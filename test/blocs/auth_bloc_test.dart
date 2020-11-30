@@ -1,35 +1,59 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+import 'dart:ffi';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:dio/dio.dart';
 import 'package:ecommerce/blocs/@blocs.dart';
 import 'package:ecommerce/services/@services.dart';
 import '../data.dart';
 
 class MockReposRepository extends Mock implements Moqui {}
 
+class MockCatalogBloc extends MockBloc<CatalogState> implements CatalogBloc {}
+
+class MockCrmBloc extends MockBloc<CrmState> implements CrmBloc {}
+
 void main() {
   MockReposRepository mockReposRepository;
+  MockCatalogBloc catalogBloc;
+  MockCrmBloc crmBloc;
 
   setUp(() {
     mockReposRepository = MockReposRepository();
   });
 
-  group('Authbloc test', () {
-    blocTest(
-      'check initial state',
-      build: () => AuthBloc(repos: mockReposRepository),
-      expect: <AuthState>[],
-    );
+  tearDown(() {
+    catalogBloc?.close();
+    crmBloc?.close();
+  });
+
+  group('Authbloc test>>>', () {
+    blocTest('check initial state',
+        build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
+        expect: []);
 
     blocTest(
       'succesful connection and Unauthenticated',
-      build: () => AuthBloc(repos: mockReposRepository),
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
-        bloc.add(LoadAuth());
+        bloc..add(LoadAuth());
       },
       expect: <AuthState>[
         AuthLoading(),
@@ -38,7 +62,7 @@ void main() {
     );
     blocTest(
       'failed connection with ConnectionProblem',
-      build: () => AuthBloc(repos: mockReposRepository),
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected())
             .thenAnswer((_) async => errorMessage);
@@ -51,8 +75,8 @@ void main() {
     );
 
     blocTest(
-      'succesfull connection and Authenticated',
-      build: () => AuthBloc(repos: mockReposRepository),
+      '???succesfull connection and Authenticated',
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
@@ -67,7 +91,7 @@ void main() {
     );
     blocTest(
       'connection and login and logout',
-      build: () => AuthBloc(repos: mockReposRepository),
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
@@ -81,13 +105,15 @@ void main() {
       expect: <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
+        AuthLoading(),
         AuthAuthenticated(authenticate),
-        AuthUnauthenticated(authenticateNoKey),
+        AuthLoading(),
+        AuthUnauthenticated(authenticateNoKey, 'you are logged out now'),
       ],
     );
     blocTest(
       'succesful connection and register',
-      build: () => AuthBloc(repos: mockReposRepository),
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
@@ -98,20 +124,20 @@ void main() {
       expect: <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
+        AuthLoading(),
         AuthAuthenticated(authenticate),
       ],
     );
 
-    dynamic result = Response;
     blocTest(
       'succesful connection login screen and reset password',
-      build: () => AuthBloc(repos: mockReposRepository),
+      build: () => AuthBloc(mockReposRepository, catalogBloc, crmBloc),
       act: (bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
         when(mockReposRepository.resetPassword(username: 'dummyEmail'))
-            .thenAnswer((_) async => result);
+            .thenAnswer((_) async => true);
         bloc.add(LoadAuth());
         await bloc.add(ResetPassword(username: 'dummyEmail'));
       },

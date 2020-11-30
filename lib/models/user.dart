@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 // To parse this JSON data, do
 //
 //      user = userFromJson(jsonString);
@@ -22,12 +36,13 @@ class User {
   String lastName;
   String name;
   String email;
-  String groupDescription;
+  String groupDescription; // admin, employee, customer, supplier etc...
   String userGroupId;
   String language;
   String country;
   String externalId; // when customer register they give their telno
   Uint8List image;
+  String base64Upload; // to upload images to the
 
   User({
     this.partyId,
@@ -56,7 +71,9 @@ class User {
         language: json["language"],
         country: json["country"],
         externalId: json["externalId"],
-        image: json["image"] != null ? base64.decode(json["image"]) : null,
+        image: json["image"] == null || json["image"] == "null"
+            ? null
+            : base64.decode(json["image"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -75,24 +92,8 @@ class User {
       };
 
   @override
-  List<Object> get props => [
-        partyId,
-        userId,
-        firstName,
-        lastName,
-        name,
-        email,
-        groupDescription,
-        userGroupId,
-        language,
-        country,
-        externalId,
-        image,
-      ];
-
-  @override
   String toString() {
     return 'User $firstName $lastName [$partyId] sec: $userGroupId img size: '
-        '${image != null ? image.length : 0}';
+        '${image?.length}';
   }
 }

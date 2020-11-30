@@ -1,15 +1,42 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:about/about.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../widgets/@widgets.dart';
 
 class AboutForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return ShowNavigationRail(AboutFormHeader(), 3);
+  }
+}
+
+class AboutFormHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    double version = GlobalConfiguration().get("version");
+    double build = GlobalConfiguration().get("build");
+
     return AboutPage(
-        title: Text('About GrowERP and Master branch'),
-        applicationVersion: 'Version {{ version }}, build #{{ buildNumber }}',
+        dialog: true,
+        title: Text('About GrowERP and this Admin app'),
+        applicationVersion: 'Version $version, build #$build',
         applicationIcon: Image(
-          image: AssetImage('assets/growerp.png'),
+          image: AssetImage('assets/images/growerp.png'),
           height: 100,
           width: 200,
         ),

@@ -20,67 +20,72 @@ import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
 import '../routing_constants.dart';
 import '../widgets/@widgets.dart';
-import '@forms.dart';
 
-class UsersForm extends StatefulWidget {
-  @override
-  _UsersFormState createState() => _UsersFormState();
-}
-
-class _UsersFormState extends State<UsersForm> {
+class UsersForm extends StatelessWidget {
+  final FormArguments formArguments;
+  UsersForm(this.formArguments);
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate;
-    return Scaffold(
-        appBar: AppBar(title: const Text('User List')),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            dynamic user = await Navigator.pushNamed(context, UserRoute);
-            setState(() {
-              authenticate.company.employees.add(user);
-            });
-          },
-          tooltip: 'Add new user',
-          child: Icon(Icons.add),
-        ),
-        body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-          if (state is AuthProblem) {
-            HelperFunctions.showMessage(
-                context, '${state.errorMessage}', Colors.red);
-          }
-          if (state is AuthUserUpdateSuccess) {
-            HelperFunctions.showMessage(
-                context, 'Update success', Colors.green);
-          }
-          if (state is AuthUserDeleteSuccess) {
-            HelperFunctions.showMessage(
-                context, 'Delete success', Colors.green);
-          }
-        }, builder: (context, state) {
-          if (state is AuthUnauthenticated) {
-            return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: RaisedButton(
-                        child: Text("Press to login first!"),
-                        onPressed: () async {
-                          final dynamic result =
-                              await Navigator.pushNamed(context, LoginRoute);
-                          HelperFunctions.showMessage(
-                              context, '$result', Colors.green);
-                        }),
-                  )
-                ]);
-          }
+    var a = (formArguments) =>
+        (UsersFormHeader(formArguments.message, formArguments.object));
+    return ShowNavigationRail(a(formArguments), 2, formArguments.object);
+  }
+}
 
-          if (state is AuthAuthenticated) authenticate = state.authenticate;
-          return userList(context, authenticate);
-        }));
+class UsersFormHeader extends StatefulWidget {
+  final String message;
+  final Authenticate authenticate;
+  const UsersFormHeader([this.message, this.authenticate]);
+  @override
+  _UsersFormStateHeader createState() =>
+      _UsersFormStateHeader(message, authenticate);
+}
+
+class _UsersFormStateHeader extends State<UsersFormHeader> {
+  final String message;
+  final Authenticate authenticate;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  _UsersFormStateHeader([this.message, this.authenticate]) {
+    HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
+  @override
+  Widget build(BuildContext context) {
+    Authenticate authenticate = this.authenticate;
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state is AuthAuthenticated) authenticate = state.authenticate;
+      return ScaffoldMessenger(
+          key: scaffoldMessengerKey,
+          child: Scaffold(
+              appBar: AppBar(
+                  title:
+                      companyLogo(context, authenticate, 'Company Users List'),
+                  automaticallyImplyLeading:
+                      ResponsiveWrapper.of(context).isSmallerThan(TABLET)),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, UserRoute,
+                      arguments:
+                          FormArguments('Enter new employee information...'));
+                },
+                tooltip: 'Add new user',
+                child: Icon(Icons.add),
+              ),
+              drawer: myDrawer(context, authenticate),
+              body: BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthProblem)
+                      HelperFunctions.showMessage(
+                          context, '${state.errorMessage}', Colors.red);
+                    if (state is AuthLoading)
+                      HelperFunctions.showMessage(
+                          context, '${state.message}', Colors.red);
+                  },
+                  child: userList(authenticate))));
+    });
   }
 
-  Widget userList(context, Authenticate authenticate) {
+  Widget userList(authenticate) {
     List<User> users = authenticate.company.employees;
     return CustomScrollView(
       slivers: <Widget>[
@@ -112,12 +117,17 @@ class _UsersFormState extends State<UsersForm> {
             (context, index) {
               return InkWell(
                 onTap: () async {
-                  dynamic user = await Navigator.pushNamed(context, UserRoute,
-                      arguments: users[index]);
+                  dynamic result = await Navigator.pushNamed(context, UserRoute,
+                      arguments: FormArguments(null, users[index]));
                   setState(() {
-                    if (user != null)
-                      users.replaceRange(index, index + 1, [user]);
+                    if (result is Authenticate)
+                      users = result.company.employees;
                   });
+                  HelperFunctions.showMessage(
+                      context,
+                      'User ${users[index].firstName} '
+                      '${users[index].lastName} modified',
+                      Colors.green);
                 },
                 onLongPress: () async {
                   bool result = await confirmDialog(
@@ -126,10 +136,10 @@ class _UsersFormState extends State<UsersForm> {
                       "Delete this user?");
                   if (result) {
                     BlocProvider.of<AuthBloc>(context)
-                        .add(DeleteUser(authenticate, users[index].partyId));
-                    setState(() {
-                      users.removeAt(index);
-                    });
+                        .add(DeleteEmployee(users[index]));
+                    Navigator.pushNamed(context, UsersRoute,
+                        arguments:
+                            FormArguments('Employee deleted', authenticate));
                   }
                 },
                 child: ListTile(

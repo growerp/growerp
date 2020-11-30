@@ -1,8 +1,23 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 // To parse this JSON data, do
 //
 //     final order = orderFromJson(jsonString);
 
 import 'dart:convert';
+import 'package:decimal/decimal.dart';
 
 Order orderFromJson(String str) => Order.fromJson(json.decode(str)["order"]);
 String orderToJson(Order data) =>
@@ -18,15 +33,13 @@ String ordersToJson(List<Order> data) =>
 class Order {
   String orderId;
   String orderStatusId;
-  String currencyId;
   String placedDate;
   String placedTime;
-  String companyPartyId;
-  String partyId;
+  String customerPartyId;
   String firstName;
   String lastName;
-  String statusId;
-  double grandTotal;
+  String email;
+  Decimal grandTotal;
   String table;
   String accommodationAreaId;
   String accommodationSpotId;
@@ -35,14 +48,12 @@ class Order {
   Order({
     this.orderId,
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
-    this.currencyId,
     this.placedDate,
     this.placedTime,
-    this.companyPartyId,
-    this.partyId,
+    this.customerPartyId,
     this.firstName,
     this.lastName,
-    this.statusId, // 'Open' or 'Closed' for easy selection
+    this.email,
     this.grandTotal,
     this.table,
     this.accommodationAreaId,
@@ -53,15 +64,13 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) => Order(
         orderId: json["orderId"],
         orderStatusId: json["orderStatusId"],
-        currencyId: json["currencyUomId"],
         placedDate: json["placedDate"],
         placedTime: json["placedTime"],
-        companyPartyId: json["companyPartyId"],
-        partyId: json["partyId"],
+        customerPartyId: json["customerPartyId"],
         firstName: json["firstName"],
         lastName: json["lastName"],
-        statusId: json["statusId"],
-        grandTotal: double.parse(json["grandTotal"]),
+        email: json["email"],
+        grandTotal: Decimal.parse(json["grandTotal"]),
         accommodationAreaId: json["accommodationAreaId"],
         accommodationSpotId: json["accommodationSpotId"],
         orderItems: List<OrderItem>.from(
@@ -71,20 +80,21 @@ class Order {
   Map<String, dynamic> toJson() => {
         "orderId": orderId,
         "orderStatusId": orderStatusId,
-        "currencyUomId": currencyId,
         "placedDate": placedDate,
         "placedTime": placedTime,
-        "companyPartyId": companyPartyId,
-        "partyId": partyId,
+        "customerPartyId": customerPartyId,
         "firstName": firstName,
         "lastName": lastName,
-        "statusId": statusId,
-        "grandTotal": grandTotal,
+        "email": email,
+        "grandTotal": grandTotal.toString(),
         "table": table,
         "accommodationAreaId": accommodationAreaId,
         "accommodationSpotId": accommodationSpotId,
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
+
+  String toString() => 'order# $orderId customer: $customerPartyId items: '
+      '${orderItems?.length} ';
 }
 
 class OrderItem {
@@ -96,24 +106,26 @@ class OrderItem {
     this.price,
   });
 
-  String orderItemSeqId;
+  int orderItemSeqId;
   String productId;
   String description;
-  int quantity;
-  double price;
+  Decimal quantity;
+  Decimal price;
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-      orderItemSeqId: json["orderItemSeqId"],
+      orderItemSeqId: int.parse(json["orderItemSeqId"]),
       productId: json["productId"],
       description: json["description"],
-      quantity: int.parse(json["quantity"]),
-      price: double.parse(json["price"]));
+      quantity: Decimal.parse(json["quantity"]),
+      price: Decimal.parse(json["price"]));
 
   Map<String, dynamic> toJson() => {
-        "orderItemSeqId": orderItemSeqId,
+        "orderItemSeqId": orderItemSeqId.toString(),
         "productId": productId,
         "description": description,
         "quantity": quantity.toString(),
         "price": price.toString()
       };
+
+  String toString() => 'OrderItem: $orderItemSeqId product: $productId $price ';
 }

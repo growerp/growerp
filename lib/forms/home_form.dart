@@ -19,45 +19,31 @@ import '../blocs/@blocs.dart';
 import '../models/@models.dart';
 import '../helper_functions.dart';
 import '../routing_constants.dart';
+import '../forms/@forms.dart';
 
-class HomeForm extends StatelessWidget {
-  final String message;
-  const HomeForm(Object arguments, {Key key, this.message}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    BlocProvider.of<CatalogBloc>(context).add(LoadCatalog());
-    BlocProvider.of<CartBloc>(context).add(LoadCart());
-    return Scaffold(
-      body: HomeBody(message: message),
-    );
-  }
-}
-
-class HomeBody extends StatefulWidget {
+class HomeForm extends StatefulWidget {
   final String message;
 
-  const HomeBody({Key key, this.message}) : super(key: key);
+  const HomeForm([this.message]);
   @override
-  State<HomeBody> createState() => _HomeState(message);
+  State<HomeForm> createState() => _HomeState(message);
 }
 
-class _HomeState extends State<HomeBody> {
+class _HomeState extends State<HomeForm> {
   final String message;
   Authenticate authenticate;
   List<Product> products;
-  List<Category> categories;
+  List<ProductCategory> categories;
   String selectedCategoryId;
-  Company company;
 
   _HomeState(this.message);
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
     Future<Null>.delayed(Duration(milliseconds: 0), () {
-      if (message != null) {
-        HelperFunctions.showMessage(context, '$message', Colors.green);
-      }
+      HelperFunctions.showTopMessage(scaffoldMessengerKey, '$message');
     });
     super.initState();
   }
@@ -65,92 +51,89 @@ class _HomeState extends State<HomeBody> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      print("=====state: $state");
       if (state is AuthProblem) {
-        return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: RaisedButton(
-                    child: Text("${state.errorMessage} \nRetry?"),
-                    onPressed: () {
-                      BlocProvider.of<CatalogBloc>(context).add(LoadCatalog());
-                      BlocProvider.of<AuthBloc>(context).add(LoadAuth());
-                    }),
-              )
-            ]);
+        return Container(
+            child: Center(
+                child: Text("${state.errorMessage}",
+                    style:
+                        new TextStyle(fontSize: 18.0, color: Colors.black))));
       }
       if (state is AuthAuthenticated) authenticate = state.authenticate;
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
-      company = authenticate?.company;
-      return BlocBuilder<CatalogBloc, CatalogState>(builder: (context, state) {
-        if (state is CatalogLoading)
-          return Center(child: CircularProgressIndicator());
-        if (state is CatalogError) {
-          return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Center(
-              child: Text("${state.errorMessage}"),
-            )
-          ]);
-        }
-        if (state is CatalogLoaded) {
-          categories = state.catalog?.categories;
-          selectedCategoryId ??= categories != null && categories.length > 0
-              ? categories[0]?.productCategoryId
-              : null;
-          products = state.catalog?.products;
-        }
-        // finally the main form!
-        return Scaffold(
-            appBar: AppBar(
-                title: Text("${company?.name ?? 'Company??'} " +
-                    "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
-                actions: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.settings),
-                      tooltip: 'Settings',
-                      onPressed: () async {
-                        await _settingsDialog(context, authenticate);
-                      }),
-                  IconButton(
-                    icon: Icon(Icons.shopping_cart),
-                    tooltip: 'Cart',
-                    onPressed: () => Navigator.pushNamed(context, CartRoute),
-                  ),
-                  if (authenticate?.apiKey == null)
+      return ScaffoldMessenger(
+          key: scaffoldMessengerKey,
+          child: Scaffold(
+              appBar: AppBar(
+                  title: Text("${authenticate?.company?.name ?? 'Company??'} " +
+                      "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+                  actions: <Widget>[
                     IconButton(
-                        icon: Icon(Icons.exit_to_app),
-                        tooltip: 'Login',
+                        icon: Icon(Icons.settings),
+                        tooltip: 'Settings',
                         onPressed: () async {
-                          if (await Navigator.pushNamed(context, LoginRoute) ==
-                              true) {
-                            Navigator.popAndPushNamed(context, HomeRoute,
-                                arguments: 'Login Successful');
-                          } else {
-                            HelperFunctions.showMessage(
-                                context, 'Not logged in', Colors.green);
-                          }
+                          await _settingsDialog(context, authenticate);
                         }),
-                  if (authenticate?.apiKey != null)
                     IconButton(
-                        icon: Icon(Icons.do_not_disturb),
-                        tooltip: 'Logout',
-                        onPressed: () => {
-                              BlocProvider.of<AuthBloc>(context).add(Logout()),
-                              Future<Null>.delayed(Duration(milliseconds: 300),
-                                  () {
-                                Navigator.popAndPushNamed(context, HomeRoute,
-                                    arguments: 'Logout successful');
+                      icon: Icon(Icons.shopping_cart),
+                      tooltip: 'Cart',
+                      onPressed: () => Navigator.pushNamed(context, CartRoute),
+                    ),
+                    if (authenticate?.apiKey == null)
+                      IconButton(
+                          icon: Icon(Icons.exit_to_app),
+                          tooltip: 'Login',
+                          onPressed: () async {
+                            if (await Navigator.pushNamed(
+                                    context, LoginRoute) ==
+                                true) {
+                              Navigator.popAndPushNamed(context, HomeRoute,
+                                  arguments: 'Login Successful');
+                            }
+                          }),
+                    if (authenticate?.apiKey != null)
+                      IconButton(
+                          icon: Icon(Icons.do_not_disturb),
+                          tooltip: 'Logout',
+                          onPressed: () => {
+                                BlocProvider.of<AuthBloc>(context)
+                                    .add(Logout()),
+                                Future<Null>.delayed(
+                                    Duration(milliseconds: 300), () {
+                                  Navigator.popAndPushNamed(context, HomeRoute,
+                                      arguments: 'Logout successful');
+                                })
                               })
-                            })
-                ]),
-            body: SingleChildScrollView(
-                physics: ClampingScrollPhysics(),
-                child: ListView(shrinkWrap: true, children: <Widget>[
-                  _categoryList(),
-                  _productsGrid(),
-                ])));
-      });
+                  ]),
+              body: BlocConsumer<CatalogBloc, CatalogState>(
+                  listener: (context, state) {
+                if (state is CatalogProblem) {
+                  HelperFunctions.showMessage(
+                      context, '${state.errorMessage}', Colors.green);
+                }
+                if (state is CatalogLoading) {
+                  HelperFunctions.showMessage(
+                      context, '${state.message}', Colors.green);
+                }
+              }, builder: (context, state) {
+                print("=====catalog state: $state");
+                if (state is CatalogLoaded) {
+                  categories = state.catalog?.categories;
+                  selectedCategoryId ??=
+                      categories != null && categories.length > 0
+                          ? categories[0]?.categoryId
+                          : null;
+                  products = state.catalog?.products;
+
+                  return SingleChildScrollView(
+                      physics: ClampingScrollPhysics(),
+                      child: ListView(shrinkWrap: true, children: <Widget>[
+                        _categoryList(),
+                        _productsGrid(),
+                      ]));
+                } else
+                  return SplashForm();
+              })));
     });
   }
 
@@ -176,18 +159,20 @@ class _HomeState extends State<HomeBody> {
                 var data = categories[index];
                 return Column(children: <Widget>[
                   GestureDetector(
-                    onTap: () => setState(
-                        () => selectedCategoryId = data.productCategoryId),
+                    onTap: () =>
+                        setState(() => selectedCategoryId = data.categoryId),
                     child: Container(
                       margin: EdgeInsets.all(10),
                       width: 70,
                       height: 70,
                       alignment: Alignment.center,
-                      child: Image.memory(
-                        data.image,
-                        height: 40,
-                        width: 40,
-                      ),
+                      child: data.image != null
+                          ? Image.memory(
+                              data.image,
+                              height: 40,
+                              width: 40,
+                            )
+                          : Image.asset('assets/images/default.png'),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white,
@@ -225,16 +210,15 @@ class _HomeState extends State<HomeBody> {
                 fontWeight: FontWeight.bold)),
       );
     else {
-      List<Product> productList = products
-          .where((i) => i.productCategoryId == selectedCategoryId)
-          .toList();
+      List<Product> productList =
+          products.where((i) => i.categoryId == selectedCategoryId).toList();
       return ClipRRect(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(35),
             bottomRight: Radius.circular(35),
           ),
           child: Container(
-              height: screenHeight - 100,
+              height: screenHeight - 200,
               width: screenWidth,
               decoration: BoxDecoration(
                 color: Color(0xffECE9DE),
@@ -270,8 +254,7 @@ class _HomeState extends State<HomeBody> {
                 ),
                 _customTitle(categories != null && categories.length > 0
                     ? categories
-                        .firstWhere(
-                            (i) => i.productCategoryId == selectedCategoryId)
+                        .firstWhere((i) => i.categoryId == selectedCategoryId)
                         .categoryName
                     : '')
               ])));
@@ -281,19 +264,22 @@ class _HomeState extends State<HomeBody> {
   Widget _gridItem(product) {
     return GestureDetector(
       onTap: () =>
-          Navigator.pushNamed(context, ProductRoute, arguments: product),
+          Navigator.pushNamed(context, ProductEcomRoute, arguments: product),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Center(
               child: Hero(
-                  tag: '${product.productId}',
-                  child: Image.memory(
+            tag: '${product.productId}',
+            child: product.image != null
+                ? Image.memory(
                     product.image,
                     height: 125,
                     fit: BoxFit.contain,
-                  ))),
+                  )
+                : Image.asset('assets/images/default.png'),
+          )),
           Padding(
             padding: const EdgeInsets.only(left: 10),
             child: Text("${product.price.toString()} ",
@@ -305,17 +291,16 @@ class _HomeState extends State<HomeBody> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              product.name,
+              "${product.productName}",
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Colors.black, fontSize: 15),
             ),
           ),
-/*          Padding(
+          Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
-            child: Text('${product.weight}g'),
+            child: Text('${product.description}'),
           )
-*/
         ],
       ),
     );

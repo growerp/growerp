@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,91 +21,49 @@ import '../models/@models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
 import '../routing_constants.dart';
-import '@forms.dart';
+import '../widgets/@widgets.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class UserForm extends StatelessWidget {
-  final User user;
-  UserForm(this.user);
+  final FormArguments formArguments;
+  UserForm(this.formArguments);
 
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate;
-    User user = this.user;
-    return WillPopScope(
-        onWillPop: () async {
-          Navigator.pop(context, user);
-          return;
-        },
-        child: Scaffold(
-            appBar: AppBar(
-              title: const Text('User page'),
-              actions: <Widget>[
-                IconButton(
-                    icon: Icon(Icons.home),
-                    onPressed: () => Navigator.pushNamed(context, HomeRoute)),
-              ],
-            ),
-            body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-              if (state is AuthProblem) {
-                HelperFunctions.showMessage(
-                    context, '${state.errorMessage}', Colors.red);
-              }
-              if (state is AuthUserUpdateSuccess) {
-                authenticate = state.authenticate;
-                HelperFunctions.showMessage(
-                    context, 'user added/updated', Colors.green);
-              }
-            }, builder: (context, state) {
-              if (state is AuthUnauthenticated)
-                return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: RaisedButton(
-                            child: Text("Press to login first!"),
-                            onPressed: () async {
-                              final dynamic result = await Navigator.pushNamed(
-                                  context, LoginRoute);
-                              HelperFunctions.showMessage(
-                                  context, '$result', Colors.green);
-                            }),
-                      )
-                    ]);
-              if (state is AuthAuthenticated) authenticate = state.authenticate;
-              if (state is AuthLoading)
-                return Center(child: CircularProgressIndicator());
-              if (state is AuthUserUpdateSuccess)
-                user = state?.authenticate?.user;
-
-              return MyUserPage(authenticate, user);
-            })));
+    var a = (formArguments) =>
+        (MyUserPage(formArguments.message, formArguments.object));
+    return ShowNavigationRail(a(formArguments), 0);
   }
 }
 
 class MyUserPage extends StatefulWidget {
-  final Authenticate authenticate;
+  final String message;
   final User user;
-  MyUserPage(this.authenticate, this.user);
+  MyUserPage(this.message, this.user);
   @override
-  _MyUserState createState() => _MyUserState(authenticate, user);
+  _MyUserState createState() => _MyUserState(message, user);
 }
 
 class _MyUserState extends State<MyUserPage> {
-  final Authenticate authenticate;
+  final String message;
   final User user;
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  User updatedUser;
+  bool loading = false;
   UserGroup _selectedUserGroup;
   PickedFile _imageFile;
   dynamic _pickImageError;
   String _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
-
-  _MyUserState(this.authenticate, this.user);
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  _MyUserState([this.message, this.user]) {
+    HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
     try {
@@ -124,46 +96,86 @@ class _MyUserState extends State<MyUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-            ? FutureBuilder<void>(
-                future: retrieveLostData(),
-                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text(
-                      'Pick image error: ${snapshot.error}}',
-                      textAlign: TextAlign.center,
-                    );
+    Authenticate authenticate;
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state is AuthAuthenticated) authenticate = state.authenticate;
+      return ScaffoldMessenger(
+          key: scaffoldMessengerKey,
+          child: Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading:
+                    ResponsiveWrapper.of(context).isSmallerThan(TABLET),
+                title: companyLogo(context, authenticate, 'User detail'),
+                actions: <Widget>[
+                  IconButton(
+                      icon: Icon(Icons.home),
+                      onPressed: () => Navigator.pushNamed(context, HomeRoute))
+                ],
+              ),
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(height: 100),
+                  FloatingActionButton(
+                    onPressed: () {
+                      _onImageButtonPressed(ImageSource.gallery,
+                          context: context);
+                    },
+                    heroTag: 'image0',
+                    tooltip: 'Pick Image from gallery',
+                    child: const Icon(Icons.photo_library),
+                  ),
+                  SizedBox(height: 20),
+                  FloatingActionButton(
+                    onPressed: () {
+                      _onImageButtonPressed(ImageSource.camera,
+                          context: context);
+                    },
+                    heroTag: 'image1',
+                    tooltip: 'Take a Photo',
+                    child: const Icon(Icons.camera_alt),
+                  ),
+                ],
+              ),
+              drawer: myDrawer(context, authenticate),
+              body: BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthProblem) {
+                    loading = false;
+                    HelperFunctions.showMessage(
+                        context, '${state.errorMessage}', Colors.red);
                   }
-                  return _showForm();
-                })
-            : _showForm(),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(height: 60),
-          FloatingActionButton(
-            onPressed: () {
-              _onImageButtonPressed(ImageSource.gallery, context: context);
-            },
-            heroTag: 'image0',
-            tooltip: 'Pick Image from gallery',
-            child: const Icon(Icons.photo_library),
-          ),
-          SizedBox(height: 20),
-          FloatingActionButton(
-            onPressed: () {
-              _onImageButtonPressed(ImageSource.camera, context: context);
-            },
-            heroTag: 'image1',
-            tooltip: 'Take a Photo',
-            child: const Icon(Icons.camera_alt),
-          ),
-        ],
-      ),
-    );
+                  if (state is AuthLoading) {
+                    loading = true;
+                    HelperFunctions.showMessage(
+                        context, '${state.message}', Colors.green);
+                  }
+                  if (state is AuthAuthenticated) {
+                    Navigator.pushNamed(context, UsersRoute,
+                        arguments: FormArguments(state.message));
+                  }
+                },
+                child: Center(
+                  child:
+                      !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                          ? FutureBuilder<void>(
+                              future: retrieveLostData(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<void> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text(
+                                    'Pick image error: ${snapshot.error}}',
+                                    textAlign: TextAlign.center,
+                                  );
+                                }
+                                return _showForm(authenticate, updatedUser);
+                              })
+                          : _showForm(authenticate, updatedUser),
+                ),
+              )));
+    }
+//      return Container(child: Text("needs logging in"));
+        );
   }
 
   Text _getRetrieveErrorWidget() {
@@ -175,12 +187,11 @@ class _MyUserState extends State<MyUserPage> {
     return null;
   }
 
-  Widget _showForm() {
+  Widget _showForm(authenticate, updatedUser) {
     _firstNameController..text = user?.firstName;
     _lastNameController..text = user?.lastName;
     _nameController..text = user?.name;
     _emailController..text = user?.email;
-    User updatedUser;
     final Text retrieveError = _getRetrieveErrorWidget();
     if (_selectedUserGroup == null && user?.userGroupId != null)
       _selectedUserGroup =
@@ -194,149 +205,123 @@ class _MyUserState extends State<MyUserPage> {
         textAlign: TextAlign.center,
       );
     }
-    return WillPopScope(
-        onWillPop: () async {
-          Navigator.pop(context, updatedUser);
-          return false;
-        },
-        child: Center(
-            child: Container(
-                width: 400,
-                child: Form(
-                    key: _formKey,
-                    child: ListView(children: <Widget>[
-                      SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: () async {
-                          PickedFile pickedFile = await _picker.getImage(
-                              source: ImageSource.gallery);
-                          BlocProvider.of<AuthBloc>(context)
-                              .add(UploadImage(user.partyId, pickedFile.path));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: Colors.green,
-                            radius: 80,
-                            child: _imageFile != null
-                                ? kIsWeb
-                                    ? Image.network(_imageFile.path)
-                                    : Image.file(File(_imageFile.path))
-                                : user?.image != null
-                                    ? Image.memory(user?.image)
-                                    : Text(
-                                        user?.firstName?.substring(0, 1) ?? '',
-                                        style: TextStyle(
-                                            fontSize: 30,
-                                            color: Colors.black))),
-                      ),
-                      SizedBox(height: 30),
-                      TextFormField(
-                        key: Key('firstName'),
-                        decoration: InputDecoration(labelText: 'First Name'),
-                        controller: _firstNameController,
-                        validator: (value) {
-                          if (value.isEmpty)
-                            return 'Please enter your first name?';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        key: Key('lastName'),
-                        decoration: InputDecoration(labelText: 'Last Name'),
-                        controller: _lastNameController,
-                        validator: (value) {
-                          if (value.isEmpty)
-                            return 'Please enter your last name?';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        key: Key('name'),
-                        decoration: InputDecoration(labelText: 'Login Name'),
-                        controller: _nameController,
-                        validator: (value) {
-                          if (value.isEmpty)
-                            return 'Please enter a login name?';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        key: Key('email'),
-                        decoration: InputDecoration(labelText: 'Email address'),
-                        controller: _emailController,
-                        validator: (String value) {
-                          if (value.isEmpty)
-                            return 'Please enter Email address?';
-                          if (!RegExp(
-                                  r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                              .hasMatch(value)) {
-                            return 'This is not a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      Container(
-                        width: 400,
-                        height: 60,
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25.0),
-                          border: Border.all(
-                              color: Colors.grey,
-                              style: BorderStyle.solid,
-                              width: 0.80),
-                        ),
-                        child: DropdownButton<UserGroup>(
-                          key: Key('dropDown'),
-                          underline: SizedBox(), // remove underline
-                          hint: Text('User Group'),
-                          value: _selectedUserGroup,
-                          items: userGroups?.map((item) {
-                            return DropdownMenuItem<UserGroup>(
-                                child: Text(item.description), value: item);
-                          })?.toList(),
-                          onChanged: (UserGroup newValue) {
-                            setState(() {
-                              _selectedUserGroup = newValue;
-                            });
-                          },
-                          isExpanded: true,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      RaisedButton(
-                          key: Key('update'),
-                          child:
-                              Text(user?.partyId == null ? 'Create' : 'Update'),
-                          onPressed: () {
-                            if (_formKey.currentState.validate())
-                              //&& state is! UsersLoading)
-                              updatedUser = User(
-                                image: _imageFile != null
-                                    ? File(_imageFile.path).readAsBytesSync()
-                                    : null,
-                                partyId: user?.partyId,
-                                firstName: _firstNameController.text,
-                                lastName: _lastNameController.text,
-                                email: _emailController.text,
-                                name: _nameController.text,
-                                userGroupId: _selectedUserGroup.userGroupId,
-                                language: Localizations.localeOf(context)
-                                    .languageCode
-                                    .toString(),
-                                country: Localizations.localeOf(context)
-                                    .languageCode
-                                    .toString(),
-                              );
-                            BlocProvider.of<AuthBloc>(context).add(UpdateUser(
-                              widget.authenticate,
-                              updatedUser,
-                              _imageFile?.path,
-                            ));
-                          })
-                    ])))));
+    return Center(
+        child: Container(
+            width: 400,
+            child: Form(
+                key: _formKey,
+                child: ListView(children: <Widget>[
+                  SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: () async {
+                      PickedFile pickedFile =
+                          await _picker.getImage(source: ImageSource.gallery);
+                      BlocProvider.of<AuthBloc>(context)
+                          .add(UploadImage(user.partyId, pickedFile.path));
+                    },
+                    child: CircleAvatar(
+                        backgroundColor: Colors.green,
+                        radius: 80,
+                        child: _imageFile != null
+                            ? kIsWeb
+                                ? Image.network(_imageFile.path)
+                                : Image.file(File(_imageFile.path))
+                            : user?.image != null
+                                ? Image.memory(user?.image)
+                                : Text(user?.firstName?.substring(0, 1) ?? '',
+                                    style: TextStyle(
+                                        fontSize: 30, color: Colors.black))),
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    key: Key('firstName'),
+                    decoration: InputDecoration(labelText: 'First Name'),
+                    controller: _firstNameController,
+                    validator: (value) {
+                      if (value.isEmpty) return 'Please enter your first name?';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    key: Key('lastName'),
+                    decoration: InputDecoration(labelText: 'Last Name'),
+                    controller: _lastNameController,
+                    validator: (value) {
+                      if (value.isEmpty) return 'Please enter your last name?';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    key: Key('name'),
+                    decoration: InputDecoration(labelText: 'User Login Name'),
+                    controller: _nameController,
+                    validator: (value) {
+                      if (value.isEmpty) return 'Please enter a login name?';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    key: Key('email'),
+                    decoration: InputDecoration(labelText: 'Email address'),
+                    controller: _emailController,
+                    validator: (String value) {
+                      if (value.isEmpty) return 'Please enter Email address?';
+                      if (!RegExp(
+                              r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                          .hasMatch(value)) {
+                        return 'This is not a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  DropdownButtonFormField<UserGroup>(
+                    key: Key('dropDown'),
+                    hint: Text('User Group'),
+                    value: _selectedUserGroup,
+                    validator: (value) =>
+                        value == null ? 'field required' : null,
+                    items: userGroups?.map((item) {
+                      return DropdownMenuItem<UserGroup>(
+                          child: Text(item.description), value: item);
+                    })?.toList(),
+                    onChanged: (UserGroup newValue) {
+                      setState(() {
+                        _selectedUserGroup = newValue;
+                      });
+                    },
+                    isExpanded: true,
+                  ),
+                  SizedBox(height: 20),
+                  RaisedButton(
+                      disabledColor: Colors.grey,
+                      key: Key('update'),
+                      child: Text(user?.partyId == null ? 'Create' : 'Update'),
+                      onPressed: () {
+                        if (_formKey.currentState.validate() && !loading) {
+                          updatedUser = User(
+                            partyId: user?.partyId,
+                            firstName: _firstNameController.text,
+                            lastName: _lastNameController.text,
+                            email: _emailController.text,
+                            name: _nameController.text,
+                            userGroupId: _selectedUserGroup.userGroupId,
+                            language: Localizations.localeOf(context)
+                                .languageCode
+                                .toString(),
+                            country: Localizations.localeOf(context)
+                                .languageCode
+                                .toString(),
+                          );
+                          BlocProvider.of<AuthBloc>(context).add(UpdateEmployee(
+                            updatedUser,
+                            _imageFile?.path,
+                          ));
+                        }
+                      })
+                ]))));
   }
 }

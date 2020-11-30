@@ -13,6 +13,9 @@
  */
 
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:ecommerce/blocs/@blocs.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -24,98 +27,149 @@ import '../models/@models.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
+  final CatalogBloc catalogBloc;
+  final CrmBloc crmBloc;
+  Authenticate authenticate;
 
-  AuthBloc({@required this.repos})
+  AuthBloc(this.repos, this.catalogBloc, this.crmBloc)
       : assert(repos != null),
         super(AuthInitial());
 
   @override
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
-    Authenticate authenticate;
+    // ################# local functions ###################
 
     Future<void> findDefaultCompany() async {
-      print("===15====");
-      dynamic companies = await repos.getCompanies();
-      if (companies is List<Company> && companies.length > 0) {
-        print("===16====");
-        authenticate =
-            Authenticate(company: companies[0], user: authenticate?.user);
+      //print("===15==1==");
+      dynamic result = await repos.getCompanies();
+      if (result is List<Company> && result.length > 0) {
+        //print("===15==2==");
+        authenticate = Authenticate(company: result[0], user: null);
+        //print("======companies received: $result ");
         await repos.persistAuthenticate(authenticate);
       } else {
-        authenticate = Authenticate(company: null, user: authenticate?.user);
+        //print("===15==3==");
+        authenticate = null;
+        await repos.persistAuthenticate(authenticate);
       }
     }
 
     Future<AuthState> checkApikey() async {
-      print("===10==== apiKey: ${authenticate.apiKey}");
-      if (authenticate.apiKey == null) {
+      //print("===10==== apiKey: ${authenticate?.apiKey}");
+      if (authenticate?.apiKey == null) {
+        if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST'))
+          catalogBloc.add(LoadCatalog(authenticate.company.partyId));
         return AuthUnauthenticated(authenticate);
       } else {
-        repos.setApikey(authenticate.apiKey);
+        repos.setApikey(authenticate?.apiKey);
         dynamic result = await repos.checkApikey();
         if (result is bool && result) {
-          print("===11====");
+          //print("===11====");
+          if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
+            //ignore when test
+            catalogBloc.add(LoadCatalog(authenticate.company.partyId));
+            crmBloc.add(LoadCrm(authenticate.company.partyId));
+          }
           return AuthAuthenticated(authenticate);
         } else {
           print("===12====");
           authenticate.apiKey = null; // revoked
           repos.setApikey(null);
+          print("===13====");
           await repos.persistAuthenticate(authenticate);
+          if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST'))
+            catalogBloc.add(LoadCatalog(authenticate.company.partyId));
           return AuthUnauthenticated(authenticate);
         }
       }
     }
 
+    // ################# start bloc ###################
     if (event is LoadAuth) {
+      //print("====start load!!!===");
       yield AuthLoading();
       dynamic connected = await repos.getConnected();
       if (connected is String) {
         yield AuthProblem(connected);
       } else {
         authenticate = await repos.getAuthenticate();
-        print("===authenticate: ${authenticate.toString()}");
         if (authenticate?.company?.partyId != null) {
-          print("===1====");
+          //print("===1====${authenticate.apiKey}");
           // check company
           dynamic result =
               await repos.checkCompany(authenticate.company.partyId);
           if (result == false) await findDefaultCompany();
-          print("===2====");
+          //print("===2====company: ${authenticate?.company?.partyId}");
           // now check user apiKey
           yield await checkApikey();
         } else {
-          print("===3====");
+          //print("===3====${authenticate?.apiKey}");
           await findDefaultCompany();
+          // only load crmbloc when logged in
           yield await checkApikey();
         }
       }
     } else if (event is LoggedIn) {
+      yield AuthLoading();
       await repos.persistAuthenticate(event.authenticate);
-      yield AuthAuthenticated(event.authenticate);
+      authenticate = event.authenticate;
+      // only load crmbloc when logged in
+      if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
+        catalogBloc.add(LoadCatalog(authenticate.company.partyId));
+        crmBloc.add(LoadCrm(authenticate.company.partyId));
+      }
+      yield AuthAuthenticated(authenticate, "Successfully logged in");
     } else if (event is Logout) {
-      final Authenticate authenticate = await repos.logout();
-      yield AuthUnauthenticated(authenticate);
+      yield AuthLoading();
+      authenticate = await repos.logout();
+      yield AuthUnauthenticated(authenticate, "you are logged out now");
     } else if (event is ResetPassword) {
       await repos.resetPassword(username: event.username);
     } else if (event is UpdateAuth) {
-      await repos.persistAuthenticate(event.authenticate);
-      yield AuthUnauthenticated(event.authenticate);
+      authenticate = await repos.logout();
+      yield AuthLoading();
+      await repos.persistAuthenticate(authenticate);
+      yield AuthUnauthenticated(authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading();
       dynamic result =
-          await repos.updateCompany(event.company, event.imageFilename);
+          await repos.updateCompany(event.company, event.imagePath);
       if (result is Company) {
-        event.authenticate.company = result;
-        yield AuthCompanyUpdateSuccess(event.authenticate);
+        authenticate.company = result;
+        yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
-        yield AuthProblem(result);
+        yield AuthProblem(result, event.company);
       }
-    } else if (event is UpdateUser) {
-      yield AuthLoading();
-      dynamic result = await repos.updateUser(event.user, event.imageFilename);
+    } else if (event is UpdateEmployee) {
+      yield AuthLoading((event.user?.partyId == null ? "Adding " : "Updating") +
+          " user ${event.user}");
+      dynamic result = await repos.updateUser(event.user, event.imagePath);
       if (result is User) {
-        event.authenticate.user = result;
-        yield AuthUserUpdateSuccess(event.authenticate);
+        if (event.user.partyId == result.partyId) authenticate.user = result;
+        List<User> users = authenticate.company.employees;
+        if (event.user.partyId == null)
+          users.add(result);
+        else {
+          // update
+          int index =
+              users.indexWhere((user) => user.partyId == result.partyId);
+          users.replaceRange(index, index + 1, [result]);
+        }
+        await repos.persistAuthenticate(authenticate);
+        yield AuthAuthenticated(authenticate,
+            'User ' + (event.user?.partyId == null ? 'Added' : 'Updated'));
+      } else {
+        yield AuthProblem(result, null, event.user);
+      }
+    } else if (event is DeleteEmployee) {
+      yield AuthLoading("Deleting user ${event.user}");
+      dynamic result = await repos.deleteUser(event.user.partyId);
+      if (result == event.user.partyId) {
+        List users = authenticate.company.employees;
+        int index = users.indexWhere((user) => user.partyId == result);
+        users.removeAt(index);
+        await repos.persistAuthenticate(authenticate);
+        yield AuthAuthenticated(authenticate, 'User ${event.user} deleted');
       } else {
         yield AuthProblem(result);
       }
@@ -141,68 +195,53 @@ class UpdateAuth extends AuthEvent {
   final Authenticate authenticate;
   UpdateAuth(this.authenticate);
   @override
-  List<Object> get props => [authenticate];
-  @override
   String toString() => 'Update Authenticate ${authenticate.toString()}';
 }
 
 class UpdateCompany extends AuthEvent {
   final Authenticate authenticate;
   final Company company;
-  final String imageFilename;
-  UpdateCompany(this.authenticate, this.company, this.imageFilename);
+  final String imagePath;
+  UpdateCompany(this.authenticate, this.company, this.imagePath);
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'Update Company ${authenticate.company.toString()}';
+  String toString() => 'Update Company ${authenticate.company.toString()} '
+      'new image: ${imagePath != null ? imagePath.length : 0}';
 }
 
-class UpdateUser extends AuthEvent {
-  final Authenticate authenticate;
+class UpdateEmployee extends AuthEvent {
   final User user;
-  final String imageFilename;
-  UpdateUser(this.authenticate, this.user, this.imageFilename);
+  final String imagePath;
+  UpdateEmployee(this.user, this.imagePath);
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'Update User ${authenticate.user.toString()} ';
+  String toString() => (user?.partyId == null ? 'Add' : 'Update') + '$user';
 }
 
-class DeleteUser extends AuthEvent {
-  final Authenticate authenticate;
-  final String partyId;
-  DeleteUser(this.authenticate, this.partyId);
+class DeleteEmployee extends AuthEvent {
+  final User user;
+  DeleteEmployee(this.user);
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'Update User ${authenticate.user.toString()} ';
+  String toString() => 'Update User $user';
 }
 
 class LoggedIn extends AuthEvent {
   final Authenticate authenticate;
   const LoggedIn({@required this.authenticate});
   @override
-  List<Object> get props => [authenticate.user.name];
-  @override
-  String toString() => 'Logging in userName: ${authenticate.user.toString()}';
+  String toString() => 'Auth Logged in with ${authenticate.user}';
 }
 
 class ResetPassword extends AuthEvent {
   final String username;
   const ResetPassword({@required this.username});
   @override
-  List<Object> get props => [username];
-  @override
-  String toString() => 'ResetPassword userName: $username';
+  String toString() => 'ResetPassword with $username';
 }
 
 class LoggingOut extends AuthEvent {
   final Authenticate authenticate;
   const LoggingOut({this.authenticate});
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'loggedOut userName: ${authenticate?.user?.name}';
+  String toString() => 'loggedOut with: ${authenticate?.user?.name}';
 }
 
 class UploadImage extends AuthEvent {
@@ -220,45 +259,33 @@ abstract class AuthState extends Equatable {
 
 class AuthInitial extends AuthState {}
 
-class AuthLoading extends AuthState {}
-
-class AuthImageUpdated extends AuthState {}
+class AuthLoading extends AuthState {
+  final String message;
+  AuthLoading([this.message]);
+  String toString() => 'Authloading msg: $message';
+}
 
 class AuthProblem extends AuthState {
   final String errorMessage;
-  AuthProblem(this.errorMessage);
-  @override
-  List<Object> get props => [errorMessage];
+  final Company newCompany;
+  final User newUser;
+  AuthProblem(this.errorMessage, [this.newCompany, this.newUser]);
   @override
   String toString() => 'AuthProblem: errorMessage: $errorMessage';
 }
 
 class AuthAuthenticated extends AuthState {
   final Authenticate authenticate;
-  AuthAuthenticated(this.authenticate);
+  final String message;
+  AuthAuthenticated(this.authenticate, [this.message]);
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'Authenticated: ${authenticate.toString()}';
+  String toString() => 'Authenticated: Msg: $message $authenticate}';
 }
 
 class AuthUnauthenticated extends AuthState {
   final Authenticate authenticate;
-  AuthUnauthenticated(this.authenticate);
+  final String message;
+  AuthUnauthenticated(this.authenticate, [this.message]);
   @override
-  List<Object> get props => [authenticate];
-  @override
-  String toString() => 'Unauthenticated: ${authenticate.toString()}';
-}
-
-class AuthUserUpdateSuccess extends AuthAuthenticated {
-  AuthUserUpdateSuccess(Authenticate authenticate) : super(authenticate);
-}
-
-class AuthUserDeleteSuccess extends AuthAuthenticated {
-  AuthUserDeleteSuccess(Authenticate authenticate) : super(authenticate);
-}
-
-class AuthCompanyUpdateSuccess extends AuthAuthenticated {
-  AuthCompanyUpdateSuccess(Authenticate authenticate) : super(authenticate);
+  String toString() => 'Unauthenticated: msg: $message $authenticate';
 }

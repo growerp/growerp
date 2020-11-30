@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -72,17 +86,13 @@ class _LoginHeaderState extends State<LoginHeader> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
         listeners: [
-          BlocListener<AuthBloc, AuthState>(
-              cubit: context.bloc<AuthBloc>(),
-              listener: (context, state) {
-                if (state is AuthAuthenticated) Navigator.pop(context, true);
-                if (state is AuthProblem) {
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text('${state.errorMessage}'),
-                    backgroundColor: Colors.red,
-                  ));
-                }
-              }),
+          BlocListener<AuthBloc, AuthState>(listener: (context, state) {
+            if (state is AuthAuthenticated) Navigator.pop(context, true);
+            if (state is AuthProblem) {
+              HelperFunctions.showMessage(
+                  context, '${state.errorMessage}', Colors.red);
+            }
+          }),
           BlocListener<LoginBloc, LoginState>(listener: (context, state) {
             if (state is LoginLoading && companyPartyId == null) {
               HelperFunctions.showMessage(
@@ -167,7 +177,8 @@ class _LoginHeaderState extends State<LoginHeader> {
                             .add(UpdateAuth(authenticate));
                         Navigator.pushNamedAndRemoveUntil(
                             context, HomeRoute, ModalRoute.withName(HomeRoute),
-                            arguments: "Ecommerce company changed!");
+                            arguments:
+                                FormArguments("Ecommerce company changed!"));
                       },
                       isExpanded: true,
                     ),
@@ -196,6 +207,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                   SizedBox(height: 40),
                   SizedBox(height: 20),
                   TextFormField(
+                    autofocus: true,
                     key: Key('username'),
                     decoration: InputDecoration(labelText: 'Username'),
                     controller: _usernameController,
@@ -251,7 +263,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                   ),
                   SizedBox(height: 30),
                   GestureDetector(
-                      child: Text('forgot password?'),
+                      child: Text('forgot/change password?'),
                       onTap: () async {
                         final String username = await _sendResetPasswordDialog(
                             context,

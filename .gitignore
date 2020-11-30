@@ -10,6 +10,7 @@
 .svn/
 coverage/
 .flutter-plugins-dependencies
+.flutter-plugins
 
 # IntelliJ related
 *.iml

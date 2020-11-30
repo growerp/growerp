@@ -12,6 +12,20 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,60 +35,45 @@ import '../models/@models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
 import '../routing_constants.dart';
+import '../widgets/@widgets.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CompanyForm extends StatelessWidget {
+  final FormArguments formArguments;
+  CompanyForm(this.formArguments);
+
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate;
-    bool isAdmin = false;
-    return Scaffold(
-        appBar: AppBar(title: const Text('Company page'), actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.home),
-              onPressed: () => Navigator.pushNamed(context, HomeRoute)),
-        ]),
-        body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-          if (state is AuthCompanyUpdateSuccess) {
-            HelperFunctions.showMessage(context,
-                'Company ${authenticate.company.name} updated', Colors.green);
-          }
-          if (state is AuthProblem) {
-            HelperFunctions.showMessage(
-                context, '${state.errorMessage}', Colors.red);
-          }
-        }, builder: (context, state) {
-          if (state is AuthUnauthenticated) {
-            authenticate = state.authenticate;
-          }
-          if (state is AuthAuthenticated) {
-            authenticate = state.authenticate;
-            isAdmin = authenticate?.user?.userGroupId == 'GROWERP_M_ADMIN';
-          }
-          return CompanyPage(authenticate, isAdmin);
-        }));
+    var a = (formArguments) => (CompanyPage(formArguments.message));
+    return ShowNavigationRail(a(formArguments));
   }
 }
 
 class CompanyPage extends StatefulWidget {
-  final Authenticate authenticate;
-  final bool isAdmin;
-  CompanyPage(this.authenticate, this.isAdmin);
+  final String message;
+  CompanyPage(this.message);
+
   @override
-  _CompanyState createState() => _CompanyState(authenticate);
+  _CompanyState createState() => _CompanyState(message);
 }
 
 class _CompanyState extends State<CompanyPage> {
-  final Authenticate authenticate;
+  final String message;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  Company updatedCompany;
   Currency _selectedCurrency;
   PickedFile _imageFile;
   dynamic _pickImageError;
   String _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
-  _CompanyState(this.authenticate);
+  _CompanyState(this.message) {
+    HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
     try {
@@ -107,50 +106,96 @@ class _CompanyState extends State<CompanyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-            ? FutureBuilder<void>(
-                future: retrieveLostData(),
-                builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                  if (snapshot.hasError) {
-                    return Text(
-                      'Pick image error: ${snapshot.error}}',
-                      textAlign: TextAlign.center,
-                    );
+    bool isAdmin;
+    Authenticate authenticate;
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state is AuthAuthenticated) {
+        authenticate = state.authenticate;
+        isAdmin = authenticate?.user?.userGroupId == "GROWERP_M_ADMIN";
+
+        return ScaffoldMessenger(
+            key: scaffoldMessengerKey,
+            child: Scaffold(
+                appBar: AppBar(
+                    automaticallyImplyLeading:
+                        ResponsiveWrapper.of(context).isSmallerThan(TABLET),
+                    title: companyLogo(context, authenticate, 'Company Detail'),
+                    actions: <Widget>[
+                      IconButton(
+                          icon: Icon(Icons.home),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, HomeRoute))
+                    ]),
+                floatingActionButton: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(height: 100),
+                    Visibility(
+                        visible: isAdmin,
+                        child: FloatingActionButton(
+                          onPressed: () {
+                            _onImageButtonPressed(ImageSource.gallery,
+                                context: context);
+                          },
+                          heroTag: 'image0',
+                          tooltip: 'Pick Image from gallery',
+                          child: const Icon(Icons.photo_library),
+                        )),
+                    SizedBox(height: 20),
+                    Visibility(
+                        visible: isAdmin,
+                        child: FloatingActionButton(
+                          onPressed: () {
+                            _onImageButtonPressed(ImageSource.camera,
+                                context: context);
+                          },
+                          heroTag: 'image1',
+                          tooltip: 'Take a Photo',
+                          child: const Icon(Icons.camera_alt),
+                        )),
+                  ],
+                ),
+                drawer: myDrawer(context, authenticate),
+                body: BlocConsumer<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                  if (state is AuthAuthenticated) {
+                    HelperFunctions.showMessage(
+                        context, '${state.message}', Colors.green);
                   }
-                  return _showForm(widget.isAdmin);
-                })
-            : _showForm(widget.isAdmin),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(height: 60),
-          Visibility(
-              visible: widget.isAdmin,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _onImageButtonPressed(ImageSource.gallery, context: context);
-                },
-                heroTag: 'image0',
-                tooltip: 'Pick Image from gallery',
-                child: const Icon(Icons.photo_library),
-              )),
-          SizedBox(height: 20),
-          Visibility(
-              visible: widget.isAdmin,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _onImageButtonPressed(ImageSource.camera, context: context);
-                },
-                heroTag: 'image1',
-                tooltip: 'Take a Photo',
-                child: const Icon(Icons.camera_alt),
-              )),
-        ],
-      ),
-    );
+                  if (state is AuthProblem) {
+                    updatedCompany = state.newCompany;
+                    HelperFunctions.showMessage(
+                        context, '${state.errorMessage}', Colors.red);
+                  }
+                }, builder: (context, state) {
+                  if (state is AuthUnauthenticated) {
+                    updatedCompany = state.authenticate.company;
+                  }
+                  if (state is AuthAuthenticated) {
+                    updatedCompany = authenticate.company;
+                  }
+                  return Center(
+                    child: !kIsWeb &&
+                            defaultTargetPlatform == TargetPlatform.android
+                        ? FutureBuilder<void>(
+                            future: retrieveLostData(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<void> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'Pick image error: ${snapshot.error}}',
+                                  textAlign: TextAlign.center,
+                                );
+                              }
+                              return _showForm(
+                                  authenticate, isAdmin, updatedCompany);
+                            })
+                        : _showForm(authenticate, isAdmin, updatedCompany),
+                  );
+                })));
+      }
+      return Container(child: Text("needs logging in"));
+    });
   }
 
   Text _getRetrieveErrorWidget() {
@@ -162,18 +207,16 @@ class _CompanyState extends State<CompanyPage> {
     return null;
   }
 
-  Widget _showForm(isAdmin) {
-    Company company = authenticate.company;
-    _nameController..text = company.name;
-    _emailController..text = company.email;
-    Company updatedCompany;
+  Widget _showForm(authenticate, isAdmin, updatedCompany) {
+    _nameController..text = updatedCompany.name;
+    _emailController..text = updatedCompany.email;
 
     final Text retrieveError = _getRetrieveErrorWidget();
     if (_selectedCurrency == null &&
-        company?.currencyId != null &&
+        updatedCompany?.currencyId != null &&
         currencies != null)
-      _selectedCurrency =
-          currencies.firstWhere((a) => a.currencyId == company.currencyId);
+      _selectedCurrency = currencies
+          .firstWhere((a) => a.currencyId == updatedCompany.currencyId);
     if (retrieveError != null) {
       return retrieveError;
     }
@@ -195,27 +238,19 @@ class _CompanyState extends State<CompanyPage> {
                     key: _formKey,
                     child: ListView(children: <Widget>[
                       SizedBox(height: 30),
-                      GestureDetector(
-                        onTap: () async {
-                          PickedFile pickedFile = await _picker.getImage(
-                              source: ImageSource.gallery);
-                          BlocProvider.of<AuthBloc>(context).add(
-                              UploadImage(company.partyId, pickedFile.path));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: Colors.green,
-                            radius: 80,
-                            child: _imageFile != null
-                                ? kIsWeb
-                                    ? Image.network(_imageFile.path)
-                                    : Image.file(File(_imageFile.path))
-                                : company.image != null
-                                    ? Image.memory(company.image)
-                                    : Text(company.name.substring(0, 1) ?? '',
-                                        style: TextStyle(
-                                            fontSize: 30,
-                                            color: Colors.black))),
-                      ),
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 80,
+                          child: _imageFile != null
+                              ? kIsWeb
+                                  ? Image.network(_imageFile.path)
+                                  : Image.file(File(_imageFile.path))
+                              : updatedCompany.image != null
+                                  ? Image.memory(updatedCompany.image)
+                                  : Text(
+                                      updatedCompany.name.substring(0, 1) ?? '',
+                                      style: TextStyle(
+                                          fontSize: 30, color: Colors.black))),
                       SizedBox(height: 20),
                       TextFormField(
                         readOnly: !isAdmin,
@@ -282,18 +317,14 @@ class _CompanyState extends State<CompanyPage> {
                           visible: isAdmin,
                           child: RaisedButton(
                               key: Key('update'),
-                              child: Text(company.partyId == null
+                              child: Text(updatedCompany.partyId == null
                                   ? 'Create'
                                   : 'Update'),
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState.validate())
                                   //&& state is! UsersLoading)
                                   updatedCompany = Company(
-                                    image: _imageFile != null
-                                        ? File(_imageFile.path)
-                                            .readAsBytesSync()
-                                        : null,
-                                    partyId: company.partyId,
+                                    partyId: updatedCompany.partyId,
                                     email: _emailController.text,
                                     name: _nameController.text,
                                     currencyId: _selectedCurrency.currencyId,

@@ -60,9 +60,9 @@ class _CartList extends StatelessWidget {
                 .toList(),
           );
         }
-        if (state is CartError) {
+        if (state is CartProblem) {
           return Center(
-            child: Text(state.message),
+            child: Text(state.errorMessage),
           );
         }
         return Container();
@@ -93,7 +93,7 @@ class _CartTotal extends StatelessWidget {
               if (cartState is CartLoading || cartState is CartPaying) {
                 return CircularProgressIndicator();
               }
-              if (cartState is CartError) {
+              if (cartState is CartProblem) {
                 HelperFunctions.showMessage(
                     context, 'Cart error: $cartState.message}?', Colors.red);
               }
@@ -121,7 +121,7 @@ class _CartTotal extends StatelessWidget {
                                 HelperFunctions.showMessage(
                                     context, 'Sending order...', Colors.green);
                                 BlocProvider.of<CartBloc>(context)
-                                    .add(PayOrder(order));
+                                    .add(ConfirmCart());
                               }
                             }),
                 ]);

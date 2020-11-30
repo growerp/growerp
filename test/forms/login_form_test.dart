@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -127,7 +141,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Register as a customer'), findsOneWidget);
     });
-    testWidgets('forgot password', (WidgetTester tester) async {
+    testWidgets('forgot/change password?', (WidgetTester tester) async {
       when(authBloc.state).thenReturn(AuthUnauthenticated(
           Authenticate(company: Company(partyId: '100000', name: 'dummy'))));
       when(loginBloc.state).thenReturn(LoginLoaded(authenticate, companies));
@@ -144,16 +158,16 @@ void main() {
         ),
       ));
       await tester.pumpAndSettle();
-      expect(find.text('forgot password?'), findsOneWidget);
+      expect(find.text('forgot/change password?'), findsOneWidget);
       await tester
-          .tap(find.widgetWithText(GestureDetector, 'forgot password?'));
+          .tap(find.widgetWithText(GestureDetector, 'forgot/change password?'));
       await tester.pumpAndSettle();
       expect(
           find.text(
               'Email you registered with?\nWe will send you a reset password'),
           findsOneWidget);
       await tester.press(find.widgetWithText(FlatButton, 'Ok'));
-      expect(find.text('forgot password?'), findsOneWidget);
+      expect(find.text('forgot/change password?'), findsOneWidget);
     });
   });
 }

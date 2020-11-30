@@ -1,41 +1,74 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:dio/dio.dart';
+import 'package:http/http.dart' show get;
+import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io' show Platform;
+import 'dart:io';
 import 'dart:async';
 import '../models/@models.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-//import 'package:http/http.dart' as http;
-//import 'dart:io';
-//import 'package:path/path.dart';
-//import 'package:async/async.dart';
-
 class Ofbiz {
   final Dio client;
 
-  String sessionToken;
+  String classificationId = GlobalConfiguration().get("classificationId");
+  String prodUrl = GlobalConfiguration().get("prodUrl");
+  bool restRequestLogs =
+      GlobalConfiguration().getValue<bool>("restRequestLogs");
+  bool restResponseLogs =
+      GlobalConfiguration().getValue<bool>("restResponseLogs");
+  int connectTimeoutProd =
+      GlobalConfiguration().getValue<int>("connectTimeoutProd") * 1000;
+  int receiveTimeoutProd =
+      GlobalConfiguration().getValue<int>("receiveTimeoutProd") * 1000;
+  int connectTimeoutTest =
+      GlobalConfiguration().getValue<int>("connectTimeoutTest") * 1000;
+  int receiveTimeoutTest =
+      GlobalConfiguration().getValue<int>("receiveTimeoutTest") * 1000;
 
   Ofbiz({@required this.client}) {
     if (kReleaseMode) {
-      //platform not supported on the web
-      // is Release Mode ??
-      client.options.baseUrl = 'https://test.growerp.com/';
-    } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
-      client.options.baseUrl = 'http://localhost:8080/';
+      client.options.baseUrl = prodUrl;
+    } else if (kIsWeb) {
+      // when flutter web need apache httpd webserver in front
+      client.options.baseUrl = 'http://localhost/rest/';
+    } else if (Platform.isIOS || Platform.isLinux) {
+      client.options.baseUrl = 'http://localhost:8080/rest/';
     } else if (Platform.isAndroid) {
-      client.options.baseUrl = 'http://10.0.2.2:8080/';
+      client.options.baseUrl = 'http://10.0.2.2:8080/rest/';
     }
-    client.options.connectTimeout = 20000; //20s
-    client.options.receiveTimeout = 40000;
+    if (kReleaseMode) {
+      client.options.connectTimeout = connectTimeoutProd;
+      client.options.receiveTimeout = receiveTimeoutProd;
+    } else {
+      client.options.connectTimeout = connectTimeoutTest;
+      client.options.receiveTimeout = receiveTimeoutTest;
+    }
+
     client.options.headers = {'Content-Type': 'application/json'};
 
-//  logging in/out going backend requests
-/*    client.interceptors
+    //  processing in/out going backend requests
+    client.interceptors
         .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
-      print('===Outgoing dio request path: ${options.path}');
-      print('===Outgoing dio request headers: ${options.headers}');
-      print('===Outgoing dio request data: ${options.data}');
+      if (restRequestLogs) {
+        print('===Outgoing dio request ${options.baseUrl}${options.path}');
+        print('===Outgoing dio request headers: ${options.headers}');
+        print('===Outgoing dio request data: ${options.data}');
+      }
       // Do something before request is sent
       return options; //continue
       // If you want to resolve the request with some custom data，
@@ -44,14 +77,23 @@ class Ofbiz {
       // you can return a `DioError` object or return `dio.reject(errMsg)`
     }, onResponse: (Response response) async {
       // Do something with response data
-      print("===incoming response: ${response.toString()}");
+      if (restResponseLogs) {
+        print("===incoming response: ${response.toString()}");
+      }
       return response; // continue
     }, onError: (DioError e) async {
       // Do something with response error
-      print("error: $e");
+      if (e.response != null) {
+        print("=== e.response.data: ${e.response.data}");
+        print("=== e.response.headers: ${e.response.headers}");
+        print("=== e.response.request: ${e.response.request}");
+      } else {
+        // Something happened in setting up or sending the request that triggered an Error
+        print("=== e.request: ${e.request}");
+        print("=== e.message: ${e.message}");
+      }
       return e; //continue
     }));
-*/
   }
 
   String responseMessage(e) {
@@ -79,44 +121,56 @@ class Ofbiz {
           errorDescription = 'Send timeout in connection with API server';
           break;
       }
-      print("====dio error: $errorDescription");
+      print("===dio error: $errorDescription");
     }
     if (e.response != null && e.response.data != null) {
-      errorDescription = e.response.data["errors"];
+      print("=====e.response: ${e.response.toString()}");
+      print("=====e.response.data: ${e.response.data}");
     }
-//    if (e.response != null) {
-    // print('dio error data: ${e.response.data}');
-    // print('dio error headers: ${e.response.headers}');
-    // print('dio error request: ${e.response.request}');
-//    } else {
-    // Something happened in setting up or sending the request that triggered an Error
-    // print('dio no response, request: ${e.request}');
-    // print('dio no response, message: ${e.message}');
-//    }
-    print('==repos.dart: returning error message: $errorDescription');
+    print('==ofbiz.dart: returning error message: $errorDescription');
     return errorDescription;
+  }
+
+  String getResponseData(Response input, [String field]) {
+    Map jsonData = json.decode(input.toString()) as Map;
+    if (field != null) return jsonData["data"][field];
+    return json.encode(jsonData["data"]);
   }
 
 // -----------------------------general ------------------------
   Future<dynamic> getConnected() async {
     try {
-      Response response = await client.get('rest/moquiSessionToken');
-      this.sessionToken = response.toString();
-      return sessionToken != null; // return true if session token ok
+      String msg = "ok?";
+      Response response = await client.get('services/growerpPing?inParams=' +
+          Uri.encodeComponent('{"message": "$msg" }'));
+      return getResponseData(response, "msg") == msg;
     } catch (e) {
       return responseMessage(e);
     }
   }
 
   void setApikey(String apiKey) {
-    client.options.headers['api_key'] = apiKey;
+    if (apiKey != null)
+      client.options.headers["Authorization"] = 'Bearer ' + apiKey;
   }
 
   Future<dynamic> checkApikey() async {
-    print("=====${client.options.headers['api_key']}");
     try {
-      Response response = await client.get('rest/s1/growerp/100/CheckApiKey');
-      return response.data["ok"] == 'ok'; // return true if session token ok
+      Response response = await client.get('services/checkToken100');
+      // return true if session token ok
+      return getResponseData(response, "ok") == "ok";
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> checkCompany(String partyId) async {
+    try {
+      Response response = await client.get(
+          'services/checkCompany100?inParams=' +
+              Uri.encodeComponent('{"companyPartyId": "$partyId"}'));
+      // return true if session token ok
+      return getResponseData(response, "ok") == "ok";
     } catch (e) {
       return responseMessage(e);
     }
@@ -124,43 +178,43 @@ class Ofbiz {
 
   Future<dynamic> getCompanies() async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/Companies');
-      List companies = List<Company>.from(
-          response.data["companies"].map((x) => Company.fromJson(x)));
-      return companies;
+      Response response = await client.get(
+          'services/getCompanies100?inParams=' +
+              Uri.encodeComponent(
+                  '{"classificationId": "$classificationId" }'));
+      if (getResponseData(response) == '{}') return List<Company>();
+      return companiesFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  /// The demo store can only register as a customer.
-  /// Any other store it depends on the person logging in.
   Future<dynamic> register(
       {String companyName,
       String companyPartyId, // if empty will create new company too!
       @required String firstName,
       @required String lastName,
-      @required String currency,
+      @required String currencyId,
       @required String email,
       List data}) async {
     try {
       var locale;
       // if (!kIsWeb) locale = await Devicelocale.currentLocale;
       Response response =
-          await client.post('rest/s1/growerp/100/UserAndCompany',
-              data: {
-                'username': email, 'emailAddress': email,
-                'newPassword': 'qqqqqq9!', 'firstName': firstName,
-                'lastName': lastName, 'locale': locale,
-                'companyPartyId': companyPartyId, // for existing companies
-                'companyName': companyName, 'currencyUomId': currency,
-                'companyEmail': email,
-                'partyClassificationId': 'AppMaster',
-                'environment': kReleaseMode,
-                'moquiSessionToken': sessionToken
-              },
-              options: Options(headers: {'api_key': null}));
-      return authenticateFromJson(response.toString());
+          await client.post('services/registerUserAndCompany100', data: {
+        "companyName": companyName,
+        "currencyId": currencyId,
+        "firstName": firstName,
+        "lastName": lastName, 'locale': locale,
+        "classificationId": classificationId,
+        "emailAddress": email,
+        "companyEmail": email,
+        "username": email,
+        "userGroupId": 'GROWERP_M_ADMIN',
+        "password": 'qqqqqq9!', // TODO: should be removed
+        "passwordVerify": 'qqqqqq9!' // TODO: should be removed
+      });
+      return authenticateFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }
@@ -171,17 +225,17 @@ class Ofbiz {
       @required String username,
       @required String password}) async {
     try {
-      Response response = await client.post('rest/s1/growerp/100/Login', data: {
-        'companyPartyId': companyPartyId,
-        'username': username,
-        'password': password,
-        'moquiSessionToken': this.sessionToken
-      });
-      dynamic result = jsonDecode(response.toString());
-      if (result['passwordChange'] == 'true') return 'passwordChange';
-      this.sessionToken = result['moquiSessionToken'];
-      client.options.headers['api_key'] = result["apiKey"];
-      return authenticateFromJson(response.toString());
+      String basicAuth =
+          'Basic ' + base64Encode(utf8.encode('$username:$password'));
+      client.options.headers["Authorization"] = basicAuth;
+      Response response = await client.post('auth/token');
+      String token = getResponseData(response, "access_token");
+      client.options.headers["Authorization"] = 'Bearer ' + token;
+
+      response = await client.get('services/getAuthenticate100');
+      dynamic result = authenticateFromJson(getResponseData(response));
+      if (result is Authenticate) result.apiKey = token;
+      return result;
     } catch (e) {
       return (responseMessage(e));
     }
@@ -189,8 +243,8 @@ class Ofbiz {
 
   Future<dynamic> resetPassword({@required String username}) async {
     try {
-      Response result = await client.post('rest/s1/growerp/100/ResetPassword',
-          data: {'username': username, 'moquiSessionToken': this.sessionToken});
+      Response result = await client
+          .post('services/resetPassword100', data: {'username': username});
       return json.decode(result.toString());
     } catch (e) {
       return responseMessage(e);
@@ -202,11 +256,10 @@ class Ofbiz {
       @required String oldPassword,
       @required String newPassword}) async {
     try {
-      await client.put('rest/s1/growerp/100/Password', data: {
+      await client.put('services/updatePassword100', data: {
         'username': username,
         'oldPassword': oldPassword,
         'newPassword': newPassword,
-        'moquiSessionToken': this.sessionToken
       });
       return getAuthenticate();
     } catch (e) {
@@ -216,7 +269,6 @@ class Ofbiz {
 
   Future<dynamic> logout() async {
     try {
-      await client.post('rest/logout');
       Authenticate authenticate = await getAuthenticate();
       authenticate.apiKey = null;
       persistAuthenticate(authenticate);
@@ -230,10 +282,12 @@ class Ofbiz {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (authenticate != null) {
       await prefs.setString('authenticate', authenticateToJson(authenticate));
+      if (authenticate?.apiKey != null)
+        client.options.headers["Authorization"] =
+            'Bearer ' + authenticate?.apiKey;
     } else {
       await prefs.setString('authenticate', null);
     }
-    client.options.headers['api_key'] = authenticate?.apiKey;
   }
 
   Future<Authenticate> getAuthenticate() async {
@@ -243,36 +297,46 @@ class Ofbiz {
     return null;
   }
 
-  Future<dynamic> getUser(String partyId) async {
+  Future<dynamic> getUser({String userPartyId, String userGroupId}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/User',
-          queryParameters: {'partyId': partyId});
-      if (partyId == null)
-        return usersFromJson(response.toString());
-      else {
-        return userFromJson(response.toString());
+      Response response = await client.get('services/getUsers100?inParams=' +
+          Uri.encodeComponent(
+              '{"userPartyId": "$userPartyId", "usergroupId": "$userGroupId" }'));
+      if (userPartyId == null) {
+        if (getResponseData(response) == "{}") return List<User>();
+        return usersFromJson(getResponseData(response));
+      } else {
+        if (getResponseData(response) == "{}") return User();
+        return userFromJson(getResponseData(response));
       }
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> updateUser(User user) async {
+  Future<dynamic> updateUser(User user, [String imagePath]) async {
     // no partyId is add
     try {
+      if (imagePath != null) {
+        if (kIsWeb) {
+          var response = await get(imagePath);
+          user.image = response.bodyBytes;
+        } else {
+          user.image = File(imagePath).readAsBytesSync();
+        }
+      }
+
       Response response;
       if (user.partyId != null) {
-        response = await client.patch('rest/s1/growerp/100/User', data: {
-          'user': userToJson(user),
-          'moquiSessionToken': sessionToken
-        });
+        //update
+        response =
+            await client.post('services/updateUser100', data: userToJson(user));
       } else {
-        response = await client.put('rest/s1/growerp/100/User', data: {
-          'user': userToJson(user),
-          'moquiSessionToken': sessionToken
-        });
+        //create
+        response =
+            await client.post('services/createUser100', data: userToJson(user));
       }
-      return userFromJson(response.toString());
+      return userFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }
@@ -280,42 +344,167 @@ class Ofbiz {
 
   Future<dynamic> deleteUser(String partyId) async {
     try {
-      Response response = await client.delete('rest/s1/growerp/100/User',
-          queryParameters: {'partyId': partyId});
-      return response.data["partyId"];
+      Response response = await client
+          .post('services/deleteUser100', data: {'userPartyId': partyId});
+      return getResponseData(response, "userPartyId");
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> updateCompany(Company company) async {
+  Future<dynamic> updateCompany(Company company, String imagePath) async {
     try {
-      Response response = await client.patch('rest/s1/growerp/100/Company',
-          data: {'moquiSessionToken': sessionToken});
-      return companyFromJson(response.toString());
+      if (imagePath != null) {
+        if (kIsWeb) {
+          var response = await get(imagePath);
+          company.image = response.bodyBytes;
+        } else {
+          company.image = File(imagePath).readAsBytesSync();
+        }
+      } else
+        company.image = null;
+
+      Response response = await client.post('services/updateCompany100',
+          data: companyToJson(company));
+      return companyFromJson(getResponseData(response));
     } catch (e) {
-      print("===catch: $e");
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> uploadImage({
-    String type, // product, user, company.....
-    String id, // id of the type
-    String fileName,
-  }) async {
+  Future<dynamic> getCatalog(String companyPartyId) async {
     try {
-      String justName = fileName.split('/').last;
-      FormData formData = FormData.fromMap({
-        "type": type,
-        "id": id,
-        "file": await MultipartFile.fromFile(fileName, filename: justName),
-        "moquiSessionToken": this.sessionToken
-      });
-//      Authenticate authenticate = await getAuthenticate();
-//      client.options.headers['api_key'] = authenticate?.apiKey;
-      await client.post("growerp/uploadImage", data: formData);
+/*      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('categoriesAndProducts', response.toString());
+      String catProdJson = prefs.getString('categoriesAndProducts');
+      if (catProdJson != null) return catalogFromJson(catProdJson);
+*/
+      Response response = await client.get('services/getCatalog100?inParams=' +
+          Uri.encodeComponent('{"companyPartyId": "$companyPartyId"}'));
+      Catalog result = catalogFromJson(getResponseData(response));
+      if (result.categories == null) result.categories = [];
+      if (result.products == null) result.products = [];
+      return result;
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getCart() async {
+    try {
+//      SharedPreferences prefs = await SharedPreferences.getInstance();
+//      String orderJson = prefs.getString('orderAndItems');
+//      if (orderJson != null) return orderFromJson(orderJson);
       return null;
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> saveCart({Order order}) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'orderAndItems', order == null ? null : orderToJson(order));
+      return null;
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> updateCategory(
+      ProductCategory category, String imagePath) async {
+    // no categoryId is add
+    try {
+      if (imagePath != null) {
+        if (kIsWeb) {
+          var response = await get(imagePath);
+          category.image = response.bodyBytes;
+        } else {
+          category.image = File(imagePath).readAsBytesSync();
+        }
+      }
+
+      Response response;
+      if (category.categoryId != null) {
+        //update
+        response = await client.post('services/updateCategory100',
+            data: categoryToJson(category));
+      } else {
+        //create
+        response = await client.post('services/createCategory100',
+            data: categoryToJson(category));
+      }
+      return categoryFromJson(getResponseData(response));
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> deleteCategory(String categoryId) async {
+    try {
+      Response response = await client
+          .post('services/deleteCategory100', data: {'categoryId': categoryId});
+      return getResponseData(response, "categoryId");
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> updateProduct(Product product, String imagePath) async {
+    // no productId is add
+    print("======create prod $product");
+    try {
+      if (imagePath != null) {
+        if (kIsWeb) {
+          var response = await get(imagePath);
+          product.image = response.bodyBytes;
+        } else {
+          product.image = File(imagePath).readAsBytesSync();
+        }
+      }
+
+      Response response;
+      if (product.productId != null) {
+        //update
+        response = await client.post('services/updateProduct100',
+            data: productToJson(product));
+      } else {
+        //create
+        response = await client.post('services/createProduct100',
+            data: productToJson(product));
+      }
+      return productFromJson(getResponseData(response));
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> deleteProduct(String productId) async {
+    try {
+      Response response = await client
+          .post('services/deleteProduct100', data: {'productId': '$productId'});
+      return getResponseData(response, "productId");
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> createOrder(Order order) async {
+    try {
+      Response response = await client.post('services/createOrder100',
+          data: orderToJson(order));
+      return orderFromJson(getResponseData(response));
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getOrders() async {
+    try {
+      Response response = await client.get('services/getOrders100?inParams={}');
+      if (getResponseData(response) == '{}') return List<Order>();
+      return ordersFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }

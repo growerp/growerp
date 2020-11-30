@@ -1,4 +1,19 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:convert';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
 import 'package:ecommerce/models/@models.dart';
@@ -9,13 +24,15 @@ import '../data.dart';
 class DioAdapterMock extends Mock implements HttpClientAdapter {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final Dio tdio = Dio();
   DioAdapterMock dioAdapterMock;
   Moqui repos;
 
-  setUp(() {
+  setUpAll(() async {
     dioAdapterMock = DioAdapterMock();
     tdio.httpClientAdapter = dioAdapterMock;
+    await GlobalConfiguration().loadFromAsset("app_settings");
     repos = Moqui(client: tdio);
   });
 
@@ -39,26 +56,6 @@ void main() {
       expect(response, equals(expected));
     });
 
-/*    test('Get currencies', () async {
-      final responsepayload =
-          currencyListToJson(CurrencyList(currencyList: currencies));
-      final httpResponse = ResponseBody.fromString(
-        responsepayload,
-        200,
-        headers: {
-          Headers.contentTypeHeader: [Headers.jsonContentType],
-        },
-      );
-
-      when(dioAdapterMock.fetch(any, any, any))
-          .thenAnswer((_) async => httpResponse);
-
-      final response = await repos.getCurrencies();
-      final expected = currencies;
-
-      expect(response, equals(expected));
-    });
-*/
     test('Get companies', () async {
       final responsepayload = companiesToJson(companies);
       final httpResponse = ResponseBody.fromString(
@@ -91,8 +88,8 @@ void main() {
           companyName: companyName,
           firstName: firstName,
           lastName: lastName,
-          currency: currencyId,
-          email: email);
+          currencyId: currencyId,
+          email: emailAddress);
       final expected = authenticateNoKey;
 
       expect(

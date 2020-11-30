@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +42,8 @@ class RegisterForm extends StatelessWidget {
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.home),
-                onPressed: () => Navigator.pushNamed(context, HomeRoute)),
+                onPressed: () => Navigator.pushNamed(context, HomeRoute,
+                    arguments: FormArguments()))
           ],
         ),
         body: BlocProvider(
@@ -54,7 +69,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
   final _formKey = GlobalKey<FormState>();
   Currency _currencySelected = kReleaseMode ? '' : currencies[0];
   final _companyController = TextEditingController()
-    ..text = kReleaseMode ? '' : 'Master template app';
+    ..text = kReleaseMode ? '' : 'Demo company from John Doe';
   final _firstNameController = TextEditingController()
     ..text = kReleaseMode ? '' : 'John';
   final _lastNameController = TextEditingController()
@@ -97,9 +112,10 @@ class _RegisterHeaderState extends State<RegisterHeader> {
           } else {
             Navigator.pushNamedAndRemoveUntil(
                 context, HomeRoute, ModalRoute.withName(HomeRoute),
-                arguments: "Register Company and admin successfull\n"
-                    "you can now login at the top right corner\n"
-                    "with your email password.");
+                arguments:
+                    FormArguments("Register Company and admin successfull\n"
+                        "you can now login with the password\n"
+                        "you can find in the email which was send to you."));
           }
         }
       },
@@ -234,8 +250,8 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                               SizedBox(height: 20),
                               RaisedButton(
                                   key: Key('newCompany'),
-                                  child: Text(
-                                      'Register AND create a new Ecommerce shop'),
+                                  child:
+                                      Text('Register AND create a new Company'),
                                   onPressed: () {
                                     if (_formKey.currentState.validate() &&
                                         state is! RegisterSending)
@@ -243,7 +259,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                           .add(
                                         RegisterCompanyAdmin(
                                           companyName: _companyController.text,
-                                          currency:
+                                          currencyId:
                                               _currencySelected.currencyId,
                                           firstName: _firstNameController.text,
                                           lastName: _lastNameController.text,

@@ -1,27 +1,16 @@
-# GrowERP master App
+# ecommerce
 
-GrowERP Flutter frontend component for Android, IOS and Web using Flutter.
+A new Flutter project.
 
-Under development.
-several branches with different products, all using Flutter:
+## Getting Started
 
-This master branch will catain an app which is used in all other apps.
-functions:
+This project is a starting point for a Flutter application.
 
-1. login
-2. logout
-3. registration new user existing company
-4. registration of new company and admin user.
-5. forgot password
-6. change pasword
-7. communication with the server.
-8. tests of all functions.
-9. switch to new another company.
-10. 'About' form describing the App.
-11. routing
-12. state management
-13. master of ALL models
-14. Fully multicompany.
+A few resources to get you started if this is your first Flutter project:
 
-For the backend you need the Moqui or OFBiz ERP system (moqui.org) 
-with an extra component: https://github.com/growerp/growerp-backend-mobile
+- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+
+For help getting started with Flutter, view our
+[online documentation](https://flutter.dev/docs), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
