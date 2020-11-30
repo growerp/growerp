@@ -1,16 +1,9 @@
-# ecommerce
+# GrowERP Ecommerce app
 
-A new Flutter project.
+An Ecommerce application, a companion for the 'admin' application present in the master branch of this repository.
 
-## Getting Started
+It has the standard functions of Ecommerce:
 
-This project is a starting point for a Flutter application.
+Showing categories and products which can be added to a shopping cart. From this cart the order can be created.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+A payment option is under development.
