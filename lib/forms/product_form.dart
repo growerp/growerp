@@ -293,7 +293,6 @@ class _MyProductState extends State<MyProductPage> {
                       child: Text(
                           product?.productId == null ? 'Create' : 'Update'),
                       onPressed: () {
-                        print("====${_selectedCategory.categoryId}");
                         if (_formKey.currentState.validate() && !loading) {
                           updatedProduct = Product(
                             productId: product?.productId,

@@ -105,8 +105,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           //print("===3====${authenticate?.apiKey}");
           await findDefaultCompany();
-          // only load crmbloc when logged in
-          yield await checkApikey();
+          if (authenticate?.company?.partyId != null)
+            yield await checkApikey();
+          else
+            yield AuthUnauthenticated(authenticate);
         }
       }
     } else if (event is LoggedIn) {

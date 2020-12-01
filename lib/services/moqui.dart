@@ -24,7 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Moqui {
   final Dio client;
-
   String sessionToken;
   String classificationId = GlobalConfiguration().get("classificationId");
   String prodUrl = GlobalConfiguration().get("prodUrl");
@@ -179,6 +178,7 @@ class Moqui {
       @required String firstName,
       @required String lastName,
       String currencyId,
+      String classificationId,
       @required String email,
       List data}) async {
     try {

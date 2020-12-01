@@ -56,6 +56,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       final authenticate = await repos.register(
           companyName: event.companyName,
           currencyId: event.currencyId,
+          classificationId: event.classificationId,
           firstName: event.firstName,
           lastName: event.lastName,
           email: event.email);
@@ -115,6 +116,7 @@ class RegisterButtonPressed extends RegisterEvent {
 class RegisterCompanyAdmin extends RegisterEvent {
   final String companyName;
   final String currencyId;
+  final String classificationId;
   final String firstName;
   final String lastName;
   final String email;
@@ -122,18 +124,15 @@ class RegisterCompanyAdmin extends RegisterEvent {
   const RegisterCompanyAdmin({
     @required this.companyName,
     @required this.currencyId,
+    @required this.classificationId,
     @required this.firstName,
     @required this.lastName,
     @required this.email,
   });
 
   @override
-  List<Object> get props =>
-      [companyName, currencyId, firstName, lastName, email];
-
-  @override
-  String toString() =>
-      'Register CompanyAdmin  { company name: $companyName, email: $email }';
+  String toString() => 'Register CompanyAdmin  { company name: $companyName, '
+      'email: $email class: $classificationId}';
 }
 
 // -------------------------------state ------------------------------

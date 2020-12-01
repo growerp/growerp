@@ -195,6 +195,7 @@ class Ofbiz {
       @required String firstName,
       @required String lastName,
       @required String currencyId,
+      @required String classificationId,
       @required String email,
       List data}) async {
     try {

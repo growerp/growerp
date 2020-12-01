@@ -79,6 +79,7 @@ void main() {
       build: () => RegisterBloc(repos: mockReposRepository),
       act: (bloc) async {
         when(mockReposRepository.register(
+                classificationId: classificationId,
                 companyName: companyName,
                 currencyId: currencyId,
                 firstName: firstName,
@@ -87,6 +88,7 @@ void main() {
             .thenAnswer((_) async => authenticateNoKey);
         bloc.add(LoadRegister());
         bloc.add(RegisterCompanyAdmin(
+            classificationId: classificationId,
             companyName: companyName,
             currencyId: currencyId,
             firstName: firstName,

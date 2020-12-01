@@ -91,6 +91,9 @@ class _RegisterHeaderState extends State<RegisterHeader> {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate;
+    classifications.retainWhere((x) => x.active == true);
+    Classification _classificationSelected =
+        kReleaseMode ? '' : classifications[0];
     return BlocListener<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterError)
@@ -216,36 +219,44 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 },
                               ),
                               SizedBox(height: 20),
-                              Container(
-                                width: 400,
-                                height: 60,
-                                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25.0),
-                                  border: Border.all(
-                                      color: Colors.grey,
-                                      style: BorderStyle.solid,
-                                      width: 0.80),
-                                ),
-                                child: DropdownButton(
-                                  key: Key('dropDown'),
-                                  underline: SizedBox(), // remove underline
-                                  hint: Text('Currency'),
-                                  value: _currencySelected,
-                                  items: currencies?.map((item) {
-                                    return DropdownMenuItem<Currency>(
+                              DropdownButtonFormField<Currency>(
+                                key: Key('dropDownCur'),
+                                hint: Text('Currency'),
+                                value: _currencySelected,
+                                validator: (value) =>
+                                    value == null ? 'field required' : null,
+                                items: currencies?.map((item) {
+                                  return DropdownMenuItem<Currency>(
                                       child: Text(
                                           item.description ?? 'Currency??'),
-                                      value: item,
-                                    );
-                                  })?.toList(),
-                                  onChanged: (Currency newValue) {
-                                    setState(() {
-                                      _currencySelected = newValue;
-                                    });
-                                  },
-                                  isExpanded: true,
-                                ),
+                                      value: item);
+                                })?.toList(),
+                                onChanged: (Currency newValue) {
+                                  setState(() {
+                                    _currencySelected = newValue;
+                                  });
+                                },
+                                isExpanded: true,
+                              ),
+                              SizedBox(height: 20),
+                              DropdownButtonFormField<Classification>(
+                                key: Key('dropDownClass'),
+                                hint: Text('Business Type'),
+                                value: _classificationSelected,
+                                validator: (value) =>
+                                    value == null ? 'field required' : null,
+                                items: classifications?.map((item) {
+                                  return DropdownMenuItem<Classification>(
+                                      child: Text(item.description ??
+                                          'Classification??'),
+                                      value: item);
+                                })?.toList(),
+                                onChanged: (Classification newValue) {
+                                  setState(() {
+                                    _classificationSelected = newValue;
+                                  });
+                                },
+                                isExpanded: true,
                               ),
                               SizedBox(height: 20),
                               RaisedButton(
@@ -261,6 +272,9 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                           companyName: _companyController.text,
                                           currencyId:
                                               _currencySelected.currencyId,
+                                          classificationId:
+                                              _classificationSelected
+                                                  .classificationId,
                                           firstName: _firstNameController.text,
                                           lastName: _lastNameController.text,
                                           email: _emailController.text,

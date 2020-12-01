@@ -67,7 +67,8 @@ void main() {
       expect(find.text('Register a new company and admin'), findsWidgets);
       expect(find.byKey(Key('firstName')), findsOneWidget);
       expect(find.byKey(Key('lastName')), findsOneWidget);
-      expect(find.byKey(Key('dropDown')), findsOneWidget);
+      expect(find.byKey(Key('dropDownCur')), findsOneWidget);
+      expect(find.byKey(Key('dropDownClass')), findsOneWidget);
       expect(find.byKey(Key('companyName')), findsOneWidget);
       expect(find.text('A temporary password will be send by email'),
           findsOneWidget);

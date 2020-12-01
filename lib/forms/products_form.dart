@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:ecommerce/forms/fatalError_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -98,89 +99,98 @@ class _ProductsFormStateHeader extends State<ProductsFormHeader> {
   }
 
   Widget productList() {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverToBoxAdapter(
-          // you could add any widget
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.transparent,
-            ),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Text("Product name [Id] ",
-                        textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("Description", textAlign: TextAlign.center)),
-                Expanded(child: Text("price", textAlign: TextAlign.center)),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+    if (catalog.categories.isEmpty)
+      return FatalErrorForm(
+          "No products yet, enter categories first\n "
+              "they are mandatory on products",
+          CategoryRoute,
+          "Create category");
+    else
+      return CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            // you could add any widget
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.transparent,
+              ),
+              title: Row(
+                children: <Widget>[
                   Expanded(
-                      child:
-                          Text("Category [id]", textAlign: TextAlign.center)),
-              ],
+                      child: Text("Product name [Id] ",
+                          textAlign: TextAlign.center)),
+                  Expanded(
+                      child: Text("Description", textAlign: TextAlign.center)),
+                  Expanded(child: Text("price", textAlign: TextAlign.center)),
+                  if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                    Expanded(
+                        child:
+                            Text("Category [id]", textAlign: TextAlign.center)),
+                ],
+              ),
             ),
           ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return InkWell(
-                onTap: () async {
-                  dynamic user = await Navigator.pushNamed(
-                      context, ProductRoute,
-                      arguments: FormArguments(null, products[index]));
-                  setState(() {
-                    if (user != null)
-                      products.replaceRange(index, index + 1, [user]);
-                  });
-                },
-                onLongPress: () async {
-                  bool result = await confirmDialog(context,
-                      "${products[index].productName}", "Delete this product?");
-                  if (result) {
-                    BlocProvider.of<CatalogBloc>(context)
-                        .add(DeleteProduct(products[index]));
-                    Navigator.pushNamed(context, ProductsRoute,
-                        arguments: FormArguments(
-                            'product deleted', authenticate, catalog));
-                  }
-                },
-                child: ListTile(
-                  //return  ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green,
-                    child: products[index]?.image != null
-                        ? Image.memory(products[index]?.image)
-                        : Text(products[index]?.productName != null
-                            ? products[index]?.productName[0]
-                            : '?'),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return InkWell(
+                  onTap: () async {
+                    dynamic user = await Navigator.pushNamed(
+                        context, ProductRoute,
+                        arguments: FormArguments(null, products[index]));
+                    setState(() {
+                      if (user != null)
+                        products.replaceRange(index, index + 1, [user]);
+                    });
+                  },
+                  onLongPress: () async {
+                    bool result = await confirmDialog(
+                        context,
+                        "${products[index].productName}",
+                        "Delete this product?");
+                    if (result) {
+                      BlocProvider.of<CatalogBloc>(context)
+                          .add(DeleteProduct(products[index]));
+                      Navigator.pushNamed(context, ProductsRoute,
+                          arguments: FormArguments(
+                              'product deleted', authenticate, catalog));
+                    }
+                  },
+                  child: ListTile(
+                    //return  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.green,
+                      child: products[index]?.image != null
+                          ? Image.memory(products[index]?.image)
+                          : Text(products[index]?.productName != null
+                              ? products[index]?.productName[0]
+                              : '?'),
+                    ),
+                    title: Row(
+                      children: <Widget>[
+                        Expanded(
+                            child: Text("${products[index].productName}, "
+                                "[${products[index].productId}]")),
+                        Expanded(
+                            child: Text("${products[index].description}",
+                                textAlign: TextAlign.center)),
+                        Expanded(
+                            child: Text("${products[index].price}",
+                                textAlign: TextAlign.center)),
+                        Expanded(
+                            child: Text(
+                                "${products[index].categoryName}"
+                                "[${products[index].categoryId}]",
+                                textAlign: TextAlign.center)),
+                      ],
+                    ),
                   ),
-                  title: Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: Text("${products[index].productName}, "
-                              "[${products[index].productId}]")),
-                      Expanded(
-                          child: Text("${products[index].description}",
-                              textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("${products[index].price}",
-                              textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text(
-                              "${products[index].categoryName}"
-                              "[${products[index].categoryId}]",
-                              textAlign: TextAlign.center)),
-                    ],
-                  ),
-                ),
-              );
-            },
-            childCount: products == null ? 0 : products?.length,
+                );
+              },
+              childCount: products == null ? 0 : products?.length,
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
   }
 }

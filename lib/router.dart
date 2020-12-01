@@ -69,6 +69,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => ProductEcomForm(settings.arguments));
     default:
       return MaterialPageRoute(
-          builder: (context) => UndefinedView(name: settings.name));
+          builder: (context) => FatalErrorForm(settings.name));
   }
 }

@@ -19,6 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'blocs/@blocs.dart';
+import 'models/@models.dart';
 import 'models/order.dart';
 import 'services/@services.dart';
 import 'styles/themes.dart';
@@ -67,6 +68,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    String classificationId = GlobalConfiguration().get("classificationId");
     return MaterialApp(
         builder: (context, widget) => ResponsiveWrapper.builder(
             BouncingScrollWrapper.builder(context, widget),
@@ -83,16 +85,20 @@ class MyApp extends StatelessWidget {
             background: Container(color: Color(0xFFF5F5F5))),
         theme: Themes.formTheme,
         onGenerateRoute: router.generateRoute,
-        home: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state is AuthLoading || state is AuthInitial)
-              return SplashForm();
-            if (state is AuthUnauthenticated &&
-                state.authenticate?.company == null)
-              return RegisterForm('No companies found in system, create one?');
-            return HomeForm();
-          },
-        ));
+        home: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+          if (state is AuthLoading || state is AuthInitial) return SplashForm();
+          if (state is AuthUnauthenticated &&
+              state.authenticate?.company ==
+                  null) if (classificationId == 'AppAdmin')
+            return RegisterForm('No companies found in system, create one?');
+          else
+            return FatalErrorForm(
+                "No $classificationId company found in system\n"
+                "Go to the admin app to create one!");
+          if (classificationId == 'AppAdmin')
+            return AdminHome(FormArguments("Welcome"));
+          return HomeForm();
+        }));
   }
 }
 

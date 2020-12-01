@@ -74,7 +74,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
           await repos.updateCategory(event.category, event.imagePath);
       if (result is ProductCategory) {
         if (event.category?.categoryId == null) {
-          catalog.categories.add(event.category);
+          catalog.categories.add(result);
         } else {
           int index = catalog.categories
               .indexWhere((cat) => cat.categoryId == result.categoryId);

@@ -18,7 +18,7 @@ export 'splash_form.dart';
 export 'login_form.dart';
 export 'register_form.dart';
 export 'changePw_form.dart';
-export 'undefined_form.dart';
+export 'fatalError_form.dart';
 export 'users_form.dart';
 export 'user_form.dart';
 export 'company_form.dart';
