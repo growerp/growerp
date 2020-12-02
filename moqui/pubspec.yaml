@@ -15,8 +15,10 @@ dependencies:
   shared_preferences: ^0.5.12+2
   http: ^0.12.2
   models:
-    path: ../models
-
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: models
 
 dev_dependencies:
   flutter_test:
