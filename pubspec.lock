@@ -141,6 +141,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  core:
+    dependency: "direct main"
+    description:
+      path: "../packages/core"
+      relative: true
+    source: path
+    version: "0.0.1"
   coverage:
     dependency: transitive
     description:
@@ -401,6 +408,24 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.1.3"
+  models:
+    dependency: "direct main"
+    description:
+      path: models
+      ref: packages
+      resolved-ref: "95611663cf81f9e9030acd8241b9a5854df25ce3"
+      url: "git@github.com:growerp/growerp"
+    source: git
+    version: "0.0.1"
+  moqui:
+    dependency: "direct main"
+    description:
+      path: moqui
+      ref: packages
+      resolved-ref: "95611663cf81f9e9030acd8241b9a5854df25ce3"
+      url: "git@github.com:growerp/growerp"
+    source: git
+    version: "0.0.1"
   nested:
     dependency: transitive
     description:
@@ -429,6 +454,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.12"
+  ofbiz:
+    dependency: "direct main"
+    description:
+      path: ofbiz
+      ref: packages
+      resolved-ref: "95611663cf81f9e9030acd8241b9a5854df25ce3"
+      url: "git@github.com:growerp/growerp"
+    source: git
+    version: "0.0.1"
   package_config:
     dependency: transitive
     description:

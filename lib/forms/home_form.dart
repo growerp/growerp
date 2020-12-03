@@ -15,11 +15,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../blocs/@blocs.dart';
-import '../models/@models.dart';
-import '../helper_functions.dart';
+import 'package:core/blocs/@blocs.dart';
+import 'package:models/models.dart';
+import 'package:core/helper_functions.dart';
 import '../routing_constants.dart';
-import '../forms/@forms.dart';
+import 'package:core/forms/@forms.dart';
 
 class HomeForm extends StatefulWidget {
   final String message;
@@ -51,7 +51,6 @@ class _HomeState extends State<HomeForm> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      print("=====state: $state");
       if (state is AuthProblem) {
         return Container(
             child: Center(
@@ -116,7 +115,6 @@ class _HomeState extends State<HomeForm> {
                       context, '${state.message}', Colors.green);
                 }
               }, builder: (context, state) {
-                print("=====catalog state: $state");
                 if (state is CatalogLoaded) {
                   categories = state.catalog?.categories;
                   selectedCategoryId ??=

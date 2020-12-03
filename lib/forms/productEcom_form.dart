@@ -2,9 +2,9 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../helper_functions.dart';
-import '../models/@models.dart';
-import '../blocs/@blocs.dart';
+import 'package:core/helper_functions.dart';
+import 'package:models/models.dart';
+import 'package:core/blocs/@blocs.dart';
 
 class ProductEcomForm extends StatefulWidget {
   final Product product;
