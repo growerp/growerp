@@ -57,6 +57,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Future<AuthState> checkApikey() async {
       //print("===10==== apiKey: ${authenticate?.apiKey}");
       if (authenticate?.apiKey == null) {
+        if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST'))
+          catalogBloc.add(LoadCatalog(authenticate.company.partyId));
         return AuthUnauthenticated(authenticate);
       } else {
         repos.setApikey(authenticate?.apiKey);
@@ -105,8 +107,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await findDefaultCompany();
           if (authenticate?.company?.partyId != null)
             yield await checkApikey();
-          else
+          else {
+            //print("===4====no company found}");
             yield AuthUnauthenticated(authenticate);
+          }
         }
       }
     } else if (event is LoggedIn) {
