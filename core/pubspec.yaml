@@ -1,0 +1,50 @@
+name: core
+description: A new Flutter package project.
+version: 0.0.1
+author:
+homepage:
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  decimal: ^0.3.0
+  global_configuration: ^1.6.0
+  equatable: ^1.2.5
+  flutter_bloc: ^6.1.0
+  meta: ^1.1.6
+  image_picker: ^0.6.7+7
+  image_picker_for_web: ^0.1.0+2
+  responsive_framework: ^0.0.8
+  about: ^1.1.2
+  ofbiz:
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: ofbiz
+  moqui:
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: moqui
+  models:
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: models
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^4.1.1
+  test_coverage: ^0.4.0
+  bloc_test: ^7.1.0
+  flutter_launcher_icons: ^0.7.5
+
+flutter:
+  uses-material-design: true
+# from https://www.flaticon.com/
