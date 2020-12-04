@@ -93,8 +93,8 @@ class Order {
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
 
-  String toString() => 'order# $orderId customer: $customerPartyId items: '
-      '${orderItems?.length} firstItem ${orderItems[0]}';
+  String toString() => 'order# $orderId customer: $customerPartyId items: ';
+//      '${orderItems?.length}';
 }
 
 class OrderItem {
