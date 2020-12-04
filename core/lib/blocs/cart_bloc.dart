@@ -29,7 +29,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   StreamSubscription authBlocSubscription;
   StreamSubscription catalogBlocSubscription;
   StreamSubscription crmBlocSubscription;
-  Order order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
+  Order order = Order(grandTotal: Decimal.parse('0'), orderItems: List());
   Authenticate authenticate;
   Catalog catalog;
   List<User> crmUsers;
@@ -76,10 +76,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } else if (event is UpdateCart) {
       yield CartLoading();
       order.customerPartyId = event.order.customerPartyId;
-      event.order.orderItems[0].orderItemSeqId = order.orderItems.length + 1;
+      event.order.orderItems[0].orderItemSeqId =
+          order.orderItems == null ? 1 : order.orderItems.length + 1;
       event.order.orderItems[0].description = catalog.products
           .firstWhere((x) => event.order.orderItems[0].productId == x.productId)
-          .description;
+          .productName;
+      if (order.orderItems == null) order.orderItems = [];
       order.orderItems.add(event.order.orderItems[0]);
       order.grandTotal = Decimal.parse('0');
       order.orderItems.forEach((x) {
@@ -199,7 +201,7 @@ class CartLoaded extends CartState {
   Decimal get totalPrice {
     if (order?.orderItems?.length == 0) return Decimal.parse('0');
     Decimal total = Decimal.parse('0');
-    if (order != null)
+    if (order != null && order.orderItems != null)
       for (OrderItem i in order?.orderItems)
         total += (i.price * Decimal.parse(i.quantity.toString()));
     return total;
