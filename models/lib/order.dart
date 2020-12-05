@@ -98,6 +98,12 @@ class Order {
 }
 
 class OrderItem {
+  int orderItemSeqId;
+  String productId;
+  String description;
+  Decimal quantity;
+  Decimal price;
+
   OrderItem({
     this.orderItemSeqId,
     this.productId,
@@ -105,12 +111,6 @@ class OrderItem {
     this.quantity,
     this.price,
   });
-
-  int orderItemSeqId;
-  String productId;
-  String description;
-  Decimal quantity;
-  Decimal price;
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
       orderItemSeqId: int.parse(json["orderItemSeqId"]),

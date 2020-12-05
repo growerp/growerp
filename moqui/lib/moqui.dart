@@ -34,14 +34,14 @@ class Moqui {
       client.options.baseUrl = 'http://10.0.2.2:8080/';
     }
     if (kReleaseMode) {
-      client.options.connectTimeout = 10;
-      client.options.receiveTimeout = 20;
+      client.options.connectTimeout = 10000;
+      client.options.receiveTimeout = 20000;
     } else {
-      client.options.connectTimeout = 20;
-      client.options.receiveTimeout = 40;
+      client.options.connectTimeout = 20000;
+      client.options.receiveTimeout = 40000;
     }
 
-    client.options.headers = {'Content-Type': 'application/json'};
+    //  client.options.headers = {'Content-Type': 'application/json'};
 
     client.interceptors
         .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
@@ -191,6 +191,7 @@ class Moqui {
 
   Future<dynamic> login(
       {@required String username, @required String password}) async {
+    print("repos: $username $password");
     try {
       Response response = await client.post('rest/s1/growerp/100/Login', data: {
         'username': username,

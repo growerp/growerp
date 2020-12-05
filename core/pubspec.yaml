@@ -21,20 +21,17 @@ dependencies:
   responsive_framework: ^0.0.8
   about: ^1.1.2
   ofbiz:
+#    path: ../ofbiz
     git:
       url: git@github.com:growerp/growerp
       ref: packages
       path: ofbiz
   moqui:
+#    path: ../moqui
     git:
       url: git@github.com:growerp/growerp
       ref: packages
       path: moqui
-  models:
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: models
 
 
 dev_dependencies:

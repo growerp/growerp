@@ -36,11 +36,11 @@ class Ofbiz {
       client.options.baseUrl = 'http://10.0.2.2:8080/rest/';
     }
     if (kReleaseMode) {
-      client.options.connectTimeout = 10;
-      client.options.receiveTimeout = 20;
+      client.options.connectTimeout = 10000;
+      client.options.receiveTimeout = 20000;
     } else {
-      client.options.connectTimeout = 20;
-      client.options.receiveTimeout = 40;
+      client.options.connectTimeout = 20000;
+      client.options.receiveTimeout = 40000;
     }
 
     client.options.headers = {'Content-Type': 'application/json'};

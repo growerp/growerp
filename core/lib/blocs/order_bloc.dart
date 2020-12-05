@@ -21,7 +21,7 @@ import 'package:models/models.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final repos;
-  List<Order> orders;
+  List<Order> orders = [];
   OrderBloc(this.repos) : super(OrderInitial());
 
   @override
