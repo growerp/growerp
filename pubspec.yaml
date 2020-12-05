@@ -21,11 +21,11 @@ dependencies:
   responsive_framework: ^0.0.8
   flutter_staggered_grid_view: ^0.3.2
   core:
-    path: ../packages/core
-#    git:
-#      url: git@github.com:growerp/growerp
-#      ref: packages
-#      path: core
+#    path: ../packages/core
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: core
 
 dev_dependencies:
   flutter_test:

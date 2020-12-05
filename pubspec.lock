@@ -144,9 +144,11 @@ packages:
   core:
     dependency: "direct main"
     description:
-      path: "../packages/core"
-      relative: true
-    source: path
+      path: core
+      ref: packages
+      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   coverage:
     dependency: transitive
@@ -411,16 +413,20 @@ packages:
   models:
     dependency: transitive
     description:
-      path: "../packages/models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   moqui:
     dependency: transitive
     description:
-      path: "../packages/moqui"
-      relative: true
-    source: path
+      path: moqui
+      ref: packages
+      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   nested:
     dependency: transitive
@@ -453,9 +459,11 @@ packages:
   ofbiz:
     dependency: transitive
     description:
-      path: "../packages/ofbiz"
-      relative: true
-    source: path
+      path: ofbiz
+      ref: packages
+      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   package_config:
     dependency: transitive
