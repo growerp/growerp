@@ -10,7 +10,7 @@ dependencies:
   decimal: ^0.3.0
   global_configuration: ^1.6.0
   equatable: ^1.2.5
-  dio: ^3.0.9
+  dio: ^3.0.10
   flutter_bloc: ^6.1.0
   meta: ^1.1.6
   shared_preferences: ^0.5.12+2
@@ -20,26 +20,13 @@ dependencies:
   animations: ^1.0.0+5
   responsive_framework: ^0.0.8
   flutter_staggered_grid_view: ^0.3.2
-  models:
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: models
   core:
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: core
-  ofbiz:
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: ofbiz
-  moqui:
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: moqui
+    path: ../packages/core
+#    git:
+#      url: git@github.com:growerp/growerp
+#      ref: packages
+#      path: core
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

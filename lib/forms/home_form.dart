@@ -16,10 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:core/blocs/@blocs.dart';
+import 'package:core/forms/@forms.dart';
 import 'package:models/models.dart';
 import 'package:core/helper_functions.dart';
 import '../routing_constants.dart';
-import 'package:core/forms/@forms.dart';
 
 class HomeForm extends StatefulWidget {
   final String message;
@@ -36,17 +36,7 @@ class _HomeState extends State<HomeForm> {
   List<ProductCategory> categories;
   String selectedCategoryId;
 
-  _HomeState(this.message);
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
-
-  @override
-  void initState() {
-    Future<Null>.delayed(Duration(milliseconds: 0), () {
-      HelperFunctions.showTopMessage(scaffoldMessengerKey, '$message');
-    });
-    super.initState();
-  }
+  _HomeState([this.message]);
 
   @override
   Widget build(BuildContext context) {
@@ -60,78 +50,78 @@ class _HomeState extends State<HomeForm> {
       }
       if (state is AuthAuthenticated) authenticate = state.authenticate;
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
-      return ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Scaffold(
-              appBar: AppBar(
-                  title: Text("${authenticate?.company?.name ?? 'Company??'} " +
-                      "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
-                  actions: <Widget>[
-                    IconButton(
-                        icon: Icon(Icons.settings),
-                        tooltip: 'Settings',
-                        onPressed: () async {
-                          await _settingsDialog(context, authenticate);
-                        }),
-                    IconButton(
-                      icon: Icon(Icons.shopping_cart),
-                      tooltip: 'Cart',
-                      onPressed: () => Navigator.pushNamed(context, CartRoute),
-                    ),
-                    if (authenticate?.apiKey == null)
-                      IconButton(
-                          icon: Icon(Icons.exit_to_app),
-                          tooltip: 'Login',
-                          onPressed: () async {
-                            if (await Navigator.pushNamed(
-                                    context, LoginRoute) ==
-                                true) {
+      return Scaffold(
+          appBar: AppBar(
+              title: Text("${authenticate?.company?.name ?? 'Company??'} " +
+                  "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.settings),
+                    tooltip: 'Settings',
+                    onPressed: () async {
+                      await _settingsDialog(context, authenticate);
+                    }),
+                IconButton(
+                  icon: Icon(Icons.shopping_cart),
+                  tooltip: 'Cart',
+                  onPressed: () => Navigator.pushNamed(context, CartRoute),
+                ),
+                if (authenticate?.apiKey == null)
+                  IconButton(
+                      icon: Icon(Icons.exit_to_app),
+                      tooltip: 'Login',
+                      onPressed: () async {
+                        if (await Navigator.pushNamed(context, LoginRoute) ==
+                            true) {
+                          Navigator.popAndPushNamed(context, HomeRoute,
+                              arguments: 'Login Successful');
+                        }
+                      }),
+                if (authenticate?.apiKey != null)
+                  IconButton(
+                      icon: Icon(Icons.do_not_disturb),
+                      tooltip: 'Logout',
+                      onPressed: () => {
+                            BlocProvider.of<AuthBloc>(context).add(Logout()),
+                            Future<Null>.delayed(Duration(milliseconds: 300),
+                                () {
                               Navigator.popAndPushNamed(context, HomeRoute,
-                                  arguments: 'Login Successful');
-                            }
-                          }),
-                    if (authenticate?.apiKey != null)
-                      IconButton(
-                          icon: Icon(Icons.do_not_disturb),
-                          tooltip: 'Logout',
-                          onPressed: () => {
-                                BlocProvider.of<AuthBloc>(context)
-                                    .add(Logout()),
-                                Future<Null>.delayed(
-                                    Duration(milliseconds: 300), () {
-                                  Navigator.popAndPushNamed(context, HomeRoute,
-                                      arguments: 'Logout successful');
-                                })
-                              })
-                  ]),
-              body: BlocConsumer<CatalogBloc, CatalogState>(
-                  listener: (context, state) {
-                if (state is CatalogProblem) {
-                  HelperFunctions.showMessage(
-                      context, '${state.errorMessage}', Colors.green);
-                }
-                if (state is CatalogLoading) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.green);
-                }
-              }, builder: (context, state) {
-                if (state is CatalogLoaded) {
-                  categories = state.catalog?.categories;
-                  selectedCategoryId ??=
-                      categories != null && categories.length > 0
-                          ? categories[0]?.categoryId
-                          : null;
-                  products = state.catalog?.products;
-
-                  return SingleChildScrollView(
-                      physics: ClampingScrollPhysics(),
-                      child: ListView(shrinkWrap: true, children: <Widget>[
-                        _categoryList(),
-                        _productsGrid(),
-                      ]));
-                } else
-                  return SplashForm();
-              })));
+                                  arguments: 'Logout successful');
+                            })
+                          })
+              ]),
+          body: BlocConsumer<CatalogBloc, CatalogState>(
+              listener: (context, state) {
+            if (state is CatalogProblem) {
+              HelperFunctions.showMessage(
+                  context, '${state.errorMessage}', Colors.green);
+            }
+            if (state is CatalogLoading) {
+              HelperFunctions.showMessage(
+                  context, '${state.message}', Colors.green);
+            }
+          }, builder: (context, state) {
+            if (state is CatalogLoaded) {
+              categories = state.catalog?.categories;
+              selectedCategoryId ??= categories != null && categories.length > 0
+                  ? categories[0]?.categoryId
+                  : null;
+              products = state.catalog?.products;
+            } else
+              return SplashForm();
+/*            return Container(
+                child: Center(
+                    child: Text("screen text",
+                        style: new TextStyle(
+                            fontSize: 18.0, color: Colors.black))));
+*/
+            return SingleChildScrollView(
+                physics: ClampingScrollPhysics(),
+                child: ListView(shrinkWrap: true, children: <Widget>[
+                  _categoryList(),
+                  _productsGrid(),
+                ]));
+          }));
     });
   }
 
@@ -347,19 +337,18 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
                   authenticate.company.partyId = null;
                   BlocProvider.of<AuthBloc>(context)
                       .add(UpdateAuth(authenticate));
-                  Navigator.popAndPushNamed(context, LoginRoute);
+                  await Navigator.popAndPushNamed(context, LoginRoute);
                 },
               ),
               SizedBox(height: 20),
-              RaisedButton(
-                child: Text('Create a new company and admin'),
-                onPressed: () {
-                  authenticate.company.partyId = null;
-                  BlocProvider.of<AuthBloc>(context)
-                      .add(UpdateAuth(authenticate));
-                  Navigator.popAndPushNamed(context, RegisterRoute);
-                },
-              ),
+              Visibility(
+                  visible: authenticate.apiKey == null,
+                  child: RaisedButton(
+                    child: Text('Register as a customer'),
+                    onPressed: () {
+                      Navigator.popAndPushNamed(context, RegisterRoute);
+                    },
+                  )),
               SizedBox(height: 20),
               RaisedButton(
                 child: Text('About'),
