@@ -167,7 +167,8 @@ class _OrdersFormStateHeader extends State<OrdersFormHeader> {
                           child: Text("${orders[index].email}",
                               textAlign: TextAlign.center)),
                       Expanded(
-                          child: Text("${orders[index].placedDate}",
+                          child: Text(
+                              "${orders[index].placedDate.toString().substring(0, 11)}",
                               textAlign: TextAlign.center)),
                       Expanded(
                           child: Text("${orders[index].grandTotal}",

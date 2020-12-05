@@ -22,7 +22,7 @@ import 'package:moqui/moqui.dart';
 import 'package:core/forms/@forms.dart';
 import 'package:models/models.dart';
 import 'package:core/router.dart' as router;
-import '../data.dart';
+import 'package:testdata/testdata.dart';
 
 class MockRepos extends Mock implements Moqui {}
 

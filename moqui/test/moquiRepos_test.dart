@@ -18,7 +18,7 @@ import 'package:dio/dio.dart';
 import 'package:models/models.dart';
 import 'package:moqui/moqui.dart';
 import 'package:mockito/mockito.dart';
-import 'data.dart';
+import 'package:testdata/testdata.dart';
 
 class DioAdapterMock extends Mock implements HttpClientAdapter {}
 

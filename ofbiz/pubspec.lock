@@ -264,11 +264,9 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: models
-      ref: packages
-      resolved-ref: ca15fb9b3d5004aaa2c9269ea611c0820c0a23ac
-      url: "git@github.com:growerp/growerp"
-    source: git
+      path: "../models"
+      relative: true
+    source: path
     version: "0.0.1"
   node_interop:
     dependency: transitive
@@ -478,6 +476,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
+  testdata:
+    dependency: "direct dev"
+    description:
+      path: "../testdata"
+      relative: true
+    source: path
+    version: "0.0.1"
   typed_data:
     dependency: transitive
     description:

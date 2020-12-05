@@ -25,3 +25,4 @@ export 'currency.dart';
 export 'menuItem.dart';
 export 'formArguments.dart';
 export 'classification.dart';
+export 'location.dart';

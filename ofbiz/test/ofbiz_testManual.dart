@@ -17,7 +17,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:models/models.dart';
-import 'data.dart';
+import 'package:testdata/testdata.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -453,7 +453,6 @@ void main() async {
         createdOrder = orderFromJson(getResponseData(response));
         order.orderId = createdOrder.orderId;
         order.placedDate = createdOrder.placedDate;
-        order.placedTime = createdOrder.placedTime;
         order.firstName = createdCustomer.firstName;
         order.lastName = createdCustomer.lastName;
         order.email = createdCustomer.email;

@@ -405,6 +405,7 @@ class Moqui {
   Future<dynamic> getOrders() async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Order');
+      print("====repose response: $response");
       return ordersFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
@@ -415,7 +416,6 @@ class Moqui {
     try {
       Response response = await client.get('rest/s1/growerp/100/Order',
           queryParameters: {'orderId': orderId});
-      print("=====receiving single order: $response");
       return orderFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

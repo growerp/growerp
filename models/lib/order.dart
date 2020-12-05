@@ -33,8 +33,7 @@ String ordersToJson(List<Order> data) =>
 class Order {
   String orderId;
   String orderStatusId;
-  String placedDate;
-  String placedTime;
+  DateTime placedDate;
   String customerPartyId;
   String firstName;
   String lastName;
@@ -49,7 +48,6 @@ class Order {
     this.orderId,
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
     this.placedDate,
-    this.placedTime,
     this.customerPartyId,
     this.firstName,
     this.lastName,
@@ -64,8 +62,9 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) => Order(
         orderId: json["orderId"],
         orderStatusId: json["orderStatusId"],
-        placedDate: json["placedDate"],
-        placedTime: json["placedTime"],
+        placedDate: json["placedDate"] != null
+            ? DateTime.parse(json["placedDate"])
+            : null,
         customerPartyId: json["customerPartyId"],
         firstName: json["firstName"],
         lastName: json["lastName"],
@@ -80,8 +79,7 @@ class Order {
   Map<String, dynamic> toJson() => {
         "orderId": orderId,
         "orderStatusId": orderStatusId,
-        "placedDate": placedDate,
-        "placedTime": placedTime,
+        "placedDate": placedDate.toString(),
         "customerPartyId": customerPartyId,
         "firstName": firstName,
         "lastName": lastName,
@@ -93,8 +91,8 @@ class Order {
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
 
-  String toString() => 'order# $orderId customer: $customerPartyId items: ';
-//      '${orderItems?.length}';
+  String toString() => 'order# $orderId customer: $customerPartyId items: '
+      '${orderItems?.length}';
 }
 
 class OrderItem {
@@ -103,28 +101,38 @@ class OrderItem {
   String description;
   Decimal quantity;
   Decimal price;
+  DateTime fromDate;
+  DateTime thruDate;
 
-  OrderItem({
-    this.orderItemSeqId,
-    this.productId,
-    this.description,
-    this.quantity,
-    this.price,
-  });
+  OrderItem(
+      {this.orderItemSeqId,
+      this.productId,
+      this.description,
+      this.quantity,
+      this.price,
+      this.fromDate,
+      this.thruDate});
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-      orderItemSeqId: int.parse(json["orderItemSeqId"]),
-      productId: json["productId"],
-      description: json["description"],
-      quantity: Decimal.parse(json["quantity"]),
-      price: Decimal.parse(json["price"]));
+        orderItemSeqId: int.parse(json["orderItemSeqId"]),
+        productId: json["productId"],
+        description: json["description"],
+        quantity: Decimal.parse(json["quantity"]),
+        price: Decimal.parse(json["price"]),
+        fromDate:
+            json["fromDate"] != null ? DateTime.parse(json["fromDate"]) : null,
+        thruDate:
+            json["thruDate"] != null ? DateTime.parse(json["thruDate"]) : null,
+      );
 
   Map<String, dynamic> toJson() => {
         "orderItemSeqId": orderItemSeqId.toString(),
         "productId": productId,
         "description": description,
         "quantity": quantity.toString(),
-        "price": price.toString()
+        "price": price.toString(),
+        "fromDate": fromDate.toString(),
+        "thruDate": thruDate.toString()
       };
 
   String toString() => 'OrderItem: $orderItemSeqId product: $productId $price ';

@@ -43,7 +43,7 @@ class Ofbiz {
       client.options.receiveTimeout = 40000;
     }
 
-    client.options.headers = {'Content-Type': 'application/json'};
+//    client.options.headers = {'Content-Type': 'application/json'};
 
     //  processing in/out going backend requests
     client.interceptors
@@ -162,10 +162,12 @@ class Ofbiz {
 
   Future<dynamic> getCompanies(String classificationId) async {
     try {
-      Response response = await client.get(
-          'services/getCompanies100?inParams=' +
-              Uri.encodeComponent(
-                  '{"classificationId": "$classificationId" }'));
+      Response response;
+      if (classificationId != null)
+        response = await client.get('services/getCompanies100?inParams=' +
+            Uri.encodeComponent('{"classificationId": "$classificationId" }'));
+      else
+        response = await client.get('services/getCompanies100?inParams={}');
       if (getResponseData(response) == '{}') return List<Company>();
       return companiesFromJson(getResponseData(response));
     } catch (e) {
@@ -284,15 +286,18 @@ class Ofbiz {
 
   Future<dynamic> getUser({String userPartyId, String userGroupId}) async {
     try {
-      Response response = await client.get('services/getUsers100?inParams=' +
-          Uri.encodeComponent(
-              '{"userPartyId": "$userPartyId", "usergroupId": "$userGroupId" }'));
-      if (userPartyId == null) {
-        if (getResponseData(response) == "{}") return List<User>();
-        return usersFromJson(getResponseData(response));
-      } else {
+      Response response;
+      if (userPartyId != null) {
+        response = await client.get('services/getUsers100?inParams=' +
+            Uri.encodeComponent('{"userPartyId": "$userPartyId"}'));
         if (getResponseData(response) == "{}") return User();
         return userFromJson(getResponseData(response));
+      }
+      if (userGroupId != null) {
+        response = await client.get('services/getUsers100?inParams=' +
+            Uri.encodeComponent('{"usergroupId": "$userGroupId" }'));
+        if (getResponseData(response) == "{}") return List<User>();
+        return usersFromJson(getResponseData(response));
       }
     } catch (e) {
       return responseMessage(e);

@@ -219,7 +219,7 @@ final Order order = orderFromJson('''
   { "order":
     { "orderId": null, "orderStatusId": "OrderOpen", 
       "currencyUomId": "THB",
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
@@ -233,7 +233,7 @@ final Order order = orderFromJson('''
 final List<Order> orders = ordersFromJson('''
   { "orders": [
     { "orderId": "00002", "orderStatusId": "OrderOpen", 
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",  
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
@@ -244,7 +244,7 @@ final List<Order> orders = ordersFromJson('''
           "quantity": "3", "price": "4.5"}
       ]},
     { "orderId": "00003", "orderStatusId": "OrderOpen", 
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,

@@ -1,4 +1,4 @@
-name: models
+name: testdata
 description: A new Flutter package project.
 version: 0.0.1
 author:
@@ -12,6 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
   decimal: ^0.3.0
+  models:
+#    path: ../models
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: models
 
 
 dev_dependencies:
@@ -19,3 +25,4 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
+
