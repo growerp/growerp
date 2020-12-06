@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -730,9 +730,11 @@ packages:
   testdata:
     dependency: "direct dev"
     description:
-      path: "../testdata"
-      relative: true
-    source: path
+      path: testdata
+      ref: packages
+      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   typed_data:
     dependency: transitive

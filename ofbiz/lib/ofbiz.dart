@@ -14,6 +14,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' show get;
+import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'dart:async';
@@ -24,9 +25,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Ofbiz {
   final Dio client;
 
+  String classificationId = GlobalConfiguration().get("classificationId");
+  String prodUrl = GlobalConfiguration().get("prodUrl");
+  bool restRequestLogs =
+      GlobalConfiguration().getValue<bool>("restRequestLogs");
+  bool restResponseLogs =
+      GlobalConfiguration().getValue<bool>("restResponseLogs");
+  int connectTimeoutProd =
+      GlobalConfiguration().getValue<int>("connectTimeoutProd") * 1000;
+  int receiveTimeoutProd =
+      GlobalConfiguration().getValue<int>("receiveTimeoutProd") * 1000;
+  int connectTimeoutTest =
+      GlobalConfiguration().getValue<int>("connectTimeoutTest") * 1000;
+  int receiveTimeoutTest =
+      GlobalConfiguration().getValue<int>("receiveTimeoutTest") * 1000;
+
   Ofbiz({@required this.client}) {
     if (kReleaseMode) {
-      client.options.baseUrl = 'http://test.growerp.com';
+      client.options.baseUrl = prodUrl;
     } else if (kIsWeb) {
       // when flutter web need apache httpd webserver in front
       client.options.baseUrl = 'http://localhost/rest/';
@@ -36,11 +52,11 @@ class Ofbiz {
       client.options.baseUrl = 'http://10.0.2.2:8080/rest/';
     }
     if (kReleaseMode) {
-      client.options.connectTimeout = 10000;
-      client.options.receiveTimeout = 20000;
+      client.options.connectTimeout = connectTimeoutProd;
+      client.options.receiveTimeout = receiveTimeoutProd;
     } else {
-      client.options.connectTimeout = 20000;
-      client.options.receiveTimeout = 40000;
+      client.options.connectTimeout = connectTimeoutTest;
+      client.options.receiveTimeout = receiveTimeoutTest;
     }
 
 //    client.options.headers = {'Content-Type': 'application/json'};

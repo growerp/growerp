@@ -191,6 +191,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
+  global_configuration:
+    dependency: "direct main"
+    description:
+      name: global_configuration
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.6.0"
   http:
     dependency: "direct main"
     description:
@@ -264,9 +271,11 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: "../models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   node_interop:
     dependency: transitive
@@ -479,9 +488,11 @@ packages:
   testdata:
     dependency: "direct dev"
     description:
-      path: "../testdata"
-      relative: true
-    source: path
+      path: testdata
+      ref: packages
+      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      url: "git@github.com:growerp/growerp"
+    source: git
     version: "0.0.1"
   typed_data:
     dependency: transitive

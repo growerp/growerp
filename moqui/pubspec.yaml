@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   dio: ^3.0.9
   shared_preferences: ^0.5.12+2
+  global_configuration: ^1.6.0
   http: ^0.12.2
   models:
 #    path: ../models

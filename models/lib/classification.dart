@@ -47,8 +47,8 @@ List<Classification> classifications = [
       active: false),
   Classification(
       classificationId: 'AppHotel',
-      description: 'Hotel, Bed & Breakfeast',
-      active: false),
+      description: 'Hotel, Bed & Breakfast',
+      active: true),
   Classification(
       classificationId: 'AppRealtor',
       description: 'Realtor/Property management',

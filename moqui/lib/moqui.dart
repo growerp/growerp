@@ -20,32 +20,44 @@ import 'dart:async';
 import 'package:models/models.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:global_configuration/global_configuration.dart';
 
 class Moqui {
   final Dio client;
   String sessionToken;
+  String prodUrl = GlobalConfiguration().get("prodUrl");
+  bool restRequestLogs =
+      GlobalConfiguration().getValue<bool>("restRequestLogs");
+  bool restResponseLogs =
+      GlobalConfiguration().getValue<bool>("restResponseLogs");
+  int connectTimeoutProd =
+      GlobalConfiguration().getValue<int>("connectTimeoutProd") * 1000;
+  int receiveTimeoutProd =
+      GlobalConfiguration().getValue<int>("receiveTimeoutProd") * 1000;
+  int connectTimeoutTest =
+      GlobalConfiguration().getValue<int>("connectTimeoutTest") * 1000;
+  int receiveTimeoutTest =
+      GlobalConfiguration().getValue<int>("receiveTimeoutTest") * 1000;
 
   Moqui({@required this.client}) {
     if (kReleaseMode) {
-      client.options.baseUrl = 'https://test.growerp.com';
+      client.options.baseUrl = prodUrl;
     } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
       client.options.baseUrl = 'http://localhost:8080/';
     } else if (Platform.isAndroid) {
       client.options.baseUrl = 'http://10.0.2.2:8080/';
     }
     if (kReleaseMode) {
-      client.options.connectTimeout = 10000;
-      client.options.receiveTimeout = 20000;
+      client.options.connectTimeout = connectTimeoutProd;
+      client.options.receiveTimeout = receiveTimeoutProd;
     } else {
-      client.options.connectTimeout = 20000;
-      client.options.receiveTimeout = 40000;
+      client.options.connectTimeout = connectTimeoutTest;
+      client.options.receiveTimeout = receiveTimeoutTest;
     }
-
-    //  client.options.headers = {'Content-Type': 'application/json'};
 
     client.interceptors
         .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
-      if (false) {
+      if (restRequestLogs) {
         print('===Outgoing dio request path: ${options.path}');
         print('===Outgoing dio request headers: ${options.headers}');
         print('===Outgoing dio request data: ${options.data}');
@@ -58,7 +70,7 @@ class Moqui {
       // you can return a `DioError` object or return `dio.reject(errMsg)`
     }, onResponse: (Response response) async {
       // Do something with response data
-      if (false) {
+      if (restResponseLogs) {
         print("===incoming response: ${response.toString()}");
       }
       return response; // continue
@@ -405,7 +417,6 @@ class Moqui {
   Future<dynamic> getOrders() async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Order');
-      print("====repose response: $response");
       return ordersFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

@@ -1,5 +1,5 @@
 name: ofbiz
-description: A new Flutter package project.
+description: GrowERP ofbiz REST interface.
 version: 0.0.1
 author:
 homepage:
@@ -15,6 +15,7 @@ dependencies:
   meta: ^1.1.6
   http: ^0.12.2
   shared_preferences: ^0.5.12+2
+  global_configuration: ^1.6.0
   models:
 #    path: ../models
     git:
