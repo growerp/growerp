@@ -13,13 +13,18 @@
  */
 
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:convert';
+import 'dart:io' show File, Platform;
+import 'package:core/helper_functions.dart';
+import 'package:image/image.dart';
 import '@blocs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/models.dart';
+import 'package:http/http.dart' show get;
+import '../helper_functions.dart';
 
 /// Authbloc controls the connection to the backend
 ///
@@ -135,9 +140,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await repos.persistAuthenticate(authenticate);
       yield AuthUnauthenticated(authenticate);
     } else if (event is UpdateCompany) {
-      yield AuthLoading();
-      dynamic result =
-          await repos.updateCompany(event.company, event.imagePath);
+      yield AuthLoading("Updating company....");
+      String base64;
+      if (event.imagePath != null)
+        base64 = await HelperFunctions.toBase64(event.imagePath);
+      dynamic result = await repos.updateCompany(event.company, base64);
       if (result is Company) {
         authenticate.company = result;
         yield AuthAuthenticated(authenticate, 'Company updated');

@@ -21,9 +21,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   print(">>>NavigateTo { ${settings.name} " +
       "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
-    case HomeRoute:
-      return MaterialPageRoute(
-          builder: (context) => AdminHome(settings.arguments));
     case UserRoute:
       return MaterialPageRoute(
           builder: (context) => UserForm(settings.arguments));
@@ -41,29 +38,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case CompanyRoute:
       return MaterialPageRoute(
           builder: (context) => CompanyForm(settings.arguments));
-    case UsersRoute:
-      return MaterialPageRoute(
-          builder: (context) => UsersForm(settings.arguments));
-    case ProductsRoute:
-      return MaterialPageRoute(
-          builder: (context) => ProductsForm(settings.arguments));
-    case ProductRoute:
-      return MaterialPageRoute(
-          builder: (context) => ProductForm(settings.arguments));
-    case CategoriesRoute:
-      return MaterialPageRoute(
-          builder: (context) => CategoriesForm(settings.arguments));
-    case CategoryRoute:
-      return MaterialPageRoute(
-          builder: (context) => CategoryForm(settings.arguments));
-    case OrdersRoute:
-      return MaterialPageRoute(
-          builder: (context) => OrdersForm(settings.arguments));
-    case OrderRoute:
-      return MaterialPageRoute(
-          builder: (context) => OrderForm(settings.arguments));
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(settings.name));
+          builder: (context) => FatalErrorForm(
+              "Routing not found for request: ${settings.name}"));
   }
 }

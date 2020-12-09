@@ -392,7 +392,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -532,7 +532,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+2"
+    version: "4.3.2+3"
   pub_semver:
     dependency: transitive
     description:
@@ -649,7 +649,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.9"
+    version: "0.9.10"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -705,7 +705,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.12"
+    version: "1.16.0-nullsafety.13"
   test_api:
     dependency: transitive
     description:
@@ -719,7 +719,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.11"
+    version: "0.3.12-nullsafety.12"
   test_coverage:
     dependency: "direct dev"
     description:
@@ -732,7 +732,7 @@ packages:
     description:
       path: testdata
       ref: packages
-      resolved-ref: "6ac2b8aa873a87cff1bf7a6c80ba59a7d56b7b84"
+      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"

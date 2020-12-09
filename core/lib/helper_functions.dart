@@ -14,7 +14,12 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide Image;
+import 'package:image/image.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' show get;
 
 class HelperFunctions {
   static showMessage(context, message, colors) {
@@ -44,5 +49,20 @@ class HelperFunctions {
             ),
             backgroundColor: Colors.green,
           )));
+  }
+
+  static Future toBase64(imagePath) async {
+    if (imagePath != null) {
+      Image image;
+      if (kIsWeb) {
+        var response = await get(imagePath);
+        image = decodeImage(response.bodyBytes);
+      } else {
+        image = decodeImage(File(imagePath).readAsBytesSync());
+      }
+      image = gaussianBlur(copyResize(image, width: 300), 3);
+      return base64Encode(encodePng(image));
+    }
+    return null;
   }
 }

@@ -358,15 +358,10 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateCompany(Company company, String imagePath) async {
+  Future<dynamic> updateCompany(Company company, String base64) async {
     try {
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          company.image = response.bodyBytes;
-        } else {
-          company.image = File(imagePath).readAsBytesSync();
-        }
+      if (base64 != null) {
+        company.image = base64Decode(base64);
       } else
         company.image = null;
 

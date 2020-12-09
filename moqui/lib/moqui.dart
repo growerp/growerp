@@ -338,22 +338,13 @@ class Moqui {
     }
   }
 
-  Future<dynamic> updateCompany(Company company, String imagePath) async {
+  Future<dynamic> updateCompany(Company company, String base64) async {
     try {
       company.image = null;
-      String base64Image;
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          base64Image = base64Encode(response.bodyBytes);
-        } else {
-          base64Image = base64Encode(File(imagePath).readAsBytesSync());
-        }
-      }
       Response response =
           await client.post('rest/s1/growerp/100/Company', data: {
         'company': companyToJson(company),
-        'base64': base64Image,
+        'base64': base64,
         'moquiSessionToken': sessionToken
       });
       return companyFromJson(response.toString());

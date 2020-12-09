@@ -32,7 +32,7 @@ class FatalErrorForm extends StatelessWidget {
           Visibility(
               visible: route != null && buttonText != null,
               child: RaisedButton(
-                  child: Text(buttonText),
+                  child: Text("$buttonText"),
                   onPressed: () {
                     Navigator.pushNamed(context, route,
                         arguments: FormArguments());

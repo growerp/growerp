@@ -12,19 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-export 'adminHome_form.dart';
 export 'about_form.dart';
 export 'splash_form.dart';
 export 'login_form.dart';
 export 'register_form.dart';
 export 'changePw_form.dart';
 export 'fatalError_form.dart';
-export 'users_form.dart';
 export 'user_form.dart';
 export 'company_form.dart';
-export 'products_form.dart';
-export 'product_form.dart';
-export 'categories_form.dart';
-export 'category_form.dart';
-export 'orders_form.dart';
-export 'order_form.dart';

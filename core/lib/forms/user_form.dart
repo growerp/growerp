@@ -126,15 +126,18 @@ class _MyUserState extends State<MyUserPage> {
                     child: const Icon(Icons.photo_library),
                   ),
                   SizedBox(height: 20),
-                  FloatingActionButton(
-                    onPressed: () {
-                      _onImageButtonPressed(ImageSource.camera,
-                          context: context);
-                    },
-                    heroTag: 'image1',
-                    tooltip: 'Take a Photo',
-                    child: const Icon(Icons.camera_alt),
-                  ),
+                  Visibility(
+                    visible: !kIsWeb,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        _onImageButtonPressed(ImageSource.camera,
+                            context: context);
+                      },
+                      heroTag: 'image1',
+                      tooltip: 'Take a Photo',
+                      child: const Icon(Icons.camera_alt),
+                    ),
+                  )
                 ],
               ),
               drawer: myDrawer(context, authenticate),
