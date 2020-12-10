@@ -320,18 +320,9 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateUser(User user, [String imagePath]) async {
+  Future<dynamic> updateUser(User user) async {
     // no partyId is add
     try {
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          user.image = response.bodyBytes;
-        } else {
-          user.image = File(imagePath).readAsBytesSync();
-        }
-      }
-
       Response response;
       if (user.partyId != null) {
         //update
@@ -358,13 +349,8 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateCompany(Company company, String base64) async {
+  Future<dynamic> updateCompany(Company company) async {
     try {
-      if (base64 != null) {
-        company.image = base64Decode(base64);
-      } else
-        company.image = null;
-
       Response response = await client.post('services/updateCompany100',
           data: companyToJson(company));
       return companyFromJson(getResponseData(response));
@@ -413,19 +399,9 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateCategory(
-      ProductCategory category, String imagePath) async {
+  Future<dynamic> updateCategory(ProductCategory category) async {
     // no categoryId is add
     try {
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          category.image = response.bodyBytes;
-        } else {
-          category.image = File(imagePath).readAsBytesSync();
-        }
-      }
-
       Response response;
       if (category.categoryId != null) {
         //update
@@ -452,19 +428,8 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateProduct(Product product, String imagePath) async {
-    // no productId is add
-    print("======create prod $product");
+  Future<dynamic> updateProduct(Product product) async {
     try {
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          product.image = response.bodyBytes;
-        } else {
-          product.image = File(imagePath).readAsBytesSync();
-        }
-      }
-
       Response response;
       if (product.productId != null) {
         //update

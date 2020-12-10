@@ -293,32 +293,20 @@ class Moqui {
     }
   }
 
-  Future<dynamic> updateUser(User user, [String imagePath]) async {
+  Future<dynamic> updateUser(User user) async {
     // no partyId is add
     try {
-      user.image = null;
-      String base64Image;
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          base64Image = base64Encode(response.bodyBytes);
-        } else {
-          base64Image = base64Encode(File(imagePath).readAsBytesSync());
-        }
-      }
       Response response;
       if (user.partyId != null) {
         //update
         response = await client.patch('rest/s1/growerp/100/User', data: {
           'user': userToJson(user),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       } else {
         //create
         response = await client.put('rest/s1/growerp/100/User', data: {
           'user': userToJson(user),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       }
@@ -338,15 +326,13 @@ class Moqui {
     }
   }
 
-  Future<dynamic> updateCompany(Company company, String base64) async {
+  Future<dynamic> updateCompany(Company company) async {
     try {
-      company.image = null;
-      Response response =
-          await client.post('rest/s1/growerp/100/Company', data: {
-        'company': companyToJson(company),
-        'base64': base64,
-        'moquiSessionToken': sessionToken
-      });
+      Response response = await client.post('rest/s1/growerp/100/Company',
+          data: {
+            'company': companyToJson(company),
+            'moquiSessionToken': sessionToken
+          });
       return companyFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
@@ -424,33 +410,20 @@ class Moqui {
     }
   }
 
-  Future<dynamic> updateCategory(
-      ProductCategory category, String imagePath) async {
+  Future<dynamic> updateCategory(ProductCategory category) async {
     // no categoryId is add
     try {
-      category.image = null;
-      String base64Image;
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          base64Image = base64Encode(response.bodyBytes);
-        } else {
-          base64Image = base64Encode(File(imagePath).readAsBytesSync());
-        }
-      }
       Response response;
       if (category.categoryId != null) {
         //update
         response = await client.patch('rest/s1/growerp/100/Category', data: {
           'category': categoryToJson(category),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       } else {
         //create
         response = await client.put('rest/s1/growerp/100/Category', data: {
           'category': categoryToJson(category),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       }
@@ -470,32 +443,20 @@ class Moqui {
     }
   }
 
-  Future<dynamic> updateProduct(Product product, String imagePath) async {
+  Future<dynamic> updateProduct(Product product) async {
     // no productId is add
     try {
-      product.image = null;
-      String base64Image;
-      if (imagePath != null) {
-        if (kIsWeb) {
-          var response = await get(imagePath);
-          base64Image = base64Encode(response.bodyBytes);
-        } else {
-          base64Image = base64Encode(File(imagePath).readAsBytesSync());
-        }
-      }
       Response response;
       if (product.productId != null) {
         //update
         response = await client.patch('rest/s1/growerp/100/Product', data: {
           'product': productToJson(product),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       } else {
         //create
         response = await client.put('rest/s1/growerp/100/Product', data: {
           'product': productToJson(product),
-          'base64': base64Image,
           'moquiSessionToken': sessionToken
         });
       }

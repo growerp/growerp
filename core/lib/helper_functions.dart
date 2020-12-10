@@ -13,11 +13,11 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Image;
-import 'package:image/image.dart';
-import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:image/image.dart' as IMG;
 import 'dart:io';
 import 'package:http/http.dart' show get;
 
@@ -51,18 +51,20 @@ class HelperFunctions {
           )));
   }
 
-  static Future toBase64(imagePath) async {
+  static Future<Uint8List> getResizedImage(imagePath) async {
     if (imagePath != null) {
-      Image image;
+      Uint8List imageData;
       if (kIsWeb) {
         var response = await get(imagePath);
-        image = decodeImage(response.bodyBytes);
+        imageData = response.bodyBytes;
       } else {
-        image = decodeImage(File(imagePath).readAsBytesSync());
+        imageData = File(imagePath).readAsBytesSync();
       }
-      image = gaussianBlur(copyResize(image, width: 300), 3);
-      return base64Encode(encodePng(image));
-    }
-    return null;
+      IMG.Image img = IMG.decodeImage(imageData);
+      IMG.Image resized = IMG.copyResize(img, width: 300);
+      imageData = IMG.encodeJpg(resized);
+      return imageData;
+    } else
+      return null;
   }
 }

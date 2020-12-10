@@ -17,6 +17,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:models/models.dart';
+import '../helper_functions.dart';
 
 class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
   final repos;
@@ -38,8 +39,9 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
       yield CatalogLoading(
           (event.product?.productId == null ? "Adding " : "Updating") +
               " product ${event.product}");
-      dynamic result =
-          await repos.updateProduct(event.product, event.imagePath);
+      event.product.image =
+          await HelperFunctions.getResizedImage(event.imagePath);
+      dynamic result = await repos.updateProduct(event.product);
       if (result is Product) {
         if (event.product?.productId == null) {
           catalog.products?.add(result);
@@ -70,8 +72,9 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
       yield CatalogLoading(
           "${(event.category?.categoryId == null ? 'Adding' : 'Updating')}"
           " category ${event.category}");
-      dynamic result =
-          await repos.updateCategory(event.category, event.imagePath);
+      event.category.image =
+          await HelperFunctions.getResizedImage(event.imagePath);
+      dynamic result = await repos.updateCategory(event.category);
       if (result is ProductCategory) {
         if (event.category?.categoryId == null) {
           catalog.categories.add(result);

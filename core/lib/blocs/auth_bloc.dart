@@ -13,17 +13,14 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' show File, Platform;
 import 'package:core/helper_functions.dart';
-import 'package:image/image.dart';
 import '@blocs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/models.dart';
-import 'package:http/http.dart' show get;
 import '../helper_functions.dart';
 
 /// Authbloc controls the connection to the backend
@@ -141,10 +138,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthUnauthenticated(authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading("Updating company....");
-      String base64;
-      if (event.imagePath != null)
-        base64 = await HelperFunctions.toBase64(event.imagePath);
-      dynamic result = await repos.updateCompany(event.company, base64);
+      event.company.image =
+          await HelperFunctions.getResizedImage(event.imagePath);
+      dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
         authenticate.company = result;
         yield AuthAuthenticated(authenticate, 'Company updated');
@@ -154,7 +150,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else if (event is UpdateEmployee) {
       yield AuthLoading((event.user?.partyId == null ? "Adding " : "Updating") +
           " user ${event.user}");
-      dynamic result = await repos.updateUser(event.user, event.imagePath);
+      event.user.image = await HelperFunctions.getResizedImage(event.imagePath);
+      dynamic result = await repos.updateUser(event.user);
       if (result is User) {
         if (event.user.partyId == result.partyId) authenticate.user = result;
         List<User> users = authenticate.company.employees;
