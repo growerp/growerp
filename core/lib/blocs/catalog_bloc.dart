@@ -44,11 +44,12 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
       dynamic result = await repos.updateProduct(event.product);
       if (result is Product) {
         if (event.product?.productId == null) {
-          catalog.products?.add(result);
+          event.product.productId = result.productId;
+          catalog.products?.add(event.product);
         } else {
           int index = catalog.products
               .indexWhere((prod) => prod.productId == result.productId);
-          catalog.products.replaceRange(index, index + 1, [result]);
+          catalog.products.replaceRange(index, index + 1, [event.product]);
         }
         yield CatalogLoaded(
             catalog: catalog,

@@ -31,6 +31,8 @@ Widget companyLogo(context, authenticate, title) {
                   style: TextStyle(fontSize: 20, color: Colors.black))),
     ),
     SizedBox(width: 10),
-    Text("$title", style: TextStyle(fontSize: 20, color: Colors.black)),
+    Flexible(
+        child: Text("$title",
+            style: TextStyle(fontSize: 20, color: Colors.black))),
   ]);
 }

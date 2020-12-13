@@ -69,8 +69,8 @@ List<MenuItem> menuItems = [
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(
       menuItemId: 500,
-      image: "assets/images/categoryGrey.png",
-      selectedImage: "assets/images/category.png",
+      image: "assets/images/categoriesGrey.png",
+      selectedImage: "assets/images/categories.png",
       title: "Categories",
       route: CategoriesRoute,
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],

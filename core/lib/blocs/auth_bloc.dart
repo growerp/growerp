@@ -13,8 +13,9 @@
  */
 
 import 'dart:async';
-import 'dart:io' show File, Platform;
+import 'dart:io' show Platform;
 import 'package:core/helper_functions.dart';
+import 'package:global_configuration/global_configuration.dart';
 import '@blocs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -92,7 +93,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthLoading();
       dynamic connected = await repos.getConnected();
       if (connected is String) {
-        yield AuthProblem(connected);
+        String backend = GlobalConfiguration().getValue("backend");
+        yield AuthProblem("$connected\nwith connector: $backend");
       } else {
         authenticate = await repos.getAuthenticate();
         if (authenticate?.company?.partyId != null) {
@@ -153,16 +155,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       event.user.image = await HelperFunctions.getResizedImage(event.imagePath);
       dynamic result = await repos.updateUser(event.user);
       if (result is User) {
-        if (event.user.partyId == result.partyId) authenticate.user = result;
         List<User> users = authenticate.company.employees;
-        if (event.user.partyId == null)
-          users.add(result);
-        else {
-          // update
+        if (event.user.partyId == null) {
+          event.user.partyId = result.partyId;
+          users.add(event.user);
+        } else {
           int index =
               users.indexWhere((user) => user.partyId == result.partyId);
-          users.replaceRange(index, index + 1, [result]);
+          users.replaceRange(index, index + 1, [event.user]);
         }
+        if (event.user.partyId == result.partyId) authenticate.user = result;
         await repos.persistAuthenticate(authenticate);
         yield AuthAuthenticated(authenticate,
             'User ' + (event.user?.partyId == null ? 'Added' : 'Updated'));

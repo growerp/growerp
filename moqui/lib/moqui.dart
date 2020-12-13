@@ -14,8 +14,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' show get;
-import 'dart:io' show File, Platform;
+import 'dart:io' show Platform;
 import 'dart:async';
 import 'package:models/models.dart';
 import 'dart:convert';

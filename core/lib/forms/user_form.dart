@@ -176,9 +176,7 @@ class _MyUserState extends State<MyUserPage> {
                           : _showForm(authenticate, updatedUser),
                 ),
               )));
-    }
-//      return Container(child: Text("needs logging in"));
-        );
+    });
   }
 
   Text _getRetrieveErrorWidget() {
@@ -230,7 +228,7 @@ class _MyUserState extends State<MyUserPage> {
                                 ? Image.network(_imageFile.path)
                                 : Image.file(File(_imageFile.path))
                             : user?.image != null
-                                ? Image.memory(user?.image)
+                                ? Image.memory(user?.image, height: 150)
                                 : Text(user?.firstName?.substring(0, 1) ?? '',
                                     style: TextStyle(
                                         fontSize: 30, color: Colors.black))),

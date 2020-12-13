@@ -26,12 +26,10 @@ class HelperFunctions {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 1),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('$message'),
-          ],
-        ),
+        content: Container(
+            padding: const EdgeInsets.all(16.0),
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Text('$message')),
         backgroundColor: colors,
       ),
     );
@@ -61,7 +59,7 @@ class HelperFunctions {
         imageData = File(imagePath).readAsBytesSync();
       }
       IMG.Image img = IMG.decodeImage(imageData);
-      IMG.Image resized = IMG.copyResize(img, width: 300);
+      IMG.Image resized = IMG.copyResize(img, width: 400);
       imageData = IMG.encodeJpg(resized);
       return imageData;
     } else
