@@ -56,7 +56,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.0"
+    version: "6.1.1"
   bloc_test:
     dependency: "direct dev"
     description:
@@ -146,7 +146,7 @@ packages:
     description:
       path: core
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "67e24ff0a763a8a1b1dc72db2f5958c0ec3d58ed"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -318,7 +318,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+14"
+    version: "0.6.7+15"
   image_picker_for_web:
     dependency: "direct main"
     description:
@@ -415,7 +415,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "67e24ff0a763a8a1b1dc72db2f5958c0ec3d58ed"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -424,7 +424,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "67e24ff0a763a8a1b1dc72db2f5958c0ec3d58ed"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -461,7 +461,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: d22d43f6c7d6ff9d69ce7da600db6548d2184323
+      resolved-ref: "67e24ff0a763a8a1b1dc72db2f5958c0ec3d58ed"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -555,7 +555,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+2"
+    version: "4.3.2+3"
   pub_semver:
     dependency: transitive
     description:
@@ -672,7 +672,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.9"
+    version: "0.9.10"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -728,7 +728,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.12"
+    version: "1.16.0-nullsafety.13"
   test_api:
     dependency: transitive
     description:
@@ -742,7 +742,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.11"
+    version: "0.3.12-nullsafety.12"
   test_coverage:
     dependency: "direct dev"
     description:

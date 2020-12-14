@@ -20,15 +20,15 @@ import 'package:core/helper_functions.dart';
 import 'package:models/models.dart';
 import 'package:core/blocs/@blocs.dart';
 
-class ProductEcomForm extends StatefulWidget {
+class ProductForm extends StatefulWidget {
   final Product product;
 
-  const ProductEcomForm(this.product);
+  const ProductForm(this.product);
   @override
   _ProductEcomFormState createState() => _ProductEcomFormState(product);
 }
 
-class _ProductEcomFormState extends State<ProductEcomForm> {
+class _ProductEcomFormState extends State<ProductForm> {
   final Product product;
   Decimal quantity;
   OrderItem orderItem;

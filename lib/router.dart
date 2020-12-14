@@ -25,9 +25,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case HomeRoute:
       return MaterialPageRoute(
           builder: (context) => HomeForm(settings.arguments));
-    case UserRoute:
-      return MaterialPageRoute(
-          builder: (context) => UserForm(settings.arguments));
     case LoginRoute:
       return MaterialPageRoute(
           builder: (context) => LoginForm(settings.arguments));
@@ -42,32 +39,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case CompanyRoute:
       return MaterialPageRoute(
           builder: (context) => CompanyForm(settings.arguments));
-    case UsersRoute:
-      return MaterialPageRoute(
-          builder: (context) => UsersForm(settings.arguments));
-    case ProductsRoute:
-      return MaterialPageRoute(
-          builder: (context) => ProductsForm(settings.arguments));
-    case ProductRoute:
-      return MaterialPageRoute(
-          builder: (context) => ProductForm(settings.arguments));
-    case CategoriesRoute:
-      return MaterialPageRoute(
-          builder: (context) => CategoriesForm(settings.arguments));
-    case CategoryRoute:
-      return MaterialPageRoute(
-          builder: (context) => CategoryForm(settings.arguments));
-    case OrdersRoute:
-      return MaterialPageRoute(
-          builder: (context) => OrdersForm(settings.arguments));
-    case OrderRoute:
-      return MaterialPageRoute(
-          builder: (context) => OrderForm(settings.arguments));
     case CartRoute:
       return MaterialPageRoute(builder: (context) => CartForm());
     case ProductEcomRoute:
       return MaterialPageRoute(
-          builder: (context) => ProductEcomForm(settings.arguments));
+          builder: (context) => ProductForm(settings.arguments));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(settings.name));
