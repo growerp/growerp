@@ -15,12 +15,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/@blocs.dart';
-import '../models/@models.dart';
-import '../helper_functions.dart';
-import '../routing_constants.dart';
-import 'detail_form.dart';
-import 'gantt_form.dart';
+import 'package:core/blocs/@blocs.dart';
+import 'package:models/models.dart';
+import 'package:core/helper_functions.dart';
+import 'package:core/routing_constants.dart';
+import '@forms.dart';
 
 class HomeForm extends StatelessWidget {
   final String message;

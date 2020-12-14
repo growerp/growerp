@@ -1,5 +1,6 @@
 name: hotel
 version: 0.0.1+1
+publish_to: none
 
 environment:
   sdk: ">=2.6.2 <3.0.0"
@@ -19,7 +20,12 @@ dependencies:
   animations: ^1.0.0+5
   responsive_framework: ^0.0.8
   date_utils: ^0.1.0+3
-
+  core:
+#    path: ../packages/core
+    git:
+      url: git@github.com:growerp/growerp
+      ref: packages
+      path: core
 dev_dependencies:
   flutter_test:
     sdk: flutter

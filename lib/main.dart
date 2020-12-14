@@ -4,12 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'blocs/@blocs.dart';
-import 'services/ofbiz.dart';
-import 'services/moqui.dart';
-import 'styles/themes.dart';
+import 'package:core/blocs/@blocs.dart';
+import 'package:models/models.dart';
+import 'package:ofbiz/ofbiz.dart';
+import 'package:moqui/moqui.dart';
+import 'package:core/styles/themes.dart';
 import 'router.dart' as router;
 import 'forms/@forms.dart';
+import 'package:core/forms/@forms.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,8 +24,23 @@ void main() async {
     create: (context) => repos,
     child: MultiBlocProvider(
       providers: [
+        BlocProvider<CatalogBloc>(create: (context) => CatalogBloc(repos)),
+        BlocProvider<CrmBloc>(create: (context) => CrmBloc(repos)),
         BlocProvider<AuthBloc>(
-            create: (context) => AuthBloc(repos: repos)..add(LoadAuth())),
+            // will load catalogBloc and crmBloc
+            create: (context) => AuthBloc(
+                repos,
+                BlocProvider.of<CatalogBloc>(context),
+                BlocProvider.of<CrmBloc>(context))
+              ..add(LoadAuth())),
+        BlocProvider<OrderBloc>(create: (context) => OrderBloc(repos)),
+        BlocProvider<CartBloc>(
+            create: (context) => CartBloc(
+                BlocProvider.of<AuthBloc>(context),
+                BlocProvider.of<OrderBloc>(context),
+                BlocProvider.of<CatalogBloc>(context),
+                BlocProvider.of<CrmBloc>(context))
+              ..add(LoadCart(Order()))),
       ],
       // add other blocs here
       child: MyApp(),
@@ -58,7 +75,9 @@ class MyApp extends StatelessWidget {
                 state.authenticate?.company == null)
               return RegisterForm('No companies found in system, create one?');
             else
-              return HomeForm(); // change this to HomeForm in specifc apps
+              return HomeForm(
+                  message:
+                      "Welcome"); // change this to HomeForm in specifc apps
           },
         ));
   }
@@ -67,19 +86,19 @@ class MyApp extends StatelessWidget {
 class SimpleBlocObserver extends BlocObserver {
   @override
   void onEvent(Cubit cubit, Object event) {
-    print("Bloc event { $event: }");
+    print(">>>Bloc event { $event: }");
     super.onEvent(cubit, event);
   }
 
   @override
   void onTransition(Cubit cubit, Transition transition) {
-    print(transition);
+    print(">>>$transition");
     super.onTransition(cubit, transition);
   }
 
   @override
   void onError(Cubit cubit, Object error, StackTrace stackTrace) {
-    print("error: $error");
+    print(">>>error: $error");
     super.onError(cubit, error, stackTrace);
   }
 }

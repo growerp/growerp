@@ -10,20 +10,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case HomeRoute:
       return MaterialPageRoute(
           builder: (context) => HomeForm(message: settings.arguments));
-    case UserRoute:
-      return MaterialPageRoute(
-          builder: (context) => UserForm(settings.arguments));
-    case LoginRoute:
-      return MaterialPageRoute(
-          builder: (context) => LoginForm(settings.arguments));
-    case RegisterRoute:
-      return MaterialPageRoute(
-          builder: (context) => RegisterForm(settings.arguments));
-    case ChangePwRoute:
-      return MaterialPageRoute(
-          builder: (context) => ChangePwForm(changePwArgs: settings.arguments));
-    case AboutRoute:
-      return MaterialPageRoute(builder: (context) => AboutForm());
     default:
       return MaterialPageRoute(
           builder: (context) => UndefinedView(name: settings.name));
