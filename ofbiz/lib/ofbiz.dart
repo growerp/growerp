@@ -13,7 +13,6 @@
  */
 
 import 'package:dio/dio.dart';
-import 'package:http/http.dart' show get;
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
@@ -199,7 +198,7 @@ class Ofbiz {
       @required String currencyId,
       @required String classificationId,
       @required String email,
-      List data}) async {
+      List demoData}) async {
     try {
       var locale;
       // if (!kIsWeb) locale = await Devicelocale.currentLocale;
@@ -208,14 +207,14 @@ class Ofbiz {
         "companyName": companyName,
         "currencyId": currencyId,
         "firstName": firstName,
-        "lastName": lastName, 'locale': locale,
+        "lastName": lastName,
+        'locale': locale,
         "classificationId": classificationId,
         "emailAddress": email,
         "companyEmail": email,
         "username": email,
         "userGroupId": 'GROWERP_M_ADMIN',
-        "password": 'qqqqqq9!', // TODO: should be removed
-        "passwordVerify": 'qqqqqq9!' // TODO: should be removed
+        "defaultData": demoData,
       });
       return authenticateFromJson(getResponseData(response));
     } catch (e) {

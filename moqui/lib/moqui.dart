@@ -168,15 +168,16 @@ class Moqui {
 
   /// The demo store can only register as a customer.
   /// Any other store it depends on the person logging in.
-  Future<dynamic> register(
-      {String companyName,
-      String companyPartyId, // if empty will create new company too!
-      @required String firstName,
-      @required String lastName,
-      String currencyId,
-      String classificationId,
-      @required String email,
-      List data}) async {
+  Future<dynamic> register({
+    String companyName,
+    String companyPartyId, // if empty will create new company too!
+    @required String firstName,
+    @required String lastName,
+    String currencyId,
+    String classificationId,
+    @required String email,
+    String demoData,
+  }) async {
     try {
       var locale;
       // if (!kIsWeb) locale = await Devicelocale.currentLocale;
@@ -191,6 +192,7 @@ class Moqui {
                 'companyEmailAddress': email,
                 'classificationId': classificationId,
                 'environment': kReleaseMode,
+                'defaultData': demoData,
                 'moquiSessionToken': sessionToken
               },
               options: Options(headers: {'api_key': null}));

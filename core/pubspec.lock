@@ -392,7 +392,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
+      resolved-ref: "48a43cebda913d69ee9d76122779fa53751e07a1"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "0457febbfa1980d5b99456ec0e8000fb549c7a53"
+      resolved-ref: "48a43cebda913d69ee9d76122779fa53751e07a1"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "0457febbfa1980d5b99456ec0e8000fb549c7a53"
+      resolved-ref: "48a43cebda913d69ee9d76122779fa53751e07a1"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"
@@ -732,7 +732,7 @@ packages:
     description:
       path: testdata
       ref: packages
-      resolved-ref: "9479ec2b3d777e7255311ed23c1a83b0a1b96e2f"
+      resolved-ref: "48a43cebda913d69ee9d76122779fa53751e07a1"
       url: "git@github.com:growerp/growerp"
     source: git
     version: "0.0.1"

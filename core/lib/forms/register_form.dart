@@ -47,8 +47,8 @@ class RegisterForm extends StatelessWidget {
           ],
         ),
         body: BlocProvider(
-          create: (context) => RegisterBloc(repos: context.repository<Object>())
-            ..add(LoadRegister()),
+          create: (context) =>
+              RegisterBloc(repos: context.read<Object>())..add(LoadRegister()),
           child: RegisterHeader(message),
         ),
       );
@@ -272,9 +272,8 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                           companyName: _companyController.text,
                                           currencyId:
                                               _currencySelected.currencyId,
-                                          classificationId:
-                                              _classificationSelected
-                                                  .classificationId,
+                                          classification:
+                                              _classificationSelected,
                                           firstName: _firstNameController.text,
                                           lastName: _lastNameController.text,
                                           email: _emailController.text,

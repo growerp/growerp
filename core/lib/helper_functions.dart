@@ -25,7 +25,7 @@ class HelperFunctions {
   static showMessage(context, message, colors) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: const Duration(seconds: 1),
+        duration: const Duration(seconds: 2),
         content: Container(
             padding: const EdgeInsets.all(16.0),
             width: MediaQuery.of(context).size.width * 0.8,
@@ -38,7 +38,7 @@ class HelperFunctions {
   static showTopMessage(_scaffoldKey, message) {
     if (message != null)
       scheduleMicrotask(() => _scaffoldKey.currentState.showSnackBar(SnackBar(
-            duration: const Duration(seconds: 1),
+            duration: const Duration(seconds: 2),
             content: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

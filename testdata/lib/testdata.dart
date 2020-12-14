@@ -150,6 +150,12 @@ final String emailAddress = 'dummy@example.com';
 final String classificationId = 'AppEcommerceShop';
 final String imageBase64 =
     "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==";
+
+Classification classification = Classification(
+  classificationId: 'AppEcommerceShop',
+  description: 'classification description',
+);
+
 Map register = {
   'username': username,
   'emailAddress': emailAddress,

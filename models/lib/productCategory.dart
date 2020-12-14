@@ -35,31 +35,28 @@ String categoriesToJson(List<ProductCategory> data) =>
 class ProductCategory {
   String categoryId;
   String categoryName;
-  String preparationAreaId;
   String description;
   Uint8List image;
+  int nbrOfProducts;
 
-  ProductCategory({
-    this.categoryId,
-    this.categoryName,
-    this.preparationAreaId,
-    this.description,
-    this.image,
-  });
+  ProductCategory(
+      {this.categoryId,
+      this.categoryName,
+      this.description,
+      this.image,
+      this.nbrOfProducts});
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) =>
       ProductCategory(
-        categoryId: json["categoryId"],
-        categoryName: json["categoryName"],
-        preparationAreaId: json["preparationAreaId"],
-        description: json["description"],
-        image: json["image"] != null ? base64.decode(json["image"]) : null,
-      );
+          categoryId: json["categoryId"],
+          categoryName: json["categoryName"],
+          description: json["description"],
+          image: json["image"] != null ? base64.decode(json["image"]) : null,
+          nbrOfProducts: json['nbrOfProducts']);
 
   Map<String, dynamic> toJson() => {
         "categoryId": categoryId,
         "categoryName": categoryName,
-        "preparationAreaId": preparationAreaId,
         "description": description,
         "image": image != null ? base64.encode(image) : null,
       };

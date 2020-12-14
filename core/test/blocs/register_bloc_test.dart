@@ -88,7 +88,7 @@ void main() {
             .thenAnswer((_) async => authenticateNoKey);
         bloc.add(LoadRegister());
         bloc.add(RegisterCompanyAdmin(
-            classificationId: classificationId,
+            classification: classification,
             companyName: companyName,
             currencyId: currencyId,
             firstName: firstName,

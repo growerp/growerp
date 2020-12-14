@@ -106,7 +106,7 @@ void main() {
           Stream.fromIterable(<RegisterEvent>[
             LoadRegister(),
             RegisterCompanyAdmin(
-                classificationId: classificationId,
+                classification: classification,
                 companyName: companyName,
                 currencyId: currencyId,
                 firstName: firstName,
