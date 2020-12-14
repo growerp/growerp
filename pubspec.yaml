@@ -43,6 +43,7 @@ flutter:
   uses-material-design: true
 # from https://www.flaticon.com/
   assets:
+    - assets/images/
     - assets/cfg/
     - assets/
     - ./

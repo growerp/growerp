@@ -133,7 +133,7 @@ class _HomeState extends State<HomeBody> {
                         (BuildContext _, VoidCallback openContainer) {
                       return _menuCard(
                         openContainer: openContainer,
-                        image: 'assets/reservation.png',
+                        image: 'assets/images/reservation.png',
                         subtitle: 'Reservation',
                       );
                     },
@@ -146,7 +146,7 @@ class _HomeState extends State<HomeBody> {
                         (BuildContext _, VoidCallback openContainer) {
                       return _menuCard(
                         openContainer: openContainer,
-                        image: 'assets/single-bed.png',
+                        image: 'assets/images/single-bed.png',
                         subtitle: 'Rooms',
                       );
                     },
@@ -159,7 +159,7 @@ class _HomeState extends State<HomeBody> {
                         (BuildContext _, VoidCallback openContainer) {
                       return _menuCard(
                         openContainer: openContainer,
-                        image: 'assets/check-in.png',
+                        image: 'assets/images/check-in.png',
                         subtitle: 'Check-In',
                       );
                     },
@@ -172,7 +172,7 @@ class _HomeState extends State<HomeBody> {
                         (BuildContext _, VoidCallback openContainer) {
                       return _menuCard(
                         openContainer: openContainer,
-                        image: 'assets/check-out.png',
+                        image: 'assets/images/check-out.png',
                         subtitle: 'Check-Out',
                       );
                     },
@@ -185,7 +185,7 @@ class _HomeState extends State<HomeBody> {
                         (BuildContext _, VoidCallback openContainer) {
                       return _menuCard(
                         openContainer: openContainer,
-                        image: 'assets/myInfo.png',
+                        image: 'assets/images/myInfo.png',
                         subtitle: 'My Info',
                       );
                     },
