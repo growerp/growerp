@@ -24,13 +24,13 @@ dependencies:
   ofbiz:
 #    path: ../ofbiz
     git:
-      url: git@github.com:growerp/growerp
+      url: https://github.com/growerp/growerp.git
       ref: packages
       path: ofbiz
   moqui:
 #    path: ../moqui
     git:
-      url: git@github.com:growerp/growerp
+      url: https://github.com/growerp/growerp.git
       ref: packages
       path: moqui
 
