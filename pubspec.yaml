@@ -23,9 +23,15 @@ dependencies:
   core:
 #    path: ../packages/core
     git:
-      url: git@github.com:growerp/growerp
+      url: https://github.com/growerp/growerp/
       ref: packages
       path: core
+  models:
+#    path: ../models
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: models
 
 dev_dependencies:
   flutter_test:
