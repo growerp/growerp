@@ -42,12 +42,7 @@ dev_dependencies:
   test_coverage: ^0.4.0
   bloc_test: ^7.1.0
   flutter_launcher_icons: ^0.7.5
-  testdata:
-#    path: ../testdata
-    git:
-      url: git@github.com:growerp/growerp
-      ref: packages
-      path: testdata
+
 flutter:
   uses-material-design: true
 # from https://www.flaticon.com/

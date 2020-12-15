@@ -392,8 +392,8 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "363d1ba87f105f4880d9b354162424b931ed10e8"
-      url: "git@github.com:growerp/growerp"
+      resolved-ref: "20778482f64a7b7270893b1521cc9148155a44bf"
+      url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
   moqui:
@@ -401,8 +401,8 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "363d1ba87f105f4880d9b354162424b931ed10e8"
-      url: "git@github.com:growerp/growerp"
+      resolved-ref: "20778482f64a7b7270893b1521cc9148155a44bf"
+      url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
   nested:
@@ -438,8 +438,8 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "363d1ba87f105f4880d9b354162424b931ed10e8"
-      url: "git@github.com:growerp/growerp"
+      resolved-ref: "20778482f64a7b7270893b1521cc9148155a44bf"
+      url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
   package_config:
@@ -649,7 +649,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.10"
+    version: "0.9.10+1"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -727,15 +727,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
-  testdata:
-    dependency: "direct dev"
-    description:
-      path: testdata
-      ref: packages
-      resolved-ref: "363d1ba87f105f4880d9b354162424b931ed10e8"
-      url: "git@github.com:growerp/growerp"
-    source: git
-    version: "0.0.1"
   typed_data:
     dependency: transitive
     description:

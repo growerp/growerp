@@ -16,10 +16,9 @@ dependencies:
   models:
 #    path: ../models
     git:
-      url: git@github.com:growerp/growerp
+      url: https://github.com/growerp/growerp.git
       ref: packages
       path: models
-
 
 dev_dependencies:
   flutter_test:

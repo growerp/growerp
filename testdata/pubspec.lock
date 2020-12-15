@@ -86,8 +86,8 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "48a43cebda913d69ee9d76122779fa53751e07a1"
-      url: "git@github.com:growerp/growerp"
+      resolved-ref: "20778482f64a7b7270893b1521cc9148155a44bf"
+      url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
   path:
