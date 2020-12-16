@@ -13,7 +13,7 @@ class AboutForm extends StatelessWidget {
       runSpacing: 20,
       children: <Widget>[
         Bloc(
-            header: 'About Growerp',
+            header: 'About GrowERP',
             content: TextSpan(children: <TextSpan>[
               _text('GrowERP is a Flutter frontend for either Moqui '
                   'or Apache OFBiz(coming soon) being multi company and currency.'
@@ -45,22 +45,19 @@ class AboutForm extends StatelessWidget {
                   'GrowERP is an initiative of Antwebsystems Co.Ltd'),
             ])),
         Bloc(
-            header: 'Growerp Applications',
+            header: 'GrowERP Applications',
             content: TextSpan(children: <TextSpan>[
               _text(
                   'We are working on the following apps for mobile and web:\n\n'),
-              _textLink('https://master.growerp.org', '1. master App\n'),
-              _text('login,logout,register,forgot password,select company, '
-                  'the basis of all other apps.\n\n'),
+              _textLink('https://admin.growerp.org', '1. Admin App\n'),
+              _text(
+                  'Maintenance of people, categories/products and orders\n\n'),
               _textLink('https://ecommerce.growerp.org', '2. ecommerce\n'),
               _text('via categories/products create order and send to '
                   'related company\n\n'),
-              _text('2. admin.\n'),
-              _text(
-                  'Maintenance of people, categories/products and orders\n\n'),
-              _textLink('https://hotel.growerp.org', '2. hotel.\n'),
+              _textLink('https://hotel.growerp.org', '3. hotel.\n'),
               _text("Hotel front desk reservation and room management\n\n"),
-              _text('3. restaurant\n'),
+              _text('4. restaurant\n'),
               _text('Kitchen, bar and table/customer management'),
             ])),
       ],
