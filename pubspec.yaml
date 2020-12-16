@@ -23,11 +23,11 @@ dependencies:
   core:
 #    path: ../packages/core
     git:
-      url: https://github.com/growerp/growerp/
+      url: https://github.com/growerp/growerp.git
       ref: packages
       path: core
   models:
-#    path: ../models
+#    path: ../packages/models
     git:
       url: https://github.com/growerp/growerp.git
       ref: packages

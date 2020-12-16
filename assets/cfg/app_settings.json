@@ -5,7 +5,7 @@
     "_________________comment__class": "AppHotel, AppEcommerceShop etc",
     "classificationId": "AppHotel",
     "_________________comment__production url__need backslash at the end!": "https://rest.example.com/",
-    "prodUrl": "https://test.growerp.com/",
+    "prodUrl": "https://test.growerp.org/",
     "_________________comment__time outs on rest interface connect, receive___": "in seconds for development and production",
     "connectTimeoutProd": 10,
     "receiveTimeoutProd": 20,
