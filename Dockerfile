@@ -30,7 +30,7 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 # Enable flutter web
 RUN flutter channel master && \
     flutter upgrade && \
-    flutter config --enable-web
+    flutter config --enable-web && \
     flutter channel dev
 
 # Copy files to container and build
