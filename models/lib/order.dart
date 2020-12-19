@@ -39,9 +39,8 @@ class Order {
   String lastName;
   String email;
   Decimal grandTotal;
-  String table;
-  String accommodationAreaId;
-  String accommodationSpotId;
+  String invoiceId;
+  String paymentId;
   List<OrderItem> orderItems;
 
   Order({
@@ -53,9 +52,8 @@ class Order {
     this.lastName,
     this.email,
     this.grandTotal,
-    this.table,
-    this.accommodationAreaId,
-    this.accommodationSpotId,
+    this.invoiceId,
+    this.paymentId,
     this.orderItems,
   });
 
@@ -70,8 +68,8 @@ class Order {
         lastName: json["lastName"],
         email: json["email"],
         grandTotal: Decimal.parse(json["grandTotal"]),
-        accommodationAreaId: json["accommodationAreaId"],
-        accommodationSpotId: json["accommodationSpotId"],
+        invoiceId: json["invoiceId"],
+        paymentId: json["paymentId"],
         orderItems: List<OrderItem>.from(
             json["orderItems"].map((x) => OrderItem.fromJson(x))),
       );
@@ -85,9 +83,8 @@ class Order {
         "lastName": lastName,
         "email": email,
         "grandTotal": grandTotal.toString(),
-        "table": table,
-        "accommodationAreaId": accommodationAreaId,
-        "accommodationSpotId": accommodationSpotId,
+        "invoiceId": invoiceId,
+        "paymentId": paymentId,
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
 
@@ -137,3 +134,11 @@ class OrderItem {
 
   String toString() => 'OrderItem: $orderItemSeqId product: $productId $price ';
 }
+
+List<String> orderStatusValues = [
+  'OrderOpen',
+  'OrderPlaced',
+  'orderApproved',
+  'OrderCompleted',
+  'OrderCancelled'
+];

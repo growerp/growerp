@@ -20,7 +20,7 @@ import 'package:mockito/mockito.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:moqui/moqui.dart';
 import 'package:core/forms/@forms.dart';
-import 'package:testdata/testdata.dart';
+import '../testdata.dart';
 
 class MockRepos extends Mock implements Moqui {}
 

@@ -57,7 +57,8 @@ class Moqui {
     client.interceptors
         .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
       if (restRequestLogs) {
-        print('===Outgoing dio request path: ${options.path}');
+        print(
+            '===Outgoing dio request path: ${options.baseUrl}${options.path}');
         print('===Outgoing dio request headers: ${options.headers}');
         print('===Outgoing dio request data: ${options.data}');
       }

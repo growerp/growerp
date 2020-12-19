@@ -17,17 +17,17 @@ dependencies:
   http: ^0.12.2
   shared_preferences: ^0.5.12+2
   global_configuration: ^1.6.0
+  models:
+#    path: ../moqui
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: models
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
   test_coverage: ^0.4.0
-  testdata:
-#    path: ../testdata
-    git:
-      url: https://github.com/growerp/growerp.git
-      ref: packages
-      path: testdata
 
 flutter:

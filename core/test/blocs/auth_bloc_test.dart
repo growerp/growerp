@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:moqui/moqui.dart';
-import 'package:testdata/testdata.dart';
+import '../testdata.dart';
 
 class MockReposRepository extends Mock implements Moqui {}
 
