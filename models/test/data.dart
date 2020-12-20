@@ -219,52 +219,40 @@ final Order order = orderFromJson('''
   { "order":
     { "orderId": null, "orderStatusId": "OrderOpen", 
       "currencyUomId": "THB",
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5"},
+          "quantity": "5", "price": "1.5" , "fromDate": null, "thruDate": null},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5"}
+          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
    ]}}
 ''');
 final List<Order> orders = ordersFromJson('''
   { "orders": [
     { "orderId": "00002", "orderStatusId": "OrderOpen", 
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",  
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5"},
+          "quantity": "5", "price": "1.5", "fromDate": null, "thruDate": null},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5"}
+          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
       ]},
     { "orderId": "00003", "orderStatusId": "OrderOpen", 
-      "placedDate": null, "placedTime": null, "partyId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5"},
+          "quantity": "5", "price": "1.5", "fromDate": null, "thruDate": null},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5"}
+          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
       ]}
    ]}
 ''');
-final Order emptyOrder = Order(orderItems: []);
-final OrderItem orderItem1 = OrderItem(
-    productId: "dummyFirstProduct",
-    description: "This is the first product",
-    quantity: Decimal.parse('5'),
-    price: Decimal.parse('3.3'));
-final OrderItem orderItem2 = OrderItem(
-    productId: "dummySecondProduct",
-    description: "This is the second product",
-    quantity: Decimal.parse('3'),
-    price: Decimal.parse('2.2'));
-final Order totalOrder = Order(orderItems: [orderItem1, orderItem2]);

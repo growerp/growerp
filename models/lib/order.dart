@@ -98,7 +98,7 @@ class OrderItem {
   String description;
   Decimal quantity;
   Decimal price;
-  DateTime fromDate;
+  DateTime fromDate; // date for reservations
   DateTime thruDate;
 
   OrderItem(
@@ -116,10 +116,10 @@ class OrderItem {
         description: json["description"],
         quantity: Decimal.parse(json["quantity"]),
         price: Decimal.parse(json["price"]),
-        fromDate:
-            json["fromDate"] != null ? DateTime.parse(json["fromDate"]) : null,
-        thruDate:
-            json["thruDate"] != null ? DateTime.parse(json["thruDate"]) : null,
+        fromDate: null, // TODO: null checking on map keys not work?
+//            json["fromDate"] != null ? DateTime.parse(json["fromDate"]) : null,
+        thruDate: null,
+//            json["thruDate"] != null ? DateTime.parse(json["thruDate"]) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -132,7 +132,8 @@ class OrderItem {
         "thruDate": thruDate.toString()
       };
 
-  String toString() => 'OrderItem: $orderItemSeqId product: $productId $price ';
+  String toString() => 'OrderItem: $orderItemSeqId product: $productId $price '
+      ' ${fromDate != null ? fromDate.toString : ""} ';
 }
 
 List<String> orderStatusValues = [
