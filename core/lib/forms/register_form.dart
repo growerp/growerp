@@ -29,6 +29,7 @@ class RegisterForm extends StatelessWidget {
   const RegisterForm([this.message]);
   @override
   Widget build(BuildContext context) {
+    classifications.retainWhere((x) => x.active == true);
     Authenticate authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       // always [AuthUnauthenticated] becaused not logged in
@@ -67,6 +68,8 @@ class RegisterHeader extends StatefulWidget {
 class _RegisterHeaderState extends State<RegisterHeader> {
   final String message;
   final _formKey = GlobalKey<FormState>();
+  Classification _classificationSelected =
+      kReleaseMode ? '' : classifications[0];
   Currency _currencySelected = kReleaseMode ? '' : currencies[0];
   final _companyController = TextEditingController()
     ..text = kReleaseMode ? '' : 'Demo company from John Doe';
@@ -91,9 +94,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
   @override
   Widget build(BuildContext context) {
     Authenticate authenticate;
-    classifications.retainWhere((x) => x.active == true);
-    Classification _classificationSelected =
-        kReleaseMode ? '' : classifications[0];
     return BlocListener<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterError)
