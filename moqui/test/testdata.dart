@@ -178,7 +178,7 @@ final ProductCategory category = categoryFromJson('''
   { "category":
       {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
       "description": null, 
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="}
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="}
   }''');
 
 final List<ProductCategory> categories = categoriesFromJson('''
@@ -186,23 +186,23 @@ final List<ProductCategory> categories = categoriesFromJson('''
       "categories": [ 
       {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
       "description": "this is the long description of category first", 
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="},
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="},
       {"categoryId": "secondCategory", "categoryName": "This is the second category",
       "description": "this is the long description of category second",
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="}]
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="}]
 }''');
 final List<Product> products = productsFromJson('''
 {     "products": [
       {"productId": "dummyFirstProduct", "productName": "This is the first product",
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
       "price": "23.99", "productCategoryId": "dummyFirstCategory",
       "description": "This is a dummy description of first product"},
       {"productId": "secondProduct", "productName": "This is the second product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "17.13", "productCategoryId": "dummyFirstCategory",
        "description": "This is a dummy description of second product"},
       {"productId": "thirdProduct", "productName": "This is the third product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "12.33", "productCategoryId": "secondCategory",
        "description": "This is a dummy description of third product"}]
 }
@@ -210,7 +210,7 @@ final List<Product> products = productsFromJson('''
 final Product product = productFromJson('''
 { "product":
       {"productId": "secondProduct", "productName": "This is the second product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "17.13", "categoryId": "dummyFirstCategory",
        "description": "This is a dummy description"}
 }    ''');
@@ -227,13 +227,11 @@ final Order order = orderFromJson('''
       "currencyUomId": "THB",
       "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
-      "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
+      "grandTotal": "7.5", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5"},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5"}
+          "quantity": "5", "price": "1.5"}
    ]}}
 ''');
 final List<Order> orders = ordersFromJson('''

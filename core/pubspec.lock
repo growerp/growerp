@@ -399,9 +399,11 @@ packages:
   moqui:
     dependency: "direct main"
     description:
-      path: "../moqui"
-      relative: true
-    source: path
+      path: moqui
+      ref: packages
+      resolved-ref: b8b09eca0b45442c38b8a9bbc2b85393ebc3f303
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   nested:
     dependency: transitive

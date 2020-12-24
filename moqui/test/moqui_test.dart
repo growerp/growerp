@@ -26,6 +26,7 @@ void main() {
   Authenticate loginAuth;
   String categoryId;
   String productId;
+  String orderId;
 
   client = Dio();
   client.options.baseUrl = 'http://localhost:8080/rest/';
@@ -65,66 +66,48 @@ void main() {
     return e; //continue
   }));
 
-  setUp(() async {
+  setUpAll(() async {
     Response response = await client.get('moquiSessionToken');
     sessionToken = response.data;
+
+    try {
+      register['moquiSessionToken'] = sessionToken;
+      register['username'] = randomString4 + register['emailAddress'];
+      register['emailAddress'] = randomString4 + register['emailAddress'];
+      register['classificationId'] = 'AppAdmin';
+      dynamic response =
+          await client.post('s1/growerp/100/UserAndCompany', data: register);
+      Authenticate result = authenticateFromJson(response.toString());
+      authenticateNoKey.company.partyId = result.company.partyId;
+      authenticateNoKey.user.partyId = result.user.partyId;
+      authenticateNoKey.user.name = register['emailAddress'];
+      authenticateNoKey.user.email = register['emailAddress'];
+      authenticateNoKey.user.image = result.user.image;
+      authenticateNoKey.user.userId = result.user.userId;
+      authenticateNoKey.user.language = result.user.language;
+      authenticateNoKey.company.image = result.company.image;
+      authenticateNoKey.company.employees = result.company.employees;
+      authenticateNoKey.company.classificationId =
+          result.company.classificationId;
+      authenticateNoKey.company.classificationDescr =
+          result.company.classificationDescr;
+      authenticateNoKey.apiKey = result.apiKey;
+      apiKey = result.apiKey;
+      // used later for login test
+      login.addAll({
+        'companyPartyId': result.company.partyId,
+        'username': result.user?.name,
+        'password': password
+      });
+      authenticate = authenticateNoKey;
+      expect(authenticateToJson(result), authenticateToJson(authenticateNoKey));
+    } catch (e) {
+      print("catch: $e");
+      expect(true, false);
+    }
   });
 
-  group('Connection test and public api >>>>>', () {
-    test('test connection', () async {
-      try {
-        print("need a local version of Moqui see: README of this project");
-        print("=========================================================");
-        Response response = await client.get('moquiSessionToken');
-        sessionToken = response.data;
-        expect(response.data.length, 20);
-      } catch (e) {
-        print("catch: $e");
-        expect(true, false);
-      }
-    });
-  });
-
-  group('Register first company, login>>>>>', () {
-    test('register', () async {
-      try {
-        register['moquiSessionToken'] = sessionToken;
-        register['username'] = randomString4 + register['emailAddress'];
-        register['emailAddress'] = randomString4 + register['emailAddress'];
-        register['classificationId'] = 'AppAdmin';
-        dynamic response =
-            await client.post('s1/growerp/100/UserAndCompany', data: register);
-        Authenticate result = authenticateFromJson(response.toString());
-        authenticateNoKey.company.partyId = result.company.partyId;
-        authenticateNoKey.user.partyId = result.user.partyId;
-        authenticateNoKey.user.name = register['emailAddress'];
-        authenticateNoKey.user.email = register['emailAddress'];
-        authenticateNoKey.user.image = result.user.image;
-        authenticateNoKey.user.userId = result.user.userId;
-        authenticateNoKey.user.language = result.user.language;
-        authenticateNoKey.company.image = result.company.image;
-        authenticateNoKey.company.employees = result.company.employees;
-        authenticateNoKey.company.classificationId =
-            result.company.classificationId;
-        authenticateNoKey.company.classificationDescr =
-            result.company.classificationDescr;
-        authenticateNoKey.apiKey = result.apiKey;
-        apiKey = result.apiKey;
-        // used later for login test
-        login.addAll({
-          'companyPartyId': result.company.partyId,
-          'username': result.user?.name,
-          'password': password
-        });
-        authenticate = authenticateNoKey;
-        expect(
-            authenticateToJson(result), authenticateToJson(authenticateNoKey));
-      } catch (e) {
-        print("catch: $e");
-        expect(true, false);
-      }
-    });
-
+  group('Companies & Login >>>>>', () {
     test('Companies', () async {
       try {
         Response response = await client.get('s1/growerp/100/Companies');
@@ -135,7 +118,6 @@ void main() {
         expect(true, false);
       }
     });
-
     test('login', () async {
       try {
         dynamic response =
@@ -288,15 +270,68 @@ void main() {
         order.customerPartyId = newCustomer.partyId;
         order.orderId = null;
         order.orderItems[0].productId = productId;
-        order.orderItems[1].productId = productId;
         // create/get order;
         response = await client.post('s1/growerp/100/Order', data: {
           'order': orderToJson(order),
           'moquiSessionToken': sessionToken
         });
-        expect(orderToJson(order),
-            orderToJson(orderFromJson(response.toString())));
-      } catch (e) {}
+        Order resultOrder = orderFromJson(response.toString());
+        orderId = resultOrder.orderId;
+        order.orderId = resultOrder.orderId;
+        order.placedDate = resultOrder.placedDate;
+        order.email = newCustomer.email;
+        order.firstName = newCustomer.firstName;
+        order.lastName = newCustomer.lastName;
+        order.customerPartyId = newCustomer.partyId;
+        order.orderItems[0].productId = productId;
+        order.orderItems[0].description = resultOrder.orderItems[0].description;
+        expect(orderToJson(order), orderToJson(resultOrder));
+      } on DioError catch (e) {
+        expect(null, e?.response?.data);
+      }
+    });
+    test('Update order status to OrderPlaced', () async {
+      client.options.headers['api_key'] = apiKey;
+      try {
+        Response response = await client.patch('s1/growerp/100/Order', data: {
+          'orderId': orderId,
+          'statusId': 'OrderPlaced',
+          'moquiSessionToken': sessionToken
+        });
+        print("=======$response");
+        expect('OrderPlaced', orderFromJson(response.toString()).orderStatusId);
+      } on DioError catch (e) {
+        expect(null, e?.response?.data);
+      }
+    });
+    test('Update order status to OrderApproved', () async {
+      client.options.headers['api_key'] = apiKey;
+      try {
+        Response response = await client.patch('s1/growerp/100/Order', data: {
+          'orderId': orderId,
+          'statusId': 'OrderApproved',
+          'moquiSessionToken': sessionToken
+        });
+        expect(
+            'OrderApproved', orderFromJson(response.toString()).orderStatusId);
+      } on DioError catch (e) {
+        expect(null, e?.response?.data);
+      }
+    });
+    test('Update order status to OrderComplated', () async {
+      client.options.headers['api_key'] = apiKey;
+      try {
+        Response response = await client.patch('s1/growerp/100/Order', data: {
+          'orderId': orderId,
+          'statusId': 'OrderCompleted',
+          'moquiSessionToken': sessionToken
+        });
+        print("=======$response");
+        expect(
+            'OrderCompleted', orderFromJson(response.toString()).orderStatusId);
+      } on DioError catch (e) {
+        expect(null, e?.response?.data);
+      }
     });
   });
 }

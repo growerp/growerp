@@ -72,5 +72,5 @@ class Product {
       };
 
   String toString() => 'Product name: $productName[$productId] price: $price '
-      'category: $categoryName[$categoryId]';
+      'category: $categoryName[$categoryId] imgSize: ${image?.length}';
 }
