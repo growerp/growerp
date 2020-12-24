@@ -143,3 +143,10 @@ List<String> orderStatusValues = [
   'OrderCompleted',
   'OrderCancelled'
 ];
+Map nextOrderStatus = {
+  'OrderOpen': 'OrderPlaced',
+  'OrderPlaced': 'OrderApproved',
+  'OrderApproved': 'OrderCompleted',
+  'OrderCompleted': 'No Change',
+  'OrderCancelled': 'No Change'
+};

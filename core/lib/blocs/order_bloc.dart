@@ -40,7 +40,30 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       dynamic result = await repos.createOrder(event.order);
       if (result is Order) {
         orders.add(result);
-        yield OrderLoaded(orders, "order created");
+        yield OrderLoaded(orders, "Order created");
+      } else
+        yield OrderProblem(result);
+    } else if (event is NextStatButtonPressed) {
+      String newStatusId;
+      switch (event.order.orderStatusId) {
+        case 'OrderOpen':
+          newStatusId = 'OrderPlaced';
+          break;
+        case 'OrderPlaced':
+          newStatusId = 'OrderApproved';
+          break;
+        case 'OrderApproved':
+          newStatusId = 'OrderCompleted';
+          break;
+      }
+      yield OrderLoading('Next status: $newStatusId...');
+      event.order.orderStatusId = newStatusId;
+      dynamic result = await repos.updateOrder(event.order);
+      if (result is Order) {
+        int index = orders.indexWhere((x) => x.orderId == result.orderId);
+        orders.replaceRange(index, index + 1, [event.order]);
+        yield OrderLoaded(
+            orders, "status update to ${event.order.orderStatusId}");
       } else
         yield OrderProblem(result);
     }
@@ -78,6 +101,13 @@ class CancelOrder extends OrderEvent {
   CancelOrder(this.orders, this.orderId);
   @override
   String toString() => 'Cancelling order $orderId';
+}
+
+class NextStatButtonPressed extends OrderEvent {
+  final Order order;
+  NextStatButtonPressed(this.order);
+  @override
+  String toString() => 'Next status Pressed order ${order.orderStatusId}';
 }
 
 // ================= state ========================

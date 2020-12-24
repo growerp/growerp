@@ -26,7 +26,7 @@ void main() {
   Authenticate loginAuth;
   String categoryId;
   String productId;
-  String orderId;
+  Order newOrder;
 
   client = Dio();
   client.options.baseUrl = 'http://localhost:8080/rest/';
@@ -276,7 +276,7 @@ void main() {
           'moquiSessionToken': sessionToken
         });
         Order resultOrder = orderFromJson(response.toString());
-        orderId = resultOrder.orderId;
+        newOrder = resultOrder;
         order.orderId = resultOrder.orderId;
         order.placedDate = resultOrder.placedDate;
         order.email = newCustomer.email;
@@ -292,14 +292,13 @@ void main() {
     });
     test('Update order status to OrderPlaced', () async {
       client.options.headers['api_key'] = apiKey;
+      newOrder.orderStatusId = 'OrderPlaced';
       try {
         Response response = await client.patch('s1/growerp/100/Order', data: {
-          'orderId': orderId,
-          'statusId': 'OrderPlaced',
+          'order': orderToJson(newOrder),
           'moquiSessionToken': sessionToken
         });
-        print("=======$response");
-        expect('OrderPlaced', orderFromJson(response.toString()).orderStatusId);
+        expect(orderFromJson(response.toString()).orderStatusId, 'OrderPlaced');
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
@@ -307,13 +306,13 @@ void main() {
     test('Update order status to OrderApproved', () async {
       client.options.headers['api_key'] = apiKey;
       try {
+        newOrder.orderStatusId = 'OrderApproved';
         Response response = await client.patch('s1/growerp/100/Order', data: {
-          'orderId': orderId,
-          'statusId': 'OrderApproved',
+          'order': orderToJson(newOrder),
           'moquiSessionToken': sessionToken
         });
         expect(
-            'OrderApproved', orderFromJson(response.toString()).orderStatusId);
+            orderFromJson(response.toString()).orderStatusId, 'OrderApproved');
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
@@ -321,14 +320,13 @@ void main() {
     test('Update order status to OrderComplated', () async {
       client.options.headers['api_key'] = apiKey;
       try {
+        newOrder.orderStatusId = 'OrderCompleted';
         Response response = await client.patch('s1/growerp/100/Order', data: {
-          'orderId': orderId,
-          'statusId': 'OrderCompleted',
+          'order': orderToJson(newOrder),
           'moquiSessionToken': sessionToken
         });
-        print("=======$response");
         expect(
-            'OrderCompleted', orderFromJson(response.toString()).orderStatusId);
+            orderFromJson(response.toString()).orderStatusId, 'OrderCompleted');
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }

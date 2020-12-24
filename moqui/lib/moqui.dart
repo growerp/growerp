@@ -393,6 +393,21 @@ class Moqui {
     }
   }
 
+  Future<dynamic> updateOrder(Order order) async {
+    try {
+      Authenticate authenticate = await getAuthenticate();
+      client.options.headers['api_key'] = authenticate.apiKey;
+      Response response = await client.patch('rest/s1/growerp/100/Order',
+          data: {
+            'order': orderToJson(order),
+            'moquiSessionToken': sessionToken
+          });
+      return orderFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
   Future<dynamic> getOrders() async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Order');
