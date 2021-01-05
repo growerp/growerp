@@ -40,6 +40,11 @@ class Company {
   String email;
   dynamic currencyId;
   Uint8List image;
+  String address1;
+  String address2;
+  String city;
+  String postalCode;
+  String country;
   List<User> employees;
 
   Company(
@@ -50,22 +55,31 @@ class Company {
       this.email,
       this.currencyId,
       this.image,
-      this.employees});
+      this.employees,
+      this.address1,
+      this.address2,
+      this.city,
+      this.postalCode,
+      this.country});
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
-        partyId: json["partyId"],
-        name: json["name"],
-        classificationId: json["classificationId"],
-        classificationDescr: json["classificationDescr"],
-        email: json["email"],
-        currencyId: json["currencyId"],
-        image: json["image"] == null || json["image"] == "null"
-            ? null
-            : base64.decode(json["image"]),
-        employees: json["employees"] != null
-            ? List<User>.from(json["employees"].map((x) => User.fromJson(x)))
-            : null,
-      );
+      partyId: json["partyId"],
+      name: json["name"],
+      classificationId: json["classificationId"],
+      classificationDescr: json["classificationDescr"],
+      email: json["email"],
+      currencyId: json["currencyId"],
+      image: json["image"] == null || json["image"] == "null"
+          ? null
+          : base64.decode(json["image"]),
+      employees: json["employees"] != null
+          ? List<User>.from(json["employees"].map((x) => User.fromJson(x)))
+          : null,
+      address1: json["address1"],
+      address2: json["address2"],
+      city: json["city"],
+      postalCode: json["postalCode"],
+      country: json["country"]);
 
   Map<String, dynamic> toJson() => {
         "partyId": partyId,
@@ -78,6 +92,11 @@ class Company {
         "employees": employees != null
             ? List<dynamic>.from(employees.map((x) => x.toJson()))
             : null,
+        "address1": address1,
+        "address2": address2,
+        "city": city,
+        "postalCode": postalCode,
+        "country": country
       };
 
   String toString() => 'Company name: $name[$partyId] Curr: $currencyId '

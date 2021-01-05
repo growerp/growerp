@@ -60,9 +60,7 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) => Order(
         orderId: json["orderId"],
         orderStatusId: json["orderStatusId"],
-        placedDate: json["placedDate"] != null
-            ? DateTime.parse(json["placedDate"])
-            : null,
+        placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
         customerPartyId: json["customerPartyId"],
         firstName: json["firstName"],
         lastName: json["lastName"],
@@ -98,8 +96,7 @@ class OrderItem {
   String description;
   Decimal quantity;
   Decimal price;
-  DateTime fromDate; // date for reservations
-  DateTime thruDate;
+  DateTime deliveryDate; // date for reservations
 
   OrderItem(
       {this.orderItemSeqId,
@@ -107,20 +104,15 @@ class OrderItem {
       this.description,
       this.quantity,
       this.price,
-      this.fromDate,
-      this.thruDate});
+      this.deliveryDate});
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-        orderItemSeqId: int.parse(json["orderItemSeqId"]),
-        productId: json["productId"],
-        description: json["description"],
-        quantity: Decimal.parse(json["quantity"]),
-        price: Decimal.parse(json["price"]),
-        fromDate: null, // TODO: null checking on map keys not work?
-//            json["fromDate"] != null ? DateTime.parse(json["fromDate"]) : null,
-        thruDate: null,
-//            json["thruDate"] != null ? DateTime.parse(json["thruDate"]) : null,
-      );
+      orderItemSeqId: int.parse(json["orderItemSeqId"]),
+      productId: json["productId"],
+      description: json["description"],
+      quantity: Decimal.parse(json["quantity"]),
+      price: Decimal.parse(json["price"]),
+      deliveryDate: DateTime.tryParse(json["deliveryDate"] ?? ''));
 
   Map<String, dynamic> toJson() => {
         "orderItemSeqId": orderItemSeqId.toString(),
@@ -128,12 +120,11 @@ class OrderItem {
         "description": description,
         "quantity": quantity.toString(),
         "price": price.toString(),
-        "fromDate": fromDate.toString(),
-        "thruDate": thruDate.toString()
+        "deliveryDate": deliveryDate.toString(),
       };
 
   String toString() => 'OrderItem: $orderItemSeqId product: $productId $price '
-      ' ${fromDate != null ? fromDate.toString : ""} ';
+      ' ${deliveryDate != null ? deliveryDate.toString : ""} ';
 }
 
 List<String> orderStatusValues = [

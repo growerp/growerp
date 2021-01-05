@@ -18,5 +18,5 @@ export 'login_form.dart';
 export 'register_form.dart';
 export 'changePw_form.dart';
 export 'fatalError_form.dart';
-export 'user_form.dart';
+export 'employee_form.dart';
 export 'company_form.dart';

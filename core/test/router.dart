@@ -13,29 +13,28 @@
  */
 
 import 'package:flutter/material.dart';
-import 'routing_constants.dart';
-import 'forms/@forms.dart';
+import 'package:core/forms/@forms.dart';
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
 Route<dynamic> generateRoute(RouteSettings settings) {
   print(">>>NavigateTo { ${settings.name} " +
       "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
-    case UserRoute:
+    case '/employee':
       return MaterialPageRoute(
-          builder: (context) => UserForm(settings.arguments));
-    case LoginRoute:
+          builder: (context) => EmployeeForm(settings.arguments));
+    case '/login':
       return MaterialPageRoute(
           builder: (context) => LoginForm(settings.arguments));
-    case RegisterRoute:
+    case '/register':
       return MaterialPageRoute(
           builder: (context) => RegisterForm(settings.arguments));
-    case ChangePwRoute:
+    case '/changepw':
       return MaterialPageRoute(
           builder: (context) => ChangePwForm(changePwArgs: settings.arguments));
-    case AboutRoute:
+    case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
-    case CompanyRoute:
+    case '/company':
       return MaterialPageRoute(
           builder: (context) => CompanyForm(settings.arguments));
     default:

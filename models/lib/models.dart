@@ -14,15 +14,16 @@
 
 // https://app.quicktype.io/
 export 'authenticate.dart';
+export 'crm.dart';
 export 'user.dart';
 export 'company.dart';
 export 'product.dart';
 export 'productCategory.dart';
 export 'catalog.dart';
 export 'order.dart';
-export 'userGroup.dart';
 export 'currency.dart';
 export 'menuItem.dart';
 export 'formArguments.dart';
 export 'classification.dart';
 export 'location.dart';
+export 'opportunity.dart';

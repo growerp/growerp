@@ -492,4 +492,57 @@ class Moqui {
       return responseMessage(e);
     }
   }
+
+  Future<dynamic> getCrm() async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/Crm');
+      return crmFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getOpportunity(String opportunityId) async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/Opportunity',
+          queryParameters: {'opportunityId': opportunityId});
+      return opportunityFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> updateOpportunity(Opportunity opportunity) async {
+    // no Id is add
+    try {
+      Response response;
+      if (opportunity.opportunityId != null) {
+        //update
+        response = await client.patch('rest/s1/growerp/100/Opportunity', data: {
+          'opportunity': opportunityToJson(opportunity),
+          'moquiSessionToken': sessionToken
+        });
+      } else {
+        //create
+        response = await client.put('rest/s1/growerp/100/Opportunity', data: {
+          'opportunity': opportunityToJson(opportunity),
+          'moquiSessionToken': sessionToken
+        });
+      }
+      print("====repos oppr: ${response.toString()}");
+      return opportunityFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> deleteOpportunity(String opportunityId) async {
+    try {
+      Response response = await client.delete('rest/s1/growerp/100/Opportunity',
+          queryParameters: {'opportunityId': opportunityId});
+      return response.data["opportunityId"];
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
 }

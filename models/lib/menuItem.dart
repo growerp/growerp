@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'routing_constants.dart';
-
 class MenuItem {
   int menuItemId;
   String image;
@@ -38,49 +36,48 @@ class MenuItem {
 
 List<MenuItem> menuItems = [
   MenuItem(
-      menuItemId: 100,
+      menuItemId: 0,
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "DashBoard",
-      route: HomeRoute,
+      route: '/home',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
-      menuItemId: 200,
+      menuItemId: 1,
       image: "assets/images/usersGrey.png",
       selectedImage: "assets/images/users.png",
       title: "Employees",
-      route: UsersRoute,
+      route: '/employees',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(
-      menuItemId: 300,
-      image: "assets/images/aboutGrey.png",
-      selectedImage: "assets/images/about.png",
-      title: "About",
-      route: AboutRoute,
+      menuItemId: 2,
+      image: "assets/images/crmGrey.png",
+      selectedImage: "assets/images/crm.png",
+      title: "CRM",
+      route: '/crm',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
-      menuItemId: 400,
+      menuItemId: 3,
       image: "assets/images/productsGrey.png",
       selectedImage: "assets/images/products.png",
-      title: "Products",
-      route: ProductsRoute,
+      title: "Catalog",
+      route: '/catalog',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(
-      menuItemId: 500,
-      image: "assets/images/categoriesGrey.png",
-      selectedImage: "assets/images/categories.png",
-      title: "Categories",
-      route: CategoriesRoute,
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
-      writeGroups: ["GROWERP_M_ADMIN"]),
-  MenuItem(
-      menuItemId: 600,
+      menuItemId: 4,
       image: "assets/images/orderGrey.png",
       selectedImage: "assets/images/order.png",
       title: "Orders",
-      route: OrdersRoute,
+      route: '/orders',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
       writeGroups: ["GROWERP_M_ADMIN"]),
+  MenuItem(
+      menuItemId: 5,
+      image: "assets/images/aboutGrey.png",
+      selectedImage: "assets/images/about.png",
+      title: "About",
+      route: '/about',
+      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
 ];

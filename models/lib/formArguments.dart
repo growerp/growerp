@@ -14,9 +14,10 @@
 
 class FormArguments {
   final String message;
+  final int tab;
   final Object object;
   final Object detail;
-  FormArguments([this.message, this.object, this.detail]);
+  FormArguments([this.message, this.tab, this.object, this.detail]);
   String toString() => 'msg: $message '
       'object: $object detail: $detail';
 }

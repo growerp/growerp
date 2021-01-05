@@ -63,8 +63,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
       yield CatalogLoading("Deleting product ${event.product.productId}");
       dynamic result = await repos.deleteProduct(event.product.productId);
       if (result == event.product.productId) {
-        int index =
-            catalog.products.indexWhere((cat) => cat.productId == result);
+        int index = catalog.products.indexWhere((x) => x.productId == result);
         catalog.products.removeAt(index);
         yield CatalogLoaded(
             catalog: catalog, message: 'Product ${event.product} deleted');
@@ -97,7 +96,7 @@ class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
       dynamic result = await repos.deleteCategory(event.category.categoryId);
       if (result == event.category.categoryId) {
         int index =
-            catalog.categories.indexWhere((cat) => cat.categoryId == result);
+            catalog.categories.indexWhere((x) => x.categoryId == result);
         catalog.categories.removeAt(index);
         yield CatalogLoaded(
             catalog: catalog, message: 'Category ${event.category} deleted');

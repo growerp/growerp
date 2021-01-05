@@ -17,7 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:models/models.dart';
 import '../blocs/@blocs.dart';
-import '../routing_constants.dart';
 import 'changePw_form.dart';
 import '../helper_functions.dart';
 
@@ -42,7 +41,7 @@ class LoginForm extends StatelessWidget {
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.home),
-                onPressed: () => Navigator.pushNamed(context, HomeRoute)),
+                onPressed: () => Navigator.pushNamed(context, '/home')),
           ],
         ),
         body: BlocProvider(
@@ -107,7 +106,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                   context, '${state.errorMessage}', Colors.red);
             }
             if (state is LoginChangePw) {
-              Navigator.pushNamed(context, ChangePwRoute,
+              Navigator.pushNamed(context, '/changepw',
                   arguments: ChangePwArgs(state.username, state.password));
             }
             if (state is LoginOk) {
@@ -176,8 +175,8 @@ class _LoginHeaderState extends State<LoginHeader> {
                             authenticate.company = newValue;
                             BlocProvider.of<AuthBloc>(context)
                                 .add(UpdateAuth(authenticate));
-                            Navigator.pushNamedAndRemoveUntil(context,
-                                HomeRoute, ModalRoute.withName(HomeRoute),
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/home', ModalRoute.withName('/home'),
                                 arguments: FormArguments(
                                     "Ecommerce company changed!"));
                           },
@@ -259,7 +258,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                         child: Text('register new account'),
                         onTap: () async {
                           final dynamic result =
-                              await Navigator.pushNamed(context, RegisterRoute);
+                              await Navigator.pushNamed(context, '/register');
                           HelperFunctions.showMessage(
                               context, '$result', Colors.green);
                         },

@@ -140,7 +140,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.11"
+    version: "0.14.2"
   crypto:
     dependency: transitive
     description:
@@ -222,7 +222,7 @@ packages:
       name: flutter_launcher_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.5"
+    version: "0.8.1"
   flutter_markdown:
     dependency: transitive
     description:
@@ -390,20 +390,16 @@ packages:
   models:
     dependency: transitive
     description:
-      path: models
-      ref: packages
-      resolved-ref: a1d16cee78c65acb449318edeb3a6b3e1281de5c
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../models"
+      relative: true
+    source: path
     version: "0.0.1"
   moqui:
     dependency: "direct main"
     description:
-      path: moqui
-      ref: packages
-      resolved-ref: a1d16cee78c65acb449318edeb3a6b3e1281de5c
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../moqui"
+      relative: true
+    source: path
     version: "0.0.1"
   nested:
     dependency: transitive
@@ -436,11 +432,9 @@ packages:
   ofbiz:
     dependency: "direct main"
     description:
-      path: ofbiz
-      ref: packages
-      resolved-ref: a1d16cee78c65acb449318edeb3a6b3e1281de5c
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../ofbiz"
+      relative: true
+    source: path
     version: "0.0.1"
   package_config:
     dependency: transitive
@@ -726,7 +720,7 @@ packages:
       name: test_coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.3"
+    version: "0.5.0"
   typed_data:
     dependency: transitive
     description:

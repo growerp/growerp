@@ -20,7 +20,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:models/models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
-import '../routing_constants.dart';
 import '../widgets/@widgets.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -30,14 +29,16 @@ class CompanyForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var a = (formArguments) => (CompanyPage(formArguments.message));
+    var a = (formArguments) =>
+        (CompanyPage(formArguments.message, formArguments.tab));
     return ShowNavigationRail(a(formArguments));
   }
 }
 
 class CompanyPage extends StatefulWidget {
   final String message;
-  CompanyPage(this.message);
+  final int tab;
+  CompanyPage(this.message, this.tab);
 
   @override
   _CompanyState createState() => _CompanyState(message);
@@ -109,8 +110,7 @@ class _CompanyState extends State<CompanyPage> {
                   actions: <Widget>[
                     IconButton(
                         icon: Icon(Icons.home),
-                        onPressed: () =>
-                            Navigator.pushNamed(context, HomeRoute))
+                        onPressed: () => Navigator.pushNamed(context, '/home'))
                   ]),
               floatingActionButton: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -259,7 +259,7 @@ class _CompanyState extends State<CompanyPage> {
                         decoration:
                             InputDecoration(labelText: 'Company Email address'),
                         controller: _emailController,
-                        validator: (String value) {
+                        validator: (value) {
                           if (value.isEmpty)
                             return 'Please enter Email address?';
                           if (!RegExp(

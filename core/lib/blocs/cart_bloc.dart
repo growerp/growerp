@@ -32,7 +32,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Order order = Order(grandTotal: Decimal.parse('0'), orderItems: List());
   Authenticate authenticate;
   Catalog catalog;
-  List<User> crmUsers;
+  List<User> customers;
 
   CartBloc(this.authBloc, this.orderBloc, this.catalogBloc, this.crmBloc)
       : super(CartInitial()) {
@@ -51,8 +51,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     });
     crmBlocSubscription = crmBloc.listen((state) {
       if (state is CrmLoaded) {
-        crmUsers = state.crmUsers;
-        add(CartCrmUpdated((crmBloc.state as CrmLoaded).crmUsers));
+        customers = state.crm.customers;
+        add(CartCrmUpdated((crmBloc.state as CrmLoaded).crm.customers));
       }
     });
   }
@@ -69,9 +69,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     if (event is LoadCart) {
       yield CartLoading();
       catalog = catalogBloc.catalog;
-      crmUsers = crmBloc.crmUsers;
+      customers = crmBloc.crm.customers;
       order = event.order != null ? event.order : order;
-      yield CartLoaded(authenticate, order, crmUsers, catalog?.products,
+      yield CartLoaded(authenticate, order, customers, catalog?.products,
           "cart initial load.");
     } else if (event is UpdateCart) {
       yield CartLoading();
@@ -88,7 +88,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         order.grandTotal += x.quantity * x.price;
       });
       yield CartLoaded(
-          authenticate, order, crmUsers, catalog?.products, "cart updated");
+          authenticate, order, customers, catalog?.products, "cart updated");
     } else if (event is DeleteItemCart) {
       yield CartLoading();
       order.orderItems.removeAt(event.index);
@@ -96,7 +96,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(authenticate, order, crmUsers, catalog?.products,
+      yield CartLoaded(authenticate, order, customers, catalog?.products,
           "Item# ${event.index} deleted");
     } else if (event is ConfirmCart) {
       yield CartLoading('Saving order...');
@@ -104,15 +104,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         orderBloc.add(CreateOrder(order));
         order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
         yield CartLoaded(
-            authenticate, order, crmUsers, catalog?.products, "order created");
+            authenticate, order, customers, catalog?.products, "order created");
       } catch (e) {
         yield CartProblem(e.toString());
       }
     } else if (event is CartCrmUpdated) {
       yield CartLoading();
-      crmUsers = event.crmUsers;
+      customers = event.customers;
       yield CartLoaded(
-          authenticate, order, crmUsers, catalog?.products, "cart updated");
+          authenticate, order, customers, catalog?.products, "cart updated");
     }
   }
 }
@@ -156,10 +156,10 @@ class CatalogUpdated extends CartEvent {
 }
 
 class CartCrmUpdated extends CartEvent {
-  final List<User> crmUsers;
-  CartCrmUpdated(this.crmUsers);
+  final List<User> customers;
+  CartCrmUpdated(this.customers);
   @override
-  String toString() => 'Updating cart with crm users#: ${crmUsers?.length}';
+  String toString() => 'Updating cart with crm users#: ${customers?.length}';
 }
 
 class AuthUpdated extends CartEvent {

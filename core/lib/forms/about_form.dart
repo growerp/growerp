@@ -21,7 +21,7 @@ import '../widgets/@widgets.dart';
 class AboutForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ShowNavigationRail(AboutFormHeader(), 3);
+    return ShowNavigationRail(AboutFormHeader(), 2);
   }
 }
 

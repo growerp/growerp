@@ -14,13 +14,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
-import '../routing_constants.dart';
 
 Widget companyLogo(context, authenticate, title) {
   return Row(children: [
     InkWell(
       onTap: () {
-        Navigator.pushNamed(context, CompanyRoute, arguments: FormArguments());
+        Navigator.pushNamed(context, '/company', arguments: FormArguments());
       },
       child: CircleAvatar(
           backgroundColor: Colors.green,

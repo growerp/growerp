@@ -13,10 +13,27 @@
  */
 
 import 'package:models/models.dart';
-import 'package:decimal/decimal.dart';
 import 'dart:math';
 
 final String randomString4 = Random().nextInt(9999).toString();
+
+Opportunity opportunity = opportunityFromJson('''
+    {  "opportunity": {
+                  "opportunityName": "Dummy Opp Name 2",
+                  "description": "Dummmy descr",
+                  "stageId": "Prospecting",
+                  "nextStep": "testing",
+                  "opportunityId": "33333",
+                  "accountPartyId": "100001",
+                  "leadPartyId": "100001",
+                  "estAmount": "30000",
+                  "estProbability": "30",
+                  "fullName": "Jan de groot",
+                  "email": "dummy@example.com"
+      }
+    }
+''');
+List<Opportunity> opportunities = [opportunity, opportunity];
 
 User user = userFromJson('''
   {"user": {"firstName": "dummyFirstName",
@@ -225,9 +242,9 @@ final Order order = orderFromJson('''
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5" , "fromDate": null, "thruDate": null},
+          "quantity": "5", "price": "1.5" , "deliveryDate": "2012-02-27 13:27:00.123456z"},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
+          "quantity": "3", "price": "4.5", "deliveryDate": null} 
    ]}}
 ''');
 final List<Order> orders = ordersFromJson('''
@@ -239,9 +256,9 @@ final List<Order> orders = ordersFromJson('''
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5", "fromDate": null, "thruDate": null},
+          "quantity": "5", "price": "1.5", "deliveryDate": null},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
+          "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]},
     { "orderId": "00003", "orderStatusId": "OrderOpen", 
       "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
@@ -250,9 +267,9 @@ final List<Order> orders = ordersFromJson('''
       "accommodationSpotId": null,
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5", "fromDate": null, "thruDate": null},
+          "quantity": "5", "price": "1.5", "deliveryDate": null},
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5", "fromDate": null, "thruDate": null}
+          "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]}
    ]}
 ''');

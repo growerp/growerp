@@ -85,6 +85,7 @@ void main() {
       authenticateNoKey.user.image = result.user.image;
       authenticateNoKey.user.userId = result.user.userId;
       authenticateNoKey.user.language = result.user.language;
+      authenticateNoKey.user.groupDescription = result.user.groupDescription;
       authenticateNoKey.company.image = result.company.image;
       authenticateNoKey.company.employees = result.company.employees;
       authenticateNoKey.company.classificationId =
@@ -130,7 +131,7 @@ void main() {
         sessionToken = loginAuth.moquiSessionToken;
         expect(authenticateToJson(loginAuth), authenticateToJson(authenticate));
       } catch (e) {
-        print("catch: $e");
+        print("===catch: $e");
         expect(true, false);
       }
     });
@@ -328,6 +329,27 @@ void main() {
         expect(
             orderFromJson(response.toString()).orderStatusId, 'OrderCompleted');
       } on DioError catch (e) {
+        expect(null, e?.response?.data);
+      }
+    });
+  });
+  group('Opportunity >>>>>', () {
+    test('create/get opportunity ', () async {
+      client.options.headers['api_key'] = apiKey;
+      try {
+        // create/get opportunity;
+        Response response = await client.put('s1/growerp/100/Opportunity',
+            data: {
+              'opportunity': opportunityToJson(opportunity),
+              'moquiSessionToken': sessionToken
+            });
+        print("=====test ${response.toString()}");
+        Opportunity result = opportunityFromJson(response.toString());
+        print("====2=====");
+        opportunity.opportunityId = result.opportunityId;
+        expect(opportunityToJson(opportunity), opportunityToJson(result));
+      } on DioError catch (e) {
+        print("======catch: $e");
         expect(null, e?.response?.data);
       }
     });

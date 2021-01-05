@@ -18,7 +18,6 @@ import 'package:flutter/foundation.dart';
 import '../blocs/@blocs.dart';
 import 'package:models/models.dart';
 import '../helper_functions.dart';
-import '../routing_constants.dart';
 
 /// RegisterForm shows dual registration forms depending on:
 ///  Authenticate.company.partyId: (from AuthBloc)
@@ -43,7 +42,7 @@ class RegisterForm extends StatelessWidget {
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.home),
-                onPressed: () => Navigator.pushNamed(context, HomeRoute,
+                onPressed: () => Navigator.pushNamed(context, '/home',
                     arguments: FormArguments()))
           ],
         ),
@@ -114,7 +113,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                     ' you can now login with your email password');
           } else {
             Navigator.pushNamedAndRemoveUntil(
-                context, HomeRoute, ModalRoute.withName(HomeRoute),
+                context, '/home', ModalRoute.withName('/home'),
                 arguments:
                     FormArguments("Register Company and admin successfull\n"
                         "you can now login with the password\n"

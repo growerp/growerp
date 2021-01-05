@@ -39,25 +39,25 @@ class User {
   String groupDescription; // admin, employee, customer, supplier etc...
   String userGroupId;
   String language;
-  String country;
   String externalId; // when customer register they give their telno
   Uint8List image;
-  String base64Upload; // to upload images to the
+  String companyPartyId;
+  String companyName;
 
-  User({
-    this.partyId,
-    this.userId,
-    this.firstName,
-    this.lastName,
-    this.name,
-    this.email,
-    this.groupDescription,
-    this.userGroupId,
-    this.language,
-    this.country,
-    this.externalId,
-    this.image,
-  });
+  User(
+      {this.partyId,
+      this.userId,
+      this.firstName,
+      this.lastName,
+      this.name,
+      this.email,
+      this.groupDescription,
+      this.userGroupId,
+      this.language,
+      this.externalId,
+      this.image,
+      this.companyPartyId,
+      this.companyName});
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         partyId: json["partyId"],
@@ -69,11 +69,12 @@ class User {
         groupDescription: json["groupDescription"],
         userGroupId: json["userGroupId"],
         language: json["language"],
-        country: json["country"],
         externalId: json["externalId"],
         image: json["image"] == null || json["image"] == "null"
             ? null
             : base64.decode(json["image"]),
+        companyPartyId: json["companyPartyId"],
+        companyName: json["companyName"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -86,9 +87,10 @@ class User {
         "groupDescription": groupDescription,
         "userGroupId": userGroupId,
         "language": language,
-        "country": country,
         "externalId": externalId,
         "image": image != null ? base64.encode(image) : null,
+        "companyPartyId": companyPartyId,
+        "companyName": companyName
       };
 
   @override
@@ -97,3 +99,21 @@ class User {
         '${image?.length}';
   }
 }
+
+class UserGroup {
+  String userGroupId;
+  String description;
+
+  UserGroup({
+    this.userGroupId,
+    this.description,
+  });
+}
+
+List<UserGroup> userGroups = [
+  UserGroup(userGroupId: 'GROWERP_M_ADMIN', description: 'Admin'),
+  UserGroup(userGroupId: 'GROWERP_M_CUSTOMER', description: 'Customer'),
+  UserGroup(userGroupId: 'GROWERP_M_EMPLOYEE', description: 'Employee'),
+  UserGroup(userGroupId: 'GROWERP_M_LEAD', description: 'Lead'),
+  UserGroup(userGroupId: 'GROWERP_M_SUPPLIER', description: 'Supplier')
+];

@@ -272,3 +272,21 @@ final OrderItem orderItem2 = OrderItem(
     quantity: Decimal.parse('3'),
     price: Decimal.parse('2.2'));
 final Order totalOrder = Order(orderItems: [orderItem1, orderItem2]);
+
+Opportunity opportunity = opportunityFromJson('''
+    {  "opportunity": {
+                  "opportunityName": "Dummy Opp Name 2",
+                  "description": "Dummmy descr",
+                  "stageId": "Prospecting",
+                  "nextStep": "testing",
+                  "opportunityId": "33333",
+                  "accountPartyId": "100001",
+                  "leadPartyId": "100001",
+                  "estAmount": "30000",
+                  "estProbability": "30",
+                  "fullName": "Jan de groot",
+                  "email": "dummy@example.com"
+      }
+    }
+''');
+List<Opportunity> opportunities = [opportunity, opportunity];

@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:models/models.dart';
-import '../routing_constants.dart';
 
 Widget myDrawer(BuildContext context, Authenticate authenticate) {
   String groupId = authenticate?.user?.userGroupId;
@@ -38,8 +37,9 @@ Widget myDrawer(BuildContext context, Authenticate authenticate) {
               return DrawerHeader(
                   child: InkWell(
                       onTap: () {
-                        Navigator.pushNamed(context, UserRoute,
-                            arguments: FormArguments(null, authenticate.user));
+                        Navigator.pushNamed(context, '/employee',
+                            arguments:
+                                FormArguments(null, null, authenticate.user));
                       },
                       child: Column(children: [
                         CircleAvatar(
@@ -92,7 +92,7 @@ Widget myNavigationRail(context, authenticate, widget, selectedIndex) {
         leading: Center(
             child: InkWell(
                 onTap: () {
-                  Navigator.pushNamed(context, UserRoute,
+                  Navigator.pushNamed(context, '/employee',
                       arguments: FormArguments(null, authenticate.user));
                 },
                 child: Column(children: [

@@ -20,31 +20,30 @@ import 'package:image_picker/image_picker.dart';
 import 'package:models/models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
-import '../routing_constants.dart';
 import '../widgets/@widgets.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class UserForm extends StatelessWidget {
+class EmployeeForm extends StatelessWidget {
   final FormArguments formArguments;
-  UserForm(this.formArguments);
+  EmployeeForm(this.formArguments);
 
   @override
   Widget build(BuildContext context) {
     var a = (formArguments) =>
-        (MyUserPage(formArguments.message, formArguments.object));
+        (EmployeePage(formArguments.message, formArguments.object));
     return ShowNavigationRail(a(formArguments), 0);
   }
 }
 
-class MyUserPage extends StatefulWidget {
+class EmployeePage extends StatefulWidget {
   final String message;
   final User user;
-  MyUserPage(this.message, this.user);
+  EmployeePage(this.message, this.user);
   @override
-  _MyUserState createState() => _MyUserState(message, user);
+  _EmployeeState createState() => _EmployeeState(message, user);
 }
 
-class _MyUserState extends State<MyUserPage> {
+class _EmployeeState extends State<EmployeePage> {
   final String message;
   final User user;
   final _formKey = GlobalKey<FormState>();
@@ -61,7 +60,7 @@ class _MyUserState extends State<MyUserPage> {
   final ImagePicker _picker = ImagePicker();
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
-  _MyUserState([this.message, this.user]) {
+  _EmployeeState([this.message, this.user]) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
   }
 
@@ -105,11 +104,11 @@ class _MyUserState extends State<MyUserPage> {
               appBar: AppBar(
                 automaticallyImplyLeading:
                     ResponsiveWrapper.of(context).isSmallerThan(TABLET),
-                title: companyLogo(context, authenticate, 'User detail'),
+                title: companyLogo(context, authenticate, 'Employee detail'),
                 actions: <Widget>[
                   IconButton(
                       icon: Icon(Icons.home),
-                      onPressed: () => Navigator.pushNamed(context, HomeRoute))
+                      onPressed: () => Navigator.pushNamed(context, '/home'))
                 ],
               ),
               floatingActionButton: Column(
@@ -154,7 +153,7 @@ class _MyUserState extends State<MyUserPage> {
                         context, '${state.message}', Colors.green);
                   }
                   if (state is AuthAuthenticated) {
-                    Navigator.pushNamed(context, UsersRoute,
+                    Navigator.pushNamed(context, '/employees',
                         arguments: FormArguments(state.message));
                   }
                 },
@@ -279,23 +278,25 @@ class _MyUserState extends State<MyUserPage> {
                     },
                   ),
                   SizedBox(height: 10),
-                  DropdownButtonFormField<UserGroup>(
-                    key: Key('dropDown'),
-                    hint: Text('User Group'),
-                    value: _selectedUserGroup,
-                    validator: (value) =>
-                        value == null ? 'field required' : null,
-                    items: userGroups?.map((item) {
-                      return DropdownMenuItem<UserGroup>(
-                          child: Text(item.description), value: item);
-                    })?.toList(),
-                    onChanged: (UserGroup newValue) {
-                      setState(() {
-                        _selectedUserGroup = newValue;
-                      });
-                    },
-                    isExpanded: true,
-                  ),
+                  Visibility(
+                      visible: user.userGroupId == null,
+                      child: DropdownButtonFormField<UserGroup>(
+                        key: Key('dropDown'),
+                        hint: Text('User Group'),
+                        value: _selectedUserGroup,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                        items: userGroups?.map((item) {
+                          return DropdownMenuItem<UserGroup>(
+                              child: Text(item.description), value: item);
+                        })?.toList(),
+                        onChanged: (UserGroup newValue) {
+                          setState(() {
+                            _selectedUserGroup = newValue;
+                          });
+                        },
+                        isExpanded: true,
+                      )),
                   SizedBox(height: 20),
                   RaisedButton(
                       disabledColor: Colors.grey,
@@ -311,9 +312,6 @@ class _MyUserState extends State<MyUserPage> {
                             name: _nameController.text,
                             userGroupId: _selectedUserGroup.userGroupId,
                             language: Localizations.localeOf(context)
-                                .languageCode
-                                .toString(),
-                            country: Localizations.localeOf(context)
                                 .languageCode
                                 .toString(),
                           );
