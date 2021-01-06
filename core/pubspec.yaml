@@ -28,7 +28,7 @@ dependencies:
       ref: packages
       path: ofbiz
   moqui:
-    path: ../moqui
+#    path: ../moqui
     git:
       url: https://github.com/growerp/growerp.git
       ref: packages
