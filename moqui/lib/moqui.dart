@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
 import 'package:models/models.dart';
+import 'package:models/balanceSheet/balanceSheet.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -541,6 +542,16 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Opportunity',
           queryParameters: {'opportunityId': opportunityId});
       return response.data["opportunityId"];
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getBalanceSheet() async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/BalanceSheet');
+      //print("====${response.toString()}");
+      return balanceSheetFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }

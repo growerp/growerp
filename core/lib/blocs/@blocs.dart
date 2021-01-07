@@ -20,3 +20,4 @@ export 'catalog_bloc.dart';
 export 'cart_bloc.dart';
 export 'order_bloc.dart';
 export 'crm_bloc.dart';
+export 'accntg_bloc.dart';
