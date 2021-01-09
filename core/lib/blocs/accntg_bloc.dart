@@ -29,6 +29,7 @@ class AccntgBloc extends Bloc<AccntgEvent, AccntgState> {
       yield AccntgInProgress();
       dynamic result = await repos.getBalanceSheet();
       if (result is BalanceSheet) {
+        //  print("==== $result");
         balanceSheet = result;
         yield AccntgLoaded(result, "balancesheet loaded");
       } else

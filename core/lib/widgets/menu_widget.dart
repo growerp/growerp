@@ -93,7 +93,7 @@ Widget myNavigationRail(context, authenticate, widget, selectedIndex) {
             child: InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, '/employee',
-                      arguments: FormArguments(null, authenticate.user));
+                      arguments: FormArguments(null, 0, authenticate.user));
                 },
                 child: Column(children: [
                   SizedBox(height: 5),

@@ -53,7 +53,6 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       }
     } else if (event is RegisterCompanyAdmin) {
       yield RegisterSending();
-      print("=======${event.classification.classificationId}");
       final authenticate = await repos.register(
           companyName: event.companyName,
           currencyId: event.currencyId,

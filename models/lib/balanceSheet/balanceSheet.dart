@@ -59,7 +59,8 @@ class BalanceSheet {
   }
 
   String toString() => "BalanceSheet:  "
-      " CashEquivalent: ${classInfoById.cashEquivalent.totalPostedByTimePeriod.all}"
-      " Asset: ${classInfoById.asset.totalPostedByTimePeriod.all}"
-      " CurrentAsset: ${classInfoById.currentAsset.totalPostedByTimePeriod.all}";
+      " CashEquivalent: ${classInfoById?.cashEquivalent?.totalPostedByTimePeriod?.all}"
+      " Asset: ${classInfoById?.asset?.totalPostedByTimePeriod?.all}"
+      " CurrentAsset: ${classInfoById?.currentAsset?.totalPostedByTimePeriod?.all}"
+      " $equityTotalMap $liabilityEquityTotalMap $netAssetTotalMap";
 }

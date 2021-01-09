@@ -6,7 +6,7 @@ import 'package:models/models.dart';
 
 class CrmBloc extends Bloc<CrmEvent, CrmState> {
   final repos;
-  Crm crm = Crm(leads: [], customers: [], opportunities: []);
+  Crm crm = Crm(leads: [], customers: [], suppliers: [], opportunities: []);
   CrmBloc(this.repos)
       : assert(repos != null),
         super(CrmInitial());
@@ -25,18 +25,18 @@ class CrmBloc extends Bloc<CrmEvent, CrmState> {
         yield CrmProblem(result);
       }
     } else if (event is UpdateCrmUser) {
-      List crmUsers = crm.leads;
-      if (event.crmUser.userGroupId == "GROWERP_M_CUSTOMER")
-        crmUsers = crm.customers;
       yield CrmLoading(
           (event.crmUser?.partyId == null ? "Adding " : "Updating") +
               " user ${event.crmUser}");
       dynamic result = await repos.updateUser(event.crmUser);
       if (result is User) {
+        List<User> crmUsers = crm.customers;
+        if (event.crmUser.userGroupId == 'GROWERP_M_SUPPLIER')
+          crmUsers = crm.suppliers;
+        if (event.crmUser.userGroupId == 'GROWERP_M_LEAD') crmUsers = crm.leads;
         if (event.crmUser.partyId == null)
           crmUsers.add(result);
         else {
-          // update
           int index =
               crmUsers.indexWhere((user) => user.partyId == result.partyId);
           crmUsers.replaceRange(index, index + 1, [result]);

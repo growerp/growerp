@@ -27,14 +27,17 @@ String crmToJson(Crm data) => '{"crm":' + json.encode(data.toJson()) + "}";
 class Crm {
   List<User> leads;
   List<User> customers;
+  List<User> suppliers;
   List<Opportunity> opportunities;
 
-  Crm({this.leads, this.customers, this.opportunities});
+  Crm({this.leads, this.customers, this.suppliers, this.opportunities});
 
   factory Crm.fromJson(Map<String, dynamic> json) => Crm(
         leads: List<User>.from(json["leads"].map((x) => User.fromJson(x))),
         customers:
             List<User>.from(json["customers"].map((x) => User.fromJson(x))),
+        suppliers:
+            List<User>.from(json["suppliers"].map((x) => User.fromJson(x))),
         opportunities: List<Opportunity>.from(
             json["opportunities"].map((x) => Opportunity.fromJson(x))),
       );
@@ -42,11 +45,13 @@ class Crm {
   Map<String, dynamic> toJson() => {
         "leads": List<dynamic>.from(leads.map((x) => x.toJson())),
         "customers": List<dynamic>.from(customers.map((x) => x.toJson())),
+        "suppliers": List<dynamic>.from(suppliers.map((x) => x.toJson())),
         "opportunities":
             List<dynamic>.from(opportunities.map((x) => x.toJson())),
       };
   @override
   String toString() => 'Crm  leads: ${leads?.length} '
       'Customers: ${customers?.length} '
+      'Suppliers: ${suppliers?.length} '
       'Opportunities: ${opportunities?.length}';
 }

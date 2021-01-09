@@ -31,7 +31,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       dynamic result = await repos.getOrders();
       if (result is List<Order>) {
         orders = result;
-        yield OrderLoaded(orders, 'orders loaded');
+        yield OrderLoaded(orders);
       } else {
         yield OrderProblem(result);
       }
@@ -130,7 +130,7 @@ class OrderLoading extends OrderState {
 class OrderLoaded extends OrderState {
   final List<Order> orders;
   final String message;
-  const OrderLoaded(this.orders, this.message);
+  const OrderLoaded(this.orders, [this.message]);
   @override
   String toString() => 'Orders loaded, ${orders?.length}';
 }

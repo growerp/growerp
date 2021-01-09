@@ -70,7 +70,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.2"
+    version: "1.6.0"
   built_collection:
     dependency: transitive
     description:
@@ -229,7 +229,7 @@ packages:
       name: flutter_markdown
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.1"
+    version: "0.5.2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -295,7 +295,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+15"
+    version: "0.6.7+17"
   image_picker_for_web:
     dependency: "direct main"
     description:
@@ -392,7 +392,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "77d4da674fba18f18147e8e13b786eb97908038b"
+      resolved-ref: a210f72c3e5d22db1c11a737c131f81d303a97f3
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "77d4da674fba18f18147e8e13b786eb97908038b"
+      resolved-ref: a210f72c3e5d22db1c11a737c131f81d303a97f3
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "77d4da674fba18f18147e8e13b786eb97908038b"
+      resolved-ref: a210f72c3e5d22db1c11a737c131f81d303a97f3
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -623,7 +623,7 @@ packages:
       name: shelf_static
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.8"
+    version: "0.2.9+1"
   shelf_web_socket:
     dependency: transitive
     description:
@@ -789,7 +789,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.2.0"
+    version: "5.5.0"
   watcher:
     dependency: transitive
     description:
@@ -841,4 +841,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0 <2.0.0"
+  flutter: ">=1.22.0"

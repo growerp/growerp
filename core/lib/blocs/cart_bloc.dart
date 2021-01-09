@@ -29,10 +29,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   StreamSubscription authBlocSubscription;
   StreamSubscription catalogBlocSubscription;
   StreamSubscription crmBlocSubscription;
-  Order order = Order(grandTotal: Decimal.parse('0'), orderItems: List());
+  Order order;
   Authenticate authenticate;
   Catalog catalog;
-  List<User> customers;
+  Crm crm;
 
   CartBloc(this.authBloc, this.orderBloc, this.catalogBloc, this.crmBloc)
       : super(CartInitial()) {
@@ -51,8 +51,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     });
     crmBlocSubscription = crmBloc.listen((state) {
       if (state is CrmLoaded) {
-        customers = state.crm.customers;
-        add(CartCrmUpdated((crmBloc.state as CrmLoaded).crm.customers));
+        crm = state.crm;
+        add(CartCrmUpdated((crmBloc.state as CrmLoaded).crm));
       }
     });
   }
@@ -68,14 +68,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Stream<CartState> mapEventToState(CartEvent event) async* {
     if (event is LoadCart) {
       yield CartLoading();
+      authenticate = authBloc.authenticate;
       catalog = catalogBloc.catalog;
-      customers = crmBloc.crm.customers;
+      crm = crmBloc.crm;
       order = event.order != null ? event.order : order;
-      yield CartLoaded(authenticate, order, customers, catalog?.products,
-          "cart initial load.");
+      yield CartLoaded(authenticate, order, crm, catalog, "cart initial load.");
     } else if (event is UpdateCart) {
       yield CartLoading();
-      order.customerPartyId = event.order.customerPartyId;
+      order = event.order;
       event.order.orderItems[0].orderItemSeqId =
           order.orderItems == null ? 1 : order.orderItems.length + 1;
       event.order.orderItems[0].description = catalog.products
@@ -87,8 +87,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(
-          authenticate, order, customers, catalog?.products, "cart updated");
+      yield CartLoaded(authenticate, order, crm, catalog, "cart updated");
     } else if (event is DeleteItemCart) {
       yield CartLoading();
       order.orderItems.removeAt(event.index);
@@ -96,23 +95,22 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(authenticate, order, customers, catalog?.products,
-          "Item# ${event.index} deleted");
+      yield CartLoaded(
+          authenticate, order, crm, catalog, "Item# ${event.index} deleted");
     } else if (event is ConfirmCart) {
       yield CartLoading('Saving order...');
+      print("saving order $order");
       try {
         orderBloc.add(CreateOrder(order));
         order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
-        yield CartLoaded(
-            authenticate, order, customers, catalog?.products, "order created");
+        yield CartLoaded(authenticate, order, crm, catalog, "order created");
       } catch (e) {
         yield CartProblem(e.toString());
       }
     } else if (event is CartCrmUpdated) {
       yield CartLoading();
-      customers = event.customers;
-      yield CartLoaded(
-          authenticate, order, customers, catalog?.products, "cart updated");
+      crm = event.crm;
+      yield CartLoaded(authenticate, order, crm, catalog, "cart updated");
     }
   }
 }
@@ -156,10 +154,11 @@ class CatalogUpdated extends CartEvent {
 }
 
 class CartCrmUpdated extends CartEvent {
-  final List<User> customers;
-  CartCrmUpdated(this.customers);
+  final Crm crm;
+  CartCrmUpdated(this.crm);
   @override
-  String toString() => 'Updating cart with crm users#: ${customers?.length}';
+  String toString() => 'Updating cart with crm users#: '
+      '${crm.customers?.length}/${crm.suppliers?.length}';
 }
 
 class AuthUpdated extends CartEvent {
@@ -193,10 +192,10 @@ class CartLoading extends CartState {
 class CartLoaded extends CartState {
   final Authenticate authenticate;
   final Order order;
-  final List customers;
-  final List products;
+  final Crm crm;
+  final Catalog catalog;
   final String message;
-  const CartLoaded(this.authenticate, this.order, this.customers, this.products,
+  const CartLoaded(this.authenticate, this.order, this.crm, this.catalog,
       [this.message]);
   Decimal get totalPrice {
     if (order?.orderItems?.length == 0) return Decimal.parse('0');
@@ -210,10 +209,12 @@ class CartLoaded extends CartState {
   @override
   List<Object> get props => [order];
   @override
-  String toString() =>
-      'Cart loaded, cart items: ' +
+  String toString() => 'Cart loaded, '
+      'company: ${authenticate?.company?.partyId}'
+      'cart items '
       '${order?.orderItems?.length} value: $totalPrice '
-          'Cust: ${customers?.length} Prod: ${products?.length}';
+      'Cust: ${crm.customers?.length} Suppliers: ${crm.suppliers?.length} '
+      'Prod: ${catalog.products?.length}';
 }
 
 class CartPaying extends CartState {}

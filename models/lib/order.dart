@@ -35,6 +35,7 @@ class Order {
   String orderStatusId;
   DateTime placedDate;
   String customerPartyId;
+  String supplierPartyId;
   String firstName;
   String lastName;
   String email;
@@ -48,6 +49,7 @@ class Order {
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
     this.placedDate,
     this.customerPartyId,
+    this.supplierPartyId,
     this.firstName,
     this.lastName,
     this.email,
@@ -62,6 +64,7 @@ class Order {
         orderStatusId: json["orderStatusId"],
         placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
         customerPartyId: json["customerPartyId"],
+        supplierPartyId: json["supplierPartyId"],
         firstName: json["firstName"],
         lastName: json["lastName"],
         email: json["email"],
@@ -77,6 +80,7 @@ class Order {
         "orderStatusId": orderStatusId,
         "placedDate": placedDate.toString(),
         "customerPartyId": customerPartyId,
+        "supplierPartyId": supplierPartyId,
         "firstName": firstName,
         "lastName": lastName,
         "email": email,
@@ -86,8 +90,8 @@ class Order {
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
 
-  String toString() => 'order# $orderId customer: $customerPartyId items: '
-      '${orderItems?.length}';
+  String toString() => 'order# $orderId customer/supplier: $customerPartyId'
+      '/$supplierPartyId items: ${orderItems?.length}';
 }
 
 class OrderItem {
