@@ -12,13 +12,17 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-export 'auth_bloc.dart';
-export 'register_bloc.dart';
-export 'login_bloc.dart';
-export 'changePw_bloc.dart';
-export 'category_bloc.dart';
-export 'cart_bloc.dart';
-export 'order_bloc.dart';
-export 'crm_bloc.dart';
-export 'accntg_bloc.dart';
-export 'product_bloc.dart';
+import 'package:flutter/material.dart';
+
+class BottomLoader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        height: 24,
+        width: 24,
+        child: CircularProgressIndicator(strokeWidth: 1.5),
+      ),
+    );
+  }
+}

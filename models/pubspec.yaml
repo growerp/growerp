@@ -12,6 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  equatable: ^1.2.5
   decimal: ^0.3.0
 
 

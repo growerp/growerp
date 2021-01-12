@@ -59,7 +59,7 @@ List<Classification> classifications = [
 ];
 
 final String defaultCatalogEcommerce = '''
-    { "categories":[   
+    { "count": "30", "categories":[   
       {
         "categoryName": "Drinks",
         "description": "this is bar category", 

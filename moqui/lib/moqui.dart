@@ -341,22 +341,6 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getCatalog(String companyPartyId) async {
-    try {
-/*      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('categoriesAndProducts', response.toString());
-      String catProdJson = prefs.getString('categoriesAndProducts');
-      if (catProdJson != null) return catalogFromJson(catProdJson);
-*/
-      Response response = await client.get(
-          'rest/s1/growerp/100/CategoriesAndProducts',
-          queryParameters: {'companyPartyId': companyPartyId});
-      return catalogFromJson(response.toString());
-    } catch (e) {
-      return responseMessage(e);
-    }
-  }
-
   Future<dynamic> getCart() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -427,6 +411,20 @@ class Moqui {
     }
   }
 
+  Future<dynamic> getCategory([start, limit, companyPartyId]) async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/Categories',
+          queryParameters: {
+            'companyPartyId': companyPartyId,
+            'start': start,
+            'limit': limit
+          });
+      return categoriesFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
   Future<dynamic> updateCategory(ProductCategory category) async {
     // no categoryId is add
     try {
@@ -455,6 +453,24 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Category',
           queryParameters: {'categoryId': categoryId});
       return response.data["categoryId"];
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getProduct([start, limit, companyPartyId, productId]) async {
+    try {
+      Response response =
+          await client.get('rest/s1/growerp/100/Products', queryParameters: {
+        'companyPartyId': companyPartyId,
+        'productId': productId,
+        'start': start,
+        'limit': limit
+      });
+      if (productId != null)
+        return productFromJson(response.toString());
+      else
+        return productsFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }

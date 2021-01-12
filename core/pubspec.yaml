@@ -21,6 +21,8 @@ dependencies:
   image_picker_for_web: ^0.1.0+2
   responsive_framework: ^0.0.8
   about: ^1.1.2
+  rxdart: ^0.24.0
+
   ofbiz:
 #    path: ../ofbiz
     git:

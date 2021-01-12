@@ -19,6 +19,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
+import 'package:equatable/equatable.dart';
 
 Product productFromJson(String str) =>
     Product.fromJson(json.decode(str)["product"]);
@@ -32,14 +33,33 @@ String productsToJson(List<Product> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
-class Product {
-  String productId;
-  String productName;
-  String description;
-  Decimal price;
-  String categoryId;
-  String categoryName;
-  Uint8List image;
+class Products extends Equatable {
+  final List<Product> products;
+  final int count;
+
+  Products({this.products, this.count});
+  @override
+  List<Object> get props => [products, count];
+
+  factory Products.fromJson(Map<String, dynamic> json) => Products(
+      products:
+          List<Product>.from(json["products"].map((x) => Product.fromJson(x))),
+      count: int.parse(json["count"]));
+
+  Map<String, dynamic> toJson() => {
+        "products": List<dynamic>.from(products.map((x) => x.toJson())),
+        "count": count.toString,
+      };
+}
+
+class Product extends Equatable {
+  final String productId;
+  final String productName;
+  final String description;
+  final Decimal price;
+  final String categoryId;
+  final String categoryName;
+  final Uint8List image;
 
   Product({
     this.productId,
@@ -71,6 +91,18 @@ class Product {
         "image": image != null ? base64.encode(image) : null,
       };
 
+  @override
+  List<Object> get props => [
+        productId,
+        productName,
+        description,
+        price,
+        categoryId,
+        categoryName,
+        image
+      ];
+
+  @override
   String toString() => 'Product name: $productName[$productId] price: $price '
       'category: $categoryName[$categoryId] imgSize: ${image?.length}';
 }

@@ -63,6 +63,14 @@ class _EmployeeState extends State<EmployeePage> {
   _EmployeeState([this.message, this.user]) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
   }
+  List<UserGroup> userGroups = [
+    // only employees here
+    UserGroup(
+      userGroupId: 'GROWERP_M_ADMIN',
+      description: 'Admin',
+    ),
+    UserGroup(userGroupId: 'GROWERP_M_EMPLOYEE', description: 'Employee'),
+  ];
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
     try {
@@ -212,26 +220,18 @@ class _EmployeeState extends State<EmployeePage> {
                 key: _formKey,
                 child: ListView(children: <Widget>[
                   SizedBox(height: 30),
-                  GestureDetector(
-                    onTap: () async {
-                      PickedFile pickedFile =
-                          await _picker.getImage(source: ImageSource.gallery);
-                      BlocProvider.of<AuthBloc>(context)
-                          .add(UploadImage(user.partyId, pickedFile.path));
-                    },
-                    child: CircleAvatar(
-                        backgroundColor: Colors.green,
-                        radius: 80,
-                        child: _imageFile != null
-                            ? kIsWeb
-                                ? Image.network(_imageFile.path)
-                                : Image.file(File(_imageFile.path))
-                            : user?.image != null
-                                ? Image.memory(user?.image, height: 150)
-                                : Text(user?.firstName?.substring(0, 1) ?? '',
-                                    style: TextStyle(
-                                        fontSize: 30, color: Colors.black))),
-                  ),
+                  CircleAvatar(
+                      backgroundColor: Colors.green,
+                      radius: 80,
+                      child: _imageFile != null
+                          ? kIsWeb
+                              ? Image.network(_imageFile.path)
+                              : Image.file(File(_imageFile.path))
+                          : user?.image != null
+                              ? Image.memory(user?.image, height: 150)
+                              : Text(user?.firstName?.substring(0, 1) ?? '',
+                                  style: TextStyle(
+                                      fontSize: 30, color: Colors.black))),
                   SizedBox(height: 30),
                   TextFormField(
                     key: Key('firstName'),
@@ -279,7 +279,7 @@ class _EmployeeState extends State<EmployeePage> {
                   ),
                   SizedBox(height: 10),
                   Visibility(
-                      visible: user.userGroupId == null,
+                      visible: user?.userGroupId == null,
                       child: DropdownButtonFormField<UserGroup>(
                         key: Key('dropDown'),
                         hint: Text('User Group'),

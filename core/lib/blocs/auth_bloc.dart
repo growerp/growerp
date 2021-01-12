@@ -30,11 +30,12 @@ import '../helper_functions.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
-  final CatalogBloc catalogBloc;
+  final CategoryBloc categoryBloc;
+  final ProductBloc productBloc;
   final CrmBloc crmBloc;
   Authenticate authenticate;
 
-  AuthBloc(this.repos, this.catalogBloc, this.crmBloc)
+  AuthBloc(this.repos, this.categoryBloc, this.crmBloc, this.productBloc)
       : assert(repos != null),
         super(AuthInitial());
 
@@ -60,8 +61,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Future<AuthState> checkApikey() async {
       //print("===10==== apiKey: ${authenticate?.apiKey}");
       if (authenticate?.apiKey == null) {
-        if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST'))
-          catalogBloc.add(LoadCatalog(authenticate.company.partyId));
         return AuthUnauthenticated(authenticate);
       } else {
         repos.setApikey(authenticate?.apiKey);
@@ -70,7 +69,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           //print("===11====");
           if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
             //ignore when test
-            catalogBloc.add(LoadCatalog(authenticate.company.partyId));
+            categoryBloc.add(CategoryFetched(authenticate.company.partyId));
+            productBloc.add(ProductFetched(authenticate.company.partyId, 20));
             crmBloc.add(LoadCrm(authenticate.company.partyId));
           }
           return AuthAuthenticated(authenticate);
@@ -80,8 +80,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           repos.setApikey(null);
           //print("===13====");
           await repos.persistAuthenticate(authenticate);
-          if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST'))
-            catalogBloc.add(LoadCatalog(authenticate.company.partyId));
           return AuthUnauthenticated(authenticate);
         }
       }
@@ -123,7 +121,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       authenticate = event.authenticate;
       // only load crmbloc when logged in
       if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
-        catalogBloc.add(LoadCatalog(authenticate.company.partyId));
+        categoryBloc.add(CategoryFetched(authenticate.company.partyId));
+        productBloc.add(ProductFetched(authenticate.company.partyId, 20));
         crmBloc.add(LoadCrm(authenticate.company.partyId));
       }
       yield AuthAuthenticated(authenticate, "Successfully logged in");
@@ -252,13 +251,6 @@ class LoggingOut extends AuthEvent {
   const LoggingOut({this.authenticate});
   @override
   String toString() => 'loggedOut with: ${authenticate?.user?.name}';
-}
-
-class UploadImage extends AuthEvent {
-  final String partyId;
-  final String fileName;
-  UploadImage(this.partyId, this.fileName);
-  String toString() => "Upload User $partyId image at $fileName]";
 }
 
 // ################## state ###################

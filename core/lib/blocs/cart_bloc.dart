@@ -24,21 +24,30 @@ import '../blocs/@blocs.dart';
 class CartBloc extends Bloc<CartEvent, CartState> {
   final OrderBloc orderBloc;
   final AuthBloc authBloc;
-  final CatalogBloc catalogBloc;
+  final CategoryBloc categoryBloc;
+  final ProductBloc productBloc;
   final CrmBloc crmBloc;
   StreamSubscription authBlocSubscription;
-  StreamSubscription catalogBlocSubscription;
+  StreamSubscription categoryBlocSubscription;
+  StreamSubscription productBlocSubscription;
   StreamSubscription crmBlocSubscription;
   Order order;
   Authenticate authenticate;
-  Catalog catalog;
+  List<ProductCategory> categories;
+  List<Product> products;
   Crm crm;
 
-  CartBloc(this.authBloc, this.orderBloc, this.catalogBloc, this.crmBloc)
+  CartBloc(this.authBloc, this.orderBloc, this.productBloc, this.categoryBloc,
+      this.crmBloc)
       : super(CartInitial()) {
-    catalogBlocSubscription = catalogBloc.listen((state) {
-      if (state is CatalogLoaded) {
-        catalog = state.catalog;
+    categoryBlocSubscription = categoryBloc.listen((state) {
+      if (state is CategorySuccess) {
+        categories = state.categories;
+      }
+    });
+    productBlocSubscription = productBloc.listen((state) {
+      if (state is ProductSuccess) {
+        products = state.products;
       }
     });
     authBlocSubscription = authBloc.listen((state) {
@@ -59,7 +68,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   @override
   Future<void> close() {
     authBlocSubscription.cancel();
-    catalogBlocSubscription.cancel();
+    categoryBlocSubscription.cancel();
+    productBlocSubscription.cancel();
     crmBlocSubscription.cancel();
     return super.close();
   }
@@ -69,16 +79,18 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     if (event is LoadCart) {
       yield CartLoading();
       authenticate = authBloc.authenticate;
-      catalog = catalogBloc.catalog;
+      categories = categoryBloc.categories;
+      products = productBloc.products;
       crm = crmBloc.crm;
       order = event.order != null ? event.order : order;
-      yield CartLoaded(authenticate, order, crm, catalog, "cart initial load.");
+      yield CartLoaded(
+          authenticate, order, crm, categories, products, "cart initial load.");
     } else if (event is UpdateCart) {
       yield CartLoading();
       order = event.order;
       event.order.orderItems[0].orderItemSeqId =
           order.orderItems == null ? 1 : order.orderItems.length + 1;
-      event.order.orderItems[0].description = catalog.products
+      event.order.orderItems[0].description = products
           .firstWhere((x) => event.order.orderItems[0].productId == x.productId)
           .productName;
       if (order.orderItems == null) order.orderItems = [];
@@ -87,7 +99,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(authenticate, order, crm, catalog, "cart updated");
+      yield CartLoaded(
+          authenticate, order, crm, categories, products, "cart updated");
     } else if (event is DeleteItemCart) {
       yield CartLoading();
       order.orderItems.removeAt(event.index);
@@ -95,22 +108,24 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(
-          authenticate, order, crm, catalog, "Item# ${event.index} deleted");
+      yield CartLoaded(authenticate, order, crm, categories, products,
+          "Item# ${event.index} deleted");
     } else if (event is ConfirmCart) {
       yield CartLoading('Saving order...');
       print("saving order $order");
       try {
         orderBloc.add(CreateOrder(order));
         order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
-        yield CartLoaded(authenticate, order, crm, catalog, "order created");
+        yield CartLoaded(
+            authenticate, order, crm, categories, products, "order created");
       } catch (e) {
         yield CartProblem(e.toString());
       }
     } else if (event is CartCrmUpdated) {
       yield CartLoading();
       crm = event.crm;
-      yield CartLoaded(authenticate, order, crm, catalog, "cart updated");
+      yield CartLoaded(
+          authenticate, order, crm, categories, products, "cart updated");
     }
   }
 }
@@ -146,11 +161,11 @@ class DeleteItemCart extends CartEvent {
   String toString() => 'Delete orderitem# $index';
 }
 
-class CatalogUpdated extends CartEvent {
-  final Catalog catalog;
-  CatalogUpdated(this.catalog);
+class CategoryCartUpdated extends CartEvent {
+  final ProductCategory category;
+  CategoryCartUpdated(this.category);
   @override
-  String toString() => 'Updating cart with catalog: $catalog';
+  String toString() => 'Updating cart with Category: $category';
 }
 
 class CartCrmUpdated extends CartEvent {
@@ -193,9 +208,11 @@ class CartLoaded extends CartState {
   final Authenticate authenticate;
   final Order order;
   final Crm crm;
-  final Catalog catalog;
+  final List<ProductCategory> categories;
+  final List<Product> products;
   final String message;
-  const CartLoaded(this.authenticate, this.order, this.crm, this.catalog,
+  const CartLoaded(
+      this.authenticate, this.order, this.crm, this.categories, this.products,
       [this.message]);
   Decimal get totalPrice {
     if (order?.orderItems?.length == 0) return Decimal.parse('0');
@@ -214,7 +231,7 @@ class CartLoaded extends CartState {
       'cart items '
       '${order?.orderItems?.length} value: $totalPrice '
       'Cust: ${crm.customers?.length} Suppliers: ${crm.suppliers?.length} '
-      'Prod: ${catalog.products?.length}';
+      'Prod: ${products?.length}';
 }
 
 class CartPaying extends CartState {}
