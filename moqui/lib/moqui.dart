@@ -205,7 +205,6 @@ class Moqui {
 
   Future<dynamic> login(
       {@required String username, @required String password}) async {
-    print("repos: $username $password");
     try {
       Response response = await client.post('rest/s1/growerp/100/Login', data: {
         'username': username,
@@ -278,13 +277,17 @@ class Moqui {
     return null;
   }
 
-  Future<dynamic> getUser({String userPartyId, String userGroupId}) async {
+  Future<dynamic> getUser(
+      {int start, int limit, String userGroupId, String userPartyId}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/User',
-          queryParameters: {
-            'userPartyId': userPartyId,
-            'userGroupId': userGroupId
-          });
+      print("repos: getUsers usergroupId: $userGroupId");
+      Response response =
+          await client.get('rest/s1/growerp/100/User', queryParameters: {
+        'userPartyId': userPartyId,
+        'userGroupId': userGroupId,
+        'start': start,
+        'limit': limit
+      });
       if (userPartyId == null)
         return usersFromJson(response.toString());
       else {
@@ -458,7 +461,8 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getProduct([start, limit, companyPartyId, productId]) async {
+  Future<dynamic> getProduct(
+      {int start, int limit, String companyPartyId, String productId}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Products', queryParameters: {
@@ -509,20 +513,19 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getCrm() async {
-    try {
-      Response response = await client.get('rest/s1/growerp/100/Crm');
-      return crmFromJson(response.toString());
-    } catch (e) {
-      return responseMessage(e);
-    }
-  }
-
-  Future<dynamic> getOpportunity(String opportunityId) async {
+  Future<dynamic> getOpportunity(int start, int limit,
+      [String opportunityId]) async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Opportunity',
-          queryParameters: {'opportunityId': opportunityId});
-      return opportunityFromJson(response.toString());
+          queryParameters: {
+            'opportunityId': opportunityId,
+            'start': start,
+            'limit': limit
+          });
+      if (opportunityId == null)
+        return opportunitiesFromJson(response.toString());
+      else
+        return opportunityFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }

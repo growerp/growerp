@@ -43,7 +43,7 @@ class ChangePwForm extends StatelessWidget {
       ),
       body: BlocProvider(
         create: (context) {
-          return ChangePwBloc(repos: context.repository<Object>());
+          return ChangePwBloc(repos: context.read<Object>());
         },
         child: ChangePwEntry(
           username: changePwArgs.username,

@@ -47,7 +47,7 @@ List<MenuItem> menuItems = [
       image: "assets/images/companyGrey.png",
       selectedImage: "assets/images/company.png",
       title: "Company",
-      route: '/employees',
+      route: '/company',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(

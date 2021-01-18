@@ -119,7 +119,7 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.0"
   collection:
     dependency: transitive
     description:
@@ -392,7 +392,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: fe40116ca53f40a421ae5e73737f0915e95aa6aa
+      resolved-ref: dca963f1afa268c794167760859a96b152719d6e
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: fe40116ca53f40a421ae5e73737f0915e95aa6aa
+      resolved-ref: dca963f1afa268c794167760859a96b152719d6e
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: fe40116ca53f40a421ae5e73737f0915e95aa6aa
+      resolved-ref: dca963f1afa268c794167760859a96b152719d6e
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -532,7 +532,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2+3"
+    version: "4.3.3"
   pub_semver:
     dependency: transitive
     description:
@@ -712,7 +712,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.0-nullsafety.13"
+    version: "1.16.0-nullsafety.15"
   test_api:
     dependency: transitive
     description:
@@ -726,7 +726,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.12-nullsafety.12"
+    version: "0.3.12-nullsafety.14"
   test_coverage:
     dependency: "direct dev"
     description:

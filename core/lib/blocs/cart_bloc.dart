@@ -26,19 +26,22 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   final AuthBloc authBloc;
   final CategoryBloc categoryBloc;
   final ProductBloc productBloc;
-  final CrmBloc crmBloc;
+  final UserBloc customerBloc;
+  final UserBloc supplierBloc;
   StreamSubscription authBlocSubscription;
   StreamSubscription categoryBlocSubscription;
   StreamSubscription productBlocSubscription;
-  StreamSubscription crmBlocSubscription;
+  StreamSubscription customerBlocSubscription;
+  StreamSubscription supplierBlocSubscription;
   Order order;
   Authenticate authenticate;
   List<ProductCategory> categories;
   List<Product> products;
-  Crm crm;
+  List<User> customers;
+  List<User> suppliers;
 
   CartBloc(this.authBloc, this.orderBloc, this.productBloc, this.categoryBloc,
-      this.crmBloc)
+      this.customerBloc, this.supplierBloc)
       : super(CartInitial()) {
     categoryBlocSubscription = categoryBloc.listen((state) {
       if (state is CategorySuccess) {
@@ -58,10 +61,16 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         authenticate = state.authenticate;
       }
     });
-    crmBlocSubscription = crmBloc.listen((state) {
-      if (state is CrmLoaded) {
-        crm = state.crm;
-        add(CartCrmUpdated((crmBloc.state as CrmLoaded).crm));
+    customerBlocSubscription = customerBloc.listen((state) {
+      if (state is UserFetchSuccess) {
+        customers = state.users;
+        add(CartUserUpdated((customerBloc.state as UserFetchSuccess).users));
+      }
+    });
+    supplierBlocSubscription = customerBloc.listen((state) {
+      if (state is UserFetchSuccess) {
+        suppliers = state.users;
+        add(CartUserUpdated((supplierBloc.state as UserFetchSuccess).users));
       }
     });
   }
@@ -70,7 +79,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     authBlocSubscription.cancel();
     categoryBlocSubscription.cancel();
     productBlocSubscription.cancel();
-    crmBlocSubscription.cancel();
+    customerBlocSubscription.cancel();
+    supplierBlocSubscription.cancel();
     return super.close();
   }
 
@@ -81,10 +91,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       authenticate = authBloc.authenticate;
       categories = categoryBloc.categories;
       products = productBloc.products;
-      crm = crmBloc.crm;
+      customers = customerBloc.users;
+      suppliers = supplierBloc.users;
       order = event.order != null ? event.order : order;
-      yield CartLoaded(
-          authenticate, order, crm, categories, products, "cart initial load.");
+      yield CartLoaded(authenticate, order, customers, suppliers, categories,
+          products, "cart initial load.");
     } else if (event is UpdateCart) {
       yield CartLoading();
       order = event.order;
@@ -99,8 +110,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(
-          authenticate, order, crm, categories, products, "cart updated");
+      yield CartLoaded(authenticate, order, customers, suppliers, categories,
+          products, "cart updated");
     } else if (event is DeleteItemCart) {
       yield CartLoading();
       order.orderItems.removeAt(event.index);
@@ -108,24 +119,19 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       order.orderItems.forEach((x) {
         order.grandTotal += x.quantity * x.price;
       });
-      yield CartLoaded(authenticate, order, crm, categories, products,
-          "Item# ${event.index} deleted");
+      yield CartLoaded(authenticate, order, customers, suppliers, categories,
+          products, "Item# ${event.index} deleted");
     } else if (event is ConfirmCart) {
       yield CartLoading('Saving order...');
       print("saving order $order");
       try {
         orderBloc.add(CreateOrder(order));
         order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
-        yield CartLoaded(
-            authenticate, order, crm, categories, products, "order created");
+        yield CartLoaded(authenticate, order, customers, suppliers, categories,
+            products, "order created");
       } catch (e) {
         yield CartProblem(e.toString());
       }
-    } else if (event is CartCrmUpdated) {
-      yield CartLoading();
-      crm = event.crm;
-      yield CartLoaded(
-          authenticate, order, crm, categories, products, "cart updated");
     }
   }
 }
@@ -168,12 +174,12 @@ class CategoryCartUpdated extends CartEvent {
   String toString() => 'Updating cart with Category: $category';
 }
 
-class CartCrmUpdated extends CartEvent {
-  final Crm crm;
-  CartCrmUpdated(this.crm);
+class CartUserUpdated extends CartEvent {
+  final List<User> users;
+  CartUserUpdated(this.users);
   @override
-  String toString() => 'Updating cart with crm users#: '
-      '${crm.customers?.length}/${crm.suppliers?.length}';
+  String toString() => 'Updating cart with user users#: '
+      '${users?.length}/${users?.length}';
 }
 
 class AuthUpdated extends CartEvent {
@@ -207,12 +213,13 @@ class CartLoading extends CartState {
 class CartLoaded extends CartState {
   final Authenticate authenticate;
   final Order order;
-  final Crm crm;
+  final List<User> customers;
+  final List<User> suppliers;
   final List<ProductCategory> categories;
   final List<Product> products;
   final String message;
-  const CartLoaded(
-      this.authenticate, this.order, this.crm, this.categories, this.products,
+  const CartLoaded(this.authenticate, this.order, this.customers,
+      this.suppliers, this.categories, this.products,
       [this.message]);
   Decimal get totalPrice {
     if (order?.orderItems?.length == 0) return Decimal.parse('0');
@@ -230,7 +237,7 @@ class CartLoaded extends CartState {
       'company: ${authenticate?.company?.partyId}'
       'cart items '
       '${order?.orderItems?.length} value: $totalPrice '
-      'Cust: ${crm.customers?.length} Suppliers: ${crm.suppliers?.length} '
+      'Cust: ${customers?.length} Suppliers: ${suppliers?.length} '
       'Prod: ${products?.length}';
 }
 

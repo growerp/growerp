@@ -19,6 +19,7 @@ export 'changePw_bloc.dart';
 export 'category_bloc.dart';
 export 'cart_bloc.dart';
 export 'order_bloc.dart';
-export 'crm_bloc.dart';
+export 'user_bloc.dart';
 export 'accntg_bloc.dart';
 export 'product_bloc.dart';
+export 'opportunity_bloc.dart';

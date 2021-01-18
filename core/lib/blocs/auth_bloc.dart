@@ -32,10 +32,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
   final CategoryBloc categoryBloc;
   final ProductBloc productBloc;
-  final CrmBloc crmBloc;
   Authenticate authenticate;
 
-  AuthBloc(this.repos, this.categoryBloc, this.crmBloc, this.productBloc)
+  AuthBloc(this.repos, this.categoryBloc, this.productBloc)
       : assert(repos != null),
         super(AuthInitial());
 
@@ -71,7 +70,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             //ignore when test
             categoryBloc.add(CategoryFetched(authenticate.company.partyId));
             productBloc.add(ProductFetched(authenticate.company.partyId, 20));
-            crmBloc.add(LoadCrm(authenticate.company.partyId));
           }
           return AuthAuthenticated(authenticate);
         } else {
@@ -123,7 +121,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
         categoryBloc.add(CategoryFetched(authenticate.company.partyId));
         productBloc.add(ProductFetched(authenticate.company.partyId, 20));
-        crmBloc.add(LoadCrm(authenticate.company.partyId));
       }
       yield AuthAuthenticated(authenticate, "Successfully logged in");
     } else if (event is Logout) {

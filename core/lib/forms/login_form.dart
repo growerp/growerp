@@ -45,7 +45,7 @@ class LoginForm extends StatelessWidget {
           ],
         ),
         body: BlocProvider(
-          create: (context) => LoginBloc(repos: context.repository<Object>())
+          create: (context) => LoginBloc(repos: context.read<Object>())
             ..add(LoadLogin(authenticate)),
           child: LoginHeader(message),
         ),

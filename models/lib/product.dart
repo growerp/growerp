@@ -15,6 +15,7 @@
 // To parse this JSON data, do
 //
 //      product = productFromJson(jsonString);
+//      products = productsFromJson(jsonString);
 
 import 'dart:convert';
 import 'dart:typed_data';

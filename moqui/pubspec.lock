@@ -91,7 +91,7 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.5.0"
+    version: "3.6.0"
   collection:
     dependency: transitive
     description:
@@ -141,6 +141,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.10"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.5"
   fake_async:
     dependency: transitive
     description:
@@ -273,7 +280,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: fe40116ca53f40a421ae5e73737f0915e95aa6aa
+      resolved-ref: dca963f1afa268c794167760859a96b152719d6e
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

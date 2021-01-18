@@ -45,8 +45,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     final currentState = state;
     if (event is ProductFetched && !_hasReachedMax(currentState)) {
       if (currentState is ProductInitial) {
-        dynamic result =
-            await repos.getProduct(0, event.productLimit, event.companyPartyId);
+        dynamic result = await repos.getProduct(
+            start: 0,
+            limit: event.productLimit,
+            companyPartyId: event.companyPartyId);
         if (result is List<Product>) {
           products = result;
           yield ProductSuccess(
@@ -58,21 +60,20 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         return;
       }
       if (currentState is ProductSuccess) {
-        print("====get more products");
         dynamic result = await repos.getProduct(
-            currentState.products.length, event.productLimit);
+            start: currentState.products.length,
+            limit: event.productLimit,
+            companyPartyId: event.companyPartyId);
         if (result is List<Product>) {
-          if (result.isEmpty) {
-            print("====result empty");
+          if (result.length < event.productLimit) {
             yield currentState.copyWith(hasReachedMax: true);
           } else {
-            print("====result NOT empty");
             products = currentState.products + result;
             yield ProductSuccess(
               categories: categories,
               products: products,
               hasReachedMax: false,
-            ).copyWith(hasReachedMax: true);
+            ).copyWith(hasReachedMax: false);
           }
         } else
           yield ProductProblem(result);
@@ -152,7 +153,6 @@ class UpdateProduct extends ProductEvent {
 //#######################state############################
 abstract class ProductState extends Equatable {
   const ProductState();
-
   @override
   List<Object> get props => [];
 }

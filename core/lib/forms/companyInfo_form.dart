@@ -23,9 +23,9 @@ import '../helper_functions.dart';
 import '../widgets/@widgets.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class CompanyForm extends StatelessWidget {
+class CompanyInfoForm extends StatelessWidget {
   final FormArguments formArguments;
-  CompanyForm(this.formArguments);
+  CompanyInfoForm(this.formArguments);
 
   @override
   Widget build(BuildContext context) {
@@ -100,90 +100,44 @@ class _CompanyState extends State<CompanyPage> {
         authenticate = state.authenticate;
         isAdmin = authenticate?.user?.userGroupId == "GROWERP_M_ADMIN";
       }
-      return ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Scaffold(
-              appBar: AppBar(
-                  automaticallyImplyLeading:
-                      ResponsiveWrapper.of(context).isSmallerThan(TABLET),
-                  title: companyLogo(context, authenticate, 'Company Detail'),
-                  actions: <Widget>[
-                    IconButton(
-                        icon: Icon(Icons.home),
-                        onPressed: () => Navigator.pushNamed(context, '/home'))
-                  ]),
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(height: 100),
-                  Visibility(
-                      visible: isAdmin,
-                      child: FloatingActionButton(
-                        onPressed: () {
-                          _onImageButtonPressed(ImageSource.gallery,
-                              context: context);
-                        },
-                        heroTag: 'image0',
-                        tooltip: 'Pick Image from gallery',
-                        child: const Icon(Icons.photo_library),
-                      )),
-                  SizedBox(height: 20),
-                  Visibility(
-                    visible: isAdmin && !kIsWeb,
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        _onImageButtonPressed(ImageSource.camera,
-                            context: context);
-                      },
-                      heroTag: 'image1',
-                      tooltip: 'Take a Photo',
-                      child: const Icon(Icons.camera_alt),
-                    ),
-                  )
-                ],
-              ),
-              drawer: myDrawer(context, authenticate),
-              body:
-                  BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-                if (state is AuthAuthenticated) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.green);
-                }
-                if (state is AuthProblem) {
-                  updatedCompany = state.newCompany;
-                  HelperFunctions.showMessage(
-                      context, '${state.errorMessage}', Colors.red);
-                }
-                if (state is AuthLoading) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.green);
-                }
-              }, builder: (context, state) {
-                if (state is AuthUnauthenticated) {
-                  updatedCompany = state.authenticate.company;
-                }
-                if (state is AuthAuthenticated) {
-                  updatedCompany = authenticate.company;
-                }
-                return Center(
-                  child:
-                      !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-                          ? FutureBuilder<void>(
-                              future: retrieveLostData(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<void> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text(
-                                    'Pick image error: ${snapshot.error}}',
-                                    textAlign: TextAlign.center,
-                                  );
-                                }
-                                return _showForm(
-                                    authenticate, isAdmin, updatedCompany);
-                              })
-                          : _showForm(authenticate, isAdmin, updatedCompany),
-                );
-              })));
+      return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
+        }
+        if (state is AuthProblem) {
+          updatedCompany = state.newCompany;
+          HelperFunctions.showMessage(
+              context, '${state.errorMessage}', Colors.red);
+        }
+        if (state is AuthLoading) {
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
+        }
+      }, builder: (context, state) {
+        if (state is AuthUnauthenticated) {
+          updatedCompany = state.authenticate.company;
+        }
+        if (state is AuthAuthenticated) {
+          updatedCompany = authenticate.company;
+        }
+        return Center(
+          child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+              ? FutureBuilder<void>(
+                  future: retrieveLostData(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<void> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text(
+                        'Pick image error: ${snapshot.error}}',
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                    return _showForm(authenticate, isAdmin, updatedCompany);
+                  })
+              : _showForm(authenticate, isAdmin, updatedCompany),
+        );
+      });
     });
   }
 
