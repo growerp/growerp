@@ -30,13 +30,14 @@ class Authenticate {
   String moquiSessionToken;
   Company company;
   User user;
+  Stats stats;
 
-  Authenticate({
-    this.apiKey,
-    this.moquiSessionToken,
-    this.company,
-    this.user,
-  });
+  Authenticate(
+      {this.apiKey,
+      this.moquiSessionToken,
+      this.company,
+      this.user,
+      this.stats});
 
   factory Authenticate.fromJson(Map<String, dynamic> json) => Authenticate(
         apiKey: json["apiKey"],
@@ -44,6 +45,7 @@ class Authenticate {
         company:
             json["company"] != null ? Company.fromJson(json["company"]) : null,
         user: json["user"] != null ? User.fromJson(json["user"]) : null,
+        stats: json["stats"] != null ? Stats.fromJson(json["stats"]) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -51,9 +53,69 @@ class Authenticate {
         "moquiSessionToken": moquiSessionToken,
         "company": company?.toJson(),
         "user": user?.toJson(),
+        "stats": stats?.toJson(),
       };
   @override
   String toString() => 'Company: ${company?.toString()} '
       'User: ${user?.toString()} apiKey: '
       '....${apiKey?.substring(apiKey.length - 10)}';
+}
+
+Stats statsFromJson(String str) => Stats.fromJson(json.decode(str)["stats"]);
+String statsToJson(Stats data) =>
+    '{"stats":' + json.encode(data.toJson()) + "}";
+
+class Stats {
+  int admins;
+  int employees;
+  int suppliers;
+  int leads;
+  int customers;
+  int openSlsOrders;
+  int openPurOrders;
+  int opportunities;
+  int categories;
+  int products;
+
+  Stats({
+    this.admins,
+    this.employees,
+    this.suppliers,
+    this.leads,
+    this.customers,
+    this.openSlsOrders,
+    this.openPurOrders,
+    this.opportunities,
+    this.categories,
+    this.products,
+  });
+
+  factory Stats.fromJson(Map<String, dynamic> json) => Stats(
+      admins: int.parse(json["admins"]),
+      employees: int.parse(json["employees"]),
+      suppliers: int.parse(json["suppliers"]),
+      leads: int.parse(json["leads"]),
+      customers: int.parse(json["customers"]),
+      openSlsOrders: int.parse(json["openSlsOrders"]),
+      openPurOrders: int.parse(json["openPurOrders"]),
+      opportunities: int.parse(json["opportunities"]),
+      categories: int.parse(json["categories"]),
+      products: int.parse(json["products"]));
+
+  Map<String, dynamic> toJson() => {
+        "admins": admins.toString(),
+        "employees": employees.toString(),
+        "suppliers": suppliers.toString(),
+        "leads": leads.toString(),
+        "customers": customers.toString(),
+        "openSlsOrders": openSlsOrders.toString(),
+        "openPurOrders": openPurOrders.toString(),
+        "opportunities": opportunities.toString(),
+        "categories": categories.toString(),
+        "products": products.toString(),
+      };
+  @override
+  String toString() {
+    return 'Statistics, products: $products categories: $categories admins: $admins';
+  }
 }

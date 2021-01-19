@@ -145,40 +145,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         yield AuthProblem(result, event.company);
       }
-    } else if (event is UpdateEmployee) {
-      yield AuthLoading((event.user?.partyId == null ? "Adding " : "Updating") +
-          " user ${event.user}");
-      event.user.image = await HelperFunctions.getResizedImage(event.imagePath);
-      dynamic result = await repos.updateUser(event.user);
-      if (result is User) {
-        List<User> users = authenticate.company.employees;
-        if (event.user.partyId == null) {
-          event.user.partyId = result.partyId;
-          users.add(event.user);
-        } else {
-          int index =
-              users.indexWhere((user) => user.partyId == result.partyId);
-          users.replaceRange(index, index + 1, [event.user]);
-        }
-        if (event.user.partyId == result.partyId) authenticate.user = result;
-        await repos.persistAuthenticate(authenticate);
-        yield AuthAuthenticated(authenticate,
-            'User ' + (event.user?.partyId == null ? 'Added' : 'Updated'));
-      } else {
-        yield AuthProblem(result, null, event.user);
-      }
-    } else if (event is DeleteEmployee) {
-      yield AuthLoading("Deleting user ${event.user}");
-      dynamic result = await repos.deleteUser(event.user.partyId);
-      if (result == event.user.partyId) {
-        List users = authenticate.company.employees;
-        int index = users.indexWhere((user) => user.partyId == result);
-        users.removeAt(index);
-        await repos.persistAuthenticate(authenticate);
-        yield AuthAuthenticated(authenticate, 'User ${event.user} deleted');
-      } else {
-        yield AuthProblem(result);
-      }
     }
   }
 }
@@ -212,21 +178,6 @@ class UpdateCompany extends AuthEvent {
   @override
   String toString() => 'Update Company ${authenticate.company.toString()} '
       'new image: ${imagePath != null ? imagePath.length : 0}';
-}
-
-class UpdateEmployee extends AuthEvent {
-  final User user;
-  final String imagePath;
-  UpdateEmployee(this.user, this.imagePath);
-  @override
-  String toString() => (user?.partyId == null ? 'Add' : 'Update') + '$user';
-}
-
-class DeleteEmployee extends AuthEvent {
-  final User user;
-  DeleteEmployee(this.user);
-  @override
-  String toString() => 'Update User $user';
 }
 
 class LoggedIn extends AuthEvent {

@@ -45,7 +45,6 @@ class Company {
   String city;
   String postalCode;
   String country;
-  List<User> employees;
 
   Company(
       {this.partyId,
@@ -55,7 +54,6 @@ class Company {
       this.email,
       this.currencyId,
       this.image,
-      this.employees,
       this.address1,
       this.address2,
       this.city,
@@ -72,9 +70,6 @@ class Company {
       image: json["image"] == null || json["image"] == "null"
           ? null
           : base64.decode(json["image"]),
-      employees: json["employees"] != null
-          ? List<User>.from(json["employees"].map((x) => User.fromJson(x)))
-          : null,
       address1: json["address1"],
       address2: json["address2"],
       city: json["city"],
@@ -89,9 +84,6 @@ class Company {
         "email": email,
         "currencyId": currencyId,
         "image": image != null ? base64.encode(image) : null,
-        "employees": employees != null
-            ? List<dynamic>.from(employees.map((x) => x.toJson()))
-            : null,
         "address1": address1,
         "address2": address2,
         "city": city,
@@ -100,6 +92,5 @@ class Company {
       };
 
   String toString() => 'Company name: $name[$partyId] Curr: $currencyId '
-      'empl: ${employees?.length} '
       'imgSize: ${image?.length}';
 }
