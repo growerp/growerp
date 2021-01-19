@@ -27,8 +27,6 @@ communication with the server
 2. Models.
 All models are in the models package.
 
-Internals:
-
 Blocs: 
 1. Authentication
     connection status
@@ -38,7 +36,10 @@ Blocs:
     products
     categories
 3. Crm
+    opportunities
     customers
     suppliers
+4. Accounting
+    balance sheet
 
 
