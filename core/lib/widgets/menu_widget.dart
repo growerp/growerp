@@ -68,7 +68,7 @@ Widget myDrawer(BuildContext context, Authenticate authenticate) {
                 ),
                 onTap: () {
                   Navigator.pushNamed(context, options[i - 1]["route"],
-                      arguments: FormArguments());
+                      arguments: FormArguments(null, options[i - 1]["tab"]));
                 });
           },
         ))

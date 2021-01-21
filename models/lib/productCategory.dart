@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:equatable/equatable.dart';
 
 ProductCategory categoryFromJson(String str) =>
     ProductCategory.fromJson(json.decode(str)["category"]);
@@ -32,12 +33,12 @@ String categoriesToJson(List<ProductCategory> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
-class ProductCategory {
-  String categoryId;
-  String categoryName;
-  String description;
-  Uint8List image;
-  int nbrOfProducts;
+class ProductCategory extends Equatable {
+  final String categoryId;
+  final String categoryName;
+  final String description;
+  final Uint8List image;
+  final int nbrOfProducts;
 
   ProductCategory(
       {this.categoryId,
@@ -61,5 +62,10 @@ class ProductCategory {
         "image": image != null ? base64.encode(image) : null,
       };
 
+  @override
+  List<Object> get props =>
+      [categoryId, categoryName, description, image, nbrOfProducts];
+
+  @override
   String toString() => 'ProductCategory name: $categoryName[$categoryId]';
 }

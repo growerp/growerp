@@ -50,7 +50,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: event.password,
       );
       if (result is Authenticate) {
-        /// for users not connected to a company like customer, suppliers
         if (result.company == null) result.company = event.company;
         yield LoginOk(result);
       } else if (result == "passwordChange") {

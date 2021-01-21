@@ -1,32 +1,30 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:rxdart/rxdart.dart';
-import '../blocs/@blocs.dart';
 
-const _opportunityLimit = 20;
+const _limit = 20;
 
 class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
   final repos;
-  final LeadBloc leadBloc;
-  StreamSubscription userBlocSubscription;
-  List<User> leads;
 
-  OpportunityBloc(this.repos, this.leadBloc) : super(OpportunityInitial()) {
-    userBlocSubscription = leadBloc.listen((state) {
-      if (state is UserFetchSuccess) {
-        leads = state.users;
-      }
-    });
-  }
-
-  @override
-  Future<void> close() {
-    userBlocSubscription.cancel();
-    return super.close();
-  }
+  OpportunityBloc(this.repos) : super(OpportunityInitial());
 
   @override
   Stream<Transition<OpportunityEvent, OpportunityState>> transformEvents(
@@ -44,58 +42,67 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     final currentState = state;
     if (event is FetchOpportunity && !_hasReachedMax(currentState)) {
       if (currentState is OpportunityInitial) {
-        dynamic result = await repos.getOpportunity(0, _opportunityLimit);
+        dynamic result = await repos.getOpportunity(start: 0, limit: _limit);
         if (result is List<Opportunity>) {
           yield OpportunitySuccess(
-              opportunities: result,
-              hasReachedMax: result.length < _opportunityLimit ? true : false,
-              leads: leads);
+            opportunities: result,
+            hasReachedMax: result.length < _limit ? true : false,
+          );
         } else
           yield OpportunityProblem(result);
         return;
       }
       if (currentState is OpportunitySuccess) {
         dynamic result = await repos.getOpportunity(
-            currentState.opportunities.length, event.limit);
+            start: currentState.opportunities.length, limit: event.limit);
         if (result is List<Opportunity>) {
-          if (result.isEmpty) {
-            yield currentState.copyWith(hasReachedMax: true);
-          } else {
-            yield OpportunitySuccess(
+          if (result.length < event.limit) {
+            yield currentState.copyWith(
                 opportunities: currentState.opportunities + result,
-                hasReachedMax: false,
-                leads: leads);
+                hasReachedMax: true);
+          } else {
+            yield currentState.copyWith(
+                opportunities: currentState.opportunities + result,
+                hasReachedMax: false);
           }
         } else
           yield OpportunityProblem(result);
       }
     } else if (event is UpdateOpportunity) {
+      bool adding = event.opportunity.opportunityId == null;
+      yield OpportunityLoading((adding ? 'adding' : 'updating') +
+          ' opportunity ${event.opportunity.opportunityName}');
       dynamic result = await repos.updateOpportunity(event.opportunity);
       if (currentState is OpportunitySuccess) {
         if (result is Opportunity) {
-          if (event.opportunity?.opportunityId == null) {
-            currentState.opportunities?.add(event.opportunity);
+          if (adding) {
+            currentState.opportunities?.add(result);
           } else {
-            int index = currentState.opportunities.indexWhere(
-                (prod) => prod.opportunityId == result.opportunityId);
-            currentState.opportunities
-                .replaceRange(index, index + 1, [event.opportunity]);
+            int index = currentState.opportunities
+                .indexWhere((p) => p.opportunityId == result.opportunityId);
+            currentState.opportunities.replaceRange(index, index + 1, [result]);
           }
           yield OpportunitySuccess(
-              opportunities: currentState.opportunities,
-              hasReachedMax: _hasReachedMax(currentState));
+                  opportunities: currentState.opportunities,
+                  hasReachedMax: currentState.hasReachedMax)
+              .copyWith(
+                  message: 'Opportunity ' + (adding ? 'added' : 'updated'));
         } else {
           yield OpportunityProblem(result);
         }
       }
     } else if (event is DeleteOpportunity) {
-      dynamic result =
-          await repos.deleteOpportunity(event.opportunity.opportunityId);
       if (currentState is OpportunitySuccess) {
-        if (result == event.opportunity.opportunityId) {
+        String name = currentState.opportunities[event.index].opportunityName;
+        yield OpportunityLoading('deleting opportunity $name');
+        dynamic result = await repos.deleteOpportunity(
+            currentState.opportunities[event.index].opportunityId);
+        if (result == currentState.opportunities[event.index].opportunityId) {
+          currentState.opportunities.removeAt(event.index);
           yield OpportunitySuccess(
-              opportunities: currentState.opportunities,
-              hasReachedMax: _hasReachedMax(currentState));
+                  opportunities: currentState.opportunities,
+                  hasReachedMax: _hasReachedMax(currentState))
+              .copyWith(message: 'Opportunity $name deleted');
         } else {
           yield OpportunityProblem(result);
         }
@@ -121,10 +128,10 @@ class FetchOpportunity extends OpportunityEvent {
 }
 
 class DeleteOpportunity extends OpportunityEvent {
-  final Opportunity opportunity;
-  DeleteOpportunity(this.opportunity);
+  final int index;
+  DeleteOpportunity(this.index);
   @override
-  String toString() => "DeleteOpportunity: $opportunity";
+  String toString() => "DeleteOpportunity: $index";
 }
 
 class UpdateOpportunity extends OpportunityEvent {
@@ -144,6 +151,15 @@ abstract class OpportunityState extends Equatable {
 
 class OpportunityInitial extends OpportunityState {}
 
+class OpportunityLoading extends OpportunityState {
+  final String message;
+  OpportunityLoading([this.message]);
+  @override
+  List<Object> get props => [message];
+  @override
+  String toString() => 'Opportunity loading...';
+}
+
 class OpportunityProblem extends OpportunityState {
   final String errorMessage;
   OpportunityProblem(this.errorMessage);
@@ -154,24 +170,24 @@ class OpportunityProblem extends OpportunityState {
 }
 
 class OpportunitySuccess extends OpportunityState {
-  final Opportunity opportunity;
   final List<Opportunity> opportunities;
-  final List<User> leads;
+  final String message;
   final bool hasReachedMax;
 
   const OpportunitySuccess({
-    this.opportunity,
     this.opportunities,
-    this.leads,
+    this.message,
     this.hasReachedMax,
   });
 
   OpportunitySuccess copyWith({
     List<Opportunity> opportunities,
+    String message,
     bool hasReachedMax,
   }) {
     return OpportunitySuccess(
       opportunities: opportunities ?? this.opportunities,
+      message: message ?? this.message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
@@ -182,5 +198,5 @@ class OpportunitySuccess extends OpportunityState {
   @override
   String toString() =>
       'OpportunitySuccess { #opportunities: ${opportunities.length}, '
-      'opportunity: $opportunity hasReachedMax: $hasReachedMax }';
+      'hasReachedMax: $hasReachedMax }';
 }

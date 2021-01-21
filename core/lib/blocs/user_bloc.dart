@@ -7,33 +7,20 @@ import 'package:rxdart/rxdart.dart';
 
 const pageLength = 20;
 
-class CustomerBloc extends UserBloc {
-  CustomerBloc(repos) : super(repos, "GROWERP_M_CUSTOMER");
-}
+mixin LeadBloc on Bloc<UserEvent, UserState> {}
+mixin CustomerBloc on Bloc<UserEvent, UserState> {}
+mixin EmployeeBloc on Bloc<UserEvent, UserState> {}
+mixin AdminBloc on Bloc<UserEvent, UserState> {}
+mixin SupplierBloc on Bloc<UserEvent, UserState> {}
 
-class EmployeeBloc extends UserBloc {
-  EmployeeBloc(repos) : super(repos, "GROWERP_M_EMPLOYEE");
-}
-
-class AdminBloc extends UserBloc {
-  AdminBloc(repos) : super(repos, "GROWERP_M_ADMIN");
-}
-
-class LeadBloc extends UserBloc {
-  LeadBloc(repos) : super(repos, "GROWERP_M_LEAD");
-}
-
-class SupplierBloc extends UserBloc {
-  SupplierBloc(repos) : super(repos, "GROWERP_M_SUPPLIER");
-}
-
-class UserBloc extends Bloc<UserEvent, UserState> {
+class UserBloc extends Bloc<UserEvent, UserState>
+    with LeadBloc, CustomerBloc, EmployeeBloc, AdminBloc, SupplierBloc {
   final repos;
   final String userGroupId;
   UserBloc(this.repos, [this.userGroupId])
       : assert(repos != null, userGroupId != null),
         super(UserInitial());
-  List<User> users;
+
   @override
   Stream<Transition<UserEvent, UserState>> transformEvents(
     Stream<UserEvent> events,
@@ -53,60 +40,66 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         dynamic result = await repos.getUser(
             userGroupId: userGroupId, start: 0, limit: event.limit);
         if (result is List<User>) {
-          yield UserFetchSuccess(
+          yield UserSuccess(
               users: result,
               hasReachedMax: result.length < event.limit ? true : false);
         } else
           yield UserProblem(result);
         return;
       }
-      if (currentState is UserFetchSuccess) {
-        //no UserLoading here, will use copyWith..
+      if (currentState is UserSuccess) {
         dynamic result = await repos.getUser(
             userGroupId: userGroupId,
             start: currentState.users.length,
             limit: event.limit);
         if (result is List<User>) {
           if (result.length < event.limit)
-            yield UserFetchSuccess(
+            yield currentState.copyWith(
                 users: currentState.users + result, hasReachedMax: true);
           else
-            yield UserFetchSuccess(
+            yield currentState.copyWith(
                 users: currentState.users + result, hasReachedMax: false);
         } else {
           yield UserProblem(result);
         }
       }
     } else if (event is UpdateUser) {
-      yield UserLoading((event.user?.partyId == null ? "Adding " : "Updating") +
-          " user ${event.user}");
+      bool adding = event.user.partyId == null;
+      yield UserLoading((adding ? "Adding " : "Updating") +
+          " user ${event.user.firstName} ${event.user.lastName}");
       dynamic result = await repos.updateUser(event.user);
-      if (currentState is UserFetchSuccess) {
+      if (currentState is UserSuccess) {
         if (result is User) {
-          if (event.user?.partyId == null) {
-            yield UserFetchSuccess(
-                users: currentState.users + [result],
-                hasReachedMax: currentState.hasReachedMax);
+          if (adding) {
+            currentState.users?.add(result);
           } else {
-            yield UserFetchSuccess(
-                users: currentState.users,
-                hasReachedMax: currentState.hasReachedMax);
+            int index = currentState.users
+                .indexWhere((p) => p.partyId == result.partyId);
+            print("userbloc userupdate before: ${currentState.users[index]}");
+            currentState.users.replaceRange(index, index + 1, [result]);
+            print("userbloc userupdate after: ${currentState.users[index]}");
           }
+          yield UserSuccess(
+                  users: currentState.users,
+                  hasReachedMax: currentState.hasReachedMax)
+              .copyWith(message: 'User ' + (adding ? 'added' : 'updated'));
         } else {
           yield UserProblem(result);
         }
       }
     } else if (event is DeleteUser) {
-      yield UserLoading("Deleting user ${event.user}");
-      dynamic result = await repos.deleteUser(event.user.partyId);
-      if (currentState is UserFetchSuccess) {
+      if (currentState is UserSuccess) {
+        String name = '${event.user.firstName} ${event.user.lastName}';
+        yield UserLoading("Deleting user $name");
+        dynamic result = await repos.deleteUser(event.user.partyId);
         if (result == event.user.partyId) {
           int index =
               currentState.users.indexWhere((user) => user.partyId == result);
           currentState.users.removeAt(index);
-          yield UserFetchSuccess(
-              users: currentState.users,
-              hasReachedMax: currentState.hasReachedMax);
+          yield UserSuccess(
+                  users: currentState.users,
+                  hasReachedMax: currentState.hasReachedMax)
+              .copyWith(message: 'User $name deleted');
         } else {
           yield UserProblem(result);
         }
@@ -116,7 +109,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 }
 
 bool _hasReachedMax(UserState state) =>
-    state is UserFetchSuccess && state.hasReachedMax;
+    state is UserSuccess && state.hasReachedMax;
 //##################### events #########################
 
 abstract class UserEvent extends Equatable {
@@ -133,18 +126,16 @@ class LoadUser extends UserEvent {
 }
 
 class FetchUser extends UserEvent {
-  final String userGroupId;
   final int limit;
-  FetchUser({this.userGroupId, this.limit});
+  FetchUser({this.limit});
   @override
-  String toString() => 'FetchUser using userGroup: $userGroupId '
+  String toString() => 'FetchUser with limit $limit '
       'limit: $limit';
 }
 
 class UpdateUser extends UserEvent {
   final User user;
-  final String imagePath;
-  UpdateUser(this.user, this.imagePath);
+  UpdateUser(this.user);
   @override
   String toString() => 'Create/Update User { $user }';
 }
@@ -188,15 +179,17 @@ class UserLoaded extends UserState {
   String toString() => 'UserLoaded { $User }';
 }
 
-class UserFetchSuccess extends UserState {
+class UserSuccess extends UserState {
   final List<User> users;
+  final message;
   final bool hasReachedMax;
 
-  UserFetchSuccess({this.users, this.hasReachedMax});
+  const UserSuccess({this.users, this.message, this.hasReachedMax});
 
-  UserFetchSuccess copyWith({List<User> users, bool hasReachedMax}) {
-    return UserFetchSuccess(
+  UserSuccess copyWith({List<User> users, String message, bool hasReachedMax}) {
+    return UserSuccess(
       users: users ?? this.users,
+      message: message ?? this.message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
@@ -206,5 +199,5 @@ class UserFetchSuccess extends UserState {
 
   @override
   String toString() =>
-      'UserFetchSuccess { length: ${users.length}, usersMax: $hasReachedMax }';
+      'UserSuccess { length: ${users.length}, usersMax: $hasReachedMax }';
 }

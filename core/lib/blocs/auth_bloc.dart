@@ -68,8 +68,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           //print("===11====");
           if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
             //ignore when test
-            categoryBloc.add(CategoryFetched(authenticate.company.partyId));
-            productBloc.add(ProductFetched(authenticate.company.partyId, 20));
+            categoryBloc.add(FetchCategory(
+                companyPartyId: authenticate.company.partyId, limit: 20));
+            productBloc.add(FetchProduct(
+                companyPartyId: authenticate.company.partyId, limit: 20));
           }
           return AuthAuthenticated(authenticate);
         } else {
@@ -119,8 +121,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       authenticate = event.authenticate;
       // only load crmbloc when logged in
       if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
-        categoryBloc.add(CategoryFetched(authenticate.company.partyId));
-        productBloc.add(ProductFetched(authenticate.company.partyId, 20));
+        categoryBloc.add(FetchCategory(
+            companyPartyId: authenticate.company.partyId, limit: 20));
+        productBloc.add(FetchProduct(
+            companyPartyId: authenticate.company.partyId, limit: 20));
       }
       yield AuthAuthenticated(authenticate, "Successfully logged in");
     } else if (event is Logout) {

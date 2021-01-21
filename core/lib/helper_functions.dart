@@ -23,16 +23,17 @@ import 'package:http/http.dart' show get;
 
 class HelperFunctions {
   static showMessage(context, message, colors) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 2),
-        content: Container(
-            padding: const EdgeInsets.all(16.0),
-            width: MediaQuery.of(context).size.width * 0.8,
-            child: Text('$message')),
-        backgroundColor: colors,
-      ),
-    );
+    if (message != null && message != "null")
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 2),
+          content: Container(
+              padding: const EdgeInsets.all(16.0),
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: Text('$message')),
+          backgroundColor: colors,
+        ),
+      );
   }
 
   static showTopMessage(_scaffoldKey, message) {

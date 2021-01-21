@@ -390,20 +390,16 @@ packages:
   models:
     dependency: transitive
     description:
-      path: models
-      ref: packages
-      resolved-ref: "85548ebb34681f1d137c947e995e406fc5cccd85"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../models"
+      relative: true
+    source: path
     version: "0.0.1"
   moqui:
     dependency: "direct main"
     description:
-      path: moqui
-      ref: packages
-      resolved-ref: "85548ebb34681f1d137c947e995e406fc5cccd85"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../moqui"
+      relative: true
+    source: path
     version: "0.0.1"
   nested:
     dependency: transitive
@@ -436,11 +432,9 @@ packages:
   ofbiz:
     dependency: "direct main"
     description:
-      path: ofbiz
-      ref: packages
-      resolved-ref: "85548ebb34681f1d137c947e995e406fc5cccd85"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../ofbiz"
+      relative: true
+    source: path
     version: "0.0.1"
   package_config:
     dependency: transitive
@@ -848,4 +842,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0"
+  flutter: ">=1.22.0 <2.0.0"

@@ -4,9 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:rxdart/rxdart.dart';
-import '../blocs/@blocs.dart';
 
-const _categoryLimit = 10000;
+const limit = 10000;
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final repos;
@@ -28,22 +27,22 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   @override
   Stream<CategoryState> mapEventToState(CategoryEvent event) async* {
     final currentState = state;
-    if (event is CategoryFetched && !_hasReachedMax(currentState)) {
+    if (event is FetchCategory && !_hasReachedMax(currentState)) {
       if (currentState is CategoryInitial) {
-        dynamic result =
-            await repos.getCategory(0, _categoryLimit, event.companyPartyId);
+        dynamic result = await repos.getCategory(
+            start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
         if (result is List<ProductCategory>) {
           categories = result;
           yield CategorySuccess(
               categories: result,
-              hasReachedMax: result.length < _categoryLimit ? true : false);
+              hasReachedMax: result.length < limit ? true : false);
         } else
           yield CategoryProblem(result);
         return;
       }
       if (currentState is CategorySuccess) {
         dynamic result = await repos.getCategory(
-            currentState.categories.length, _categoryLimit);
+            start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
         if (result is List<ProductCategory>) {
           if (result.isEmpty) {
             yield currentState.copyWith(hasReachedMax: true);
@@ -58,14 +57,17 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           yield CategoryProblem(result);
       }
     } else if (event is UpdateCategory) {
+      bool adding = event.category.categoryId == null;
+      yield CategoryLoading((adding ? 'adding' : 'updating') +
+          ' category ${event.category.categoryName}');
       dynamic result = await repos.updateCategory(event.category);
       if (result is ProductCategory) {
         if (event.category?.categoryId == null) {
-          categories?.add(event.category);
+          categories?.add(result);
         } else {
           int index = categories
               .indexWhere((prod) => prod.categoryId == result.categoryId);
-          categories.replaceRange(index, index + 1, [event.category]);
+          categories.replaceRange(index, index + 1, [result]);
         }
         yield CategorySuccess(
             categories: categories,
@@ -74,15 +76,20 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         yield CategoryProblem(result);
       }
     } else if (event is DeleteCategory) {
-      dynamic result = await repos.deleteCategory(event.category.categoryId);
-      if (result == event.category.categoryId) {
-        yield CategorySuccess(categories: categories);
-      } else {
-        yield CategoryProblem(result);
+      if (currentState is CategorySuccess) {
+        int index = currentState.categories
+            .indexWhere((cat) => cat.categoryId == event.category.categoryId);
+        String name = currentState.categories[index].categoryName;
+        yield CategoryLoading('deleting category $name');
+        dynamic result = await repos.deleteCategory(event.category.categoryId);
+        if (result == event.category.categoryId) {
+          currentState.categories.removeAt(index);
+          yield CategorySuccess(categories: categories)
+              .copyWith(message: 'Category $name deleted');
+        } else {
+          yield CategoryProblem(result);
+        }
       }
-    } else if (event is CategoriesForProductUpdated) {
-      yield CategorySuccess(
-          categories: categories, hasReachedMax: _hasReachedMax(currentState));
     }
   }
 }
@@ -96,11 +103,12 @@ abstract class CategoryEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class CategoryFetched extends CategoryEvent {
+class FetchCategory extends CategoryEvent {
   final String companyPartyId;
-  CategoryFetched(this.companyPartyId);
+  final int limit;
+  FetchCategory({this.companyPartyId, this.limit});
   @override
-  String toString() => "CategoryFetched company: $companyPartyId";
+  String toString() => "FetchCategory company: $companyPartyId";
 }
 
 class DeleteCategory extends CategoryEvent {
@@ -127,6 +135,15 @@ abstract class CategoryState extends Equatable {
 
 class CategoryInitial extends CategoryState {}
 
+class CategoryLoading extends CategoryState {
+  final String message;
+  CategoryLoading([this.message]);
+  @override
+  List<Object> get props => [message];
+  @override
+  String toString() => 'Category loading...';
+}
+
 class CategoryProblem extends CategoryState {
   final String errorMessage;
   CategoryProblem(this.errorMessage);
@@ -137,24 +154,18 @@ class CategoryProblem extends CategoryState {
 }
 
 class CategorySuccess extends CategoryState {
-  final ProductCategory category;
   final List<ProductCategory> categories;
   final bool hasReachedMax;
+  final String message;
 
-  const CategorySuccess({
-    this.category,
-    this.categories,
-    this.hasReachedMax,
-  });
+  const CategorySuccess({this.categories, this.hasReachedMax, this.message});
 
-  CategorySuccess copyWith({
-    List<ProductCategory> categories,
-    bool hasReachedMax,
-  }) {
+  CategorySuccess copyWith(
+      {List<ProductCategory> categories, bool hasReachedMax, String message}) {
     return CategorySuccess(
-      categories: categories ?? this.categories,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    );
+        categories: categories ?? this.categories,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        message: message ?? this.message);
   }
 
   @override
@@ -162,5 +173,5 @@ class CategorySuccess extends CategoryState {
 
   @override
   String toString() => 'CategorySuccess { #categories: ${categories.length}, '
-      'category: $category hasReachedMax: $hasReachedMax }';
+      'hasReachedMax: $hasReachedMax }';
 }

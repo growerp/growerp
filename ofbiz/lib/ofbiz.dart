@@ -455,9 +455,9 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> createOrder(Order order) async {
+  Future<dynamic> updateOrder(Order order) async {
     try {
-      Response response = await client.post('services/createOrder100',
+      Response response = await client.post('services/updateOrder100',
           data: orderToJson(order));
       return orderFromJson(getResponseData(response));
     } catch (e) {
@@ -465,7 +465,7 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> getOrders() async {
+  Future<dynamic> getOrder() async {
     try {
       Response response = await client.get('services/getOrders100?inParams={}');
       if (getResponseData(response) == '{}') return List<Order>();

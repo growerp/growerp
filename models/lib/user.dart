@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:equatable/equatable.dart';
 
 User userFromJson(String str) => User.fromJson(json.decode(str)["user"]);
 String userToJson(User data) => '{"user":' + json.encode(data.toJson()) + "}";
@@ -29,20 +30,20 @@ String usersToJson(List<User> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
-class User {
-  String partyId;
-  String userId;
-  String firstName;
-  String lastName;
-  String name;
-  String email;
-  String groupDescription; // admin, employee, customer, supplier etc...
-  String userGroupId;
-  String language;
-  String externalId; // when customer register they give their telno
-  Uint8List image;
-  String companyPartyId;
-  String companyName;
+class User extends Equatable {
+  final String partyId;
+  final String userId;
+  final String firstName;
+  final String lastName;
+  final String name;
+  final String email;
+  final String groupDescription; // admin, employee, customer, supplier etc...
+  final String userGroupId;
+  final String language;
+  final String externalId; // when customer register they give their telno
+  final Uint8List image;
+  final String companyPartyId;
+  final String companyName;
 
   User(
       {this.partyId,
@@ -93,6 +94,22 @@ class User {
         "companyName": companyName
       };
 
+  @override
+  List<Object> get props => [
+        partyId,
+        userId,
+        firstName,
+        lastName,
+        name,
+        email,
+        groupDescription,
+        userGroupId,
+        language,
+        externalId,
+        image,
+        companyPartyId,
+        companyName
+      ];
   @override
   String toString() {
     return 'User $firstName $lastName [$partyId] sec: $userGroupId img size: '

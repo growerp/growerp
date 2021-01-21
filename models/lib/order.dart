@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 import 'package:decimal/decimal.dart';
+import 'package:models/user.dart';
 
 Order orderFromJson(String str) => Order.fromJson(json.decode(str)["order"]);
 String orderToJson(Order data) =>
@@ -34,11 +35,8 @@ class Order {
   String orderId;
   String orderStatusId;
   DateTime placedDate;
-  String customerPartyId;
-  String supplierPartyId;
-  String firstName;
-  String lastName;
-  String email;
+  bool sales;
+  User otherUser;
   Decimal grandTotal;
   String invoiceId;
   String paymentId;
@@ -48,11 +46,8 @@ class Order {
     this.orderId,
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
     this.placedDate,
-    this.customerPartyId,
-    this.supplierPartyId,
-    this.firstName,
-    this.lastName,
-    this.email,
+    this.sales,
+    this.otherUser,
     this.grandTotal,
     this.invoiceId,
     this.paymentId,
@@ -63,11 +58,8 @@ class Order {
         orderId: json["orderId"],
         orderStatusId: json["orderStatusId"],
         placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
-        customerPartyId: json["customerPartyId"],
-        supplierPartyId: json["supplierPartyId"],
-        firstName: json["firstName"],
-        lastName: json["lastName"],
-        email: json["email"],
+        sales: json["sales"] == "true",
+        otherUser: User.fromJson(json["otherUser"]),
         grandTotal: Decimal.parse(json["grandTotal"]),
         invoiceId: json["invoiceId"],
         paymentId: json["paymentId"],
@@ -79,19 +71,17 @@ class Order {
         "orderId": orderId,
         "orderStatusId": orderStatusId,
         "placedDate": placedDate.toString(),
-        "customerPartyId": customerPartyId,
-        "supplierPartyId": supplierPartyId,
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email,
+        "sales": sales.toString(),
+        "otherUser": otherUser?.toJson(),
         "grandTotal": grandTotal.toString(),
         "invoiceId": invoiceId,
         "paymentId": paymentId,
         "orderItems": List<dynamic>.from(orderItems.map((x) => x.toJson())),
       };
 
-  String toString() => 'order# $orderId customer/supplier: $customerPartyId'
-      '/$supplierPartyId items: ${orderItems?.length}';
+  String toString() => 'order# $orderId sales? $sales '
+      'otherUser: $otherUser'
+      'orderItems: ${orderItems?.length}';
 }
 
 class OrderItem {

@@ -18,17 +18,66 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:models/models.dart';
+import 'package:rxdart/rxdart.dart';
 
-class OrderBloc extends Bloc<OrderEvent, OrderState> {
+const _limit = 20;
+
+mixin PurchOrderBloc on Bloc<OrderEvent, OrderState> {}
+mixin SalesOrderBloc on Bloc<OrderEvent, OrderState> {}
+
+class OrderBloc extends Bloc<OrderEvent, OrderState>
+    with PurchOrderBloc, SalesOrderBloc {
   final repos;
+  final bool sales;
   List<Order> orders = [];
-  OrderBloc(this.repos) : super(OrderInitial());
+  OrderBloc(this.repos, this.sales) : super(OrderInitial());
+
+  @override
+  Stream<Transition<OrderEvent, OrderState>> transformEvents(
+    Stream<OrderEvent> events,
+    TransitionFunction<OrderEvent, OrderState> transitionFn,
+  ) {
+    return super.transformEvents(
+      events.debounceTime(const Duration(milliseconds: 500)),
+      transitionFn,
+    );
+  }
 
   @override
   Stream<OrderState> mapEventToState(OrderEvent event) async* {
-    if (event is LoadOrder) {
+    final currentState = state;
+    if (event is FetchOrder && !_hasReachedMax(currentState)) {
+      if (currentState is OrderInitial) {
+        dynamic result =
+            await repos.getOrder(sales: sales, start: 0, limit: _limit);
+        if (result is List<Order>) {
+          yield OrderSuccess(
+            orders: result,
+            hasReachedMax: result.length < _limit ? true : false,
+          );
+        } else
+          yield OrderProblem(result);
+        return;
+      }
+      if (currentState is OrderSuccess) {
+        dynamic result = await repos.getOrder(
+            sales: sales,
+            start: currentState.orders.length,
+            limit: event.limit);
+        if (result is List<Order>) {
+          if (result.length < event.limit) {
+            yield currentState.copyWith(
+                orders: currentState.orders + result, hasReachedMax: true);
+          } else {
+            yield currentState.copyWith(
+                orders: currentState.orders + result, hasReachedMax: false);
+          }
+        } else
+          yield OrderProblem(result);
+      }
+    } else if (event is LoadOrder) {
       yield OrderLoading('Loading orders...');
-      dynamic result = await repos.getOrders();
+      dynamic result = await repos.getOrder();
       if (result is List<Order>) {
         orders = result;
         yield OrderLoaded(orders);
@@ -37,7 +86,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       }
     } else if (event is CreateOrder) {
       yield OrderLoading('Create Order...');
-      dynamic result = await repos.createOrder(event.order);
+      dynamic result = await repos.updateOrder(event.order);
       if (result is Order) {
         orders.add(result);
         yield OrderLoaded(orders, "Order created");
@@ -70,6 +119,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   }
 }
 
+bool _hasReachedMax(OrderState state) =>
+    state is OrderSuccess && state.hasReachedMax;
+
 // ===================events =====================
 @immutable
 abstract class OrderEvent extends Equatable {
@@ -80,11 +132,25 @@ abstract class OrderEvent extends Equatable {
 
 class LoadOrder extends OrderEvent {}
 
+class FetchOrder extends OrderEvent {
+  final int limit;
+  FetchOrder(this.limit);
+  @override
+  String toString() => "OrderFetched limit: $limit";
+}
+
 class CreateOrder extends OrderEvent {
   final Order order;
   CreateOrder(this.order);
   @override
   String toString() => 'Creating order $order';
+}
+
+class DeleteOrder extends OrderEvent {
+  final int index;
+  DeleteOrder(this.index);
+  @override
+  String toString() => "DeleteOrder: $index";
 }
 
 class UpdateOrder extends OrderEvent {
@@ -140,4 +206,35 @@ class OrderProblem extends OrderState {
   const OrderProblem(this.errorMessage);
   @override
   List<Object> get props => [errorMessage];
+}
+
+class OrderSuccess extends OrderState {
+  final List<Order> orders;
+  final String message;
+  final bool hasReachedMax;
+
+  const OrderSuccess({
+    this.orders,
+    this.message,
+    this.hasReachedMax,
+  });
+
+  OrderSuccess copyWith({
+    List<Order> orders,
+    String message,
+    bool hasReachedMax,
+  }) {
+    return OrderSuccess(
+      orders: orders ?? this.orders,
+      message: message ?? this.message,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+    );
+  }
+
+  @override
+  List<Object> get props => [orders, hasReachedMax];
+
+  @override
+  String toString() => 'OrderSuccess { #orders: ${orders.length}, '
+      'hasReachedMax: $hasReachedMax }';
 }

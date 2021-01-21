@@ -448,7 +448,7 @@ void main() async {
         order.orderItems[0].description = createdProduct.productName;
         order.orderItems[1].productId = createdProduct.productId;
         order.orderItems[1].description = createdProduct.productName;
-        Response response = await client.post('services/createOrder100',
+        Response response = await client.post('services/updateOrder100',
             data: orderToJson(order));
         createdOrder = orderFromJson(getResponseData(response));
         order.orderId = createdOrder.orderId;

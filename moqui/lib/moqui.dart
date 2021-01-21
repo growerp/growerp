@@ -278,13 +278,17 @@ class Moqui {
   }
 
   Future<dynamic> getUser(
-      {int start, int limit, String userGroupId, String userPartyId}) async {
+      {int start,
+      int limit,
+      String userGroupId,
+      String userPartyId,
+      String filter}) async {
     try {
-      print("repos: getUsers usergroupId: $userGroupId");
       Response response =
           await client.get('rest/s1/growerp/100/User', queryParameters: {
         'userPartyId': userPartyId,
         'userGroupId': userGroupId,
+        'filter': filter,
         'start': start,
         'limit': limit
       });
@@ -344,37 +348,25 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getCart() async {
+  Future<dynamic> getCart({bool sales}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-//      String orderJson = prefs.getString('orderAndItems');
-//      if (orderJson != null) return orderFromJson(orderJson);
+      String orderJson =
+          prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
+      if (orderJson != null) return orderFromJson(orderJson);
       return null;
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> saveCart({Order order}) async {
+  Future<dynamic> saveCart(Order order) async {
     try {
+      print("===save===${order.sales}");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          'orderAndItems', order == null ? null : orderToJson(order));
-      return null;
-    } catch (e) {
-      return responseMessage(e);
-    }
-  }
-
-  Future<dynamic> createOrder(Order order) async {
-    try {
-      Authenticate authenticate = await getAuthenticate();
-      client.options.headers['api_key'] = authenticate.apiKey;
-      Response response = await client.post('rest/s1/growerp/100/Order', data: {
-        'order': orderToJson(order),
-        'moquiSessionToken': sessionToken
-      });
-      return orderFromJson(response.toString());
+          order.sales ? 'salesOrderAndItems' : 'purchOrderAndItems',
+          order == null ? null : orderToJson(order));
     } catch (e) {
       return responseMessage(e);
     }
@@ -384,44 +376,61 @@ class Moqui {
     try {
       Authenticate authenticate = await getAuthenticate();
       client.options.headers['api_key'] = authenticate.apiKey;
-      Response response = await client.patch('rest/s1/growerp/100/Order',
-          data: {
-            'order': orderToJson(order),
-            'moquiSessionToken': sessionToken
-          });
+      Response response;
+      if (order.orderId == null)
+        response = await client.post('rest/s1/growerp/100/Order', data: {
+          'order': orderToJson(order),
+          'moquiSessionToken': sessionToken
+        });
+      else
+        response = await client.patch('rest/s1/growerp/100/Order', data: {
+          'order': orderToJson(order),
+          'moquiSessionToken': sessionToken
+        });
       return orderFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> getOrders({bool purchase}) async {
+  Future<dynamic> getOrder(
+      {int start,
+      int limit,
+      bool open,
+      bool sales,
+      DateTime startDate,
+      String orderId}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/Order');
-      return ordersFromJson(response.toString());
+      Response response =
+          await client.get('rest/s1/growerp/100/Order', queryParameters: {
+        'sales': sales,
+        'open': 'open',
+        'orderId': orderId,
+        'startDate': '${startDate?.year?.toString()}-'
+            '${startDate?.month?.toString()?.padLeft(2, '0')}-'
+            '${startDate?.day?.toString()?.padLeft(2, '0')}',
+        'start': start,
+        'limit': limit
+      });
+      if (orderId == null)
+        return ordersFromJson(response.toString());
+      else
+        return orderFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> getOrder(String orderId) async {
+  Future<dynamic> getCategory(
+      {int start, int limit, String companyPartyId, String filter}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/Order',
-          queryParameters: {'orderId': orderId});
-      return orderFromJson(response.toString());
-    } catch (e) {
-      return responseMessage(e);
-    }
-  }
-
-  Future<dynamic> getCategory([start, limit, companyPartyId]) async {
-    try {
-      Response response = await client.get('rest/s1/growerp/100/Categories',
-          queryParameters: {
-            'companyPartyId': companyPartyId,
-            'start': start,
-            'limit': limit
-          });
+      Response response =
+          await client.get('rest/s1/growerp/100/Categories', queryParameters: {
+        'start': start,
+        'limit': limit,
+        'companyPartyId': companyPartyId,
+        'filter': filter
+      });
       return categoriesFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
@@ -462,14 +471,19 @@ class Moqui {
   }
 
   Future<dynamic> getProduct(
-      {int start, int limit, String companyPartyId, String productId}) async {
+      {int start,
+      int limit,
+      String companyPartyId,
+      String productId,
+      String filter}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Products', queryParameters: {
         'companyPartyId': companyPartyId,
         'productId': productId,
         'start': start,
-        'limit': limit
+        'limit': limit,
+        'filter': filter
       });
       if (productId != null)
         return productFromJson(response.toString());
@@ -513,8 +527,8 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getOpportunity(int start, int limit,
-      [String opportunityId]) async {
+  Future<dynamic> getOpportunity(
+      {int start, int limit, String opportunityId}) async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Opportunity',
           queryParameters: {
@@ -548,7 +562,6 @@ class Moqui {
           'moquiSessionToken': sessionToken
         });
       }
-      print("====repos oppr: ${response.toString()}");
       return opportunityFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

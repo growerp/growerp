@@ -4,30 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:rxdart/rxdart.dart';
-import '../blocs/@blocs.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final repos;
-  final CategoryBloc categoryBloc;
-  StreamSubscription categoryBlocSubscription;
   List<Product> products;
-  List<ProductCategory> categories;
 
-  ProductBloc(this.repos, this.categoryBloc) : super(ProductInitial()) {
-    categoryBlocSubscription = categoryBloc.listen((state) {
-      if (state is CategorySuccess) {
-        categories = state.categories;
-        add(CategoriesForProductUpdated(
-            (categoryBloc.state as CategorySuccess).categories));
-      }
-    });
-  }
-
-  @override
-  Future<void> close() {
-    categoryBlocSubscription.cancel();
-    return super.close();
-  }
+  ProductBloc(
+    this.repos,
+  ) : super(ProductInitial());
 
   @override
   Stream<Transition<ProductEvent, ProductState>> transformEvents(
@@ -43,18 +27,15 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   @override
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
     final currentState = state;
-    if (event is ProductFetched && !_hasReachedMax(currentState)) {
+    if (event is FetchProduct && !_hasReachedMax(currentState)) {
       if (currentState is ProductInitial) {
         dynamic result = await repos.getProduct(
-            start: 0,
-            limit: event.productLimit,
-            companyPartyId: event.companyPartyId);
+            start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
         if (result is List<Product>) {
           products = result;
           yield ProductSuccess(
-              categories: categories,
               products: result,
-              hasReachedMax: result.length < event.productLimit ? true : false);
+              hasReachedMax: result.length < event.limit ? true : false);
         } else
           yield ProductProblem(result);
         return;
@@ -62,50 +43,60 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (currentState is ProductSuccess) {
         dynamic result = await repos.getProduct(
             start: currentState.products.length,
-            limit: event.productLimit,
+            limit: event.limit,
             companyPartyId: event.companyPartyId);
         if (result is List<Product>) {
-          if (result.length < event.productLimit) {
-            yield currentState.copyWith(hasReachedMax: true);
+          if (result.length < event.limit) {
+            yield currentState.copyWith(
+                products: currentState.products + result, hasReachedMax: true);
           } else {
-            products = currentState.products + result;
-            yield ProductSuccess(
-              categories: categories,
-              products: products,
+            yield ProductSuccess().copyWith(
+              products: currentState.products + result,
               hasReachedMax: false,
-            ).copyWith(hasReachedMax: false);
+            );
           }
         } else
           yield ProductProblem(result);
       }
     } else if (event is UpdateProduct) {
+      bool adding = event.product.productId == null;
+      yield ProductLoading((adding ? 'adding' : 'updating') +
+          ' product ${event.product.productName}');
       dynamic result = await repos.updateProduct(event.product);
-      if (result is Product) {
-        if (event.product?.productId == null) {
-          products?.add(event.product);
+      if (currentState is ProductSuccess) {
+        if (result is Product) {
+          if (adding) {
+            currentState.products?.add(result);
+          } else {
+            int index = currentState.products
+                .indexWhere((prod) => prod.productId == result.productId);
+            currentState.products.replaceRange(index, index + 1, [result]);
+          }
+          yield ProductSuccess(
+                  products: currentState.products,
+                  hasReachedMax: _hasReachedMax(currentState))
+              .copyWith(message: 'product ' + (adding ? 'added' : 'updated'));
         } else {
-          int index =
-              products.indexWhere((prod) => prod.productId == result.productId);
-          products.replaceRange(index, index + 1, [event.product]);
+          yield ProductProblem(result);
         }
-        yield ProductSuccess(
-            products: products, hasReachedMax: _hasReachedMax(currentState));
-      } else {
-        yield ProductProblem(result);
       }
     } else if (event is DeleteProduct) {
-      dynamic result = await repos.deleteProduct(event.product.productId);
-      if (result == event.product.productId) {
-        yield ProductSuccess(
-            products: products, hasReachedMax: _hasReachedMax(currentState));
-      } else {
-        yield ProductProblem(result);
+      if (currentState is ProductSuccess) {
+        int index = currentState.products
+            .indexWhere((prod) => prod.productId == event.product.productId);
+        String name = currentState.products[index].productName;
+        yield ProductLoading('deleting product $name');
+        dynamic result = await repos.deleteProduct(event.product.productId);
+        if (result == event.product.productId) {
+          currentState.products.removeAt(index);
+          yield ProductSuccess(
+                  products: currentState.products,
+                  hasReachedMax: _hasReachedMax(currentState))
+              .copyWith(message: 'Product $name deleted');
+        } else {
+          yield ProductProblem(result);
+        }
       }
-    } else if (event is CategoriesForProductUpdated) {
-      yield ProductSuccess(
-          products: products,
-          categories: categories,
-          hasReachedMax: _hasReachedMax(currentState));
     }
   }
 }
@@ -119,21 +110,12 @@ abstract class ProductEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class ProductFetched extends ProductEvent {
+class FetchProduct extends ProductEvent {
   final String companyPartyId;
-  final int productLimit;
-  ProductFetched(this.companyPartyId, this.productLimit);
+  final int limit;
+  FetchProduct({this.companyPartyId, this.limit});
   @override
-  String toString() =>
-      "ProductFetched company: $companyPartyId, productLimit: $productLimit";
-}
-
-class CategoriesForProductUpdated extends ProductEvent {
-  final List<ProductCategory> categories;
-  CategoriesForProductUpdated(this.categories);
-  @override
-  String toString() =>
-      "CategoriesForProductUpdated: #categories: ${categories.length}";
+  String toString() => "FetchProduct company: $companyPartyId, limit: $limit";
 }
 
 class DeleteProduct extends ProductEvent {
@@ -159,6 +141,15 @@ abstract class ProductState extends Equatable {
 
 class ProductInitial extends ProductState {}
 
+class ProductLoading extends ProductState {
+  final String message;
+  ProductLoading([this.message]);
+  @override
+  List<Object> get props => [message];
+  @override
+  String toString() => 'Product loading...';
+}
+
 class ProductProblem extends ProductState {
   final String errorMessage;
   ProductProblem(this.errorMessage);
@@ -169,35 +160,24 @@ class ProductProblem extends ProductState {
 }
 
 class ProductSuccess extends ProductState {
-  final Product product;
   final List<Product> products;
-  final List<ProductCategory> categories;
   final bool hasReachedMax;
+  final String message;
 
-  const ProductSuccess({
-    this.product,
-    this.products,
-    this.categories,
-    this.hasReachedMax,
-  });
+  const ProductSuccess({this.products, this.hasReachedMax, this.message});
 
-  ProductSuccess copyWith({
-    List<Product> products,
-    bool hasReachedMax,
-  }) {
+  ProductSuccess copyWith(
+      {List<Product> products, bool hasReachedMax, String message}) {
     return ProductSuccess(
-      categories: categories ?? this.categories,
-      product: product ?? this.product,
-      products: products ?? this.products,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    );
+        products: products ?? this.products,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        message: message ?? this.message);
   }
 
   @override
-  List<Object> get props => [product, products, categories, hasReachedMax];
+  List<Object> get props => [products, hasReachedMax];
 
   @override
-  String toString() => 'ProductSuccess { product: $product '
-      '#products: ${products?.length}, '
-      '#categories: ${categories?.length} hasReachedMax: $hasReachedMax }';
+  String toString() => 'ProductSuccess { #products: ${products?.length}, '
+      'hasReachedMax: $hasReachedMax }';
 }
