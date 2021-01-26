@@ -18,7 +18,7 @@
 
 import 'dart:convert';
 import 'package:decimal/decimal.dart';
-import 'package:models/user.dart';
+import 'user_model.dart';
 
 Order orderFromJson(String str) => Order.fromJson(json.decode(str)["order"]);
 String orderToJson(Order data) =>
@@ -80,8 +80,8 @@ class Order {
       };
 
   String toString() => 'order# $orderId sales? $sales '
-      'otherUser: $otherUser'
-      'orderItems: ${orderItems?.length}';
+      'otherUser: $otherUser '
+      'orderItems: ${orderItems.length}';
 }
 
 class OrderItem {

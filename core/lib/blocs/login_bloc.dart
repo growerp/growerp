@@ -16,7 +16,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final repos;

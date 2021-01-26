@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
 
 const limit = 10000;

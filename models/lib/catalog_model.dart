@@ -16,7 +16,7 @@
 //
 //     final catalog = catalogFromJson(jsonString);
 
-import 'models.dart';
+import '@models.dart';
 import 'dart:convert';
 
 Catalog catalogFromJson(String str) => Catalog.fromJson(json.decode(str));

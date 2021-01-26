@@ -15,7 +15,7 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:moqui/moqui.dart';
 import 'package:mockito/mockito.dart';
 import 'testdata.dart';

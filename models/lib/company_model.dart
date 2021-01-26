@@ -18,7 +18,6 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
-import 'user.dart';
 
 Company companyFromJson(String str) =>
     Company.fromJson(json.decode(str)["company"]);

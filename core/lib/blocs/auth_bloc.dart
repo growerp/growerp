@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import '../helper_functions.dart';
 
 /// Authbloc controls the connection to the backend

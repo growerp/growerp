@@ -17,7 +17,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 

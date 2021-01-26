@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:decimal/decimal.dart';
 import 'dart:math';
 

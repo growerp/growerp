@@ -15,7 +15,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 
 class AccntgBloc extends Bloc<AccntgEvent, AccntgState> {
   final repos;

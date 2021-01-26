@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 
 Widget companyLogo(context, authenticate, title) {
   return Row(children: [

@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import '../blocs/@blocs.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import '../helper_functions.dart';
 
 /// RegisterForm shows dual registration forms depending on:

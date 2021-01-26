@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'testdata.dart';
 
 class MyHttpOverrides extends HttpOverrides {

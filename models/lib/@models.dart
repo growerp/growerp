@@ -13,18 +13,17 @@
  */
 
 // https://app.quicktype.io/
-export 'authenticate.dart';
-export 'crm.dart';
-export 'user.dart';
-export 'company.dart';
-export 'product.dart';
-export 'productCategory.dart';
-export 'catalog.dart';
-export 'order.dart';
-export 'currency.dart';
-export 'menuItem.dart';
-export 'formArguments.dart';
-export 'classification.dart';
-export 'location.dart';
-export 'opportunity.dart';
-export 'balanceSheet/balanceSheet.dart';
+export 'authenticate_model.dart';
+export 'user_model.dart';
+export 'company_model.dart';
+export 'product_model.dart';
+export 'productCategory_model.dart';
+export 'catalog_model.dart';
+export 'order_model.dart';
+export 'currency_model.dart';
+export 'menuItem_model.dart';
+export 'formArguments_model.dart';
+export 'classification_model.dart';
+export 'location_model.dart';
+export 'opportunity_model.dart';
+export 'balanceSheet/balanceSheet_model.dart';

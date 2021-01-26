@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'dart:math';
 
 final String randomString4 = Random().nextInt(9999).toString();

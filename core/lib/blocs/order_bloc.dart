@@ -17,7 +17,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
 
 const _limit = 20;

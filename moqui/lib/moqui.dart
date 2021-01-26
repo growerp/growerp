@@ -16,7 +16,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -353,6 +353,7 @@ class Moqui {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String orderJson =
           prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
+      print("====json from pref: $orderJson");
       if (orderJson != null) return orderFromJson(orderJson);
       return null;
     } catch (e) {
@@ -362,7 +363,7 @@ class Moqui {
 
   Future<dynamic> saveCart(Order order) async {
     try {
-      print("===save===${order.sales}");
+      print("===save===${order}");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(
           order.sales ? 'salesOrderAndItems' : 'purchOrderAndItems',
@@ -377,6 +378,7 @@ class Moqui {
       Authenticate authenticate = await getAuthenticate();
       client.options.headers['api_key'] = authenticate.apiKey;
       Response response;
+      print("====repos: order $order");
       if (order.orderId == null)
         response = await client.post('rest/s1/growerp/100/Order', data: {
           'order': orderToJson(order),
@@ -387,6 +389,7 @@ class Moqui {
           'order': orderToJson(order),
           'moquiSessionToken': sessionToken
         });
+      print("=== order response: ${response.toString()}");
       return orderFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

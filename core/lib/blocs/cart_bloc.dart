@@ -18,7 +18,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import '../blocs/@blocs.dart';
 
 mixin PurchCartBloc on Bloc<CartEvent, CartState> {}
@@ -34,12 +34,14 @@ class CartBloc extends Bloc<CartEvent, CartState>
 
   @override
   Stream<CartState> mapEventToState(CartEvent event) async* {
-    final currentState = state;
-    if (event is LoadCart && currentState is CartInitial) {
+    if (event is LoadCart) {
       yield CartLoading();
+      print("===cartbloc load order: ${event.order}");
       if (event.order.orderId == null)
         order = await repos.getCart(sales: event.order.sales);
+      print("===cartbloc pref order: $order");
       if (order == null) order = event.order;
+      print("===cartbloc returned order: $order");
       yield CartLoaded(order, "cart initial load.");
     } else if (event is AddToCart) {
       yield CartLoading();

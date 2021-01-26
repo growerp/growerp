@@ -17,8 +17,8 @@
 //     final authenticate = authenticateFromJson(jsonString);
 
 import 'dart:convert';
-import 'user.dart';
-import 'company.dart';
+import 'user_model.dart';
+import 'company_model.dart';
 
 Authenticate authenticateFromJson(String str) =>
     Authenticate.fromJson(json.decode(str));
