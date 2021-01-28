@@ -16,10 +16,8 @@ class Classification {
   String classificationId;
   String description;
   bool active;
-  String defaultData;
 
-  Classification(
-      {this.classificationId, this.description, this.active, this.defaultData});
+  Classification({this.classificationId, this.description, this.active});
 
   @override
   String toString() => 'Classification name: $description [$classificationId]';
@@ -38,8 +36,7 @@ List<Classification> classifications = [
   Classification(
       classificationId: 'AppEcommerceShop',
       description: 'Ecommerce and shop',
-      active: true,
-      defaultData: defaultCatalogEcommerce),
+      active: true),
   Classification(
       classificationId: 'AppHospital',
       description: 'Hospital/Clinic/Dentist/Doctor/Beauty Shop',
@@ -57,33 +54,3 @@ List<Classification> classifications = [
       description: 'Realtor/Property management',
       active: false),
 ];
-
-final String defaultCatalogEcommerce = '''
-    { "count": "30", "categories":[   
-      {
-        "categoryName": "Drinks",
-        "description": "this is bar category", 
-        "image": "drinks",
-        "products":
-        [
-          { "productName": "This is the first product cola",
-            "image": "cola",
-            "price": "23.99",
-            "description": "This is a dummy description of first product cola"
-          }
-        ]
-      },
-      { "categoryName": "food",
-        "description": "this is the long description of category food",
-        "image": "food",
-        "products": 
-        [
-          { "productName": "This is the second product macaroni",
-            "image": "macaroni",
-            "price": "17.13",
-            "description": "This is a dummy description of second product macaroni"
-          }
-        ]
-      }
-    ]}
-''';

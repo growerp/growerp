@@ -42,7 +42,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     final currentState = state;
     if (event is FetchOpportunity && !_hasReachedMax(currentState)) {
       if (currentState is OpportunityInitial) {
-        dynamic result = await repos.getOpportunity(start: 0, limit: _limit);
+        dynamic result =
+            await repos.getOpportunity(start: 0, limit: _limit, all: false);
         if (result is List<Opportunity>) {
           yield OpportunitySuccess(
             opportunities: result,
@@ -54,7 +55,9 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       }
       if (currentState is OpportunitySuccess) {
         dynamic result = await repos.getOpportunity(
-            start: currentState.opportunities.length, limit: event.limit);
+            start: currentState.opportunities.length,
+            limit: event.limit,
+            all: false);
         if (result is List<Opportunity>) {
           if (result.length < event.limit) {
             yield currentState.copyWith(

@@ -36,6 +36,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   Stream<UserState> mapEventToState(UserEvent event) async* {
     final currentState = state;
     if (event is FetchUser && !_hasReachedMax(currentState)) {
+      print("====curstate: $currentState event limit: ${event.limit}");
       if (currentState is UserInitial) {
         dynamic result = await repos.getUser(
             userGroupId: userGroupId, start: 0, limit: event.limit);
@@ -129,8 +130,7 @@ class FetchUser extends UserEvent {
   final int limit;
   FetchUser({this.limit});
   @override
-  String toString() => 'FetchUser with limit $limit '
-      'limit: $limit';
+  String toString() => 'FetchUser with limit $limit';
 }
 
 class UpdateUser extends UserEvent {

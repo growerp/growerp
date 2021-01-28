@@ -74,8 +74,11 @@ class Opportunity extends Equatable {
         opportunityId: json["opportunityId"],
         opportunityName: json["opportunityName"],
         description: json["description"],
-        estAmount: Decimal.parse(json["estAmount"]),
-        estProbability: int.parse(json["estProbability"]),
+        estAmount:
+            json["estAmount"] != null ? Decimal.parse(json["estAmount"]) : null,
+        estProbability: json["estProbability"] != null
+            ? int.parse(json["estProbability"])
+            : null,
         stageId: json["stageId"],
         nextStep: json["nextStep"],
         accountPartyId: json["accountPartyId"],

@@ -214,7 +214,6 @@ class Ofbiz {
         "companyEmail": email,
         "username": email,
         "userGroupId": 'GROWERP_M_ADMIN',
-        "defaultData": demoData,
       });
       return authenticateFromJson(getResponseData(response));
     } catch (e) {

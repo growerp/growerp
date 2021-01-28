@@ -185,15 +185,17 @@ class Moqui {
       Response response =
           await client.post('rest/s1/growerp/100/UserAndCompany',
               data: {
-                'username': email, 'emailAddress': email,
-                'newPassword': 'qqqqqq9!', 'firstName': firstName,
-                'lastName': lastName, 'locale': locale,
-                'companyPartyId': companyPartyId, // for existing companies
-                'companyName': companyName, 'currencyId': currencyId,
+                'username': email,
+                'emailAddress': email,
+                'newPassword': 'qqqqqq9!',
+                'firstName': firstName,
+                'lastName': lastName,
+                'locale': locale,
+                'companyName': companyName,
+                'currencyId': currencyId,
                 'companyEmailAddress': email,
                 'classificationId': classificationId,
                 'environment': kReleaseMode,
-                'defaultData': demoData,
                 'moquiSessionToken': sessionToken
               },
               options: Options(headers: {'api_key': null}));
@@ -353,7 +355,6 @@ class Moqui {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String orderJson =
           prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
-      print("====json from pref: $orderJson");
       if (orderJson != null) return orderFromJson(orderJson);
       return null;
     } catch (e) {
@@ -363,7 +364,6 @@ class Moqui {
 
   Future<dynamic> saveCart(Order order) async {
     try {
-      print("===save===${order}");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(
           order.sales ? 'salesOrderAndItems' : 'purchOrderAndItems',
@@ -378,7 +378,6 @@ class Moqui {
       Authenticate authenticate = await getAuthenticate();
       client.options.headers['api_key'] = authenticate.apiKey;
       Response response;
-      print("====repos: order $order");
       if (order.orderId == null)
         response = await client.post('rest/s1/growerp/100/Order', data: {
           'order': orderToJson(order),
@@ -389,7 +388,6 @@ class Moqui {
           'order': orderToJson(order),
           'moquiSessionToken': sessionToken
         });
-      print("=== order response: ${response.toString()}");
       return orderFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
@@ -531,14 +529,15 @@ class Moqui {
   }
 
   Future<dynamic> getOpportunity(
-      {int start, int limit, String opportunityId}) async {
+      {int start, int limit, String opportunityId, bool all}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/Opportunity',
-          queryParameters: {
-            'opportunityId': opportunityId,
-            'start': start,
-            'limit': limit
-          });
+      Response response =
+          await client.get('rest/s1/growerp/100/Opportunity', queryParameters: {
+        'opportunityId': opportunityId,
+        'start': start,
+        'limit': limit,
+        'all': all.toString()
+      });
       if (opportunityId == null)
         return opportunitiesFromJson(response.toString());
       else
@@ -584,7 +583,6 @@ class Moqui {
   Future<dynamic> getBalanceSheet() async {
     try {
       Response response = await client.get('rest/s1/growerp/100/BalanceSheet');
-      //print("====${response.toString()}");
       return balanceSheetFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

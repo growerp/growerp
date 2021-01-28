@@ -74,6 +74,7 @@ class Stats {
   int openSlsOrders;
   int openPurOrders;
   int opportunities;
+  int myOpportunities;
   int categories;
   int products;
 
@@ -86,6 +87,7 @@ class Stats {
     this.openSlsOrders,
     this.openPurOrders,
     this.opportunities,
+    this.myOpportunities,
     this.categories,
     this.products,
   });
@@ -99,6 +101,7 @@ class Stats {
       openSlsOrders: int.parse(json["openSlsOrders"]),
       openPurOrders: int.parse(json["openPurOrders"]),
       opportunities: int.parse(json["opportunities"]),
+      myOpportunities: int.parse(json["myOpportunities"]),
       categories: int.parse(json["categories"]),
       products: int.parse(json["products"]));
 
@@ -111,6 +114,7 @@ class Stats {
         "openSlsOrders": openSlsOrders.toString(),
         "openPurOrders": openPurOrders.toString(),
         "opportunities": opportunities.toString(),
+        "myOpportunities": myOpportunities.toString(),
         "categories": categories.toString(),
         "products": products.toString(),
       };

@@ -108,7 +108,7 @@ class FetchCategory extends CategoryEvent {
   final int limit;
   FetchCategory({this.companyPartyId, this.limit});
   @override
-  String toString() => "FetchCategory company: $companyPartyId";
+  String toString() => "FetchCategory company: $companyPartyId, limit: $limit";
 }
 
 class DeleteCategory extends CategoryEvent {

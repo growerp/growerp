@@ -59,8 +59,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
           classificationId: event.classification.classificationId,
           firstName: event.firstName,
           lastName: event.lastName,
-          email: event.email,
-          demoData: event.classification.defaultData);
+          email: event.email);
       if (authenticate is Authenticate) {
         await repos.persistAuthenticate(authenticate);
         yield RegisterSuccess(authenticate);
