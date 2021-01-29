@@ -476,7 +476,8 @@ class Moqui {
       int limit,
       String companyPartyId,
       String productId,
-      String filter}) async {
+      String filter,
+      String search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Products', queryParameters: {
@@ -484,7 +485,8 @@ class Moqui {
         'productId': productId,
         'start': start,
         'limit': limit,
-        'filter': filter
+        'filter': filter,
+        'search': search
       });
       if (productId != null)
         return productFromJson(response.toString());

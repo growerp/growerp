@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ *
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
@@ -27,36 +41,59 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   @override
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
     final currentState = state;
-    if (event is FetchProduct && !_hasReachedMax(currentState)) {
-      if (currentState is ProductInitial) {
+    if (event is FetchProduct) {
+      if (currentState is ProductSuccess && event.search != null) {
+        yield ProductLoading();
         dynamic result = await repos.getProduct(
-            start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
+            start: 0,
+            limit: event.limit,
+            companyPartyId: event.companyPartyId,
+            search: event.search);
         if (result is List<Product>) {
           products = result;
           yield ProductSuccess(
               products: result,
+              search: event.search,
               hasReachedMax: result.length < event.limit ? true : false);
         } else
           yield ProductProblem(result);
         return;
-      }
-      if (currentState is ProductSuccess) {
-        dynamic result = await repos.getProduct(
-            start: currentState.products.length,
-            limit: event.limit,
-            companyPartyId: event.companyPartyId);
-        if (result is List<Product>) {
-          if (result.length < event.limit) {
-            yield currentState.copyWith(
-                products: currentState.products + result, hasReachedMax: true);
-          } else {
-            yield ProductSuccess().copyWith(
-              products: currentState.products + result,
-              hasReachedMax: false,
-            );
-          }
-        } else
-          yield ProductProblem(result);
+      } else if (!_hasReachedMax(currentState)) {
+        if (currentState is ProductInitial) {
+          dynamic result = await repos.getProduct(
+              start: 0,
+              limit: event.limit,
+              companyPartyId: event.companyPartyId,
+              search: event.search);
+          if (result is List<Product>) {
+            products = result;
+            yield ProductSuccess(
+                products: result,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield ProductProblem(result);
+          return;
+        }
+        if (currentState is ProductSuccess) {
+          dynamic result = await repos.getProduct(
+              start: currentState.products.length,
+              limit: event.limit,
+              companyPartyId: event.companyPartyId);
+          if (result is List<Product>) {
+            if (result.length < event.limit) {
+              yield currentState.copyWith(
+                  products: currentState.products + result,
+                  hasReachedMax: true,
+                  search: event.search);
+            } else {
+              yield ProductSuccess().copyWith(
+                products: currentState.products + result,
+                hasReachedMax: false,
+              );
+            }
+          } else
+            yield ProductProblem(result);
+        }
       }
     } else if (event is UpdateProduct) {
       bool adding = event.product.productId == null;
@@ -113,9 +150,11 @@ abstract class ProductEvent extends Equatable {
 class FetchProduct extends ProductEvent {
   final String companyPartyId;
   final int limit;
-  FetchProduct({this.companyPartyId, this.limit});
+  final search;
+  FetchProduct({this.companyPartyId, this.limit, this.search});
   @override
-  String toString() => "FetchProduct company: $companyPartyId, limit: $limit";
+  String toString() => "FetchProduct company: $companyPartyId, "
+      "limit: $limit, search: $search";
 }
 
 class DeleteProduct extends ProductEvent {
@@ -163,15 +202,21 @@ class ProductSuccess extends ProductState {
   final List<Product> products;
   final bool hasReachedMax;
   final String message;
+  final String search;
 
-  const ProductSuccess({this.products, this.hasReachedMax, this.message});
+  const ProductSuccess(
+      {this.products, this.hasReachedMax, this.message, this.search});
 
   ProductSuccess copyWith(
-      {List<Product> products, bool hasReachedMax, String message}) {
+      {List<Product> products,
+      bool hasReachedMax,
+      String message,
+      String search}) {
     return ProductSuccess(
         products: products ?? this.products,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        message: message ?? this.message);
+        message: message ?? this.message,
+        search: search ?? this.search);
   }
 
   @override
