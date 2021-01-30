@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "2280618adfd0beb342779fb6de775cb327c6476e"
+      resolved-ref: "7c1f4e49de0eac672fa8596a682338d2645d4fcb"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "2280618adfd0beb342779fb6de775cb327c6476e"
+      resolved-ref: "7c1f4e49de0eac672fa8596a682338d2645d4fcb"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

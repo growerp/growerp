@@ -37,7 +37,7 @@ Widget myDrawer(BuildContext context, Authenticate authenticate) {
               return DrawerHeader(
                   child: InkWell(
                       onTap: () {
-                        Navigator.pushNamed(context, '/employee',
+                        Navigator.pushNamed(context, '/user',
                             arguments:
                                 FormArguments(null, null, authenticate.user));
                       },
@@ -92,8 +92,8 @@ Widget myNavigationRail(context, authenticate, widget, selectedIndex) {
         leading: Center(
             child: InkWell(
                 onTap: () {
-                  Navigator.pushNamed(context, '/employee',
-                      arguments: FormArguments(null, 0, authenticate.user));
+                  Navigator.pushNamed(context, '/user',
+                      arguments: FormArguments(null, null, authenticate.user));
                 },
                 child: Column(children: [
                   SizedBox(height: 5),

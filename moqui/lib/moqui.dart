@@ -284,7 +284,8 @@ class Moqui {
       int limit,
       String userGroupId,
       String userPartyId,
-      String filter}) async {
+      String filter,
+      String search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/User', queryParameters: {
@@ -292,7 +293,8 @@ class Moqui {
         'userGroupId': userGroupId,
         'filter': filter,
         'start': start,
-        'limit': limit
+        'limit': limit,
+        'search': search
       });
       if (userPartyId == null)
         return usersFromJson(response.toString());
@@ -400,7 +402,8 @@ class Moqui {
       bool open,
       bool sales,
       DateTime startDate,
-      String orderId}) async {
+      String orderId,
+      String search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Order', queryParameters: {
@@ -411,7 +414,8 @@ class Moqui {
             '${startDate?.month?.toString()?.padLeft(2, '0')}-'
             '${startDate?.day?.toString()?.padLeft(2, '0')}',
         'start': start,
-        'limit': limit
+        'limit': limit,
+        'search': search
       });
       if (orderId == null)
         return ordersFromJson(response.toString());
@@ -423,14 +427,19 @@ class Moqui {
   }
 
   Future<dynamic> getCategory(
-      {int start, int limit, String companyPartyId, String filter}) async {
+      {int start,
+      int limit,
+      String companyPartyId,
+      String filter,
+      String search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Categories', queryParameters: {
         'start': start,
         'limit': limit,
         'companyPartyId': companyPartyId,
-        'filter': filter
+        'filter': filter,
+        'search': search
       });
       return categoriesFromJson(response.toString());
     } catch (e) {
@@ -531,14 +540,19 @@ class Moqui {
   }
 
   Future<dynamic> getOpportunity(
-      {int start, int limit, String opportunityId, bool all}) async {
+      {int start,
+      int limit,
+      String opportunityId,
+      bool all,
+      String search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Opportunity', queryParameters: {
         'opportunityId': opportunityId,
         'start': start,
         'limit': limit,
-        'all': all.toString()
+        'all': all.toString(),
+        'search': search
       });
       if (opportunityId == null)
         return opportunitiesFromJson(response.toString());

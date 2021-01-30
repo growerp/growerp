@@ -19,8 +19,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
 
-const _limit = 20;
-
 class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
   final repos;
 
@@ -40,36 +38,45 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
   @override
   Stream<OpportunityState> mapEventToState(OpportunityEvent event) async* {
     final currentState = state;
-    if (event is FetchOpportunity && !_hasReachedMax(currentState)) {
+    if (event is FetchOpportunity) {
       if (currentState is OpportunityInitial) {
-        dynamic result =
-            await repos.getOpportunity(start: 0, limit: _limit, all: false);
-        if (result is List<Opportunity>) {
+        dynamic result = await repos.getOpportunity(
+            start: 0, limit: event.limit, all: false);
+        if (result is List<Opportunity>)
           yield OpportunitySuccess(
-            opportunities: result,
-            hasReachedMax: result.length < _limit ? true : false,
-          );
-        } else
+              opportunities: result,
+              hasReachedMax: result.length < event.limit ? true : false);
+        else
           yield OpportunityProblem(result);
         return;
-      }
-      if (currentState is OpportunitySuccess) {
-        dynamic result = await repos.getOpportunity(
-            start: currentState.opportunities.length,
-            limit: event.limit,
-            all: false);
-        if (result is List<Opportunity>) {
-          if (result.length < event.limit) {
+      } else if (currentState is OpportunitySuccess) {
+        if (event.search != null && currentState.search == null ||
+            (currentState.search != null &&
+                event.search != currentState.search)) {
+          yield OpportunityLoading();
+          dynamic result = await repos.getOpportunity(
+              start: 0, limit: event.limit, all: false, search: event.search);
+          if (result is List<Opportunity>)
+            yield OpportunitySuccess(
+                opportunities: result,
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          else
+            yield OpportunityProblem(result);
+        } else if (!_hasReachedMax(currentState)) {
+          dynamic result = await repos.getOpportunity(
+              start: currentState.opportunities.length,
+              limit: event.limit,
+              all: false,
+              search: event.search);
+          if (result is List<Opportunity>) {
             yield currentState.copyWith(
                 opportunities: currentState.opportunities + result,
-                hasReachedMax: true);
-          } else {
-            yield currentState.copyWith(
-                opportunities: currentState.opportunities + result,
-                hasReachedMax: false);
-          }
-        } else
-          yield OpportunityProblem(result);
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield OpportunityProblem(result);
+        }
       }
     } else if (event is UpdateOpportunity) {
       bool adding = event.opportunity.opportunityId == null;
@@ -125,9 +132,10 @@ abstract class OpportunityEvent extends Equatable {
 
 class FetchOpportunity extends OpportunityEvent {
   final limit;
-  FetchOpportunity([this.limit]);
+  final String search;
+  FetchOpportunity({this.limit, this.search});
   @override
-  String toString() => "OpportunityFetched limit: $limit";
+  String toString() => "FetchOpportunity limit: $limit, search: $search";
 }
 
 class DeleteOpportunity extends OpportunityEvent {
@@ -176,27 +184,25 @@ class OpportunitySuccess extends OpportunityState {
   final List<Opportunity> opportunities;
   final String message;
   final bool hasReachedMax;
+  final String search;
 
-  const OpportunitySuccess({
-    this.opportunities,
-    this.message,
-    this.hasReachedMax,
-  });
+  const OpportunitySuccess(
+      {this.opportunities, this.message, this.hasReachedMax, this.search});
 
-  OpportunitySuccess copyWith({
-    List<Opportunity> opportunities,
-    String message,
-    bool hasReachedMax,
-  }) {
+  OpportunitySuccess copyWith(
+      {List<Opportunity> opportunities,
+      String message,
+      bool hasReachedMax,
+      String search}) {
     return OpportunitySuccess(
-      opportunities: opportunities ?? this.opportunities,
-      message: message ?? this.message,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    );
+        opportunities: opportunities ?? this.opportunities,
+        message: message ?? this.message,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        search: search ?? this.search);
   }
 
   @override
-  List<Object> get props => [opportunities, hasReachedMax];
+  List<Object> get props => [opportunities, hasReachedMax, search];
 
   @override
   String toString() =>

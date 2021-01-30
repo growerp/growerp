@@ -48,8 +48,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
     final currentState = state;
-    if (event is FetchUser && !_hasReachedMax(currentState)) {
-      print("====curstate: $currentState event limit: ${event.limit}");
+    if (event is FetchUser) {
       if (currentState is UserInitial) {
         dynamic result = await repos.getUser(
             userGroupId: userGroupId, start: 0, limit: event.limit);
@@ -60,21 +59,37 @@ class UserBloc extends Bloc<UserEvent, UserState>
         } else
           yield UserProblem(result);
         return;
-      }
-      if (currentState is UserSuccess) {
-        dynamic result = await repos.getUser(
-            userGroupId: userGroupId,
-            start: currentState.users.length,
-            limit: event.limit);
-        if (result is List<User>) {
-          if (result.length < event.limit)
+      } else if (currentState is UserSuccess) {
+        if (event.search != null && currentState.search == null ||
+            (currentState.search != null &&
+                event.search != currentState.search)) {
+          yield UserLoading();
+          dynamic result = await repos.getUser(
+              userGroupId: userGroupId,
+              start: 0,
+              limit: event.limit,
+              search: event.search);
+          if (result is List<User>) {
+            yield UserSuccess(
+                users: result,
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield UserProblem(result);
+          return;
+        } else if (!_hasReachedMax(currentState)) {
+          dynamic result = await repos.getUser(
+              start: currentState.users.length,
+              limit: event.limit,
+              search: event.search,
+              userGroupId: userGroupId);
+          if (result is List<User>) {
             yield currentState.copyWith(
-                users: currentState.users + result, hasReachedMax: true);
-          else
-            yield currentState.copyWith(
-                users: currentState.users + result, hasReachedMax: false);
-        } else {
-          yield UserProblem(result);
+                users: currentState.users + result,
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield UserProblem(result);
         }
       }
     } else if (event is UpdateUser) {
@@ -141,9 +156,10 @@ class LoadUser extends UserEvent {
 
 class FetchUser extends UserEvent {
   final int limit;
-  FetchUser({this.limit});
+  final String search;
+  FetchUser({this.limit, this.search});
   @override
-  String toString() => 'FetchUser with limit $limit';
+  String toString() => 'FetchUser with limit $limit search: $search';
 }
 
 class UpdateUser extends UserEvent {
@@ -196,15 +212,18 @@ class UserSuccess extends UserState {
   final List<User> users;
   final message;
   final bool hasReachedMax;
+  final String search;
 
-  const UserSuccess({this.users, this.message, this.hasReachedMax});
+  const UserSuccess(
+      {this.users, this.message, this.hasReachedMax, this.search});
 
-  UserSuccess copyWith({List<User> users, String message, bool hasReachedMax}) {
+  UserSuccess copyWith(
+      {List<User> users, String message, bool hasReachedMax, String search}) {
     return UserSuccess(
-      users: users ?? this.users,
-      message: message ?? this.message,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    );
+        users: users ?? this.users,
+        message: message ?? this.message,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        search: search ?? this.search);
   }
 
   @override

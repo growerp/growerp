@@ -42,8 +42,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
     final currentState = state;
     if (event is FetchProduct) {
-      if (currentState is ProductSuccess && event.search != null) {
-        yield ProductLoading();
+      if (currentState is ProductInitial) {
         dynamic result = await repos.getProduct(
             start: 0,
             limit: event.limit,
@@ -53,13 +52,15 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           products = result;
           yield ProductSuccess(
               products: result,
-              search: event.search,
               hasReachedMax: result.length < event.limit ? true : false);
         } else
           yield ProductProblem(result);
         return;
-      } else if (!_hasReachedMax(currentState)) {
-        if (currentState is ProductInitial) {
+      } else if (currentState is ProductSuccess) {
+        if (event.search != null && currentState.search == null ||
+            (currentState.search != null &&
+                event.search != currentState.search)) {
+          yield ProductLoading();
           dynamic result = await repos.getProduct(
               start: 0,
               limit: event.limit,
@@ -69,28 +70,21 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             products = result;
             yield ProductSuccess(
                 products: result,
+                search: event.search,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield ProductProblem(result);
           return;
-        }
-        if (currentState is ProductSuccess) {
+        } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getProduct(
               start: currentState.products.length,
               limit: event.limit,
+              search: event.search,
               companyPartyId: event.companyPartyId);
           if (result is List<Product>) {
-            if (result.length < event.limit) {
-              yield currentState.copyWith(
-                  products: currentState.products + result,
-                  hasReachedMax: true,
-                  search: event.search);
-            } else {
-              yield ProductSuccess().copyWith(
+            yield currentState.copyWith(
                 products: currentState.products + result,
-                hasReachedMax: false,
-              );
-            }
+                hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield ProductProblem(result);
         }

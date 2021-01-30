@@ -1,5 +1,4 @@
-/*
- * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+/* This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  *
  * To the extent possible under law, the author(s) have dedicated all
@@ -18,8 +17,6 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
-
-const limit = 10000;
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final repos;
@@ -41,7 +38,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   @override
   Stream<CategoryState> mapEventToState(CategoryEvent event) async* {
     final currentState = state;
-    if (event is FetchCategory && !_hasReachedMax(currentState)) {
+    if (event is FetchCategory) {
       if (currentState is CategoryInitial) {
         dynamic result = await repos.getCategory(
             start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
@@ -49,26 +46,43 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           categories = result;
           yield CategorySuccess(
               categories: result,
-              hasReachedMax: result.length < limit ? true : false);
+              hasReachedMax: result.length < event.limit ? true : false);
         } else
           yield CategoryProblem(result);
         return;
-      }
-      if (currentState is CategorySuccess) {
-        dynamic result = await repos.getCategory(
-            start: 0, limit: event.limit, companyPartyId: event.companyPartyId);
-        if (result is List<ProductCategory>) {
-          if (result.isEmpty) {
-            yield currentState.copyWith(hasReachedMax: true);
-          } else {
-            categories = currentState.categories + result;
+      } else if (currentState is CategorySuccess) {
+        if (event.search != null && currentState.search == null ||
+            (currentState.search != null &&
+                event.search != currentState.search)) {
+          yield CategoryLoading();
+          dynamic result = await repos.getCategory(
+              start: 0,
+              limit: event.limit,
+              companyPartyId: event.companyPartyId,
+              search: event.search);
+          if (result is List<ProductCategory>) {
+            categories = result;
             yield CategorySuccess(
-              categories: categories,
-              hasReachedMax: false,
-            );
-          }
-        } else
-          yield CategoryProblem(result);
+                categories: result,
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield CategoryProblem(result);
+          return;
+        } else if (!_hasReachedMax(currentState)) {
+          dynamic result = await repos.getCategory(
+              start: currentState.categories.length,
+              limit: event.limit,
+              search: event.search,
+              companyPartyId: event.companyPartyId);
+          if (result is List<ProductCategory>) {
+            yield currentState.copyWith(
+                categories: currentState.categories + result,
+                search: event.search,
+                hasReachedMax: result.length < event.limit ? true : false);
+          } else
+            yield CategoryProblem(result);
+        }
       }
     } else if (event is UpdateCategory) {
       bool adding = event.category.categoryId == null;
@@ -104,7 +118,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           yield CategoryProblem(result);
         }
       }
-    }
+    } else
+      print("===Event $event not found");
   }
 }
 
@@ -120,9 +135,11 @@ abstract class CategoryEvent extends Equatable {
 class FetchCategory extends CategoryEvent {
   final String companyPartyId;
   final int limit;
-  FetchCategory({this.companyPartyId, this.limit});
+  final String search;
+  FetchCategory({this.companyPartyId, this.limit, this.search});
   @override
-  String toString() => "FetchCategory company: $companyPartyId, limit: $limit";
+  String toString() => "FetchCategory company: $companyPartyId, "
+      "limit: $limit search: $search";
 }
 
 class DeleteCategory extends CategoryEvent {
@@ -171,15 +188,21 @@ class CategorySuccess extends CategoryState {
   final List<ProductCategory> categories;
   final bool hasReachedMax;
   final String message;
+  final String search;
 
-  const CategorySuccess({this.categories, this.hasReachedMax, this.message});
+  const CategorySuccess(
+      {this.categories, this.hasReachedMax, this.message, this.search});
 
   CategorySuccess copyWith(
-      {List<ProductCategory> categories, bool hasReachedMax, String message}) {
+      {List<ProductCategory> categories,
+      bool hasReachedMax,
+      String message,
+      String search}) {
     return CategorySuccess(
         categories: categories ?? this.categories,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        message: message ?? this.message);
+        message: message ?? this.message,
+        search: search ?? this.search);
   }
 
   @override
