@@ -32,12 +32,13 @@ class Authenticate {
   User user;
   Stats stats;
 
-  Authenticate(
-      {this.apiKey,
-      this.moquiSessionToken,
-      this.company,
-      this.user,
-      this.stats});
+  Authenticate({
+    this.apiKey,
+    this.moquiSessionToken,
+    this.company,
+    this.user,
+    this.stats,
+  });
 
   factory Authenticate.fromJson(Map<String, dynamic> json) => Authenticate(
         apiKey: json["apiKey"],
@@ -93,17 +94,18 @@ class Stats {
   });
 
   factory Stats.fromJson(Map<String, dynamic> json) => Stats(
-      admins: int.parse(json["admins"]),
-      employees: int.parse(json["employees"]),
-      suppliers: int.parse(json["suppliers"]),
-      leads: int.parse(json["leads"]),
-      customers: int.parse(json["customers"]),
-      openSlsOrders: int.parse(json["openSlsOrders"]),
-      openPurOrders: int.parse(json["openPurOrders"]),
-      opportunities: int.parse(json["opportunities"]),
-      myOpportunities: int.parse(json["myOpportunities"]),
-      categories: int.parse(json["categories"]),
-      products: int.parse(json["products"]));
+        admins: int.parse(json["admins"]),
+        employees: int.parse(json["employees"]),
+        suppliers: int.parse(json["suppliers"]),
+        leads: int.parse(json["leads"]),
+        customers: int.parse(json["customers"]),
+        openSlsOrders: int.parse(json["openSlsOrders"]),
+        openPurOrders: int.parse(json["openPurOrders"]),
+        opportunities: int.parse(json["opportunities"]),
+//      myOpportunities: int.parse(json["myOpportunities"]),
+        categories: int.parse(json["categories"]),
+        products: int.parse(json["products"]),
+      );
 
   Map<String, dynamic> toJson() => {
         "admins": admins.toString(),

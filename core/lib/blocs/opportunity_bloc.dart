@@ -53,7 +53,6 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
         if (event.search != null && currentState.search == null ||
             (currentState.search != null &&
                 event.search != currentState.search)) {
-          yield OpportunityLoading();
           dynamic result = await repos.getOpportunity(
               start: 0, limit: event.limit, all: false, search: event.search);
           if (result is List<Opportunity>)
@@ -133,7 +132,7 @@ abstract class OpportunityEvent extends Equatable {
 class FetchOpportunity extends OpportunityEvent {
   final limit;
   final String search;
-  FetchOpportunity({this.limit, this.search});
+  FetchOpportunity({this.limit = 20, this.search});
   @override
   String toString() => "FetchOpportunity limit: $limit, search: $search";
 }

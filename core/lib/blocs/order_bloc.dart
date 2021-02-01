@@ -148,14 +148,14 @@ class FetchOrder extends OrderEvent {
   final String search;
   FetchOrder({this.limit, this.search});
   @override
-  String toString() => "OrderFetched limit: $limit, search: $search";
+  String toString() => "FetchOrder limit: $limit, search: $search";
 }
 
 class CreateOrder extends OrderEvent {
   final Order order;
   CreateOrder(this.order);
   @override
-  String toString() => 'Creating order $order';
+  String toString() => 'CreateOrder $order';
 }
 
 class DeleteOrder extends OrderEvent {
@@ -170,7 +170,7 @@ class UpdateOrder extends OrderEvent {
   final Order newOrder;
   UpdateOrder(this.orders, this.newOrder);
   @override
-  String toString() => 'Updating order ${newOrder.orderId}';
+  String toString() => 'UpdateOrder ${newOrder.orderId}';
 }
 
 class CancelOrder extends OrderEvent {
@@ -178,7 +178,7 @@ class CancelOrder extends OrderEvent {
   final String orderId;
   CancelOrder(this.orders, this.orderId);
   @override
-  String toString() => 'Cancelling order $orderId';
+  String toString() => 'CancelOrder $orderId';
 }
 
 class NextStatButtonPressed extends OrderEvent {

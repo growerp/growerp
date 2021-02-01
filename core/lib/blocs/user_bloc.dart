@@ -60,19 +60,20 @@ class UserBloc extends Bloc<UserEvent, UserState>
           yield UserProblem(result);
         return;
       } else if (currentState is UserSuccess) {
-        if (event.search != null && currentState.search == null ||
-            (currentState.search != null &&
-                event.search != currentState.search)) {
-          yield UserLoading();
+        if (event.searchString != null && currentState.searchString == null ||
+            (currentState.searchString != null &&
+                event.searchString != currentState.searchString)) {
+          yield UserLoading("Searching for ${event.searchString}");
           dynamic result = await repos.getUser(
               userGroupId: userGroupId,
               start: 0,
               limit: event.limit,
-              search: event.search);
+              search: event.searchString);
           if (result is List<User>) {
             yield UserSuccess(
+                message: "result for search ${event.searchString}",
                 users: result,
-                search: event.search,
+                searchString: event.searchString,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield UserProblem(result);
@@ -81,12 +82,12 @@ class UserBloc extends Bloc<UserEvent, UserState>
           dynamic result = await repos.getUser(
               start: currentState.users.length,
               limit: event.limit,
-              search: event.search,
+              search: event.searchString,
               userGroupId: userGroupId);
           if (result is List<User>) {
             yield currentState.copyWith(
                 users: currentState.users + result,
-                search: event.search,
+                search: event.searchString,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield UserProblem(result);
@@ -156,10 +157,10 @@ class LoadUser extends UserEvent {
 
 class FetchUser extends UserEvent {
   final int limit;
-  final String search;
-  FetchUser({this.limit, this.search});
+  final String searchString;
+  FetchUser({this.limit = 20, this.searchString});
   @override
-  String toString() => 'FetchUser with limit $limit search: $search';
+  String toString() => 'FetchUser with limit $limit search: $searchString';
 }
 
 class UpdateUser extends UserEvent {
@@ -212,10 +213,10 @@ class UserSuccess extends UserState {
   final List<User> users;
   final message;
   final bool hasReachedMax;
-  final String search;
+  final String searchString;
 
   const UserSuccess(
-      {this.users, this.message, this.hasReachedMax, this.search});
+      {this.users, this.message, this.hasReachedMax, this.searchString});
 
   UserSuccess copyWith(
       {List<User> users, String message, bool hasReachedMax, String search}) {
@@ -223,7 +224,7 @@ class UserSuccess extends UserState {
         users: users ?? this.users,
         message: message ?? this.message,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        search: search ?? this.search);
+        searchString: searchString ?? this.searchString);
   }
 
   @override

@@ -18,14 +18,12 @@ class LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Center(
-          child: Card(
-            child: Container(
-              width: 80,
-              height: 80,
-              color: Colors.white,
-              padding: EdgeInsets.all(12.0),
-              child: CircularProgressIndicator(),
-            ),
+          child: Container(
+            width: 80,
+            height: 80,
+            color: Colors.transparent,
+            padding: EdgeInsets.all(12.0),
+            child: CircularProgressIndicator(),
           ),
         ),
       );
