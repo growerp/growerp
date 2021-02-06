@@ -243,6 +243,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                           )),
                       SizedBox(height: 20),
                       RaisedButton(
+                          key: Key('loginButton'),
                           child: Text('Login'),
                           onPressed: () {
                             if (_formKey.currentState.validate() &&

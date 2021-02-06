@@ -42,7 +42,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.1"
+    version: "1.6.2"
   built_collection:
     dependency: transitive
     description:
@@ -280,7 +280,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "3c57235b140016d8e136f958b839eddf078a4dac"
+      resolved-ref: "3b4cb5e4b7477d62460f757addc3410015dce5be"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -339,14 +339,14 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.2"
+    version: "1.10.0"
   platform:
     dependency: transitive
     description:
       name: platform
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.1"
+    version: "3.0.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -423,7 +423,7 @@ packages:
       name: shared_preferences_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2+2"
+    version: "0.0.2+3"
   sky_engine:
     dependency: transitive
     description: flutter
