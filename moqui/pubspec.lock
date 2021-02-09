@@ -278,11 +278,9 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: models
-      ref: packages
-      resolved-ref: "3b4cb5e4b7477d62460f757addc3410015dce5be"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../models"
+      relative: true
+    source: path
     version: "0.0.1"
   node_interop:
     dependency: transitive
@@ -543,4 +541,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.17.0 <2.0.0"
+  flutter: ">=1.17.0"

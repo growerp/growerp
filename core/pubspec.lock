@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "3b4cb5e4b7477d62460f757addc3410015dce5be"
+      resolved-ref: d2446b7918a79f104b5b71a5f3309a826665fcad
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "3b4cb5e4b7477d62460f757addc3410015dce5be"
+      resolved-ref: d2446b7918a79f104b5b71a5f3309a826665fcad
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -848,4 +848,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.22.0 <2.0.0"
+  flutter: ">=1.22.0"

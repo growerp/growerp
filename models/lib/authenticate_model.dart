@@ -17,6 +17,8 @@
 //     final authenticate = authenticateFromJson(jsonString);
 
 import 'dart:convert';
+import 'package:decimal/decimal.dart';
+
 import 'user_model.dart';
 import 'company_model.dart';
 
@@ -78,6 +80,10 @@ class Stats {
   int myOpportunities;
   int categories;
   int products;
+  int salesInvoicesNotPaidCount;
+  Decimal salesInvoicesNotPaidAmount;
+  int purchInvoicesNotPaidCount;
+  Decimal purchInvoicesNotPaidAmount;
 
   Stats({
     this.admins,
@@ -91,6 +97,10 @@ class Stats {
     this.myOpportunities,
     this.categories,
     this.products,
+    this.salesInvoicesNotPaidCount,
+    this.salesInvoicesNotPaidAmount,
+    this.purchInvoicesNotPaidCount,
+    this.purchInvoicesNotPaidAmount,
   });
 
   factory Stats.fromJson(Map<String, dynamic> json) => Stats(
@@ -102,9 +112,15 @@ class Stats {
         openSlsOrders: int.parse(json["openSlsOrders"]),
         openPurOrders: int.parse(json["openPurOrders"]),
         opportunities: int.parse(json["opportunities"]),
-//      myOpportunities: int.parse(json["myOpportunities"]),
+        myOpportunities: int.parse(json["myOpportunities"]),
         categories: int.parse(json["categories"]),
         products: int.parse(json["products"]),
+        salesInvoicesNotPaidCount: int.parse(json["salesInvoicesNotPaidCount"]),
+        salesInvoicesNotPaidAmount:
+            Decimal.parse(json["salesInvoicesNotPaidAmount"]),
+        purchInvoicesNotPaidCount: int.parse(json["purchInvoicesNotPaidCount"]),
+        purchInvoicesNotPaidAmount:
+            Decimal.parse(json["purchInvoicesNotPaidAmount"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -119,6 +135,10 @@ class Stats {
         "myOpportunities": myOpportunities.toString(),
         "categories": categories.toString(),
         "products": products.toString(),
+        "salesInvoicesNotPaidCount": salesInvoicesNotPaidCount.toString(),
+        "salesInvoicesNotPaidAmount": salesInvoicesNotPaidAmount.toString(),
+        "purchInvoicesNotPaidCount": purchInvoicesNotPaidCount.toString(),
+        "purchInvoicesNotPaidAmount": purchInvoicesNotPaidAmount.toString()
       };
   @override
   String toString() {
