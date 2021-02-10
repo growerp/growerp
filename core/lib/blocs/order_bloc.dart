@@ -46,8 +46,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState>
     final currentState = state;
     if (event is FetchOrder) {
       if (currentState is OrderInitial) {
-        dynamic result =
-            await repos.getOrder(sales: sales, start: 0, limit: event.limit);
+        dynamic result = await repos.getOrder(
+            sales: sales, start: 0, limit: event.limit, search: event.search);
         if (result is List<Order>)
           yield OrderSuccess(
             orders: result,
@@ -61,7 +61,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState>
         if (event.search != null && currentState.search == null ||
             (currentState.search != null &&
                 event.search != currentState.search)) {
-          yield OrderLoading();
           dynamic result = await repos.getOrder(
               sales: sales, start: 0, limit: event.limit, search: event.search);
           if (result is List<Order>)
@@ -88,16 +87,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState>
       }
     } else if (currentState is OrderSuccess) {
       if (event is CreateOrder) {
-        yield OrderLoading('Create Order...');
+        yield OrderLoading('Creating Order...');
         dynamic result = await repos.updateOrder(event.order);
         if (result is Order) {
           currentState.orders.add(result);
           yield currentState.copyWith(
               message: "order created id: ${result.orderId}");
         } else
-          yield OrderProblem(result);
+          yield currentState.copyWith(errorMessage: result);
       } else if (event is UpdateOrder) {
-        yield OrderLoading('Update order: ${event.order}');
+        yield OrderLoading('Update order: ${event.order.orderId}');
         dynamic result = await repos.updateOrder(event.order);
         if (result is Order) {
           int index = currentState.orders
@@ -106,7 +105,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState>
           yield currentState.copyWith(
               message: "status update to ${event.order.orderStatusId}");
         } else
-          yield OrderProblem(result);
+          yield currentState.copyWith(errorMessage: result);
       }
     }
   }
@@ -174,17 +173,27 @@ class OrderProblem extends OrderState {
 class OrderSuccess extends OrderState {
   final List<Order> orders;
   final String message;
+  final String errorMessage;
   final bool hasReachedMax;
   final String search;
 
   const OrderSuccess(
-      {this.orders, this.message, this.hasReachedMax, this.search});
+      {this.orders,
+      this.message,
+      this.errorMessage,
+      this.hasReachedMax,
+      this.search});
 
   OrderSuccess copyWith(
-      {List<Order> orders, String message, bool hasReachedMax, String search}) {
+      {List<Order> orders,
+      String message,
+      String errorMessage,
+      bool hasReachedMax,
+      String search}) {
     return OrderSuccess(
         orders: orders ?? this.orders,
         message: message ?? this.message,
+        errorMessage: errorMessage ?? this.errorMessage,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         search: search ?? this.search);
   }

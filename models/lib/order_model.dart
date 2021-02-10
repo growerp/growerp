@@ -85,7 +85,7 @@ class Order {
 
   String toString() => 'order# $orderId sales? $sales '
       ' ${deliveryDate != null ? deliveryDate.toString : ""} '
-      'otherUser: $otherUser '
+      'otherUser: $otherUser invoiceId: $invoiceId, paymentId: $paymentId'
       'orderItems: ${orderItems.length}';
 }
 
