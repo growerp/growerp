@@ -35,6 +35,7 @@ class Order {
   String orderId;
   String orderStatusId;
   DateTime placedDate;
+  DateTime deliveryDate;
   bool sales;
   User otherUser;
   Decimal grandTotal;
@@ -46,6 +47,7 @@ class Order {
     this.orderId,
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
     this.placedDate,
+    this.deliveryDate,
     this.sales,
     this.otherUser,
     this.grandTotal,
@@ -58,6 +60,7 @@ class Order {
         orderId: json["orderId"],
         orderStatusId: json["orderStatusId"],
         placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
+        deliveryDate: DateTime.tryParse(json["deliveryDate"] ?? ''),
         sales: json["sales"] == "true",
         otherUser: User.fromJson(json["otherUser"]),
         grandTotal: Decimal.parse(json["grandTotal"]),
@@ -71,6 +74,7 @@ class Order {
         "orderId": orderId,
         "orderStatusId": orderStatusId,
         "placedDate": placedDate.toString(),
+        "deliveryDate": deliveryDate.toString(),
         "sales": sales.toString(),
         "otherUser": otherUser?.toJson(),
         "grandTotal": grandTotal.toString(),
@@ -80,6 +84,7 @@ class Order {
       };
 
   String toString() => 'order# $orderId sales? $sales '
+      ' ${deliveryDate != null ? deliveryDate.toString : ""} '
       'otherUser: $otherUser '
       'orderItems: ${orderItems.length}';
 }
@@ -90,23 +95,22 @@ class OrderItem {
   String description;
   Decimal quantity;
   Decimal price;
-  DateTime deliveryDate; // date for reservations
 
-  OrderItem(
-      {this.orderItemSeqId,
-      this.productId,
-      this.description,
-      this.quantity,
-      this.price,
-      this.deliveryDate});
+  OrderItem({
+    this.orderItemSeqId,
+    this.productId,
+    this.description,
+    this.quantity,
+    this.price,
+  });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-      orderItemSeqId: int.parse(json["orderItemSeqId"]),
-      productId: json["productId"],
-      description: json["description"],
-      quantity: Decimal.parse(json["quantity"]),
-      price: Decimal.parse(json["price"]),
-      deliveryDate: DateTime.tryParse(json["deliveryDate"] ?? ''));
+        orderItemSeqId: int.parse(json["orderItemSeqId"]),
+        productId: json["productId"],
+        description: json["description"],
+        quantity: Decimal.parse(json["quantity"]),
+        price: Decimal.parse(json["price"]),
+      );
 
   Map<String, dynamic> toJson() => {
         "orderItemSeqId": orderItemSeqId.toString(),
@@ -114,11 +118,9 @@ class OrderItem {
         "description": description,
         "quantity": quantity.toString(),
         "price": price.toString(),
-        "deliveryDate": deliveryDate.toString(),
       };
 
-  String toString() => 'OrderItem: $orderItemSeqId product: $productId $price '
-      ' ${deliveryDate != null ? deliveryDate.toString : ""} ';
+  String toString() => 'OrderItem: $orderItemSeqId product: $productId $price ';
 }
 
 List<String> orderStatusValues = [
@@ -132,6 +134,6 @@ Map nextOrderStatus = {
   'OrderOpen': 'OrderPlaced',
   'OrderPlaced': 'OrderApproved',
   'OrderApproved': 'OrderCompleted',
-  'OrderCompleted': 'No Change',
-  'OrderCancelled': 'No Change'
+  'OrderCompleted': 'OrderCompleted',
+  'OrderCancelled': 'OrderCancelled'
 };

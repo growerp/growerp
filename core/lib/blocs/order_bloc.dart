@@ -86,46 +86,28 @@ class OrderBloc extends Bloc<OrderEvent, OrderState>
             yield OrderProblem(result);
         }
       }
-    } else if (event is LoadOrder) {
-      yield OrderLoading('Loading orders...');
-      dynamic result = await repos.getOrder();
-      if (result is List<Order>) {
-        orders = result;
-        yield OrderLoaded(orders);
-      } else {
-        yield OrderProblem(result);
+    } else if (currentState is OrderSuccess) {
+      if (event is CreateOrder) {
+        yield OrderLoading('Create Order...');
+        dynamic result = await repos.updateOrder(event.order);
+        if (result is Order) {
+          currentState.orders.add(result);
+          yield currentState.copyWith(
+              message: "order created id: ${result.orderId}");
+        } else
+          yield OrderProblem(result);
+      } else if (event is UpdateOrder) {
+        yield OrderLoading('Update order: ${event.order}');
+        dynamic result = await repos.updateOrder(event.order);
+        if (result is Order) {
+          int index = currentState.orders
+              .indexWhere((ord) => ord.orderId == result.orderId);
+          currentState.orders.replaceRange(index, index + 1, [result]);
+          yield currentState.copyWith(
+              message: "status update to ${event.order.orderStatusId}");
+        } else
+          yield OrderProblem(result);
       }
-    } else if (event is CreateOrder) {
-      yield OrderLoading('Create Order...');
-      dynamic result = await repos.updateOrder(event.order);
-      if (result is Order) {
-        orders.add(result);
-        yield OrderLoaded(orders, "Order created");
-      } else
-        yield OrderProblem(result);
-    } else if (event is NextStatButtonPressed) {
-      String newStatusId;
-      switch (event.order.orderStatusId) {
-        case 'OrderOpen':
-          newStatusId = 'OrderPlaced';
-          break;
-        case 'OrderPlaced':
-          newStatusId = 'OrderApproved';
-          break;
-        case 'OrderApproved':
-          newStatusId = 'OrderCompleted';
-          break;
-      }
-      yield OrderLoading('Next status: $newStatusId...');
-      event.order.orderStatusId = newStatusId;
-      dynamic result = await repos.updateOrder(event.order);
-      if (result is Order) {
-        int index = orders.indexWhere((x) => x.orderId == result.orderId);
-        orders.replaceRange(index, index + 1, [event.order]);
-        yield OrderLoaded(
-            orders, "status update to ${event.order.orderStatusId}");
-      } else
-        yield OrderProblem(result);
     }
   }
 }
@@ -158,34 +140,11 @@ class CreateOrder extends OrderEvent {
   String toString() => 'CreateOrder $order';
 }
 
-class DeleteOrder extends OrderEvent {
-  final int index;
-  DeleteOrder(this.index);
-  @override
-  String toString() => "DeleteOrder: $index";
-}
-
 class UpdateOrder extends OrderEvent {
-  final List<Order> orders;
-  final Order newOrder;
-  UpdateOrder(this.orders, this.newOrder);
-  @override
-  String toString() => 'UpdateOrder ${newOrder.orderId}';
-}
-
-class CancelOrder extends OrderEvent {
-  final List<Order> orders;
-  final String orderId;
-  CancelOrder(this.orders, this.orderId);
-  @override
-  String toString() => 'CancelOrder $orderId';
-}
-
-class NextStatButtonPressed extends OrderEvent {
   final Order order;
-  NextStatButtonPressed(this.order);
+  UpdateOrder(this.order);
   @override
-  String toString() => 'Next status Pressed order ${order.orderStatusId}';
+  String toString() => 'UpdateOrder $order';
 }
 
 // ================= state ========================
@@ -203,14 +162,6 @@ class OrderLoading extends OrderState {
   const OrderLoading([this.message]);
   @override
   String toString() => 'Order loading, $message';
-}
-
-class OrderLoaded extends OrderState {
-  final List<Order> orders;
-  final String message;
-  const OrderLoaded(this.orders, [this.message]);
-  @override
-  String toString() => 'Orders loaded, ${orders?.length}';
 }
 
 class OrderProblem extends OrderState {
