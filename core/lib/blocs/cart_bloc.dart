@@ -36,12 +36,9 @@ class CartBloc extends Bloc<CartEvent, CartState>
   Stream<CartState> mapEventToState(CartEvent event) async* {
     if (event is LoadCart) {
       yield CartLoading();
-      print("===cartbloc load order: ${event.order}");
       if (event.order.orderId == null)
         order = await repos.getCart(sales: event.order.sales);
-      print("===cartbloc pref order: $order");
       if (order == null) order = event.order;
-      print("===cartbloc returned order: $order");
       yield CartLoaded(order, "cart initial load.");
     } else if (event is AddToCart) {
       yield CartLoading();
@@ -74,7 +71,6 @@ class CartBloc extends Bloc<CartEvent, CartState>
               : "Cart cleared");
     } else if (event is CreateOrderFromCart) {
       yield CartLoading('Saving order...');
-      print("saving order $order");
       try {
         orderBloc.add(CreateOrder(order));
         order = Order(grandTotal: Decimal.parse('0'), orderItems: []);

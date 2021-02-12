@@ -112,8 +112,8 @@ class User extends Equatable {
       ];
   @override
   String toString() {
-    return 'User $firstName $lastName [$partyId] sec: $userGroupId img size: '
-        '${image?.length}';
+    return 'User $firstName $lastName [$partyId] sec: $userGroupId '
+        'company: $companyName[$companyPartyId] size: ${image?.length}';
   }
 }
 
