@@ -61,7 +61,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                 search: event.search,
                 hasReachedMax: result.length < event.limit ? true : false);
           else
-            yield OpportunityProblem(result);
+            yield currentState.copyWith(errorMessage: result);
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getOpportunity(
               start: currentState.opportunities.length,
@@ -74,7 +74,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                 search: event.search,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
-            yield OpportunityProblem(result);
+            yield currentState.copyWith(errorMessage: result);
         }
       }
     } else if (event is UpdateOpportunity) {
@@ -97,7 +97,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
               .copyWith(
                   message: 'Opportunity ' + (adding ? 'added' : 'updated'));
         } else {
-          yield OpportunityProblem(result);
+          yield OpportunitySuccess(errorMessage: result);
         }
       }
     } else if (event is DeleteOpportunity) {
@@ -182,20 +182,27 @@ class OpportunityProblem extends OpportunityState {
 class OpportunitySuccess extends OpportunityState {
   final List<Opportunity> opportunities;
   final String message;
+  final errorMessage;
   final bool hasReachedMax;
   final String search;
 
   const OpportunitySuccess(
-      {this.opportunities, this.message, this.hasReachedMax, this.search});
+      {this.opportunities,
+      this.message,
+      this.errorMessage,
+      this.hasReachedMax,
+      this.search});
 
   OpportunitySuccess copyWith(
       {List<Opportunity> opportunities,
       String message,
+      String errorMessage,
       bool hasReachedMax,
       String search}) {
     return OpportunitySuccess(
         opportunities: opportunities ?? this.opportunities,
         message: message ?? this.message,
+        errorMessage: errorMessage ?? this.errorMessage,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         search: search ?? this.search);
   }
