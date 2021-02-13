@@ -97,7 +97,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
               .copyWith(
                   message: 'Opportunity ' + (adding ? 'added' : 'updated'));
         } else {
-          yield OpportunitySuccess(errorMessage: result);
+          yield currentState.copyWith(errorMessage: result);
         }
       }
     } else if (event is DeleteOpportunity) {
@@ -113,7 +113,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                   hasReachedMax: _hasReachedMax(currentState))
               .copyWith(message: 'Opportunity $name deleted');
         } else {
-          yield OpportunityProblem(result);
+          yield currentState.copyWith(errorMessage: result);
         }
       }
     }
@@ -182,7 +182,7 @@ class OpportunityProblem extends OpportunityState {
 class OpportunitySuccess extends OpportunityState {
   final List<Opportunity> opportunities;
   final String message;
-  final errorMessage;
+  final String errorMessage;
   final bool hasReachedMax;
   final String search;
 
@@ -201,7 +201,7 @@ class OpportunitySuccess extends OpportunityState {
       String search}) {
     return OpportunitySuccess(
         opportunities: opportunities ?? this.opportunities,
-        message: message ?? this.message,
+        message: message ?? errorMessage == null ? this.message : null,
         errorMessage: errorMessage ?? this.errorMessage,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         search: search ?? this.search);
@@ -212,6 +212,6 @@ class OpportunitySuccess extends OpportunityState {
 
   @override
   String toString() =>
-      'OpportunitySuccess { #opportunities: ${opportunities.length}, '
+      'OpportunitySuccess { #opportunities: ${opportunities?.length}, '
       'hasReachedMax: $hasReachedMax }';
 }
