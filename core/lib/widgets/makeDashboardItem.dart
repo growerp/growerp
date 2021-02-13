@@ -26,8 +26,9 @@ Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
         decoration: BoxDecoration(color: Color.fromRGBO(220, 220, 220, 1.0)),
         child: new InkWell(
           onTap: () {
-            Navigator.pushNamed(context, menuItem.route,
-                arguments: FormArguments());
+            if (menuItem.route != null)
+              Navigator.pushNamed(context, menuItem.route,
+                  arguments: FormArguments());
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
