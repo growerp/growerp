@@ -34,7 +34,8 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             child: InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, '/user',
-                      arguments: FormArguments(object: authenticate.user));
+                      arguments: FormArguments(
+                          object: authenticate.user, menuIndex: MENU_COMPANY));
                 },
                 child: Column(children: [
                   SizedBox(height: 5),

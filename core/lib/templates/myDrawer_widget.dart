@@ -37,8 +37,9 @@ Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone) {
                   child: InkWell(
                       onTap: () {
                         Navigator.pushNamed(context, '/user',
-                            arguments:
-                                FormArguments(object: authenticate.user));
+                            arguments: FormArguments(
+                                object: authenticate.user,
+                                menuIndex: MENU_COMPANY));
                       },
                       child: Column(children: [
                         CircleAvatar(
