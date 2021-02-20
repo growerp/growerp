@@ -70,13 +70,12 @@ class UserBloc extends Bloc<UserEvent, UserState>
               limit: event.limit,
               search: event.searchString);
           if (result is List<User>) {
-            yield UserSuccess(
+            yield currentState.copyWith(
                 message: "result for search ${event.searchString}",
-                users: result,
-                searchString: event.searchString,
+                users: currentState.users + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
-            yield UserProblem(result);
+            yield currentState.copyWith(message: result, error: true);
           return;
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getUser(
@@ -87,10 +86,10 @@ class UserBloc extends Bloc<UserEvent, UserState>
           if (result is List<User>) {
             yield currentState.copyWith(
                 users: currentState.users + result,
-                search: event.searchString,
+                searchString: event.searchString,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
-            yield UserProblem(result);
+            yield currentState.copyWith(message: result, error: true);
         }
       }
     } else if (event is UpdateUser) {
@@ -109,10 +108,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
             currentState.users.replaceRange(index, index + 1, [result]);
             print("userbloc userupdate after: ${currentState.users[index]}");
           }
-          yield UserSuccess(
-                  users: currentState.users,
-                  hasReachedMax: currentState.hasReachedMax)
-              .copyWith(message: 'User ' + (adding ? 'added' : 'updated'));
+          yield currentState.copyWith(
+              message: 'User ' + (adding ? 'added' : 'updated'));
         } else {
           yield UserProblem(result);
         }
@@ -126,12 +123,9 @@ class UserBloc extends Bloc<UserEvent, UserState>
           int index =
               currentState.users.indexWhere((user) => user.partyId == result);
           currentState.users.removeAt(index);
-          yield UserSuccess(
-                  users: currentState.users,
-                  hasReachedMax: currentState.hasReachedMax)
-              .copyWith(message: 'User $name deleted');
+          yield currentState.copyWith(message: 'User $name deleted');
         } else {
-          yield UserProblem(result);
+          yield currentState.copyWith(message: result, error: true);
         }
       }
     }
@@ -211,18 +205,28 @@ class UserLoaded extends UserState {
 
 class UserSuccess extends UserState {
   final List<User> users;
-  final message;
+  final String message;
+  final bool error;
   final bool hasReachedMax;
   final String searchString;
 
   const UserSuccess(
-      {this.users, this.message, this.hasReachedMax, this.searchString});
+      {this.users,
+      this.message,
+      this.error = false,
+      this.hasReachedMax,
+      this.searchString});
 
   UserSuccess copyWith(
-      {List<User> users, String message, bool hasReachedMax, String search}) {
+      {List<User> users,
+      String message,
+      bool error = false,
+      bool hasReachedMax,
+      String searchString}) {
     return UserSuccess(
         users: users ?? this.users,
-        message: message ?? this.message,
+        message: message,
+        error: error,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         searchString: searchString ?? this.searchString);
   }
@@ -231,6 +235,6 @@ class UserSuccess extends UserState {
   List<Object> get props => [users, hasReachedMax];
 
   @override
-  String toString() =>
-      'UserSuccess { length: ${users.length}, usersMax: $hasReachedMax }';
+  String toString() => 'UserSuccess { length: ${users.length}, '
+      'hasReachedMax: $hasReachedMax message $message error: $error}';
 }

@@ -12,14 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-const MENU_DASHBOARD = 0;
-const MENU_COMPANY = 1;
-const MENU_CRM = 2;
-const MENU_CATALOG = 3;
-const MENU_SALES = 4;
-const MENU_PURCHASE = 5;
-const MENU_ACCOUNTING = 6;
-
 class MenuItem {
   int menuItemId;
   String image;
@@ -48,7 +40,7 @@ List<MenuItem> menuItems = [
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "DashBoard",
-      route: '/home',
+      route: '/',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
       menuItemId: 1,

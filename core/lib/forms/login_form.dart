@@ -41,7 +41,7 @@ class LoginForm extends StatelessWidget {
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.home),
-                onPressed: () => Navigator.pushNamed(context, '/home')),
+                onPressed: () => Navigator.pushNamed(context, '/')),
           ],
         ),
         body: BlocProvider(
@@ -176,9 +176,9 @@ class _LoginHeaderState extends State<LoginHeader> {
                             BlocProvider.of<AuthBloc>(context)
                                 .add(UpdateAuth(authenticate));
                             Navigator.pushNamedAndRemoveUntil(
-                                context, '/home', ModalRoute.withName('/home'),
+                                context, '/', ModalRoute.withName('/'),
                                 arguments: FormArguments(
-                                    "Ecommerce company changed!"));
+                                    message: "Ecommerce company changed!"));
                           },
                           isExpanded: true,
                         ),
@@ -242,7 +242,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                             ),
                           )),
                       SizedBox(height: 20),
-                      RaisedButton(
+                      ElevatedButton(
                           key: Key('loginButton'),
                           child: Text('Login'),
                           onPressed: () {

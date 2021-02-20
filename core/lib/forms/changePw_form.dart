@@ -164,7 +164,7 @@ class _ChangePwEntryState extends State<ChangePwEntry> {
                         },
                       ),
                       SizedBox(height: 20),
-                      RaisedButton(
+                      ElevatedButton(
                           child: Text('Submit new Password'),
                           onPressed: () {
                             if (_formKey.currentState.validate() &&

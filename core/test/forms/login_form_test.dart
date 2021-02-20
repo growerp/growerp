@@ -110,7 +110,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(Key('username')), username);
       await tester.enterText(find.byKey(Key('password')), password);
-      await tester.tap(find.widgetWithText(RaisedButton, 'Login'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
       await tester.pumpAndSettle();
 
       whenListen(

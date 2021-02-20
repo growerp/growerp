@@ -20,8 +20,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:models/@models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
-import '../widgets/@widgets.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class CompanyInfoForm extends StatelessWidget {
   final FormArguments formArguments;
@@ -29,9 +27,7 @@ class CompanyInfoForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var a = (formArguments) =>
-        (CompanyPage(formArguments.message, formArguments.tab));
-    return ShowNavigationRail(a(formArguments));
+    return CompanyPage(formArguments.message, formArguments.menuIndex);
   }
 }
 
@@ -258,7 +254,7 @@ class _CompanyState extends State<CompanyPage> {
                       SizedBox(height: 20),
                       Visibility(
                           visible: isAdmin,
-                          child: RaisedButton(
+                          child: ElevatedButton(
                               key: Key('update'),
                               child: Text(updatedCompany.partyId == null
                                   ? 'Create'

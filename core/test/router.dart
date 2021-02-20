@@ -31,9 +31,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => ChangePwForm(changePwArgs: settings.arguments));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
-    case '/companyInfo':
-      return MaterialPageRoute(
-          builder: (context) => CompanyInfoForm(settings.arguments));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(

@@ -42,7 +42,7 @@ class RegisterForm extends StatelessWidget {
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.home),
-                onPressed: () => Navigator.pushNamed(context, '/home',
+                onPressed: () => Navigator.pushNamed(context, '/',
                     arguments: FormArguments()))
           ],
         ),
@@ -113,9 +113,9 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                     ' you can now login with your email password');
           } else {
             Navigator.pushNamedAndRemoveUntil(
-                context, '/home', ModalRoute.withName('/home'),
-                arguments:
-                    FormArguments("Register Company and admin successfull\n"
+                context, '/', ModalRoute.withName('/'),
+                arguments: FormArguments(
+                    message: "Register Company and admin successfull\n"
                         "you can now login with the password\n"
                         "you can find in the email which was send to you."));
           }
@@ -182,7 +182,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                             visible: authenticate?.company?.partyId != null,
                             child: Column(children: [
                               SizedBox(height: 20),
-                              RaisedButton(
+                              ElevatedButton(
                                   key: Key('newCustomer'),
                                   child: Text('Register as a customer'),
                                   onPressed: () {
@@ -258,7 +258,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 isExpanded: true,
                               ),
                               SizedBox(height: 20),
-                              RaisedButton(
+                              ElevatedButton(
                                   key: Key('newCompany'),
                                   child:
                                       Text('Register AND create a new Company'),

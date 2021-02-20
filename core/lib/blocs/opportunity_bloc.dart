@@ -56,12 +56,11 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
           dynamic result = await repos.getOpportunity(
               start: 0, limit: event.limit, all: false, search: event.search);
           if (result is List<Opportunity>)
-            yield OpportunitySuccess(
-                opportunities: result,
-                search: event.search,
+            yield currentState.copyWith(
+                opportunities: currentState.opportunities + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           else
-            yield currentState.copyWith(errorMessage: result);
+            yield currentState.copyWith(message: result, error: true);
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getOpportunity(
               start: currentState.opportunities.length,
@@ -71,13 +70,13 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
           if (result is List<Opportunity>) {
             yield currentState.copyWith(
                 opportunities: currentState.opportunities + result,
-                search: event.search,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
-            yield currentState.copyWith(errorMessage: result);
+            yield currentState.copyWith(message: result, error: true);
         }
       }
     } else if (event is UpdateOpportunity) {
+      // return to opportunity detail
       bool adding = event.opportunity.opportunityId == null;
       yield OpportunityLoading((adding ? 'adding' : 'updating') +
           ' opportunity ${event.opportunity.opportunityName}');
@@ -91,29 +90,25 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                 .indexWhere((p) => p.opportunityId == result.opportunityId);
             currentState.opportunities.replaceRange(index, index + 1, [result]);
           }
-          yield OpportunitySuccess(
-                  opportunities: currentState.opportunities,
-                  hasReachedMax: currentState.hasReachedMax)
-              .copyWith(
-                  message: 'Opportunity ' + (adding ? 'added' : 'updated'));
+          yield currentState.copyWith(
+              message: 'Opportunity ' + (adding ? 'added' : 'updated'));
         } else {
-          yield currentState.copyWith(errorMessage: result);
+          yield OpportunityProblem(result);
         }
       }
     } else if (event is DeleteOpportunity) {
       if (currentState is OpportunitySuccess) {
         String name = currentState.opportunities[event.index].opportunityName;
+        String id = currentState.opportunities[event.index].opportunityId;
         yield OpportunityLoading('deleting opportunity $name');
         dynamic result = await repos.deleteOpportunity(
             currentState.opportunities[event.index].opportunityId);
         if (result == currentState.opportunities[event.index].opportunityId) {
           currentState.opportunities.removeAt(event.index);
-          yield OpportunitySuccess(
-                  opportunities: currentState.opportunities,
-                  hasReachedMax: _hasReachedMax(currentState))
-              .copyWith(message: 'Opportunity $name deleted');
+          yield currentState.copyWith(
+              message: 'Opportunity $name[$id] deleted');
         } else {
-          yield currentState.copyWith(errorMessage: result);
+          yield currentState.copyWith(message: result, error: true);
         }
       }
     }
@@ -182,27 +177,27 @@ class OpportunityProblem extends OpportunityState {
 class OpportunitySuccess extends OpportunityState {
   final List<Opportunity> opportunities;
   final String message;
-  final String errorMessage;
+  final bool error;
   final bool hasReachedMax;
   final String search;
 
   const OpportunitySuccess(
       {this.opportunities,
       this.message,
-      this.errorMessage,
+      this.error = false,
       this.hasReachedMax,
       this.search});
 
   OpportunitySuccess copyWith(
       {List<Opportunity> opportunities,
       String message,
-      String errorMessage,
+      bool error = false,
       bool hasReachedMax,
       String search}) {
     return OpportunitySuccess(
         opportunities: opportunities ?? this.opportunities,
-        message: message ?? errorMessage == null ? this.message : null,
-        errorMessage: errorMessage ?? this.errorMessage,
+        message: message,
+        error: error,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         search: search ?? this.search);
   }
@@ -213,5 +208,5 @@ class OpportunitySuccess extends OpportunityState {
   @override
   String toString() =>
       'OpportunitySuccess { #opportunities: ${opportunities?.length}, '
-      'hasReachedMax: $hasReachedMax }';
+      'hasReachedMax: $hasReachedMax message $message error: $error}';
 }

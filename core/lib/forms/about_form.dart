@@ -16,12 +16,11 @@ import 'package:about/about.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../widgets/@widgets.dart';
 
 class AboutForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ShowNavigationRail(AboutFormHeader(), 2);
+    return AboutFormHeader();
   }
 }
 

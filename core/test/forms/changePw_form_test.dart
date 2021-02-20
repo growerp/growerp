@@ -60,7 +60,7 @@ void main() {
       await tester.enterText(find.byKey(Key('password1')), newPassword);
       await tester.enterText(find.byKey(Key('password2')), newPassword);
       await tester
-          .tap(find.widgetWithText(RaisedButton, 'Submit new Password'));
+          .tap(find.widgetWithText(ElevatedButton, 'Submit new Password'));
       await tester.pumpAndSettle();
       whenListen(
           changePwBloc,
