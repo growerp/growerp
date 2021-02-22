@@ -136,7 +136,7 @@ class FetchCategory extends CategoryEvent {
   final String companyPartyId;
   final int limit;
   final String search;
-  FetchCategory({this.companyPartyId, this.limit, this.search});
+  FetchCategory({this.companyPartyId, this.limit = 20, this.search});
   @override
   String toString() => "FetchCategory company: $companyPartyId, "
       "limit: $limit search: $search";

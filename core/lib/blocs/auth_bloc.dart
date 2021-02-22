@@ -30,11 +30,9 @@ import '../helper_functions.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
-  final CategoryBloc categoryBloc;
-  final ProductBloc productBloc;
   Authenticate authenticate;
 
-  AuthBloc(this.repos, this.categoryBloc, this.productBloc)
+  AuthBloc(this.repos)
       : assert(repos != null),
         super(AuthInitial());
 
@@ -66,13 +64,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         dynamic result = await repos.checkApikey();
         if (result is bool && result) {
           //print("===11====");
-          if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
-            //ignore when test
-            categoryBloc.add(FetchCategory(
-                companyPartyId: authenticate.company.partyId, limit: 20));
-            productBloc.add(FetchProduct(
-                companyPartyId: authenticate.company.partyId, limit: 20));
-          }
           return AuthAuthenticated(authenticate);
         } else {
           //print("===12====");
@@ -119,13 +110,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthLoading();
       await repos.persistAuthenticate(event.authenticate);
       authenticate = event.authenticate;
-      // only load crmbloc when logged in
-      if (kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST')) {
-        categoryBloc.add(FetchCategory(
-            companyPartyId: authenticate.company.partyId, limit: 20));
-        productBloc.add(FetchProduct(
-            companyPartyId: authenticate.company.partyId, limit: 20));
-      }
       yield AuthAuthenticated(authenticate, "Successfully logged in");
     } else if (event is Logout) {
       yield AuthLoading();

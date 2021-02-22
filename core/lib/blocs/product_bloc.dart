@@ -143,9 +143,11 @@ abstract class ProductEvent extends Equatable {
 
 class FetchProduct extends ProductEvent {
   final String companyPartyId;
+  final String categoryId;
   final int limit;
   final search;
-  FetchProduct({this.companyPartyId, this.limit, this.search});
+  FetchProduct(
+      {this.companyPartyId, this.categoryId, this.limit = 20, this.search});
   @override
   String toString() => "FetchProduct company: $companyPartyId, "
       "limit: $limit, search: $search";

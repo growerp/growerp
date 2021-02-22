@@ -484,6 +484,7 @@ class Moqui {
       {int start,
       int limit,
       String companyPartyId,
+      String categoryId,
       String productId,
       String filter,
       String search}) async {
@@ -491,6 +492,7 @@ class Moqui {
       Response response =
           await client.get('rest/s1/growerp/100/Products', queryParameters: {
         'companyPartyId': companyPartyId,
+        'categoryId': categoryId,
         'productId': productId,
         'start': start,
         'limit': limit,
