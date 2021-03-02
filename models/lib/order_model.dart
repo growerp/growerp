@@ -36,6 +36,7 @@ class Order {
   String orderStatusId;
   DateTime placedDate;
   DateTime deliveryDate;
+  String description;
   bool sales;
   User otherUser;
   Decimal grandTotal;
@@ -48,6 +49,7 @@ class Order {
     this.orderStatusId, // 'OrderOpen','OrderPlaced','OrderApproved', 'OrderCompleted', 'OrderCancelled'
     this.placedDate,
     this.deliveryDate,
+    this.description,
     this.sales,
     this.otherUser,
     this.grandTotal,
@@ -61,6 +63,7 @@ class Order {
         orderStatusId: json["orderStatusId"],
         placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
         deliveryDate: DateTime.tryParse(json["deliveryDate"] ?? ''),
+        description: json["description"],
         sales: json["sales"] == "true",
         otherUser: User.fromJson(json["otherUser"]),
         grandTotal: Decimal.parse(json["grandTotal"]),
@@ -75,8 +78,9 @@ class Order {
         "orderStatusId": orderStatusId,
         "placedDate": placedDate.toString(),
         "deliveryDate": deliveryDate.toString(),
+        "description": description,
         "sales": sales.toString(),
-        "otherUser": otherUser?.toJson(),
+        "otherUser": otherUser == null ? null : otherUser.toJson(),
         "grandTotal": grandTotal.toString(),
         "invoiceId": invoiceId,
         "paymentId": paymentId,
@@ -91,6 +95,7 @@ class Order {
 
 class OrderItem {
   int orderItemSeqId;
+  String itemTypeId;
   String productId;
   String description;
   Decimal quantity;
@@ -98,6 +103,7 @@ class OrderItem {
 
   OrderItem({
     this.orderItemSeqId,
+    this.itemTypeId,
     this.productId,
     this.description,
     this.quantity,
@@ -106,6 +112,7 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
         orderItemSeqId: int.parse(json["orderItemSeqId"]),
+        itemTypeId: json["itemTypeId"],
         productId: json["productId"],
         description: json["description"],
         quantity: Decimal.parse(json["quantity"]),
@@ -114,6 +121,7 @@ class OrderItem {
 
   Map<String, dynamic> toJson() => {
         "orderItemSeqId": orderItemSeqId.toString(),
+        "itemTypeId": itemTypeId,
         "productId": productId,
         "description": description,
         "quantity": quantity.toString(),

@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:models/@models.dart';
 import 'dart:math';
 
@@ -76,37 +78,42 @@ List<User> users = usersFromJson('''
   ]}
 ''');
 
-Company company = companyFromJson('''
-    {  "company": {"name": "Dummy Company Name 2",
-                  "partyId": "100001",
-                  "currency": "dummyCurrency",
-                  "classificationId": "AppEcommerceShop",
-                  "classificationDescr": "App for Ecommerce and shop",
-                  "email": "dummy@example.com",
-      "image": "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-      }
-    }
-''');
-List<Company> companies = companiesFromJson('''
-  {"companies": [
-      {"name": "Dummy Company Name",
-        "partyId": "100001",
-        "currency": "dummyCurrency",
-        "classificationId": "AppEcommerceShop",
-        "classificationDescr": "App for Ecommerce and shop",
-        "email": "dummy@example.com",
-        "image": "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-      },
-      {  "name": "Dummy Company Name 2",
-          "partyId": "100002",
-          "currency": "dummyCurrency",
-          "classificationId": "AppEcommerceShop",
-          "classificationDescr": "App for Ecommerce and shop",
-          "email": "dummy@example.com",
-      "image": "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-      }
-  ]}
-''');
+List<ItemType> salesItems = [
+  ItemType(itemTypeId: "slstype1", description: "slstype 1 description"),
+  ItemType(itemTypeId: "slstype2", description: "slstype 2 description"),
+  ItemType(itemTypeId: "slstype3", description: "slstype 3 description")
+];
+List<ItemType> purchaseItems = [
+  ItemType(itemTypeId: "slstype1", description: "slstype 1 description"),
+  ItemType(itemTypeId: "slstype2", description: "slstype 2 description"),
+  ItemType(itemTypeId: "slstype3", description: "slstype 3 description")
+];
+ItemTypes itemTypes = ItemTypes(purchase: purchaseItems, sales: salesItems);
+List<int> list =
+    'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='.codeUnits;
+Uint8List imageString = Uint8List.fromList(list);
+
+Company company = Company(
+    name: "Dummy Company Name 2",
+    partyId: "100001",
+    currencyId: "dummyCurrency",
+    classificationId: "AppEcommerceShop",
+    classificationDescr: "App for Ecommerce and shop",
+    email: "dummy@example.com",
+    image: imageString,
+    itemTypes: itemTypes);
+
+List<Company> companies = [
+  company,
+  Company(
+    name: "Dummy Company Name 1",
+    partyId: "100001",
+    currencyId: "dummyCurrency",
+    classificationId: "AppFreelancer",
+    classificationDescr: "App for Ecommerce and shop",
+    email: "dummy@example.com",
+  )
+];
 
 Authenticate authenticateNoKey = authenticateFromJson('''
            {  "company": {"name": "Dummy Company Name",
@@ -137,6 +144,8 @@ Authenticate authenticateNoKey = authenticateFromJson('''
               "apiKey": null
             }
       ''');
+
+      
 Authenticate authenticate = authenticateFromJson('''
            {  "company": {"name": "Dummy Company Name",
                           "partyId": "100001",
@@ -235,11 +244,9 @@ final currencies = [
 final Order order = orderFromJson('''
   { "order":
     { "orderId": null, "orderStatusId": "OrderOpen", 
-      "currencyUomId": "THB",
-      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
-      "firstName": "dummyFirstName", "lastName": "dummylastName",
-      "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
-      "accommodationSpotId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z",
+      "otherUser": { "partyId": "dummy"},
+      "grandTotal": "44.53",
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5" , "deliveryDate": "2012-02-27 13:27:00.123456z"},
@@ -250,10 +257,9 @@ final Order order = orderFromJson('''
 final List<Order> orders = ordersFromJson('''
   { "orders": [
     { "orderId": "00002", "orderStatusId": "OrderOpen", 
-      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
-      "firstName": "dummyFirstName", "lastName": "dummylastName",  
-      "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
-      "accommodationSpotId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z",
+      "otherUser": { "partyId": "dummy"},
+      "grandTotal": "44.53",
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},
@@ -261,10 +267,9 @@ final List<Order> orders = ordersFromJson('''
           "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]},
     { "orderId": "00003", "orderStatusId": "OrderOpen", 
-      "placedDate": "2012-02-27 13:27:00.123456z", "partyId": null,
-      "firstName": "dummyFirstName", "lastName": "dummylastName",
-      "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
-      "accommodationSpotId": null,
+      "placedDate": "2012-02-27 13:27:00.123456z",
+      "otherUser": { "partyId": "dummy"},
+      "grandTotal": "44.53", 
       "orderItems": [
         { "orderItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},

@@ -73,7 +73,8 @@ class CartBloc extends Bloc<CartEvent, CartState>
       yield CartLoading('Saving order...');
       try {
         orderBloc.add(CreateOrder(order));
-        order = Order(grandTotal: Decimal.parse('0'), orderItems: []);
+        order = Order(
+            sales: order.sales, grandTotal: Decimal.parse('0'), orderItems: []);
         await repos.saveCart(order);
         yield CartLoaded(order, "order created");
       } catch (e) {
@@ -164,4 +165,5 @@ class CartProblem extends CartState {
   const CartProblem(this.errorMessage);
   @override
   List<Object> get props => [errorMessage];
+  String toString() => 'CartProblem: $errorMessage';
 }

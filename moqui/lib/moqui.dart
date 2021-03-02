@@ -217,6 +217,7 @@ class Moqui {
       if (result['passwordChange'] == 'true') return 'passwordChange';
       this.sessionToken = result['moquiSessionToken'];
       client.options.headers['api_key'] = result["apiKey"];
+      persistAuthenticate(authenticateFromJson(response.toString()));
       return authenticateFromJson(response.toString());
     } catch (e) {
       return (responseMessage(e));
@@ -255,7 +256,6 @@ class Moqui {
       await client.post('rest/logout');
       Authenticate authenticate = await getAuthenticate();
       authenticate.apiKey = null;
-      persistAuthenticate(authenticate);
       return authenticate;
     } catch (e) {
       return responseMessage(e);

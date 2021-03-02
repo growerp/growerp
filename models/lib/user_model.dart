@@ -79,7 +79,7 @@ class User extends Equatable {
       );
 
   Map<String, dynamic> toJson() => {
-        "partyId": partyId ?? null,
+        "partyId": partyId,
         "userId": userId,
         "firstName": firstName,
         "lastName": lastName,

@@ -44,7 +44,7 @@ List<Classification> classifications = [
   Classification(
       classificationId: 'AppService',
       description: 'Service company, freelancer, WFH',
-      active: false),
+      active: true),
   Classification(
       classificationId: 'AppHotel',
       description: 'Hotel, Bed & Breakfast',

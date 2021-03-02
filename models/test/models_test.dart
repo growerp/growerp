@@ -25,6 +25,14 @@ void main() {
     List<User> newObjs = usersFromJson(json2);
     expect(usersToJson(newObjs), usersToJson(users));
   });
+  test('itemTypes', () {
+    String json1 = itemTypesToJson(itemTypes);
+    ItemTypes newObj = itemTypesFromJson(json1);
+    expect(itemTypesToJson(newObj), itemTypesToJson(itemTypes));
+    String json2 = itemTypesToJson(itemTypes);
+    ItemTypes newObjs = itemTypesFromJson(json2);
+    expect(itemTypesToJson(newObjs), itemTypesToJson(itemTypes));
+  });
 
   test('category', () {
     String json1 = categoryToJson(category);
