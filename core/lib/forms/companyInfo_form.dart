@@ -20,6 +20,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:models/@models.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
+import '../templates/@templates.dart';
 
 class CompanyInfoForm extends StatelessWidget {
   final FormArguments formArguments;
@@ -96,44 +97,52 @@ class _CompanyState extends State<CompanyPage> {
         authenticate = state.authenticate;
         isAdmin = authenticate?.user?.userGroupId == "GROWERP_M_ADMIN";
       }
-      return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-        if (state is AuthAuthenticated) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-        if (state is AuthProblem) {
-          updatedCompany = state.newCompany;
-          HelperFunctions.showMessage(
-              context, '${state.errorMessage}', Colors.red);
-        }
-        if (state is AuthLoading) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-      }, builder: (context, state) {
-        if (state is AuthUnauthenticated) {
-          updatedCompany = state.authenticate.company;
-        }
-        if (state is AuthAuthenticated) {
-          updatedCompany = authenticate.company;
-        }
-        return Center(
-          child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-              ? FutureBuilder<void>(
-                  future: retrieveLostData(),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<void> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text(
-                        'Pick image error: ${snapshot.error}}',
-                        textAlign: TextAlign.center,
-                      );
-                    }
-                    return _showForm(authenticate, isAdmin, updatedCompany);
-                  })
-              : _showForm(authenticate, isAdmin, updatedCompany),
-        );
-      });
+      return ScaffoldMessenger(
+          key: scaffoldMessengerKey,
+          child: Scaffold(
+              floatingActionButton:
+                  imageButtons(context, _onImageButtonPressed),
+              body:
+                  BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+                if (state is AuthAuthenticated) {
+                  HelperFunctions.showMessage(
+                      context, '${state.message}', Colors.green);
+                }
+                if (state is AuthProblem) {
+                  updatedCompany = state.newCompany;
+                  HelperFunctions.showMessage(
+                      context, '${state.errorMessage}', Colors.red);
+                }
+                if (state is AuthLoading) {
+                  HelperFunctions.showMessage(
+                      context, '${state.message}', Colors.green);
+                }
+              }, builder: (context, state) {
+                if (state is AuthUnauthenticated) {
+                  updatedCompany = state.authenticate.company;
+                }
+                if (state is AuthAuthenticated) {
+                  updatedCompany = authenticate.company;
+                }
+                return Center(
+                  child:
+                      !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                          ? FutureBuilder<void>(
+                              future: retrieveLostData(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<void> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text(
+                                    'Pick image error: ${snapshot.error}}',
+                                    textAlign: TextAlign.center,
+                                  );
+                                }
+                                return _showForm(
+                                    authenticate, isAdmin, updatedCompany);
+                              })
+                          : _showForm(authenticate, isAdmin, updatedCompany),
+                );
+              })));
     });
   }
 
