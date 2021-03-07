@@ -355,61 +355,65 @@ class Moqui {
   Future<dynamic> getCart({bool sales}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String orderJson =
-          prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
-      if (orderJson != null) return orderFromJson(orderJson);
+      String orderJson;
+      //  = prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
+      if (orderJson != null) return finDocFromJson(orderJson);
       return null;
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> saveCart(Order order) async {
+  Future<dynamic> saveCart(FinDoc order) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(
           order.sales ? 'salesOrderAndItems' : 'purchOrderAndItems',
-          order == null ? null : orderToJson(order));
+          order == null ? null : finDocToJson(order));
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> updateOrder(Order order) async {
+  Future<dynamic> updateFinDoc(FinDoc finDoc) async {
     try {
       Authenticate authenticate = await getAuthenticate();
       client.options.headers['api_key'] = authenticate.apiKey;
       Response response;
-      if (order.orderId == null)
-        response = await client.post('rest/s1/growerp/100/Order', data: {
-          'order': orderToJson(order),
+      if (finDoc.invoiceId == null && // create
+          finDoc.orderId == null &&
+          finDoc.paymentId == null)
+        response = await client.post('rest/s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
-      else
-        response = await client.patch('rest/s1/growerp/100/Order', data: {
-          'order': orderToJson(order),
+      else // update
+        response = await client.patch('rest/s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
-      return orderFromJson(response.toString());
+      return finDocFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> getOrder(
+  Future<dynamic> getFinDoc(
       {int start,
       int limit,
       bool open,
       bool sales,
+      String docType,
       DateTime startDate,
-      String orderId,
+      String id,
       String search}) async {
     try {
       Response response =
-          await client.get('rest/s1/growerp/100/Order', queryParameters: {
+          await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
         'sales': sales,
+        'docType': docType,
         'open': 'open',
-        'orderId': orderId,
+        'id': id,
         'startDate': '${startDate?.year?.toString()}-'
             '${startDate?.month?.toString()?.padLeft(2, '0')}-'
             '${startDate?.day?.toString()?.padLeft(2, '0')}',
@@ -417,10 +421,10 @@ class Moqui {
         'limit': limit,
         'search': search
       });
-      if (orderId == null)
-        return ordersFromJson(response.toString());
+      if (id == null)
+        return finDocsFromJson(response.toString());
       else
-        return orderFromJson(response.toString());
+        return finDocFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);
     }

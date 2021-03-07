@@ -19,7 +19,7 @@ export 'company_model.dart';
 export 'product_model.dart';
 export 'productCategory_model.dart';
 export 'catalog_model.dart';
-export 'order_model.dart';
+export 'finDoc_model.dart';
 export 'currency_model.dart';
 export 'menuItem_model.dart';
 export 'formArguments_model.dart';

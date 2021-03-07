@@ -221,9 +221,9 @@ final currencies = [
   "United States Dollar [USD]"
 ];
 
-final Order order = orderFromJson('''
+final FinDoc order = orderFromJson('''
   { "order":
-    { "orderId": null, "orderStatusId": "OrderOpen", 
+    { "orderId": null, "statusId": "OrderOpen", 
       "currencyUomId": "THB",
       "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
@@ -236,9 +236,9 @@ final Order order = orderFromJson('''
           "quantity": "3", "price": "4.5"}
    ]}}
 ''');
-final List<Order> orders = ordersFromJson('''
+final List<FinDoc> orders = ordersFromJson('''
   { "orders": [
-    { "orderId": "00002", "orderStatusId": "OrderOpen", 
+    { "orderId": "00002", "statusId": "OrderOpen", 
       "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",  
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
@@ -249,7 +249,7 @@ final List<Order> orders = ordersFromJson('''
         { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5"}
       ]},
-    { "orderId": "00003", "orderStatusId": "OrderOpen", 
+    { "orderId": "00003", "statusId": "OrderOpen", 
       "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
@@ -262,7 +262,7 @@ final List<Order> orders = ordersFromJson('''
       ]}
    ]}
 ''');
-final Order emptyOrder = Order(orderItems: []);
+final FinDoc emptyFinDoc = FinDoc(orderItems: []);
 final OrderItem orderItem1 = OrderItem(
     productId: "dummyFirstProduct",
     description: "This is the first product",
@@ -273,4 +273,4 @@ final OrderItem orderItem2 = OrderItem(
     description: "This is the second product",
     quantity: Decimal.parse('3'),
     price: Decimal.parse('2.2'));
-final Order totalOrder = Order(orderItems: [orderItem1, orderItem2]);
+final FinDoc totalFinDoc = FinDoc(orderItems: [orderItem1, orderItem2]);

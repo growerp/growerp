@@ -145,7 +145,6 @@ Authenticate authenticateNoKey = authenticateFromJson('''
             }
       ''');
 
-      
 Authenticate authenticate = authenticateFromJson('''
            {  "company": {"name": "Dummy Company Name",
                           "partyId": "100001",
@@ -241,39 +240,39 @@ final currencies = [
   "United States Dollar [USD]"
 ];
 
-final Order order = orderFromJson('''
-  { "order":
-    { "orderId": null, "orderStatusId": "OrderOpen", 
+final FinDoc finDoc = finDocFromJson('''
+  { "finDoc":
+    { "finDocId": null, "statusId": "OrderOpen", 
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53",
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
+      "finDocItems": [
+        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5" , "deliveryDate": "2012-02-27 13:27:00.123456z"},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null} 
    ]}}
 ''');
-final List<Order> orders = ordersFromJson('''
-  { "orders": [
-    { "orderId": "00002", "orderStatusId": "OrderOpen", 
+final List<FinDoc> finDocs = finDocsFromJson('''
+  { "finDocs": [
+    { "finDocId": "00002", "statusId": "OrderOpen", 
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53",
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
+      "finDocItems": [
+        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]},
-    { "orderId": "00003", "orderStatusId": "OrderOpen", 
+    { "finDocId": "00003", "statusId": "OrderOpen", 
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53", 
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
+      "finDocItems": [
+        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]}
    ]}

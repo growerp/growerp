@@ -15,10 +15,11 @@
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 
-Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone) {
+Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
+    List<MenuItem> menu) {
   String groupId = authenticate?.user?.userGroupId;
   List options = [];
-  menuItems.forEach((option) => {
+  menu?.forEach((option) => {
         if (option.readGroups.contains(groupId))
           options.add({
             "route": option.route,

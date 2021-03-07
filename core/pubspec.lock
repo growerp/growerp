@@ -49,7 +49,7 @@ packages:
       name: bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.1"
+    version: "6.1.3"
   bloc_test:
     dependency: "direct dev"
     description:
@@ -84,7 +84,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.0"
+    version: "8.0.2"
   characters:
     dependency: transitive
     description:
@@ -189,7 +189,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.3"
+    version: "1.0.0"
   file:
     dependency: transitive
     description:
@@ -215,7 +215,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.2"
+    version: "6.1.3"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -274,7 +274,7 @@ packages:
       name: http_multi_server
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "3.0.0"
   http_parser:
     dependency: transitive
     description:
@@ -323,7 +323,7 @@ packages:
       name: io
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.4"
+    version: "1.0.0"
   js:
     dependency: transitive
     description:
@@ -392,7 +392,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "296b39d2d8d42237bd77020b6222bca5c5d6a01c"
+      resolved-ref: "0675f055434169a50d6fcab9599625594c303a0a"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -401,7 +401,7 @@ packages:
     description:
       path: moqui
       ref: packages
-      resolved-ref: "75d47701de88be9ae4e1bc3ff81785f6cdf81a10"
+      resolved-ref: "0675f055434169a50d6fcab9599625594c303a0a"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -438,7 +438,7 @@ packages:
     description:
       path: ofbiz
       ref: packages
-      resolved-ref: "75d47701de88be9ae4e1bc3ff81785f6cdf81a10"
+      resolved-ref: "0675f055434169a50d6fcab9599625594c303a0a"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -483,14 +483,14 @@ packages:
       name: path_provider_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.4+3"
+    version: "0.0.5"
   pedantic:
     dependency: transitive
     description:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0"
+    version: "1.11.0"
   petitparser:
     dependency: transitive
     description:
@@ -553,7 +553,7 @@ packages:
       name: responsive_framework
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.14"
+    version: "0.0.15"
   rxdart:
     dependency: "direct main"
     description:
@@ -705,7 +705,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.16.3"
+    version: "1.16.5"
   test_api:
     dependency: transitive
     description:
@@ -719,7 +719,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.13"
+    version: "0.3.15"
   test_coverage:
     dependency: "direct dev"
     description:
@@ -817,7 +817,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.4+1"
+    version: "2.0.0"
   xdg_directories:
     dependency: transitive
     description:
@@ -840,5 +840,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.12.0-0.0 <3.0.0"
+  dart: ">=2.12.0-259.9.beta <3.0.0"
   flutter: ">=1.22.0"

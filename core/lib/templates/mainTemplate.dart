@@ -22,11 +22,18 @@ import 'package:models/@models.dart';
 import '@templates.dart';
 
 class MainTemplate extends StatefulWidget {
+  @required
   final List<Widget> actions; // actions at the appbar
+  @required
   final int tabIndex; // tab selected
+  @required
   final int menuIndex; // navigator rail menu selected
+  @required
   final Widget child; // child page
+  @required
   final List<MapItem> mapItems;
+  @required
+  final List<MenuItem> menu;
   MainTemplate({
     Key key,
     this.actions,
@@ -34,6 +41,7 @@ class MainTemplate extends StatefulWidget {
     this.menuIndex,
     this.child,
     this.mapItems,
+    this.menu,
   }) : super(key: key);
 
   @override
@@ -107,14 +115,14 @@ class _HeaderState extends State<MainTemplate>
           return simplePage(authenticate, isPhone);
         else // tablet or web show navigation
           return myNavigationRail(context, authenticate,
-              simplePage(authenticate, isPhone), widget.menuIndex);
+              simplePage(authenticate, isPhone), widget.menuIndex, widget.menu);
       } else {
         // show tabbar page
         if (isPhone)
           return tabPage(authenticate, isPhone);
         else
           return myNavigationRail(context, authenticate,
-              tabPage(authenticate, isPhone), widget.menuIndex);
+              tabPage(authenticate, isPhone), widget.menuIndex, widget.menu);
       }
     });
   }
@@ -129,7 +137,7 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             body: widget.child));
   }
 
@@ -157,7 +165,7 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             floatingActionButton: floatingActionButtonList[tabIndex],
             bottomNavigationBar: isPhone
                 ? BottomNavigationBar(

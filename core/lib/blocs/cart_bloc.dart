@@ -28,55 +28,57 @@ class CartBloc extends Bloc<CartEvent, CartState>
     with PurchCartBloc, SalesCartBloc {
   final repos;
   final bool sales;
-  final OrderBloc orderBloc;
-  Order order;
-  CartBloc({this.repos, this.sales, this.orderBloc}) : super(CartInitial());
+  final FinDocBloc finDocBloc;
+  FinDoc finDoc;
+  CartBloc({this.repos, this.sales, this.finDocBloc}) : super(CartInitial());
 
   @override
   Stream<CartState> mapEventToState(CartEvent event) async* {
     if (event is LoadCart) {
       yield CartLoading();
-      if (event.order.orderId == null)
-        order = await repos.getCart(sales: event.order.sales);
-      if (order == null) order = event.order;
-      yield CartLoaded(order, "cart initial load.");
+      if (event.finDoc.orderId == null &&
+          event.finDoc.invoiceId == null &&
+          event.finDoc.paymentId == null)
+        finDoc = await repos.getCart(sales: event.finDoc.sales);
+      if (finDoc == null) finDoc = event.finDoc;
+      yield CartLoaded(finDoc, "cart initial load.");
     } else if (event is AddToCart) {
       yield CartLoading();
-      event.newItem.orderItemSeqId = event.order.orderItems.length + 1;
-      event.order.orderItems.add(event.newItem);
-      event.order.grandTotal = Decimal.parse('0');
-      event.order.orderItems.forEach((x) {
-        event.order.grandTotal += x.quantity * x.price;
+      event.newItem.itemSeqId = event.finDoc.items.length + 1;
+      event.finDoc.items.add(event.newItem);
+      event.finDoc.grandTotal = Decimal.parse('0');
+      event.finDoc.items.forEach((x) {
+        event.finDoc.grandTotal += x.quantity * x.price;
       });
-      order = event.order;
-      await repos.saveCart(event.order);
-      yield CartLoaded(event.order, "cart updated");
+      finDoc = event.finDoc;
+      await repos.saveCart(event.finDoc);
+      yield CartLoaded(event.finDoc, "cart updated");
     } else if (event is DeleteFromCart) {
       yield CartLoading();
       if (event.index != null) {
-        order.orderItems.removeAt(event.index);
-        order.grandTotal = Decimal.parse('0');
+        finDoc.items.removeAt(event.index);
+        finDoc.grandTotal = Decimal.parse('0');
         int i = 0;
-        order.orderItems.forEach((x) {
-          order.orderItems[i].orderItemSeqId = 1 + i++;
-          order.grandTotal += x.quantity * x.price;
+        finDoc.items.forEach((x) {
+          finDoc.items[i].itemSeqId = 1 + i++;
+          finDoc.grandTotal += x.quantity * x.price;
         });
       } else
-        order = Order(sales: order.sales, orderItems: []);
-      await repos.saveCart(order);
+        finDoc = FinDoc(sales: finDoc.sales, items: []);
+      await repos.saveCart(finDoc);
       yield CartLoaded(
-          order,
+          finDoc,
           event.index != null
               ? "Item# ${event.index} deleted"
               : "Cart cleared");
-    } else if (event is CreateOrderFromCart) {
-      yield CartLoading('Saving order...');
+    } else if (event is CreateFinDocFromCart) {
+      yield CartLoading('Saving ${finDoc.docType}...');
       try {
-        orderBloc.add(CreateOrder(order));
-        order = Order(
-            sales: order.sales, grandTotal: Decimal.parse('0'), orderItems: []);
-        await repos.saveCart(order);
-        yield CartLoaded(order, "order created");
+        finDocBloc.add(CreateFinDoc(finDoc));
+        finDoc = FinDoc(
+            sales: finDoc.sales, grandTotal: Decimal.parse('0'), items: []);
+        await repos.saveCart(finDoc);
+        yield CartLoaded(finDoc, "${finDoc.docType} created");
       } catch (e) {
         yield CartProblem(e.toString());
       }
@@ -93,27 +95,27 @@ abstract class CartEvent extends Equatable {
 }
 
 class LoadCart extends CartEvent {
-  final Order order;
-  LoadCart(this.order);
+  final FinDoc finDoc;
+  LoadCart(this.finDoc);
   @override
-  String toString() => "Loading cart with order: $order ...";
+  String toString() => "Loading cart with ${finDoc.docType}: $finDoc ...";
 }
 
-class CreateOrderFromCart extends CartEvent {}
+class CreateFinDocFromCart extends CartEvent {}
 
 class AddToCart extends CartEvent {
-  final Order order;
-  final OrderItem newItem;
-  const AddToCart({this.order, this.newItem});
+  final FinDoc finDoc;
+  final FinDocItem newItem;
+  const AddToCart({this.finDoc, this.newItem});
   @override
-  String toString() => 'Updating cart: $order';
+  String toString() => 'Updating cart: $finDoc';
 }
 
 class DeleteFromCart extends CartEvent {
   final int index;
   DeleteFromCart([this.index]);
   @override
-  String toString() => 'Delete orderitem# $index';
+  String toString() => 'Delete item# $index';
 }
 
 // ================= state ========================
@@ -133,31 +135,31 @@ class CartLoading extends CartState {
 }
 
 class CartLoaded extends CartState {
-  final Order order;
+  final FinDoc finDoc;
   final String message;
-  const CartLoaded(this.order, [this.message]);
+  const CartLoaded(this.finDoc, [this.message]);
   Decimal get totalPrice {
-    if (order?.orderItems?.length == 0) return Decimal.parse('0');
+    if (finDoc?.items?.length == 0) return Decimal.parse('0');
     Decimal total = Decimal.parse('0');
-    if (order != null && order.orderItems != null)
-      for (OrderItem i in order?.orderItems)
+    if (finDoc != null && finDoc.items != null)
+      for (FinDocItem i in finDoc?.items)
         total += (i.price * Decimal.parse(i.quantity.toString()));
     return total;
   }
 
   @override
-  List<Object> get props => [order];
+  List<Object> get props => [finDoc];
   @override
-  String toString() => 'Cart loaded with order: $order';
+  String toString() => 'Cart loaded with ${finDoc.docType}: $finDoc';
 }
 
 class CartPaying extends CartState {}
 
 class CartPaid extends CartState {
-  final String orderId;
-  const CartPaid({this.orderId});
-  List<Object> get props => [orderId];
-  String toString() => 'Cart Paid, orderId : $orderId';
+  final FinDoc finDoc;
+  const CartPaid({this.finDoc});
+  List<Object> get props => [finDoc];
+  String toString() => 'Cart Paid, ${finDoc.docType} : $finDoc';
 }
 
 class CartProblem extends CartState {

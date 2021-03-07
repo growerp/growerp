@@ -73,13 +73,13 @@ void main() {
     expect(authenticateToJson(newAuth), authenticateToJson(authenticate));
   });
 
-  test('order', () {
-    String json1 = orderToJson(order);
-    Order neworder = orderFromJson(json1);
-    expect(orderToJson(neworder), orderToJson(order));
-    String json2 = ordersToJson(orders);
-    List<Order> neworders = ordersFromJson(json2);
-    expect(ordersToJson(neworders), ordersToJson(orders));
+  test('finDoc', () {
+    String json1 = finDocToJson(finDoc);
+    FinDoc newfinDoc = finDocFromJson(json1);
+    expect(finDocToJson(newfinDoc), finDocToJson(finDoc));
+    String json2 = finDocsToJson(finDocs);
+    List<FinDoc> newfinDocs = finDocsFromJson(json2);
+    expect(finDocsToJson(newfinDocs), finDocsToJson(finDocs));
   });
 
   test('opportunity', () {

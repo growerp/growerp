@@ -19,6 +19,8 @@ const MENU_CATALOG = 3;
 const MENU_SALES = 4;
 const MENU_PURCHASE = 5;
 const MENU_ACCOUNTING = 6;
+const MENU_ACCTSALES = 2;
+const MENU_ACCTPURCHASE = 3;
 
 class MenuItem {
   int menuItemId;
@@ -47,7 +49,7 @@ List<MenuItem> menuItems = [
       menuItemId: 0,
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
-      title: "DashBoard",
+      title: "Main",
       route: '/home',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
@@ -72,6 +74,59 @@ List<MenuItem> menuItems = [
       title: "Catalog",
       route: '/catalog',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+      writeGroups: ["GROWERP_M_ADMIN"]),
+  MenuItem(
+      menuItemId: 4,
+      image: "assets/images/orderGrey.png",
+      selectedImage: "assets/images/order.png",
+      title: "Sales",
+      route: '/sales',
+      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+      writeGroups: ["GROWERP_M_ADMIN"]),
+  MenuItem(
+      menuItemId: 5,
+      image: "assets/images/supplierGrey.png",
+      selectedImage: "assets/images/supplier.png",
+      title: "Purchase",
+      route: '/purchase',
+      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+  MenuItem(
+      menuItemId: 6,
+      image: "assets/images/accountingGrey.png",
+      selectedImage: "assets/images/accounting.png",
+      title: "Accounting",
+      route: '/accounting',
+      readGroups: ["GROWERP_M_ADMIN"]),
+];
+List<MenuItem> accntMenuItems = [
+  MenuItem(
+      menuItemId: 0,
+      image: "assets/images/dashBoardGrey.png",
+      selectedImage: "assets/images/dashBoard.png",
+      title: "Main",
+      route: '/home',
+      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+  MenuItem(
+      menuItemId: 1,
+      image: "assets/images/accountingGrey.png",
+      selectedImage: "assets/images/accounting.png",
+      title: "     Acct\nDashBoard",
+      route: '/accounting',
+      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+  MenuItem(
+      menuItemId: 2,
+      image: "assets/images/orderGrey.png",
+      selectedImage: "assets/images/order.png",
+      title: " Acct\nSales",
+      route: '/acctSales',
+      readGroups: ["GROWERP_M_ADMIN"]),
+  MenuItem(
+      menuItemId: 3,
+      image: "assets/images/supplierGrey.png",
+      selectedImage: "assets/images/supplier.png",
+      title: "    Acct\nPurchase",
+      route: '/acctPurchase',
+      readGroups: ["GROWERP_M_ADMIN"],
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(
       menuItemId: 4,

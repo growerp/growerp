@@ -39,7 +39,7 @@ void main() async {
 
   User createdCustomer;
   Product createdProduct;
-  Order createdOrder;
+  FinDoc createdOrder;
 
   client = Dio();
 
@@ -440,7 +440,7 @@ void main() async {
       }
     });
   });
-  group('Order operations >>>>> ', () {
+  group('FinDoc operations >>>>> ', () {
     test('create/get  order', () async {
       try {
         order.customerPartyId = createdCustomer.partyId;
@@ -450,7 +450,7 @@ void main() async {
         order.orderItems[1].description = createdProduct.productName;
         Response response = await client.post('services/updateOrder100',
             data: orderToJson(order));
-        createdOrder = orderFromJson(getResponseData(response));
+        createdFinDoc = orderFromJson(getResponseData(response));
         order.orderId = createdOrder.orderId;
         order.placedDate = createdOrder.placedDate;
         order.firstName = createdCustomer.firstName;
@@ -471,7 +471,7 @@ void main() async {
         Response response =
             await client.get('services/getOrders100?inParams={}');
         //print("====$response====");
-        List<Order> orders = ordersFromJson(getResponseData(response));
+        List<FinDoc> orders = ordersFromJson(getResponseData(response));
         //print("===orders# ${orders.length}");
         expect(orders.length, 1);
         expect(orderToJson(createdOrder), orderToJson(orders[0]));

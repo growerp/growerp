@@ -386,11 +386,11 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> saveCart({Order order}) async {
+  Future<dynamic> saveCart({FinDoc order}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          'orderAndItems', order == null ? null : orderToJson(order));
+          'orderAndItems', order == null ? null : finDocToJson(order));
       return null;
     } catch (e) {
       return responseMessage(e);
@@ -454,21 +454,21 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> updateOrder(Order order) async {
+  Future<dynamic> updateFinDoc(FinDoc order) async {
     try {
       Response response = await client.post('services/updateOrder100',
-          data: orderToJson(order));
-      return orderFromJson(getResponseData(response));
+          data: finDocToJson(order));
+      return finDocFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> getOrder() async {
+  Future<dynamic> getFinDoc() async {
     try {
       Response response = await client.get('services/getOrders100?inParams={}');
-      if (getResponseData(response) == '{}') return List<Order>();
-      return ordersFromJson(getResponseData(response));
+      if (getResponseData(response) == '{}') return List<FinDoc>();
+      return finDocsFromJson(getResponseData(response));
     } catch (e) {
       return responseMessage(e);
     }

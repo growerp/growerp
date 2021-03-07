@@ -16,9 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget widget, int menuIndex) {
+    Widget widget, int menuIndex, List<MenuItem> menu) {
   List<NavigationRailDestination> items = [];
-  menuItems.forEach((option) => {
+  menu?.forEach((option) => {
         if (option.readGroups.contains(authenticate?.user?.userGroupId))
           items.add(NavigationRailDestination(
             icon: Image.asset(option.image, height: 40),
@@ -55,7 +55,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
         selectedIndex: menuIndex ?? 0,
         onDestinationSelected: (int index) {
           menuIndex = index;
-          Navigator.pushNamed(context, menuItems[index].route,
+          Navigator.pushNamed(context, menu[index].route,
               arguments: FormArguments());
         },
         labelType: NavigationRailLabelType.all,
