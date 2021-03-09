@@ -262,7 +262,7 @@ packages:
     source: hosted
     version: "0.12.10"
   meta:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: meta
       url: "https://pub.dartlang.org"
@@ -280,7 +280,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: e0e9db4f87a9f5a35e0761ff1e16d131ec4df817
+      resolved-ref: "0675f055434169a50d6fcab9599625594c303a0a"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
