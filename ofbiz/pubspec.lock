@@ -280,7 +280,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: e0e9db4f87a9f5a35e0761ff1e16d131ec4df817
+      resolved-ref: c3282d71da221a4eae2373d2a167da10c9872548
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

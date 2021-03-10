@@ -98,7 +98,7 @@ List<MenuItem> menuItems = [
       route: '/accounting',
       readGroups: ["GROWERP_M_ADMIN"]),
 ];
-List<MenuItem> accntMenuItems = [
+List<MenuItem> acctMenuItems = [
   MenuItem(
       menuItemId: 0,
       image: "assets/images/dashBoardGrey.png",
@@ -128,7 +128,7 @@ List<MenuItem> accntMenuItems = [
       route: '/acctPurchase',
       readGroups: ["GROWERP_M_ADMIN"],
       writeGroups: ["GROWERP_M_ADMIN"]),
-  MenuItem(
+  /*MenuItem(
       menuItemId: 4,
       image: "assets/images/orderGrey.png",
       selectedImage: "assets/images/order.png",
@@ -143,4 +143,5 @@ List<MenuItem> accntMenuItems = [
       title: "Purchase",
       route: '/purchase',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+*/
 ];

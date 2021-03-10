@@ -18,7 +18,7 @@
 
 import 'dart:convert';
 import 'package:decimal/decimal.dart';
-import 'user_model.dart';
+import '@models.dart';
 
 FinDoc finDocFromJson(String str) =>
     FinDoc.fromJson(json.decode(str)["finDoc"]);
@@ -93,6 +93,22 @@ class FinDoc {
         "grandTotal": grandTotal.toString(),
         "items": List<dynamic>.from(items.map((x) => x.toJson())),
       };
+
+  bool idIsNull() => (invoiceId == null && orderId == null && paymentId == null)
+      ? true
+      : false;
+
+  String salesString() => sales == true ? 'Sales' : 'Purchase';
+
+  String id() => idIsNull()
+      ? 'New'
+      : docType == 'order'
+          ? orderId
+          : docType == 'payment'
+              ? paymentId
+              : docType == 'invoice'
+                  ? invoiceId
+                  : null;
 
   String toString() =>
       "$docType# $orderId/$invoiceId/$paymentId s/p: ${sales ? 'sales' : 'purchase'} "
