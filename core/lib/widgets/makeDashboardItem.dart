@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:models/@models.dart';
+import '../templates/@templates.dart';
 
 Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
     String subTitle1, String subTitle2, String subTitle3) {

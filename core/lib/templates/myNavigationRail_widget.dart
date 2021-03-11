@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
+import '@templates.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
     Widget widget, int menuIndex, List<MenuItem> menu) {

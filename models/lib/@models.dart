@@ -21,7 +21,6 @@ export 'productCategory_model.dart';
 export 'catalog_model.dart';
 export 'finDoc_model.dart';
 export 'currency_model.dart';
-export 'menuItem_model.dart';
 export 'formArguments_model.dart';
 export 'classification_model.dart';
 export 'location_model.dart';
