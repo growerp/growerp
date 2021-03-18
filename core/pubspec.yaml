@@ -24,17 +24,17 @@ dependencies:
   rxdart: ^0.24.0
 
   ofbiz:
-    path: ../ofbiz
-#    git:
-#      url: https://github.com/growerp/growerp.git
-#      ref: packages
-#      path: ofbiz
+#    path: ../ofbiz
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: ofbiz
   moqui:
-    path: ../moqui
-#    git:
-#      url: https://github.com/growerp/growerp.git
-#      ref: packages
-#      path: moqui
+#    path: ../moqui
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: moqui
 
 
 dev_dependencies:

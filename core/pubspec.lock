@@ -84,7 +84,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.0.2"
+    version: "8.0.3"
   characters:
     dependency: transitive
     description:
@@ -119,7 +119,7 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.6.0"
+    version: "3.7.0"
   collection:
     dependency: transitive
     description:
@@ -390,16 +390,20 @@ packages:
   models:
     dependency: transitive
     description:
-      path: "../models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: b32306b078616b19e2fbc47daf2e0a1489bd5cdb
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   moqui:
     dependency: "direct main"
     description:
-      path: "../moqui"
-      relative: true
-    source: path
+      path: moqui
+      ref: packages
+      resolved-ref: b32306b078616b19e2fbc47daf2e0a1489bd5cdb
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   nested:
     dependency: transitive
@@ -432,9 +436,11 @@ packages:
   ofbiz:
     dependency: "direct main"
     description:
-      path: "../ofbiz"
-      relative: true
-    source: path
+      path: ofbiz
+      ref: packages
+      resolved-ref: b32306b078616b19e2fbc47daf2e0a1489bd5cdb
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   package_config:
     dependency: transitive
@@ -811,7 +817,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.4"
   xdg_directories:
     dependency: transitive
     description:
@@ -834,5 +840,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.12.0-259.9.beta <3.0.0"
+  dart: ">=2.12.0 <3.0.0"
   flutter: ">=1.22.0"

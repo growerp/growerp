@@ -26,6 +26,7 @@ mixin PurchPaymentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin SalesPaymentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin PurchFinDocBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin SalesFinDocBloc on Bloc<FinDocEvent, FinDocState> {}
+mixin TransactionBloc on Bloc<FinDocEvent, FinDocState> {}
 
 class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     with
@@ -34,7 +35,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         PurchPaymentBloc,
         SalesPaymentBloc,
         PurchFinDocBloc,
-        SalesFinDocBloc {
+        SalesFinDocBloc,
+        TransactionBloc {
   final repos;
   final bool sales;
   final String docType; // invoice,payment,order

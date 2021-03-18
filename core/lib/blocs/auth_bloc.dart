@@ -13,10 +13,8 @@
  */
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:core/helper_functions.dart';
 import 'package:global_configuration/global_configuration.dart';
-import '@blocs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';

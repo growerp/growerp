@@ -278,9 +278,11 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: "../models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: b32306b078616b19e2fbc47daf2e0a1489bd5cdb
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   node_interop:
     dependency: transitive

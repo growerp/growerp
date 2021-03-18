@@ -610,4 +610,13 @@ class Moqui {
       return responseMessage(e);
     }
   }
+
+  Future<dynamic> getLedger() async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/Ledger');
+      return glAccountListFromJson(response.toString());
+    } catch (e) {
+      return responseMessage(e);
+    }
+  }
 }

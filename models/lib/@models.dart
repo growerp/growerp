@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// https://app.quicktype.io/
 export 'authenticate_model.dart';
 export 'user_model.dart';
 export 'company_model.dart';
@@ -25,4 +24,5 @@ export 'formArguments_model.dart';
 export 'classification_model.dart';
 export 'location_model.dart';
 export 'opportunity_model.dart';
-export 'balanceSheet/balanceSheet_model.dart';
+export 'balanceSheet_model.dart';
+export 'glAccount_model.dart';

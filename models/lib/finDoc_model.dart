@@ -33,11 +33,12 @@ String finDocsToJson(List<FinDoc> data) =>
     "}";
 
 class FinDoc {
-  String docType; // invoice, payment finDoc
+  String docType; // invoice, payment etc
   bool sales;
   String orderId;
   String invoiceId;
   String paymentId;
+  String transactionId;
   String statusId;
   DateTime creationDate;
   DateTime completionDate;
@@ -52,6 +53,7 @@ class FinDoc {
     this.orderId,
     this.invoiceId,
     this.paymentId,
+    this.transactionId,
     this.statusId,
     this.creationDate,
     this.completionDate,
@@ -63,16 +65,19 @@ class FinDoc {
 
   factory FinDoc.fromJson(Map<String, dynamic> json) => FinDoc(
         docType: json["docType"],
-        sales: json["sales"] == "true",
+        sales: json["sales"] == null ? null : json["sales"] == "true",
         orderId: json["orderId"],
         invoiceId: json["invoiceId"],
         paymentId: json["paymentId"],
+        transactionId: json["transactionId"],
         statusId: json["statusId"],
         creationDate: DateTime.tryParse(json["creationDate"] ?? ''),
         completionDate: DateTime.tryParse(json["completionDate"] ?? ''),
         description: json["description"],
         otherUser: User.fromJson(json["otherUser"]),
-        grandTotal: Decimal.parse(json["grandTotal"]),
+        grandTotal: json["grandTotal"] != null
+            ? Decimal.parse(json["grandTotal"])
+            : null,
         items: json["items"] == null
             ? []
             : List<FinDocItem>.from(
@@ -85,6 +90,7 @@ class FinDoc {
         "orderId": orderId,
         "invoiceId": invoiceId,
         "paymentId": paymentId,
+        "transactionId": transactionId,
         "statusId": statusId,
         "creationDate": creationDate.toString(),
         "completionDate": completionDate.toString(),
@@ -94,11 +100,15 @@ class FinDoc {
         "items": List<dynamic>.from(items.map((x) => x.toJson())),
       };
 
-  bool idIsNull() => (invoiceId == null && orderId == null && paymentId == null)
+  bool idIsNull() => (invoiceId == null &&
+          orderId == null &&
+          paymentId == null &&
+          transactionId == null)
       ? true
       : false;
 
-  String salesString() => sales == true ? 'Sales' : 'Purchase';
+  String salesString() =>
+      sales != null ? (sales == true ? 'Sales' : 'Purchase') : 'all';
 
   String id() => idIsNull()
       ? 'New'
@@ -108,10 +118,12 @@ class FinDoc {
               ? paymentId
               : docType == 'invoice'
                   ? invoiceId
-                  : null;
+                  : docType == 'transaction'
+                      ? transactionId
+                      : null;
 
   String toString() =>
-      "$docType# $orderId/$invoiceId/$paymentId s/p: ${sales ? 'sales' : 'purchase'} "
+      "$docType# $orderId/$invoiceId/$paymentId s/p: ${salesString()}"
       "status: $statusId otherUser: $otherUser Items: ${items?.length}";
 }
 
@@ -122,6 +134,7 @@ class FinDocItem {
   String description;
   Decimal quantity;
   Decimal price;
+  String glAccountId;
 
   FinDocItem({
     this.itemSeqId,
@@ -130,6 +143,7 @@ class FinDocItem {
     this.description,
     this.quantity,
     this.price,
+    this.glAccountId,
   });
 
   factory FinDocItem.fromJson(Map<String, dynamic> json) => FinDocItem(
@@ -137,8 +151,10 @@ class FinDocItem {
         itemTypeId: json["itemTypeId"],
         productId: json["productId"],
         description: json["description"],
-        quantity: Decimal.parse(json["quantity"]),
-        price: Decimal.parse(json["price"]),
+        quantity:
+            json["quantity"] != null ? Decimal.parse(json["quantity"]) : null,
+        price: json["price"] != null ? Decimal.parse(json["price"]) : null,
+        glAccountId: json["glAccountId"],
       );
 
   Map<String, dynamic> toJson() => {

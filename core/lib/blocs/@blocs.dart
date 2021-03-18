@@ -20,6 +20,6 @@ export 'category_bloc.dart';
 export 'cart_bloc.dart';
 export 'finDoc_bloc.dart';
 export 'user_bloc.dart';
-export 'accntg_bloc.dart';
+export 'accnt_bloc.dart';
 export 'product_bloc.dart';
 export 'opportunity_bloc.dart';
