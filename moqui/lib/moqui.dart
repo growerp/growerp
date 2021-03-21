@@ -380,9 +380,7 @@ class Moqui {
       Authenticate authenticate = await getAuthenticate();
       client.options.headers['api_key'] = authenticate.apiKey;
       Response response;
-      if (finDoc.invoiceId == null && // create
-          finDoc.orderId == null &&
-          finDoc.paymentId == null)
+      if (finDoc.idIsNull())
         response = await client.post('rest/s1/growerp/100/FinDoc', data: {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
@@ -392,6 +390,7 @@ class Moqui {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
+      print("=====repos reponse: $response");
       return finDocFromJson(response.toString());
     } catch (e) {
       return responseMessage(e);

@@ -24,8 +24,8 @@ mixin PurchInvoiceBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin SalesInvoiceBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin PurchPaymentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin SalesPaymentBloc on Bloc<FinDocEvent, FinDocState> {}
-mixin PurchFinDocBloc on Bloc<FinDocEvent, FinDocState> {}
-mixin SalesFinDocBloc on Bloc<FinDocEvent, FinDocState> {}
+mixin PurchaseOrderBloc on Bloc<FinDocEvent, FinDocState> {}
+mixin SalesOrderBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin TransactionBloc on Bloc<FinDocEvent, FinDocState> {}
 
 class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
@@ -34,8 +34,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         SalesInvoiceBloc,
         PurchPaymentBloc,
         SalesPaymentBloc,
-        PurchFinDocBloc,
-        SalesFinDocBloc,
+        PurchaseOrderBloc,
+        SalesOrderBloc,
         TransactionBloc {
   final repos;
   final bool sales;
@@ -59,6 +59,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     final currentState = state;
     if (event is FetchFinDoc) {
       if (currentState is FinDocInitial) {
+        yield FinDocLoading("Getting documents...");
         dynamic result = await repos.getFinDoc(
             sales: sales,
             docType: docType,
@@ -116,7 +117,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           yield currentState.copyWith(
               message: "${result.docType} updated/created");
         } else
-          yield currentState.copyWith(errorMessage: result);
+          yield FinDocProblem(result);
       } else if (event is UpdateFinDoc) {
         yield FinDocLoading('Update ${event.finDoc.docType}');
         dynamic result = await repos.updateFinDoc(event.finDoc);
@@ -140,7 +141,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           yield currentState.copyWith(
               message: "status updated to ${result.statusId}");
         } else
-          yield currentState.copyWith(errorMessage: result);
+          yield FinDocProblem(result);
       }
     }
   }

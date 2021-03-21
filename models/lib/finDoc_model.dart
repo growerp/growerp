@@ -74,7 +74,8 @@ class FinDoc {
         creationDate: DateTime.tryParse(json["creationDate"] ?? ''),
         completionDate: DateTime.tryParse(json["completionDate"] ?? ''),
         description: json["description"],
-        otherUser: User.fromJson(json["otherUser"]),
+        otherUser:
+            json["otherUser"] == null ? null : User.fromJson(json["otherUser"]),
         grandTotal: json["grandTotal"] != null
             ? Decimal.parse(json["grandTotal"])
             : null,
