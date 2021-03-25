@@ -255,25 +255,25 @@ class FinDocItem extends Equatable {
 
 Map<String, String> finDocStatusValues = {
   // explanation of status values
-  'finDocPrep': 'in Preparation',
-  'finDocCreated': 'Created',
-  'finDocApproved': 'Approved',
-  'finDocCompleted': 'Completed',
-  'finDocCancelled': 'Cancelled'
+  'FinDocPrep': 'in Preparation',
+  'FinDocCreated': 'Created',
+  'FinDocApproved': 'Approved',
+  'FinDocCompleted': 'Completed',
+  'FinDocCancelled': 'Cancelled'
 };
 
 Map<String, String> nextFinDocStatus = {
   // sequence of status values
-  'finDocPrep': 'finDocCreated',
-  'finDocCreated': 'finDocApproved',
-  'finDocApproved': 'finDocCompleted',
+  'FinDocPrep': 'FinDocCreated',
+  'FinDocCreated': 'FinDocApproved',
+  'FinDocApproved': 'FinDocCompleted',
 };
 
-Map<String, bool> finDocStatusFixed = {
+Map<String, bool> FinDocStatusFixed = {
   // if document can be updated
-  'finDocPrep': true,
-  'finDocCreated': true,
-  'finDocApproved': false,
-  'finDocCompleted': false,
-  'finDocCancelled': false,
+  'FinDocPrep': true,
+  'FinDocCreated': true,
+  'FinDocApproved': false,
+  'FinDocCompleted': false,
+  'FinDocCancelled': false,
 };
