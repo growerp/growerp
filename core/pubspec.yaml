@@ -12,16 +12,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  decimal: ^0.3.0
+  decimal: ^1.0.0
   global_configuration: ^1.6.0
-  equatable: ^1.2.5
-  flutter_bloc: ^6.1.0
+  equatable: ^2.0.0
+  flutter_bloc: ^7.0.0
   meta: ^1.1.6
   image_picker: ^0.6.7+7
   image_picker_for_web: ^0.1.0+2
-  responsive_framework: ^0.0.8
-  about: ^1.1.2
-  rxdart: ^0.24.0
+  responsive_framework: ^0.1.0
+  about: ^2.0.0
+  rxdart: ^0.26.0
 
   backend:
 #    path: ../backend
@@ -34,10 +34,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mockito: ^4.1.1
+  mockito: ^5.0.2
   very_good_analysis: ^2.0.0
-  bloc_test: ^7.1.0
-  flutter_launcher_icons: ^0.8.1
+  bloc_test: ^8.0.0
+  flutter_launcher_icons: ^0.9.0
 
 flutter:
   uses-material-design: true

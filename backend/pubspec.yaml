@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^3.0.9
-  shared_preferences: ^0.5.12+4
+  shared_preferences: ^2.0.5
   global_configuration: ^1.6.0
   http: ^0.12.2
   models:
@@ -26,7 +26,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mockito: ^4.1.1
+  mockito: ^5.0.2
   very_good_analysis: ^2.0.0
 
 flutter:

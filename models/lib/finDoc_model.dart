@@ -269,7 +269,7 @@ Map<String, String> nextFinDocStatus = {
   'FinDocApproved': 'FinDocCompleted',
 };
 
-Map<String, bool> FinDocStatusFixed = {
+Map<String, bool> finDocStatusFixed = {
   // if document can be updated
   'FinDocPrep': true,
   'FinDocCreated': true,
