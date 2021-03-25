@@ -29,7 +29,7 @@ mixin SupplierBloc on Bloc<UserEvent, UserState> {}
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, AdminBloc, SupplierBloc {
   final repos;
-  final String userGroupId;
+  final String? userGroupId;
   UserBloc(this.repos, [this.userGroupId])
       : assert(repos != null, userGroupId != null),
         super(UserInitial());
@@ -47,7 +47,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
 
   @override
   Stream<UserState> mapEventToState(UserEvent event) async* {
-    final currentState = state;
+    final UserState currentState = state;
     if (event is FetchUser) {
       if (currentState is UserInitial) {
         dynamic result = await repos.getUser(
@@ -72,20 +72,20 @@ class UserBloc extends Bloc<UserEvent, UserState>
           if (result is List<User>) {
             yield currentState.copyWith(
                 message: "result for search ${event.searchString}",
-                users: currentState.users + result,
+                users: currentState.users! + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield currentState.copyWith(message: result, error: true);
           return;
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getUser(
-              start: currentState.users.length,
+              start: currentState.users!.length,
               limit: event.limit,
               search: event.searchString,
               userGroupId: userGroupId);
           if (result is List<User>) {
             yield currentState.copyWith(
-                users: currentState.users + result,
+                users: currentState.users! + result,
                 searchString: event.searchString,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
@@ -102,11 +102,11 @@ class UserBloc extends Bloc<UserEvent, UserState>
           if (adding) {
             currentState.users?.add(result);
           } else {
-            int index = currentState.users
+            int index = currentState.users!
                 .indexWhere((p) => p.partyId == result.partyId);
-            print("userbloc userupdate before: ${currentState.users[index]}");
-            currentState.users.replaceRange(index, index + 1, [result]);
-            print("userbloc userupdate after: ${currentState.users[index]}");
+            print("userbloc userupdate before: ${currentState.users![index]}");
+            currentState.users!.replaceRange(index, index + 1, [result]);
+            print("userbloc userupdate after: ${currentState.users![index]}");
           }
           yield currentState.copyWith(
               message: 'User ' + (adding ? 'added' : 'updated'));
@@ -121,8 +121,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
         dynamic result = await repos.deleteUser(event.user.partyId);
         if (result == event.user.partyId) {
           int index =
-              currentState.users.indexWhere((user) => user.partyId == result);
-          currentState.users.removeAt(index);
+              currentState.users!.indexWhere((user) => user.partyId == result);
+          currentState.users!.removeAt(index);
           yield currentState.copyWith(message: 'User $name deleted');
         } else {
           yield currentState.copyWith(message: result, error: true);
@@ -133,7 +133,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
 }
 
 bool _hasReachedMax(UserState state) =>
-    state is UserSuccess && state.hasReachedMax;
+    state is UserSuccess && state.hasReachedMax!;
 //##################### events #########################
 
 abstract class UserEvent extends Equatable {
@@ -143,7 +143,7 @@ abstract class UserEvent extends Equatable {
 }
 
 class LoadUser extends UserEvent {
-  final String userGroupId;
+  final String? userGroupId;
   LoadUser([this.userGroupId]);
   @override
   String toString() => 'LoadUser using groupId: $userGroupId';
@@ -151,7 +151,7 @@ class LoadUser extends UserEvent {
 
 class FetchUser extends UserEvent {
   final int limit;
-  final String searchString;
+  final String? searchString;
   FetchUser({this.limit = 20, this.searchString});
   @override
   String toString() => 'FetchUser with limit $limit search: $searchString';
@@ -175,20 +175,20 @@ class DeleteUser extends UserEvent {
 abstract class UserState extends Equatable {
   const UserState();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class UserInitial extends UserState {}
 
 class UserLoading extends UserState {
-  final String message;
+  final String? message;
   UserLoading([this.message]);
   @override
   String toString() => 'UserLoading: { $message }';
 }
 
 class UserProblem extends UserState {
-  final String errorMessage;
+  final String? errorMessage;
   UserProblem(this.errorMessage);
   @override
   String toString() => 'UserProblem { $errorMessage }';
@@ -196,7 +196,7 @@ class UserProblem extends UserState {
 
 class UserLoaded extends UserState {
   final User user;
-  final String message;
+  final String? message;
 
   UserLoaded(this.user, [this.message]);
 
@@ -204,11 +204,11 @@ class UserLoaded extends UserState {
 }
 
 class UserSuccess extends UserState {
-  final List<User> users;
-  final String message;
+  final List<User>? users;
+  final String? message;
   final bool error;
-  final bool hasReachedMax;
-  final String searchString;
+  final bool? hasReachedMax;
+  final String? searchString;
 
   const UserSuccess(
       {this.users,
@@ -218,11 +218,11 @@ class UserSuccess extends UserState {
       this.searchString});
 
   UserSuccess copyWith(
-      {List<User> users,
-      String message,
+      {List<User>? users,
+      String? message,
       bool error = false,
-      bool hasReachedMax,
-      String searchString}) {
+      bool? hasReachedMax,
+      String? searchString}) {
     return UserSuccess(
         users: users ?? this.users,
         message: message,
@@ -232,9 +232,9 @@ class UserSuccess extends UserState {
   }
 
   @override
-  List<Object> get props => [users, hasReachedMax];
+  List<Object?> get props => [users, hasReachedMax];
 
   @override
-  String toString() => 'UserSuccess { length: ${users.length}, '
+  String toString() => 'UserSuccess { length: ${users!.length}, '
       'hasReachedMax: $hasReachedMax message $message error: $error}';
 }

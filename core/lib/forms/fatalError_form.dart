@@ -17,8 +17,8 @@ import 'package:flutter/material.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;
-  final String route;
-  final String buttonText;
+  final String? route;
+  final String? buttonText;
   const FatalErrorForm(this.message, [this.route, this.buttonText]);
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class FatalErrorForm extends StatelessWidget {
               child: ElevatedButton(
                   child: Text("$buttonText"),
                   onPressed: () {
-                    Navigator.pushNamed(context, route,
+                    Navigator.pushNamed(context, route!,
                         arguments: FormArguments());
                   }))
         ])));

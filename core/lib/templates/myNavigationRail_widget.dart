@@ -17,14 +17,14 @@ import 'package:models/@models.dart';
 import '@templates.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget widget, int menuIndex, List<MenuItem> menu) {
+    Widget widget, int? menuIndex, List<MenuItem>? menu) {
   List<NavigationRailDestination> items = [];
   menu?.forEach((option) => {
-        if (option.readGroups.contains(authenticate?.user?.userGroupId))
+        if (option.readGroups!.contains(authenticate.user?.userGroupId))
           items.add(NavigationRailDestination(
-            icon: Image.asset(option.image, height: 40),
-            selectedIcon: Image.asset(option.selectedImage),
-            label: Text(option.title),
+            icon: Image.asset(option.image!, height: 40),
+            selectedIcon: Image.asset(option.selectedImage!),
+            label: Text(option.title!),
           )),
       });
 
@@ -44,19 +44,19 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                       backgroundColor: Colors.green,
                       radius: 15,
                       child: authenticate.user?.image != null
-                          ? Image.memory(authenticate?.user?.image)
+                          ? Image.memory(authenticate.user!.image!)
                           : Text(
-                              authenticate?.user?.firstName?.substring(0, 1) ??
+                              authenticate.user?.firstName?.substring(0, 1) ??
                                   '',
                               style: TextStyle(
                                   fontSize: 20, color: Colors.black))),
-                  Text("${authenticate.user.firstName} "
-                      "${authenticate.user.lastName}"),
+                  Text("${authenticate.user!.firstName} "
+                      "${authenticate.user!.lastName}"),
                 ]))),
         selectedIndex: menuIndex ?? 0,
         onDestinationSelected: (int index) {
           menuIndex = index;
-          Navigator.pushNamed(context, menu[index].route,
+          Navigator.pushNamed(context, menu![index].route!,
               arguments: FormArguments());
         },
         labelType: NavigationRailLabelType.all,

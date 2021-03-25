@@ -22,13 +22,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/login':
       return MaterialPageRoute(
-          builder: (context) => LoginForm(settings.arguments));
+          builder: (context) => LoginForm(settings.arguments as String?));
     case '/register':
       return MaterialPageRoute(
-          builder: (context) => RegisterForm(settings.arguments));
+          builder: (context) => RegisterForm(settings.arguments as String?));
     case '/changepw':
       return MaterialPageRoute(
-          builder: (context) => ChangePwForm(changePwArgs: settings.arguments));
+          builder: (context) => ChangePwForm(changePwArgs: settings.arguments as ChangePwArgs?));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
     default:

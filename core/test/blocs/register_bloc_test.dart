@@ -21,11 +21,11 @@ import '../testdata.dart';
 
 class MockReposRepository extends Mock implements Moqui {}
 
-class MockAuthBloc extends MockBloc<AuthState> implements AuthBloc {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
 void main() {
-  MockReposRepository mockReposRepository;
-  MockAuthBloc mockAuthBloc;
+  late MockReposRepository mockReposRepository;
+  MockAuthBloc? mockAuthBloc;
 
   setUp(() {
     mockReposRepository = MockReposRepository();
@@ -40,20 +40,20 @@ void main() {
     blocTest(
       'check initial state',
       build: () => RegisterBloc(repos: mockReposRepository),
-      expect: <AuthState>[],
+      expect: () => <AuthState>[],
     );
 
     blocTest(
       'Register load success',
       build: () =>
           RegisterBloc(repos: mockReposRepository)..add(LoadRegister()),
-      expect: <RegisterState>[RegisterLoading(), RegisterLoaded()],
+      expect: () => <RegisterState>[RegisterLoading(), RegisterLoaded()],
     );
 
     blocTest(
       'Register existing shop success',
       build: () => RegisterBloc(repos: mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.register(
                 companyPartyId: companyPartyId,
                 firstName: firstName,
@@ -67,7 +67,7 @@ void main() {
             lastName: lastName,
             email: emailAddress));
       },
-      expect: <RegisterState>[
+      expect: () => <RegisterState>[
         RegisterLoading(),
         RegisterLoaded(),
         RegisterSending(),
@@ -77,7 +77,7 @@ void main() {
     blocTest(
       'Register new shop success',
       build: () => RegisterBloc(repos: mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.register(
                 classificationId: classificationId,
                 companyName: companyName,
@@ -95,7 +95,7 @@ void main() {
             lastName: lastName,
             email: emailAddress));
       },
-      expect: <RegisterState>[
+      expect: () => <RegisterState>[
         RegisterLoading(),
         RegisterLoaded(),
         RegisterSending(),
@@ -105,7 +105,7 @@ void main() {
     blocTest(
       'Register Failure',
       build: () => RegisterBloc(repos: mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.register(
                 companyPartyId: companyPartyId,
                 firstName: firstName,
@@ -119,7 +119,7 @@ void main() {
             lastName: lastName,
             email: emailAddress));
       },
-      expect: <RegisterState>[
+      expect: () => <RegisterState>[
         RegisterLoading(),
         RegisterLoaded(),
         RegisterSending(),

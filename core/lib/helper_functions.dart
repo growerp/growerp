@@ -50,7 +50,7 @@ class HelperFunctions {
           )));
   }
 
-  static Future<Uint8List> getResizedImage(imagePath) async {
+  static Future<Uint8List?> getResizedImage(imagePath) async {
     if (imagePath != null) {
       Uint8List imageData;
       if (kIsWeb) {
@@ -59,9 +59,9 @@ class HelperFunctions {
       } else {
         imageData = File(imagePath).readAsBytesSync();
       }
-      IMG.Image img = IMG.decodeImage(imageData);
+      IMG.Image img = IMG.decodeImage(imageData)!;
       IMG.Image resized = IMG.copyResize(img, width: 400);
-      imageData = IMG.encodeJpg(resized);
+      imageData = IMG.encodeJpg(resized) as Uint8List;
       return imageData;
     } else
       return null;

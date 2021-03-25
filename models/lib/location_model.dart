@@ -32,12 +32,12 @@ String locationsToJson(List<Location> data) =>
     "}";
 
 class Location {
-  String locationId;
-  String locationTypeId;
-  String locationName;
-  String description;
-  String parentLocationId;
-  Uint8List image;
+  String? locationId;
+  String? locationTypeId;
+  String? locationName;
+  String? description;
+  String? parentLocationId;
+  Uint8List? image;
 
   Location({
     this.locationId,
@@ -63,7 +63,7 @@ class Location {
         "locationName": locationName,
         "description": description,
         "parentLocationId": parentLocationId,
-        "image": image != null ? base64.encode(image) : null,
+        "image": image != null ? base64.encode(image!) : null,
       };
 
   String toString() => 'Location name: $locationName[$locationId]';

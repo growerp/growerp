@@ -31,19 +31,19 @@ String usersToJson(List<User> data) =>
     "}";
 
 class User extends Equatable {
-  final String partyId;
-  final String userId;
-  final String firstName;
-  final String lastName;
-  final String name;
-  final String email;
-  final String groupDescription; // admin, employee, customer, supplier etc...
-  final String userGroupId;
-  final String language;
-  final String externalId; // when customer register they give their telno
-  final Uint8List image;
-  final String companyPartyId;
-  final String companyName;
+  final String? partyId;
+  final String? userId;
+  final String? firstName;
+  final String? lastName;
+  final String? name;
+  final String? email;
+  final String? groupDescription; // admin, employee, customer, supplier etc...
+  final String? userGroupId;
+  final String? language;
+  final String? externalId; // when customer register they give their telno
+  final Uint8List? image;
+  final String? companyPartyId;
+  final String? companyName;
 
   User({
     this.partyId,
@@ -88,13 +88,13 @@ class User extends Equatable {
         "userGroupId": userGroupId,
         "language": language,
         "externalId": externalId,
-        "image": image != null ? base64.encode(image) : null,
+        "image": image != null ? base64.encode(image!) : null,
         "companyPartyId": companyPartyId,
         "companyName": companyName
       };
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         partyId,
         userId,
         firstName,
@@ -116,19 +116,19 @@ class User extends Equatable {
   }
 
   User copyWith({
-    String partyId,
-    String userId,
-    String firstName,
-    String lastName,
-    String name,
-    String email,
-    String groupDescription,
-    String userGroupId,
-    String language,
-    String externalId,
-    Uint8List image,
-    String companyPartyId,
-    String companyName,
+    String? partyId,
+    String? userId,
+    String? firstName,
+    String? lastName,
+    String? name,
+    String? email,
+    String? groupDescription,
+    String? userGroupId,
+    String? language,
+    String? externalId,
+    Uint8List? image,
+    String? companyPartyId,
+    String? companyName,
   }) =>
       User(
         partyId: partyId ?? this.partyId,
@@ -148,8 +148,8 @@ class User extends Equatable {
 }
 
 class UserGroup {
-  String userGroupId;
-  String description;
+  String? userGroupId;
+  String? description;
 
   UserGroup({
     this.userGroupId,

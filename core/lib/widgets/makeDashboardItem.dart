@@ -28,7 +28,7 @@ Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
         child: new InkWell(
           onTap: () {
             if (menuItem.route != null)
-              Navigator.pushNamed(context, menuItem.route,
+              Navigator.pushNamed(context, menuItem.route!,
                   arguments: FormArguments());
           },
           child: Column(
@@ -37,7 +37,7 @@ Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
             verticalDirection: VerticalDirection.down,
             children: <Widget>[
               SizedBox(height: 5.0),
-              Center(child: Image.asset(menuItem.selectedImage, height: 80.0)),
+              Center(child: Image.asset(menuItem.selectedImage!, height: 80.0)),
               Center(
                 child: Text("${menuItem.title}",
                     style: TextStyle(

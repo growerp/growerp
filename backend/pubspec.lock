@@ -126,21 +126,21 @@ packages:
       name: decimal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.5"
+    version: "1.0.0"
   dio:
     dependency: "direct main"
     description:
       name: dio
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.10"
+    version: "4.0.0-prev3"
   equatable:
     dependency: transitive
     description:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.6"
+    version: "2.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -197,21 +197,21 @@ packages:
       name: global_configuration
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.0"
+    version: "2.0.0-nullsafety.0"
   http:
     dependency: "direct main"
     description:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.2"
+    version: "0.13.1"
   http_parser:
     dependency: transitive
     description:
       name: http_parser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.4"
+    version: "4.0.0"
   js:
     dependency: transitive
     description:
@@ -250,11 +250,9 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: models
-      ref: packages
-      resolved-ref: "16937a4c0c540d03f36685474e1fa048153f0e8d"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../models"
+      relative: true
+    source: path
     version: "0.0.1"
   package_config:
     dependency: transitive
@@ -332,7 +330,7 @@ packages:
       name: rational
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.8"
+    version: "1.0.0"
   shared_preferences:
     dependency: "direct main"
     description:

@@ -16,12 +16,12 @@ import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 import '@templates.dart';
 
-Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
-    List<MenuItem> menu) {
-  String groupId = authenticate?.user?.userGroupId;
+Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
+    List<MenuItem>? menu) {
+  String? groupId = authenticate?.user?.userGroupId;
   List options = [];
   menu?.forEach((option) => {
-        if (option.readGroups.contains(groupId))
+        if (option.readGroups!.contains(groupId))
           options.add({
             "route": option.route,
             "selImage": option.selectedImage,
@@ -40,7 +40,7 @@ Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                       onTap: () {
                         Navigator.pushNamed(context, '/user',
                             arguments: FormArguments(
-                                object: authenticate.user,
+                                object: authenticate!.user,
                                 menuIndex: MENU_COMPANY));
                       },
                       child: Column(children: [
@@ -48,17 +48,17 @@ Widget myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                             backgroundColor: Colors.green,
                             radius: 40,
                             child: authenticate?.user?.image != null
-                                ? Image.memory(authenticate.user?.image)
+                                ? Image.memory(authenticate!.user!.image!)
                                 : Text(
-                                    authenticate.user?.firstName
+                                    authenticate!.user?.firstName
                                             ?.substring(0, 1) ??
                                         '',
                                     style: TextStyle(
                                         fontSize: 30, color: Colors.black))),
                         SizedBox(height: 20),
                         Text(
-                            "${authenticate.user.firstName} "
-                            "${authenticate.user.lastName}",
+                            "${authenticate.user!.firstName} "
+                            "${authenticate.user!.lastName}",
                             style:
                                 TextStyle(fontSize: 20, color: Colors.black)),
                       ])));

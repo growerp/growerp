@@ -18,11 +18,11 @@ class BalanceSheet {
     this.header,
   });
 
-  ClassInfo asset;
-  ClassInfo liability;
-  ClassInfo equity;
-  ClassInfo distribution;
-  Header header;
+  ClassInfo? asset;
+  ClassInfo? liability;
+  ClassInfo? equity;
+  ClassInfo? distribution;
+  Header? header;
 
   factory BalanceSheet.fromJson(Map<String, dynamic> json) => BalanceSheet(
         asset: json["asset"] != null ? ClassInfo.fromJson(json["asset"]) : null,
@@ -38,24 +38,24 @@ class BalanceSheet {
       );
 
   Map<String, dynamic> toJson() => {
-        "asset": asset.toJson(),
-        "liability": liability.toJson(),
-        "equity": equity.toJson(),
-        "distribution": distribution.toJson(),
-        "header": header.toJson(),
+        "asset": asset!.toJson(),
+        "liability": liability!.toJson(),
+        "equity": equity!.toJson(),
+        "distribution": distribution!.toJson(),
+        "header": header!.toJson(),
       };
 }
 
 class ClassInfo {
   ClassInfo({
-    @required this.id,
-    @required this.description,
-    @required this.periodsAmount,
-    @required this.children,
+    required this.id,
+    required this.description,
+    required this.periodsAmount,
+    required this.children,
   });
 
-  String id;
-  String description;
+  String? id;
+  String? description;
   List<double> periodsAmount;
   List<ClassInfo> children;
 
@@ -78,11 +78,11 @@ class ClassInfo {
 
 class Header {
   Header({
-    @required this.title,
-    @required this.children,
+    required this.title,
+    required this.children,
   });
 
-  String title;
+  String? title;
   List<String> children;
 
   factory Header.fromJson(Map<String, dynamic> json) => Header(

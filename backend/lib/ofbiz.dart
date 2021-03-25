@@ -24,8 +24,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Ofbiz {
   final Dio client;
 
-  String classificationId = GlobalConfiguration().get("classificationId");
-  String prodUrl = GlobalConfiguration().get("prodUrl");
+  String? classificationId = GlobalConfiguration().get("classificationId");
+  String? prodUrl = GlobalConfiguration().get("prodUrl");
   bool restRequestLogs =
       GlobalConfiguration().getValue<bool>("restRequestLogs");
   bool restResponseLogs =
@@ -39,9 +39,9 @@ class Ofbiz {
   int receiveTimeoutTest =
       GlobalConfiguration().getValue<int>("receiveTimeoutTest") * 1000;
 
-  Ofbiz({@required this.client}) {
+  Ofbiz({required this.client}) {
     if (kReleaseMode) {
-      client.options.baseUrl = prodUrl;
+      client.options.baseUrl = prodUrl!;
     } else if (kIsWeb) {
       // when flutter web need apache httpd webserver in front
       client.options.baseUrl = 'http://localhost/rest/';
@@ -62,62 +62,55 @@ class Ofbiz {
 
     //  processing in/out going backend requests
     client.interceptors
-        .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
-      if (false) {
+        .add(InterceptorsWrapper(onRequest: (options, handler) async {
+      if (restRequestLogs) {
         print('===Outgoing dio request ${options.baseUrl}${options.path}');
         print('===Outgoing dio request headers: ${options.headers}');
         print('===Outgoing dio request data: ${options.data}');
       }
-      // Do something before request is sent
-      return options; //continue
-      // If you want to resolve the request with some custom data，
-      // you can return a `Response` object or return `dio.resolve(data)`.
-      // If you want to reject the request with a error message,
-      // you can return a `DioError` object or return `dio.reject(errMsg)`
-    }, onResponse: (Response response) async {
-      // Do something with response data
-      if (false) {
+      return handler.next(options);
+    }, onResponse: (response, handler) async {
+      if (restResponseLogs) {
         print("===incoming response: ${response.toString()}");
       }
-      return response; // continue
-    }, onError: (DioError e) async {
+      return handler.next(response);
+    }, onError: (DioError e, handler) async {
       // Do something with response error
       if (e.response != null) {
-        print("=== e.response.data: ${e.response.data}");
-        print("=== e.response.headers: ${e.response.headers}");
-        print("=== e.response.request: ${e.response.request}");
+        print("=== e.response.data: ${e.response!.data}");
+        print("=== e.response.headers: ${e.response!.headers}");
+        print("=== e.response.request: ${e.response!.requestOptions}");
       } else {
         // Something happened in setting up or sending the request that triggered an Error
-        print("=== e.request: ${e.request}");
+        print("=== e.request: ${e.requestOptions}");
         print("=== e.message: ${e.message}");
       }
-      return e; //continue
+      return handler.next(e); //continue
     }));
   }
 
   String responseMessage(e) {
     String errorDescription = e.toString();
     if (e is DioError) {
-      DioError dioError = e;
-      switch (dioError.type) {
-        case DioErrorType.CANCEL:
+      DioErrorType dioError = e as DioErrorType;
+      switch (dioError) {
+        case DioErrorType.cancel:
           errorDescription = 'Request to API server was cancelled';
           break;
-        case DioErrorType.CONNECT_TIMEOUT:
+        case DioErrorType.connectTimeout:
           errorDescription = 'Connection timeout with API server';
           break;
-        case DioErrorType.DEFAULT:
-          errorDescription =
-              'Connection to API server failed due to internet connection';
-          break;
-        case DioErrorType.RECEIVE_TIMEOUT:
+        case DioErrorType.receiveTimeout:
           errorDescription = 'Receive timeout in connection with API server';
           break;
-        case DioErrorType.RESPONSE:
+        case DioErrorType.response:
           errorDescription = 'Internet or server problem?';
           break;
-        case DioErrorType.SEND_TIMEOUT:
+        case DioErrorType.sendTimeout:
           errorDescription = 'Send timeout in connection with API server';
+          break;
+        case DioErrorType.other:
+          errorDescription = 'Default error type, Some other Error.';
           break;
       }
       print("===dio error: $errorDescription");
@@ -130,10 +123,10 @@ class Ofbiz {
     return errorDescription;
   }
 
-  String getResponseData(Response input, [String field]) {
-    Map jsonData = json.decode(input.toString()) as Map;
-    if (field != null) return jsonData["data"][field];
-    return json.encode(jsonData["data"]);
+  String? getResponseData(Response input, [String? field]) {
+    Map? jsonData = json.decode(input.toString()) as Map?;
+    if (field != null) return jsonData!["data"][field];
+    return json.encode(jsonData!["data"]);
   }
 
 // -----------------------------general ------------------------
@@ -183,22 +176,22 @@ class Ofbiz {
             Uri.encodeComponent('{"classificationId": "$classificationId" }'));
       else
         response = await client.get('services/getCompanies100?inParams={}');
-      if (getResponseData(response) == '{}') return List<Company>();
-      return companiesFromJson(getResponseData(response));
+      if (getResponseData(response) == '{}') return [];
+      return companiesFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
   }
 
   Future<dynamic> register(
-      {String companyName,
-      String companyPartyId, // if empty will create new company too!
-      @required String firstName,
-      @required String lastName,
-      @required String currencyId,
-      @required String classificationId,
-      @required String email,
-      List demoData}) async {
+      {String? companyName,
+      String? companyPartyId, // if empty will create new company too!
+      required String firstName,
+      required String lastName,
+      required String currencyId,
+      required String classificationId,
+      required String email,
+      List? demoData}) async {
     try {
       var locale;
       // if (!kIsWeb) locale = await Devicelocale.currentLocale;
@@ -215,26 +208,26 @@ class Ofbiz {
         "username": email,
         "userGroupId": 'GROWERP_M_ADMIN',
       });
-      return authenticateFromJson(getResponseData(response));
+      return authenticateFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
   }
 
   Future<dynamic> login(
-      {@required String companyPartyId,
-      @required String username,
-      @required String password}) async {
+      {required String companyPartyId,
+      required String username,
+      required String password}) async {
     try {
       String basicAuth =
           'Basic ' + base64Encode(utf8.encode('$username:$password'));
       client.options.headers["Authorization"] = basicAuth;
       Response response = await client.post('auth/token');
-      String token = getResponseData(response, "access_token");
+      String token = getResponseData(response, "access_token")!;
       client.options.headers["Authorization"] = 'Bearer ' + token;
 
       response = await client.get('services/getAuthenticate100');
-      dynamic result = authenticateFromJson(getResponseData(response));
+      dynamic result = authenticateFromJson(getResponseData(response)!);
       if (result is Authenticate) result.apiKey = token;
       return result;
     } catch (e) {
@@ -242,7 +235,7 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> resetPassword({@required String username}) async {
+  Future<dynamic> resetPassword({required String username}) async {
     try {
       Response result = await client
           .post('services/resetPassword100', data: {'username': username});
@@ -253,9 +246,9 @@ class Ofbiz {
   }
 
   Future<dynamic> updatePassword(
-      {@required String username,
-      @required String oldPassword,
-      @required String newPassword}) async {
+      {required String username,
+      required String oldPassword,
+      required String newPassword}) async {
     try {
       await client.put('services/updatePassword100', data: {
         'username': username,
@@ -270,7 +263,8 @@ class Ofbiz {
 
   Future<dynamic> logout() async {
     try {
-      Authenticate authenticate = await getAuthenticate();
+      Authenticate authenticate =
+          await (getAuthenticate() as FutureOr<Authenticate>);
       authenticate.apiKey = null;
       persistAuthenticate(authenticate);
       return authenticate;
@@ -281,37 +275,33 @@ class Ofbiz {
 
   Future<void> persistAuthenticate(Authenticate authenticate) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (authenticate != null) {
-      await prefs.setString('authenticate', authenticateToJson(authenticate));
-      if (authenticate?.apiKey != null)
-        client.options.headers["Authorization"] =
-            'Bearer ' + authenticate?.apiKey;
-    } else {
-      await prefs.setString('authenticate', null);
-    }
+    await prefs.setString('authenticate', authenticateToJson(authenticate));
+    if (authenticate.apiKey != null)
+      client.options.headers["Authorization"] =
+          'Bearer ' + authenticate.apiKey!;
   }
 
-  Future<Authenticate> getAuthenticate() async {
+  Future<Authenticate?> getAuthenticate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String result = prefs.getString('authenticate');
+    String? result = prefs.getString('authenticate');
     if (result != null) return authenticateFromJson(result);
     return null;
   }
 
-  Future<dynamic> getUser({String userPartyId, String userGroupId}) async {
+  Future<dynamic> getUser({String? userPartyId, String? userGroupId}) async {
     try {
       Response response;
       if (userPartyId != null) {
         response = await client.get('services/getUsers100?inParams=' +
             Uri.encodeComponent('{"userPartyId": "$userPartyId"}'));
         if (getResponseData(response) == "{}") return User();
-        return userFromJson(getResponseData(response));
+        return userFromJson(getResponseData(response)!);
       }
       if (userGroupId != null) {
         response = await client.get('services/getUsers100?inParams=' +
             Uri.encodeComponent('{"usergroupId": "$userGroupId" }'));
-        if (getResponseData(response) == "{}") return List<User>();
-        return usersFromJson(getResponseData(response));
+        if (getResponseData(response) == "{}") return [];
+        return usersFromJson(getResponseData(response)!);
       }
     } catch (e) {
       return responseMessage(e);
@@ -331,7 +321,7 @@ class Ofbiz {
         response =
             await client.post('services/createUser100', data: userToJson(user));
       }
-      return userFromJson(getResponseData(response));
+      return userFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
@@ -351,7 +341,7 @@ class Ofbiz {
     try {
       Response response = await client.post('services/updateCompany100',
           data: companyToJson(company));
-      return companyFromJson(getResponseData(response));
+      return companyFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
@@ -366,7 +356,7 @@ class Ofbiz {
 */
       Response response = await client.get('services/getCatalog100?inParams=' +
           Uri.encodeComponent('{"companyPartyId": "$companyPartyId"}'));
-      Catalog result = catalogFromJson(getResponseData(response));
+      Catalog result = catalogFromJson(getResponseData(response)!);
       if (result.categories == null) result.categories = [];
       if (result.products == null) result.products = [];
       return result;
@@ -375,23 +365,22 @@ class Ofbiz {
     }
   }
 
-  Future<dynamic> getCart() async {
+  Future<dynamic> getCart({bool? sales}) async {
     try {
-//      SharedPreferences prefs = await SharedPreferences.getInstance();
-//      String orderJson = prefs.getString('orderAndItems');
-//      if (orderJson != null) return orderFromJson(orderJson);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? orderJson;
+      //  = prefs.getString('finDoc');
+      if (orderJson != null) return finDocFromJson(orderJson);
       return null;
     } catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> saveCart({FinDoc order}) async {
+  Future<dynamic> saveCart(FinDoc finDoc) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          'orderAndItems', order == null ? null : finDocToJson(order));
-      return null;
+      await prefs.setString('finDoc', finDocToJson(finDoc));
     } catch (e) {
       return responseMessage(e);
     }
@@ -410,7 +399,7 @@ class Ofbiz {
         response = await client.post('services/createCategory100',
             data: categoryToJson(category));
       }
-      return categoryFromJson(getResponseData(response));
+      return categoryFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
@@ -438,7 +427,7 @@ class Ofbiz {
         response = await client.post('services/createProduct100',
             data: productToJson(product));
       }
-      return productFromJson(getResponseData(response));
+      return productFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
@@ -458,7 +447,7 @@ class Ofbiz {
     try {
       Response response = await client.post('services/updateOrder100',
           data: finDocToJson(order));
-      return finDocFromJson(getResponseData(response));
+      return finDocFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }
@@ -467,8 +456,8 @@ class Ofbiz {
   Future<dynamic> getFinDoc() async {
     try {
       Response response = await client.get('services/getOrders100?inParams={}');
-      if (getResponseData(response) == '{}') return List<FinDoc>();
-      return finDocsFromJson(getResponseData(response));
+      if (getResponseData(response) == '{}') return [];
+      return finDocsFromJson(getResponseData(response)!);
     } catch (e) {
       return responseMessage(e);
     }

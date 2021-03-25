@@ -22,7 +22,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final repos;
 
   LoginBloc({
-    @required this.repos,
+    required this.repos,
   })  : assert(repos != null),
         super(LoginInitial());
 
@@ -34,7 +34,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         // no company selected yet so select one
         dynamic companies = await repos.getCompanies(null);
         if (companies is List) {
-          yield LoginLoaded(event.authenticate, companies);
+          yield LoginLoaded(event.authenticate, companies as List<Company>?);
         } else {
           yield LoginError(companies);
         }
@@ -69,7 +69,7 @@ abstract class LoginEvent extends Equatable {
 }
 
 class LoadLogin extends LoginEvent {
-  final Authenticate authenticate;
+  final Authenticate? authenticate;
   LoadLogin([this.authenticate]);
 
   @override
@@ -78,14 +78,14 @@ class LoadLogin extends LoginEvent {
 }
 
 class LoginButtonPressed extends LoginEvent {
-  final Company company;
+  final Company? company;
   final String username;
   final String password;
 
   const LoginButtonPressed({
-    @required this.company,
-    @required this.username,
-    @required this.password,
+    required this.company,
+    required this.username,
+    required this.password,
   });
 
   @override
@@ -96,7 +96,7 @@ class LoginButtonPressed extends LoginEvent {
 abstract class LoginState extends Equatable {
   const LoginState();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoginInitial extends LoginState {}
@@ -104,16 +104,16 @@ class LoginInitial extends LoginState {}
 class LoginLoading extends LoginState {}
 
 class LoginLoaded extends LoginState {
-  final Authenticate authenticate;
-  final List<Company> companies;
+  final Authenticate? authenticate;
+  final List<Company>? companies;
   LoginLoaded(this.authenticate, [this.companies]);
   @override
-  List<Object> get props => [companies];
+  List<Object?> get props => [companies];
   String toString() => 'Login loaded, companies size: ${companies?.length}';
 }
 
 class LoginChangePw extends LoginState {
-  final Company company;
+  final Company? company;
   final String username;
   final String password;
   LoginChangePw(this.company, this.username, this.password);
@@ -129,16 +129,16 @@ class LoginOk extends LoginState {
   @override
   List<Object> get props => [authenticate];
   @override
-  String toString() => 'LoginOk { username: ${authenticate.user.name} }';
+  String toString() => 'LoginOk { username: ${authenticate.user!.name} }';
 }
 
 class LogginInProgress extends LoginState {}
 
 class LoginError extends LoginState {
-  final String errorMessage;
+  final String? errorMessage;
   LoginError(this.errorMessage);
   @override
-  List<Object> get props => [errorMessage];
+  List<Object?> get props => [errorMessage];
   @override
   String toString() => 'LoginError { error: $errorMessage }';
 }

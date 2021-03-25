@@ -21,11 +21,11 @@ import '../testdata.dart';
 
 class MockReposRepository extends Mock implements Moqui {}
 
-class MockAuthBloc extends MockBloc<AuthState> implements AuthBloc {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
 void main() {
-  MockReposRepository mockReposRepository;
-  MockAuthBloc authBloc;
+  late MockReposRepository mockReposRepository;
+  MockAuthBloc? authBloc;
 
   setUp(() {
     mockReposRepository = MockReposRepository();
@@ -40,50 +40,50 @@ void main() {
     blocTest(
       'check initial state',
       build: () => LoginBloc(repos: mockReposRepository),
-      expect: <AuthState>[],
+      expect: () => <AuthState>[],
     );
 
     blocTest('Login success',
         build: () => LoginBloc(repos: mockReposRepository),
-        act: (bloc) async {
+        act: (dynamic bloc) async {
           when(mockReposRepository.login(
                   username: emailAddress, password: password))
               .thenAnswer((_) async => authenticate);
           bloc.add(LoginButtonPressed(
               company: company, username: emailAddress, password: password));
           whenListen(
-              authBloc,
+              authBloc!,
               Stream.fromIterable(
                   <AuthEvent>[LoggedIn(authenticate: authenticate)]));
         },
-        expect: <LoginState>[LogginInProgress(), LoginOk(authenticate)]);
+        expect: () => <LoginState>[LogginInProgress(), LoginOk(authenticate)]);
 
     blocTest(
       'Login failure',
       build: () => LoginBloc(repos: mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.login(username: username, password: password))
             .thenAnswer((_) async => errorMessage);
         bloc.add(LoginButtonPressed(
             company: company, username: username, password: password));
       },
-      expect: <LoginState>[LogginInProgress(), LoginError(errorMessage)],
+      expect: () => <LoginState>[LogginInProgress(), LoginError(errorMessage)],
     );
 
     blocTest(
       'Login succes and change password',
       build: () => LoginBloc(repos: mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.login(username: username, password: password))
             .thenAnswer((_) async => "passwordChange");
         bloc.add(LoginButtonPressed(
             company: company, username: username, password: password));
         whenListen(
-            authBloc,
+            authBloc!,
             Stream.fromIterable(
                 <AuthEvent>[LoggedIn(authenticate: authenticate)]));
       },
-      expect: <LoginState>[
+      expect: () => <LoginState>[
         LogginInProgress(),
         LoginChangePw(company, username, password),
       ],

@@ -13,9 +13,9 @@
  */
 
 class Classification {
-  String classificationId;
-  String description;
-  bool active;
+  String? classificationId;
+  String? description;
+  bool? active;
 
   Classification({this.classificationId, this.description, this.active});
 

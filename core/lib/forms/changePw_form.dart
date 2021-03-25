@@ -27,7 +27,7 @@ class ChangePwArgs {
 }
 
 class ChangePwForm extends StatelessWidget {
-  final ChangePwArgs changePwArgs;
+  final ChangePwArgs? changePwArgs;
   const ChangePwForm({this.changePwArgs});
   @override
   Widget build(BuildContext context) {
@@ -46,8 +46,8 @@ class ChangePwForm extends StatelessWidget {
           return ChangePwBloc(repos: context.read<Object>());
         },
         child: ChangePwEntry(
-          username: changePwArgs.username,
-          oldPassword: changePwArgs.oldPassword,
+          username: changePwArgs!.username,
+          oldPassword: changePwArgs!.oldPassword,
         ),
       ),
     );
@@ -55,10 +55,10 @@ class ChangePwForm extends StatelessWidget {
 }
 
 class ChangePwEntry extends StatefulWidget {
-  final String username;
-  final String oldPassword;
+  final String? username;
+  final String? oldPassword;
 
-  const ChangePwEntry({Key key, this.username, this.oldPassword})
+  const ChangePwEntry({Key? key, this.username, this.oldPassword})
       : super(key: key);
   @override
   State<ChangePwEntry> createState() =>
@@ -66,8 +66,8 @@ class ChangePwEntry extends StatefulWidget {
 }
 
 class _ChangePwEntryState extends State<ChangePwEntry> {
-  final String username;
-  final String oldPassword;
+  final String? username;
+  final String? oldPassword;
   final _formKey = GlobalKey<FormState>();
   bool _obscureText1 = true;
   bool _obscureText2 = true;
@@ -127,7 +127,7 @@ class _ChangePwEntryState extends State<ChangePwEntry> {
                           ),
                         ),
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return 'Please enter first password?';
                           final regExpRequire = RegExp(
                               r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
@@ -156,7 +156,7 @@ class _ChangePwEntryState extends State<ChangePwEntry> {
                         ),
                         controller: _password2Controller,
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return 'Enter password again to verify?';
                           if (value != _password1Controller.text)
                             return 'Password is not matching';
@@ -167,7 +167,7 @@ class _ChangePwEntryState extends State<ChangePwEntry> {
                       ElevatedButton(
                           child: Text('Submit new Password'),
                           onPressed: () {
-                            if (_formKey.currentState.validate() &&
+                            if (_formKey.currentState!.validate() &&
                                 state is ChangePwInitial)
                               BlocProvider.of<ChangePwBloc>(context).add(
                                 ChangePwButtonPressed(

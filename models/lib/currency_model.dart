@@ -31,8 +31,8 @@ String currenciesToJson(List<Currency> data) =>
     "}";
 
 class Currency {
-  String currencyId;
-  String description;
+  String? currencyId;
+  String? description;
 
   Currency({
     this.currencyId,

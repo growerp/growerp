@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 class ChangePwBloc extends Bloc<ChangePwEvent, ChangePwState> {
   final repos;
 
-  ChangePwBloc({@required this.repos})
+  ChangePwBloc({required this.repos})
       : assert(repos != null),
         super(ChangePwInitial());
 
@@ -48,14 +48,14 @@ abstract class ChangePwEvent extends Equatable {
 }
 
 class ChangePwButtonPressed extends ChangePwEvent {
-  final String username;
-  final String oldPassword;
+  final String? username;
+  final String? oldPassword;
   final String newPassword;
 
   const ChangePwButtonPressed({
-    @required this.username,
-    @required this.oldPassword,
-    @required this.newPassword,
+    required this.username,
+    required this.oldPassword,
+    required this.newPassword,
   });
 
   @override
@@ -79,7 +79,7 @@ class ChangePwOk extends ChangePwState {}
 class ChangePwFailure extends ChangePwState {
   final String message;
 
-  const ChangePwFailure({@required this.message});
+  const ChangePwFailure({required this.message});
 
   @override
   List<Object> get props => [message];

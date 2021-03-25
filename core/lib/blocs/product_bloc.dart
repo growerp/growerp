@@ -21,7 +21,7 @@ import 'package:rxdart/rxdart.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final repos;
-  List<Product> products;
+  List<Product>? products;
 
   ProductBloc(
     this.repos,
@@ -40,7 +40,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   @override
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
-    final currentState = state;
+    final ProductState currentState = state;
     if (event is FetchProduct) {
       if (currentState is ProductInitial) {
         dynamic result = await repos.getProduct(
@@ -77,13 +77,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           return;
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getProduct(
-              start: currentState.products.length,
+              start: currentState.products!.length,
               limit: event.limit,
               search: event.search,
               companyPartyId: event.companyPartyId);
           if (result is List<Product>) {
             yield currentState.copyWith(
-                products: currentState.products + result,
+                products: currentState.products! + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield ProductProblem(result);
@@ -99,9 +99,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           if (adding) {
             currentState.products?.add(result);
           } else {
-            int index = currentState.products
+            int index = currentState.products!
                 .indexWhere((prod) => prod.productId == result.productId);
-            currentState.products.replaceRange(index, index + 1, [result]);
+            currentState.products!.replaceRange(index, index + 1, [result]);
           }
           yield ProductSuccess(
                   products: currentState.products,
@@ -113,13 +113,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       }
     } else if (event is DeleteProduct) {
       if (currentState is ProductSuccess) {
-        int index = currentState.products
+        int index = currentState.products!
             .indexWhere((prod) => prod.productId == event.product.productId);
-        String name = currentState.products[index].productName;
+        String? name = currentState.products![index].productName;
         yield ProductLoading('deleting product $name');
         dynamic result = await repos.deleteProduct(event.product.productId);
         if (result == event.product.productId) {
-          currentState.products.removeAt(index);
+          currentState.products!.removeAt(index);
           yield ProductSuccess(
                   products: currentState.products,
                   hasReachedMax: _hasReachedMax(currentState))
@@ -133,7 +133,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 }
 
 bool _hasReachedMax(ProductState state) =>
-    state is ProductSuccess && state.hasReachedMax;
+    state is ProductSuccess && state.hasReachedMax!;
 
 //#######################events###########################
 abstract class ProductEvent extends Equatable {
@@ -142,8 +142,8 @@ abstract class ProductEvent extends Equatable {
 }
 
 class FetchProduct extends ProductEvent {
-  final String companyPartyId;
-  final String categoryId;
+  final String? companyPartyId;
+  final String? categoryId;
   final int limit;
   final search;
   FetchProduct(
@@ -171,43 +171,43 @@ class UpdateProduct extends ProductEvent {
 abstract class ProductState extends Equatable {
   const ProductState();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class ProductInitial extends ProductState {}
 
 class ProductLoading extends ProductState {
-  final String message;
+  final String? message;
   ProductLoading([this.message]);
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
   @override
   String toString() => 'Product loading...';
 }
 
 class ProductProblem extends ProductState {
-  final String errorMessage;
+  final String? errorMessage;
   ProductProblem(this.errorMessage);
   @override
-  List<Object> get props => [errorMessage];
+  List<Object?> get props => [errorMessage];
   @override
   String toString() => 'ProductProblem { errorMessage $errorMessage }';
 }
 
 class ProductSuccess extends ProductState {
-  final List<Product> products;
-  final bool hasReachedMax;
-  final String message;
-  final String search;
+  final List<Product>? products;
+  final bool? hasReachedMax;
+  final String? message;
+  final String? search;
 
   const ProductSuccess(
       {this.products, this.hasReachedMax, this.message, this.search});
 
   ProductSuccess copyWith({
-    List<Product> products,
-    bool hasReachedMax,
-    String message,
-    String search,
+    List<Product>? products,
+    bool? hasReachedMax,
+    String? message,
+    String? search,
   }) =>
       ProductSuccess(
         products: products ?? this.products,
@@ -217,7 +217,7 @@ class ProductSuccess extends ProductState {
       );
 
   @override
-  List<Object> get props => [products, hasReachedMax];
+  List<Object?> get props => [products, hasReachedMax];
 
   @override
   String toString() => 'ProductSuccess { #products: ${products?.length}, '

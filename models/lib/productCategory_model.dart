@@ -34,11 +34,11 @@ String categoriesToJson(List<ProductCategory> data) =>
     "}";
 
 class ProductCategory extends Equatable {
-  final String categoryId;
-  final String categoryName;
-  final String description;
-  final Uint8List image;
-  final int nbrOfProducts;
+  final String? categoryId;
+  final String? categoryName;
+  final String? description;
+  final Uint8List? image;
+  final int? nbrOfProducts;
 
   ProductCategory(
       {this.categoryId,
@@ -59,22 +59,22 @@ class ProductCategory extends Equatable {
         "categoryId": categoryId,
         "categoryName": categoryName,
         "description": description,
-        "image": image != null ? base64.encode(image) : null,
+        "image": image != null ? base64.encode(image!) : null,
       };
 
   @override
-  List<Object> get props =>
+  List<Object?> get props =>
       [categoryId, categoryName, description, image, nbrOfProducts];
 
   @override
   String toString() => 'ProductCategory name: $categoryName[$categoryId]';
 
   ProductCategory copyWith({
-    String categoryId,
-    String categoryName,
-    String description,
-    Uint8List image,
-    int nbrOfProducts,
+    String? categoryId,
+    String? categoryName,
+    String? description,
+    Uint8List? image,
+    int? nbrOfProducts,
   }) =>
       ProductCategory(
           categoryId: categoryId ?? this.categoryId,

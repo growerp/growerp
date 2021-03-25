@@ -24,12 +24,12 @@ import '../helper_functions.dart';
 ///   when null show new company registration/admin
 ///   when present show customer registration for specified company.partyId
 class RegisterForm extends StatelessWidget {
-  final String message;
+  final String? message;
   const RegisterForm([this.message]);
   @override
   Widget build(BuildContext context) {
     classifications.retainWhere((x) => x.active == true);
-    Authenticate authenticate;
+    Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       // always [AuthUnauthenticated] becaused not logged in
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
@@ -57,7 +57,7 @@ class RegisterForm extends StatelessWidget {
 }
 
 class RegisterHeader extends StatefulWidget {
-  final String message;
+  final String? message;
   const RegisterHeader(this.message);
 
   @override
@@ -65,11 +65,11 @@ class RegisterHeader extends StatefulWidget {
 }
 
 class _RegisterHeaderState extends State<RegisterHeader> {
-  final String message;
+  final String? message;
   final _formKey = GlobalKey<FormState>();
-  Classification _classificationSelected =
-      kReleaseMode ? '' : classifications[0];
-  Currency _currencySelected = kReleaseMode ? '' : currencies[0];
+  Classification? _classificationSelected =
+      kReleaseMode ? '' as Classification? : classifications[0];
+  Currency? _currencySelected = kReleaseMode ? '' as Currency? : currencies[0];
   final _companyController = TextEditingController()
     ..text = kReleaseMode ? '' : 'Demo company from John Doe';
   final _firstNameController = TextEditingController()
@@ -92,7 +92,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
 
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate;
+    Authenticate? authenticate;
     return BlocListener<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterError)
@@ -139,7 +139,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           decoration: InputDecoration(labelText: 'First Name'),
                           controller: _firstNameController,
                           validator: (value) {
-                            if (value.isEmpty)
+                            if (value!.isEmpty)
                               return 'Please enter your first name?';
                             return null;
                           },
@@ -150,7 +150,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           decoration: InputDecoration(labelText: 'Last Name'),
                           controller: _lastNameController,
                           validator: (value) {
-                            if (value.isEmpty)
+                            if (value!.isEmpty)
                               return 'Please enter your last name?';
                             return null;
                           },
@@ -167,8 +167,8 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           decoration:
                               InputDecoration(labelText: 'Email address'),
                           controller: _emailController,
-                          validator: (String value) {
-                            if (value.isEmpty)
+                          validator: (String? value) {
+                            if (value!.isEmpty)
                               return 'Please enter Email address?';
                             if (!RegExp(
                                     r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
@@ -186,7 +186,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                   key: Key('newCustomer'),
                                   child: Text('Register as a customer'),
                                   onPressed: () {
-                                    if (_formKey.currentState.validate() &&
+                                    if (_formKey.currentState!.validate() &&
                                         state is! RegisterSending)
                                       BlocProvider.of<RegisterBloc>(context)
                                           .add(
@@ -212,7 +212,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                     InputDecoration(labelText: 'Business name'),
                                 controller: _companyController,
                                 validator: (value) {
-                                  if (value.isEmpty)
+                                  if (value!.isEmpty)
                                     return 'Please enter business name?';
                                   return null;
                                 },
@@ -224,13 +224,13 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 value: _currencySelected,
                                 validator: (value) =>
                                     value == null ? 'field required' : null,
-                                items: currencies?.map((item) {
+                                items: currencies.map((item) {
                                   return DropdownMenuItem<Currency>(
                                       child: Text(
                                           item.description ?? 'Currency??'),
                                       value: item);
-                                })?.toList(),
-                                onChanged: (Currency newValue) {
+                                }).toList(),
+                                onChanged: (Currency? newValue) {
                                   setState(() {
                                     _currencySelected = newValue;
                                   });
@@ -244,13 +244,13 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 value: _classificationSelected,
                                 validator: (value) =>
                                     value == null ? 'field required' : null,
-                                items: classifications?.map((item) {
+                                items: classifications.map((item) {
                                   return DropdownMenuItem<Classification>(
                                       child: Text(item.description ??
                                           'Classification??'),
                                       value: item);
-                                })?.toList(),
-                                onChanged: (Classification newValue) {
+                                }).toList(),
+                                onChanged: (Classification? newValue) {
                                   setState(() {
                                     _classificationSelected = newValue;
                                   });
@@ -263,7 +263,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                   child:
                                       Text('Register AND create a new Company'),
                                   onPressed: () {
-                                    if (_formKey.currentState.validate() &&
+                                    if (_formKey.currentState!.validate() &&
                                         state is! RegisterSending)
                                       BlocProvider.of<RegisterBloc>(context)
                                           .add(

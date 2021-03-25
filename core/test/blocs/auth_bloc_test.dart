@@ -19,10 +19,10 @@ import 'package:core/blocs/@blocs.dart';
 import 'package:backend/@backend.dart';
 import '../testdata.dart';
 
-class MockReposRepository extends Mock implements Moqui {}
+class MockReposRepository extends MockBloc implements Moqui {}
 
 void main() {
-  MockReposRepository mockReposRepository;
+  late MockReposRepository mockReposRepository;
 
   setUp(() {
     mockReposRepository = MockReposRepository();
@@ -30,18 +30,18 @@ void main() {
 
   group('Authbloc test>>>', () {
     blocTest('check initial state',
-        build: () => AuthBloc(mockReposRepository), expect: []);
+        build: () => AuthBloc(mockReposRepository), expect: () => []);
 
     blocTest(
       'succesful connection and Unauthenticated',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
         bloc..add(LoadAuth());
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
       ],
@@ -49,12 +49,12 @@ void main() {
     blocTest(
       'failed connection with ConnectionProblem',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected())
             .thenAnswer((_) async => errorMessage);
         bloc.add(LoadAuth());
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthProblem(errorMessage),
       ],
@@ -63,14 +63,14 @@ void main() {
     blocTest(
       '???succesfull connection and Authenticated',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticate);
         when(mockReposRepository.checkApikey()).thenAnswer((_) async => true);
         bloc.add(LoadAuth());
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthAuthenticated(authenticate),
       ],
@@ -78,7 +78,7 @@ void main() {
     blocTest(
       'connection and login and logout',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
@@ -88,7 +88,7 @@ void main() {
         bloc.add(LoggedIn(authenticate: authenticate));
         bloc.add(Logout());
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
         AuthLoading(),
@@ -100,14 +100,14 @@ void main() {
     blocTest(
       'succesful connection and register',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
         bloc.add(LoadAuth());
         bloc.add(LoggedIn(authenticate: authenticate));
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
         AuthLoading(),
@@ -118,7 +118,7 @@ void main() {
     blocTest(
       'succesful connection login screen and reset password',
       build: () => AuthBloc(mockReposRepository),
-      act: (bloc) async {
+      act: (dynamic bloc) async {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
@@ -127,7 +127,7 @@ void main() {
         bloc.add(LoadAuth());
         await bloc.add(ResetPassword(username: 'dummyEmail'));
       },
-      expect: <AuthState>[
+      expect: () => <AuthState>[
         AuthLoading(),
         AuthUnauthenticated(authenticateNoKey),
       ],

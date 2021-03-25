@@ -24,13 +24,13 @@ const MENU_ACCTPURCHASE = 2;
 const MENU_ACCTLEDGER = 3;
 
 class MenuItem {
-  int menuItemId;
-  String image;
-  String selectedImage;
-  String title;
-  String route;
-  List readGroups;
-  List writeGroups;
+  int? menuItemId;
+  String? image;
+  String? selectedImage;
+  String? title;
+  String? route;
+  List? readGroups;
+  List? writeGroups;
 
   MenuItem(
       {this.menuItemId,

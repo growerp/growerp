@@ -26,11 +26,11 @@ import '../helper_functions.dart';
 ///   when null show company selection and returns to homescreen
 ///   when present show customer login user/password
 class LoginForm extends StatelessWidget {
-  final String message;
+  final String? message;
   const LoginForm([this.message]);
   @override
   Widget build(BuildContext context) {
-    Authenticate authenticate;
+    Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
       return Scaffold(
@@ -55,21 +55,21 @@ class LoginForm extends StatelessWidget {
 }
 
 class LoginHeader extends StatefulWidget {
-  final String message;
+  final String? message;
   const LoginHeader(this.message);
   @override
   State<LoginHeader> createState() => _LoginHeaderState(message);
 }
 
 class _LoginHeaderState extends State<LoginHeader> {
-  final String message;
+  final String? message;
   final _formKey = GlobalKey<FormState>();
-  Authenticate authenticate;
+  Authenticate? authenticate;
   bool _obscureText = true;
-  String companyPartyId;
-  String companyName;
-  List<Company> companies;
-  Company _companySelected;
+  String? companyPartyId;
+  String? companyName;
+  List<Company>? companies;
+  Company? _companySelected;
   _LoginHeaderState(this.message);
 
   @override
@@ -125,9 +125,9 @@ class _LoginHeaderState extends State<LoginHeader> {
             if (state is LoginLoading)
               return Center(child: CircularProgressIndicator());
             if (state is LoginLoaded) {
-              companies = state?.companies;
+              companies = state.companies;
               _companySelected = companies != null
-                  ? companies[0]
+                  ? companies![0]
                   : Company(partyId: companyPartyId);
             }
             if (companyPartyId == null) {
@@ -167,12 +167,12 @@ class _LoginHeaderState extends State<LoginHeader> {
                           value: _companySelected,
                           items: companies?.map((item) {
                             return DropdownMenuItem<Company>(
-                              child: Text(item?.name ?? 'Company??'),
+                              child: Text(item.name ?? 'Company??'),
                               value: item,
                             );
-                          })?.toList(),
-                          onChanged: (Company newValue) {
-                            authenticate.company = newValue;
+                          }).toList(),
+                          onChanged: (Company? newValue) {
+                            authenticate!.company = newValue;
                             BlocProvider.of<AuthBloc>(context)
                                 .add(UpdateAuth(authenticate));
                             Navigator.pushNamedAndRemoveUntil(
@@ -191,7 +191,7 @@ class _LoginHeaderState extends State<LoginHeader> {
   Widget _loginToCurrentCompany(state) {
     final _usernameController = TextEditingController()
       ..text = authenticate?.user?.name != null
-          ? authenticate.user.name
+          ? authenticate!.user!.name!
           : kReleaseMode
               ? ''
               : 'admin@growerp.com';
@@ -213,7 +213,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                         decoration: InputDecoration(labelText: 'Username'),
                         controller: _usernameController,
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return 'Please enter username or email?';
                           return null;
                         },
@@ -222,7 +222,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                       TextFormField(
                           key: Key('password'),
                           validator: (value) {
-                            if (value.isEmpty)
+                            if (value!.isEmpty)
                               return 'Please enter your password?';
                             return null;
                           },
@@ -246,11 +246,11 @@ class _LoginHeaderState extends State<LoginHeader> {
                           key: Key('loginButton'),
                           child: Text('Login'),
                           onPressed: () {
-                            if (_formKey.currentState.validate() &&
+                            if (_formKey.currentState!.validate() &&
                                 state is! LogginInProgress)
                               BlocProvider.of<LoginBloc>(context).add(
                                   LoginButtonPressed(
-                                      company: authenticate.company,
+                                      company: authenticate!.company,
                                       username: _usernameController.text,
                                       password: _passwordController.text));
                           }),
@@ -296,7 +296,7 @@ class _LoginHeaderState extends State<LoginHeader> {
   }
 }
 
-_sendResetPasswordDialog(BuildContext context, String username) async {
+_sendResetPasswordDialog(BuildContext context, String? username) async {
   return showDialog<String>(
     context: context,
     barrierDismissible: true,

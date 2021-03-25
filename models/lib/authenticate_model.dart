@@ -28,12 +28,12 @@ Authenticate authenticateFromJson(String str) =>
 String authenticateToJson(Authenticate data) => json.encode(data.toJson());
 
 class Authenticate {
-  String apiKey;
-  String moquiSessionToken;
-  Company company;
-  User user;
-  Stats stats;
-  ItemTypes itemTypes;
+  String? apiKey;
+  String? moquiSessionToken;
+  Company? company;
+  User? user;
+  Stats? stats;
+  ItemTypes? itemTypes;
 
   Authenticate({
     this.apiKey,
@@ -62,12 +62,12 @@ class Authenticate {
         "company": company?.toJson(),
         "user": user?.toJson(),
         "stats": stats?.toJson(),
-        "itemTypes": itemTypes == null ? null : itemTypes.toJson()
+        "itemTypes": itemTypes == null ? null : itemTypes!.toJson()
       };
   @override
   String toString() => 'Company: ${company?.toString()} '
       'User: ${user?.toString()} apiKey: '
-      '....${apiKey?.substring(apiKey.length - 10)}';
+      '....${apiKey?.substring(apiKey!.length - 10)}';
 }
 
 Stats statsFromJson(String str) => Stats.fromJson(json.decode(str)["stats"]);
@@ -75,21 +75,21 @@ String statsToJson(Stats data) =>
     '{"stats":' + json.encode(data.toJson()) + "}";
 
 class Stats {
-  int admins;
-  int employees;
-  int suppliers;
-  int leads;
-  int customers;
-  int openSlsOrders;
-  int openPurOrders;
-  int opportunities;
-  int myOpportunities;
-  int categories;
-  int products;
-  int salesInvoicesNotPaidCount;
-  Decimal salesInvoicesNotPaidAmount;
-  int purchInvoicesNotPaidCount;
-  Decimal purchInvoicesNotPaidAmount;
+  int? admins;
+  int? employees;
+  int? suppliers;
+  int? leads;
+  int? customers;
+  int? openSlsOrders;
+  int? openPurOrders;
+  int? opportunities;
+  int? myOpportunities;
+  int? categories;
+  int? products;
+  int? salesInvoicesNotPaidCount;
+  Decimal? salesInvoicesNotPaidAmount;
+  int? purchInvoicesNotPaidCount;
+  Decimal? purchInvoicesNotPaidAmount;
 
   Stats({
     this.admins,
@@ -166,8 +166,8 @@ class ItemTypes {
     this.purchase,
   });
 
-  List<ItemType> sales;
-  List<ItemType> purchase;
+  List<ItemType>? sales;
+  List<ItemType>? purchase;
 
   factory ItemTypes.fromJson(Map<String, dynamic> json) => ItemTypes(
         sales:
@@ -177,8 +177,8 @@ class ItemTypes {
       );
 
   Map<String, dynamic> toJson() => {
-        "sales": List<dynamic>.from(sales.map((x) => x.toJson())),
-        "purchase": List<dynamic>.from(purchase.map((x) => x.toJson())),
+        "sales": List<dynamic>.from(sales!.map((x) => x.toJson())),
+        "purchase": List<dynamic>.from(purchase!.map((x) => x.toJson())),
       };
 }
 
@@ -188,8 +188,8 @@ class ItemType {
     this.description,
   });
 
-  String itemTypeId;
-  String description;
+  String? itemTypeId;
+  String? description;
 
   factory ItemType.fromJson(Map<String, dynamic> json) => ItemType(
         itemTypeId: json["itemTypeId"],

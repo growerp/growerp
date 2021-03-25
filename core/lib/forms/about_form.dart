@@ -27,8 +27,8 @@ class AboutForm extends StatelessWidget {
 class AboutFormHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    double version = GlobalConfiguration().get("version");
-    double build = GlobalConfiguration().get("build");
+    double? version = GlobalConfiguration().get("version");
+    double? build = GlobalConfiguration().get("build");
 
     return AboutPage(
         dialog: true,

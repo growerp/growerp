@@ -23,8 +23,8 @@ import 'package:global_configuration/global_configuration.dart';
 
 class Moqui {
   final Dio client;
-  String sessionToken;
-  String prodUrl = GlobalConfiguration().get("prodUrl");
+  String? sessionToken;
+  String? prodUrl = GlobalConfiguration().get("prodUrl");
   bool restRequestLogs =
       GlobalConfiguration().getValue<bool>("restRequestLogs");
   bool restResponseLogs =
@@ -38,9 +38,9 @@ class Moqui {
   int receiveTimeoutTest =
       GlobalConfiguration().getValue<int>("receiveTimeoutTest") * 1000;
 
-  Moqui({@required this.client}) {
+  Moqui({required this.client}) {
     if (kReleaseMode) {
-      client.options.baseUrl = prodUrl;
+      client.options.baseUrl = prodUrl!;
     } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
       client.options.baseUrl = 'http://localhost:8080/';
     } else if (Platform.isAndroid) {
@@ -55,63 +55,56 @@ class Moqui {
     }
 
     client.interceptors
-        .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
+        .add(InterceptorsWrapper(onRequest: (options, handler) async {
       if (restRequestLogs) {
         print(
             '===Outgoing dio request path: ${options.baseUrl}${options.path}');
         print('===Outgoing dio request headers: ${options.headers}');
         print('===Outgoing dio request data: ${options.data}');
       }
-      // Do something before request is sent
-      return options; //continue
-      // If you want to resolve the request with some custom data，
-      // you can return a `Response` object or return `dio.resolve(data)`.
-      // If you want to reject the request with a error message,
-      // you can return a `DioError` object or return `dio.reject(errMsg)`
-    }, onResponse: (Response response) async {
-      // Do something with response data
+      return handler.next(options); //continue
+    }, onResponse: (response, handler) async {
       if (restResponseLogs) {
         print("===incoming response: ${response.toString()}");
       }
-      return response; // continue
-    }, onError: (DioError e) async {
+      return handler.next(response); // continue
+    }, onError: (DioError e, handler) async {
       // Do something with response error
       if (e.response != null) {
-        print("=== e.response.data: ${e.response.data}");
-        print("=== e.response.headers: ${e.response.headers}");
-        print("=== e.response.request: ${e.response.request}");
+        print("=== e.response.data: ${e.response!.data}");
+        print("=== e.response.headers: ${e.response!.headers}");
+        print("=== e.response.request: ${e.response!.requestOptions}");
       } else {
         // Something happened in setting up or sending the request that triggered an Error
-        print("=== e.request: ${e.request}");
+        print("=== e.request: ${e.requestOptions}");
         print("=== e.message: ${e.message}");
       }
-      return e; //continue
+      return handler.next(e); //continue
     }));
   }
 
-  String responseMessage(e) {
-    String errorDescription = e.toString();
+  String? responseMessage(e) {
+    String? errorDescription = e.toString();
     if (e is DioError) {
-      DioError dioError = e;
-      switch (dioError.type) {
-        case DioErrorType.CANCEL:
+      DioErrorType dioError = e as DioErrorType;
+      switch (dioError) {
+        case DioErrorType.cancel:
           errorDescription = 'Request to API server was cancelled';
           break;
-        case DioErrorType.CONNECT_TIMEOUT:
+        case DioErrorType.connectTimeout:
           errorDescription = 'Connection timeout with API server';
           break;
-        case DioErrorType.DEFAULT:
-          errorDescription =
-              'Connection to API server failed due to internet connection';
-          break;
-        case DioErrorType.RECEIVE_TIMEOUT:
+        case DioErrorType.receiveTimeout:
           errorDescription = 'Receive timeout in connection with API server';
           break;
-        case DioErrorType.RESPONSE:
+        case DioErrorType.response:
           errorDescription = 'Internet or server problem?';
           break;
-        case DioErrorType.SEND_TIMEOUT:
+        case DioErrorType.sendTimeout:
           errorDescription = 'Send timeout in connection with API server';
+          break;
+        case DioErrorType.other:
+          errorDescription = 'Default error type, Some other Error.';
           break;
       }
       // print("====dio error: $errorDescription");
@@ -170,14 +163,14 @@ class Moqui {
   /// The demo store can only register as a customer.
   /// Any other store it depends on the person logging in.
   Future<dynamic> register({
-    String companyName,
-    String companyPartyId, // if empty will create new company too!
-    @required String firstName,
-    @required String lastName,
-    String currencyId,
-    String classificationId,
-    @required String email,
-    String demoData,
+    String? companyName,
+    String? companyPartyId, // if empty will create new company too!
+    required String firstName,
+    required String lastName,
+    String? currencyId,
+    String? classificationId,
+    required String email,
+    String? demoData,
   }) async {
     try {
       var locale;
@@ -206,7 +199,7 @@ class Moqui {
   }
 
   Future<dynamic> login(
-      {@required String username, @required String password}) async {
+      {required String username, required String password}) async {
     try {
       Response response = await client.post('rest/s1/growerp/100/Login', data: {
         'username': username,
@@ -224,7 +217,7 @@ class Moqui {
     }
   }
 
-  Future<dynamic> resetPassword({@required String username}) async {
+  Future<dynamic> resetPassword({required String username}) async {
     try {
       Response result = await client.post('rest/s1/growerp/100/ResetPassword',
           data: {'username': username, 'moquiSessionToken': this.sessionToken});
@@ -235,9 +228,9 @@ class Moqui {
   }
 
   Future<dynamic> updatePassword(
-      {@required String username,
-      @required String oldPassword,
-      @required String newPassword}) async {
+      {required String username,
+      required String oldPassword,
+      required String newPassword}) async {
     try {
       await client.put('rest/s1/growerp/100/Password', data: {
         'username': username,
@@ -254,7 +247,8 @@ class Moqui {
   Future<dynamic> logout() async {
     try {
       await client.post('rest/logout');
-      Authenticate authenticate = await getAuthenticate();
+      Authenticate authenticate =
+          await (getAuthenticate() as FutureOr<Authenticate>);
       authenticate.apiKey = null;
       return authenticate;
     } catch (e) {
@@ -264,28 +258,24 @@ class Moqui {
 
   Future<void> persistAuthenticate(Authenticate authenticate) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (authenticate != null) {
-      await prefs.setString('authenticate', authenticateToJson(authenticate));
-    } else {
-      await prefs.setString('authenticate', null);
-    }
-    client.options.headers['api_key'] = authenticate?.apiKey;
+    await prefs.setString('authenticate', authenticateToJson(authenticate));
+    client.options.headers['api_key'] = authenticate.apiKey;
   }
 
-  Future<Authenticate> getAuthenticate() async {
+  Future<Authenticate?> getAuthenticate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String result = prefs.getString('authenticate');
+    String? result = prefs.getString('authenticate');
     if (result != null) return authenticateFromJson(result);
     return null;
   }
 
   Future<dynamic> getUser(
-      {int start,
-      int limit,
-      String userGroupId,
-      String userPartyId,
-      String filter,
-      String search}) async {
+      {int? start,
+      int? limit,
+      String? userGroupId,
+      String? userPartyId,
+      String? filter,
+      String? search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/User', queryParameters: {
@@ -352,11 +342,11 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getCart({bool sales}) async {
+  Future<dynamic> getCart({bool? sales}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String orderJson;
-      //  = prefs.getString(sales ? 'salesOrderAndItems' : 'purchOrderAndItems');
+      String? orderJson;
+      //  = prefs.getString('finDoc');
       if (orderJson != null) return finDocFromJson(orderJson);
       return null;
     } catch (e) {
@@ -364,12 +354,10 @@ class Moqui {
     }
   }
 
-  Future<dynamic> saveCart(FinDoc order) async {
+  Future<dynamic> saveCart(FinDoc finDoc) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          order.sales ? 'salesOrderAndItems' : 'purchOrderAndItems',
-          order == null ? null : finDocToJson(order));
+      await prefs.setString('finDoc', finDocToJson(finDoc));
     } catch (e) {
       return responseMessage(e);
     }
@@ -377,7 +365,8 @@ class Moqui {
 
   Future<dynamic> updateFinDoc(FinDoc finDoc) async {
     try {
-      Authenticate authenticate = await getAuthenticate();
+      Authenticate authenticate =
+          await (getAuthenticate() as FutureOr<Authenticate>);
       client.options.headers['api_key'] = authenticate.apiKey;
       Response response;
       if (finDoc.idIsNull())
@@ -398,14 +387,14 @@ class Moqui {
   }
 
   Future<dynamic> getFinDoc(
-      {int start,
-      int limit,
-      bool open,
-      bool sales,
-      String docType,
-      DateTime startDate,
-      String id,
-      String search}) async {
+      {int? start,
+      int? limit,
+      bool? open,
+      bool? sales,
+      String? docType,
+      DateTime? startDate,
+      String? id,
+      String? search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
@@ -413,9 +402,9 @@ class Moqui {
         'docType': docType,
         'open': 'open',
         'id': id,
-        'startDate': '${startDate?.year?.toString()}-'
-            '${startDate?.month?.toString()?.padLeft(2, '0')}-'
-            '${startDate?.day?.toString()?.padLeft(2, '0')}',
+        'startDate': '${startDate?.year.toString()}-'
+            '${startDate?.month.toString().padLeft(2, '0')}-'
+            '${startDate?.day.toString().padLeft(2, '0')}',
         'start': start,
         'limit': limit,
         'search': search
@@ -430,11 +419,11 @@ class Moqui {
   }
 
   Future<dynamic> getCategory(
-      {int start,
-      int limit,
-      String companyPartyId,
-      String filter,
-      String search}) async {
+      {int? start,
+      int? limit,
+      String? companyPartyId,
+      String? filter,
+      String? search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Categories', queryParameters: {
@@ -484,13 +473,13 @@ class Moqui {
   }
 
   Future<dynamic> getProduct(
-      {int start,
-      int limit,
-      String companyPartyId,
-      String categoryId,
-      String productId,
-      String filter,
-      String search}) async {
+      {int? start,
+      int? limit,
+      String? companyPartyId,
+      String? categoryId,
+      String? productId,
+      String? filter,
+      String? search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Products', queryParameters: {
@@ -545,11 +534,11 @@ class Moqui {
   }
 
   Future<dynamic> getOpportunity(
-      {int start,
-      int limit,
-      String opportunityId,
-      bool all,
-      String search}) async {
+      {int? start,
+      int? limit,
+      String? opportunityId,
+      bool? all,
+      String? search}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/Opportunity', queryParameters: {

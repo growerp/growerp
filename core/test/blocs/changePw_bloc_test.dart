@@ -24,7 +24,7 @@ class MockReposRepository extends Mock implements Moqui {}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  MockReposRepository mockReposRepository;
+  late MockReposRepository mockReposRepository;
 
   setUp(() {
     mockReposRepository = MockReposRepository();
@@ -33,11 +33,11 @@ void main() {
   group('ChangePassword bloc test', () {
     blocTest('check initial state',
         build: () => ChangePwBloc(repos: mockReposRepository),
-        expect: <AuthState>[]);
+        expect: () => <AuthState>[]);
 
     blocTest('ChangePw success',
         build: () => ChangePwBloc(repos: mockReposRepository),
-        act: (bloc) async {
+        act: (dynamic bloc) async {
           when(mockReposRepository.updatePassword(
                   username: username,
                   oldPassword: password,
@@ -48,7 +48,7 @@ void main() {
               oldPassword: password,
               newPassword: password));
         },
-        expect: <ChangePwState>[ChangePwInProgress(), ChangePwOk()]);
+        expect: () => <ChangePwState>[ChangePwInProgress(), ChangePwOk()]);
 // cannot run see: https://stackoverflow.com/questions/57689492/flutter-unhandled-exception-servicesbinding-defaultbinarymessenger-was-accesse
 /*    blocTest('ChangePw failure',
         build: () =>

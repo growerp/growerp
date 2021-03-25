@@ -23,8 +23,8 @@ Catalog catalogFromJson(String str) => Catalog.fromJson(json.decode(str));
 String catalogToJson(Catalog data) => json.encode(data.toJson());
 
 class Catalog {
-  List<ProductCategory> categories;
-  List<Product> products;
+  List<ProductCategory>? categories;
+  List<Product>? products;
 
   Catalog({
     this.categories,
@@ -32,13 +32,13 @@ class Catalog {
   });
 
   ProductCategory getByProductCategoryId(String id) =>
-      categories.firstWhere((element) => element.categoryId == id);
+      categories!.firstWhere((element) => element.categoryId == id);
   ProductCategory getByProductCategoryPosition(int position) =>
-      categories[position % 2];
+      categories![position % 2];
 
   Product getByProductId(String id) =>
-      products.firstWhere((element) => element.productId == id);
-  Product getByProductPosition(int position) => products[position % 2];
+      products!.firstWhere((element) => element.productId == id);
+  Product getByProductPosition(int position) => products![position % 2];
 
   factory Catalog.fromJson(Map<String, dynamic> json) => Catalog(
         categories: json["categories"] != null
@@ -52,8 +52,8 @@ class Catalog {
       );
 
   Map<String, dynamic> toJson() => {
-        "categories": List<dynamic>.from(categories.map((x) => x.toJson())),
-        "products": List<dynamic>.from(products.map((x) => x.toJson())),
+        "categories": List<dynamic>.from(categories!.map((x) => x.toJson())),
+        "products": List<dynamic>.from(products!.map((x) => x.toJson())),
       };
 
   String toString() =>

@@ -23,7 +23,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final repos;
 
   RegisterBloc({
-    @required this.repos,
+    required this.repos,
   })  : assert(repos != null),
         super(RegisterInitial());
 
@@ -75,36 +75,36 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 abstract class RegisterEvent extends Equatable {
   const RegisterEvent();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoadRegister extends RegisterEvent {
-  final String companyPartyId;
-  final String companyName;
+  final String? companyPartyId;
+  final String? companyName;
 
   LoadRegister({this.companyPartyId, this.companyName});
   @override
-  List<Object> get props => [companyPartyId];
+  List<Object?> get props => [companyPartyId];
 
   @override
   String toString() => 'Register Load event: companyPartyId: $companyPartyId';
 }
 
 class RegisterButtonPressed extends RegisterEvent {
-  final String companyPartyId;
+  final String? companyPartyId;
   final String firstName;
   final String lastName;
   final String email;
 
   const RegisterButtonPressed({
-    @required this.companyPartyId,
-    @required this.firstName,
-    @required this.lastName,
-    @required this.email,
+    required this.companyPartyId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
   });
 
   @override
-  List<Object> get props => [companyPartyId, firstName, lastName, email];
+  List<Object?> get props => [companyPartyId, firstName, lastName, email];
 
   @override
   String toString() =>
@@ -115,19 +115,19 @@ class RegisterButtonPressed extends RegisterEvent {
 
 class RegisterCompanyAdmin extends RegisterEvent {
   final String companyName;
-  final String currencyId;
+  final String? currencyId;
   final Classification classification;
   final String firstName;
   final String lastName;
   final String email;
 
   const RegisterCompanyAdmin({
-    @required this.companyName,
-    @required this.currencyId,
-    @required this.classification,
-    @required this.firstName,
-    @required this.lastName,
-    @required this.email,
+    required this.companyName,
+    required this.currencyId,
+    required this.classification,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
   });
 
   @override
@@ -140,7 +140,7 @@ class RegisterCompanyAdmin extends RegisterEvent {
 abstract class RegisterState extends Equatable {
   const RegisterState();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class RegisterInitial extends RegisterState {}
@@ -157,16 +157,16 @@ class RegisterSuccess extends RegisterState {
   List<Object> get props => [authenticate];
   String toString() =>
       "Register success new company: " +
-      "${authenticate.company.name}[${authenticate.company.partyId}]";
+      "${authenticate.company!.name}[${authenticate.company!.partyId}]";
 }
 
 class RegisterError extends RegisterState {
-  final String errorMessage;
+  final String? errorMessage;
 
   const RegisterError(this.errorMessage);
 
   @override
-  List<Object> get props => [errorMessage];
+  List<Object?> get props => [errorMessage];
 
   @override
   String toString() => 'RegisterError { error: $errorMessage }';

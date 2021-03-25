@@ -70,7 +70,7 @@ abstract class AccntState extends Equatable {
   const AccntState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class AccntInitial extends AccntState {}
@@ -78,25 +78,25 @@ class AccntInitial extends AccntState {}
 class AccntInProgress extends AccntState {}
 
 class AccntSuccess extends AccntState {
-  final BalanceSheet balanceSheet;
-  final List<GlAccount> ledgerTree;
-  final String message;
+  final BalanceSheet? balanceSheet;
+  final List<GlAccount>? ledgerTree;
+  final String? message;
 
   AccntSuccess({this.balanceSheet, this.message, this.ledgerTree});
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 
   @override
   String toString() => 'AccntLoad { $message }';
 }
 
 class AccntProblem extends AccntState {
-  final String errorMessage;
+  final String? errorMessage;
 
   const AccntProblem(this.errorMessage);
 
   @override
-  List<Object> get props => [errorMessage];
+  List<Object?> get props => [errorMessage];
 
   @override
   String toString() => 'AccntFailed { error: $errorMessage }';

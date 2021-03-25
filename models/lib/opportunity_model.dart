@@ -33,22 +33,22 @@ String opportunitiesToJson(List<Opportunity> data) =>
     "}";
 
 class Opportunity extends Equatable {
-  final DateTime lastUpdated;
-  final String opportunityId;
-  final String opportunityName;
-  final String description;
-  final Decimal estAmount;
-  final int estProbability;
-  final String stageId;
-  final String nextStep;
-  final String accountPartyId;
-  final String accountEmail;
-  final String accountFirstName;
-  final String accountLastName;
-  final String leadPartyId;
-  final String leadEmail;
-  final String leadFirstName;
-  final String leadLastName;
+  final DateTime? lastUpdated;
+  final String? opportunityId;
+  final String? opportunityName;
+  final String? description;
+  final Decimal? estAmount;
+  final int? estProbability;
+  final String? stageId;
+  final String? nextStep;
+  final String? accountPartyId;
+  final String? accountEmail;
+  final String? accountFirstName;
+  final String? accountLastName;
+  final String? leadPartyId;
+  final String? leadEmail;
+  final String? leadFirstName;
+  final String? leadLastName;
 
   Opportunity({
     this.lastUpdated,
@@ -110,7 +110,7 @@ class Opportunity extends Equatable {
         "leadEmail": leadEmail,
       };
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         lastUpdated,
         opportunityId,
         opportunityName,
@@ -131,22 +131,22 @@ class Opportunity extends Equatable {
   String toString() => 'Opportunity name: $opportunityName[$opportunityId]';
 
   Opportunity copyWith({
-    DateTime lastUpdated,
-    String opportunityId,
-    String opportunityName,
-    String description,
-    Decimal estAmount,
-    int estProbability,
-    String stageId,
-    String nextStep,
-    String accountPartyId,
-    String accountEmail,
-    String accountFirstName,
-    String accountLastName,
-    String leadPartyId,
-    String leadEmail,
-    String leadFirstName,
-    String leadLastName,
+    DateTime? lastUpdated,
+    String? opportunityId,
+    String? opportunityName,
+    String? description,
+    Decimal? estAmount,
+    int? estProbability,
+    String? stageId,
+    String? nextStep,
+    String? accountPartyId,
+    String? accountEmail,
+    String? accountFirstName,
+    String? accountLastName,
+    String? leadPartyId,
+    String? leadEmail,
+    String? leadFirstName,
+    String? leadLastName,
   }) =>
       Opportunity(
         lastUpdated: lastUpdated ?? this.lastUpdated,

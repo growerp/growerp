@@ -34,20 +34,20 @@ String finDocsToJson(List<FinDoc> data) =>
     "}";
 
 class FinDoc extends Equatable {
-  final String docType; // invoice, payment etc
-  final bool sales;
-  final String orderId;
-  final String invoiceId;
-  final String paymentId;
-  final String transactionId;
-  final String statusId;
-  final DateTime creationDate;
-  final DateTime completionDate;
-  final String description;
-  final User
+  final String? docType; // invoice, payment etc
+  final bool? sales;
+  final String? orderId;
+  final String? invoiceId;
+  final String? paymentId;
+  final String? transactionId;
+  final String? statusId;
+  final DateTime? creationDate;
+  final DateTime? completionDate;
+  final String? description;
+  final User?
       otherUser; //a single person responsible for finDoc of a single company
-  final Decimal grandTotal;
-  final List<FinDocItem> items;
+  final Decimal? grandTotal;
+  final List<FinDocItem>? items;
 
   FinDoc({
     this.docType,
@@ -98,9 +98,9 @@ class FinDoc extends Equatable {
         "creationDate": creationDate.toString(),
         "completionDate": completionDate.toString(),
         "description": description,
-        "otherUser": otherUser == null ? null : otherUser.toJson(),
+        "otherUser": otherUser == null ? null : otherUser!.toJson(),
         "grandTotal": grandTotal.toString(),
-        "items": List<dynamic>.from(items.map((x) => x.toJson())),
+        "items": List<dynamic>.from(items!.map((x) => x.toJson())),
       };
 
   bool idIsNull() => (invoiceId == null &&
@@ -113,7 +113,7 @@ class FinDoc extends Equatable {
   String salesString() =>
       sales != null ? (sales == true ? 'Sales' : 'Purchase') : 'all';
 
-  String id() => idIsNull()
+  String? id() => idIsNull()
       ? 'New'
       : docType == 'order'
           ? orderId
@@ -126,7 +126,7 @@ class FinDoc extends Equatable {
                       : null;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         docType, // invoice, payment etc
         sales,
         orderId,
@@ -142,7 +142,7 @@ class FinDoc extends Equatable {
         items,
       ];
 
-  List<String> otherIds() =>
+  List<String?> otherIds() =>
       docType == 'order' ? ['invoice', invoiceId, 'payment', paymentId] : [];
 
   String toString() =>
@@ -150,19 +150,19 @@ class FinDoc extends Equatable {
       "status: $statusId otherUser: $otherUser Items: ${items?.length}";
 
   FinDoc copyWith({
-    String docType, // invoice, payment etc
-    bool sales,
-    String orderId,
-    String invoiceId,
-    String paymentId,
-    String transactionId,
-    String statusId,
-    DateTime creationDate,
-    DateTime completionDate,
-    String description,
-    User otherUser, //a single person responsible for finDoc of a single company
-    Decimal grandTotal,
-    List<FinDocItem> items,
+    String? docType, // invoice, payment etc
+    bool? sales,
+    String? orderId,
+    String? invoiceId,
+    String? paymentId,
+    String? transactionId,
+    String? statusId,
+    DateTime? creationDate,
+    DateTime? completionDate,
+    String? description,
+    User? otherUser, //a single person responsible for finDoc of a single company
+    Decimal? grandTotal,
+    List<FinDocItem>? items,
   }) =>
       FinDoc(
         docType: docType ?? this.docType,
@@ -182,13 +182,13 @@ class FinDoc extends Equatable {
 }
 
 class FinDocItem extends Equatable {
-  final int itemSeqId;
-  final String itemTypeId;
-  final String productId;
-  final String description;
-  final Decimal quantity;
-  final Decimal price;
-  final String glAccountId;
+  final int? itemSeqId;
+  final String? itemTypeId;
+  final String? productId;
+  final String? description;
+  final Decimal? quantity;
+  final Decimal? price;
+  final String? glAccountId;
 
   FinDocItem({
     this.itemSeqId,
@@ -223,7 +223,7 @@ class FinDocItem extends Equatable {
   String toString() => 'FinDocItem: $itemSeqId product: $productId $price ';
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         itemSeqId,
         itemTypeId,
         productId,
@@ -234,13 +234,13 @@ class FinDocItem extends Equatable {
       ];
 
   FinDocItem copyWith({
-    int itemSeqId,
-    String itemTypeId,
-    String productId,
-    String description,
-    Decimal quantity,
-    Decimal price,
-    String glAccountId,
+    int? itemSeqId,
+    String? itemTypeId,
+    String? productId,
+    String? description,
+    Decimal? quantity,
+    Decimal? price,
+    String? glAccountId,
   }) =>
       FinDocItem(
         itemSeqId: itemSeqId ?? this.itemSeqId,

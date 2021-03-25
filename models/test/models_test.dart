@@ -90,8 +90,8 @@ void main() {
     expect(finDocsToJson(newfinDocs), finDocsToJson(finDocs));
     String toString = finDoc.toString();
     expect(toString, finDoc.toString());
-    String itemString = finDoc.items[0].toString();
-    expect(itemString, finDoc.items[0].toString());
+    String itemString = finDoc.items![0].toString();
+    expect(itemString, finDoc.items![0].toString());
     FinDoc testFinDoc = FinDoc();
     expect(testFinDoc.idIsNull(), true);
     expect(testFinDoc.id(), 'New');

@@ -35,12 +35,12 @@ String productsToJson(List<Product> data) =>
     "}";
 
 class Products extends Equatable {
-  final List<Product> products;
-  final int count;
+  final List<Product>? products;
+  final int? count;
 
   Products({this.products, this.count});
   @override
-  List<Object> get props => [products, count];
+  List<Object?> get props => [products, count];
 
   factory Products.fromJson(Map<String, dynamic> json) => Products(
       products:
@@ -48,19 +48,19 @@ class Products extends Equatable {
       count: int.parse(json["count"]));
 
   Map<String, dynamic> toJson() => {
-        "products": List<dynamic>.from(products.map((x) => x.toJson())),
+        "products": List<dynamic>.from(products!.map((x) => x.toJson())),
         "count": count.toString,
       };
 }
 
 class Product extends Equatable {
-  final String productId;
-  final String productName;
-  final String description;
-  final Decimal price;
-  final String categoryId;
-  final String categoryName;
-  final Uint8List image;
+  final String? productId;
+  final String? productName;
+  final String? description;
+  final Decimal? price;
+  final String? categoryId;
+  final String? categoryName;
+  final Uint8List? image;
 
   Product({
     this.productId,
@@ -89,11 +89,11 @@ class Product extends Equatable {
         "price": price.toString(),
         "categoryId": categoryId,
         "categoryName": categoryName,
-        "image": image != null ? base64.encode(image) : null,
+        "image": image != null ? base64.encode(image!) : null,
       };
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         productId,
         productName,
         description,
@@ -108,13 +108,13 @@ class Product extends Equatable {
       'category: $categoryName[$categoryId] imgSize: ${image?.length}';
 
   Product copyWith({
-    String productId,
-    String productName,
-    String description,
-    Decimal price,
-    String categoryId,
-    String categoryName,
-    Uint8List image,
+    String? productId,
+    String? productName,
+    String? description,
+    Decimal? price,
+    String? categoryId,
+    String? categoryName,
+    Uint8List? image,
   }) =>
       Product(
         productId: productId ?? this.productId,

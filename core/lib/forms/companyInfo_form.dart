@@ -33,8 +33,8 @@ class CompanyInfoForm extends StatelessWidget {
 }
 
 class CompanyPage extends StatefulWidget {
-  final String message;
-  final int tab;
+  final String? message;
+  final int? tab;
   CompanyPage(this.message, this.tab);
 
   @override
@@ -42,15 +42,15 @@ class CompanyPage extends StatefulWidget {
 }
 
 class _CompanyState extends State<CompanyPage> {
-  final String message;
+  final String? message;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  Company updatedCompany;
-  Currency _selectedCurrency;
-  PickedFile _imageFile;
+  Company? updatedCompany;
+  Currency? _selectedCurrency;
+  PickedFile? _imageFile;
   dynamic _pickImageError;
-  String _retrieveDataError;
+  String? _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -59,7 +59,8 @@ class _CompanyState extends State<CompanyPage> {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
   }
 
-  void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
+  void _onImageButtonPressed(ImageSource source,
+      {BuildContext? context}) async {
     try {
       final pickedFile = await _picker.getImage(
         source: source,
@@ -84,14 +85,14 @@ class _CompanyState extends State<CompanyPage> {
         _imageFile = response.file;
       });
     } else {
-      _retrieveDataError = response.exception.code;
+      _retrieveDataError = response.exception!.code;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isAdmin;
-    Authenticate authenticate;
+    bool? isAdmin;
+    Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate;
@@ -119,10 +120,10 @@ class _CompanyState extends State<CompanyPage> {
                 }
               }, builder: (context, state) {
                 if (state is AuthUnauthenticated) {
-                  updatedCompany = state.authenticate.company;
+                  updatedCompany = state.authenticate!.company;
                 }
                 if (state is AuthAuthenticated) {
-                  updatedCompany = authenticate.company;
+                  updatedCompany = authenticate!.company;
                 }
                 return Center(
                   child:
@@ -146,9 +147,9 @@ class _CompanyState extends State<CompanyPage> {
     });
   }
 
-  Text _getRetrieveErrorWidget() {
+  Text? _getRetrieveErrorWidget() {
     if (_retrieveDataError != null) {
-      final Text result = Text(_retrieveDataError);
+      final Text result = Text(_retrieveDataError!);
       _retrieveDataError = null;
       return result;
     }
@@ -159,7 +160,7 @@ class _CompanyState extends State<CompanyPage> {
     _nameController..text = updatedCompany.name;
     _emailController..text = updatedCompany.email;
 
-    final Text retrieveError = _getRetrieveErrorWidget();
+    final Text? retrieveError = _getRetrieveErrorWidget();
     if (_selectedCurrency == null &&
         updatedCompany?.currencyId != null &&
         currencies != null)
@@ -191,8 +192,8 @@ class _CompanyState extends State<CompanyPage> {
                           radius: 80,
                           child: _imageFile != null
                               ? kIsWeb
-                                  ? Image.network(_imageFile.path)
-                                  : Image.file(File(_imageFile.path))
+                                  ? Image.network(_imageFile!.path)
+                                  : Image.file(File(_imageFile!.path))
                               : updatedCompany.image != null
                                   ? Image.memory(updatedCompany.image)
                                   : Text(
@@ -206,7 +207,7 @@ class _CompanyState extends State<CompanyPage> {
                         decoration: InputDecoration(labelText: 'Company Name'),
                         controller: _nameController,
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return 'Please enter the company Name?';
                           return null;
                         },
@@ -219,7 +220,7 @@ class _CompanyState extends State<CompanyPage> {
                             InputDecoration(labelText: 'Company Email address'),
                         controller: _emailController,
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return 'Please enter Email address?';
                           if (!RegExp(
                                   r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
@@ -248,11 +249,12 @@ class _CompanyState extends State<CompanyPage> {
                               underline: SizedBox(), // remove underline
                               hint: Text('Currency'),
                               value: _selectedCurrency,
-                              items: currencies?.map((item) {
+                              items: currencies.map((item) {
                                 return DropdownMenuItem<Currency>(
-                                    child: Text(item.description), value: item);
-                              })?.toList(),
-                              onChanged: (Currency newValue) {
+                                    child: Text(item.description!),
+                                    value: item);
+                              }).toList(),
+                              onChanged: (Currency? newValue) {
                                 setState(() {
                                   _selectedCurrency = newValue;
                                 });
@@ -269,13 +271,13 @@ class _CompanyState extends State<CompanyPage> {
                                   ? 'Create'
                                   : 'Update'),
                               onPressed: () async {
-                                if (_formKey.currentState.validate())
+                                if (_formKey.currentState!.validate())
                                   //&& state is! UsersLoading)
                                   updatedCompany = Company(
                                     partyId: updatedCompany.partyId,
                                     email: _emailController.text,
                                     name: _nameController.text,
-                                    currencyId: _selectedCurrency.currencyId,
+                                    currencyId: _selectedCurrency!.currencyId,
                                   );
                                 authenticate.company = updatedCompany;
                                 BlocProvider.of<AuthBloc>(context)

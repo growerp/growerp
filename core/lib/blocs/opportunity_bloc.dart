@@ -37,7 +37,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
 
   @override
   Stream<OpportunityState> mapEventToState(OpportunityEvent event) async* {
-    final currentState = state;
+    final OpportunityState currentState = state;
     if (event is FetchOpportunity) {
       if (currentState is OpportunityInitial) {
         dynamic result = await repos.getOpportunity(
@@ -57,19 +57,19 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
               start: 0, limit: event.limit, all: false, search: event.search);
           if (result is List<Opportunity>)
             yield currentState.copyWith(
-                opportunities: currentState.opportunities + result,
+                opportunities: currentState.opportunities! + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           else
             yield currentState.copyWith(message: result, error: true);
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getOpportunity(
-              start: currentState.opportunities.length,
+              start: currentState.opportunities!.length,
               limit: event.limit,
               all: false,
               search: event.search);
           if (result is List<Opportunity>) {
             yield currentState.copyWith(
-                opportunities: currentState.opportunities + result,
+                opportunities: currentState.opportunities! + result,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
             yield currentState.copyWith(message: result, error: true);
@@ -86,9 +86,9 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
           if (adding) {
             currentState.opportunities?.add(result);
           } else {
-            int index = currentState.opportunities
+            int index = currentState.opportunities!
                 .indexWhere((p) => p.opportunityId == result.opportunityId);
-            currentState.opportunities.replaceRange(index, index + 1, [result]);
+            currentState.opportunities!.replaceRange(index, index + 1, [result]);
           }
           yield currentState.copyWith(
               message: 'Opportunity ' + (adding ? 'added' : 'updated'));
@@ -98,13 +98,13 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
       }
     } else if (event is DeleteOpportunity) {
       if (currentState is OpportunitySuccess) {
-        String name = currentState.opportunities[event.index].opportunityName;
-        String id = currentState.opportunities[event.index].opportunityId;
+        String? name = currentState.opportunities![event.index].opportunityName;
+        String? id = currentState.opportunities![event.index].opportunityId;
         yield OpportunityLoading('deleting opportunity $name');
         dynamic result = await repos.deleteOpportunity(
-            currentState.opportunities[event.index].opportunityId);
-        if (result == currentState.opportunities[event.index].opportunityId) {
-          currentState.opportunities.removeAt(event.index);
+            currentState.opportunities![event.index].opportunityId);
+        if (result == currentState.opportunities![event.index].opportunityId) {
+          currentState.opportunities!.removeAt(event.index);
           yield currentState.copyWith(
               message: 'Opportunity $name[$id] deleted');
         } else {
@@ -116,7 +116,7 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
 }
 
 bool _hasReachedMax(OpportunityState state) =>
-    state is OpportunitySuccess && state.hasReachedMax;
+    state is OpportunitySuccess && state.hasReachedMax!;
 
 //#######################events###########################
 abstract class OpportunityEvent extends Equatable {
@@ -126,7 +126,7 @@ abstract class OpportunityEvent extends Equatable {
 
 class FetchOpportunity extends OpportunityEvent {
   final limit;
-  final String search;
+  final String? search;
   FetchOpportunity({this.limit = 20, this.search});
   @override
   String toString() => "FetchOpportunity limit: $limit, search: $search";
@@ -151,35 +151,35 @@ abstract class OpportunityState extends Equatable {
   const OpportunityState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class OpportunityInitial extends OpportunityState {}
 
 class OpportunityLoading extends OpportunityState {
-  final String message;
+  final String? message;
   OpportunityLoading([this.message]);
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
   @override
   String toString() => 'Opportunity loading...';
 }
 
 class OpportunityProblem extends OpportunityState {
-  final String errorMessage;
+  final String? errorMessage;
   OpportunityProblem(this.errorMessage);
   @override
-  List<Object> get props => [errorMessage];
+  List<Object?> get props => [errorMessage];
   @override
   String toString() => 'OpportunityProblem { errorMessage $errorMessage }';
 }
 
 class OpportunitySuccess extends OpportunityState {
-  final List<Opportunity> opportunities;
-  final String message;
+  final List<Opportunity>? opportunities;
+  final String? message;
   final bool error;
-  final bool hasReachedMax;
-  final String search;
+  final bool? hasReachedMax;
+  final String? search;
 
   const OpportunitySuccess(
       {this.opportunities,
@@ -189,11 +189,11 @@ class OpportunitySuccess extends OpportunityState {
       this.search});
 
   OpportunitySuccess copyWith(
-      {List<Opportunity> opportunities,
-      String message,
+      {List<Opportunity>? opportunities,
+      String? message,
       bool error = false,
-      bool hasReachedMax,
-      String search}) {
+      bool? hasReachedMax,
+      String? search}) {
     return OpportunitySuccess(
         opportunities: opportunities ?? this.opportunities,
         message: message,
@@ -203,7 +203,7 @@ class OpportunitySuccess extends OpportunityState {
   }
 
   @override
-  List<Object> get props => [opportunities, hasReachedMax, search];
+  List<Object?> get props => [opportunities, hasReachedMax, search];
 
   @override
   String toString() =>

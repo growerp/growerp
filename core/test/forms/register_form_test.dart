@@ -25,16 +25,15 @@ import '../testdata.dart';
 
 class MockRepos extends Mock implements Moqui {}
 
-class MockAuthBloc extends MockBloc<AuthState> implements AuthBloc {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
-class MockRegisterBloc extends MockBloc<RegisterState> implements RegisterBloc {
-}
+class MockRegisterBloc extends Mock implements RegisterBloc {}
 
 void main() {
   group('Register_Form', () {
-    Object repos;
-    RegisterBloc registerBloc;
-    AuthBloc authBloc;
+    Object? repos;
+    late RegisterBloc registerBloc;
+    late AuthBloc authBloc;
 
     setUp(() {
       repos = MockRepos();

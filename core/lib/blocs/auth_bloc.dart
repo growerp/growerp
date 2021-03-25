@@ -28,7 +28,7 @@ import '../helper_functions.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
-  Authenticate authenticate;
+  Authenticate? authenticate;
 
   AuthBloc(this.repos)
       : assert(repos != null),
@@ -65,7 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return AuthAuthenticated(authenticate);
         } else {
           //print("===12====");
-          authenticate.apiKey = null; // revoked
+          authenticate!.apiKey = null; // revoked
           repos.setApikey(null);
           //print("===13====");
           await repos.persistAuthenticate(authenticate);
@@ -88,7 +88,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           //print("===1====${authenticate.apiKey}");
           // check company
           dynamic result =
-              await repos.checkCompany(authenticate.company.partyId);
+              await repos.checkCompany(authenticate!.company!.partyId);
           if (result == false) await findDefaultCompany();
           //print("===2====company: ${authenticate?.company?.partyId}");
           // now check user apiKey
@@ -126,7 +126,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           image: (await HelperFunctions.getResizedImage(event.imagePath)));
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
-        authenticate.company = result;
+        authenticate!.company = result;
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
         yield AuthProblem(result, event.company);
@@ -150,38 +150,38 @@ class LoadAuth extends AuthEvent {
 class Logout extends AuthEvent {}
 
 class UpdateAuth extends AuthEvent {
-  final Authenticate authenticate;
+  final Authenticate? authenticate;
   UpdateAuth(this.authenticate);
   @override
   String toString() => 'Update Authenticate ${authenticate.toString()}';
 }
 
 class UpdateCompany extends AuthEvent {
-  final Authenticate authenticate;
+  final Authenticate? authenticate;
   final Company company;
-  final String imagePath;
+  final String? imagePath;
   UpdateCompany(this.authenticate, this.company, this.imagePath);
   @override
-  String toString() => 'Update Company ${authenticate.company.toString()} '
-      'new image: ${imagePath != null ? imagePath.length : 0}';
+  String toString() => 'Update Company ${authenticate!.company.toString()} '
+      'new image: ${imagePath != null ? imagePath!.length : 0}';
 }
 
 class LoggedIn extends AuthEvent {
   final Authenticate authenticate;
-  const LoggedIn({@required this.authenticate});
+  const LoggedIn({required this.authenticate});
   @override
   String toString() => 'Auth Logged in with ${authenticate.user}';
 }
 
 class ResetPassword extends AuthEvent {
   final String username;
-  const ResetPassword({@required this.username});
+  const ResetPassword({required this.username});
   @override
   String toString() => 'ResetPassword with $username';
 }
 
 class LoggingOut extends AuthEvent {
-  final Authenticate authenticate;
+  final Authenticate? authenticate;
   const LoggingOut({this.authenticate});
   @override
   String toString() => 'loggedOut with: ${authenticate?.user?.name}';
@@ -196,31 +196,31 @@ abstract class AuthState extends Equatable {
 class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {
-  final String message;
+  final String? message;
   AuthLoading([this.message]);
   String toString() => 'Authloading msg: $message';
 }
 
 class AuthProblem extends AuthState {
-  final String errorMessage;
-  final Company newCompany;
-  final User newUser;
+  final String? errorMessage;
+  final Company? newCompany;
+  final User? newUser;
   AuthProblem(this.errorMessage, [this.newCompany, this.newUser]);
   @override
   String toString() => 'AuthProblem: errorMessage: $errorMessage';
 }
 
 class AuthAuthenticated extends AuthState {
-  final Authenticate authenticate;
-  final String message;
+  final Authenticate? authenticate;
+  final String? message;
   AuthAuthenticated(this.authenticate, [this.message]);
   @override
   String toString() => 'Authenticated: Msg: $message $authenticate}';
 }
 
 class AuthUnauthenticated extends AuthState {
-  final Authenticate authenticate;
-  final String message;
+  final Authenticate? authenticate;
+  final String? message;
   AuthUnauthenticated(this.authenticate, [this.message]);
   @override
   String toString() => 'Unauthenticated: msg: $message $authenticate';

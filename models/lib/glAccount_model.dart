@@ -41,14 +41,14 @@ class GlAccount {
     this.children,
   });
 
-  String id;
-  int l;
-  String classId;
-  String isDebit;
-  String accountName;
-  double postedBalance;
-  double rollUp;
-  List<GlAccount> children;
+  String? id;
+  int? l;
+  String? classId;
+  String? isDebit;
+  String? accountName;
+  double? postedBalance;
+  double? rollUp;
+  List<GlAccount>? children;
 
   factory GlAccount.fromJson(Map<String, dynamic> json) => GlAccount(
         id: json["id"],
@@ -72,6 +72,6 @@ class GlAccount {
         "accountName": accountName,
         "postedBalance": postedBalance,
         "rollUp": rollUp,
-        "children": List<dynamic>.from(children.map((x) => x.toJson())),
+        "children": List<dynamic>.from(children!.map((x) => x.toJson())),
       };
 }

@@ -6,16 +6,16 @@ homepage:
 publish_to: none
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  dio: ^3.0.9
+  dio: ^4.0.0-prev3
   shared_preferences: ^2.0.5
-  global_configuration: ^1.6.0
-  http: ^0.12.2
+  global_configuration: ^2.0.0-nullsafety.0
+  http: ^0.13.1
   models:
 #    path: ../models
     git:

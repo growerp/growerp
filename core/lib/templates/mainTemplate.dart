@@ -23,19 +23,19 @@ import '@templates.dart';
 
 class MainTemplate extends StatefulWidget {
   @required
-  final List<Widget> actions; // actions at the appbar
+  final List<Widget>? actions; // actions at the appbar
   @required
-  final int tabIndex; // tab selected
+  final int? tabIndex; // tab selected
   @required
-  final int menuIndex; // navigator rail menu selected
+  final int? menuIndex; // navigator rail menu selected
   @required
-  final Widget child; // child page
+  final Widget? child; // child page
   @required
-  final List<MapItem> mapItems;
+  final List<MapItem>? mapItems;
   @required
-  final List<MenuItem> menu;
+  final List<MenuItem>? menu;
   MainTemplate({
-    Key key,
+    Key? key,
     this.actions,
     this.tabIndex,
     this.menuIndex,
@@ -52,12 +52,12 @@ class _HeaderState extends State<MainTemplate>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
-  int tabIndex;
+  late int tabIndex;
   List<Widget> tabList = [];
   List<Widget> tabText = [];
-  List<FloatingActionButton> floatingActionButtonList = [];
+  List<FloatingActionButton?> floatingActionButtonList = [];
   List<BottomNavigationBarItem> bottomItems = [];
-  TabController _controller;
+  TabController? _controller;
 
   @override
   void initState() {
@@ -65,20 +65,21 @@ class _HeaderState extends State<MainTemplate>
     tabIndex = widget.tabIndex ?? 0;
     widget.mapItems?.forEach((x) => {
           // form to display
-          tabList.add(x.form),
+          tabList.add(x.form!),
           // text of tabs at top of screen (tablet, web)
-          tabText.add(Align(alignment: Alignment.center, child: Text(x.label))),
+          tabText
+              .add(Align(alignment: Alignment.center, child: Text(x.label!))),
           // tabs t bottom of screen : phone
           bottomItems
-              .add(BottomNavigationBarItem(icon: x.icon, label: x.label)),
+              .add(BottomNavigationBarItem(icon: x.icon!, label: x.label)),
           // floating actionbutton at each tab
           (x.floatButtonRoute == null)
               ? floatingActionButtonList.add(null)
               : floatingActionButtonList.add(FloatingActionButton(
                   onPressed: () async {
                     await Navigator.pushNamed(
-                        context, widget.mapItems[tabIndex].floatButtonRoute,
-                        arguments: widget.mapItems[tabIndex].floatButtonArgs);
+                        context, widget.mapItems![tabIndex].floatButtonRoute!,
+                        arguments: widget.mapItems![tabIndex].floatButtonArgs);
                   },
                   tooltip: 'Add New',
                   child: Icon(Icons.add)))
@@ -88,23 +89,23 @@ class _HeaderState extends State<MainTemplate>
       vsync: this,
       initialIndex: widget.tabIndex ?? 0,
     );
-    _controller.addListener(() {
+    _controller!.addListener(() {
       setState(() {
-        tabIndex = _controller.index;
+        tabIndex = _controller!.index;
       });
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    Authenticate authenticate;
+    Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthProblem)
         return FatalErrorForm("Internet or server problem?");
@@ -114,20 +115,20 @@ class _HeaderState extends State<MainTemplate>
         if (isPhone) // no navigation bar
           return simplePage(authenticate, isPhone);
         else // tablet or web show navigation
-          return myNavigationRail(context, authenticate,
+          return myNavigationRail(context, authenticate!,
               simplePage(authenticate, isPhone), widget.menuIndex, widget.menu);
       } else {
         // show tabbar page
         if (isPhone)
           return tabPage(authenticate, isPhone);
         else
-          return myNavigationRail(context, authenticate,
+          return myNavigationRail(context, authenticate!,
               tabPage(authenticate, isPhone), widget.menuIndex, widget.menu);
       }
     });
   }
 
-  Widget simplePage(Authenticate authenticate, bool isPhone) {
+  Widget simplePage(Authenticate? authenticate, bool isPhone) {
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
@@ -141,7 +142,7 @@ class _HeaderState extends State<MainTemplate>
             body: widget.child));
   }
 
-  Widget tabPage(Authenticate authenticate, bool isPhone) {
+  Widget tabPage(Authenticate? authenticate, bool isPhone) {
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
@@ -182,7 +183,7 @@ class _HeaderState extends State<MainTemplate>
                 ? Center(child: tabList[tabIndex])
                 : TabBarView(
                     controller: _controller,
-                    children: tabList,
+                    children: tabList as List<Widget>,
                   )));
   }
 }

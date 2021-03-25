@@ -24,16 +24,15 @@ import '../testdata.dart';
 
 class MockRepos extends Mock implements Moqui {}
 
-class MockAuthBloc extends MockBloc<AuthState> implements AuthBloc {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
-class MockChangePwBloc extends MockBloc<ChangePwState> implements ChangePwBloc {
-}
+class MockChangePwBloc extends Mock implements ChangePwBloc {}
 
 void main() {
   group('ChangePw_Form test: ', () {
-    Object repos;
-    ChangePwBloc changePwBloc;
-    AuthBloc authBloc;
+    Object? repos;
+    late ChangePwBloc changePwBloc;
+    late AuthBloc authBloc;
 
     setUp(() {
       repos = MockRepos();

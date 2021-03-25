@@ -20,14 +20,14 @@ import 'package:decimal/decimal.dart';
 
 void main() {
   Dio client;
-  String sessionToken;
-  String apiKey;
+  String? sessionToken;
+  String? apiKey;
   Map login = Map<dynamic, dynamic>();
   Authenticate authenticate;
   Authenticate loginAuth;
-  String categoryId;
-  String productId;
-  FinDoc order;
+  String? categoryId;
+  String? productId;
+  late FinDoc order;
 
   client = Dio();
   client.options.baseUrl = 'http://localhost:8080/rest/';
@@ -35,36 +35,31 @@ void main() {
   client.options.receiveTimeout = 40000;
   client.options.headers = {'Content-Type': 'application/json'};
   client.interceptors
-      .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
+      .add(InterceptorsWrapper(onRequest: (options, handler) async {
     if (false) {
       print('===Outgoing dio request path: ${options.path}');
       print('===Outgoing dio request headers: ${options.headers}');
       print('===Outgoing dio request data: ${options.data}');
     }
-    // Do something before request is sent
-    return options; //continue
-    // If you want to resolve the request with some custom data，
-    // you can return a `Response` object or return `dio.resolve(data)`.
-    // If you want to reject the request with a error message,
-    // you can return a `DioError` object or return `dio.reject(errMsg)`
-  }, onResponse: (Response response) async {
+    return handler.next(options);
+  }, onResponse: (response, handler) async {
     // Do something with response data
     if (false) {
       print("===incoming response: ${response.toString()}");
     }
-    return response; // continue
-  }, onError: (DioError e) async {
+    return handler.next(response);
+  }, onError: (DioError e, handler) async {
     // Do something with response error
     if (e.response != null) {
-      print("=== e.response.data: ${e.response.data}");
-      print("=== e.response.headers: ${e.response.headers}");
-      print("=== e.response.request: ${e.response.request}");
+      print("=== e.response.data: ${e.response!.data}");
+      print("=== e.response.headers: ${e.response!.headers}");
+      print("=== e.response.request: ${e.response!.requestOptions}");
     } else {
       // Something happened in setting up or sending the request that triggered an Error
-      print("=== e.request: ${e.request}");
+      print("=== e.request: ${e.requestOptions}");
       print("=== e.message: ${e.message}");
     }
-    return e; //continue
+    return handler.next(e); //continue
   }));
 
   setUpAll(() async {
@@ -82,7 +77,7 @@ void main() {
       apiKey = result.apiKey;
       // used later for login test
       login.addAll({
-        'companyPartyId': result.company.partyId,
+        'companyPartyId': result.company!.partyId,
         'username': result.user?.name,
         'password': password
       });
@@ -228,7 +223,7 @@ void main() {
             grandTotal: resultOrder.grandTotal);
         expect(finDocToJson(order), finDocToJson(resultOrder));
       } on DioError catch (e) {
-        expect(null, e?.response?.data);
+        expect(null, e.response?.data);
       }
     });
     test('Update order status to OrderPlaced', () async {
@@ -248,7 +243,7 @@ void main() {
             paymentId: resultOrder.paymentId);
         expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
-        expect(null, e?.response?.data);
+        expect(null, e.response?.data);
       }
     });
     test('Update order status to OrderApproved', () async {
@@ -266,7 +261,7 @@ void main() {
             paymentId: resultOrder.paymentId);
         expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
-        expect(null, e?.response?.data);
+        expect(null, e.response?.data);
       }
     });
     test('Update order status to OrderComplated', () async {
@@ -284,7 +279,7 @@ void main() {
             paymentId: resultOrder.paymentId);
         expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
-        expect(null, e?.response?.data);
+        expect(null, e.response?.data);
       }
     });
   });
@@ -323,7 +318,7 @@ void main() {
             )),
             opportunityToJson(result));
       } on DioError catch (e) {
-        expect(null, e?.response?.data);
+        expect(null, e.response?.data);
       }
     });
   });

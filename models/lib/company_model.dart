@@ -34,18 +34,18 @@ String companiesToJson(List<Company> data) =>
     "}";
 
 class Company extends Equatable {
-  final String partyId;
-  final String name;
-  final String classificationId;
-  final String classificationDescr;
-  final String email;
-  final String currencyId;
-  final Uint8List image;
-  final String address1;
-  final String address2;
-  final String city;
-  final String postalCode;
-  final String country;
+  final String? partyId;
+  final String? name;
+  final String? classificationId;
+  final String? classificationDescr;
+  final String? email;
+  final String? currencyId;
+  final Uint8List? image;
+  final String? address1;
+  final String? address2;
+  final String? city;
+  final String? postalCode;
+  final String? country;
 
   Company({
     this.partyId,
@@ -84,7 +84,7 @@ class Company extends Equatable {
         "classificationDescr": classificationDescr,
         "email": email,
         "currencyId": currencyId,
-        "image": image != null ? base64.encode(image) : null,
+        "image": image != null ? base64.encode(image!) : null,
         "address1": address1,
         "address2": address2,
         "city": city,
@@ -92,7 +92,7 @@ class Company extends Equatable {
         "country": country,
       };
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         partyId,
         name,
         classificationId,
@@ -112,18 +112,18 @@ class Company extends Equatable {
       'imgSize: ${image?.length}';
 
   Company copyWith({
-    String partyId,
-    String name,
-    String classificationId,
-    String classificationDescr,
-    String email,
-    String currencyId,
-    Uint8List image,
-    String address1,
-    String address2,
-    String city,
-    String postalCode,
-    String country,
+    String? partyId,
+    String? name,
+    String? classificationId,
+    String? classificationDescr,
+    String? email,
+    String? currencyId,
+    Uint8List? image,
+    String? address1,
+    String? address2,
+    String? city,
+    String? postalCode,
+    String? country,
   }) =>
       Company(
         partyId: partyId ?? this.partyId,
