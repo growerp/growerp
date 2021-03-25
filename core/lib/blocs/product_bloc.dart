@@ -203,17 +203,18 @@ class ProductSuccess extends ProductState {
   const ProductSuccess(
       {this.products, this.hasReachedMax, this.message, this.search});
 
-  ProductSuccess copyWith(
-      {List<Product> products,
-      bool hasReachedMax,
-      String message,
-      String search}) {
-    return ProductSuccess(
+  ProductSuccess copyWith({
+    List<Product> products,
+    bool hasReachedMax,
+    String message,
+    String search,
+  }) =>
+      ProductSuccess(
         products: products ?? this.products,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         message: message ?? this.message,
-        search: search ?? this.search);
-  }
+        search: search ?? this.search,
+      );
 
   @override
   List<Object> get props => [products, hasReachedMax];

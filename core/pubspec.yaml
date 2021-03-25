@@ -23,25 +23,19 @@ dependencies:
   about: ^1.1.2
   rxdart: ^0.24.0
 
-  ofbiz:
-#    path: ../ofbiz
+  backend:
+#    path: ../backend
     git:
       url: https://github.com/growerp/growerp.git
       ref: packages
-      path: ofbiz
-  moqui:
-#    path: ../moqui
-    git:
-      url: https://github.com/growerp/growerp.git
-      ref: packages
-      path: moqui
+      path: backend
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
-  test_coverage: ^0.5.0
+  very_good_analysis: ^2.0.0
   bloc_test: ^7.1.0
   flutter_launcher_icons: ^0.8.1
 

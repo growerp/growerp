@@ -24,11 +24,9 @@ void main() {
     String json2 = usersToJson(users);
     List<User> newObjs = usersFromJson(json2);
     expect(usersToJson(newObjs), usersToJson(users));
+    expect(user, user.copyWith());
   });
   test('itemTypes', () {
-    String json1 = itemTypesToJson(itemTypes);
-    ItemTypes newObj = itemTypesFromJson(json1);
-    expect(itemTypesToJson(newObj), itemTypesToJson(itemTypes));
     String json2 = itemTypesToJson(itemTypes);
     ItemTypes newObjs = itemTypesFromJson(json2);
     expect(itemTypesToJson(newObjs), itemTypesToJson(itemTypes));
@@ -41,6 +39,10 @@ void main() {
     String json2 = categoriesToJson(categories);
     List<ProductCategory> newObjs = categoriesFromJson(json2);
     expect(categoriesToJson(newObjs), categoriesToJson(categories));
+    List props = category.props;
+    expect(props, category.props);
+    String toString = category.toString();
+    expect(toString, category.toString());
   });
 
   test('product', () {
@@ -50,6 +52,11 @@ void main() {
     String json2 = productsToJson(products);
     List<Product> newObjs = productsFromJson(json2);
     expect(productsToJson(newObjs), productsToJson(products));
+    List props = product.props;
+    expect(props, product.props);
+    String toString = product.toString();
+    expect(toString, product.toString());
+    expect(product, product.copyWith());
   });
 
   test('catalog', () {
@@ -65,6 +72,7 @@ void main() {
     String json2 = companiesToJson(companies);
     List<Company> newObjs = companiesFromJson(json2);
     expect(companiesToJson(newObjs), companiesToJson(companies));
+    expect(company, company.copyWith());
   });
 
   test('authenticate', () {
@@ -80,6 +88,21 @@ void main() {
     String json2 = finDocsToJson(finDocs);
     List<FinDoc> newfinDocs = finDocsFromJson(json2);
     expect(finDocsToJson(newfinDocs), finDocsToJson(finDocs));
+    String toString = finDoc.toString();
+    expect(toString, finDoc.toString());
+    String itemString = finDoc.items[0].toString();
+    expect(itemString, finDoc.items[0].toString());
+    FinDoc testFinDoc = FinDoc();
+    expect(testFinDoc.idIsNull(), true);
+    expect(testFinDoc.id(), 'New');
+    testFinDoc = FinDoc(docType: 'invoice', invoiceId: 'abc');
+    expect(testFinDoc.id(), 'abc');
+    testFinDoc = FinDoc(docType: 'payment', paymentId: 'abc');
+    expect(testFinDoc.id(), 'abc');
+    testFinDoc = FinDoc(docType: 'order', orderId: 'abc');
+    expect(testFinDoc.id(), 'abc');
+    testFinDoc = FinDoc(docType: 'transaction', transactionId: 'abc');
+    expect(testFinDoc.id(), 'abc');
   });
 
   test('opportunity', () {
@@ -90,5 +113,19 @@ void main() {
     List<Opportunity> newopportunities = opportunitiesFromJson(json2);
     expect(opportunitiesToJson(newopportunities),
         opportunitiesToJson(opportunities));
+    String toString = opportunity.toString();
+    expect(toString, opportunity.toString());
+    List props = opportunity.props;
+    expect(props, opportunity.props);
+    List testStages = opportunityStages;
+    expect(testStages, opportunityStages);
+  });
+  test('currency', () {
+    String json1 = currencyToJson(currencies[0]);
+    Currency newcurrency = currencyFromJson(json1);
+    expect(currencyToJson(newcurrency), currencyToJson(currencies[0]));
+    String json2 = currenciesToJson(currencies);
+    List<Currency> newcurrencies = currenciesFromJson(json2);
+    expect(currenciesToJson(newcurrencies), currenciesToJson(currencies));
   });
 }

@@ -129,6 +129,43 @@ class Opportunity extends Equatable {
         leadEmail,
       ];
   String toString() => 'Opportunity name: $opportunityName[$opportunityId]';
+
+  Opportunity copyWith({
+    DateTime lastUpdated,
+    String opportunityId,
+    String opportunityName,
+    String description,
+    Decimal estAmount,
+    int estProbability,
+    String stageId,
+    String nextStep,
+    String accountPartyId,
+    String accountEmail,
+    String accountFirstName,
+    String accountLastName,
+    String leadPartyId,
+    String leadEmail,
+    String leadFirstName,
+    String leadLastName,
+  }) =>
+      Opportunity(
+        lastUpdated: lastUpdated ?? this.lastUpdated,
+        opportunityId: opportunityId ?? this.opportunityId,
+        opportunityName: opportunityName ?? this.opportunityName,
+        description: description ?? this.description,
+        estAmount: estAmount ?? this.estAmount,
+        estProbability: estProbability ?? this.estProbability,
+        stageId: stageId ?? this.stageId,
+        nextStep: nextStep ?? this.nextStep,
+        accountPartyId: accountPartyId ?? this.accountPartyId,
+        accountFirstName: accountFirstName ?? this.accountFirstName,
+        accountLastName: accountLastName ?? this.accountLastName,
+        accountEmail: accountEmail ?? this.accountEmail,
+        leadPartyId: leadPartyId ?? this.leadPartyId,
+        leadFirstName: leadFirstName ?? this.leadFirstName,
+        leadLastName: leadLastName ?? this.leadLastName,
+        leadEmail: leadEmail ?? this.leadEmail,
+      );
 }
 
 List<String> opportunityStages = [

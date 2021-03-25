@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 import 'package:decimal/decimal.dart';
+import 'package:equatable/equatable.dart';
 import '@models.dart';
 
 FinDoc finDocFromJson(String str) =>
@@ -32,20 +33,21 @@ String finDocsToJson(List<FinDoc> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
-class FinDoc {
-  String docType; // invoice, payment etc
-  bool sales;
-  String orderId;
-  String invoiceId;
-  String paymentId;
-  String transactionId;
-  String statusId;
-  DateTime creationDate;
-  DateTime completionDate;
-  String description;
-  User otherUser; //a single person responsible for finDoc of a single company
-  Decimal grandTotal;
-  List<FinDocItem> items;
+class FinDoc extends Equatable {
+  final String docType; // invoice, payment etc
+  final bool sales;
+  final String orderId;
+  final String invoiceId;
+  final String paymentId;
+  final String transactionId;
+  final String statusId;
+  final DateTime creationDate;
+  final DateTime completionDate;
+  final String description;
+  final User
+      otherUser; //a single person responsible for finDoc of a single company
+  final Decimal grandTotal;
+  final List<FinDocItem> items;
 
   FinDoc({
     this.docType,
@@ -123,19 +125,70 @@ class FinDoc {
                       ? transactionId
                       : null;
 
+  @override
+  List<Object> get props => [
+        docType, // invoice, payment etc
+        sales,
+        orderId,
+        invoiceId,
+        paymentId,
+        transactionId,
+        statusId,
+        creationDate,
+        completionDate,
+        description,
+        otherUser, //a single person responsible for finDoc of a single company
+        grandTotal,
+        items,
+      ];
+
+  List<String> otherIds() =>
+      docType == 'order' ? ['invoice', invoiceId, 'payment', paymentId] : [];
+
   String toString() =>
       "$docType# $orderId/$invoiceId/$paymentId s/p: ${salesString()}"
       "status: $statusId otherUser: $otherUser Items: ${items?.length}";
+
+  FinDoc copyWith({
+    String docType, // invoice, payment etc
+    bool sales,
+    String orderId,
+    String invoiceId,
+    String paymentId,
+    String transactionId,
+    String statusId,
+    DateTime creationDate,
+    DateTime completionDate,
+    String description,
+    User otherUser, //a single person responsible for finDoc of a single company
+    Decimal grandTotal,
+    List<FinDocItem> items,
+  }) =>
+      FinDoc(
+        docType: docType ?? this.docType,
+        sales: sales ?? this.sales,
+        orderId: orderId ?? this.orderId,
+        invoiceId: invoiceId ?? this.invoiceId,
+        paymentId: paymentId ?? this.paymentId,
+        transactionId: transactionId ?? this.transactionId,
+        statusId: statusId ?? this.statusId,
+        creationDate: creationDate ?? this.creationDate,
+        completionDate: completionDate ?? this.completionDate,
+        description: description ?? this.description,
+        otherUser: otherUser ?? this.otherUser,
+        grandTotal: grandTotal ?? this.grandTotal,
+        items: items ?? this.items,
+      );
 }
 
-class FinDocItem {
-  int itemSeqId;
-  String itemTypeId;
-  String productId;
-  String description;
-  Decimal quantity;
-  Decimal price;
-  String glAccountId;
+class FinDocItem extends Equatable {
+  final int itemSeqId;
+  final String itemTypeId;
+  final String productId;
+  final String description;
+  final Decimal quantity;
+  final Decimal price;
+  final String glAccountId;
 
   FinDocItem({
     this.itemSeqId,
@@ -168,6 +221,36 @@ class FinDocItem {
       };
 
   String toString() => 'FinDocItem: $itemSeqId product: $productId $price ';
+
+  @override
+  List<Object> get props => [
+        itemSeqId,
+        itemTypeId,
+        productId,
+        description,
+        quantity,
+        price,
+        glAccountId,
+      ];
+
+  FinDocItem copyWith({
+    int itemSeqId,
+    String itemTypeId,
+    String productId,
+    String description,
+    Decimal quantity,
+    Decimal price,
+    String glAccountId,
+  }) =>
+      FinDocItem(
+        itemSeqId: itemSeqId ?? this.itemSeqId,
+        itemTypeId: itemTypeId ?? this.itemTypeId,
+        productId: productId ?? this.productId,
+        description: description ?? this.description,
+        quantity: quantity ?? this.quantity,
+        price: price ?? this.price,
+        glAccountId: glAccountId ?? this.glAccountId,
+      );
 }
 
 Map<String, String> finDocStatusValues = {
@@ -190,7 +273,7 @@ Map<String, bool> finDocStatusFixed = {
   // if document can be updated
   'finDocPrep': true,
   'finDocCreated': true,
-  'finDocApproved': true,
+  'finDocApproved': false,
   'finDocCompleted': false,
   'finDocCancelled': false,
 };

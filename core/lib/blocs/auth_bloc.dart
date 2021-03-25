@@ -122,8 +122,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthUnauthenticated(authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading("Updating company....");
-      event.company.image =
-          await HelperFunctions.getResizedImage(event.imagePath);
+      event.company.copyWith(
+          image: (await HelperFunctions.getResizedImage(event.imagePath)));
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
         authenticate.company = result;

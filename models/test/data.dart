@@ -94,14 +94,14 @@ List<int> list =
 Uint8List imageString = Uint8List.fromList(list);
 
 Company company = Company(
-    name: "Dummy Company Name 2",
-    partyId: "100001",
-    currencyId: "dummyCurrency",
-    classificationId: "AppEcommerceShop",
-    classificationDescr: "App for Ecommerce and shop",
-    email: "dummy@example.com",
-    image: imageString,
-    itemTypes: itemTypes);
+  name: "Dummy Company Name 2",
+  partyId: "100001",
+  currencyId: "dummyCurrency",
+  classificationId: "AppEcommerceShop",
+  classificationDescr: "App for Ecommerce and shop",
+  email: "dummy@example.com",
+  image: imageString,
+);
 
 List<Company> companies = [
   company,
@@ -182,7 +182,7 @@ Map register = {
   'firstName': firstName,
   'lastName': lastName,
   'companyName': companyName,
-  'currencyId': currencyId,
+  'currencyId': currencies[0],
   'companyEmailAddress': emailAddress,
   'classificationId': classificationId,
   'language': 'en_US',
@@ -193,14 +193,14 @@ Map register = {
 final Catalog emptyCatalog = Catalog(categories: [], products: []);
 final Catalog catalog = Catalog(categories: categories, products: products);
 
-final ProductCategory category = categoryFromJson('''
+ProductCategory category = categoryFromJson('''
   { "category":
       {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
       "description": null, 
       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="}
   }''');
 
-final List<ProductCategory> categories = categoriesFromJson('''
+List<ProductCategory> categories = categoriesFromJson('''
     {
       "categories": [ 
       {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
@@ -233,46 +233,41 @@ final Product product = productFromJson('''
        "price": "17.13", "categoryId": "dummyFirstCategory",
        "description": "This is a dummy description"}
 }    ''');
-final String currencyId = 'USD';
-final currencies = [
-  "Thailand Baht [THB]",
-  "Euro [EUR]",
-  "United States Dollar [USD]"
-];
 
 final FinDoc finDoc = finDocFromJson('''
   { "finDoc":
-    { "finDocId": null, "statusId": "OrderOpen", 
+    { "orderId": null, "sales": "true", "docType": "invoice", 
+      "statusId": "FinDocCompleted", 
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53",
-      "finDocItems": [
-        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5" , "deliveryDate": "2012-02-27 13:27:00.123456z"},
-        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "itemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null} 
    ]}}
 ''');
 final List<FinDoc> finDocs = finDocsFromJson('''
   { "finDocs": [
-    { "finDocId": "00002", "statusId": "OrderOpen", 
+    { "invoiceId": "00002", "statusId": "OrderOpen", "sales": "true",
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53",
-      "finDocItems": [
-        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},
-        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "itemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]},
-    { "finDocId": "00003", "statusId": "OrderOpen", 
+    { "paymentId": "00003", "statusId": "OrderOpen", "sales": "false",
       "placedDate": "2012-02-27 13:27:00.123456z",
       "otherUser": { "partyId": "dummy"},
       "grandTotal": "44.53", 
-      "finDocItems": [
-        { "finDocItemSeqId": "01", "productId": null, "description": "Cola",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5", "deliveryDate": null},
-        { "finDocItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "itemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5", "deliveryDate": null}
       ]}
    ]}

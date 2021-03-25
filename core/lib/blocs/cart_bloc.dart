@@ -44,25 +44,26 @@ class CartBloc extends Bloc<CartEvent, CartState>
       yield CartLoaded(finDoc, "cart initial load.");
     } else if (event is AddToCart) {
       yield CartLoading();
-      event.newItem.itemSeqId = event.finDoc.items.length + 1;
-      event.finDoc.items.add(event.newItem);
-      event.finDoc.grandTotal = Decimal.parse('0');
+      Decimal grandTotal = Decimal.parse('0');
       event.finDoc.items.forEach((x) {
-        event.finDoc.grandTotal += x.quantity * x.price;
+        grandTotal += x.quantity * x.price;
+        event.finDoc.items.add(
+            event.newItem.copyWith(itemSeqId: event.finDoc.items.length + 1));
       });
-      finDoc = event.finDoc;
-      await repos.saveCart(event.finDoc);
+      finDoc = event.finDoc.copyWith(grandTotal: grandTotal);
+      await repos.saveCart(finDoc);
       yield CartLoaded(event.finDoc, "cart updated");
     } else if (event is DeleteFromCart) {
       yield CartLoading();
       if (event.index != null) {
         finDoc.items.removeAt(event.index);
-        finDoc.grandTotal = Decimal.parse('0');
+        Decimal grandTotal = Decimal.parse('0');
         int i = 0;
         finDoc.items.forEach((x) {
-          finDoc.items[i].itemSeqId = 1 + i++;
-          finDoc.grandTotal += x.quantity * x.price;
+          finDoc.items[i] = finDoc.items[i].copyWith(itemSeqId: 1 + i++);
+          grandTotal += x.quantity * x.price;
         });
+        finDoc = finDoc.copyWith(grandTotal: grandTotal);
       } else
         finDoc = FinDoc(sales: finDoc.sales, items: []);
       await repos.saveCart(finDoc);

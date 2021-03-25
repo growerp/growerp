@@ -1,5 +1,5 @@
-name: ofbiz
-description: GrowERP ofbiz REST interface.
+name: backend
+description: Backend package for GrowERP flutter frontend
 version: 0.0.1
 author:
 homepage:
@@ -13,10 +13,9 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^3.0.9
-  meta: ^1.1.6
-  http: ^0.12.2
   shared_preferences: ^0.5.12+4
   global_configuration: ^1.6.0
+  http: ^0.12.2
   models:
 #    path: ../models
     git:
@@ -28,6 +27,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
-  test_coverage: ^0.4.0
+  very_good_analysis: ^2.0.0
 
 flutter:
+

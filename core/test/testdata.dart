@@ -98,14 +98,7 @@ Authenticate authenticateNoKey = authenticateFromJson('''
                           "classificationId": "AppEcommerceShop",
                           "classificationDescr": "App for Ecommerce and shop",
                           "email": "dummy@example.com",
-      "image": "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
-                          "employees": [{"firstName": "dummyFirstName",
-                       "lastName": "dummyLastName",
-                       "email": "dummy@example.com",
-                       "name": "dummyUsername",
-                       "image": null,
-                       "groupDescription": "Admin",
-                       "userGroupId":"GROWERP_M_ADMIN"}]
+      "image": "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
                           },
               "user": {"firstName": "dummyFirstName",
                        "lastName": "dummyLastName",
@@ -114,8 +107,7 @@ Authenticate authenticateNoKey = authenticateFromJson('''
                        "image": null,
                        "groupDescription": "Admin",
                        "userGroupId":"GROWERP_M_ADMIN",
-                       "language": null,
-                       "country": null
+                       "language": null
                        },
               "apiKey": null
             }
@@ -171,46 +163,46 @@ Map register = {
   'moquiSessionToken': null // need to be set when used!
 };
 
-final Catalog emptyCatalog = Catalog(categories: [], products: []);
-final Catalog catalog = Catalog(categories: categories, products: products);
+Catalog emptyCatalog = Catalog(categories: [], products: []);
+Catalog catalog = Catalog(categories: categories, products: products);
 
-final ProductCategory category = categoryFromJson('''
+ProductCategory category = categoryFromJson('''
   { "category":
-      {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
-      "description": null, 
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="}
+      {"categoryId": null, "categoryName": "1stCat",
+      "description": "this is a description", 
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="}
   }''');
 
-final List<ProductCategory> categories = categoriesFromJson('''
+List<ProductCategory> categories = categoriesFromJson('''
     {
       "categories": [ 
       {"categoryId": "dummyFirstCategory", "categoryName": "1stCat",
       "description": "this is the long description of category first", 
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="},
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="},
       {"categoryId": "secondCategory", "categoryName": "This is the second category",
       "description": "this is the long description of category second",
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA="}]
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg=="}]
 }''');
-final List<Product> products = productsFromJson('''
+List<Product> products = productsFromJson('''
 {     "products": [
       {"productId": "dummyFirstProduct", "productName": "This is the first product",
-      "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+      "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
       "price": "23.99", "productCategoryId": "dummyFirstCategory",
       "description": "This is a dummy description of first product"},
       {"productId": "secondProduct", "productName": "This is the second product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "17.13", "productCategoryId": "dummyFirstCategory",
        "description": "This is a dummy description of second product"},
       {"productId": "thirdProduct", "productName": "This is the third product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "12.33", "productCategoryId": "secondCategory",
        "description": "This is a dummy description of third product"}]
 }
     ''');
-final Product product = productFromJson('''
+Product product = productFromJson('''
 { "product":
       {"productId": "secondProduct", "productName": "This is the second product",
-       "image": "R0lGODlhAQABAAAAACwAAAAAAQABAAA=",
+       "image": "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAH0lEQVR42mNk+M9Qz0BFwDhq4KiBowaOGjhq4Eg1EAAlJx3tIbLVagAAAABJRU5ErkJggg==",
        "price": "17.13", "categoryId": "dummyFirstCategory",
        "description": "This is a dummy description"}
 }    ''');
@@ -221,32 +213,28 @@ final currencies = [
   "United States Dollar [USD]"
 ];
 
-final FinDoc order = orderFromJson('''
-  { "order":
-    { "orderId": null, "statusId": "OrderOpen", 
-      "currencyUomId": "THB",
-      "placedDate": null, "partyId": null,
-      "firstName": "dummyFirstName", "lastName": "dummylastName",
-      "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
-      "accommodationSpotId": null,
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
-          "quantity": "5", "price": "1.5"},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
-          "quantity": "3", "price": "4.5"}
+final FinDoc order = finDocFromJson('''
+  { "finDoc":
+    { "orderId": null, "statusId": "OrderOpen", "docType": "order", 
+      "sales": "true", "currencyUomId": "THB",
+      "placedDate": null,
+      "grandTotal": "7.5",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
+          "quantity": "5", "price": "1.5"}
    ]}}
 ''');
-final List<FinDoc> orders = ordersFromJson('''
-  { "orders": [
+final List<FinDoc> orders = finDocsFromJson('''
+  { "finDocs": [
     { "orderId": "00002", "statusId": "OrderOpen", 
       "placedDate": null, "partyId": null,
       "firstName": "dummyFirstName", "lastName": "dummylastName",  
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5"},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "itemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5"}
       ]},
     { "orderId": "00003", "statusId": "OrderOpen", 
@@ -254,23 +242,60 @@ final List<FinDoc> orders = ordersFromJson('''
       "firstName": "dummyFirstName", "lastName": "dummylastName",
       "grandTotal": "44.53", "table": null, "accommodationAreaId": null,
       "accommodationSpotId": null,
-      "orderItems": [
-        { "orderItemSeqId": "01", "productId": null, "description": "Cola",
+      "items": [
+        { "itemSeqId": "01", "productId": null, "description": "Cola",
           "quantity": "5", "price": "1.5"},
-        { "orderItemSeqId": "02", "productId": null, "description": "Macaroni",
+        { "itemSeqId": "02", "productId": null, "description": "Macaroni",
           "quantity": "3", "price": "4.5"}
       ]}
    ]}
 ''');
-final FinDoc emptyFinDoc = FinDoc(orderItems: []);
-final OrderItem orderItem1 = OrderItem(
+final FinDoc emptyFinDoc = FinDoc(items: []);
+final FinDocItem item1 = FinDocItem(
     productId: "dummyFirstProduct",
     description: "This is the first product",
     quantity: Decimal.parse('5'),
     price: Decimal.parse('3.3'));
-final OrderItem orderItem2 = OrderItem(
+final FinDocItem item2 = FinDocItem(
     productId: "dummySecondProduct",
     description: "This is the second product",
     quantity: Decimal.parse('3'),
     price: Decimal.parse('2.2'));
-final FinDoc totalFinDoc = FinDoc(orderItems: [orderItem1, orderItem2]);
+final FinDoc totalFinDoc = FinDoc(items: [item1, item2]);
+
+Opportunity opportunity = opportunityFromJson('''
+    {  "opportunity": {
+                  "opportunityName": "Dummy Opp Name 2",
+                  "description": "Dummmy descr",
+                  "stageId": "Prospecting",
+                  "nextStep": "testing",
+                  "opportunityId": "33333",
+                  "accountPartyId": "100001",
+                  "leadPartyId": "100001",
+                  "estAmount": "30000",
+                  "estProbability": "30",
+                  "fullName": "Jan de groot",
+                  "email": "dummy@example.com"
+      }
+    }
+''');
+List<Opportunity> opportunities = [opportunity, opportunity];
+
+ItemTypes itemTypes = itemTypesFromJson('''
+{ "itemTypes": {
+  "sales":[
+    {"itemTypeId":"ItemProduct","description":"Product"},
+    {"itemTypeId":"ItemSalesTax","description":"Sales Tax"},
+    {"itemTypeId":"ItemServiceProduct","description":"Service Product"},
+    {"itemTypeId":"ItemShipping","description":"Shipping and Handling"},
+    {"itemTypeId":"ItemVatTax","description":"VAT Tax (not added to totals)"}
+  ],
+  "purchase":[
+    {"itemTypeId":"ItemProduct","description":"Product"},
+    {"itemTypeId":"ItemSalesTax","description":"Sales Tax"},
+    {"itemTypeId":"ItemServiceProduct","description":"Service Product"},
+    {"itemTypeId":"ItemShipping","description":"Shipping and Handling"},
+    {"itemTypeId":"ItemVatTax","description":"VAT Tax (not added to totals)"}
+  ]
+}}
+''');

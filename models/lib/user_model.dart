@@ -45,20 +45,21 @@ class User extends Equatable {
   final String companyPartyId;
   final String companyName;
 
-  User(
-      {this.partyId,
-      this.userId,
-      this.firstName,
-      this.lastName,
-      this.name,
-      this.email,
-      this.groupDescription,
-      this.userGroupId,
-      this.language,
-      this.externalId,
-      this.image,
-      this.companyPartyId,
-      this.companyName});
+  User({
+    this.partyId,
+    this.userId,
+    this.firstName,
+    this.lastName,
+    this.name,
+    this.email,
+    this.groupDescription,
+    this.userGroupId,
+    this.language,
+    this.externalId,
+    this.image,
+    this.companyPartyId,
+    this.companyName,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         partyId: json["partyId"],
@@ -71,9 +72,7 @@ class User extends Equatable {
         userGroupId: json["userGroupId"],
         language: json["language"],
         externalId: json["externalId"],
-        image: json["image"] == null || json["image"] == "null"
-            ? null
-            : base64.decode(json["image"]),
+        image: json["image"] == null ? null : base64.decode(json["image"]),
         companyPartyId: json["companyPartyId"],
         companyName: json["companyName"],
       );
@@ -115,6 +114,37 @@ class User extends Equatable {
     return 'User $firstName $lastName [$partyId] sec: $userGroupId '
         'company: $companyName[$companyPartyId] size: ${image?.length}';
   }
+
+  User copyWith({
+    String partyId,
+    String userId,
+    String firstName,
+    String lastName,
+    String name,
+    String email,
+    String groupDescription,
+    String userGroupId,
+    String language,
+    String externalId,
+    Uint8List image,
+    String companyPartyId,
+    String companyName,
+  }) =>
+      User(
+        partyId: partyId ?? this.partyId,
+        userId: userId ?? this.userId,
+        firstName: firstName ?? this.firstName,
+        lastName: lastName ?? this.lastName,
+        name: name ?? this.name,
+        email: email ?? this.email,
+        groupDescription: groupDescription ?? this.groupDescription,
+        userGroupId: userGroupId ?? this.userGroupId,
+        language: language ?? this.language,
+        externalId: externalId ?? this.externalId,
+        image: image ?? this.image,
+        companyPartyId: companyPartyId ?? this.companyPartyId,
+        companyName: companyName ?? this.companyName,
+      );
 }
 
 class UserGroup {

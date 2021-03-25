@@ -106,4 +106,23 @@ class Product extends Equatable {
   @override
   String toString() => 'Product name: $productName[$productId] price: $price '
       'category: $categoryName[$categoryId] imgSize: ${image?.length}';
+
+  Product copyWith({
+    String productId,
+    String productName,
+    String description,
+    Decimal price,
+    String categoryId,
+    String categoryName,
+    Uint8List image,
+  }) =>
+      Product(
+        productId: productId ?? this.productId,
+        productName: productName ?? this.productName,
+        description: description ?? this.description,
+        price: price ?? this.price,
+        categoryId: categoryId ?? this.categoryId,
+        categoryName: categoryName ?? this.categoryName,
+        image: image ?? this.image,
+      );
 }

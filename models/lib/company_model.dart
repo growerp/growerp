@@ -19,6 +19,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
+
 Company companyFromJson(String str) =>
     Company.fromJson(json.decode(str)["company"]);
 String companyToJson(Company data) =>
@@ -31,20 +33,19 @@ String companiesToJson(List<Company> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
-class Company {
-  String partyId;
-  String name;
-  String classificationId;
-  String classificationDescr;
-  String email;
-  dynamic currencyId;
-  Uint8List image;
-  String address1;
-  String address2;
-  String city;
-  String postalCode;
-  String country;
-  ItemTypes itemTypes; // for order and invoiceitem
+class Company extends Equatable {
+  final String partyId;
+  final String name;
+  final String classificationId;
+  final String classificationDescr;
+  final String email;
+  final String currencyId;
+  final Uint8List image;
+  final String address1;
+  final String address2;
+  final String city;
+  final String postalCode;
+  final String country;
 
   Company({
     this.partyId,
@@ -59,7 +60,6 @@ class Company {
     this.city,
     this.postalCode,
     this.country,
-    this.itemTypes,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
@@ -69,17 +69,12 @@ class Company {
         classificationDescr: json["classificationDescr"],
         email: json["email"],
         currencyId: json["currencyId"],
-        image: json["image"] == null || json["image"] == "null"
-            ? null
-            : base64.decode(json["image"]),
+        image: json["image"] == null ? null : base64.decode(json["image"]),
         address1: json["address1"],
         address2: json["address2"],
         city: json["city"],
         postalCode: json["postalCode"],
         country: json["country"],
-        itemTypes: json["itemTypes"] == null
-            ? null
-            : ItemTypes.fromJson(json["itemTypes"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -95,60 +90,53 @@ class Company {
         "city": city,
         "postalCode": postalCode,
         "country": country,
-        "itemTypes": itemTypes == null ? null : itemTypes.toJson()
       };
+  @override
+  List<Object> get props => [
+        partyId,
+        name,
+        classificationId,
+        classificationDescr,
+        email,
+        currencyId,
+        image,
+        address1,
+        address2,
+        city,
+        postalCode,
+        country,
+      ];
 
+  @override
   String toString() => 'Company name: $name[$partyId] Curr: $currencyId '
       'imgSize: ${image?.length}';
-}
 
-// To parse this JSON data, do
-//
-//     final itemTypes = itemTypesFromJson(jsonString);
-
-ItemTypes itemTypesFromJson(String str) =>
-    ItemTypes.fromJson(json.decode(str)["itemTypes"]);
-String itemTypesToJson(ItemTypes data) =>
-    '{"itemTypes":' + json.encode(data.toJson()) + "}";
-
-class ItemTypes {
-  ItemTypes({
-    this.sales,
-    this.purchase,
-  });
-
-  List<ItemType> sales;
-  List<ItemType> purchase;
-
-  factory ItemTypes.fromJson(Map<String, dynamic> json) => ItemTypes(
-        sales:
-            List<ItemType>.from(json["sales"].map((x) => ItemType.fromJson(x))),
-        purchase: List<ItemType>.from(
-            json["purchase"].map((x) => ItemType.fromJson(x))),
+  Company copyWith({
+    String partyId,
+    String name,
+    String classificationId,
+    String classificationDescr,
+    String email,
+    String currencyId,
+    Uint8List image,
+    String address1,
+    String address2,
+    String city,
+    String postalCode,
+    String country,
+  }) =>
+      Company(
+        partyId: partyId ?? this.partyId,
+        name: name ?? this.name,
+        classificationId: classificationId ?? this.classificationId,
+        classificationDescr: classificationDescr ?? this.classificationDescr,
+        email: email ?? this.email,
+        currencyId: currencyId ?? this.currencyId,
+        image: image ?? this.image,
+        address1: address1 ?? this.address1,
+        address2: address2 ?? this.address2,
+        city: city ?? this.city,
+        postalCode: postalCode ?? this.postalCode,
+        country: country ?? this.country,
       );
-
-  Map<String, dynamic> toJson() => {
-        "sales": List<dynamic>.from(sales.map((x) => x.toJson())),
-        "purchase": List<dynamic>.from(purchase.map((x) => x.toJson())),
-      };
-}
-
-class ItemType {
-  ItemType({
-    this.itemTypeId,
-    this.description,
-  });
-
-  String itemTypeId;
-  String description;
-
-  factory ItemType.fromJson(Map<String, dynamic> json) => ItemType(
-        itemTypeId: json["itemTypeId"],
-        description: json["description"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "itemTypeId": itemTypeId,
-        "description": description,
-      };
 }

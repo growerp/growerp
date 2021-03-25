@@ -33,6 +33,7 @@ class Authenticate {
   Company company;
   User user;
   Stats stats;
+  ItemTypes itemTypes;
 
   Authenticate({
     this.apiKey,
@@ -40,6 +41,7 @@ class Authenticate {
     this.company,
     this.user,
     this.stats,
+    this.itemTypes,
   });
 
   factory Authenticate.fromJson(Map<String, dynamic> json) => Authenticate(
@@ -49,6 +51,9 @@ class Authenticate {
             json["company"] != null ? Company.fromJson(json["company"]) : null,
         user: json["user"] != null ? User.fromJson(json["user"]) : null,
         stats: json["stats"] != null ? Stats.fromJson(json["stats"]) : null,
+        itemTypes: json["itemTypes"] == null
+            ? null
+            : ItemTypes.fromJson(json["itemTypes"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +62,7 @@ class Authenticate {
         "company": company?.toJson(),
         "user": user?.toJson(),
         "stats": stats?.toJson(),
+        "itemTypes": itemTypes == null ? null : itemTypes.toJson()
       };
   @override
   String toString() => 'Company: ${company?.toString()} '
@@ -144,4 +150,54 @@ class Stats {
   String toString() {
     return 'Statistics, products: $products categories: $categories admins: $admins';
   }
+}
+// To parse this JSON data, do
+//
+//     final itemTypes = itemTypesFromJson(jsonString);
+
+ItemTypes itemTypesFromJson(String str) =>
+    ItemTypes.fromJson(json.decode(str)["itemTypes"]);
+String itemTypesToJson(ItemTypes data) =>
+    '{"itemTypes":' + json.encode(data.toJson()) + "}";
+
+class ItemTypes {
+  ItemTypes({
+    this.sales,
+    this.purchase,
+  });
+
+  List<ItemType> sales;
+  List<ItemType> purchase;
+
+  factory ItemTypes.fromJson(Map<String, dynamic> json) => ItemTypes(
+        sales:
+            List<ItemType>.from(json["sales"].map((x) => ItemType.fromJson(x))),
+        purchase: List<ItemType>.from(
+            json["purchase"].map((x) => ItemType.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "sales": List<dynamic>.from(sales.map((x) => x.toJson())),
+        "purchase": List<dynamic>.from(purchase.map((x) => x.toJson())),
+      };
+}
+
+class ItemType {
+  ItemType({
+    this.itemTypeId,
+    this.description,
+  });
+
+  String itemTypeId;
+  String description;
+
+  factory ItemType.fromJson(Map<String, dynamic> json) => ItemType(
+        itemTypeId: json["itemTypeId"],
+        description: json["description"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "itemTypeId": itemTypeId,
+        "description": description,
+      };
 }

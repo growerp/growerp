@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:moqui/moqui.dart';
+import 'package:backend/@backend.dart';
 import 'package:core/forms/@forms.dart';
 import 'package:models/@models.dart';
 import '../router.dart' as router;

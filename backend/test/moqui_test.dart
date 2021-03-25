@@ -16,6 +16,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:models/@models.dart';
 import 'testdata.dart';
+import 'package:decimal/decimal.dart';
 
 void main() {
   Dio client;
@@ -26,7 +27,7 @@ void main() {
   Authenticate loginAuth;
   String categoryId;
   String productId;
-  FinDoc newOrder;
+  FinDoc order;
 
   client = Dio();
   client.options.baseUrl = 'http://localhost:8080/rest/';
@@ -74,25 +75,10 @@ void main() {
       register['moquiSessionToken'] = sessionToken;
       register['username'] = randomString4 + register['emailAddress'];
       register['emailAddress'] = randomString4 + register['emailAddress'];
-      register['classificationId'] = 'AppAdmin';
       dynamic response =
           await client.post('s1/growerp/100/UserAndCompany', data: register);
       Authenticate result = authenticateFromJson(response.toString());
-      authenticateNoKey.company.partyId = result.company.partyId;
-      authenticateNoKey.user.partyId = result.user.partyId;
-      authenticateNoKey.user.name = register['emailAddress'];
-      authenticateNoKey.user.email = register['emailAddress'];
-      authenticateNoKey.user.image = result.user.image;
-      authenticateNoKey.user.userId = result.user.userId;
-      authenticateNoKey.user.language = result.user.language;
-      authenticateNoKey.user.groupDescription = result.user.groupDescription;
-      authenticateNoKey.company.image = result.company.image;
-      authenticateNoKey.company.employees = result.company.employees;
-      authenticateNoKey.company.classificationId =
-          result.company.classificationId;
-      authenticateNoKey.company.classificationDescr =
-          result.company.classificationDescr;
-      authenticateNoKey.apiKey = result.apiKey;
+
       apiKey = result.apiKey;
       // used later for login test
       login.addAll({
@@ -100,8 +86,7 @@ void main() {
         'username': result.user?.name,
         'password': password
       });
-      authenticate = authenticateNoKey;
-      expect(authenticateToJson(result), authenticateToJson(authenticateNoKey));
+      expect(true, result is Authenticate);
     } catch (e) {
       print("catch: $e");
       expect(true, false);
@@ -124,12 +109,9 @@ void main() {
         dynamic response =
             await client.post('s1/growerp/100/Login', data: login);
         loginAuth = authenticateFromJson(response.toString());
-        authenticate.apiKey = loginAuth.apiKey;
         apiKey = loginAuth.apiKey;
-        client.options.headers['api_key'] = loginAuth.apiKey;
-        authenticate.moquiSessionToken = loginAuth.moquiSessionToken;
         sessionToken = loginAuth.moquiSessionToken;
-        expect(authenticateToJson(loginAuth), authenticateToJson(authenticate));
+        expect(true, loginAuth is Authenticate);
       } catch (e) {
         print("===catch: $e");
         expect(true, false);
@@ -141,16 +123,16 @@ void main() {
     test('create/get category ', () async {
       client.options.headers['api_key'] = apiKey;
       try {
-        category.categoryId = null;
         Response response = await client.put('s1/growerp/100/Category', data: {
           'category': categoryToJson(category),
           'moquiSessionToken': sessionToken
         });
-        categoryId = categoryFromJson(response.toString()).categoryId;
-        category.categoryId = categoryId;
-        category.image = categoryFromJson(response.toString()).image;
-        expect(categoryToJson(category),
-            categoryToJson(categoryFromJson(response.toString())));
+        ProductCategory result = categoryFromJson(response.toString());
+        category = category.copyWith(
+            categoryId: result.categoryId, image: result.image);
+        categoryId = result.categoryId;
+        expect(categoryToJson(category), categoryToJson(result));
+        expect(true, result.image != null);
       } catch (e) {
         print("catch: $e");
         expect(true, false);
@@ -159,77 +141,22 @@ void main() {
     test('create/get product ', () async {
       client.options.headers['api_key'] = apiKey;
       try {
-        product.productId = null;
-        product.categoryId = categoryId;
+        product = product.copyWith(productId: null, categoryId: categoryId);
         Response response = await client.put('s1/growerp/100/Product', data: {
           'product': productToJson(product),
           'moquiSessionToken': sessionToken
         });
-        productId = productFromJson(response.toString()).productId;
-        product.productId = productId;
-        product.categoryName = category.categoryName;
-        product.image = productFromJson(response.toString()).image;
-        expect(productToJson(product),
-            productToJson(productFromJson(response.toString())));
+        Product result = productFromJson(response.toString());
+        product = product.copyWith(
+            productId: result.productId,
+            image: result.image,
+            categoryName: result.categoryName);
+        expect(productToJson(product), productToJson(result));
+        expect(true, result.image != null);
       } catch (e) {
         print("catch: $e");
         expect(true, false);
       }
-    });
-  });
-
-  group('Image upload tests>>>>>', () {
-    test('upload image company', () async {
-      await client.post('s1/growerp/100/Image', data: {
-        'type': 'company',
-        'id': loginAuth.company.partyId,
-        'base64': imageBase64,
-        'moquiSessionToken': sessionToken,
-      });
-      dynamic response = await client.get('s1/growerp/100/Company',
-          queryParameters: {'partyId': loginAuth.company.partyId});
-      Company company = companyFromJson(response.toString());
-      expect(company.image, isNotEmpty);
-    });
-    test('upload image user', () async {
-      await client.post('s1/growerp/100/Image', data: {
-        'type': 'user',
-        'id': loginAuth.user.partyId,
-        'base64': imageBase64,
-        'moquiSessionToken': sessionToken,
-      });
-      dynamic response = await client.get('s1/growerp/100/User',
-          queryParameters: {'userPartyId': loginAuth.user.partyId});
-      User user = userFromJson(response.toString());
-      expect(user.image, isNotEmpty);
-    });
-
-    test('upload image category', () async {
-      await client.post('s1/growerp/100/Image', data: {
-        'type': 'category',
-        'id': categoryId,
-        'base64': imageBase64,
-        'moquiSessionToken': sessionToken,
-      });
-
-      dynamic response = await client.get('s1/growerp/100/Categories',
-          queryParameters: {'categoryId': categoryId});
-      ProductCategory category = categoryFromJson(response.toString());
-      expect(category.image, isNotEmpty);
-    });
-
-    test('upload image product', () async {
-      await client.post('s1/growerp/100/Image', data: {
-        'type': 'product',
-        'id': productId,
-        'base64': imageBase64,
-        'moquiSessionToken': sessionToken,
-      });
-
-      dynamic response = await client.get('s1/growerp/100/Products',
-          queryParameters: {'productId': productId});
-      Product product = productFromJson(response.toString());
-      expect(product.image, isNotEmpty);
     });
   });
 
@@ -261,93 +188,141 @@ void main() {
       client.options.headers['api_key'] = apiKey;
       try {
         // create customer
-        customer.name = randomString4;
-        customer.email = "$randomString4@example.com";
+        User customer = User(
+            firstName: randomString4,
+            lastName: randomString4,
+            email: "$randomString4@example.com",
+            userGroupId: "GROWERP_M_CUSTOMER",
+            companyName: randomString4);
         Response response = await client.put('s1/growerp/100/User', data: {
           'user': userToJson(customer),
           'moquiSessionToken': sessionToken
         });
-        User newCustomer = userFromJson(response.toString());
-        order.customerPartyId = newCustomer.partyId;
-        order.orderId = null;
-        order.orderItems[0].productId = productId;
+        customer = userFromJson(response.toString());
+
+        order = FinDoc(
+            docType: 'order',
+            sales: true,
+            description: 'test order',
+            otherUser: customer,
+            items: [
+              FinDocItem(
+                  itemSeqId: 1,
+                  itemTypeId: 'ItemProduct',
+                  productId: productId,
+                  quantity: Decimal.parse("3"),
+                  price: Decimal.parse("34.88"))
+            ]);
+
         // create/get order;
-        response = await client.post('s1/growerp/100/Order', data: {
-          'order': orderToJson(order),
+        response = await client.post('s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(order),
           'moquiSessionToken': sessionToken
         });
-        FinDoc resultFinDoc = orderFromJson(response.toString());
-        newFinDoc = resultOrder;
-        order.orderId = resultOrder.orderId;
-        order.placedDate = resultOrder.placedDate;
-        order.email = newCustomer.email;
-        order.firstName = newCustomer.firstName;
-        order.lastName = newCustomer.lastName;
-        order.customerPartyId = newCustomer.partyId;
-        order.orderItems[0].productId = productId;
-        order.orderItems[0].description = resultOrder.orderItems[0].description;
-        expect(orderToJson(order), orderToJson(resultOrder));
+        FinDoc resultOrder = finDocFromJson(response.toString());
+        expect(true, resultOrder is FinDoc);
+        order = order.copyWith(
+            orderId: resultOrder.orderId,
+            creationDate: resultOrder.creationDate,
+            statusId: resultOrder.statusId,
+            grandTotal: resultOrder.grandTotal);
+        expect(finDocToJson(order), finDocToJson(resultOrder));
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
     });
     test('Update order status to OrderPlaced', () async {
       client.options.headers['api_key'] = apiKey;
-      newOrder.statusId = 'OrderPlaced';
+      order = order.copyWith(statusId: 'FinDocCreated');
       try {
-        Response response = await client.patch('s1/growerp/100/Order', data: {
-          'order': orderToJson(newOrder),
+        Response response = await client.patch('s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(order),
           'moquiSessionToken': sessionToken
         });
-        expect(orderFromJson(response.toString()).statusId, 'OrderPlaced');
+        FinDoc resultOrder = finDocFromJson(response.toString());
+        expect(resultOrder.invoiceId != null, true);
+        expect(resultOrder.paymentId != null, true);
+        order = order.copyWith(
+            statusId: 'FinDocCreated',
+            invoiceId: resultOrder.invoiceId,
+            paymentId: resultOrder.paymentId);
+        expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
     });
     test('Update order status to OrderApproved', () async {
       client.options.headers['api_key'] = apiKey;
+      order = order.copyWith(statusId: 'FinDocApproved');
       try {
-        newOrder.statusId = 'OrderApproved';
-        Response response = await client.patch('s1/growerp/100/Order', data: {
-          'order': orderToJson(newOrder),
+        Response response = await client.patch('s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(order),
           'moquiSessionToken': sessionToken
         });
-        expect(orderFromJson(response.toString()).statusId, 'OrderApproved');
+        FinDoc resultOrder = finDocFromJson(response.toString());
+        order = order.copyWith(
+            statusId: 'FinDocApproved',
+            invoiceId: resultOrder.invoiceId,
+            paymentId: resultOrder.paymentId);
+        expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
     });
     test('Update order status to OrderComplated', () async {
       client.options.headers['api_key'] = apiKey;
+      order = order.copyWith(statusId: 'FinDocCompleted');
       try {
-        newOrder.statusId = 'OrderCompleted';
-        Response response = await client.patch('s1/growerp/100/Order', data: {
-          'order': orderToJson(newOrder),
+        Response response = await client.patch('s1/growerp/100/FinDoc', data: {
+          'finDoc': finDocToJson(order),
           'moquiSessionToken': sessionToken
         });
-        expect(orderFromJson(response.toString()).statusId, 'OrderCompleted');
+        FinDoc resultOrder = finDocFromJson(response.toString());
+        order = order.copyWith(
+            statusId: 'FinDocCompleted',
+            invoiceId: resultOrder.invoiceId,
+            paymentId: resultOrder.paymentId);
+        expect(finDocToJson(resultOrder), finDocToJson(order));
       } on DioError catch (e) {
         expect(null, e?.response?.data);
       }
     });
   });
+
   group('Opportunity >>>>>', () {
     test('create/get opportunity ', () async {
       client.options.headers['api_key'] = apiKey;
       try {
+        // create lead
+        User lead = User(
+            firstName: randomString4,
+            lastName: randomString4,
+            email: "$randomString4@example1.com",
+            userGroupId: "GROWERP_M_LEAD",
+            companyName: randomString4);
+        Response response = await client.put('s1/growerp/100/User', data: {
+          'user': userToJson(lead),
+          'moquiSessionToken': sessionToken
+        });
+        lead = userFromJson(response.toString());
+        opportunity = opportunity.copyWith(
+            leadPartyId: lead.partyId,
+            leadEmail: lead.email,
+            leadFirstName: lead.firstName,
+            leadLastName: lead.lastName);
         // create/get opportunity;
-        Response response = await client.put('s1/growerp/100/Opportunity',
-            data: {
-              'opportunity': opportunityToJson(opportunity),
-              'moquiSessionToken': sessionToken
-            });
-        print("=====test ${response.toString()}");
+        response = await client.put('s1/growerp/100/Opportunity', data: {
+          'opportunity': opportunityToJson(opportunity),
+          'moquiSessionToken': sessionToken
+        });
         Opportunity result = opportunityFromJson(response.toString());
-        print("====2=====");
-        opportunity.opportunityId = result.opportunityId;
-        expect(opportunityToJson(opportunity), opportunityToJson(result));
+        expect(
+            opportunityToJson(opportunity.copyWith(
+              opportunityId: result.opportunityId,
+              lastUpdated: result.lastUpdated,
+            )),
+            opportunityToJson(result));
       } on DioError catch (e) {
-        print("======catch: $e");
         expect(null, e?.response?.data);
       }
     });
