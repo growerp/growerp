@@ -115,7 +115,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         if (result is FinDoc) {
           currentState.finDocs!.add(result);
           yield currentState.copyWith(
-              message: "${result.docType} updated/created");
+              message: "${result.docType} #${result.id()} created");
         } else
           yield FinDocProblem(result);
       } else if (event is UpdateFinDoc) {
@@ -141,6 +141,15 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           yield currentState.copyWith(
               message: "status updated to ${result.statusId}");
         } else
+          yield FinDocProblem(result);
+      } else if (event is DeleteFinDoc) {
+        yield FinDocLoading('Deleting ${event.finDoc.docType}');
+        dynamic result = await repos
+            .updateFinDoc(event.finDoc.copyWith(statusId: "finDocCancelled"));
+        if (result is FinDoc)
+          yield currentState.copyWith(
+              message: "${event.finDoc.docType} status to Cancelled");
+        else
           yield FinDocProblem(result);
       }
     }
@@ -178,6 +187,13 @@ class CreateFinDoc extends FinDocEvent {
 class UpdateFinDoc extends FinDocEvent {
   final FinDoc finDoc;
   UpdateFinDoc(this.finDoc);
+  @override
+  String toString() => 'UpdateFinDoc $finDoc';
+}
+
+class DeleteFinDoc extends FinDocEvent {
+  final FinDoc finDoc;
+  DeleteFinDoc(this.finDoc);
   @override
   String toString() => 'UpdateFinDoc $finDoc';
 }

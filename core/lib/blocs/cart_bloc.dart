@@ -29,57 +29,56 @@ class CartBloc extends Bloc<CartEvent, CartState>
   final repos;
   final bool? sales;
   final FinDocBloc? finDocBloc;
-  FinDoc? finDoc;
+  FinDoc finDoc = FinDoc(items: []);
   CartBloc({this.repos, this.sales, this.finDocBloc}) : super(CartInitial());
 
   @override
   Stream<CartState> mapEventToState(CartEvent event) async* {
     if (event is LoadCart) {
       yield CartLoading();
-      if (event.finDoc.orderId == null &&
-          event.finDoc.invoiceId == null &&
-          event.finDoc.paymentId == null)
-        finDoc = await repos.getCart(sales: event.finDoc.sales);
-      if (finDoc == null) finDoc = event.finDoc;
+      if (event.finDoc.idIsNull()) {
+        // if new, get last finDoc
+        var result = await repos.getCart(
+            sales: event.finDoc.sales, docType: event.finDoc.docType);
+        if (result is FinDoc)
+          finDoc = result;
+        else
+          finDoc = event.finDoc; // nothing found so show empty
+      }
       yield CartLoaded(finDoc, "cart initial load.");
     } else if (event is AddToCart) {
       yield CartLoading();
       Decimal grandTotal = Decimal.parse('0');
       event.finDoc!.items!.forEach((x) {
         grandTotal += x.quantity! * x.price!;
-        event.finDoc!.items!.add(event.newItem!
-            .copyWith(itemSeqId: event.finDoc!.items!.length + 1));
       });
+      event.finDoc!.items!
+          .add(event.newItem!.copyWith(itemSeqId: finDoc.items!.length + 1));
       finDoc = event.finDoc!.copyWith(grandTotal: grandTotal);
       await repos.saveCart(finDoc);
-      yield CartLoaded(event.finDoc, "cart updated");
-    } else if (event is DeleteFromCart) {
+      yield CartLoaded(finDoc, "cart updated");
+    } else if (event is ClearCart) {
+      finDoc = FinDoc(
+          sales: event.finDoc.sales, docType: event.finDoc.docType, items: []);
+      yield CartLoaded(finDoc, "cart cleared.");
+    } else if (event is DeleteItemFromCart) {
       yield CartLoading();
-      if (event.index != null) {
-        finDoc!.items!.removeAt(event.index!);
-        Decimal grandTotal = Decimal.parse('0');
-        int i = 0;
-        finDoc!.items!.forEach((x) {
-          finDoc!.items![i] = finDoc!.items![i].copyWith(itemSeqId: 1 + i++);
-          grandTotal += x.quantity! * x.price!;
-        });
-        finDoc = finDoc!.copyWith(grandTotal: grandTotal);
-      } else
-        finDoc = FinDoc(sales: finDoc!.sales, items: []);
+      finDoc.items!.removeAt(event.index!);
+      Decimal grandTotal = Decimal.parse('0');
+      int i = 0;
+      finDoc.items!.forEach((x) {
+        finDoc.items![i] = finDoc.items![i].copyWith(itemSeqId: 1 + i++);
+        grandTotal += x.quantity! * x.price!;
+      });
+      finDoc = finDoc.copyWith(grandTotal: grandTotal);
       await repos.saveCart(finDoc);
-      yield CartLoaded(
-          finDoc,
-          event.index != null
-              ? "Item# ${event.index} deleted"
-              : "Cart cleared");
+      yield CartLoaded(finDoc, "Item# ${event.index} removed");
     } else if (event is CreateFinDocFromCart) {
-      yield CartLoading('Saving ${finDoc!.docType}...');
+      yield CartLoading('Saving ${event.finDoc.docType}...');
       try {
-        finDocBloc!.add(CreateFinDoc(finDoc));
-        finDoc = FinDoc(
-            sales: finDoc!.sales, grandTotal: Decimal.parse('0'), items: []);
-        await repos.saveCart(finDoc);
-        yield CartLoaded(finDoc, "${finDoc!.docType} created");
+        finDocBloc!.add(CreateFinDoc(event.finDoc));
+        add(ClearCart(event.finDoc));
+        yield CartLoaded(finDoc, "${finDoc.docType} created, cart cleared..");
       } catch (e) {
         yield CartProblem(e.toString());
       }
@@ -102,7 +101,13 @@ class LoadCart extends CartEvent {
   String toString() => "Loading cart with ${finDoc.docType}: $finDoc ...";
 }
 
-class CreateFinDocFromCart extends CartEvent {}
+class CreateFinDocFromCart extends CartEvent {
+  final FinDoc finDoc;
+  CreateFinDocFromCart(this.finDoc);
+  @override
+  String toString() =>
+      (finDoc.idIsNull() ? 'Create ' : 'Update ') + finDoc.docType!;
+}
 
 class AddToCart extends CartEvent {
   final FinDoc? finDoc;
@@ -112,11 +117,18 @@ class AddToCart extends CartEvent {
   String toString() => 'Updating cart: $finDoc';
 }
 
-class DeleteFromCart extends CartEvent {
+class DeleteItemFromCart extends CartEvent {
   final int? index;
-  DeleteFromCart([this.index]);
+  DeleteItemFromCart([this.index]);
   @override
   String toString() => 'Delete item# $index';
+}
+
+class ClearCart extends CartEvent {
+  final FinDoc finDoc;
+  ClearCart(this.finDoc);
+  @override
+  String toString() => ('Clear cart');
 }
 
 // ================= state ========================

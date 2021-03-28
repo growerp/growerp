@@ -15,8 +15,6 @@
 import 'dart:async';
 import 'package:core/helper_functions.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/@models.dart';
@@ -111,12 +109,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthAuthenticated(authenticate, "Successfully logged in");
     } else if (event is Logout) {
       yield AuthLoading();
-      authenticate = await repos.logout();
+      authenticate = await repos.logout(authenticate);
       yield AuthUnauthenticated(authenticate, "you are logged out now");
     } else if (event is ResetPassword) {
       await repos.resetPassword(username: event.username);
     } else if (event is UpdateAuth) {
-      authenticate = await repos.logout();
+      authenticate = await repos.logout(authenticate);
       yield AuthLoading();
       await repos.persistAuthenticate(authenticate);
       yield AuthUnauthenticated(authenticate);

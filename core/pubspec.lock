@@ -46,9 +46,11 @@ packages:
   backend:
     dependency: "direct main"
     description:
-      path: "../backend"
-      relative: true
-    source: path
+      path: backend
+      ref: packages
+      resolved-ref: "33542c3843a3f78b3362ac36a04675f59e763b4a"
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   bloc:
     dependency: transitive
@@ -383,9 +385,11 @@ packages:
   models:
     dependency: transitive
     description:
-      path: "../models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: "33542c3843a3f78b3362ac36a04675f59e763b4a"
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   nested:
     dependency: transitive

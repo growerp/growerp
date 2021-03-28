@@ -65,9 +65,14 @@ class Authenticate {
         "itemTypes": itemTypes == null ? null : itemTypes!.toJson()
       };
   @override
-  String toString() => 'Company: ${company?.toString()} '
-      'User: ${user?.toString()} apiKey: '
-      '....${apiKey?.substring(apiKey!.length - 10)}';
+  String toString() =>
+      'Company: $company '
+          'User: $user apiKey: '
+          '....${apiKey?.substring(apiKey!.length - 10)} ' +
+      (itemTypes != null
+          ? 'itemTypes: ${itemTypes!.sales!.length}/'
+              '${itemTypes!.purchase!.length}'
+          : '');
 }
 
 Stats statsFromJson(String str) => Stats.fromJson(json.decode(str)["stats"]);
@@ -148,7 +153,7 @@ class Stats {
       };
   @override
   String toString() {
-    return 'Statistics, products: $products categories: $categories admins: $admins';
+    return 'Statistics, admins: $admins';
   }
 }
 // To parse this JSON data, do
@@ -200,4 +205,9 @@ class ItemType {
         "itemTypeId": itemTypeId,
         "description": description,
       };
+
+  @override
+  String toString() {
+    return 'Itemtype: $itemTypeId';
+  }
 }

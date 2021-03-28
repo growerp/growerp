@@ -84,7 +84,13 @@ class Moqui {
   }
 
   String? responseMessage(e) {
-    String? errorDescription = e.toString();
+    String? errorDescription;
+
+    if (e.response) {
+      return e.response.data["errors"];
+    }
+
+    errorDescription = e.toString();
     if (e is DioError) {
       DioErrorType dioError = e as DioErrorType;
       switch (dioError) {
@@ -107,10 +113,6 @@ class Moqui {
           errorDescription = 'Default error type, Some other Error.';
           break;
       }
-      // print("====dio error: $errorDescription");
-    }
-    if (e?.response != null && e?.response?.data != null) {
-      errorDescription = e.response.data["errors"];
     }
     print('==moqui.dart: returning error message: $errorDescription');
     return errorDescription;
@@ -122,7 +124,7 @@ class Moqui {
       Response response = await client.get('rest/moquiSessionToken');
       this.sessionToken = response.toString();
       return sessionToken != null; // return true if session token ok
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -135,7 +137,7 @@ class Moqui {
     try {
       Response response = await client.get('rest/s1/growerp/100/CheckApiKey');
       return response.data["ok"] == "ok"; // return true if session token ok
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -145,7 +147,7 @@ class Moqui {
       Response response = await client.get('rest/s1/growerp/100/CheckCompany',
           queryParameters: {'partyId': partyId});
       return response.data["ok"] == 'ok'; // return true if session token ok
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -155,7 +157,7 @@ class Moqui {
       Response response = await client.get('rest/s1/growerp/100/Companies',
           queryParameters: {"classificationId": classificationId});
       return companiesFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -193,7 +195,7 @@ class Moqui {
               },
               options: Options(headers: {'api_key': null}));
       return authenticateFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -212,7 +214,7 @@ class Moqui {
       client.options.headers['api_key'] = result["apiKey"];
       persistAuthenticate(authenticateFromJson(response.toString()));
       return authenticateFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return (responseMessage(e));
     }
   }
@@ -222,7 +224,7 @@ class Moqui {
       Response result = await client.post('rest/s1/growerp/100/ResetPassword',
           data: {'username': username, 'moquiSessionToken': this.sessionToken});
       return json.decode(result.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -239,19 +241,18 @@ class Moqui {
         'moquiSessionToken': this.sessionToken
       });
       return getAuthenticate();
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> logout() async {
+  Future<dynamic> logout(authenticate) async {
     try {
       await client.post('rest/logout');
-      Authenticate authenticate =
-          await (getAuthenticate() as FutureOr<Authenticate>);
       authenticate.apiKey = null;
+      await persistAuthenticate(authenticate);
       return authenticate;
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -291,7 +292,7 @@ class Moqui {
       else {
         return userFromJson(response.toString());
       }
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -314,7 +315,7 @@ class Moqui {
         });
       }
       return userFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -324,7 +325,7 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/User',
           queryParameters: {'partyId': partyId});
       return response.data["partyId"];
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -337,17 +338,17 @@ class Moqui {
             'moquiSessionToken': sessionToken
           });
       return companyFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
 
-  Future<dynamic> getCart({bool? sales}) async {
+  Future<dynamic> getCart(
+      {required bool sales, required String docType}) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? orderJson;
-      //  = prefs.getString('finDoc');
-      if (orderJson != null) return finDocFromJson(orderJson);
+      String? result = prefs.getString('finDoc$sales$docType');
+      if (result != null) return finDocFromJson(result);
       return null;
     } catch (e) {
       return responseMessage(e);
@@ -357,7 +358,8 @@ class Moqui {
   Future<dynamic> saveCart(FinDoc finDoc) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('finDoc', finDocToJson(finDoc));
+      await prefs.setString(
+          "finDoc${finDoc.sales}${finDoc.docType}", finDocToJson(finDoc));
     } catch (e) {
       return responseMessage(e);
     }
@@ -365,11 +367,10 @@ class Moqui {
 
   Future<dynamic> updateFinDoc(FinDoc finDoc) async {
     try {
-      Authenticate authenticate =
-          await (getAuthenticate() as FutureOr<Authenticate>);
-      client.options.headers['api_key'] = authenticate.apiKey;
+      Authenticate? authenticate = await (getAuthenticate());
+      client.options.headers['api_key'] = authenticate!.apiKey;
       Response response;
-      if (finDoc.idIsNull())
+      if (finDoc.idIsNull()) // add
         response = await client.post('rest/s1/growerp/100/FinDoc', data: {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
@@ -379,9 +380,8 @@ class Moqui {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
-      print("=====repos reponse: $response");
       return finDocFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -413,7 +413,7 @@ class Moqui {
         return finDocsFromJson(response.toString());
       else
         return finDocFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -434,7 +434,7 @@ class Moqui {
         'search': search
       });
       return categoriesFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -457,7 +457,7 @@ class Moqui {
         });
       }
       return categoryFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -467,7 +467,7 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Category',
           queryParameters: {'categoryId': categoryId});
       return response.data["categoryId"];
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -495,7 +495,7 @@ class Moqui {
         return productFromJson(response.toString());
       else
         return productsFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -518,7 +518,7 @@ class Moqui {
         });
       }
       return productFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -528,7 +528,7 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Product',
           queryParameters: {'productId': productId});
       return response.data["productId"];
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -552,7 +552,7 @@ class Moqui {
         return opportunitiesFromJson(response.toString());
       else
         return opportunityFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -575,7 +575,7 @@ class Moqui {
         });
       }
       return opportunityFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -585,7 +585,7 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Opportunity',
           queryParameters: {'opportunityId': opportunityId});
       return response.data["opportunityId"];
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -594,7 +594,7 @@ class Moqui {
     try {
       Response response = await client.get('rest/s1/growerp/100/BalanceSheet');
       return balanceSheetFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }
@@ -603,7 +603,7 @@ class Moqui {
     try {
       Response response = await client.get('rest/s1/growerp/100/Ledger');
       return glAccountListFromJson(response.toString());
-    } catch (e) {
+    } on DioError catch (e) {
       return responseMessage(e);
     }
   }

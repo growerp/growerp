@@ -19,9 +19,10 @@ import 'package:core/blocs/@blocs.dart';
 import 'package:backend/@backend.dart';
 import '../testdata.dart';
 
-class MockReposRepository extends MockBloc implements Moqui {}
+class MockReposRepository extends Mock implements Moqui {}
 
 void main() {
+  AuthBloc authBloc;
   late MockReposRepository mockReposRepository;
 
   setUp(() {

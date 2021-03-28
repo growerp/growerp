@@ -146,8 +146,8 @@ class FinDoc extends Equatable {
       docType == 'order' ? ['invoice', invoiceId, 'payment', paymentId] : [];
 
   String toString() =>
-      "$docType# $orderId/$invoiceId/$paymentId s/p: ${salesString()}"
-      "status: $statusId otherUser: $otherUser Items: ${items?.length}";
+      "$docType# $orderId!/$invoiceId!/$paymentId! s/p: ${salesString()} "
+      "status: $statusId! otherUser: $otherUser! Items: ${items!.length}";
 
   FinDoc copyWith({
     String? docType, // invoice, payment etc
@@ -160,7 +160,8 @@ class FinDoc extends Equatable {
     DateTime? creationDate,
     DateTime? completionDate,
     String? description,
-    User? otherUser, //a single person responsible for finDoc of a single company
+    User?
+        otherUser, //a single person responsible for finDoc of a single company
     Decimal? grandTotal,
     List<FinDocItem>? items,
   }) =>
