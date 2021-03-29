@@ -45,9 +45,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         //print("======companies received: $result ");
         await repos.persistAuthenticate(authenticate);
       } else {
+        // no companies yet or all removed ...
         //print("===15==3==");
-        authenticate = null;
-        await repos.persistAuthenticate(authenticate);
+        await repos.removeAuthenticate(); //clean all
       }
     }
 
@@ -64,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           //print("===12====");
           authenticate!.apiKey = null; // revoked
-          repos.setApikey(null);
+          repos.setApikey('');
           //print("===13====");
           await repos.persistAuthenticate(authenticate);
           return AuthUnauthenticated(authenticate);
@@ -114,10 +114,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else if (event is ResetPassword) {
       await repos.resetPassword(username: event.username);
     } else if (event is UpdateAuth) {
-      authenticate = await repos.logout(authenticate);
+      authenticate = await repos.logout(event.authenticate);
       yield AuthLoading();
-      await repos.persistAuthenticate(authenticate);
-      yield AuthUnauthenticated(authenticate);
+      await repos.persistAuthenticate(event.authenticate);
+      yield AuthUnauthenticated(event.authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading("Updating company....");
       event.company.copyWith(

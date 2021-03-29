@@ -257,6 +257,11 @@ class Moqui {
     }
   }
 
+  Future<void> removeAuthenticate() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('authenticate');
+  }
+
   Future<void> persistAuthenticate(Authenticate authenticate) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('authenticate', authenticateToJson(authenticate));

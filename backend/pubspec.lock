@@ -133,7 +133,7 @@ packages:
       name: dio
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.0-prev3"
+    version: "4.0.0"
   equatable:
     dependency: transitive
     description:
@@ -252,7 +252,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "33542c3843a3f78b3362ac36a04675f59e763b4a"
+      resolved-ref: "2ca0331b5bfd1ff6b80e4e43f47ac09e6af2682d"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

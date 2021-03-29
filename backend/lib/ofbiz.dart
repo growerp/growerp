@@ -142,8 +142,7 @@ class Ofbiz {
   }
 
   void setApikey(String apiKey) {
-    if (apiKey != null)
-      client.options.headers["Authorization"] = 'Bearer ' + apiKey;
+    client.options.headers["Authorization"] = 'Bearer ' + apiKey;
   }
 
   Future<dynamic> checkApikey() async {
