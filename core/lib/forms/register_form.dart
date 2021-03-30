@@ -68,8 +68,8 @@ class _RegisterHeaderState extends State<RegisterHeader> {
   final String? message;
   final _formKey = GlobalKey<FormState>();
   Classification? _classificationSelected =
-      kReleaseMode ? '' as Classification? : classifications[0];
-  Currency? _currencySelected = kReleaseMode ? '' as Currency? : currencies[0];
+      kReleaseMode ? null : classifications[0];
+  Currency? _currencySelected = kReleaseMode ? null : currencies[0];
   final _companyController = TextEditingController()
     ..text = kReleaseMode ? '' : 'Demo company from John Doe';
   final _firstNameController = TextEditingController()
