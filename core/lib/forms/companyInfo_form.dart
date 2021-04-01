@@ -272,20 +272,19 @@ class _CompanyState extends State<CompanyPage> {
                                   : 'Update'),
                               onPressed: () async {
                                 if (_formKey.currentState!.validate())
-                                  //&& state is! UsersLoading)
+                                  //        && !Loading)
                                   updatedCompany = Company(
-                                    partyId: updatedCompany.partyId,
-                                    email: _emailController.text,
-                                    name: _nameController.text,
-                                    currencyId: _selectedCurrency!.currencyId,
-                                  );
+                                      partyId: updatedCompany.partyId,
+                                      email: _emailController.text,
+                                      name: _nameController.text,
+                                      currencyId: _selectedCurrency!.currencyId,
+                                      image:
+                                          await HelperFunctions.getResizedImage(
+                                              _imageFile?.path));
                                 authenticate.company = updatedCompany;
-                                BlocProvider.of<AuthBloc>(context)
-                                    .add(UpdateCompany(
-                                  authenticate,
-                                  updatedCompany,
-                                  _imageFile?.path,
-                                ));
+                                BlocProvider.of<AuthBloc>(context).add(
+                                    UpdateCompany(
+                                        authenticate, updatedCompany));
                               }))
                     ])))));
   }

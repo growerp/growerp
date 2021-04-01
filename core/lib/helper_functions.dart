@@ -54,7 +54,7 @@ class HelperFunctions {
     if (imagePath != null) {
       Uint8List imageData;
       if (kIsWeb) {
-        var response = await get(imagePath);
+        var response = await get(Uri.parse(imagePath));
         imageData = response.bodyBytes;
       } else {
         imageData = File(imagePath).readAsBytesSync();

@@ -83,7 +83,7 @@ void main() {
         when(mockReposRepository.getConnected()).thenAnswer((_) async => true);
         when(mockReposRepository.getAuthenticate())
             .thenAnswer((_) async => authenticateNoKey);
-        when(mockReposRepository.logout())
+        when(mockReposRepository.logout(authenticate))
             .thenAnswer((_) async => authenticateNoKey);
         bloc.add(LoadAuth());
         bloc.add(LoggedIn(authenticate: authenticate));

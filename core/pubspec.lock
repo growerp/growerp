@@ -46,11 +46,9 @@ packages:
   backend:
     dependency: "direct main"
     description:
-      path: backend
-      ref: packages
-      resolved-ref: "2ca0331b5bfd1ff6b80e4e43f47ac09e6af2682d"
-      url: "https://github.com/growerp/growerp.git"
-    source: git
+      path: "../backend"
+      relative: true
+    source: path
     version: "0.0.1"
   bloc:
     dependency: transitive

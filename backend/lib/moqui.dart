@@ -85,15 +85,14 @@ class Moqui {
 
   String? responseMessage(e) {
     String? errorDescription;
-
-    if (e.response) {
+    if (e.response != null) {
       return e.response.data["errors"];
     }
 
     errorDescription = e.toString();
-    if (e is DioError) {
-      DioErrorType dioError = e as DioErrorType;
-      switch (dioError) {
+
+    if (e is DioErrorType) {
+      switch (e) {
         case DioErrorType.cancel:
           errorDescription = 'Request to API server was cancelled';
           break;
@@ -114,6 +113,7 @@ class Moqui {
           break;
       }
     }
+
     print('==moqui.dart: returning error message: $errorDescription');
     return errorDescription;
   }
@@ -401,6 +401,7 @@ class Moqui {
       String? id,
       String? search}) async {
     try {
+      print("=====$id $docType $sales");
       Response response =
           await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
         'sales': sales,
@@ -414,10 +415,7 @@ class Moqui {
         'limit': limit,
         'search': search
       });
-      if (id == null)
-        return finDocsFromJson(response.toString());
-      else
-        return finDocFromJson(response.toString());
+      return finDocsFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
     }

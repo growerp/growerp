@@ -29,11 +29,12 @@ class MainTemplate extends StatefulWidget {
   @required
   final int? menuIndex; // navigator rail menu selected
   @required
-  final Widget? child; // child page
+  final Widget? child; // child page when no tabs required
   @required
-  final List<MapItem>? mapItems;
+  final List<MapItem>? mapItems; // for tabs, null if no tabs
   @required
   final List<MenuItem>? menu;
+  final leadAction; // single actionButton on the lef like back button
   MainTemplate({
     Key? key,
     this.actions,
@@ -42,6 +43,7 @@ class MainTemplate extends StatefulWidget {
     this.child,
     this.mapItems,
     this.menu,
+    this.leadAction,
   }) : super(key: key);
 
   @override
@@ -135,6 +137,7 @@ class _HeaderState extends State<MainTemplate>
             appBar: AppBar(
                 key: Key('DashBoardAuth'),
                 automaticallyImplyLeading: isPhone,
+                leading: widget.leadAction,
                 title: companyLogo(context, authenticate,
                     authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),

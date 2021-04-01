@@ -120,8 +120,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthUnauthenticated(event.authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading("Updating company....");
-      event.company.copyWith(
-          image: (await HelperFunctions.getResizedImage(event.imagePath)));
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
         authenticate!.company = result;
@@ -157,11 +155,9 @@ class UpdateAuth extends AuthEvent {
 class UpdateCompany extends AuthEvent {
   final Authenticate? authenticate;
   final Company company;
-  final String? imagePath;
-  UpdateCompany(this.authenticate, this.company, this.imagePath);
+  UpdateCompany(this.authenticate, this.company);
   @override
-  String toString() => 'Update Company ${authenticate!.company.toString()} '
-      'new image: ${imagePath != null ? imagePath!.length : 0}';
+  String toString() => 'Update Company ${authenticate!.company.toString()} ';
 }
 
 class LoggedIn extends AuthEvent {

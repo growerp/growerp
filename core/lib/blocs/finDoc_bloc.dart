@@ -41,6 +41,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final bool sales;
   final String docType; // invoice,payment,order
   List<FinDoc> finDocs = [];
+  int limit = 20;
   FinDocBloc(this.repos, this.sales, this.docType) : super(FinDocInitial());
 
   @override
@@ -59,8 +60,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     final FinDocState currentState = state;
     if (event is FetchFinDoc) {
       if (currentState is FinDocInitial) {
-        yield FinDocLoading("Getting documents...");
+        yield FinDocLoading("Getting $docType...");
         dynamic result = await repos.getFinDoc(
+            id: event.id,
             sales: sales,
             docType: docType,
             start: 0,
@@ -69,19 +71,20 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         if (result is List<FinDoc>)
           yield FinDocSuccess(
             finDocs: result,
-            hasReachedMax: result.length < event.limit! ? true : false,
+            hasReachedMax:
+                result.length < (event.limit ?? limit) ? true : false,
           );
         else
           yield FinDocProblem(result);
         return;
-      }
-      if (currentState is FinDocSuccess) {
+      } else if (currentState is FinDocSuccess) {
         if (event.search != null && currentState.search == null ||
             (currentState.search != null &&
                 event.search != currentState.search)) {
           dynamic result = await repos.getFinDoc(
+              id: event.id,
               sales: sales,
-              docType: docType,
+              docType: event.docType,
               start: 0,
               limit: event.limit,
               search: event.search);
@@ -89,7 +92,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             yield FinDocSuccess(
                 finDocs: result,
                 search: event.search,
-                hasReachedMax: result.length < event.limit! ? true : false);
+                hasReachedMax:
+                    result.length < (event.limit ?? limit) ? true : false);
           else
             yield FinDocProblem(result);
         } else if (!_hasReachedMax(currentState)) {
@@ -103,7 +107,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             yield FinDocSuccess(
                 finDocs: currentState.finDocs! + result,
                 search: event.search,
-                hasReachedMax: result.length < event.limit! ? true : false);
+                hasReachedMax:
+                    result.length < (event.limit ?? limit) ? true : false);
           else
             yield FinDocProblem(result);
         }
@@ -170,9 +175,11 @@ abstract class FinDocEvent extends Equatable {
 class LoadFinDoc extends FinDocEvent {}
 
 class FetchFinDoc extends FinDocEvent {
+  final String? id;
+  final String? docType; // to get a single document id, docType
   final int? limit;
   final String? search;
-  FetchFinDoc({this.limit, this.search});
+  FetchFinDoc({this.limit, this.search, this.id, this.docType});
   @override
   String toString() => "FetchFinDoc limit: $limit, search: $search";
 }
