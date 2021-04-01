@@ -401,7 +401,6 @@ class Moqui {
       String? id,
       String? search}) async {
     try {
-      print("=====$id $docType $sales");
       Response response =
           await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
         'sales': sales,

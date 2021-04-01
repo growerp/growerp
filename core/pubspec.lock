@@ -46,9 +46,11 @@ packages:
   backend:
     dependency: "direct main"
     description:
-      path: "../backend"
-      relative: true
-    source: path
+      path: backend
+      ref: packages
+      resolved-ref: a4403ecb68d24057db465356d9458562cefe2ccb
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   bloc:
     dependency: transitive
@@ -161,14 +163,14 @@ packages:
       name: dart_style
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.14"
+    version: "2.0.0"
   decimal:
     dependency: "direct main"
     description:
       name: decimal
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.0+1"
   dio:
     dependency: transitive
     description:
@@ -243,7 +245,7 @@ packages:
       name: flutter_plugin_android_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -302,7 +304,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.3"
+    version: "0.7.4"
   image_picker_for_web:
     dependency: "direct main"
     description:
@@ -337,7 +339,7 @@ packages:
       name: logging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   markdown:
     dependency: transitive
     description:
@@ -372,7 +374,7 @@ packages:
       name: mockito
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   mocktail:
     dependency: transitive
     description:
@@ -385,7 +387,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "33542c3843a3f78b3362ac36a04675f59e763b4a"
+      resolved-ref: a4403ecb68d24057db465356d9458562cefe2ccb
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -603,7 +605,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.10+4"
+    version: "1.0.0"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -687,7 +689,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.2"
+    version: "6.0.3"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -743,7 +745,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.0+1"
+    version: "6.2.0"
   watcher:
     dependency: transitive
     description:
@@ -771,7 +773,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.4"
+    version: "2.0.5"
   xdg_directories:
     dependency: transitive
     description:
