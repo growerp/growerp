@@ -408,30 +408,37 @@ class _CompanyState extends State<CompanyPage> {
                                       onPressed: () async {
                                         if (_formKey.currentState!.validate()) {
                                           //        && !Loading)
-                                          Address address = Address(
-                                            address1: _address1Controller.text,
-                                            address2: _address2Controller.text,
-                                            city: _cityController.text,
-                                            postalCode:
-                                                _postalCodeController.text,
-                                            province: _provinceController.text,
-                                            country: _selectedCountry!.id,
-                                          );
+                                          Address? address;
+                                          if (_address1Controller
+                                              .text.isNotEmpty)
+                                            Address? address = Address(
+                                              address1:
+                                                  _address1Controller.text,
+                                              address2:
+                                                  _address2Controller.text,
+                                              city: _cityController.text,
+                                              postalCode:
+                                                  _postalCodeController.text,
+                                              province:
+                                                  _provinceController.text,
+                                              country: _selectedCountry!.id,
+                                            );
                                           updatedCompany = Company(
                                               partyId: updatedCompany.partyId,
                                               email: _emailController.text,
                                               name: _nameController.text,
                                               currencyId:
                                                   _selectedCurrency!.currencyId,
-//                                              address: address,
+                                              address: address,
                                               vatPerc: Decimal.parse(
-                                                  _vatPercController.text == ''
+                                                  _vatPercController
+                                                          .text.isEmpty
                                                       ? '0'
                                                       : _vatPercController
                                                           .text),
                                               salesPerc: Decimal.parse(
-                                                  _salesPercController.text ==
-                                                          ''
+                                                  _salesPercController
+                                                          .text.isEmpty
                                                       ? '0'
                                                       : _salesPercController
                                                           .text),

@@ -71,10 +71,10 @@ class Company extends Equatable {
         image: json["image"] == null ? null : base64.decode(json["image"]),
         address:
             json["address"] == null ? null : Address.fromJson(json["address"]),
-        vatPerc: json["vatPerc"] == null
+        vatPerc: json["vatPerc"] == "null"
             ? Decimal.parse("0.00")
             : Decimal.parse(json["vatPerc"]),
-        salesPerc: json["salesPerc"] == null
+        salesPerc: json["salesPerc"] == "null"
             ? Decimal.parse("0.00")
             : Decimal.parse(json["salesPerc"]),
       );
@@ -88,8 +88,8 @@ class Company extends Equatable {
         "currencyId": currencyId,
         "image": image != null ? base64.encode(image!) : null,
         "address": address == null ? null : address!.toJson(),
-        "vatPerc": vatPerc == null ? null : vatPerc.toString(),
-        "salesPerc": salesPerc == null ? null : salesPerc.toString(),
+        "vatPerc": vatPerc.toString(),
+        "salesPerc": salesPerc.toString(),
       };
   @override
   List<Object?> get props => [
