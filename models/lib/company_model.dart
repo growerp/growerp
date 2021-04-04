@@ -19,7 +19,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
+
+import 'address_model.dart';
 
 Company companyFromJson(String str) =>
     Company.fromJson(json.decode(str)["company"]);
@@ -41,11 +44,9 @@ class Company extends Equatable {
   final String? email;
   final String? currencyId;
   final Uint8List? image;
-  final String? address1;
-  final String? address2;
-  final String? city;
-  final String? postalCode;
-  final String? country;
+  final Address? address;
+  final Decimal? vatPerc;
+  final Decimal? salesPerc;
 
   Company({
     this.partyId,
@@ -55,11 +56,9 @@ class Company extends Equatable {
     this.email,
     this.currencyId,
     this.image,
-    this.address1,
-    this.address2,
-    this.city,
-    this.postalCode,
-    this.country,
+    this.address,
+    this.vatPerc,
+    this.salesPerc,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
@@ -70,11 +69,14 @@ class Company extends Equatable {
         email: json["email"],
         currencyId: json["currencyId"],
         image: json["image"] == null ? null : base64.decode(json["image"]),
-        address1: json["address1"],
-        address2: json["address2"],
-        city: json["city"],
-        postalCode: json["postalCode"],
-        country: json["country"],
+        address:
+            json["address"] == null ? null : Address.fromJson(json["address"]),
+        vatPerc: json["vatPerc"] == null
+            ? Decimal.parse("0.00")
+            : Decimal.parse(json["vatPerc"]),
+        salesPerc: json["salesPerc"] == null
+            ? Decimal.parse("0.00")
+            : Decimal.parse(json["salesPerc"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -85,11 +87,9 @@ class Company extends Equatable {
         "email": email,
         "currencyId": currencyId,
         "image": image != null ? base64.encode(image!) : null,
-        "address1": address1,
-        "address2": address2,
-        "city": city,
-        "postalCode": postalCode,
-        "country": country,
+        "address": address == null ? null : address!.toJson(),
+        "vatPerc": vatPerc == null ? null : vatPerc.toString(),
+        "salesPerc": salesPerc == null ? null : salesPerc.toString(),
       };
   @override
   List<Object?> get props => [
@@ -100,11 +100,9 @@ class Company extends Equatable {
         email,
         currencyId,
         image,
-        address1,
-        address2,
-        city,
-        postalCode,
-        country,
+        address,
+        vatPerc,
+        salesPerc,
       ];
 
   @override
@@ -119,11 +117,9 @@ class Company extends Equatable {
     String? email,
     String? currencyId,
     Uint8List? image,
-    String? address1,
-    String? address2,
-    String? city,
-    String? postalCode,
-    String? country,
+    Address? address,
+    Decimal? vatPerc,
+    Decimal? salesPerc,
   }) =>
       Company(
         partyId: partyId ?? this.partyId,
@@ -133,10 +129,8 @@ class Company extends Equatable {
         email: email ?? this.email,
         currencyId: currencyId ?? this.currencyId,
         image: image ?? this.image,
-        address1: address1 ?? this.address1,
-        address2: address2 ?? this.address2,
-        city: city ?? this.city,
-        postalCode: postalCode ?? this.postalCode,
-        country: country ?? this.country,
+        address: address ?? this.address,
+        vatPerc: vatPerc ?? this.vatPerc,
+        salesPerc: salesPerc ?? this.salesPerc,
       );
 }

@@ -177,23 +177,23 @@ class Moqui {
     try {
       var locale;
       // if (!kIsWeb) locale = await Devicelocale.currentLocale;
-      Response response =
-          await client.post('rest/s1/growerp/100/UserAndCompany',
-              data: {
-                'username': email,
-                'emailAddress': email,
-                'newPassword': 'qqqqqq9!',
-                'firstName': firstName,
-                'lastName': lastName,
-                'locale': locale,
-                'companyName': companyName,
-                'currencyId': currencyId,
-                'companyEmailAddress': email,
-                'classificationId': classificationId,
-                'environment': kReleaseMode,
-                'moquiSessionToken': sessionToken
-              },
-              options: Options(headers: {'api_key': null}));
+      Response response = await client.post(
+        'rest/s1/growerp/100/UserAndCompany',
+        data: {
+          'username': email,
+          'emailAddress': email,
+          'newPassword': 'qqqqqq9!',
+          'firstName': firstName,
+          'lastName': lastName,
+          'locale': locale,
+          'companyName': companyName,
+          'currencyId': currencyId,
+          'companyEmailAddress': email,
+          'classificationId': classificationId,
+          'environment': kReleaseMode,
+          'moquiSessionToken': sessionToken
+        },
+      );
       return authenticateFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
@@ -265,7 +265,10 @@ class Moqui {
   Future<void> persistAuthenticate(Authenticate authenticate) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('authenticate', authenticateToJson(authenticate));
-    client.options.headers['api_key'] = authenticate.apiKey;
+    if (authenticate.apiKey == null)
+      client.options.headers.remove('api_key');
+    else
+      client.options.headers['api_key'] = authenticate.apiKey;
   }
 
   Future<Authenticate?> getAuthenticate() async {
@@ -353,7 +356,7 @@ class Moqui {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? result = prefs.getString('finDoc$sales$docType');
-      if (result != null) return finDocFromJson(result);
+      //if (result != null) return finDocFromJson(result);
       return null;
     } catch (e) {
       return responseMessage(e);
@@ -385,7 +388,7 @@ class Moqui {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
-      return finDocFromJson(response.toString());
+      return finDocsFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
     }

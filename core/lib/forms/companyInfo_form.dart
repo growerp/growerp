@@ -13,11 +13,14 @@
  */
 
 import 'dart:io';
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:models/@models.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
 import '../blocs/@blocs.dart';
 import '../helper_functions.dart';
 import '../templates/@templates.dart';
@@ -46,8 +49,16 @@ class _CompanyState extends State<CompanyPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _address1Controller = TextEditingController();
+  final _address2Controller = TextEditingController();
+  final _postalCodeController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _provinceController = TextEditingController();
+  final _vatPercController = TextEditingController();
+  final _salesPercController = TextEditingController();
   Company? updatedCompany;
   Currency? _selectedCurrency;
+  Country? _selectedCountry;
   PickedFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -110,7 +121,6 @@ class _CompanyState extends State<CompanyPage> {
                       context, '${state.message}', Colors.green);
                 }
                 if (state is AuthProblem) {
-                  updatedCompany = state.newCompany;
                   HelperFunctions.showMessage(
                       context, '${state.errorMessage}', Colors.red);
                 }
@@ -157,13 +167,28 @@ class _CompanyState extends State<CompanyPage> {
   }
 
   Widget _showForm(authenticate, isAdmin, updatedCompany) {
+    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     _nameController..text = updatedCompany.name;
     _emailController..text = updatedCompany.email;
-
+    if (updatedCompany.address != null) {
+      _address1Controller..text = updatedCompany.address!.address1 ?? '';
+      _address2Controller..text = updatedCompany.address!.address2 ?? '';
+      _provinceController..text = updatedCompany.address!.province ?? '';
+      _cityController..text = updatedCompany.address.city ?? '';
+      _postalCodeController..text = updatedCompany.address!.postalCode ?? '';
+      if (_selectedCountry == null)
+        _selectedCountry = updatedCompany.address.country;
+    }
+    _vatPercController
+      ..text = updatedCompany.vatPerc.toString() == "0"
+          ? ''
+          : updatedCompany.vatPerc.toString();
+    _salesPercController
+      ..text = updatedCompany.salesPerc.toString() == "0"
+          ? ''
+          : updatedCompany.salesPerc.toString();
     final Text? retrieveError = _getRetrieveErrorWidget();
-    if (_selectedCurrency == null &&
-        updatedCompany?.currencyId != null &&
-        currencies != null)
+    if (_selectedCurrency == null && updatedCompany?.currencyId != null)
       _selectedCurrency = currencies
           .firstWhere((a) => a.currencyId == updatedCompany.currencyId);
     if (retrieveError != null) {
@@ -175,6 +200,7 @@ class _CompanyState extends State<CompanyPage> {
         textAlign: TextAlign.center,
       );
     }
+    int columns = isPhone ? 1 : 2;
     return WillPopScope(
         onWillPop: () async {
           Navigator.pop(context, updatedCompany);
@@ -182,110 +208,242 @@ class _CompanyState extends State<CompanyPage> {
         },
         child: Center(
             child: Container(
-                width: 400,
+                width: columns.toDouble() * 400,
                 child: Form(
                     key: _formKey,
-                    child: ListView(children: <Widget>[
-                      SizedBox(height: 30),
-                      CircleAvatar(
-                          backgroundColor: Colors.green,
-                          radius: 80,
-                          child: _imageFile != null
-                              ? kIsWeb
-                                  ? Image.network(_imageFile!.path)
-                                  : Image.file(File(_imageFile!.path))
-                              : updatedCompany.image != null
-                                  ? Image.memory(updatedCompany.image)
-                                  : Text(
-                                      updatedCompany.name.substring(0, 1) ?? '',
-                                      style: TextStyle(
-                                          fontSize: 30, color: Colors.black))),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        readOnly: !isAdmin,
-                        key: Key('companyName'),
-                        decoration: InputDecoration(labelText: 'Company Name'),
-                        controller: _nameController,
-                        validator: (value) {
-                          if (value!.isEmpty)
-                            return 'Please enter the company Name?';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        readOnly: !isAdmin,
-                        key: Key('email'),
-                        decoration:
-                            InputDecoration(labelText: 'Company Email address'),
-                        controller: _emailController,
-                        validator: (value) {
-                          if (value!.isEmpty)
-                            return 'Please enter Email address?';
-                          if (!RegExp(
-                                  r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                              .hasMatch(value)) {
-                            return 'This is not a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      IgnorePointer(
-                          ignoring: !isAdmin,
-                          child: Container(
-                            width: 400,
-                            height: 60,
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25.0),
-                              border: Border.all(
-                                  color: Colors.grey,
-                                  style: BorderStyle.solid,
-                                  width: 0.80),
-                            ),
-                            child: DropdownButton<Currency>(
-                              key: Key('dropDown'),
-                              underline: SizedBox(), // remove underline
-                              hint: Text('Currency'),
-                              value: _selectedCurrency,
-                              items: currencies.map((item) {
-                                return DropdownMenuItem<Currency>(
-                                    child: Text(item.description!),
-                                    value: item);
-                              }).toList(),
-                              onChanged: (Currency? newValue) {
-                                setState(() {
-                                  _selectedCurrency = newValue;
-                                });
-                              },
-                              isExpanded: true,
-                            ),
-                          )),
-                      SizedBox(height: 20),
-                      Visibility(
-                          visible: isAdmin,
-                          child: ElevatedButton(
-                              key: Key('update'),
-                              child: Text(updatedCompany.partyId == null
-                                  ? 'Create'
-                                  : 'Update'),
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate())
-                                  //        && !Loading)
-                                  updatedCompany = Company(
-                                      partyId: updatedCompany.partyId,
-                                      email: _emailController.text,
-                                      name: _nameController.text,
-                                      currencyId: _selectedCurrency!.currencyId,
-                                      image:
-                                          await HelperFunctions.getResizedImage(
-                                              _imageFile?.path));
-                                authenticate.company = updatedCompany;
-                                BlocProvider.of<AuthBloc>(context).add(
-                                    UpdateCompany(
-                                        authenticate, updatedCompany));
-                              }))
-                    ])))));
+                    child: Padding(
+                        padding: EdgeInsets.all(15),
+                        child: GridView.count(
+                            crossAxisCount: columns,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                            childAspectRatio: (5.5),
+                            children: <Widget>[
+                              CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  radius: 80,
+                                  child: _imageFile != null
+                                      ? kIsWeb
+                                          ? Image.network(_imageFile!.path)
+                                          : Image.file(File(_imageFile!.path))
+                                      : updatedCompany.image != null
+                                          ? Image.memory(updatedCompany.image)
+                                          : Text(
+                                              updatedCompany.name
+                                                      .substring(0, 1) ??
+                                                  '',
+                                              style: TextStyle(
+                                                  fontSize: 30,
+                                                  color: Colors.black))),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                key: Key('companyName'),
+                                decoration:
+                                    InputDecoration(labelText: 'Company Name'),
+                                controller: _nameController,
+                                validator: (value) {
+                                  if (value!.isEmpty)
+                                    return 'Please enter the company Name?';
+                                  return null;
+                                },
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                key: Key('email'),
+                                decoration: InputDecoration(
+                                    labelText: 'Company Email address'),
+                                controller: _emailController,
+                                validator: (value) {
+                                  if (value!.isEmpty)
+                                    return 'Please enter Email address?';
+                                  if (!RegExp(
+                                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                      .hasMatch(value)) {
+                                    return 'This is not a valid email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              IgnorePointer(
+                                  ignoring: !isAdmin,
+                                  child: Container(
+                                    width: 400,
+                                    height: 60,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10.0),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25.0),
+                                      border: Border.all(
+                                          color: Colors.grey,
+                                          style: BorderStyle.solid,
+                                          width: 0.80),
+                                    ),
+                                    child: DropdownButton<Currency>(
+                                      key: Key('dropDown'),
+                                      underline: SizedBox(), // remove underline
+                                      hint: Text('Currency'),
+                                      value: _selectedCurrency,
+                                      items: currencies.map((item) {
+                                        return DropdownMenuItem<Currency>(
+                                            child: Text(item.description!),
+                                            value: item);
+                                      }).toList(),
+                                      onChanged: (Currency? newValue) {
+                                        setState(() {
+                                          _selectedCurrency = newValue;
+                                        });
+                                      },
+                                      isExpanded: true,
+                                    ),
+                                  )),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                decoration:
+                                    InputDecoration(labelText: 'Address1'),
+                                controller: _address1Controller,
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                decoration:
+                                    InputDecoration(labelText: 'Address2'),
+                                controller: _address2Controller,
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                decoration:
+                                    InputDecoration(labelText: 'PostalCode'),
+                                controller: _postalCodeController,
+                                validator: (value) {
+                                  if (_address1Controller.text.isNotEmpty &&
+                                      value!.isEmpty)
+                                    return 'Please enter a Postal Code?';
+                                  return null;
+                                },
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                decoration: InputDecoration(labelText: 'City'),
+                                controller: _cityController,
+                                validator: (value) {
+                                  if (_address1Controller.text.isNotEmpty &&
+                                      value!.isEmpty)
+                                    return 'Please enter a City?';
+                                  return null;
+                                },
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                decoration:
+                                    InputDecoration(labelText: 'Province'),
+                                controller: _provinceController,
+                                validator: (value) {
+                                  if (_address1Controller.text.isNotEmpty &&
+                                      value!.isEmpty)
+                                    return 'Please enter a Province?';
+                                  return null;
+                                },
+                              ),
+                              IgnorePointer(
+                                  ignoring: !isAdmin,
+                                  child: Container(
+                                      width: 400,
+                                      height: 40,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                        border: Border.all(
+                                            color: Colors.grey,
+                                            style: BorderStyle.solid,
+                                            width: 0.80),
+                                      ),
+                                      child: DropdownButton<Country>(
+                                        key: Key('dropDown'),
+                                        underline:
+                                            SizedBox(), // remove underline
+                                        hint: Text('Country'),
+                                        value: _selectedCountry,
+                                        items: countries.map((item) {
+                                          return DropdownMenuItem<Country>(
+                                              child: Text(item.name!),
+                                              value: item);
+                                        }).toList(),
+                                        onChanged: (Country? newValue) {
+                                          setState(() {
+                                            _selectedCountry = newValue;
+                                          });
+                                        },
+                                        isExpanded: true,
+                                      ))),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d+\.?\d{0,2}')),
+                                ],
+                                decoration: InputDecoration(
+                                    labelText: 'VAT. percentage'),
+                                controller: _vatPercController,
+                              ),
+                              TextFormField(
+                                readOnly: !isAdmin,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d+\.?\d{0,2}')),
+                                ],
+                                decoration: InputDecoration(
+                                    labelText: 'Sales Tax percentage'),
+                                controller: _salesPercController,
+                              ),
+                              Visibility(
+                                  visible: isAdmin,
+                                  child: ElevatedButton(
+                                      key: Key('update'),
+                                      child: Text(updatedCompany.partyId == null
+                                          ? 'Create'
+                                          : 'Update'),
+                                      onPressed: () async {
+                                        if (_formKey.currentState!.validate()) {
+                                          //        && !Loading)
+                                          Address address = Address(
+                                            address1: _address1Controller.text,
+                                            address2: _address2Controller.text,
+                                            city: _cityController.text,
+                                            postalCode:
+                                                _postalCodeController.text,
+                                            province: _provinceController.text,
+                                            country: _selectedCountry!.id,
+                                          );
+                                          updatedCompany = Company(
+                                              partyId: updatedCompany.partyId,
+                                              email: _emailController.text,
+                                              name: _nameController.text,
+                                              currencyId:
+                                                  _selectedCurrency!.currencyId,
+//                                              address: address,
+                                              vatPerc: Decimal.parse(
+                                                  _vatPercController.text == ''
+                                                      ? '0'
+                                                      : _vatPercController
+                                                          .text),
+                                              salesPerc: Decimal.parse(
+                                                  _salesPercController.text ==
+                                                          ''
+                                                      ? '0'
+                                                      : _salesPercController
+                                                          .text),
+                                              image: await HelperFunctions
+                                                  .getResizedImage(
+                                                      _imageFile?.path));
+                                          authenticate.company = updatedCompany;
+                                          BlocProvider.of<AuthBloc>(context)
+                                              .add(UpdateCompany(authenticate,
+                                                  updatedCompany));
+                                        }
+                                      }))
+                            ]))))));
   }
 }

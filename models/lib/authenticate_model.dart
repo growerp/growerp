@@ -123,15 +123,15 @@ class Stats {
         openSlsOrders: int.parse(json["openSlsOrders"]),
         openPurOrders: int.parse(json["openPurOrders"]),
         opportunities: int.parse(json["opportunities"]),
-        myOpportunities: int.parse(json["myOpportunities"]),
+//        myOpportunities: int.parse(json["myOpportunities"]),
         categories: int.parse(json["categories"]),
         products: int.parse(json["products"]),
-        salesInvoicesNotPaidCount: int.parse(json["salesInvoicesNotPaidCount"]),
-        salesInvoicesNotPaidAmount:
-            Decimal.parse(json["salesInvoicesNotPaidAmount"]),
-        purchInvoicesNotPaidCount: int.parse(json["purchInvoicesNotPaidCount"]),
-        purchInvoicesNotPaidAmount:
-            Decimal.parse(json["purchInvoicesNotPaidAmount"]),
+//        salesInvoicesNotPaidCount: int.parse(json["salesInvoicesNotPaidCount"]),
+//        salesInvoicesNotPaidAmount:
+//            Decimal.parse(json["salesInvoicesNotPaidAmount"]),
+//        purchInvoicesNotPaidCount: int.parse(json["purchInvoicesNotPaidCount"]),
+//        purchInvoicesNotPaidAmount:
+//            Decimal.parse(json["purchInvoicesNotPaidAmount"]),
       );
 
   Map<String, dynamic> toJson() => {

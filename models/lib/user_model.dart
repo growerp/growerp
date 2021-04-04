@@ -20,6 +20,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
+import 'address_model.dart';
+
 User userFromJson(String str) => User.fromJson(json.decode(str)["user"]);
 String userToJson(User data) => '{"user":' + json.encode(data.toJson()) + "}";
 
@@ -44,6 +46,7 @@ class User extends Equatable {
   final Uint8List? image;
   final String? companyPartyId;
   final String? companyName;
+  final Address? address;
 
   User({
     this.partyId,
@@ -59,6 +62,7 @@ class User extends Equatable {
     this.image,
     this.companyPartyId,
     this.companyName,
+    this.address,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -75,6 +79,8 @@ class User extends Equatable {
         image: json["image"] == null ? null : base64.decode(json["image"]),
         companyPartyId: json["companyPartyId"],
         companyName: json["companyName"],
+        address:
+            json["address"] == null ? null : Address.fromJson(json["address"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -90,7 +96,8 @@ class User extends Equatable {
         "externalId": externalId,
         "image": image != null ? base64.encode(image!) : null,
         "companyPartyId": companyPartyId,
-        "companyName": companyName
+        "companyName": companyName,
+        "address": address == null ? null : address!.toJson(),
       };
 
   @override
@@ -107,7 +114,8 @@ class User extends Equatable {
         externalId,
         image,
         companyPartyId,
-        companyName
+        companyName,
+        address,
       ];
   @override
   String toString() {
@@ -129,6 +137,7 @@ class User extends Equatable {
     Uint8List? image,
     String? companyPartyId,
     String? companyName,
+    Address? address,
   }) =>
       User(
         partyId: partyId ?? this.partyId,
@@ -144,6 +153,7 @@ class User extends Equatable {
         image: image ?? this.image,
         companyPartyId: companyPartyId ?? this.companyPartyId,
         companyName: companyName ?? this.companyName,
+        address: address ?? this.address,
       );
 }
 

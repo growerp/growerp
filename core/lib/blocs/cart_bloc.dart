@@ -30,7 +30,8 @@ class CartBloc extends Bloc<CartEvent, CartState>
   final bool? sales;
   final FinDocBloc? finDocBloc;
   FinDoc finDoc = FinDoc(items: []);
-  CartBloc({this.repos, this.sales, this.finDocBloc}) : super(CartInitial());
+  CartBloc({this.repos, this.sales = true, this.finDocBloc})
+      : super(CartInitial());
 
   @override
   Stream<CartState> mapEventToState(CartEvent event) async* {

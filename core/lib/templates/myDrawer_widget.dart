@@ -69,9 +69,13 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
                   options[i - 1]["selImage"],
                 ),
                 onTap: () {
-                  Navigator.pushNamed(context, options[i - 1]["route"],
-                      arguments:
-                          FormArguments(menuIndex: options[i - 1]["tab"]));
+                  if (options[i - 1]["route"] == "/")
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/', (Route<dynamic> route) => false);
+                  else
+                    Navigator.pushNamed(context, options[i - 1]["route"],
+                        arguments:
+                            FormArguments(menuIndex: options[i - 1]["tab"]));
                 });
           },
         ))

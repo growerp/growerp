@@ -51,7 +51,7 @@ List<MenuItem> menuItems = [
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "Main",
-      route: '/home',
+      route: '/',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
       menuItemId: 1,
@@ -144,6 +144,6 @@ List<MenuItem> acctMenuItems = [
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "Main",
-      route: '/home',
+      route: '/',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
 ];

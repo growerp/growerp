@@ -22,6 +22,7 @@ import 'package:models/@models.dart';
 import '@templates.dart';
 
 class MainTemplate extends StatefulWidget {
+  final title; //title at the top of the page, default companyName
   @required
   final List<Widget>? actions; // actions at the appbar
   @required
@@ -37,6 +38,7 @@ class MainTemplate extends StatefulWidget {
   final leadAction; // single actionButton on the lef like back button
   MainTemplate({
     Key? key,
+    this.title,
     this.actions,
     this.tabIndex,
     this.menuIndex,
@@ -109,8 +111,6 @@ class _HeaderState extends State<MainTemplate>
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state is AuthProblem)
-        return FatalErrorForm("Internet or server problem?");
       if (state is AuthAuthenticated) authenticate = state.authenticate;
       if (widget.mapItems == null) {
         // show simple page
@@ -139,7 +139,7 @@ class _HeaderState extends State<MainTemplate>
                 automaticallyImplyLeading: isPhone,
                 leading: widget.leadAction,
                 title: companyLogo(context, authenticate,
-                    authenticate?.company?.name ?? 'Company??'),
+                    widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
             drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             body: widget.child));
@@ -167,7 +167,7 @@ class _HeaderState extends State<MainTemplate>
                         tabs: tabText,
                       ),
                 title: companyLogo(context, authenticate,
-                    authenticate?.company?.name ?? 'Company??'),
+                    widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
             drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             floatingActionButton: floatingActionButtonList[tabIndex],
@@ -186,7 +186,7 @@ class _HeaderState extends State<MainTemplate>
                 ? Center(child: tabList[tabIndex])
                 : TabBarView(
                     controller: _controller,
-                    children: tabList as List<Widget>,
+                    children: tabList,
                   )));
   }
 }

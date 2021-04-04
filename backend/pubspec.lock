@@ -112,7 +112,7 @@ packages:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   dart_style:
     dependency: transitive
     description:
@@ -250,9 +250,11 @@ packages:
   models:
     dependency: "direct main"
     description:
-      path: "../models"
-      relative: true
-    source: path
+      path: models
+      ref: packages
+      resolved-ref: "5758768c5954bd398bf5f098f53657f04cc145a8"
+      url: "https://github.com/growerp/growerp.git"
+    source: git
     version: "0.0.1"
   package_config:
     dependency: transitive

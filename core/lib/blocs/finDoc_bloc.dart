@@ -117,41 +117,41 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       if (event is CreateFinDoc) {
         yield FinDocLoading('Creating ${event.finDoc!.docType}...');
         dynamic result = await repos.updateFinDoc(event.finDoc);
-        if (result is FinDoc) {
-          currentState.finDocs!.add(result);
+        if (result is List<FinDoc>) {
+          currentState.finDocs!.add(result[0]);
           yield currentState.copyWith(
-              message: "${result.docType} #${result.id()} created");
+              message: "${result[0].docType} #${result[0].id()} created");
         } else
           yield FinDocProblem(result);
       } else if (event is UpdateFinDoc) {
         yield FinDocLoading('Update ${event.finDoc.docType}');
         dynamic result = await repos.updateFinDoc(event.finDoc);
-        if (result is FinDoc) {
+        if (result is List<FinDoc>) {
           late int index;
-          switch (result.docType) {
+          switch (result[0].docType) {
             case 'order':
               index = currentState.finDocs!
-                  .indexWhere((ord) => ord.orderId == result.orderId);
+                  .indexWhere((ord) => ord.orderId == result[0].orderId);
               break;
             case 'invoice':
               index = currentState.finDocs!
-                  .indexWhere((ord) => ord.invoiceId == result.invoiceId);
+                  .indexWhere((ord) => ord.invoiceId == result[0].invoiceId);
               break;
             case 'payment':
               index = currentState.finDocs!
-                  .indexWhere((ord) => ord.paymentId == result.paymentId);
+                  .indexWhere((ord) => ord.paymentId == result[0].paymentId);
               break;
           }
-          currentState.finDocs!.replaceRange(index, index + 1, [result]);
+          currentState.finDocs!.replaceRange(index, index + 1, [result[0]]);
           yield currentState.copyWith(
-              message: "status updated to ${result.statusId}");
+              message: "status updated to ${result[0].statusId}");
         } else
           yield FinDocProblem(result);
       } else if (event is DeleteFinDoc) {
         yield FinDocLoading('Deleting ${event.finDoc.docType}');
         dynamic result = await repos
             .updateFinDoc(event.finDoc.copyWith(statusId: "finDocCancelled"));
-        if (result is FinDoc)
+        if (result is List<FinDoc>)
           yield currentState.copyWith(
               message: "${event.finDoc.docType} status to Cancelled");
         else

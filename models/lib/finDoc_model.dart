@@ -80,7 +80,7 @@ class FinDoc extends Equatable {
             json["otherUser"] == null ? null : User.fromJson(json["otherUser"]),
         grandTotal: json["grandTotal"] != null
             ? Decimal.parse(json["grandTotal"])
-            : null,
+            : Decimal.parse("0"),
         items: json["items"] == null
             ? []
             : List<FinDocItem>.from(
@@ -208,7 +208,9 @@ class FinDocItem extends Equatable {
         description: json["description"],
         quantity:
             json["quantity"] != null ? Decimal.parse(json["quantity"]) : null,
-        price: json["price"] != null ? Decimal.parse(json["price"]) : null,
+        price: json["price"] != null
+            ? Decimal.parse(json["price"])
+            : Decimal.parse("0"),
         glAccountId: json["glAccountId"],
       );
 

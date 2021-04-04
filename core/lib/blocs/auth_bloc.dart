@@ -13,12 +13,10 @@
  */
 
 import 'dart:async';
-import 'package:core/helper_functions.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/@models.dart';
-import '../helper_functions.dart';
 
 /// Authbloc controls the connection to the backend
 ///
@@ -125,7 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         authenticate!.company = result;
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
-        yield AuthProblem(result, event.company);
+        yield AuthProblem(result);
       }
     }
   }
@@ -197,9 +195,7 @@ class AuthLoading extends AuthState {
 
 class AuthProblem extends AuthState {
   final String? errorMessage;
-  final Company? newCompany;
-  final User? newUser;
-  AuthProblem(this.errorMessage, [this.newCompany, this.newUser]);
+  AuthProblem(this.errorMessage);
   @override
   String toString() => 'AuthProblem: errorMessage: $errorMessage';
 }

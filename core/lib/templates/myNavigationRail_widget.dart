@@ -56,8 +56,12 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
         selectedIndex: menuIndex ?? 0,
         onDestinationSelected: (int index) {
           menuIndex = index;
-          Navigator.pushNamed(context, menu![index].route!,
-              arguments: FormArguments());
+          if (menu![index].route == "/")
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+          else
+            Navigator.pushNamed(context, menu[index].route!,
+                arguments: FormArguments());
         },
         labelType: NavigationRailLabelType.all,
         selectedLabelTextStyle: TextStyle(fontSize: 12, color: Colors.black),
