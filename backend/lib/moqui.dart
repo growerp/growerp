@@ -274,7 +274,7 @@ class Moqui {
   Future<Authenticate?> getAuthenticate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? result = prefs.getString('authenticate');
-    if (result != null) return authenticateFromJson(result);
+    //if (result != null) return authenticateFromJson(result);
     return null;
   }
 
