@@ -36,7 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     Future<void> findDefaultCompany() async {
       //print("===15==1==");
-      dynamic result = await repos.getCompanies(null);
+      dynamic result = await repos.getCompanies();
       if (result is List<Company> && result.length > 0) {
         //print("===15==2==");
         authenticate = Authenticate(company: result[0], user: null);
@@ -81,7 +81,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         authenticate = await repos.getAuthenticate();
         if (authenticate?.company?.partyId != null) {
-          //print("===1====${authenticate.apiKey}");
+          //print("===1====${authenticate!.apiKey}");
           // check company
           dynamic result =
               await repos.checkCompany(authenticate!.company!.partyId);

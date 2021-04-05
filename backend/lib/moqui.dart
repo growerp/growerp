@@ -152,7 +152,7 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getCompanies(classificationId) async {
+  Future<dynamic> getCompanies([String? classificationId]) async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Companies',
           queryParameters: {"classificationId": classificationId});
@@ -274,7 +274,7 @@ class Moqui {
   Future<Authenticate?> getAuthenticate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? result = prefs.getString('authenticate');
-    //if (result != null) return authenticateFromJson(result);
+    if (result != null) return authenticateFromJson(result);
     return null;
   }
 

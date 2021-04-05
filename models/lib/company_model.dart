@@ -71,11 +71,11 @@ class Company extends Equatable {
         image: json["image"] == null ? null : base64.decode(json["image"]),
         address:
             json["address"] == null ? null : Address.fromJson(json["address"]),
-        vatPerc: json["vatPerc"] == "null"
-            ? Decimal.parse("0.00")
+        vatPerc: json["vatPerc"] == "null" || json["vatPerc"] == null
+            ? Decimal.parse("0")
             : Decimal.parse(json["vatPerc"]),
-        salesPerc: json["salesPerc"] == "null"
-            ? Decimal.parse("0.00")
+        salesPerc: json["salesPerc"] == "null" || json["salesPerc"] == null
+            ? Decimal.parse("0")
             : Decimal.parse(json["salesPerc"]),
       );
 

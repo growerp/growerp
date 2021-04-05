@@ -15,7 +15,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 import 'package:models/@models.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -23,27 +22,25 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginBloc({
     required this.repos,
-  })  : assert(repos != null),
+  })   : assert(repos != null),
         super(LoginInitial());
 
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
     if (event is LoadLogin) {
       yield LoginLoading();
-      if (event.authenticate?.company?.partyId == null) {
+      if (event.authenticate!.company!.partyId == null) {
         // no company selected yet so select one
-        dynamic companies = await repos.getCompanies(null);
+        dynamic companies = await repos.getCompanies();
         if (companies is List) {
           yield LoginLoaded(event.authenticate, companies as List<Company>?);
         } else {
           yield LoginError(companies);
         }
       } else {
-        // create new customer existing company
         yield LoginLoaded(event.authenticate);
       }
-    }
-    if (event is LoginButtonPressed) {
+    } else if (event is LoginButtonPressed) {
       yield LogginInProgress();
       final result = await repos.login(
         username: event.username,
@@ -73,8 +70,7 @@ class LoadLogin extends LoginEvent {
   LoadLogin([this.authenticate]);
 
   @override
-  String toString() =>
-      'Login Load event: company: ${authenticate?.company?.toString()}';
+  String toString() => 'LoadLogin event: company: ${authenticate?.company}';
 }
 
 class LoginButtonPressed extends LoginEvent {

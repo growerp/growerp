@@ -35,7 +35,7 @@ class LoginForm extends StatelessWidget {
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
       return Scaffold(
         appBar: AppBar(
-          title: Text(authenticate?.company?.partyId == null
+          title: Text(authenticate!.company!.partyId == null
               ? 'Select company'
               : 'Login to: ${authenticate?.company?.name}'),
           actions: <Widget>[
@@ -71,7 +71,7 @@ class _LoginHeaderState extends State<LoginHeader> {
   List<Company>? companies;
   Company? _companySelected;
   _LoginHeaderState(this.message);
-
+/*
   @override
   void initState() {
     Future<Null>.delayed(Duration(milliseconds: 0), () {
@@ -80,7 +80,7 @@ class _LoginHeaderState extends State<LoginHeader> {
     });
     super.initState();
   }
-
+*/
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -93,7 +93,7 @@ class _LoginHeaderState extends State<LoginHeader> {
             }
           }),
           BlocListener<LoginBloc, LoginState>(listener: (context, state) {
-            if (state is LoginLoading && companyPartyId == null) {
+            if (state is LoginLoading) {
               HelperFunctions.showMessage(
                   context, 'Loading login form...', Colors.green);
             }
@@ -118,11 +118,11 @@ class _LoginHeaderState extends State<LoginHeader> {
         child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
           if (state is AuthUnauthenticated) {
             authenticate = state.authenticate;
-            companyPartyId = authenticate?.company?.partyId;
-            companyName = authenticate?.company?.name;
+            companyPartyId = authenticate!.company!.partyId;
+            companyName = authenticate!.company!.name;
           }
           return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
-            if (state is LoginLoading)
+            if (state is LoginLoading || state is LoginInitial)
               return Center(child: CircularProgressIndicator());
             if (state is LoginLoaded) {
               companies = state.companies;
