@@ -41,7 +41,7 @@ class DetailForm extends StatelessWidget {
                   // TODO(shihaohong): Remove this once Flutter stable adopts the modern
                   // Material text style nomenclature.
                   // ignore: deprecated_member_use
-                  style: Theme.of(context).textTheme.headline.copyWith(
+                  style: Theme.of(context).textTheme.headline!.copyWith(
                         color: Colors.black54,
                         fontSize: 30.0,
                       ),
@@ -52,7 +52,7 @@ class DetailForm extends StatelessWidget {
                   // TODO(shihaohong): Remove this once Flutter stable adopts the modern
                   // Material text style nomenclature.
                   // ignore: deprecated_member_use
-                  style: Theme.of(context).textTheme.body1.copyWith(
+                  style: Theme.of(context).textTheme.body1!.copyWith(
                         color: Colors.black54,
                         height: 1.5,
                         fontSize: 16.0,

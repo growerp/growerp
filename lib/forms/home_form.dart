@@ -16,14 +16,13 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:core/helper_functions.dart';
-import 'package:core/routing_constants.dart';
 import '@forms.dart';
 
 class HomeForm extends StatelessWidget {
-  final String message;
-  const HomeForm({Key key, this.message}) : super(key: key);
+  final String? message;
+  const HomeForm({Key? key, this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,17 +33,17 @@ class HomeForm extends StatelessWidget {
 }
 
 class HomeBody extends StatefulWidget {
-  final String message;
+  final String? message;
 
-  const HomeBody({Key key, this.message}) : super(key: key);
+  const HomeBody({Key? key, this.message}) : super(key: key);
   @override
   State<HomeBody> createState() => _HomeState(message);
 }
 
 class _HomeState extends State<HomeBody> {
-  final String message;
-  Authenticate authenticate;
-  Company company;
+  final String? message;
+  Authenticate? authenticate;
+  Company? company;
   ContainerTransitionType _transitionType = ContainerTransitionType.fadeThrough;
   _HomeState(this.message);
 
@@ -80,7 +79,7 @@ class _HomeState extends State<HomeBody> {
       return Scaffold(
         appBar: AppBar(
             title: Text("${company?.name ?? 'Company??'} " +
-                "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+                "${authenticate?.apiKey != null ? "- username: " + authenticate!.user!.name! : ''}"),
             actions: <Widget>[
               IconButton(
                   icon: Icon(Icons.settings),
@@ -93,9 +92,9 @@ class _HomeState extends State<HomeBody> {
                     icon: Icon(Icons.exit_to_app),
                     tooltip: 'Login',
                     onPressed: () async {
-                      if (await Navigator.pushNamed(context, LoginRoute) ==
+                      if (await Navigator.pushNamed(context, '/login') ==
                           true) {
-                        Navigator.popAndPushNamed(context, HomeRoute,
+                        Navigator.popAndPushNamed(context, '/',
                             arguments: 'Login Successful');
                       } else {
                         HelperFunctions.showMessage(
@@ -109,7 +108,7 @@ class _HomeState extends State<HomeBody> {
                     onPressed: () => {
                           BlocProvider.of<AuthBloc>(context).add(Logout()),
                           Future<Null>.delayed(Duration(milliseconds: 300), () {
-                            Navigator.popAndPushNamed(context, HomeRoute,
+                            Navigator.popAndPushNamed(context, '/',
                                 arguments: 'Logout successful');
                           })
                         })
@@ -200,7 +199,7 @@ class _HomeState extends State<HomeBody> {
     });
   }
 
-  _settingsDialog(BuildContext context, Authenticate authenticate) async {
+  _settingsDialog(BuildContext context, Authenticate? authenticate) async {
     return showDialog<String>(
       context: context,
       barrierDismissible: true,
@@ -215,27 +214,27 @@ class _HomeState extends State<HomeBody> {
                 RaisedButton(
                   child: Text('Select an another company'),
                   onPressed: () async {
-                    authenticate.company.partyId = null;
+                    authenticate!.company!.copyWith(partyId: null);
                     BlocProvider.of<AuthBloc>(context)
                         .add(UpdateAuth(authenticate));
-                    Navigator.popAndPushNamed(context, LoginRoute);
+                    Navigator.popAndPushNamed(context, '/login');
                   },
                 ),
                 SizedBox(height: 20),
                 RaisedButton(
                   child: Text('Create a new company and admin'),
                   onPressed: () {
-                    authenticate.company.partyId = null;
+                    authenticate!.company!.copyWith(partyId: null);
                     BlocProvider.of<AuthBloc>(context)
                         .add(UpdateAuth(authenticate));
-                    Navigator.popAndPushNamed(context, RegisterRoute);
+                    Navigator.popAndPushNamed(context, 'register');
                   },
                 ),
                 SizedBox(height: 20),
                 RaisedButton(
                   child: Text('About'),
                   onPressed: () {
-                    Navigator.popAndPushNamed(context, AboutRoute);
+                    Navigator.popAndPushNamed(context, '/about');
                   },
                 ),
               ]),
@@ -251,18 +250,19 @@ class _OpenContainerWrapper extends StatelessWidget {
     this.transitionType,
   });
 
-  final OpenContainerBuilder closedBuilder;
-  final ContainerTransitionType transitionType;
+  final OpenContainerBuilder? closedBuilder;
+  final ContainerTransitionType? transitionType;
 
   @override
   Widget build(BuildContext context) {
     return OpenContainer(
-      transitionType: transitionType,
+      transitionType: transitionType!,
       openBuilder: (BuildContext context, VoidCallback _) {
         return DetailForm();
       },
       tappable: false,
-      closedBuilder: closedBuilder,
+      closedBuilder:
+          closedBuilder as Widget Function(BuildContext, void Function()),
     );
   }
 }
@@ -270,7 +270,7 @@ class _OpenContainerWrapper extends StatelessWidget {
 class _topCard extends StatelessWidget {
   const _topCard({this.openContainer});
 
-  final VoidCallback openContainer;
+  final VoidCallback? openContainer;
 
   @override
   Widget build(BuildContext context) {
@@ -295,9 +295,9 @@ class _menuCard extends StatelessWidget {
     this.subtitle,
   });
 
-  final VoidCallback openContainer;
-  final String image;
-  final String subtitle;
+  final VoidCallback? openContainer;
+  final String? image;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -306,7 +306,7 @@ class _menuCard extends StatelessWidget {
       height: 80,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[Image.asset(image), Text(subtitle)],
+        children: <Widget>[Image.asset(image!), Text(subtitle!)],
       ),
     );
   }
@@ -320,10 +320,10 @@ class _InkWellOverlay extends StatelessWidget {
     this.child,
   });
 
-  final VoidCallback openContainer;
-  final double width;
-  final double height;
-  final Widget child;
+  final VoidCallback? openContainer;
+  final double? width;
+  final double? height;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {

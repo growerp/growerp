@@ -19,10 +19,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:models/models.dart';
-import 'package:ofbiz/ofbiz.dart';
-import 'package:moqui/moqui.dart';
+import 'package:backend/ofbiz.dart';
+import 'package:backend/moqui.dart';
 import 'package:core/styles/themes.dart';
+import 'package:core/widgets/@widgets.dart';
 import 'router.dart' as router;
 import 'forms/@forms.dart';
 import 'package:core/forms/@forms.dart';
@@ -38,23 +38,20 @@ void main() async {
     create: (context) => repos,
     child: MultiBlocProvider(
       providers: [
-        BlocProvider<CatalogBloc>(create: (context) => CatalogBloc(repos)),
-        BlocProvider<CrmBloc>(create: (context) => CrmBloc(repos)),
+        BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
+        BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
+        BlocProvider<CustomerBloc>(
+            create: (context) => UserBloc(repos, "GROWERP_M_CUSTOMER")),
         BlocProvider<AuthBloc>(
-            // will load catalogBloc and crmBloc
-            create: (context) => AuthBloc(
-                repos,
-                BlocProvider.of<CatalogBloc>(context),
-                BlocProvider.of<CrmBloc>(context))
-              ..add(LoadAuth())),
-        BlocProvider<OrderBloc>(create: (context) => OrderBloc(repos)),
-        BlocProvider<CartBloc>(
+            create: (context) => AuthBloc(repos)..add(LoadAuth())),
+        BlocProvider<SalesOrderBloc>(
+            create: (context) => FinDocBloc(repos, true, 'order')),
+        BlocProvider<SalesCartBloc>(
             create: (context) => CartBloc(
-                BlocProvider.of<AuthBloc>(context),
-                BlocProvider.of<OrderBloc>(context),
-                BlocProvider.of<CatalogBloc>(context),
-                BlocProvider.of<CrmBloc>(context))
-              ..add(LoadCart(Order()))),
+                repos: repos,
+                sales: true,
+                finDocBloc:
+                    BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)),
       ],
       // add other blocs here
       child: MyApp(),
@@ -67,7 +64,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         builder: (context, widget) => ResponsiveWrapper.builder(
-            BouncingScrollWrapper.builder(context, widget),
+            BouncingScrollWrapper.builder(context, widget!),
             maxWidth: 1200,
             minWidth: 450,
             defaultScale: true,
@@ -92,25 +89,5 @@ class MyApp extends StatelessWidget {
               return HomeForm(); // change this to HomeForm in specifc apps
           },
         ));
-  }
-}
-
-class SimpleBlocObserver extends BlocObserver {
-  @override
-  void onEvent(Cubit cubit, Object event) {
-    print(">>>Bloc event { $event: }");
-    super.onEvent(cubit, event);
-  }
-
-  @override
-  void onTransition(Cubit cubit, Transition transition) {
-    print(">>>$transition");
-    super.onTransition(cubit, transition);
-  }
-
-  @override
-  void onError(Cubit cubit, Object error, StackTrace stackTrace) {
-    print(">>>error: $error");
-    super.onError(cubit, error, stackTrace);
   }
 }
