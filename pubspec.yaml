@@ -8,6 +8,8 @@ environment:
 dependencies:
   flutter: 
     sdk: flutter
+  flutter_localizations:
+        sdk: flutter
   global_configuration: ^2.0.0-nullsafety.0
   equatable: ^2.0.0
   dio: ^4.0.0
@@ -21,11 +23,14 @@ dependencies:
   responsive_framework: ^0.1.0
   date_utils: ^0.2.0
   core:
-#    path: ../packages/core
-    git:
-      url: https://github.com/growerp/growerp.git
-      ref: packages
-      path: core
+    path: ../packages/core
+#    git:
+#      url: https://github.com/growerp/growerp.git
+#      ref: packages
+#      path: core
+  models:
+    path: ../packages/models
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -12,20 +12,20 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/coreRouter.dart';
 import 'package:flutter/material.dart';
-import 'forms/@forms.dart';
+import 'forms/@forms.dart' as local;
+import 'package:core/forms/@forms.dart';
+import 'package:models/@models.dart';
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
 Route<dynamic> generateRoute(RouteSettings settings) {
-  print("NavigateTo { ${settings.name} " +
-      "with data: ${settings.arguments.toString()} }");
+  print(">>>NavigateTo { ${settings.name} " +
+      "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
     case '/':
-      return MaterialPageRoute(
-          builder: (context) =>
-              HomeForm(message: settings.arguments as String?));
+      return MaterialPageRoute(builder: (context) => local.HomeForm());
     default:
-      return MaterialPageRoute(
-          builder: (context) => UndefinedView(name: settings.name));
+      return coreRoute(settings);
   }
 }

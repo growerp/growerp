@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,9 +24,10 @@ import 'package:backend/ofbiz.dart';
 import 'package:backend/moqui.dart';
 import 'package:core/styles/themes.dart';
 import 'package:core/widgets/@widgets.dart';
-import 'router.dart' as router;
+import 'generated/l10n.dart';
+import 'hotelRouter.dart' as router;
 import 'forms/@forms.dart';
-import 'package:core/forms/@forms.dart';
+import 'package:core/forms/@forms.dart' as core;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +54,17 @@ void main() async {
                 sales: true,
                 finDocBloc:
                     BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)),
+        BlocProvider<AccntBloc>(create: (context) => AccntBloc(repos)),
+        BlocProvider<TransactionBloc>(
+            create: (context) => FinDocBloc(repos, false, 'transaction')),
+        BlocProvider<SalesInvoiceBloc>(
+            create: (context) => FinDocBloc(repos, true, 'invoice')),
+        BlocProvider<PurchInvoiceBloc>(
+            create: (context) => FinDocBloc(repos, false, 'invoice')),
+        BlocProvider<SalesPaymentBloc>(
+            create: (context) => FinDocBloc(repos, true, 'payment')),
+        BlocProvider<PurchPaymentBloc>(
+            create: (context) => FinDocBloc(repos, false, 'payment')),
       ],
       // add other blocs here
       child: MyApp(),
@@ -62,7 +75,15 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    String? classificationId = GlobalConfiguration().get("classificationId");
     return MaterialApp(
+        localizationsDelegates: [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
         builder: (context, widget) => ResponsiveWrapper.builder(
             BouncingScrollWrapper.builder(context, widget!),
             maxWidth: 1200,
@@ -80,13 +101,22 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: router.generateRoute,
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            if (state is AuthLoading || state is AuthInitial)
-              return SplashForm();
-            if (state is AuthUnauthenticated &&
-                state.authenticate?.company == null)
-              return RegisterForm('No companies found in system, create one?');
-            else
-              return HomeForm(); // change this to HomeForm in specifc apps
+            if (state is AuthProblem)
+              return core.FatalErrorForm("Internet or server problem?");
+            if (state is AuthUnauthenticated) {
+              if (state.authenticate?.company == null) {
+                if (classificationId == 'AppAdmin')
+                  return core.RegisterForm(
+                      'No companies found in system, create one?');
+                else
+                  return core.FatalErrorForm(S
+                      .of(context)
+                      .classificationNotDefined(classificationId!));
+              } else
+                return HomeForm();
+            }
+            if (state is AuthAuthenticated) return HomeForm();
+            return core.SplashForm();
           },
         ));
   }

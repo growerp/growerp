@@ -87,6 +87,7 @@ class GanttFormState extends State<GanttForm> {
     return Scaffold(
       body: Column(
         children: <Widget>[
+          SizedBox(height: 10),
           SizedBox(
             height: 15,
             child: Row(
