@@ -190,6 +190,7 @@ class FinDocItem extends Equatable {
   final Decimal? quantity;
   final Decimal? price;
   final String? glAccountId;
+  final Reservation? reservation;
 
   FinDocItem({
     this.itemSeqId,
@@ -199,6 +200,7 @@ class FinDocItem extends Equatable {
     this.quantity,
     this.price,
     this.glAccountId,
+    this.reservation,
   });
 
   factory FinDocItem.fromJson(Map<String, dynamic> json) => FinDocItem(
@@ -212,6 +214,9 @@ class FinDocItem extends Equatable {
             ? Decimal.parse(json["price"])
             : Decimal.parse("0"),
         glAccountId: json["glAccountId"],
+        reservation: json["reservation"] == null
+            ? null
+            : Reservation.fromJson(json["reservation"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -221,6 +226,7 @@ class FinDocItem extends Equatable {
         "description": description,
         "quantity": quantity.toString(),
         "price": price.toString(),
+        "reservation": reservation == null ? null : reservation!.toJson(),
       };
 
   String toString() => 'FinDocItem: $itemSeqId product: $productId $price ';
@@ -234,6 +240,7 @@ class FinDocItem extends Equatable {
         quantity,
         price,
         glAccountId,
+        reservation
       ];
 
   FinDocItem copyWith({
@@ -244,6 +251,7 @@ class FinDocItem extends Equatable {
     Decimal? quantity,
     Decimal? price,
     String? glAccountId,
+    Reservation? reservation,
   }) =>
       FinDocItem(
         itemSeqId: itemSeqId ?? this.itemSeqId,
@@ -253,6 +261,7 @@ class FinDocItem extends Equatable {
         quantity: quantity ?? this.quantity,
         price: price ?? this.price,
         glAccountId: glAccountId ?? this.glAccountId,
+        reservation: reservation ?? this.reservation,
       );
 }
 

@@ -55,6 +55,7 @@ class Products extends Equatable {
 
 class Product extends Equatable {
   final String? productId;
+  final String? productType;
   final String? productName;
   final String? description;
   final Decimal? price;
@@ -64,6 +65,7 @@ class Product extends Equatable {
 
   Product({
     this.productId,
+    this.productType,
     this.productName,
     this.description,
     this.price,
@@ -74,6 +76,7 @@ class Product extends Equatable {
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         productId: json["productId"],
+        productType: json["productType"],
         productName: json["productName"],
         description: json["description"],
         price: Decimal.parse(json["price"]),
@@ -84,6 +87,7 @@ class Product extends Equatable {
 
   Map<String, dynamic> toJson() => {
         "productId": productId,
+        "productType": productType,
         "productName": productName,
         "description": description,
         "price": price.toString(),
@@ -95,6 +99,7 @@ class Product extends Equatable {
   @override
   List<Object?> get props => [
         productId,
+        productType,
         productName,
         description,
         price,
@@ -109,6 +114,7 @@ class Product extends Equatable {
 
   Product copyWith({
     String? productId,
+    String? productType,
     String? productName,
     String? description,
     Decimal? price,
@@ -118,6 +124,7 @@ class Product extends Equatable {
   }) =>
       Product(
         productId: productId ?? this.productId,
+        productType: productType ?? this.productType,
         productName: productName ?? this.productName,
         description: description ?? this.description,
         price: price ?? this.price,
@@ -126,3 +133,12 @@ class Product extends Equatable {
         image: image ?? this.image,
       );
 }
+
+Map<String, String> productTypes = {
+  'PtService': 'Service',
+  'PtAsset': 'Physical Good',
+  'PtAssetUse': 'Rental',
+  'Service': 'PtService',
+  'Physical Good': 'PtAsset',
+  'Rental': 'PtAssetUse',
+};

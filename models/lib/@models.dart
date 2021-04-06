@@ -22,7 +22,7 @@ export 'finDoc_model.dart';
 export 'currency_model.dart';
 export 'formArguments_model.dart';
 export 'classification_model.dart';
-export 'location_model.dart';
+export 'asset_model.dart';
 export 'opportunity_model.dart';
 export 'balanceSheet_model.dart';
 export 'glAccount_model.dart';
