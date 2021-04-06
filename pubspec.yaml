@@ -19,12 +19,7 @@ dependencies:
   about: ^2.0.0
   animations: ^2.0.0
   responsive_framework: ^0.1.0
-  date_utils: 
-#    path: ../packages/date_utils
-    git:
-      url: https://github.com/growerp/growerp.git
-      ref: packages
-      path: date_utils  
+  date_utils: ^0.2.0
   core:
 #    path: ../packages/core
     git:
