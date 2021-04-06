@@ -16,4 +16,4 @@ export 'loading_indicator.dart';
 export 'confirm_dialog.dart';
 export 'bottom_loader.dart';
 export 'makeDashboardItem.dart';
-export 'observer..dart';
+export 'observer.dart';

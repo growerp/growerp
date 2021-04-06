@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:core/forms/@forms.dart';
 import 'package:models/@models.dart';
 import '@templates.dart';
 
@@ -36,6 +35,9 @@ class MainTemplate extends StatefulWidget {
   @required
   final List<MenuItem>? menu;
   final leadAction; // single actionButton on the lef like back button
+  @required
+  final int
+      menuCompany; // menu number where the company detail screen is located.
   MainTemplate({
     Key? key,
     this.title,
@@ -46,6 +48,7 @@ class MainTemplate extends StatefulWidget {
     this.mapItems,
     this.menu,
     this.leadAction,
+    this.menuCompany = 1,
   }) : super(key: key);
 
   @override
@@ -117,15 +120,25 @@ class _HeaderState extends State<MainTemplate>
         if (isPhone) // no navigation bar
           return simplePage(authenticate, isPhone);
         else // tablet or web show navigation
-          return myNavigationRail(context, authenticate!,
-              simplePage(authenticate, isPhone), widget.menuIndex, widget.menu);
+          return myNavigationRail(
+              context,
+              authenticate!,
+              simplePage(authenticate, isPhone),
+              widget.menuIndex,
+              widget.menu,
+              widget.menuCompany);
       } else {
         // show tabbar page
         if (isPhone)
           return tabPage(authenticate, isPhone);
         else
-          return myNavigationRail(context, authenticate!,
-              tabPage(authenticate, isPhone), widget.menuIndex, widget.menu);
+          return myNavigationRail(
+              context,
+              authenticate!,
+              tabPage(authenticate, isPhone),
+              widget.menuIndex,
+              widget.menu,
+              widget.menuCompany);
       }
     });
   }
@@ -141,7 +154,8 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu,
+                widget.menuCompany),
             body: widget.child));
   }
 
@@ -169,7 +183,8 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu,
+                widget.menuCompany),
             floatingActionButton: floatingActionButtonList[tabIndex],
             bottomNavigationBar: isPhone
                 ? BottomNavigationBar(

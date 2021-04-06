@@ -14,10 +14,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
-import '@templates.dart';
+import '';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget widget, int? menuIndex, List<MenuItem>? menu) {
+    Widget widget, int? menuIndex, List<MenuItem>? menu, int menuCompany) {
   List<NavigationRailDestination> items = [];
   menu?.forEach((option) => {
         if (option.readGroups!.contains(authenticate.user?.userGroupId))
@@ -36,7 +36,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                 onTap: () {
                   Navigator.pushNamed(context, '/user',
                       arguments: FormArguments(
-                          object: authenticate.user, menuIndex: MENU_COMPANY));
+                          object: authenticate.user, menuIndex: menuCompany));
                 },
                 child: Column(children: [
                   SizedBox(height: 5),

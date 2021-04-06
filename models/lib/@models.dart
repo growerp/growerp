@@ -27,3 +27,4 @@ export 'opportunity_model.dart';
 export 'balanceSheet_model.dart';
 export 'glAccount_model.dart';
 export 'address_model.dart';
+export 'menuItem_model.dart';

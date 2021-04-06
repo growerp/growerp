@@ -12,17 +12,24 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-export 'about_form.dart';
-export 'splash_form.dart';
-export 'login_form.dart';
-export 'register_form.dart';
-export 'changePw_form.dart';
-export 'fatalError_form.dart';
-export 'companyInfo_form.dart';
-export 'accounting_form.dart';
-export 'accntPurchase_form.dart';
-export 'accntSales_form.dart';
-export 'ledger_form.dart';
-export 'ledgerTree_form.dart';
-export 'finDoc_form.dart';
-export 'finDocs_form.dart';
+class MenuItem {
+  int? menuItemId;
+  String? image;
+  String? selectedImage;
+  String? title;
+  String? route;
+  List? readGroups;
+  List? writeGroups;
+
+  MenuItem(
+      {this.menuItemId,
+      this.image,
+      this.selectedImage,
+      this.title,
+      this.route,
+      this.readGroups,
+      this.writeGroups});
+
+  @override
+  String toString() => 'MenuItem name: $title [$menuItemId]';
+}

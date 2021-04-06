@@ -17,7 +17,7 @@ import 'package:models/@models.dart';
 import '@templates.dart';
 
 Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
-    List<MenuItem>? menu) {
+    List<MenuItem>? menu, int menuCompany) {
   String? groupId = authenticate?.user?.userGroupId;
   List options = [];
   menu?.forEach((option) => {
@@ -41,7 +41,7 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
                         Navigator.pushNamed(context, '/user',
                             arguments: FormArguments(
                                 object: authenticate!.user,
-                                menuIndex: MENU_COMPANY));
+                                menuIndex: menuCompany));
                       },
                       child: Column(children: [
                         CircleAvatar(
