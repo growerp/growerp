@@ -12,11 +12,20 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:models/@models.dart';
+
 class FormArguments {
   final String? message;
+  final List<MenuItem>? menuName;
   final int? menuIndex;
+  final int? tabIndex;
   final Object? object;
-  FormArguments({this.message, this.menuIndex, this.object});
+  FormArguments(
+      {this.message,
+      this.menuName,
+      this.menuIndex,
+      this.tabIndex,
+      this.object});
   String toString() => 'msg: $message menuIndex: $menuIndex '
       'object: $object';
 }

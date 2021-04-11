@@ -14,14 +14,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
-import '@templates.dart';
 
 Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
-    List<MenuItem>? menu, int menuCompany) {
+    List<MenuItem>? menu) {
   String? groupId = authenticate?.user?.userGroupId;
   List options = [];
   menu?.forEach((option) => {
-        if (option.readGroups!.contains(groupId))
+        if (option.readGroups.contains(groupId))
           options.add({
             "route": option.route,
             "selImage": option.selectedImage,
@@ -40,8 +39,8 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
                       onTap: () {
                         Navigator.pushNamed(context, '/user',
                             arguments: FormArguments(
-                                object: authenticate!.user,
-                                menuIndex: menuCompany));
+                              object: authenticate!.user,
+                            ));
                       },
                       child: Column(children: [
                         CircleAvatar(

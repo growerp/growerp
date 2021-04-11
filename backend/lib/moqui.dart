@@ -388,6 +388,7 @@ class Moqui {
           'finDoc': finDocToJson(finDoc),
           'moquiSessionToken': sessionToken
         });
+      // returns a single record in a list
       return finDocsFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);

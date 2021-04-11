@@ -12,24 +12,34 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-class MenuItem {
-  int? menuItemId;
-  String? image;
-  String? selectedImage;
-  String? title;
-  String? route;
-  List? readGroups;
-  List? writeGroups;
+import 'package:flutter/material.dart';
+import '@models.dart';
 
-  MenuItem(
-      {this.menuItemId,
-      this.image,
-      this.selectedImage,
-      this.title,
-      this.route,
-      this.readGroups,
-      this.writeGroups});
+class MenuItem {
+  // main menu item shown on the left or in drawer
+  final String image; // image when not seleced
+  final String selectedImage; // image when selected
+  final String title; // a the top of the page
+  final String route; // route path required to show this item
+  final List<TabItem>? tabItems; // top/bottom tabs
+  final Widget? child; // when no tabs this is single page
+  final Widget? leadAction; // single actionButton on the left like back button
+  final List readGroups; // user groups who can read
+  final List? writeGroups; // user groups who can add/update/delete
+
+  MenuItem({
+    required this.image,
+    required this.selectedImage,
+    required this.title,
+    required this.route,
+    this.tabItems,
+    this.child,
+    this.leadAction,
+    required this.readGroups,
+    this.writeGroups,
+  });
 
   @override
-  String toString() => 'MenuItem name: $title [$menuItemId]';
+  String toString() => 'MenuItem name: $title route: $route '
+      'tabItems# ${tabItems != null ? tabItems!.length : "0"}';
 }

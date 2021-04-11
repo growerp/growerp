@@ -12,7 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
+
+import 'forms/@forms.dart';
 
 const MENU_ACCOUNTING = 6;
 const MENU_ACCTSALES = 1;
@@ -21,37 +24,100 @@ const MENU_ACCTLEDGER = 3;
 
 List<MenuItem> acctMenuItems = [
   MenuItem(
-      menuItemId: 1,
-      image: "assets/images/accountingGrey.png",
-      selectedImage: "assets/images/accounting.png",
-      title: "     Acct\nDashBoard",
-      route: '/accounting',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+    image: "assets/images/accountingGrey.png",
+    selectedImage: "assets/images/accounting.png",
+    title: "     Acct\nDashBoard",
+    route: '/accounting',
+    readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+    child: AcctDashBoard(),
+  ),
   MenuItem(
-      menuItemId: 2,
       image: "assets/images/orderGrey.png",
       selectedImage: "assets/images/order.png",
       title: " Acct\nSales",
       route: '/acctSales',
-      readGroups: ["GROWERP_M_ADMIN"]),
+      readGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      tabItems: [
+        TabItem(
+          form: FinDocsForm(sales: true, docType: 'invoice'),
+          label: "Sales invoices",
+          icon: Icon(Icons.home),
+          floatButtonRoute: "/finDoc",
+          floatButtonArgs: FormArguments(
+              object: FinDoc(sales: true, docType: 'invoice', items: []),
+              menuIndex: MENU_ACCTSALES),
+        ),
+        TabItem(
+          form: FinDocsForm(sales: true, docType: 'payment'),
+          label: "Sales payments(Receipts)",
+          icon: Icon(Icons.home),
+          floatButtonRoute: "/finDoc",
+          floatButtonArgs: FormArguments(
+              object: FinDoc(sales: true, docType: 'payment', items: []),
+              menuIndex: MENU_ACCTSALES),
+        ),
+      ]),
   MenuItem(
-      menuItemId: 3,
       image: "assets/images/supplierGrey.png",
       selectedImage: "assets/images/supplier.png",
       title: "    Acct\nPurchase",
       route: '/acctPurchase',
-      readGroups: ["GROWERP_M_ADMIN"],
-      writeGroups: ["GROWERP_M_ADMIN"]),
+      readGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      writeGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      tabItems: [
+        TabItem(
+          form: FinDocsForm(sales: false, docType: 'invoice'),
+          label: "Purchase invoices",
+          icon: Icon(Icons.home),
+          floatButtonRoute: "/finDoc",
+          floatButtonArgs: FormArguments(
+              object: FinDoc(sales: false, docType: 'invoice', items: []),
+              menuIndex: MENU_ACCTPURCHASE),
+        ),
+        TabItem(
+          form: FinDocsForm(sales: false, docType: 'payment'),
+          label: "Puchase payments",
+          icon: Icon(Icons.home),
+          floatButtonRoute: "/finDoc",
+          floatButtonArgs: FormArguments(
+              object: FinDoc(sales: false, docType: 'payment', items: []),
+              menuIndex: MENU_ACCTPURCHASE),
+        ),
+      ]),
   MenuItem(
-      menuItemId: 4,
       image: "assets/images/accountingGrey.png",
       selectedImage: "assets/images/accounting.png",
       title: "Ledger",
       route: '/ledger',
-      readGroups: ["GROWERP_M_ADMIN"],
-      writeGroups: ["GROWERP_M_ADMIN"]),
+      readGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      writeGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      tabItems: [
+        TabItem(
+          form: LedgerTreeForm(),
+          label: "Ledger Tree",
+          icon: Icon(Icons.home),
+        ),
+        TabItem(
+          form: FinDocsForm(docType: 'transaction'),
+          label: "Transactions",
+          icon: Icon(Icons.home),
+          floatButtonRoute: "/finDoc",
+          floatButtonArgs: FormArguments(
+              object: FinDoc(sales: true, docType: 'transaction', items: []),
+              menuIndex: MENU_ACCTLEDGER),
+        ),
+      ]),
 /*  MenuItem(
-      menuItemId: 5,
       image: "assets/images/accountingGrey.png",
       selectedImage: "assets/images/accounting.png",
       title: "Reports",
@@ -60,7 +126,6 @@ List<MenuItem> acctMenuItems = [
       writeGroups: ["GROWERP_M_ADMIN"]),
 */
   MenuItem(
-      menuItemId: 0,
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "Main",

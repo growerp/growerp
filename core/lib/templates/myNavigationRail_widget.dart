@@ -17,14 +17,14 @@ import 'package:models/@models.dart';
 import '';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget widget, int? menuIndex, List<MenuItem>? menu, int menuCompany) {
+    Widget widget, int? menuIndex, List<MenuItem>? menu) {
   List<NavigationRailDestination> items = [];
   menu?.forEach((option) => {
-        if (option.readGroups!.contains(authenticate.user?.userGroupId))
+        if (option.readGroups.contains(authenticate.user?.userGroupId))
           items.add(NavigationRailDestination(
-            icon: Image.asset(option.image!, height: 40),
-            selectedIcon: Image.asset(option.selectedImage!),
-            label: Text(option.title!),
+            icon: Image.asset(option.image, height: 40),
+            selectedIcon: Image.asset(option.selectedImage),
+            label: Text(option.title),
           )),
       });
 
@@ -35,8 +35,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             child: InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, '/user',
-                      arguments: FormArguments(
-                          object: authenticate.user, menuIndex: menuCompany));
+                      arguments: FormArguments(object: authenticate.user));
                 },
                 child: Column(children: [
                   SizedBox(height: 5),
@@ -60,7 +59,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             Navigator.of(context)
                 .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
           else
-            Navigator.pushNamed(context, menu[index].route!,
+            Navigator.pushNamed(context, menu[index].route,
                 arguments: FormArguments());
         },
         labelType: NavigationRailLabelType.all,

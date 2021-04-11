@@ -13,7 +13,9 @@
  */
 
 import 'package:core/forms/@forms.dart';
+import 'package:core/templates/@templates.dart';
 import 'package:flutter/material.dart';
+import 'acctMenuItem_data.dart';
 import 'forms/@forms.dart';
 import 'package:models/@models.dart';
 
@@ -39,13 +41,17 @@ Route<dynamic> coreRoute(RouteSettings settings) {
     case '/accounting':
       return MaterialPageRoute(builder: (context) => AccountingForm());
     case '/acctSales':
-      return MaterialPageRoute(builder: (context) => AccntSalesOrderForm());
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuItem(
+              menuList: acctMenuItems, menuIndex: 1, tabIndex: 0));
     case '/acctPurchase':
-      return MaterialPageRoute(builder: (context) => AccntPurchaseOrderForm());
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuItem(
+              menuList: acctMenuItems, menuIndex: 2, tabIndex: 0));
     case '/ledger':
-      return MaterialPageRoute(builder: (context) => LedgerForm());
-    case '/ledgerTree':
-      return MaterialPageRoute(builder: (context) => LedgerTreeForm());
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuItem(
+              menuList: acctMenuItems, menuIndex: 3, tabIndex: 0));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
     default:

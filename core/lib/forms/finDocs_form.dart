@@ -327,11 +327,16 @@ class _OrdersState extends State<FinDocsForm> {
                                         tooltip:
                                             'Cancel ${finDocs![0].docType}',
                                         onPressed: () async {
-                                          await Navigator.pushNamed(
-                                              context, '/finDoc',
-                                              arguments: FormArguments(
-                                                  menuIndex: tab,
-                                                  object: finDocs![index]));
+                                          await showDialog(
+                                              barrierDismissible: true,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return FinDocForm(
+                                                    formArguments:
+                                                        FormArguments(
+                                                            object: finDocs![
+                                                                index]));
+                                              });
                                         },
                                       ),
                                       IconButton(

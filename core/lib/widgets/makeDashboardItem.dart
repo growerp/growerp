@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:models/@models.dart';
-import '../templates/@templates.dart';
 
 Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
     String subTitle1, String subTitle2, String subTitle3) {
@@ -27,9 +26,8 @@ Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
         decoration: BoxDecoration(color: Color.fromRGBO(220, 220, 220, 1.0)),
         child: new InkWell(
           onTap: () {
-            if (menuItem.route != null)
-              Navigator.pushNamed(context, menuItem.route!,
-                  arguments: FormArguments());
+            Navigator.pushNamed(context, menuItem.route,
+                arguments: FormArguments());
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,7 +35,7 @@ Card makeDashboardItem(BuildContext context, MenuItem menuItem, String subTitle,
             verticalDirection: VerticalDirection.down,
             children: <Widget>[
               SizedBox(height: 5.0),
-              Center(child: Image.asset(menuItem.selectedImage!, height: 80.0)),
+              Center(child: Image.asset(menuItem.selectedImage, height: 80.0)),
               Center(
                 child: Text("${menuItem.title}",
                     style: TextStyle(

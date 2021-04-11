@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/templates/@templates.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
@@ -22,76 +21,14 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:models/@models.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/helper_functions.dart';
-import '@forms.dart';
-import '../acctMenuItem_data.dart';
 
 class FinDocForm extends StatelessWidget {
-  final FormArguments? formArguments;
-  const FinDocForm({Key? key, this.formArguments}) : super(key: key);
+  final FormArguments formArguments;
+  const FinDocForm({Key? key, required this.formArguments}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    FinDoc finDoc = formArguments!.object as FinDoc;
-    MapItem finDocItem = MapItem(
-        form: FinDocPage(formArguments!.message, finDoc),
-        label:
-            "${finDoc.salesString()} Sales ${finDoc.docType} #${finDoc.id()}",
-        icon: Icon(Icons.home));
-    if (finDoc.docType == 'invoice' || finDoc.docType == 'payment') {
-      if (finDoc.sales!) {
-        acctSalesMap[finDoc.docType == 'invoice' ? 0 : 1] = finDocItem;
-        BlocProvider.of<SalesCartBloc>(context)..add(LoadCart(finDoc));
-        return MainTemplate(
-          menu: acctMenuItems,
-          mapItems: acctSalesMap,
-          menuIndex: MENU_ACCTSALES,
-          tabIndex: finDoc.docType == 'invoice' ? 0 : 1,
-        );
-      } else {
-        acctPurchaseMap[finDoc.docType == 'invoice' ? 0 : 1] = finDocItem;
-        BlocProvider.of<PurchCartBloc>(context)..add(LoadCart(finDoc));
-        return MainTemplate(
-          menu: acctMenuItems,
-          mapItems: acctPurchaseMap,
-          menuIndex: MENU_ACCTPURCHASE,
-          tabIndex: finDoc.docType == 'invoice' ? 0 : 1,
-        );
-      }
-/*    } // orders
-    else if (finDoc.docType == 'order') {
-      if (finDoc.sales!) {
-        salesMap[0] = finDocItem;
-        BlocProvider.of<SalesCartBloc>(context)..add(LoadCart(finDoc));
-        return MainTemplate(
-          menu: menuItems,
-          mapItems: salesMap,
-          menuIndex: MENU_SALES,
-          tabIndex: 0,
-        );
-      } else {
-        purchaseMap[0] = finDocItem;
-        BlocProvider.of<PurchCartBloc>(context)..add(LoadCart(finDoc));
-        return MainTemplate(
-          menu: menuItems,
-          mapItems: purchaseMap,
-          menuIndex: MENU_PURCHASE,
-          tabIndex: 0,
-        );
-      }
-    } else if (finDoc.docType == 'transaction') {
-      ledgerMap[1] = finDocItem;
-      BlocProvider.of<SalesCartBloc>(context)..add(LoadCart(finDoc));
-      return MainTemplate(
-        menu: menuItems,
-        mapItems: ledgerMap,
-        menuIndex: MENU_ACCTLEDGER,
-        tabIndex: 1,
-      );
-*/
-    } else
-      return Container(
-          child:
-              Center(child: Text("Unrecognized docType: ${finDoc.docType} ")));
+    return FinDocPage(formArguments.message, formArguments.object as FinDoc);
   }
 }
 
@@ -105,7 +42,7 @@ class FinDocPage extends StatefulWidget {
 
 class _MyFinDocState extends State<FinDocPage> {
   final String? message;
-  final FinDoc finDocIn; // incoming finDoc
+  final FinDoc finDoc; // incoming finDoc
   final _formKeyHeader = GlobalKey<FormState>();
   final _formKeyItems = GlobalKey<FormState>();
   final _priceController = TextEditingController();
@@ -115,70 +52,80 @@ class _MyFinDocState extends State<FinDocPage> {
   final _userSearchBoxController = TextEditingController();
   final _productSearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
-  FinDoc? finDoc;
+  FinDoc? finDocUpdated;
   List<ItemType> itemTypes = [];
   Product? _selectedProduct;
   User? _selectedUser;
   ItemType? _selectedItemType;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
-  _MyFinDocState(this.message, this.finDocIn) {
+  _MyFinDocState(this.message, this.finDoc) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (finDoc == null) finDoc = finDocIn.copyWith();
+    int columns = ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 1 : 2;
+    if (finDocUpdated == null) finDocUpdated = finDoc.copyWith();
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    if (finDoc!.sales!) {
+    if (finDocUpdated!.sales!) {
       _cartBloc = BlocProvider.of<SalesCartBloc>(context) as CartBloc;
     } else {
       _cartBloc = BlocProvider.of<PurchCartBloc>(context) as CartBloc;
     }
     var repos = context.read<Object>();
-    if (finDoc!.sales!)
-      return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-        if (state is AuthAuthenticated)
-          itemTypes = state.authenticate!.itemTypes!.sales!;
-        return BlocListener<SalesOrderBloc, FinDocState>(
-            listener: (context, state) {
-              if (state is FinDocProblem)
-                HelperFunctions.showMessage(
-                    context, '${state.errorMessage}', Colors.red);
-              if (state is FinDocSuccess)
-                HelperFunctions.showMessage(
-                    context, '${state.message}', Colors.green);
-            },
-            child: BlocConsumer<SalesCartBloc, CartState>(
-                listener: (context, state) {
-              if (state is CartProblem) {
-                HelperFunctions.showMessage(
-                    context, '${state.errorMessage}', Colors.red);
-              }
-              if (state is CartLoaded) {
-                HelperFunctions.showMessage(
-                    context, '${state.message}', Colors.green);
-              }
-            }, builder: (context, state) {
-              if (state is CartLoading)
-                return Center(child: CircularProgressIndicator());
-              if (state is CartLoaded) {
-                finDoc = state.finDoc;
-              }
-              return Column(children: [
-                SizedBox(height: 20),
-                _headerEntry(repos),
-                _itemEntry(repos, isPhone),
-                _actionButtons(),
-                Center(
-                    child: Text("Grant total : " +
-                        (finDoc!.grandTotal == null
-                            ? "0.00"
-                            : finDoc!.grandTotal.toString()))),
-                _finDocItemList(),
-              ]);
-            }));
-      });
+    if (finDocUpdated!.sales!)
+      return Dialog(
+          insetPadding: EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+              width: columns.toDouble() * 400,
+              height: 1 / columns.toDouble() * 1200,
+              child:
+                  BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+                if (state is AuthAuthenticated)
+                  itemTypes = state.authenticate!.itemTypes!.sales!;
+                return BlocListener<SalesOrderBloc, FinDocState>(
+                    listener: (context, state) {
+                      if (state is FinDocProblem)
+                        HelperFunctions.showMessage(
+                            context, '${state.errorMessage}', Colors.red);
+                      if (state is FinDocSuccess)
+                        HelperFunctions.showMessage(
+                            context, '${state.message}', Colors.green);
+                    },
+                    child: BlocConsumer<SalesCartBloc, CartState>(
+                        listener: (context, state) {
+                      if (state is CartProblem) {
+                        HelperFunctions.showMessage(
+                            context, '${state.errorMessage}', Colors.red);
+                      }
+                      if (state is CartLoaded) {
+                        HelperFunctions.showMessage(
+                            context, '${state.message}', Colors.green);
+                      }
+                    }, builder: (context, state) {
+                      if (state is CartLoading)
+                        return Center(child: CircularProgressIndicator());
+                      if (state is CartLoaded) {
+                        finDocUpdated = state.finDoc;
+                      }
+                      return Column(children: [
+                        SizedBox(height: 20),
+                        _headerEntry(repos),
+                        _itemEntry(repos, isPhone),
+                        _actionButtons(),
+                        Center(
+                            child: Text("Grant total : " +
+                                (finDocUpdated!.grandTotal == null
+                                    ? "0.00"
+                                    : finDocUpdated!.grandTotal.toString()))),
+                        _finDocItemList(),
+                      ]);
+                    }));
+              })));
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated)
         itemTypes = state.authenticate!.itemTypes!.purchase!;
@@ -207,27 +154,31 @@ class _MyFinDocState extends State<FinDocPage> {
             if (state is CartLoading)
               return Center(child: CircularProgressIndicator());
             if (state is CartLoaded) {
-              finDoc = state.finDoc;
+              finDocUpdated = state.finDoc;
             }
-            return Column(children: [
-              SizedBox(height: 20),
-              _headerEntry(repos),
-              _itemEntry(repos, isPhone),
-              _actionButtons(),
-              Center(
-                  child:
-                      Text("Grant total : ${finDoc!.grandTotal?.toString()}")),
-              _finDocItemList(),
-            ]);
+            return Dialog(
+                insetPadding: EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(children: [
+                  SizedBox(height: 20),
+                  _headerEntry(repos),
+                  _itemEntry(repos, isPhone),
+                  _actionButtons(),
+                  Center(
+                      child: Text(
+                          "Grant total : ${finDocUpdated!.grandTotal?.toString()}")),
+                  _finDocItemList(),
+                ]));
           }));
     });
   }
 
   Widget _headerEntry(repos) {
     int columns = ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 1 : 2;
-    double width = columns.toDouble() * 350;
-    _selectedUser = finDoc!.otherUser;
-    _descriptionController.text = finDoc!.description ?? "";
+    _selectedUser = finDocUpdated!.otherUser;
+    _descriptionController.text = finDocUpdated!.description ?? "";
 
     Future<List<User>> getData(userGroupId, filter) async {
       var response = await repos.getUser(
@@ -249,7 +200,8 @@ class _MyFinDocState extends State<FinDocPage> {
                       childAspectRatio: (6),
                       children: <Widget>[
                         DropdownSearch<User>(
-                          label: finDoc!.sales! ? 'Customer' : 'Supplier',
+                          label:
+                              finDocUpdated!.sales! ? 'Customer' : 'Supplier',
                           dialogMaxWidth: 300,
                           autoFocusSearchBox: true,
                           selectedItem: _selectedUser,
@@ -275,7 +227,7 @@ class _MyFinDocState extends State<FinDocPage> {
                             });
                           },
                           validator: (value) => value == null
-                              ? "Select ${finDoc!.sales! ? 'Customer' : 'Supplier'}!"
+                              ? "Select ${finDocUpdated!.sales! ? 'Customer' : 'Supplier'}!"
                               : null,
                         ),
                         TextFormField(
@@ -406,18 +358,18 @@ class _MyFinDocState extends State<FinDocPage> {
               key: Key('clear'),
               child: Text('Clear'),
               onPressed: () {
-                if (finDoc!.items!.length > 0) {
-                  _cartBloc.add(ClearCart(finDoc!));
+                if (finDocUpdated!.items!.length > 0) {
+                  _cartBloc.add(ClearCart(finDocUpdated!));
                 }
               }),
           ElevatedButton(
-              child: Text(finDoc!.idIsNull()
+              child: Text(finDocUpdated!.idIsNull()
                   ? 'Create '
-                  : 'Update ' + '${finDoc!.docType}'),
+                  : 'Update ' + '${finDocUpdated!.docType}'),
               onPressed: () {
-                if (finDoc!.items!.length > 0) {
-                  print("==create findoc: $finDoc");
-                  _cartBloc.add(CreateFinDocFromCart(finDoc!));
+                if (finDocUpdated!.items!.length > 0) {
+                  print("==create findoc: $finDocUpdated");
+                  _cartBloc.add(CreateFinDocFromCart(finDocUpdated!));
                 }
               }),
           ElevatedButton(
@@ -426,9 +378,9 @@ class _MyFinDocState extends State<FinDocPage> {
               onPressed: () {
                 if (_formKeyHeader.currentState!.validate() &&
                     _formKeyItems.currentState!.validate()) {
-                  print("===findoc TO cart: $finDoc");
+                  print("===findoc TO cart: $finDocUpdated");
                   _cartBloc.add(AddToCart(
-                      finDoc: finDoc!.copyWith(
+                      finDoc: finDocUpdated!.copyWith(
                           otherUser: _selectedUser,
                           description: _descriptionController.text),
                       newItem: FinDocItem(
@@ -454,7 +406,7 @@ class _MyFinDocState extends State<FinDocPage> {
   }
 
   Widget _finDocItemList() {
-    List<FinDocItem>? items = finDoc?.items;
+    List<FinDocItem>? items = finDocUpdated?.items;
 
     return Expanded(
         child: CustomScrollView(
@@ -482,11 +434,6 @@ class _MyFinDocState extends State<FinDocPage> {
               return InkWell(
                   onLongPress: () async {
                     _cartBloc.add(DeleteItemFromCart(index));
-                    Navigator.pushNamed(context, '/finDoc',
-                        arguments: FormArguments(
-                            message: 'item deleted',
-                            menuIndex: 0,
-                            object: finDoc));
                   },
                   child: ListTile(
                       leading: CircleAvatar(

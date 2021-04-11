@@ -22,33 +22,25 @@ import '@templates.dart';
 
 class MainTemplate extends StatefulWidget {
   final title; //title at the top of the page, default companyName
-  @required
   final List<Widget>? actions; // actions at the appbar
-  @required
-  final int? tabIndex; // tab selected
-  @required
-  final int? menuIndex; // navigator rail menu selected
-  @required
+  final int? tabIndex; // tab selected, if none create new
+  final int menuIndex; // navigator rail menu selected
   final Widget? child; // child page when no tabs required
-  @required
-  final List<MapItem>? mapItems; // for tabs, null if no tabs
-  @required
-  final List<MenuItem>? menu;
+  final List<TabItem>? mapItems; // for tabs, null if no tabs
+  final List<MenuItem> menu;
   final leadAction; // single actionButton on the lef like back button
-  @required
-  final int
-      menuCompany; // menu number where the company detail screen is located.
+  final TabItem? tabItem;
   MainTemplate({
     Key? key,
     this.title,
     this.actions,
     this.tabIndex,
-    this.menuIndex,
+    required this.menuIndex,
     this.child,
     this.mapItems,
-    this.menu,
+    required this.menu,
     this.leadAction,
-    this.menuCompany = 1,
+    this.tabItem,
   }) : super(key: key);
 
   @override
@@ -69,6 +61,10 @@ class _HeaderState extends State<MainTemplate>
   @override
   void initState() {
     super.initState();
+    if (widget.tabIndex == null && widget.tabItem != null) {
+      // create new one
+      widget.menu[widget.menuIndex].tabItems!.add(widget.tabItem!);
+    }
     tabIndex = widget.tabIndex ?? 0;
     widget.mapItems?.forEach((x) => {
           // form to display
@@ -121,24 +117,24 @@ class _HeaderState extends State<MainTemplate>
           return simplePage(authenticate, isPhone);
         else // tablet or web show navigation
           return myNavigationRail(
-              context,
-              authenticate!,
-              simplePage(authenticate, isPhone),
-              widget.menuIndex,
-              widget.menu,
-              widget.menuCompany);
+            context,
+            authenticate!,
+            simplePage(authenticate, isPhone),
+            widget.menuIndex,
+            widget.menu,
+          );
       } else {
         // show tabbar page
         if (isPhone)
           return tabPage(authenticate, isPhone);
         else
           return myNavigationRail(
-              context,
-              authenticate!,
-              tabPage(authenticate, isPhone),
-              widget.menuIndex,
-              widget.menu,
-              widget.menuCompany);
+            context,
+            authenticate!,
+            tabPage(authenticate, isPhone),
+            widget.menuIndex,
+            widget.menu,
+          );
       }
     });
   }
@@ -154,8 +150,7 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menu,
-                widget.menuCompany),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             body: widget.child));
   }
 
@@ -183,8 +178,7 @@ class _HeaderState extends State<MainTemplate>
                 title: companyLogo(context, authenticate,
                     widget.title ?? authenticate?.company?.name ?? 'Company??'),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menu,
-                widget.menuCompany),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menu),
             floatingActionButton: floatingActionButtonList[tabIndex],
             bottomNavigationBar: isPhone
                 ? BottomNavigationBar(
