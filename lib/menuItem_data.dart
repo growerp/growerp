@@ -12,7 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/@forms.dart';
+import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
+
+import 'forms/gantt_form.dart';
 
 const MENU_DASHBOARD = 0;
 const MENU_COMPANY = 1;
@@ -27,37 +31,90 @@ const MENU_ACCTLEDGER = 3;
 
 List<MenuItem> menuItems = [
   MenuItem(
-      menuItemId: 0,
       image: "assets/images/dashBoardGrey.png",
       selectedImage: "assets/images/dashBoard.png",
       title: "Main",
       route: '/',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
-  MenuItem(
-      menuItemId: 1,
-      image: "assets/images/companyGrey.png",
-      selectedImage: "assets/images/company.png",
-      title: "Hotel",
-      route: '/company',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
-      writeGroups: ["GROWERP_M_ADMIN"]),
+      child: GanttForm()),
   MenuItem(
-      menuItemId: 2,
+    image: "assets/images/companyGrey.png",
+    selectedImage: "assets/images/company.png",
+    title: "Hotel",
+    route: '/company',
+    readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+    writeGroups: ["GROWERP_M_ADMIN"],
+    tabItems: [
+      TabItem(
+        form: CompanyInfoForm(FormArguments()),
+        label: "Company Info",
+        icon: Icon(Icons.home),
+      ),
+      TabItem(
+        form: UsersForm(
+          key: ValueKey("GROWERP_M_ADMIN"),
+          userGroupId: "GROWERP_M_ADMIN",
+        ),
+        label: "Admins",
+        icon: Icon(Icons.business),
+        floatButtonForm: UserForm(
+            formArguments:
+                FormArguments(object: User(userGroupId: "GROWERP_M_ADMIN"))),
+      ),
+      TabItem(
+        form: UsersForm(
+          key: ValueKey("GROWERP_M_EMPLOYEE"),
+          userGroupId: "GROWERP_M_EMPLOYEE",
+        ),
+        label: "Employees",
+        icon: Icon(Icons.school),
+        floatButtonForm: UserForm(
+            formArguments:
+                FormArguments(object: User(userGroupId: "GROWERP_M_EMPLOYEE"))),
+      ),
+    ],
+  ),
+  MenuItem(
       image: "assets/images/single-bedGrey.png",
       selectedImage: "assets/images/single-bed.png",
       title: "Rooms",
       route: '/rooms',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
-      menuItemId: 3,
       image: "assets/images/reservationGrey.png",
       selectedImage: "assets/images/reservation.png",
       title: "Reservations",
       route: '/reservations',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
-      writeGroups: ["GROWERP_M_ADMIN"]),
+      readGroups: [
+        "GROWERP_M_ADMIN",
+        "GROWERP_M_EMPLOYEE"
+      ],
+      writeGroups: [
+        "GROWERP_M_ADMIN"
+      ],
+      tabItems: [
+        TabItem(
+          form: FinDocsForm(sales: true, docType: 'order'),
+          label: "Sales orders",
+          icon: Icon(Icons.home),
+          floatButtonForm: FinDocForm(
+            formArguments: FormArguments(
+                object: FinDoc(sales: true, docType: 'order', items: [])),
+          ),
+        ),
+        TabItem(
+          form: UsersForm(
+            key: ValueKey("GROWERP_M_CUSTOMER"),
+            userGroupId: "GROWERP_M_CUSTOMER",
+          ),
+          label: "Customers",
+          icon: Icon(Icons.business),
+          floatButtonForm: UserForm(
+              formArguments: FormArguments(
+                  object: User(userGroupId: "GROWERP_M_CUSTOMER"))),
+        ),
+      ]),
   MenuItem(
-      menuItemId: 4,
       image: "assets/images/check-inGrey.png",
       selectedImage: "assets/images/check-in.png",
       title: "check-In",
@@ -65,14 +122,12 @@ List<MenuItem> menuItems = [
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
       writeGroups: ["GROWERP_M_ADMIN"]),
   MenuItem(
-      menuItemId: 5,
       image: "assets/images/check-outGrey.png",
       selectedImage: "assets/images/check-out.png",
       title: "Check-Out",
       route: '/',
       readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
-      menuItemId: 6,
       image: "assets/images/accountingGrey.png",
       selectedImage: "assets/images/accounting.png",
       title: "Accounting",

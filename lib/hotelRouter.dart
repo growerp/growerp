@@ -14,9 +14,11 @@
 
 import 'package:core/coreRouter.dart';
 import 'package:flutter/material.dart';
+import 'package:models/@models.dart';
 import 'forms/@forms.dart' as local;
 import 'package:core/forms/@forms.dart';
-import 'package:models/@models.dart';
+import 'menuItem_data.dart';
+import 'package:core/templates/@templates.dart';
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -25,6 +27,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(builder: (context) => local.HomeForm());
+    case '/company':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 0));
+    case '/admins':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 1));
+    case '/employees':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 2));
+    case '/reservations':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 3, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

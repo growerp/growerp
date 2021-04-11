@@ -42,6 +42,10 @@ void main() async {
       providers: [
         BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
         BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
+        BlocProvider<AdminBloc>(
+            create: (context) => UserBloc(repos, "GROWERP_M_ADMIN")),
+        BlocProvider<EmployeeBloc>(
+            create: (context) => UserBloc(repos, "GROWERP_M_EMPLOYEE")),
         BlocProvider<CustomerBloc>(
             create: (context) => UserBloc(repos, "GROWERP_M_CUSTOMER")),
         BlocProvider<AuthBloc>(

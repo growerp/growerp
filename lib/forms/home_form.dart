@@ -29,8 +29,8 @@ class HomeForm extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         Authenticate authenticate = state.authenticate!;
-        return MainTemplate(
-          menu: menuItems,
+        return DisplayMenuItem(
+          menuList: menuItems,
           menuIndex: 0,
           actions: <Widget>[
             IconButton(
@@ -49,7 +49,6 @@ class HomeForm extends StatelessWidget {
                         BlocProvider.of<AuthBloc>(context).add(Logout()),
                       }),
           ],
-          child: GanttForm(),
         );
       }
 
