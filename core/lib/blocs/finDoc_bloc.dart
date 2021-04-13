@@ -117,7 +117,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       if (event is CreateFinDoc) {
         yield FinDocLoading('Creating ${event.finDoc!.docType}...');
         dynamic result = await repos.updateFinDoc(event.finDoc);
-        if (result is List<FinDoc>) {
+        if (result is List<FinDoc> && result.isNotEmpty) {
           currentState.finDocs!.add(result[0]);
           yield currentState.copyWith(
               message: "${result[0].docType} #${result[0].id()} created");

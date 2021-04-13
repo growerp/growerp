@@ -47,6 +47,10 @@ class CartBloc extends Bloc<CartEvent, CartState>
           finDoc = event.finDoc; // nothing found so show empty
       }
       yield CartLoaded(finDoc, "cart initial load.");
+    } else if (event is ModifyHeaderCart) {
+      yield CartLoading();
+      await repos.saveCart(event.finDoc);
+      yield CartLoaded(event.finDoc, "cart header updated");
     } else if (event is AddToCart) {
       yield CartLoading();
       Decimal grandTotal = Decimal.parse('0');
@@ -78,6 +82,7 @@ class CartBloc extends Bloc<CartEvent, CartState>
       yield CartLoading('Saving ${event.finDoc.docType}...');
       try {
         finDocBloc!.add(CreateFinDoc(event.finDoc));
+        print("=====cartbloc create $finDoc");
         add(ClearCart(event.finDoc));
         yield CartLoaded(finDoc, "${finDoc.docType} created, cart cleared..");
       } catch (e) {
@@ -108,6 +113,13 @@ class CreateFinDocFromCart extends CartEvent {
   @override
   String toString() =>
       (finDoc.idIsNull() ? 'Create ' : 'Update ') + finDoc.docType!;
+}
+
+class ModifyHeaderCart extends CartEvent {
+  final FinDoc? finDoc;
+  const ModifyHeaderCart({this.finDoc});
+  @override
+  String toString() => 'Modify header cart: $finDoc';
 }
 
 class AddToCart extends CartEvent {

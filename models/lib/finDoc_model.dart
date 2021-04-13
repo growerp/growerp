@@ -147,6 +147,7 @@ class FinDoc extends Equatable {
 
   String toString() =>
       "$docType# $orderId!/$invoiceId!/$paymentId! s/p: ${salesString()} "
+      "Descr: $description! "
       "status: $statusId! otherUser: $otherUser! Items: ${items!.length}";
 
   FinDoc copyWith({

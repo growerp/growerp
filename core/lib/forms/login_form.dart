@@ -275,7 +275,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                                             kReleaseMode
                                         ? 'admin@growerp.com'
                                         : authenticate?.user?.name);
-                            if (username != null) {
+                            if (username.isNotEmpty) {
                               BlocProvider.of<AuthBloc>(context)
                                   .add(ResetPassword(username: username));
                               HelperFunctions.showMessage(
@@ -318,13 +318,13 @@ _sendResetPasswordDialog(BuildContext context, String? username) async {
                   }))
         ]),
         actions: <Widget>[
-          FlatButton(
+          ElevatedButton(
             child: Text('Cancel'),
             onPressed: () {
               Navigator.of(context).pop(null);
             },
           ),
-          FlatButton(
+          ElevatedButton(
             child: Text('Ok'),
             onPressed: () {
               Navigator.of(context).pop(username);

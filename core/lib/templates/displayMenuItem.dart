@@ -66,13 +66,15 @@ class _MenuItemState extends State<DisplayMenuItem>
     if (tabItems != null)
       for (var i = 0; i < tabItems!.length; i++) {
         // form to display
-        tabList!.add(tabItems![i].form!);
+        tabList!.add(tabItems![i].form as Widget);
         // text of tabs at top of screen (tablet, web)
         tabText!.add(Align(
-            alignment: Alignment.center, child: Text(tabItems![i].label!)));
+            alignment: Alignment.center,
+            child: Text(tabItems![i].label as String)));
         // tabs at bottom of screen : phone
         bottomItems!.add(BottomNavigationBarItem(
-            icon: tabItems![i].icon!, label: tabItems![i].label));
+            icon: tabItems![i].icon as Widget,
+            label: tabItems![i].label as String));
         // floating actionbutton at each tab
         if (tabItems![i].floatButtonRoute != null)
           floatingActionButtonList[i] = FloatingActionButton(

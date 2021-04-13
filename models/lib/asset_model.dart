@@ -40,6 +40,8 @@ class Asset extends Equatable {
   final String? assetName; // include room number/name
   final String? description;
   final String? parentAssetId;
+  final String? productId;
+  final String? productName;
   final List<Reservation>? reservations;
 
   Asset({
@@ -48,6 +50,8 @@ class Asset extends Equatable {
     this.assetName,
     this.description,
     this.parentAssetId,
+    this.productId,
+    this.productName,
     this.reservations,
   });
 
@@ -57,6 +61,8 @@ class Asset extends Equatable {
         assetName: json["assetName"],
         description: json["description"],
         parentAssetId: json["parentAssetId"],
+        productId: json["productId"],
+        productName: json["productName"],
         reservations: json["reservations"] == null
             ? []
             : List<Reservation>.from(
@@ -69,10 +75,13 @@ class Asset extends Equatable {
         "assetName": assetName,
         "description": description,
         "parentAssetId": parentAssetId,
+        "productId": productId,
+        "productName": productName,
         "reservation": List<dynamic>.from(reservations!.map((x) => x.toJson())),
       };
 
-  String toString() => 'Asset name: $assetName[$assetId]';
+  String toString() =>
+      'Asset name: $assetName[$assetId] $productName[$productId]';
 
   @override
   List<Object?> get props => [
@@ -81,6 +90,8 @@ class Asset extends Equatable {
         assetName,
         description,
         parentAssetId,
+        productId,
+        productName,
         reservations,
       ];
 }

@@ -22,25 +22,25 @@ import 'package:core/blocs/@blocs.dart';
 import 'package:core/helper_functions.dart';
 import 'package:core/templates/@templates.dart';
 
-class UserForm extends StatelessWidget {
+class UserDialog extends StatelessWidget {
   final FormArguments formArguments;
-  const UserForm({Key? key, required this.formArguments}) : super(key: key);
+  const UserDialog({Key? key, required this.formArguments}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return UserDialog(formArguments.message, formArguments.object as User);
+    return UserPage(formArguments.message, formArguments.object as User);
   }
 }
 
-class UserDialog extends StatefulWidget {
+class UserPage extends StatefulWidget {
   final String? message;
   final User user;
-  UserDialog(this.message, this.user);
+  UserPage(this.message, this.user);
   @override
   _UserState createState() => _UserState(message, user);
 }
 
-class _UserState extends State<UserDialog> {
+class _UserState extends State<UserPage> {
   final String? message;
   final User user;
   final _formKey = GlobalKey<FormState>();
@@ -211,10 +211,10 @@ class _UserState extends State<UserDialog> {
         textAlign: TextAlign.center,
       );
     }
-    return _userForm(widget.user, updatedUser);
+    return _UserDialog(widget.user, updatedUser);
   }
 
-  Widget _userForm(user, updatedUser) {
+  Widget _UserDialog(user, updatedUser) {
     return Form(
         key: _formKey,
         child: ListView(children: <Widget>[

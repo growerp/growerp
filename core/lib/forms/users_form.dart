@@ -202,7 +202,7 @@ class _UsersState extends State<UsersForm> {
                               barrierDismissible: true,
                               context: context,
                               builder: (BuildContext context) {
-                                return UserForm(
+                                return UserDialog(
                                     formArguments:
                                         FormArguments(object: users![index]));
                               });

@@ -331,7 +331,7 @@ class _OrdersState extends State<FinDocsForm> {
                                               barrierDismissible: true,
                                               context: context,
                                               builder: (BuildContext context) {
-                                                return FinDocForm(
+                                                return FinDocDialog(
                                                     formArguments:
                                                         FormArguments(
                                                             object: finDocs![
