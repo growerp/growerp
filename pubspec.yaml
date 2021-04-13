@@ -28,8 +28,6 @@ dependencies:
       url: https://github.com/growerp/growerp.git
       ref: packages
       path: core
-  models:
-    path: ../packages/models
 
 dev_dependencies:
   flutter_test:

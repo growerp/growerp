@@ -57,7 +57,7 @@ List<MenuItem> menuItems = [
         ),
         label: "Admins",
         icon: Icon(Icons.business),
-        floatButtonForm: UserForm(
+        floatButtonForm: UserDialog(
             formArguments:
                 FormArguments(object: User(userGroupId: "GROWERP_M_ADMIN"))),
       ),
@@ -68,7 +68,7 @@ List<MenuItem> menuItems = [
         ),
         label: "Employees",
         icon: Icon(Icons.school),
-        floatButtonForm: UserForm(
+        floatButtonForm: UserDialog(
             formArguments:
                 FormArguments(object: User(userGroupId: "GROWERP_M_EMPLOYEE"))),
       ),
@@ -97,7 +97,7 @@ List<MenuItem> menuItems = [
           form: FinDocsForm(sales: true, docType: 'order'),
           label: "Sales orders",
           icon: Icon(Icons.home),
-          floatButtonForm: FinDocForm(
+          floatButtonForm: FinDocDialog(
             formArguments: FormArguments(
                 object: FinDoc(sales: true, docType: 'order', items: [])),
           ),
@@ -109,7 +109,7 @@ List<MenuItem> menuItems = [
           ),
           label: "Customers",
           icon: Icon(Icons.business),
-          floatButtonForm: UserForm(
+          floatButtonForm: UserDialog(
               formArguments: FormArguments(
                   object: User(userGroupId: "GROWERP_M_CUSTOMER"))),
         ),
