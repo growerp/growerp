@@ -54,11 +54,11 @@ class CartBloc extends Bloc<CartEvent, CartState>
     } else if (event is AddToCart) {
       yield CartLoading();
       Decimal grandTotal = Decimal.parse('0');
+      event.finDoc!.items!
+          .add(event.newItem!.copyWith(itemSeqId: finDoc.items!.length + 1));
       event.finDoc!.items!.forEach((x) {
         grandTotal += x.quantity! * x.price!;
       });
-      event.finDoc!.items!
-          .add(event.newItem!.copyWith(itemSeqId: finDoc.items!.length + 1));
       finDoc = event.finDoc!.copyWith(grandTotal: grandTotal);
       await repos.saveCart(finDoc);
       yield CartLoaded(finDoc, "cart updated");
@@ -82,7 +82,6 @@ class CartBloc extends Bloc<CartEvent, CartState>
       yield CartLoading('Saving ${event.finDoc.docType}...');
       try {
         finDocBloc!.add(CreateFinDoc(event.finDoc));
-        print("=====cartbloc create $finDoc");
         add(ClearCart(event.finDoc));
         yield CartLoaded(finDoc, "${finDoc.docType} created, cart cleared..");
       } catch (e) {
@@ -164,14 +163,6 @@ class CartLoaded extends CartState {
   final FinDoc? finDoc;
   final String? message;
   const CartLoaded(this.finDoc, [this.message]);
-  Decimal get totalPrice {
-    if (finDoc?.items?.length == 0) return Decimal.parse('0');
-    Decimal total = Decimal.parse('0');
-    if (finDoc != null && finDoc!.items != null)
-      for (FinDocItem i in finDoc!.items!)
-        total += (i.price! * Decimal.parse(i.quantity.toString()));
-    return total;
-  }
 
   @override
   List<Object?> get props => [finDoc];

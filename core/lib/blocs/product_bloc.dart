@@ -104,9 +104,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             currentState.products!.replaceRange(index, index + 1, [result]);
           }
           yield ProductSuccess(
-                  products: currentState.products,
-                  hasReachedMax: _hasReachedMax(currentState))
-              .copyWith(message: 'product ' + (adding ? 'added' : 'updated'));
+              products: currentState.products,
+              hasReachedMax: _hasReachedMax(currentState),
+              message: 'product ' + (adding ? 'added' : 'updated'));
         } else {
           yield ProductProblem(result);
         }
@@ -128,7 +128,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           yield ProductProblem(result);
         }
       }
-    }
+    } else
+      print("===Event $event not found");
   }
 }
 

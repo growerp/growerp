@@ -61,6 +61,8 @@ class _MyFinDocState extends State<FinDocPage> {
   void initState() {
     super.initState();
     finDocUpdated = finDoc.copyWith();
+    _selectedUser = finDocUpdated.otherUser;
+    _descriptionController.text = finDocUpdated.description ?? "";
   }
 
   @override
@@ -98,7 +100,6 @@ class _MyFinDocState extends State<FinDocPage> {
         return Center(child: CircularProgressIndicator());
       if (state is CartLoaded) {
         finDocUpdated = state.finDoc!;
-        print("====loaded findoc: $finDocUpdated");
       }
       return Column(children: [
         SizedBox(height: 20),
@@ -223,9 +224,6 @@ class _MyFinDocState extends State<FinDocPage> {
           ElevatedButton(
               child: Text("Update header"),
               onPressed: () {
-                print("====update header user: $_selectedUser");
-                print("==update header findoc: "
-                    "${finDocUpdated.copyWith(otherUser: _selectedUser, description: _descriptionController.text)}");
                 _cartBloc.add(ModifyHeaderCart(
                     finDoc: finDocUpdated.copyWith(
                         otherUser: _selectedUser,
@@ -237,7 +235,6 @@ class _MyFinDocState extends State<FinDocPage> {
               onPressed: () async {
                 final dynamic finDocItem =
                     await _addAnotherItemDialog(context, itemTypes);
-                print("========added finDocItem: $finDocItem");
                 if (finDocItem != null)
                   _cartBloc.add(AddToCart(
                       finDoc: finDocUpdated.copyWith(
@@ -251,8 +248,6 @@ class _MyFinDocState extends State<FinDocPage> {
               onPressed: () async {
                 final dynamic finDocItem =
                     await _addProductItemDialog(context, repos);
-                print("========added finDocItem: $finDocItem");
-                print("========added finDoc: $finDoc");
                 if (finDocItem != null)
                   _cartBloc.add(AddToCart(
                       finDoc: finDocUpdated.copyWith(

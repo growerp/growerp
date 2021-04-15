@@ -100,42 +100,43 @@ class _ProductState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     var repos = context.read<Object>();
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Builder(
-                builder: (context) => GestureDetector(
-                    onTap: () {},
-                    child: Dialog(
-                        insetPadding: EdgeInsets.all(10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ScaffoldMessenger(
-                            key: scaffoldMessengerKey,
-                            child: Container(
-                                padding: EdgeInsets.all(20),
-                                width: 400,
-                                height: 750,
-                                child: Scaffold(
-                                    floatingActionButton: imageButtons(
-                                        context, _onImageButtonPressed),
-                                    body:
-                                        BlocListener<ProductBloc, ProductState>(
-                                            listener: (context, state) {
-                                      if (state is ProductProblem) {
-                                        loading = false;
-                                        HelperFunctions.showMessage(
-                                            context,
-                                            '${state.errorMessage}',
-                                            Colors.red);
-                                      }
-                                      if (state is ProductSuccess)
-                                        Navigator.of(context).pop();
-                                    }, child: Builder(builder:
-                                                (BuildContext context) {
-                                      return Center(
+    return BlocConsumer<ProductBloc, ProductState>(listener: (context, state) {
+      if (state is ProductLoading)
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+      if (state is ProductProblem) {
+        loading = false;
+        HelperFunctions.showMessage(
+            context, '${state.errorMessage}', Colors.red);
+      }
+      if (state is ProductSuccess) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+        Navigator.of(context).pop();
+      }
+    }, builder: (BuildContext context, state) {
+      if (state is ProductLoading) return Container();
+      return GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Builder(
+                  builder: (context) => GestureDetector(
+                      onTap: () {},
+                      child: Dialog(
+                          insetPadding: EdgeInsets.all(10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Container(
+                              padding: EdgeInsets.all(20),
+                              width: 400,
+                              height: 750,
+                              child: ScaffoldMessenger(
+                                  key: scaffoldMessengerKey,
+                                  child: Scaffold(
+                                      backgroundColor: Colors.transparent,
+                                      floatingActionButton: imageButtons(
+                                          context, _onImageButtonPressed),
+                                      body: Center(
                                         child: !kIsWeb &&
                                                 defaultTargetPlatform ==
                                                     TargetPlatform.android
@@ -154,8 +155,8 @@ class _ProductState extends State<ProductPage> {
                                                   return _showForm(repos);
                                                 })
                                             : _showForm(repos),
-                                      );
-                                    }))))))))));
+                                      )))))))));
+    });
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -266,9 +267,7 @@ class _ProductState extends State<ProductPage> {
                       return result;
                     },
                     onChanged: (ProductCategory? newValue) {
-                      setState(() {
-                        _selectedCategory = newValue;
-                      });
+                      _selectedCategory = newValue;
                     },
                   ),
                   SizedBox(height: 20),

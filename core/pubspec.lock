@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: "3f50ef33deb94fe80154925e51df43472e130fe1"
+      resolved-ref: "7cc0723493832695f59031c92145734c6696a869"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -339,7 +339,7 @@ packages:
       name: image_picker_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   intl:
     dependency: "direct main"
     description:
@@ -415,7 +415,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "3f50ef33deb94fe80154925e51df43472e130fe1"
+      resolved-ref: "7cc0723493832695f59031c92145734c6696a869"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

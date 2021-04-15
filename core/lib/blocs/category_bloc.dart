@@ -99,7 +99,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         }
         yield CategorySuccess(
             categories: categories,
-            hasReachedMax: _hasReachedMax(currentState));
+            hasReachedMax: _hasReachedMax(currentState),
+            message: 'Category ' + (adding ? 'added' : 'updated'));
       } else {
         yield CategoryProblem(result);
       }

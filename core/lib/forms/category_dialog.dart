@@ -94,42 +94,41 @@ class _CategoryState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Builder(
-                builder: (context) => GestureDetector(
-                    onTap: () {},
-                    child: Dialog(
-                        insetPadding: EdgeInsets.all(10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Container(
-                            padding: EdgeInsets.all(20),
-                            width: 400,
-                            height: 600,
-                            child: ScaffoldMessenger(
-                                key: scaffoldMessengerKey,
-                                child: Scaffold(
-                                    floatingActionButton: imageButtons(
-                                        context, _onImageButtonPressed),
-                                    body: BlocListener<CategoryBloc,
-                                            CategoryState>(
-                                        listener: (context, state) {
-                                      if (state is CategoryProblem) {
-                                        loading = false;
-                                        HelperFunctions.showMessage(
-                                            context,
-                                            '${state.errorMessage}',
-                                            Colors.red);
-                                      }
-                                      if (state is CategorySuccess)
-                                        Navigator.of(context).pop();
-                                    }, child: Builder(
-                                            builder: (BuildContext context) {
-                                      return Center(
+    return BlocConsumer<CategoryBloc, CategoryState>(
+        listener: (context, state) {
+      if (state is CategoryProblem) {
+        loading = false;
+        HelperFunctions.showMessage(
+            context, '${state.errorMessage}', Colors.red);
+      }
+      if (state is CategorySuccess) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+        Navigator.of(context).pop();
+      }
+    }, builder: (BuildContext context, state) {
+      if (state is CategoryLoading) return Container();
+      return GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Builder(
+                  builder: (context) => GestureDetector(
+                      onTap: () {},
+                      child: Dialog(
+                          insetPadding: EdgeInsets.all(10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Container(
+                              padding: EdgeInsets.all(20),
+                              width: 400,
+                              height: 600,
+                              child: ScaffoldMessenger(
+                                  key: scaffoldMessengerKey,
+                                  child: Scaffold(
+                                      floatingActionButton: imageButtons(
+                                          context, _onImageButtonPressed),
+                                      body: Center(
                                         child: !kIsWeb &&
                                                 defaultTargetPlatform ==
                                                     TargetPlatform.android
@@ -148,8 +147,8 @@ class _CategoryState extends State<CategoryPage> {
                                                   return _showForm();
                                                 })
                                             : _showForm(),
-                                      );
-                                    }))))))))));
+                                      )))))))));
+    });
   }
 
   Text? _getRetrieveErrorWidget() {

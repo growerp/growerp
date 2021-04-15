@@ -55,7 +55,6 @@ class _MenuItemState extends State<DisplayMenuItem>
 
   @override
   void initState() {
-    print("===display ${widget.menuList[widget.menuIndex]} ");
     super.initState();
     MenuItem menuItem = widget.menuList[widget.menuIndex];
     tabItems = menuItem.tabItems;

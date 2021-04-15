@@ -88,7 +88,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
           } else {
             int index = currentState.opportunities!
                 .indexWhere((p) => p.opportunityId == result.opportunityId);
-            currentState.opportunities!.replaceRange(index, index + 1, [result]);
+            currentState.opportunities!
+                .replaceRange(index, index + 1, [result]);
           }
           yield currentState.copyWith(
               message: 'Opportunity ' + (adding ? 'added' : 'updated'));

@@ -27,19 +27,19 @@ class _ProductsState extends State<ProductsForm> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _productBloc = BlocProvider.of<ProductBloc>(context)..add(FetchProduct());
+    _productBloc = BlocProvider.of<ProductBloc>(context);
     search = false;
     limit = 20;
   }
 
   @override
   Widget build(BuildContext context) {
-    setState(() {
-      limit = (MediaQuery.of(context).size.height / 35).round();
-    });
+    limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
-        authenticate = state.authenticate;
+        authenticate = state.authenticate!;
+        _productBloc
+          ..add(FetchProduct(companyPartyId: authenticate!.company!.partyId));
         return BlocConsumer<ProductBloc, ProductState>(
             listener: (context, state) {
           if (state is ProductProblem)
@@ -49,6 +49,7 @@ class _ProductsState extends State<ProductsForm> {
             HelperFunctions.showMessage(
                 context, '${state.message}', Colors.green);
         }, builder: (context, state) {
+          if (state is ProductLoading) return LoadingIndicator();
           if (state is ProductSuccess) {
             List<Product>? products = state.products;
             return ListView.builder(

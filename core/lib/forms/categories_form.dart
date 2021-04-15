@@ -27,8 +27,7 @@ class _CategoriesState extends State<CategoriesForm> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _categoryBloc = BlocProvider.of<CategoryBloc>(context)
-      ..add(FetchCategory());
+    _categoryBloc = BlocProvider.of<CategoryBloc>(context);
     search = false;
   }
 
@@ -40,8 +39,11 @@ class _CategoriesState extends State<CategoriesForm> {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate;
+        _categoryBloc
+          ..add(FetchCategory(companyPartyId: authenticate!.company!.partyId));
         return BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
+          if (state is CategoryLoading) return LoadingIndicator();
           if (state is CategoryProblem)
             return Center(child: Text("${state.errorMessage}"));
           if (state is CategorySuccess) {

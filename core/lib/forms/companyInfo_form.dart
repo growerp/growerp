@@ -251,6 +251,8 @@ class _CompanyState extends State<CompanyPage> {
                                 readOnly: !isAdmin,
                                 key: Key('email'),
                                 decoration: InputDecoration(
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 30.0, horizontal: 10.0),
                                     labelText: 'Company Email address'),
                                 controller: _emailController,
                                 validator: (value) {
@@ -333,8 +335,10 @@ class _CompanyState extends State<CompanyPage> {
                               ),
                               TextFormField(
                                 readOnly: !isAdmin,
-                                decoration:
-                                    InputDecoration(labelText: 'Province'),
+                                decoration: InputDecoration(
+                                    labelText: 'Province',
+                                    contentPadding: new EdgeInsets.symmetric(
+                                        vertical: 30.0, horizontal: 10.0)),
                                 controller: _provinceController,
                                 validator: (value) {
                                   if (_address1Controller.text.isNotEmpty &&

@@ -105,7 +105,7 @@ class _UserState extends State<UserPage> {
         child: Container(
             padding: EdgeInsets.all(20),
             width: 400,
-            height: 700,
+            height: 650,
             child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
               if (state is AuthAuthenticated) authenticate = state.authenticate;
               return ScaffoldMessenger(

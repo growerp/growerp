@@ -546,6 +546,7 @@ class Moqui {
       bool? all,
       String? search}) async {
     try {
+      print("===========get oppr: $opportunityId");
       Response response =
           await client.get('rest/s1/growerp/100/Opportunity', queryParameters: {
         'opportunityId': opportunityId,
@@ -554,6 +555,7 @@ class Moqui {
         'all': all.toString(),
         'search': search
       });
+      print("====repos: ${response.toString()}");
       if (opportunityId == null)
         return opportunitiesFromJson(response.toString());
       else
