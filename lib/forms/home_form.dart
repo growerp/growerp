@@ -26,6 +26,7 @@ import '@forms.dart';
 class HomeForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         Authenticate authenticate = state.authenticate!;
@@ -66,6 +67,12 @@ class HomeForm extends StatelessWidget {
                 body: Center(
                     child: Column(children: <Widget>[
                   SizedBox(height: 100),
+                  Text("GrowERP Hotel.",
+                      style: TextStyle(
+                          fontSize: isPhone ? 15 : 25,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold)),
+                  SizedBox(height: 20),
                   Text("Login with an existing Id"),
                   SizedBox(height: 20),
                   ElevatedButton(
