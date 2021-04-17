@@ -21,7 +21,6 @@ import 'package:core/widgets/@widgets.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/templates/@templates.dart';
 import '../menuItem_data.dart';
-import '@forms.dart';
 
 class HomeForm extends StatelessWidget {
   @override
@@ -77,7 +76,6 @@ class HomeForm extends StatelessWidget {
                   SizedBox(height: 20),
                   ElevatedButton(
                     key: Key('loginButton'),
-                    autofocus: true,
                     child: Text('Login'),
                     onPressed: () async {
                       await Navigator.pushNamed(context, '/login');

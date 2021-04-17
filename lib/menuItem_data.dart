@@ -75,11 +75,26 @@ List<MenuItem> menuItems = [
     ],
   ),
   MenuItem(
-      image: "assets/images/single-bedGrey.png",
-      selectedImage: "assets/images/single-bed.png",
-      title: "Rooms",
-      route: '/rooms',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
+    image: "assets/images/single-bedGrey.png",
+    selectedImage: "assets/images/single-bed.png",
+    title: "Rooms",
+    route: '/rooms',
+    readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+    tabItems: [
+      TabItem(
+        form: AssetsForm(),
+        label: "Rooms",
+        icon: Icon(Icons.home),
+        floatButtonForm: AssetDialog(formArguments: FormArguments()),
+      ),
+      TabItem(
+        form: ProductsForm(),
+        label: "Room Types",
+        icon: Icon(Icons.home),
+        floatButtonForm: ProductDialog(formArguments: FormArguments()),
+      ),
+    ],
+  ),
   MenuItem(
       image: "assets/images/reservationGrey.png",
       selectedImage: "assets/images/reservation.png",

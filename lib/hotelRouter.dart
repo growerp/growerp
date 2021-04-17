@@ -14,7 +14,6 @@
 
 import 'package:core/coreRouter.dart';
 import 'package:flutter/material.dart';
-import 'package:models/@models.dart';
 import 'forms/@forms.dart' as local;
 import 'package:core/forms/@forms.dart';
 import 'menuItem_data.dart';
@@ -39,6 +38,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 2));
+    case '/rooms':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 2, tabIndex: 0));
     case '/reservations':
       return MaterialPageRoute(
           builder: (context) =>

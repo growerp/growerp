@@ -42,6 +42,7 @@ void main() async {
       providers: [
         BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
         BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
+        BlocProvider<AssetBloc>(create: (context) => AssetBloc(repos)),
         BlocProvider<AdminBloc>(
             create: (context) => UserBloc(repos, "GROWERP_M_ADMIN")),
         BlocProvider<EmployeeBloc>(
@@ -79,7 +80,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    String? classificationId = GlobalConfiguration().get("classificationId");
     return MaterialApp(
         localizationsDelegates: [
           S.delegate,
@@ -109,13 +109,8 @@ class MyApp extends StatelessWidget {
               return core.FatalErrorForm("Internet or server problem?");
             if (state is AuthUnauthenticated) {
               if (state.authenticate?.company == null) {
-                if (classificationId == 'AppAdmin')
-                  return core.RegisterForm(
-                      'No companies found in system, create one?');
-                else
-                  return core.FatalErrorForm(S
-                      .of(context)
-                      .classificationNotDefined(classificationId!));
+                return core.RegisterForm(
+                    'No companies found in system, create one?');
               } else
                 return HomeForm();
             }
