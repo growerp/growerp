@@ -18,6 +18,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:global_configuration/global_configuration.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final repos;
@@ -26,6 +27,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ProductBloc(
     this.repos,
   ) : super(ProductInitial());
+
+  String classificationId =
+      GlobalConfiguration().getValue<String>("classificationId");
 
   @override
   Stream<Transition<ProductEvent, ProductState>> transformEvents(
@@ -46,6 +50,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         dynamic result = await repos.getProduct(
             start: 0,
             limit: event.limit,
+            assetClassId: classificationId == 'AppHotel'
+                ? assetClassIds['Hotel Room']
+                : null,
             companyPartyId: event.companyPartyId,
             search: event.search);
         if (result is List<Product>) {
@@ -64,6 +71,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           dynamic result = await repos.getProduct(
               start: 0,
               limit: event.limit,
+              assetClassId: classificationId == 'AppHotel'
+                  ? assetClassIds['Hotel Room']
+                  : null,
               companyPartyId: event.companyPartyId,
               search: event.search);
           if (result is List<Product>) {
@@ -145,10 +155,15 @@ abstract class ProductEvent extends Equatable {
 class FetchProduct extends ProductEvent {
   final String? companyPartyId;
   final String? categoryId;
+  final String? assetClassId;
   final int limit;
   final search;
   FetchProduct(
-      {this.companyPartyId, this.categoryId, this.limit = 20, this.search});
+      {this.companyPartyId,
+      this.categoryId,
+      this.assetClassId,
+      this.limit = 20,
+      this.search});
   @override
   String toString() => "FetchProduct company: $companyPartyId, "
       "limit: $limit, search: $search";

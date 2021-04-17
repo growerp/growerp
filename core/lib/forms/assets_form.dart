@@ -8,16 +8,16 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 
 import '@forms.dart';
 
-class ProductsForm extends StatefulWidget {
-  const ProductsForm();
+class AssetsForm extends StatefulWidget {
+  const AssetsForm();
   @override
-  _ProductsState createState() => _ProductsState();
+  _AssetsState createState() => _AssetsState();
 }
 
-class _ProductsState extends State<ProductsForm> {
+class _AssetsState extends State<AssetsForm> {
   final _scrollController = ScrollController();
   double _scrollThreshold = 200.0;
-  late ProductBloc _productBloc;
+  late AssetBloc _assetBloc;
   Authenticate? authenticate;
   late int limit;
   late bool search;
@@ -27,7 +27,7 @@ class _ProductsState extends State<ProductsForm> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _productBloc = BlocProvider.of<ProductBloc>(context);
+    _assetBloc = BlocProvider.of<AssetBloc>(context);
     search = false;
     limit = 20;
   }
@@ -38,24 +38,23 @@ class _ProductsState extends State<ProductsForm> {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate!;
-        _productBloc
-          ..add(FetchProduct(companyPartyId: authenticate!.company!.partyId));
-        return BlocConsumer<ProductBloc, ProductState>(
-            listener: (context, state) {
-          if (state is ProductProblem)
+        _assetBloc
+          ..add(FetchAsset(companyPartyId: authenticate!.company!.partyId));
+        return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
+          if (state is AssetProblem)
             HelperFunctions.showMessage(
                 context, '${state.errorMessage}', Colors.red);
-          if (state is ProductSuccess)
+          if (state is AssetSuccess)
             HelperFunctions.showMessage(
                 context, '${state.message}', Colors.green);
         }, builder: (context, state) {
-          if (state is ProductLoading) return LoadingIndicator();
-          if (state is ProductSuccess) {
-            List<Product>? products = state.products;
+          if (state is AssetLoading) return LoadingIndicator();
+          if (state is AssetSuccess) {
+            List<Asset>? assets = state.assets;
             return ListView.builder(
-              itemCount: state.hasReachedMax! && products!.isNotEmpty
-                  ? products.length + 1
-                  : products!.length + 2,
+              itemCount: state.hasReachedMax! && assets!.isNotEmpty
+                  ? assets.length + 1
+                  : assets!.length + 2,
               controller: _scrollController,
               itemBuilder: (BuildContext context, int index) {
                 if (index == 0)
@@ -89,7 +88,7 @@ class _ProductsState extends State<ProductsForm> {
                                       searchString = value;
                                     }),
                                     onSubmitted: ((value) {
-                                      _productBloc.add(FetchProduct(
+                                      _assetBloc.add(FetchAsset(
                                           search: value, limit: limit));
                                       setState(() {
                                         search = !search;
@@ -99,7 +98,7 @@ class _ProductsState extends State<ProductsForm> {
                               ElevatedButton(
                                   child: Text('Search'),
                                   onPressed: () {
-                                    _productBloc.add(FetchProduct(
+                                    _assetBloc.add(FetchAsset(
                                         search: searchString, limit: limit));
                                   })
                             ])
@@ -111,64 +110,43 @@ class _ProductsState extends State<ProductsForm> {
                                 if (!ResponsiveWrapper.of(context)
                                     .isSmallerThan(TABLET))
                                   Expanded(
-                                      child: Text("Description",
+                                      child: Text("Status",
                                           textAlign: TextAlign.center)),
                                 Expanded(
-                                    child: Text("Price",
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("Category",
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("Nbr Of Assets",
+                                    child: Text("Product",
                                         textAlign: TextAlign.center)),
                               ]),
                               Divider(color: Colors.black),
                             ]),
                       trailing: Text(' '));
-                if (index == 1 && products.isEmpty)
+                if (index == 1 && assets.isEmpty)
                   return Center(
                       heightFactor: 20,
                       child: Text("no records found!",
                           textAlign: TextAlign.center));
                 index -= 1;
-                return index >= products.length
+                return index >= assets.length
                     ? BottomLoader()
                     : Dismissible(
-                        key: Key(products[index].productId!),
+                        key: Key(assets[index].assetId!),
                         direction: DismissDirection.startToEnd,
                         child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor: Colors.green,
-                              child: products[index].image != null
-                                  ? Image.memory(
-                                      products[index].image!,
-                                      height: 100,
-                                    )
-                                  : Text("${products[index].productName![0]}"),
+                              child: Text("${assets[index].assetName![0]}"),
                             ),
                             title: Row(
                               children: <Widget>[
                                 Expanded(
-                                    child: Text("${products[index].productName}"
-                                        "[${products[index].productId}]")),
+                                    child: Text("${assets[index].assetName}"
+                                        "[${assets[index].assetId}]")),
                                 if (!ResponsiveWrapper.of(context)
                                     .isSmallerThan(TABLET))
                                   Expanded(
-                                      child: Text(
-                                          "${products[index].description}",
+                                      child: Text("${assets[index].statusId}",
                                           textAlign: TextAlign.center)),
                                 Expanded(
-                                    child: Text(
-                                        "${authenticate!.company!.currencyId} "
-                                        "${products[index].price}",
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        "${products[index].categoryName}",
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("${products[index].assetCount}",
+                                    child: Text("${assets[index].productName}",
                                         textAlign: TextAlign.center)),
                               ],
                             ),
@@ -177,16 +155,15 @@ class _ProductsState extends State<ProductsForm> {
                                   barrierDismissible: true,
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return ProductDialog(
+                                    return AssetDialog(
                                         formArguments: FormArguments(
-                                            object: products[index]));
+                                            object: assets[index]));
                                   });
                             },
                             trailing: IconButton(
                               icon: Icon(Icons.delete_forever),
                               onPressed: () {
-                                _productBloc
-                                    .add(DeleteProduct(products[index]));
+                                _assetBloc.add(DeleteAsset(assets[index]));
                               },
                             )));
               },
@@ -209,7 +186,7 @@ class _ProductsState extends State<ProductsForm> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= _scrollThreshold) {
-      _productBloc.add(FetchProduct(
+      _assetBloc.add(FetchAsset(
           companyPartyId: authenticate!.company!.partyId,
           limit: limit,
           search: searchString));

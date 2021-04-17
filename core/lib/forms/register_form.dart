@@ -28,7 +28,6 @@ class RegisterForm extends StatelessWidget {
   const RegisterForm([this.message]);
   @override
   Widget build(BuildContext context) {
-    classifications.retainWhere((x) => x.active == true);
     Authenticate? authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       // always [AuthUnauthenticated] becaused not logged in
@@ -67,8 +66,6 @@ class RegisterHeader extends StatefulWidget {
 class _RegisterHeaderState extends State<RegisterHeader> {
   final String? message;
   final _formKey = GlobalKey<FormState>();
-  Classification? _classificationSelected =
-      kReleaseMode ? null : classifications[0];
   Currency? _currencySelected = kReleaseMode ? null : currencies[0];
   final _companyController = TextEditingController()
     ..text = kReleaseMode ? '' : 'Demo company from John Doe';
@@ -222,8 +219,9 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 key: Key('dropDownCur'),
                                 hint: Text('Currency'),
                                 value: _currencySelected,
-                                validator: (value) =>
-                                    value == null ? 'field required' : null,
+                                validator: (value) => value == null
+                                    ? 'Currency field required!'
+                                    : null,
                                 items: currencies.map((item) {
                                   return DropdownMenuItem<Currency>(
                                       child: Text(
@@ -233,26 +231,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                 onChanged: (Currency? newValue) {
                                   setState(() {
                                     _currencySelected = newValue;
-                                  });
-                                },
-                                isExpanded: true,
-                              ),
-                              SizedBox(height: 20),
-                              DropdownButtonFormField<Classification>(
-                                key: Key('dropDownClass'),
-                                hint: Text('Business Type'),
-                                value: _classificationSelected,
-                                validator: (value) =>
-                                    value == null ? 'field required' : null,
-                                items: classifications.map((item) {
-                                  return DropdownMenuItem<Classification>(
-                                      child: Text(item.description ??
-                                          'Classification??'),
-                                      value: item);
-                                }).toList(),
-                                onChanged: (Classification? newValue) {
-                                  setState(() {
-                                    _classificationSelected = newValue;
                                   });
                                 },
                                 isExpanded: true,
@@ -272,9 +250,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                                           currencyId:
                                               _currencySelected?.currencyId ??
                                                   currencies[0].currencyId,
-                                          classification:
-                                              _classificationSelected ??
-                                                  classifications[0],
                                           firstName: _firstNameController.text,
                                           lastName: _lastNameController.text,
                                           email: _emailController.text,

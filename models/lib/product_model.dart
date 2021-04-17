@@ -55,56 +55,66 @@ class Products extends Equatable {
 
 class Product extends Equatable {
   final String? productId;
-  final String? productType;
+  final String? productTypeId; // assetUse(rental)
+  final String? assetClassId; // room, restaurant table
   final String? productName;
   final String? description;
   final Decimal? price;
   final String? categoryId;
   final String? categoryName;
+  final int? assetCount;
   final Uint8List? image;
 
   Product({
     this.productId,
-    this.productType,
+    this.productTypeId,
+    this.assetClassId,
     this.productName,
     this.description,
     this.price,
     this.categoryId,
     this.categoryName,
+    this.assetCount,
     this.image,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         productId: json["productId"],
-        productType: json["productType"],
+        productTypeId: json["productTypeId"],
+        assetClassId: json["assetClassId"],
         productName: json["productName"],
         description: json["description"],
         price: Decimal.parse(json["price"]),
         categoryId: json["categoryId"],
         categoryName: json["categoryName"],
+        assetCount: int.parse(json["assetCount"]),
         image: json["image"] != null ? base64.decode(json["image"]) : null,
       );
 
   Map<String, dynamic> toJson() => {
         "productId": productId,
-        "productType": productType,
+        "productTypeId": productTypeId,
+        "assetClassId": assetClassId,
         "productName": productName,
         "description": description,
         "price": price.toString(),
         "categoryId": categoryId,
         "categoryName": categoryName,
+        "assetCount": assetCount.toString(),
         "image": image != null ? base64.encode(image!) : null,
       };
 
   @override
   List<Object?> get props => [
         productId,
-        productType,
+        productTypeId,
+        assetClassId,
         productName,
         description,
         price,
         categoryId,
         categoryName,
+        assetCount,
         image
       ];
 
@@ -114,7 +124,8 @@ class Product extends Equatable {
 
   Product copyWith({
     String? productId,
-    String? productType,
+    String? productTypeId,
+    String? assetClassId,
     String? productName,
     String? description,
     Decimal? price,
@@ -124,17 +135,19 @@ class Product extends Equatable {
   }) =>
       Product(
         productId: productId ?? this.productId,
-        productType: productType ?? this.productType,
+        productTypeId: productTypeId ?? this.productTypeId,
+        assetClassId: assetClassId ?? this.assetClassId,
         productName: productName ?? this.productName,
         description: description ?? this.description,
         price: price ?? this.price,
         categoryId: categoryId ?? this.categoryId,
         categoryName: categoryName ?? this.categoryName,
+        assetCount: this.assetCount,
         image: image ?? this.image,
       );
 }
 
-Map<String, String> productTypes = {
+Map<String, String> productTypeIds = {
   'PtService': 'Service',
   'PtAsset': 'Physical Good',
   'PtAssetUse': 'Rental',

@@ -484,6 +484,8 @@ class Moqui {
       String? companyPartyId,
       String? categoryId,
       String? productId,
+      String? productTypeId,
+      String? assetClassId,
       String? filter,
       String? search}) async {
     try {
@@ -492,6 +494,8 @@ class Moqui {
         'companyPartyId': companyPartyId,
         'categoryId': categoryId,
         'productId': productId,
+        'productTypeId': productTypeIds[productTypeId],
+        'assetClassId': assetClassId,
         'start': start,
         'limit': limit,
         'filter': filter,
@@ -534,6 +538,69 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Product',
           queryParameters: {'productId': productId});
       return response.data["productId"];
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getAsset(
+      {int? start,
+      int? limit,
+      String? companyPartyId,
+      String? assetClassId,
+      String? assetId,
+      String? productId,
+      String? filter,
+      String? search}) async {
+    try {
+      Response response =
+          await client.get('rest/s1/growerp/100/Asset', queryParameters: {
+        'companyPartyId': companyPartyId,
+        'assetId': assetId,
+        'assetClassId': assetClassId,
+        'productId': productId,
+        'start': start,
+        'limit': limit,
+        'filter': filter,
+        'search': search
+      });
+      if (assetId != null)
+        return assetFromJson(response.toString());
+      else
+        return assetsFromJson(response.toString());
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> updateAsset(Asset asset) async {
+    // no productId is add
+    try {
+      Response response;
+      if (asset.assetId != null) {
+        //update
+        response = await client.patch('rest/s1/growerp/100/Asset', data: {
+          'asset': assetToJson(asset),
+          'moquiSessionToken': sessionToken
+        });
+      } else {
+        //create
+        response = await client.put('rest/s1/growerp/100/Asset', data: {
+          'asset': assetToJson(asset),
+          'moquiSessionToken': sessionToken
+        });
+      }
+      return assetFromJson(response.toString());
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> deleteAsset(String assetId) async {
+    try {
+      Response response = await client.delete('rest/s1/growerp/100/Asset',
+          queryParameters: {'assetId': assetId});
+      return response.data["assetId"];
     } on DioError catch (e) {
       return responseMessage(e);
     }

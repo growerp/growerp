@@ -29,3 +29,5 @@ export 'category_dialog.dart';
 export 'categories_form.dart';
 export 'product_dialog.dart';
 export 'products_form.dart';
+export 'asset_dialog.dart';
+export 'assets_form.dart';

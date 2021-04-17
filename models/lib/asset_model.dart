@@ -35,10 +35,12 @@ String assetsToJson(List<Asset> data) =>
 // backend relation: product -> asset -> assetReservation -> orderItem
 
 class Asset extends Equatable {
-  final String? assetId; // room, table etc
-  final String? assetTypeId;
+  final String? assetId;
+  final String? assetClassId; // room, table etc
   final String? assetName; // include room number/name
-  final String? description;
+  final String? statusId;
+  final Decimal? quantityOnHand;
+  final Decimal? availableToPromise;
   final String? parentAssetId;
   final String? productId;
   final String? productName;
@@ -46,9 +48,11 @@ class Asset extends Equatable {
 
   Asset({
     this.assetId,
-    this.assetTypeId,
+    this.assetClassId,
     this.assetName,
-    this.description,
+    this.statusId,
+    this.quantityOnHand,
+    this.availableToPromise,
     this.parentAssetId,
     this.productId,
     this.productName,
@@ -57,9 +61,15 @@ class Asset extends Equatable {
 
   factory Asset.fromJson(Map<String, dynamic> json) => Asset(
         assetId: json["assetId"],
-        assetTypeId: json["assetTypeId"],
+        assetClassId: json["assetClassId"],
         assetName: json["assetName"],
-        description: json["description"],
+        statusId: json["statusId"],
+        quantityOnHand: json["quantityOnHand"] != null
+            ? Decimal.parse(json["quantityOnHand"])
+            : Decimal.parse("0"),
+        availableToPromise: json["availableToPromise"] != null
+            ? Decimal.parse(json["availableToPromise"])
+            : Decimal.parse("0"),
         parentAssetId: json["parentAssetId"],
         productId: json["productId"],
         productName: json["productName"],
@@ -71,9 +81,11 @@ class Asset extends Equatable {
 
   Map<String, dynamic> toJson() => {
         "assetId": assetId,
-        "assetTypeId": assetTypeId,
+        "assetClassId": assetClassId,
         "assetName": assetName,
-        "description": description,
+        "statusId": statusId,
+        "quantityOnHand": quantityOnHand.toString(),
+        "availableToPromise": availableToPromise.toString(),
         "parentAssetId": parentAssetId,
         "productId": productId,
         "productName": productName,
@@ -86,9 +98,11 @@ class Asset extends Equatable {
   @override
   List<Object?> get props => [
         assetId,
-        assetTypeId,
+        assetClassId,
         assetName,
-        description,
+        statusId,
+        quantityOnHand,
+        availableToPromise,
         parentAssetId,
         productId,
         productName,
@@ -96,22 +110,12 @@ class Asset extends Equatable {
       ];
 }
 
-List<String> assetTypes = [
-  'Room',
-  'Table',
-  'TableArea',
-  'WareHouse',
-  'Shop',
-  'Prepare'
-];
-
 class Reservation extends Equatable {
   final String? reservationId;
   final String? orderId;
   final String? orderItemSeqId;
   final String? productId;
   final String? assetId;
-  final String? description;
   final Decimal? quantity;
   final DateTime? reservedDate;
 
@@ -121,7 +125,6 @@ class Reservation extends Equatable {
     this.orderItemSeqId,
     this.productId,
     this.assetId,
-    this.description,
     this.quantity,
     this.reservedDate,
   });
@@ -132,7 +135,6 @@ class Reservation extends Equatable {
         orderItemSeqId: json["orderItemSeqId"],
         productId: json["productId"],
         assetId: json["assetId"],
-        description: json["description"],
         quantity:
             json["quantity"] != null ? Decimal.parse(json["quantity"]) : null,
         reservedDate: json["reservedDate"] != null
@@ -146,7 +148,6 @@ class Reservation extends Equatable {
         "orderItemSeqId": orderItemSeqId,
         "productId": productId,
         "assetId": assetId,
-        "description": description,
         "quantity": quantity.toString(),
         "reservedDate": reservedDate.toString(),
       };
@@ -161,7 +162,6 @@ class Reservation extends Equatable {
         orderItemSeqId,
         productId,
         assetId,
-        description,
         quantity,
         reservedDate,
       ];
@@ -172,7 +172,6 @@ class Reservation extends Equatable {
     String? orderItemSeqId,
     String? productId,
     String? assetId,
-    String? description,
     Decimal? quantity,
     DateTime? reservedDate,
   }) =>
@@ -182,8 +181,16 @@ class Reservation extends Equatable {
         orderItemSeqId: orderItemSeqId ?? this.orderItemSeqId,
         productId: productId ?? this.productId,
         assetId: assetId ?? this.assetId,
-        description: description ?? this.description,
         quantity: quantity ?? this.quantity,
         reservedDate: reservedDate ?? this.reservedDate,
       );
 }
+
+Map<String, String> assetClassIds = {
+  'Hotel Room': 'AsClsRoom',
+  'Restaurant Table': 'AsClsTable',
+  'Restaurant Table Area': 'AsClsTableArea',
+  'AsClsRoom': 'Hotel Room',
+  'AsClsTable': 'Restaurant Table',
+  'AsClsTableArea': 'Restaurant Table Area',
+};

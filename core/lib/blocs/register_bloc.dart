@@ -18,13 +18,14 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:models/@models.dart';
+import 'package:global_configuration/global_configuration.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final repos;
 
   RegisterBloc({
     required this.repos,
-  })  : assert(repos != null),
+  })   : assert(repos != null),
         super(RegisterInitial());
 
   @override
@@ -56,7 +57,8 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       final authenticate = await repos.register(
           companyName: event.companyName,
           currencyId: event.currencyId,
-          classificationId: event.classification.classificationId,
+          classificationId:
+              GlobalConfiguration().getValue<String>("classificationId"),
           firstName: event.firstName,
           lastName: event.lastName,
           email: event.email);
@@ -116,7 +118,7 @@ class RegisterButtonPressed extends RegisterEvent {
 class RegisterCompanyAdmin extends RegisterEvent {
   final String companyName;
   final String? currencyId;
-  final Classification classification;
+  final Classification? classification;
   final String firstName;
   final String lastName;
   final String email;
@@ -124,7 +126,7 @@ class RegisterCompanyAdmin extends RegisterEvent {
   const RegisterCompanyAdmin({
     required this.companyName,
     required this.currencyId,
-    required this.classification,
+    this.classification,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -132,7 +134,8 @@ class RegisterCompanyAdmin extends RegisterEvent {
 
   @override
   String toString() => 'Register CompanyAdmin  { company name: $companyName, '
-      'email: $email class: ${classification.classificationId}';
+      'email: $email '
+      'class: ${classification != null ? classification!.classificationId! : '?'}';
 }
 
 // -------------------------------state ------------------------------

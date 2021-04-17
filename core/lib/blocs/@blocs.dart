@@ -23,3 +23,4 @@ export 'user_bloc.dart';
 export 'accnt_bloc.dart';
 export 'product_bloc.dart';
 export 'opportunity_bloc.dart';
+export 'asset_bloc.dart';
