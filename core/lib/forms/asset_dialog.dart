@@ -18,11 +18,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:models/@models.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/helper_functions.dart';
-import 'package:core/templates/@templates.dart';
+import 'package:global_configuration/global_configuration.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
 
 class AssetDialog extends StatelessWidget {
   final FormArguments formArguments;
@@ -30,7 +30,7 @@ class AssetDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AssetPage(formArguments.message, formArguments.object as Asset);
+    return AssetPage(formArguments.message, formArguments.object as Asset?);
   }
 }
 
@@ -50,53 +50,21 @@ class _AssetState extends State<AssetPage> {
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _quantityOnHandController = TextEditingController();
   TextEditingController _productSearchBoxController = TextEditingController();
+  String classificationId = GlobalConfiguration().get("classificationId");
 
   bool loading = false;
   late Asset updatedAsset;
-  Product? _selectedCategory;
-  PickedFile? _imageFile;
-  dynamic _pickImageError;
-  String? _retrieveDataError;
+  Product? _selectedProduct;
 
-  final ImagePicker _picker = ImagePicker();
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   _AssetState(this.message, this.asset) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
   }
 
-  void _onImageButtonPressed(ImageSource source,
-      {BuildContext? context}) async {
-    try {
-      final pickedFile = await _picker.getImage(
-        source: source,
-      );
-      setState(() {
-        _imageFile = pickedFile;
-      });
-    } catch (e) {
-      setState(() {
-        _pickImageError = e;
-      });
-    }
-  }
-
-  Future<void> retrieveLostData() async {
-    final LostData response = await _picker.getLostData();
-    if (response.isEmpty) {
-      return;
-    }
-    if (response.file != null) {
-      setState(() {
-        _imageFile = response.file;
-      });
-    } else {
-      _retrieveDataError = response.exception!.code;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     var repos = context.read<Object>();
     return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
       if (state is AssetLoading)
@@ -127,74 +95,46 @@ class _AssetState extends State<AssetPage> {
                           child: Container(
                               padding: EdgeInsets.all(20),
                               width: 400,
-                              height: 750,
-                              child: ScaffoldMessenger(
-                                  key: scaffoldMessengerKey,
-                                  child: Scaffold(
-                                      backgroundColor: Colors.transparent,
-                                      floatingActionButton: imageButtons(
-                                          context, _onImageButtonPressed),
-                                      body: Center(
-                                        child: !kIsWeb &&
-                                                defaultTargetPlatform ==
-                                                    TargetPlatform.android
-                                            ? FutureBuilder<void>(
-                                                future: retrieveLostData(),
-                                                builder: (BuildContext context,
-                                                    AsyncSnapshot<void>
-                                                        snapshot) {
-                                                  if (snapshot.hasError) {
-                                                    return Text(
-                                                      'Pick image error: ${snapshot.error}}',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    );
-                                                  }
-                                                  return _showForm(repos);
-                                                })
-                                            : _showForm(repos),
-                                      )))))))));
+                              height: 700,
+                              child: Center(
+                                child: _showForm(repos, isPhone),
+                              )))))));
     });
   }
 
-  Text? _getRetrieveErrorWidget() {
-    if (_retrieveDataError != null) {
-      final Text result = Text(_retrieveDataError!);
-      _retrieveDataError = null;
-      return result;
-    }
-    return null;
-  }
-
-  Widget _showForm(repos) {
+  Widget _showForm(repos, isPhone) {
+    String? _statusId;
     if (asset != null) {
+      _statusId = asset!.statusId;
       _nameController.text = asset!.assetName ?? '';
       _quantityOnHandController.text =
           asset!.quantityOnHand == null ? '' : asset!.quantityOnHand.toString();
-      if (_selectedCategory == null && asset?.productId != null)
-        _selectedCategory = Product(
+      if (_selectedProduct == null && asset?.productId != null)
+        _selectedProduct = Product(
             productId: asset!.productId, productName: asset!.productName);
-    }
-    final Text? retrieveError = _getRetrieveErrorWidget();
-    if (retrieveError != null) {
-      return retrieveError;
-    }
-    if (_pickImageError != null) {
-      return Text(
-        'Pick image error: $_pickImageError',
-        textAlign: TextAlign.center,
-      );
     }
     return Center(
         child: Container(
-            width: 400,
             child: Form(
                 key: _formKey,
                 child: ListView(children: <Widget>[
+                  Center(
+                      child: Text(
+                          (classificationId == 'AppHotel'
+                                  ? "Room# "
+                                  : "Asset# ") +
+                              (asset == null ? "New" : "${asset!.assetId!}"),
+                          style: TextStyle(
+                              fontSize: isPhone ? 10 : 15,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold))),
                   SizedBox(height: 30),
                   TextFormField(
                     key: Key('name'),
-                    decoration: InputDecoration(labelText: 'Asset Name'),
+                    decoration: InputDecoration(
+                        labelText: classificationId == 'AppHotel'
+                            ? 'Room Name/#'
+                            : 'Asset Name'),
                     controller: _nameController,
                     validator: (value) {
                       if (value!.isEmpty) return 'Please enter a asset name?';
@@ -208,26 +148,33 @@ class _AssetState extends State<AssetPage> {
                     decoration: InputDecoration(labelText: 'Description'),
                     controller: _descriptionController,
                   ),
+                  Visibility(
+                      visible: classificationId != 'AppHotel',
+                      child: SizedBox(height: 20)),
+                  Visibility(
+                      visible: classificationId != 'AppHotel',
+                      child: TextFormField(
+                        key: Key('quantityOnHand'),
+                        decoration:
+                            InputDecoration(labelText: 'Quantity on Hand'),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                        ],
+                        controller: _quantityOnHandController,
+                        validator: (value) {
+                          if (value!.isEmpty)
+                            return 'Please enter a quantityOnHand?';
+                          return null;
+                        },
+                      )),
                   SizedBox(height: 20),
-                  TextFormField(
-                    key: Key('quantityOnHand'),
-                    decoration: InputDecoration(labelText: 'Asset Price'),
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-                    ],
-                    controller: _quantityOnHandController,
-                    validator: (value) {
-                      if (value!.isEmpty)
-                        return 'Please enter a quantityOnHand?';
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
                   DropdownSearch<Product>(
-                    label: 'Category',
+                    label: classificationId == 'AppHotel'
+                        ? 'Room Type'
+                        : 'Product',
                     dialogMaxWidth: 300,
                     autoFocusSearchBox: true,
-                    selectedItem: _selectedCategory,
+                    selectedItem: _selectedProduct,
                     dropdownSearchDecoration: InputDecoration(
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25.0)),
@@ -240,16 +187,38 @@ class _AssetState extends State<AssetPage> {
                     searchBoxController: _productSearchBoxController,
                     isFilteredOnline: true,
                     showClearButton: true,
-                    key: Key('dropDownCategory'),
+                    key: Key('dropDownProduct'),
                     itemAsString: (Product? u) => "${u?.productName}",
                     onFind: (String filter) async {
-                      var result = await repos.getCategory(
+                      var result = await repos.getProduct(
                           filter: _productSearchBoxController.text);
                       return result;
                     },
+                    validator: (value) =>
+                        value == null ? 'field required' : null,
                     onChanged: (Product? newValue) {
-                      _selectedCategory = newValue;
+                      _selectedProduct = newValue;
                     },
+                  ),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    key: Key('dropDown'),
+                    hint: Text('Status'),
+                    value: _statusId,
+                    validator: (value) =>
+                        value == null ? 'field required' : null,
+                    items: assetStatusValues
+                        .map((label) => DropdownMenuItem<String>(
+                              child: Text(label),
+                              value: label,
+                            ))
+                        .toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _statusId = newValue;
+                      });
+                    },
+                    isExpanded: true,
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
@@ -260,9 +229,11 @@ class _AssetState extends State<AssetPage> {
                           updatedAsset = Asset(
                             assetId: asset?.assetId,
                             assetName: _nameController.text,
-                            quantityOnHand:
-                                Decimal.parse(_quantityOnHandController.text),
-                            productId: _selectedCategory!.productId,
+                            quantityOnHand: _quantityOnHandController.text != ""
+                                ? Decimal.parse(_quantityOnHandController.text)
+                                : null,
+                            productId: _selectedProduct!.productId,
+                            statusId: _statusId,
                           );
                           BlocProvider.of<AssetBloc>(context).add(UpdateAsset(
                             updatedAsset,

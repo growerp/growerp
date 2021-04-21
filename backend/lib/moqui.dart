@@ -25,6 +25,7 @@ class Moqui {
   final Dio client;
   String? sessionToken;
   String? prodUrl = GlobalConfiguration().get("prodUrl");
+  String classificationId = GlobalConfiguration().get("classificationId");
   bool restRequestLogs =
       GlobalConfiguration().getValue<bool>("restRequestLogs");
   bool restResponseLogs =
@@ -206,6 +207,7 @@ class Moqui {
       Response response = await client.post('rest/s1/growerp/100/Login', data: {
         'username': username,
         'password': password,
+        'classificationId': classificationId,
         'moquiSessionToken': this.sessionToken
       });
       dynamic result = jsonDecode(response.toString());
@@ -416,7 +418,8 @@ class Moqui {
             '${startDate?.day.toString().padLeft(2, '0')}',
         'start': start,
         'limit': limit,
-        'search': search
+        'search': search,
+        'classificationId': classificationId,
       });
       return finDocsFromJson(response.toString());
     } on DioError catch (e) {
@@ -437,7 +440,8 @@ class Moqui {
         'limit': limit,
         'companyPartyId': companyPartyId,
         'filter': filter,
-        'search': search
+        'search': search,
+        'classificationId': classificationId,
       });
       return categoriesFromJson(response.toString());
     } on DioError catch (e) {
@@ -495,7 +499,7 @@ class Moqui {
         'categoryId': categoryId,
         'productId': productId,
         'productTypeId': productTypeIds[productTypeId],
-        'assetClassId': assetClassId,
+        'assetClassId': assetClassIds[assetClassId],
         'start': start,
         'limit': limit,
         'filter': filter,
@@ -538,6 +542,26 @@ class Moqui {
       Response response = await client.delete('rest/s1/growerp/100/Product',
           queryParameters: {'productId': productId});
       return response.data["productId"];
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getAssetGannt() async {
+    try {
+      Response response = await client.get('rest/s1/growerp/100/AssetGannt');
+      return ganntLinesFromJson(response.toString());
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> checkAssetRentalAvailable(String productId,
+      DateTime rentalFromDate, DateTime rentalThruDate) async {
+    try {
+      Response response =
+          await client.get('rest/s1/growerp/100/AssetRentalAvailable');
+      return response.data["assetId"]; // null not available
     } on DioError catch (e) {
       return responseMessage(e);
     }

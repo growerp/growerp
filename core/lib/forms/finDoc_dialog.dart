@@ -17,6 +17,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:models/@models.dart';
 import 'package:core/blocs/@blocs.dart';
@@ -235,6 +236,19 @@ class _MyFinDocState extends State<FinDocPage> {
               onPressed: () async {
                 final dynamic finDocItem =
                     await _addAnotherItemDialog(context, itemTypes);
+                if (finDocItem != null)
+                  _cartBloc.add(AddToCart(
+                      finDoc: finDocUpdated.copyWith(
+                          otherUser: _selectedUser,
+                          description: _descriptionController.text),
+                      newItem: finDocItem));
+              }),
+          ElevatedButton(
+              key: Key('itemRental'),
+              child: Text('Asset Rental'),
+              onPressed: () async {
+                final dynamic finDocItem =
+                    await _addRentalItemDialog(context, repos);
                 if (finDocItem != null)
                   _cartBloc.add(AddToCart(
                       finDoc: finDocUpdated.copyWith(
@@ -537,6 +551,119 @@ _addProductItemDialog(BuildContext context, repos) async {
             onPressed: () {
               Navigator.of(context).pop(FinDocItem(
                 itemTypeId: 'ItemProduct',
+                productId: _selectedProduct!.productId,
+                price: Decimal.parse(_priceController.text),
+                description: _itemDescriptionController.text,
+                quantity: _quantityController.text.isEmpty
+                    ? Decimal.parse('1')
+                    : Decimal.parse(_quantityController.text),
+              ));
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+_addRentalItemDialog(BuildContext context, repos) async {
+  final _priceController = TextEditingController();
+  final _itemDescriptionController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _productSearchBoxController = TextEditingController();
+  Product? _selectedProduct;
+  String classificationId = GlobalConfiguration().get("classificationId");
+
+  Future<List<Product>> getProduct(filter) async {
+    var response = await repos.getProduct(
+        filter: _productSearchBoxController.text,
+        assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
+        productTypeId: classificationId == 'AppHotel' ? 'Rental' : null);
+    return response;
+  }
+
+  return showDialog<FinDocItem>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32.0))),
+        title: Text('Add a Reservation', textAlign: TextAlign.center),
+        content: Container(
+            height: 380,
+            child: Column(children: <Widget>[
+              DropdownSearch<Product>(
+                label: 'Product',
+                dialogMaxWidth: 300,
+                autoFocusSearchBox: true,
+                selectedItem: _selectedProduct,
+                dropdownSearchDecoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0)),
+                ),
+                searchBoxDecoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0)),
+                ),
+                showSearchBox: true,
+                searchBoxController: _productSearchBoxController,
+                isFilteredOnline: true,
+                key: Key('dropProduct'),
+                itemAsString: (Product? u) => "${u!.productName}",
+                onFind: (String filter) =>
+                    getProduct(_productSearchBoxController.text),
+                onChanged: (Product? newValue) {
+                  _selectedProduct = newValue;
+                  _priceController.text = newValue!.price.toString();
+                  _itemDescriptionController.text =
+                      "${newValue.productName}[${newValue.productId}]";
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                  key: Key('itemDescription'),
+                  decoration: InputDecoration(labelText: 'Item Description'),
+                  controller: _itemDescriptionController,
+                  validator: (value) {
+                    if (value!.isEmpty) return 'Item description?';
+                    return null;
+                  }),
+              SizedBox(height: 20),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Price/Amount'),
+                controller: _priceController,
+                validator: (value) {
+                  if (value!.isEmpty) return 'Enter Price or Amount?';
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              InputDatePickerFormField(
+                initialDate: DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime(DateTime.now().year + 1),
+                key: Key('date'),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                key: Key('quantity'),
+                decoration: InputDecoration(labelText: 'Quantity'),
+                controller: _quantityController,
+              ),
+            ])),
+        actions: <Widget>[
+          ElevatedButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            child: Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop(FinDocItem(
+                itemTypeId: 'ItemRental',
                 productId: _selectedProduct!.productId,
                 price: Decimal.parse(_priceController.text),
                 description: _itemDescriptionController.text,

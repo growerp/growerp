@@ -294,10 +294,14 @@ class _OrdersState extends State<FinDocsForm> {
                                         title: Text(finDocs![index].docType !=
                                                 "transaction"
                                             ? "ProductId: ${e.productId} "
-                                                "Description: ${e.description} "
-                                                "Quantity: ${e.quantity.toString()} "
-                                                "Price: ${e.price.toString()} "
-                                                "SubTotal: ${(e.quantity! * e.price!).toString()}"
+                                                    "Description: ${e.description} "
+                                                    "Quantity: ${e.quantity.toString()} "
+                                                    "Price: ${e.price.toString()} "
+                                                    "SubTotal: ${(e.quantity! * e.price!).toString()}" +
+                                                (e.rentalFromDate == null
+                                                    ? ''
+                                                    : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
+                                                        "${e.rentalThruDate.toString().substring(0, 10)}")
                                             : "ProductId: ${e.productId} "
                                                 "Description: ${e.description} ")))
                               ]))),

@@ -116,7 +116,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
           yield AssetSuccess(
               assets: currentState.assets,
               hasReachedMax: _hasReachedMax(currentState),
-              message: 'asset ' + (adding ? 'added' : 'updated'));
+              message: 'asset ${result.assetName}[${result.assetId}] ' +
+                  (adding ? ' added' : 'updated'));
         } else {
           yield AssetProblem(result);
         }
@@ -206,21 +207,28 @@ class AssetProblem extends AssetState {
 }
 
 class AssetSuccess extends AssetState {
+  final List<GanntLine>? ganntLines;
   final List<Asset>? assets;
   final bool? hasReachedMax;
   final String? message;
   final String? search;
 
   const AssetSuccess(
-      {this.assets, this.hasReachedMax, this.message, this.search});
+      {this.ganntLines,
+      this.assets,
+      this.hasReachedMax,
+      this.message,
+      this.search});
 
   AssetSuccess copyWith({
+    List<GanntLine>? ganntLines,
     List<Asset>? assets,
     bool? hasReachedMax,
     String? message,
     String? search,
   }) =>
       AssetSuccess(
+        ganntLines: ganntLines ?? this.ganntLines,
         assets: assets ?? this.assets,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
         message: message ?? this.message,

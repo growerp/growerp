@@ -17,13 +17,13 @@ import 'package:flutter/material.dart';
 /// dialog returns true when continue, false when cancelled
 confirmDialog(BuildContext context, String title, String content) {
   // set up the buttons
-  Widget cancelButton = FlatButton(
+  Widget cancelButton = ElevatedButton(
     child: Text("Cancel"),
     onPressed: () {
       Navigator.of(context).pop(false);
     },
   );
-  Widget continueButton = FlatButton(
+  Widget continueButton = ElevatedButton(
     child: Text("Continue"),
     onPressed: () {
       Navigator.of(context).pop(true);

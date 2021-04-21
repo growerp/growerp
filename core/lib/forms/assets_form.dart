@@ -133,7 +133,9 @@ class _AssetsState extends State<AssetsForm> {
                         child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor: Colors.green,
-                              child: Text("${assets[index].assetName![0]}"),
+                              child: Text(assets[index].assetName != null
+                                  ? "${assets[index].assetName![0]}"
+                                  : "?"),
                             ),
                             title: Row(
                               children: <Widget>[

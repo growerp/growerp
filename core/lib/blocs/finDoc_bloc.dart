@@ -144,7 +144,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           }
           currentState.finDocs!.replaceRange(index, index + 1, [result[0]]);
           yield currentState.copyWith(
-              message: "status updated to ${result[0].statusId}");
+              message: "${result[0].docType} status updated to "
+                  "${finDocStatusValues[result[0].statusId]}");
         } else
           yield FinDocProblem(result);
       } else if (event is DeleteFinDoc) {

@@ -47,6 +47,7 @@ class FinDoc extends Equatable {
   final User?
       otherUser; //a single person responsible for finDoc of a single company
   final Decimal? grandTotal;
+  final String? classificationId; // is productStore
   final List<FinDocItem>? items;
 
   FinDoc({
@@ -62,6 +63,7 @@ class FinDoc extends Equatable {
     this.description,
     this.otherUser,
     this.grandTotal,
+    this.classificationId,
     this.items,
   });
 
@@ -81,6 +83,7 @@ class FinDoc extends Equatable {
         grandTotal: json["grandTotal"] != null
             ? Decimal.parse(json["grandTotal"])
             : Decimal.parse("0"),
+        classificationId: json["classificationId"],
         items: json["items"] == null
             ? []
             : List<FinDocItem>.from(
@@ -100,6 +103,7 @@ class FinDoc extends Equatable {
         "description": description,
         "otherUser": otherUser == null ? null : otherUser!.toJson(),
         "grandTotal": grandTotal.toString(),
+        "classificationId": classificationId,
         "items": List<dynamic>.from(items!.map((x) => x.toJson())),
       };
 
@@ -164,6 +168,7 @@ class FinDoc extends Equatable {
     User?
         otherUser, //a single person responsible for finDoc of a single company
     Decimal? grandTotal,
+    String? classificationId,
     List<FinDocItem>? items,
   }) =>
       FinDoc(
@@ -179,6 +184,7 @@ class FinDoc extends Equatable {
         description: description ?? this.description,
         otherUser: otherUser ?? this.otherUser,
         grandTotal: grandTotal ?? this.grandTotal,
+        classificationId: classificationId ?? this.classificationId,
         items: items ?? this.items,
       );
 }
@@ -191,7 +197,8 @@ class FinDocItem extends Equatable {
   final Decimal? quantity;
   final Decimal? price;
   final String? glAccountId;
-  final Reservation? reservation;
+  final DateTime? rentalFromDate;
+  final DateTime? rentalThruDate;
 
   FinDocItem({
     this.itemSeqId,
@@ -201,7 +208,8 @@ class FinDocItem extends Equatable {
     this.quantity,
     this.price,
     this.glAccountId,
-    this.reservation,
+    this.rentalFromDate,
+    this.rentalThruDate,
   });
 
   factory FinDocItem.fromJson(Map<String, dynamic> json) => FinDocItem(
@@ -215,9 +223,8 @@ class FinDocItem extends Equatable {
             ? Decimal.parse(json["price"])
             : Decimal.parse("0"),
         glAccountId: json["glAccountId"],
-        reservation: json["reservation"] == null
-            ? null
-            : Reservation.fromJson(json["reservation"]),
+        rentalFromDate: DateTime.tryParse(json["rentalFromDate"] ?? ''),
+        rentalThruDate: DateTime.tryParse(json["rentalThruDate"] ?? ''),
       );
 
   Map<String, dynamic> toJson() => {
@@ -227,10 +234,13 @@ class FinDocItem extends Equatable {
         "description": description,
         "quantity": quantity.toString(),
         "price": price.toString(),
-        "reservation": reservation == null ? null : reservation!.toJson(),
+        "glAccountId": glAccountId,
+        "rentalFromDate": rentalFromDate.toString(),
+        "rentalThruDate": rentalThruDate.toString(),
       };
 
-  String toString() => 'FinDocItem: $itemSeqId product: $productId $price ';
+  String toString() =>
+      'FinDocItem: $itemSeqId product: $productId $price ${rentalFromDate.toString()}';
 
   @override
   List<Object?> get props => [
@@ -241,7 +251,8 @@ class FinDocItem extends Equatable {
         quantity,
         price,
         glAccountId,
-        reservation
+        rentalFromDate,
+        rentalThruDate,
       ];
 
   FinDocItem copyWith({
@@ -252,7 +263,8 @@ class FinDocItem extends Equatable {
     Decimal? quantity,
     Decimal? price,
     String? glAccountId,
-    Reservation? reservation,
+    DateTime? rentalFromDate,
+    DateTime? rentalThruDate,
   }) =>
       FinDocItem(
         itemSeqId: itemSeqId ?? this.itemSeqId,
@@ -262,7 +274,8 @@ class FinDocItem extends Equatable {
         quantity: quantity ?? this.quantity,
         price: price ?? this.price,
         glAccountId: glAccountId ?? this.glAccountId,
-        reservation: reservation ?? this.reservation,
+        rentalFromDate: rentalFromDate ?? this.rentalFromDate,
+        rentalThruDate: rentalThruDate ?? this.rentalThruDate,
       );
 }
 

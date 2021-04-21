@@ -50,9 +50,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         dynamic result = await repos.getProduct(
             start: 0,
             limit: event.limit,
-            assetClassId: classificationId == 'AppHotel'
-                ? assetClassIds['Hotel Room']
-                : null,
+            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
             companyPartyId: event.companyPartyId,
             search: event.search);
         if (result is List<Product>) {
@@ -71,9 +69,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           dynamic result = await repos.getProduct(
               start: 0,
               limit: event.limit,
-              assetClassId: classificationId == 'AppHotel'
-                  ? assetClassIds['Hotel Room']
-                  : null,
+              assetClassId:
+                  classificationId == 'AppHotel' ? 'Hotel Room' : null,
               companyPartyId: event.companyPartyId,
               search: event.search);
           if (result is List<Product>) {

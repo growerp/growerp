@@ -89,7 +89,9 @@ class Asset extends Equatable {
         "parentAssetId": parentAssetId,
         "productId": productId,
         "productName": productName,
-        "reservation": List<dynamic>.from(reservations!.map((x) => x.toJson())),
+        "reservations": reservations != null
+            ? List<dynamic>.from(reservations!.map((x) => x.toJson()))
+            : null,
       };
 
   String toString() =>
@@ -116,8 +118,8 @@ class Reservation extends Equatable {
   final String? orderItemSeqId;
   final String? productId;
   final String? assetId;
-  final Decimal? quantity;
-  final DateTime? reservedDate;
+  final DateTime? rentalFromDate;
+  final DateTime? rentalThruDate;
 
   Reservation({
     this.reservationId,
@@ -125,8 +127,8 @@ class Reservation extends Equatable {
     this.orderItemSeqId,
     this.productId,
     this.assetId,
-    this.quantity,
-    this.reservedDate,
+    this.rentalFromDate,
+    this.rentalThruDate,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) => Reservation(
@@ -135,10 +137,11 @@ class Reservation extends Equatable {
         orderItemSeqId: json["orderItemSeqId"],
         productId: json["productId"],
         assetId: json["assetId"],
-        quantity:
-            json["quantity"] != null ? Decimal.parse(json["quantity"]) : null,
-        reservedDate: json["reservedDate"] != null
-            ? DateTime.tryParse(json["creationDate"] ?? '')
+        rentalFromDate: json["rentalFromDate"] != null
+            ? DateTime.tryParse(json["rentalFromDate"] ?? '')
+            : null,
+        rentalThruDate: json["rentalThruDate"] != null
+            ? DateTime.tryParse(json["rentalThruDate"] ?? '')
             : null,
       );
 
@@ -148,12 +151,12 @@ class Reservation extends Equatable {
         "orderItemSeqId": orderItemSeqId,
         "productId": productId,
         "assetId": assetId,
-        "quantity": quantity.toString(),
-        "reservedDate": reservedDate.toString(),
+        "rentalFromDate": rentalFromDate.toString(),
+        "rentalThruDate": rentalThruDate.toString(),
       };
 
   String toString() =>
-      'Reservation: $reservationId product: $productId $reservedDate ';
+      'Reservation: $reservationId product: $productId ${rentalFromDate.toString()} ';
 
   @override
   List<Object?> get props => [
@@ -162,8 +165,8 @@ class Reservation extends Equatable {
         orderItemSeqId,
         productId,
         assetId,
-        quantity,
-        reservedDate,
+        rentalFromDate,
+        rentalThruDate,
       ];
 
   Reservation copyWith({
@@ -172,8 +175,8 @@ class Reservation extends Equatable {
     String? orderItemSeqId,
     String? productId,
     String? assetId,
-    Decimal? quantity,
-    DateTime? reservedDate,
+    DateTime? rentalFromDate,
+    DateTime? rentalThruDate,
   }) =>
       Reservation(
         reservationId: reservationId ?? this.reservationId,
@@ -181,8 +184,8 @@ class Reservation extends Equatable {
         orderItemSeqId: orderItemSeqId ?? this.orderItemSeqId,
         productId: productId ?? this.productId,
         assetId: assetId ?? this.assetId,
-        quantity: quantity ?? this.quantity,
-        reservedDate: reservedDate ?? this.reservedDate,
+        rentalFromDate: rentalFromDate ?? this.rentalFromDate,
+        rentalThruDate: rentalThruDate ?? this.rentalThruDate,
       );
 }
 
@@ -193,4 +196,15 @@ Map<String, String> assetClassIds = {
   'AsClsRoom': 'Hotel Room',
   'AsClsTable': 'Restaurant Table',
   'AsClsTableArea': 'Restaurant Table Area',
+};
+
+List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];
+
+Map<String, String> assetStatusses = {
+  'Available': 'AstAvailable',
+  'Deactivated': 'AstDeactivated',
+  'In Use': 'AstInUse',
+  'AstAvailable': 'Available',
+  'AstDeactivated': 'Deactivated',
+  'AstInUse': 'In Use',
 };
