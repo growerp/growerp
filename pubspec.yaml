@@ -23,11 +23,11 @@ dependencies:
   responsive_framework: ^0.1.0
   date_utils: ^0.2.0
   core:
-    path: ../packages/core
-#    git:
-#      url: https://github.com/growerp/growerp.git
-#      ref: packages
-#      path: core
+#    path: ../packages/core
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: core
 
 dev_dependencies:
   flutter_test:

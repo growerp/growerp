@@ -24,6 +24,7 @@ import 'package:backend/ofbiz.dart';
 import 'package:backend/moqui.dart';
 import 'package:core/styles/themes.dart';
 import 'package:core/widgets/@widgets.dart';
+import 'bloc/gannt_bloc.dart';
 import 'generated/l10n.dart';
 import 'hotelRouter.dart' as router;
 import 'forms/@forms.dart';
@@ -70,6 +71,8 @@ void main() async {
             create: (context) => FinDocBloc(repos, true, 'payment')),
         BlocProvider<PurchPaymentBloc>(
             create: (context) => FinDocBloc(repos, false, 'payment')),
+        BlocProvider<GanntBloc>(
+            create: (context) => GanntBloc(repos)..add(LoadGannt())),
       ],
       // add other blocs here
       child: MyApp(),

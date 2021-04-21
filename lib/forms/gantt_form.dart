@@ -14,8 +14,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:date_utils/date_utils.dart' as Utils;
-import '../data/reservation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hotel/bloc/gannt_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:models/@models.dart';
 
 const DAY = 1, WEEK = 2, MONTH = 3; // columnPeriod values
 
@@ -33,15 +35,11 @@ class GanttForm extends StatefulWidget {
 class GanttFormState extends State<GanttForm> {
   DateTime? ganttFromDate;
   int? columnPeriod; //DAY,  WEEK, MONTH
-  List<Room>? roomsInChart;
-  List<Reservation>? reservations;
 
   @override
   void initState() {
     super.initState();
     columnPeriod = DAY;
-    reservations = reservationsInput;
-    roomsInChart = rooms;
   }
 
   @override
@@ -93,15 +91,15 @@ class GanttFormState extends State<GanttForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () => setState(() => columnPeriod = DAY),
                   child: Text('Day'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () => setState(() => columnPeriod = WEEK),
                   child: Text('Week'),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () => setState(() => columnPeriod = MONTH),
                   child: Text('Month'),
                 ),
@@ -114,8 +112,6 @@ class GanttFormState extends State<GanttForm> {
             child: GanttChart(
               columnPeriod: columnPeriod,
               ganttFromDate: ganttFromDate,
-              reservations: reservations,
-              roomsInChart: roomsInChart,
             ),
           ),
         ],
@@ -127,56 +123,55 @@ class GanttFormState extends State<GanttForm> {
 class GanttChart extends StatelessWidget {
   final int? columnPeriod;
   final DateTime? ganttFromDate;
-  final List<Reservation>? reservations;
-  final List<Room>? roomsInChart;
 
   GanttChart({
     this.columnPeriod,
     this.ganttFromDate,
-    this.reservations,
-    this.roomsInChart,
   });
+
+  List<GanntLine>? reservations;
 
   @override
   Widget build(BuildContext context) {
-    // sort by roomId and fromDate
-    reservations!.sort((a, b) {
-      var r = a.roomId!.compareTo(b.roomId!);
-      if (r != 0) return r;
-      return a.fromDate!.compareTo(b.fromDate!);
-    });
-    //reservations.forEach((e) => print(
-    //    "id: ${e.id} from ${e.fromDate.toString()} to: ${e.thruDate.toString()}"));
-    var screenWidth = MediaQuery.of(context).size.width;
+    return BlocBuilder<GanntBloc, GanntState>(builder: (context, state) {
+      if (state is GanntSuccess) reservations = state.ganntLines;
+      if (state is GanntLoading)
+        return Center(child: CircularProgressIndicator());
+      if (state is GanntInitial)
+        return Center(child: CircularProgressIndicator());
+      //reservations.forEach((e) => print(
+      //    "id: ${e.id} from ${e.fromDate.toString()} to: ${e.thruDate.toString()}"));
+      var screenWidth = MediaQuery.of(context).size.width;
 
-    var chartBars = buildChartBars(screenWidth);
-    return Container(
-      height: chartBars.length * 29.0 + 25.0 + 4.0,
-      child: ListView(
-        physics: new ClampingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          Stack(fit: StackFit.loose, children: <Widget>[
-            buildGrid(screenWidth),
-            buildHeader(screenWidth, Colors.lightGreen),
-            Container(
-                margin: EdgeInsets.only(top: 25.0),
-                child: Container(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: chartBars,
+      var chartBars = buildChartBars(screenWidth);
+      return Container(
+        height: chartBars.length * 29.0 + 25.0 + 4.0,
+        child: ListView(
+          physics: new ClampingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            Stack(fit: StackFit.loose, children: <Widget>[
+              buildGrid(screenWidth),
+              buildHeader(screenWidth, Colors.lightGreen),
+              Container(
+                  margin: EdgeInsets.only(top: 25.0),
+                  child: Container(
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: chartBars,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )),
-          ]),
-        ],
-      ),
-    );
+                      ],
+                    ),
+                  )),
+            ]),
+          ],
+        ),
+      );
+    });
   }
 
   Widget buildGrid(double screenWidth) {
@@ -237,7 +232,7 @@ class GanttChart extends StatelessWidget {
             months[(ganttFromDate!.month + i - 1) % 12] + ' ' + year.toString();
         if ((ganttFromDate!.month + i) == 12) year++;
       }
-      var formatter = new DateFormat('yyyy-MM-dd');
+      var formatter = new DateFormat('yy-MM-dd');
       if (columnPeriod == WEEK) {
         headerText = 'Week starting: ' +
             days[(ganttFromDate!.weekday) % 7] +
@@ -275,7 +270,7 @@ class GanttChart extends StatelessWidget {
     List<Widget> chartBars = [];
     var last;
     for (int i = 0; i < reservations!.length; i++) {
-      if (last != null && reservations![i].roomId == last.roomId)
+      if (last != null && reservations![i].assetId == last.assetId)
         continue; // skip more than one reservation for a single room
       last = reservations![i];
       chartBars.add(Row(children: <Widget>[
@@ -283,7 +278,7 @@ class GanttChart extends StatelessWidget {
           height: 20,
           width: screenWidth / columnsOnScreen,
           child: Text(
-            reservations![i].roomId.toString(),
+            reservations![i].assetName!.substring(4),
             textAlign: TextAlign.center,
           ),
         ),
@@ -296,10 +291,14 @@ class GanttChart extends StatelessWidget {
   List<Widget> buildReservations(int index, double screenWidth) {
     DateTime? lastDate = ganttFromDate!.subtract(Duration(days: 1));
     List<Widget> chartContent = [];
-    int? currentRoomId = reservations![index].roomId;
+    String? currentRoomId = reservations![index].assetId;
     double? halfDay, halfDayLength = 0;
     while (index < reservations!.length &&
-        reservations![index].roomId == currentRoomId) {
+        reservations![index].assetId == currentRoomId) {
+      if (reservations![index].fromDate == null) {
+        index++;
+        continue;
+      }
       // define the scale of 1 day
       late double dayScale;
       if (columnPeriod == DAY) dayScale = screenWidth / columnsOnScreen;
@@ -314,7 +313,7 @@ class GanttChart extends StatelessWidget {
         continue;
       }
       if (reservations![index].fromDate!.isBefore(ganttFromDate!)) {
-        reservations![index].fromDate = lastDate;
+        //     reservations![index].fromDate = lastDate;
         borderRadius = BorderRadius.only(
             topRight: Radius.circular(10.0),
             bottomRight: Radius.circular(10.0));
