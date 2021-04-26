@@ -15,7 +15,6 @@
 import 'package:core/coreRouter.dart';
 import 'package:flutter/material.dart';
 import 'forms/@forms.dart' as local;
-import 'package:core/forms/@forms.dart';
 import 'menuItem_data.dart';
 import 'package:core/templates/@templates.dart';
 
@@ -46,6 +45,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               DisplayMenuItem(menuList: menuItems, menuIndex: 3, tabIndex: 0));
+    case '/checkInOut':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuItem(menuList: menuItems, menuIndex: 4, tabIndex: 0));
     default:
       return coreRoute(settings);
   }
