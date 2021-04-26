@@ -88,13 +88,14 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
               start: 0,
               limit: event.limit,
               search: event.search);
-          if (result is List<FinDoc>)
+          if (result is List<FinDoc>) {
+            finDocs = result;
             yield FinDocSuccess(
                 finDocs: result,
                 search: event.search,
                 hasReachedMax:
                     result.length < (event.limit ?? limit) ? true : false);
-          else
+          } else
             yield FinDocProblem(result);
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getFinDoc(
@@ -103,13 +104,14 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
               start: currentState.finDocs!.length,
               limit: event.limit,
               search: event.search);
-          if (result is List<FinDoc>)
+          if (result is List<FinDoc>) {
+            finDocs = result;
             yield FinDocSuccess(
                 finDocs: currentState.finDocs! + result,
                 search: event.search,
                 hasReachedMax:
                     result.length < (event.limit ?? limit) ? true : false);
-          else
+          } else
             yield FinDocProblem(result);
         }
       }

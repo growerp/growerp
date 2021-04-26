@@ -9,7 +9,9 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 
 class FinDocsForm extends StatefulWidget {
   final sales, docType;
-  const FinDocsForm({this.sales = true, this.docType});
+  final DateTime? fromDate, thruDate;
+  const FinDocsForm(
+      {this.sales = true, this.docType, this.fromDate, this.thruDate});
   @override
   _OrdersState createState() => _OrdersState();
 }
@@ -102,6 +104,16 @@ class _OrdersState extends State<FinDocsForm> {
       if (state is FinDocSuccess) {
         isLoading = false;
         finDocs = state.finDocs;
+        if (widget.fromDate != null) {
+          finDocs = finDocs!
+              .where((el) => el.items![0].rentalFromDate == widget.fromDate)
+              .toList();
+        }
+        if (widget.thruDate != null) {
+          finDocs = finDocs!
+              .where((el) => el.items![0].rentalThruDate == widget.thruDate)
+              .toList();
+        }
         hasReachedMax = state.hasReachedMax;
       }
       return finDocsPage();
