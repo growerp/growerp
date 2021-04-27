@@ -54,6 +54,10 @@ Route<dynamic> coreRoute(RouteSettings settings) {
               menuList: acctMenuItems, menuIndex: 3, tabIndex: 0));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
+    case '/printer':
+      return MaterialPageRoute(
+          builder: (context) =>
+              PrintingForm(formArguments: settings.arguments as FormArguments));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(

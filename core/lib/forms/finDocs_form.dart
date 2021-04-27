@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'package:core/forms/@forms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -177,50 +191,50 @@ class _OrdersState extends State<FinDocsForm> {
         controller: _scrollController,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0)
-            return ListTile(
-                onTap: (() {
-                  setState(() {
-                    showSearchField = !showSearchField;
-                  });
-                }),
-                leading: Image.asset('assets/images/search.png', height: 30),
-                title: showSearchField
-                    ? Row(children: <Widget>[
-                        SizedBox(
-                            width: isPhone
-                                ? MediaQuery.of(context).size.width - 250
-                                : MediaQuery.of(context).size.width - 350,
-                            child: TextField(
-                              textInputAction: TextInputAction.go,
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.transparent),
+            return Column(children: [
+              ListTile(
+                  onTap: (() {
+                    setState(() {
+                      showSearchField = !showSearchField;
+                    });
+                  }),
+                  leading: Image.asset('assets/images/search.png', height: 30),
+                  title: showSearchField
+                      ? Row(children: <Widget>[
+                          SizedBox(
+                              width: isPhone
+                                  ? MediaQuery.of(context).size.width - 250
+                                  : MediaQuery.of(context).size.width - 350,
+                              child: TextField(
+                                textInputAction: TextInputAction.go,
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.transparent),
+                                  ),
+                                  hintText: "search in ID, " +
+                                      (widget.sales ? "customer" : "supplier"),
                                 ),
-                                hintText: "search in ID, " +
-                                    (widget.sales ? "customer" : "supplier"),
-                              ),
-                              onChanged: ((value) {
-                                searchString = value;
-                              }),
-                              onSubmitted: ((value) {
-                                _finDocBloc.add(
-                                    FetchFinDoc(search: value, limit: limit));
-                                setState(() {
-                                  showSearchField = !showSearchField;
-                                });
-                              }),
-                            )),
-                        ElevatedButton(
-                            child: Text('Search'),
-                            onPressed: () {
-                              _finDocBloc.add(FetchFinDoc(
-                                  search: searchString, limit: limit));
-                            })
-                      ])
-                    : Column(children: [
-                        Row(children: <Widget>[
+                                onChanged: ((value) {
+                                  searchString = value;
+                                }),
+                                onSubmitted: ((value) {
+                                  _finDocBloc.add(
+                                      FetchFinDoc(search: value, limit: limit));
+                                  setState(() {
+                                    showSearchField = !showSearchField;
+                                  });
+                                }),
+                              )),
+                          ElevatedButton(
+                              child: Text('Search'),
+                              onPressed: () {
+                                _finDocBloc.add(FetchFinDoc(
+                                    search: searchString, limit: limit));
+                              })
+                        ])
+                      : Row(children: <Widget>[
                           Expanded(
                               child: Text(
                                   // capitalize first char
@@ -232,9 +246,6 @@ class _OrdersState extends State<FinDocsForm> {
                                   : widget.sales
                                       ? "Customer"
                                       : "Supplier")),
-                          if (!ResponsiveWrapper.of(context)
-                              .isSmallerThan(TABLET))
-                            Expanded(child: Text("Email")),
                           Expanded(child: Text("Date")),
                           if (!isPhone) Expanded(child: Text("Total")),
                           Expanded(
@@ -247,11 +258,22 @@ class _OrdersState extends State<FinDocsForm> {
                                 child: Text("#items",
                                     textAlign: TextAlign.center)),
                         ]),
-                        Divider(color: Colors.black),
-                      ]),
-                trailing: isPhone
-                    ? Text('             ')
-                    : Text('                            '));
+                  subtitle: Row(children: <Widget>[
+                    Expanded(child: Text("")),
+                    Visibility(
+                        visible: !isPhone,
+                        child: Expanded(child: Text("City"))),
+                    Visibility(
+                        visible: !isPhone,
+                        child: Expanded(child: Text("Country"))),
+                    Expanded(child: Text("Email address"), flex: 1),
+                  ]),
+                  trailing: isPhone
+                      ? Text('             ')
+                      : Text('                            ')),
+              Divider(color: Colors.black),
+            ]);
+
           if (index == 1 && finDocs!.isEmpty && !isLoading)
             return Center(
                 heightFactor: 20,
@@ -275,18 +297,11 @@ class _OrdersState extends State<FinDocsForm> {
                               child: Text(
                                   "${finDocs![index].otherUser!.firstName}, "
                                   "${finDocs![index].otherUser!.lastName}")),
-                          if (!ResponsiveWrapper.of(context)
-                              .isSmallerThan(TABLET))
-                            Expanded(
-                                child: Text(
-                              "${finDocs![index].otherUser!.email}",
-                            )),
                           Expanded(
                               child: Text(
                             "${finDocs![index].creationDate?.toString().substring(0, 11)}",
                           )),
-                          if (!ResponsiveWrapper.of(context)
-                              .isSmallerThan(TABLET))
+                          if (!isPhone)
                             Expanded(
                                 child: Text("${finDocs![index].grandTotal}",
                                     textAlign: TextAlign.center)),
@@ -294,14 +309,42 @@ class _OrdersState extends State<FinDocsForm> {
                               child: Text(
                                   "${finDocStatusValues[finDocs![index].statusId!]}",
                                   textAlign: TextAlign.center)),
-                          if (!ResponsiveWrapper.of(context)
-                                  .isSmallerThan(TABLET) &&
-                              widget.docType != 'payment')
+                          if (!isPhone && widget.docType != 'payment')
                             Expanded(
                                 child: Text("${finDocs![index].items?.length}",
                                     textAlign: TextAlign.center)),
                         ],
                       ),
+                      subtitle: Row(children: <Widget>[
+                        Expanded(
+                          child: Text(""),
+                        ),
+                        Visibility(
+                            visible: !isPhone,
+                            child: Expanded(
+                                child: Text(
+                                    finDocs![index].otherUser!.address != null
+                                        ? finDocs![index]
+                                            .otherUser!
+                                            .address!
+                                            .city!
+                                        : ""))),
+                        Visibility(
+                            visible: !isPhone,
+                            child: Expanded(
+                                child: Text(
+                                    finDocs![index].otherUser!.address != null
+                                        ? finDocs![index]
+                                            .otherUser!
+                                            .address!
+                                            .country!
+                                        : ""))),
+                        Expanded(
+                            flex: 1,
+                            child: Text(
+                              "${finDocs![index].otherUser!.email}",
+                            )),
+                      ]),
                       children: List.from(finDocs![index].items!.map((e) => Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
