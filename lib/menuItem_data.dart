@@ -130,9 +130,9 @@ List<MenuItem> menuItems = [
         ),
       ]),
   MenuItem(
-      image: "assets/images/check-inGrey.png",
-      selectedImage: "assets/images/check-in.png",
-      title: "check-In",
+      image: "assets/images/check-in-outGrey.png",
+      selectedImage: "assets/images/check-in-out.png",
+      title: "check-In-out",
       route: '/checkInOut',
       readGroups: [
         "GROWERP_M_ADMIN",
@@ -144,23 +144,17 @@ List<MenuItem> menuItems = [
       tabItems: [
         TabItem(
           form: FinDocsForm(
-              sales: true, docType: 'order', fromDate: DateTime.now()),
+              sales: true, docType: 'order', rentalFromDate: DateTime.now()),
           label: "CheckIn",
           icon: Icon(Icons.home),
         ),
         TabItem(
           form: FinDocsForm(
-              sales: true, docType: 'order', thruDate: DateTime.now()),
+              sales: true, docType: 'order', rentalThruDate: DateTime.now()),
           label: "CheckOut",
           icon: Icon(Icons.home),
         ),
       ]),
-  MenuItem(
-      image: "assets/images/check-outGrey.png",
-      selectedImage: "assets/images/check-out.png",
-      title: "Check-Out",
-      route: '/',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"]),
   MenuItem(
       image: "assets/images/accountingGrey.png",
       selectedImage: "assets/images/accounting.png",
