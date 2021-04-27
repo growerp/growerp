@@ -110,7 +110,7 @@ List<MenuItem> menuItems = [
       tabItems: [
         TabItem(
           form: FinDocsForm(sales: true, docType: 'order'),
-          label: "Sales orders",
+          label: "Reservations",
           icon: Icon(Icons.home),
           floatButtonForm: FinDocDialog(
             formArguments: FormArguments(
