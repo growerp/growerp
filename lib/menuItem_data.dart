@@ -31,12 +31,17 @@ const MENU_ACCTLEDGER = 3;
 
 List<MenuItem> menuItems = [
   MenuItem(
-      image: "assets/images/dashBoardGrey.png",
-      selectedImage: "assets/images/dashBoard.png",
-      title: "Main",
-      route: '/',
-      readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
-      child: GanttForm()),
+    image: "assets/images/dashBoardGrey.png",
+    selectedImage: "assets/images/dashBoard.png",
+    title: "Main",
+    route: '/',
+    readGroups: ["GROWERP_M_ADMIN", "GROWERP_M_EMPLOYEE"],
+    writeGroups: ["GROWERP_M_ADMIN"],
+    child: GanttForm(),
+    floatButtonForm: ReservationDialog(
+      formArguments: FormArguments(object: FinDoc(items: [])),
+    ),
+  ),
   MenuItem(
     image: "assets/images/companyGrey.png",
     selectedImage: "assets/images/company.png",
@@ -109,12 +114,11 @@ List<MenuItem> menuItems = [
       ],
       tabItems: [
         TabItem(
-          form: FinDocsForm(sales: true, docType: 'order'),
+          form: FinDocsForm(sales: true, docType: 'order', onlyRental: true),
           label: "Reservations",
           icon: Icon(Icons.home),
-          floatButtonForm: FinDocDialog(
-            formArguments: FormArguments(
-                object: FinDoc(sales: true, docType: 'order', items: [])),
+          floatButtonForm: ReservationDialog(
+            formArguments: FormArguments(object: FinDoc(items: [])),
           ),
         ),
         TabItem(

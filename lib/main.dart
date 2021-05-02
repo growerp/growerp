@@ -24,7 +24,6 @@ import 'package:backend/ofbiz.dart';
 import 'package:backend/moqui.dart';
 import 'package:core/styles/themes.dart';
 import 'package:core/widgets/@widgets.dart';
-import 'bloc/gannt_bloc.dart';
 import 'generated/l10n.dart';
 import 'hotelRouter.dart' as router;
 import 'forms/@forms.dart';
@@ -43,7 +42,8 @@ void main() async {
       providers: [
         BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
         BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
-        BlocProvider<AssetBloc>(create: (context) => AssetBloc(repos)),
+        BlocProvider<AssetBloc>(
+            create: (context) => AssetBloc(repos)..add(FetchAsset())),
         BlocProvider<AdminBloc>(
             create: (context) => UserBloc(repos, "GROWERP_M_ADMIN")),
         BlocProvider<EmployeeBloc>(
@@ -53,13 +53,8 @@ void main() async {
         BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(repos)..add(LoadAuth())),
         BlocProvider<SalesOrderBloc>(
-            create: (context) => FinDocBloc(repos, true, 'order')),
-        BlocProvider<SalesCartBloc>(
-            create: (context) => CartBloc(
-                repos: repos,
-                sales: true,
-                finDocBloc:
-                    BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)),
+            create: (context) =>
+                FinDocBloc(repos, true, 'order')..add(FetchFinDoc())),
         BlocProvider<AccntBloc>(create: (context) => AccntBloc(repos)),
         BlocProvider<TransactionBloc>(
             create: (context) => FinDocBloc(repos, false, 'transaction')),
@@ -71,8 +66,6 @@ void main() async {
             create: (context) => FinDocBloc(repos, true, 'payment')),
         BlocProvider<PurchPaymentBloc>(
             create: (context) => FinDocBloc(repos, false, 'payment')),
-        BlocProvider<GanntBloc>(
-            create: (context) => GanntBloc(repos)..add(LoadGannt())),
       ],
       // add other blocs here
       child: MyApp(),

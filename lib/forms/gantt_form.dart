@@ -12,10 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/blocs/@blocs.dart';
+import 'package:core/forms/reservation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:date_utils/date_utils.dart' as Utils;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hotel/bloc/gannt_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:models/@models.dart';
 
@@ -95,10 +97,12 @@ class GanttFormState extends State<GanttForm> {
                   onPressed: () => setState(() => columnPeriod = DAY),
                   child: Text('Day'),
                 ),
+                SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () => setState(() => columnPeriod = WEEK),
                   child: Text('Week'),
                 ),
+                SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () => setState(() => columnPeriod = MONTH),
                   child: Text('Month'),
@@ -121,56 +125,100 @@ class GanttFormState extends State<GanttForm> {
 }
 
 class GanttChart extends StatelessWidget {
-  final int? columnPeriod;
-  final DateTime? ganttFromDate;
+  final int? columnPeriod; // day/week/month
+  final DateTime? ganttFromDate; //earliest date on gannt
 
   GanttChart({
     this.columnPeriod,
     this.ganttFromDate,
   });
 
-  List<GanntLine>? reservations;
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GanntBloc, GanntState>(builder: (context, state) {
-      if (state is GanntSuccess) reservations = state.ganntLines;
-      if (state is GanntLoading)
-        return Center(child: CircularProgressIndicator());
-      if (state is GanntInitial)
-        return Center(child: CircularProgressIndicator());
-      //reservations.forEach((e) => print(
-      //    "id: ${e.id} from ${e.fromDate.toString()} to: ${e.thruDate.toString()}"));
-      var screenWidth = MediaQuery.of(context).size.width;
+    late List<Asset>? assets;
+    late List<FinDoc>? finDocs;
+    List<GanntLine> reservations = [];
 
-      var chartBars = buildChartBars(screenWidth);
-      return Container(
-        height: chartBars.length * 29.0 + 25.0 + 4.0,
-        child: ListView(
-          physics: new ClampingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            Stack(fit: StackFit.loose, children: <Widget>[
-              buildGrid(screenWidth),
-              buildHeader(screenWidth, Colors.lightGreen),
-              Container(
-                  margin: EdgeInsets.only(top: 25.0),
-                  child: Container(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: chartBars,
+    return BlocBuilder<AssetBloc, AssetState>(builder: (context, state) {
+      if (state is! AssetSuccess)
+        return Center(child: CircularProgressIndicator());
+      if (state is AssetSuccess) {
+        assets = state.assets!;
+        assets!
+            .sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
+      }
+      return BlocBuilder<SalesOrderBloc, FinDocState>(
+          builder: (context, state) {
+        if (state is FinDocSuccess) {
+          finDocs = state.finDocs!;
+          reservations = [];
+          assets!.forEach((asset) {
+            bool found = false;
+            finDocs!.forEach((finDoc) {
+              if (finDoc.statusId != 'FinDocCreated' ||
+                  finDoc.statusId != 'FinDocApproved') {
+                finDoc.items!.forEach((item) {
+                  if (item.assetId == asset.assetId &&
+                      item.rentalFromDate != null &&
+                      item.rentalThruDate != null) {
+                    found = true;
+                    reservations.add(GanntLine(
+                      finDoc: finDoc,
+                      customerPartyId: finDoc.otherUser!.partyId,
+                      assetId: asset.assetId,
+                      assetName: asset.assetName,
+                      fromDate: item.rentalFromDate,
+                      thruDate: item.rentalThruDate,
+                      customerName:
+                          "${finDoc.otherUser!.firstName} ${finDoc.otherUser!.lastName} @ "
+                          "${finDoc.otherUser!.companyName}",
+                    ));
+                  }
+                });
+              }
+            });
+            if (found == false) {
+              reservations.add(GanntLine(
+                assetId: asset.assetId,
+                assetName: asset.assetName,
+              ));
+            }
+          });
+        }
+        if (state is! FinDocSuccess)
+          return Center(child: CircularProgressIndicator());
+        //reservations.forEach((e) => print(
+        //    "id: ${e.id} from ${e.fromDate.toString()} to: ${e.thruDate.toString()}"));
+        var screenWidth = MediaQuery.of(context).size.width;
+        var chartBars = buildAssetBars(context, screenWidth, reservations);
+        return Container(
+          height: chartBars.length * 29.0 + 25.0 + 4.0,
+          child: ListView(
+            physics: new ClampingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              Stack(fit: StackFit.loose, children: <Widget>[
+                buildGrid(screenWidth),
+                buildHeader(screenWidth, Colors.lightGreen),
+                Container(
+                    margin: EdgeInsets.only(top: 25.0),
+                    child: Container(
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: chartBars,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )),
-            ]),
-          ],
-        ),
-      );
+                        ],
+                      ),
+                    )),
+              ]),
+            ],
+          ),
+        );
+      });
     });
   }
 
@@ -240,7 +288,7 @@ class GanttChart extends StatelessWidget {
             formatter.format(ganttFromDate!.add(new Duration(days: i * 7)));
       }
       if (columnPeriod == DAY) {
-        headerText = days[(ganttFromDate!.weekday - 1 + i) % 7] +
+        headerText = days[(ganttFromDate!.weekday + i) % 7] +
             '\n' +
             formatter.format(ganttFromDate!.add(new Duration(days: i)));
       }
@@ -266,39 +314,40 @@ class GanttChart extends StatelessWidget {
     );
   }
 
-  List<Widget> buildChartBars(double screenWidth) {
+  List<Widget> buildAssetBars(context, double screenWidth, reservations) {
     List<Widget> chartBars = [];
     var last;
     for (int i = 0; i < reservations!.length; i++) {
-      if (last != null && reservations![i].assetId == last.assetId)
-        continue; // skip more than one reservation for a single room
+      if (last != null && reservations![i].assetId == last.assetId) continue;
+      // only process assets here, all reservation per asset in buildAssetReservations
       last = reservations![i];
       chartBars.add(Row(children: <Widget>[
         Container(
           height: 20,
           width: screenWidth / columnsOnScreen,
           child: Text(
-            reservations![i].assetName!.substring(4),
+            reservations![i].assetName ?? "${reservations![i].assetId}",
             textAlign: TextAlign.center,
           ),
         ),
-        Row(children: buildReservations(i, screenWidth)),
+        Row(
+            children:
+                buildAssetReservations(context, i, screenWidth, reservations)),
       ]));
     }
     return chartBars;
   }
 
-  List<Widget> buildReservations(int index, double screenWidth) {
+  List<Widget> buildAssetReservations(
+      BuildContext context, int index, double screenWidth, reservations) {
     DateTime? lastDate = ganttFromDate!.subtract(Duration(days: 1));
     List<Widget> chartContent = [];
-    String? currentRoomId = reservations![index].assetId;
+    String? currentAssetId = reservations![index].assetId;
     double? halfDay, halfDayLength = 0;
+    if (reservations[index].fromDate == null)
+      return chartContent; // no reservations for this asset
     while (index < reservations!.length &&
-        reservations![index].assetId == currentRoomId) {
-      if (reservations![index].fromDate == null) {
-        index++;
-        continue;
-      }
+        reservations![index].assetId == currentAssetId) {
       // define the scale of 1 day
       late double dayScale;
       if (columnPeriod == DAY) dayScale = screenWidth / columnsOnScreen;
@@ -306,14 +355,9 @@ class GanttChart extends StatelessWidget {
       if (columnPeriod == MONTH)
         dayScale = screenWidth / (columnsOnScreen * 365 / 12);
       if (halfDay == null) halfDay = dayScale / 2;
-
       BorderRadius borderRadius = BorderRadius.circular(10.0);
-      if (reservations![index].thruDate!.isBefore(ganttFromDate!)) {
-        reservations!.removeAt(index);
-        continue;
-      }
-      if (reservations![index].fromDate!.isBefore(ganttFromDate!)) {
-        //     reservations![index].fromDate = lastDate;
+      if (reservations![index].fromDate!.difference(ganttFromDate!).inDays <
+          0) {
         borderRadius = BorderRadius.only(
             topRight: Radius.circular(10.0),
             bottomRight: Radius.circular(10.0));
@@ -323,32 +367,47 @@ class GanttChart extends StatelessWidget {
       if (lastDate != null) {
         DateTime from = reservations![index].fromDate!;
         DateTime thru = reservations![index].thruDate!;
-        //print(
-        //    'i2: ${reservations[index].id} from: ${from.toString()} thru: ${thru.toString()}'
-        //    'difference: ${thru.difference(from).inDays}');
-        chartContent.add(Container(
-          decoration:
-              BoxDecoration(color: Colors.green, borderRadius: borderRadius),
-          height: 20.0,
-          width: (thru.difference(from).inDays) * dayScale + halfDayLength!,
-          margin: EdgeInsets.only(
-              left:
-                  (reservations![index].fromDate!.difference(lastDate).inDays) *
-                          dayScale +
-                      halfDay,
-              top: 4.0,
-              bottom: 4.0),
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              reservations![index].customerName!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 10.0),
-            ),
-          ),
-        ));
+        chartContent.add(MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+                onTap: () async {
+                  print(
+                      "===3==findoc in ganntform: ${reservations![index].finDoc} index: $index");
+                  await showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ReservationDialog(
+                            formArguments: FormArguments(
+                                object: reservations![index - 1].finDoc));
+                      });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.green, borderRadius: borderRadius),
+                  height: 20.0,
+                  width: (thru.difference(from).inDays) * dayScale +
+                      halfDayLength!,
+                  margin: EdgeInsets.only(
+                      left: (reservations![index]
+                                  .fromDate!
+                                  .difference(lastDate)
+                                  .inDays) *
+                              dayScale +
+                          halfDay,
+                      top: 4.0,
+                      bottom: 4.0),
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      reservations![index].customerName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 10.0),
+                    ),
+                  ),
+                ))));
       }
       lastDate = reservations![index].thruDate;
       index++;
