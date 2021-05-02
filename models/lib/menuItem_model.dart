@@ -26,6 +26,7 @@ class MenuItem {
   final Widget? leadAction; // single actionButton on the left like back button
   final List readGroups; // user groups who can read
   final List? writeGroups; // user groups who can add/update/delete
+  final Widget? floatButtonForm; // for dialogs which use navigator internally
 
   MenuItem({
     required this.image,
@@ -37,6 +38,7 @@ class MenuItem {
     this.leadAction,
     required this.readGroups,
     this.writeGroups,
+    this.floatButtonForm,
   });
 
   @override

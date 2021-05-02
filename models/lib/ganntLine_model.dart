@@ -18,6 +18,8 @@
 
 import 'dart:convert';
 
+import 'finDoc_model.dart';
+
 List<GanntLine> ganntLinesFromJson(String str) => List<GanntLine>.from(
     json.decode(str)["ganntLines"].map((x) => GanntLine.fromJson(x)));
 
@@ -28,6 +30,7 @@ String ganntLinesToJson(List<GanntLine> data) =>
 
 class GanntLine {
   GanntLine({
+    this.finDoc,
     this.assetId,
     this.assetName,
     this.productId,
@@ -37,6 +40,7 @@ class GanntLine {
     this.customerName,
   });
 
+  final FinDoc? finDoc;
   final String? assetId;
   final String? assetName;
   final String? productId;
@@ -46,6 +50,7 @@ class GanntLine {
   final String? customerName;
 
   factory GanntLine.fromJson(Map<String, dynamic> json) => GanntLine(
+        finDoc: json["finDoc"],
         assetId: json["assetId"],
         assetName: json["assetName"],
         productId: json["productId"],
@@ -58,6 +63,7 @@ class GanntLine {
       );
 
   Map<String, dynamic> toJson() => {
+        "finDoc": finDoc,
         "assetId": assetId,
         "assetName": assetName,
         "productId": productId,
@@ -66,4 +72,7 @@ class GanntLine {
         "customerPartyId": customerPartyId,
         "customerName": customerName,
       };
+//  @override
+//  String toString() =>
+//      "ganntLine, finDocId: ${finDoc!.id() ?? null} fromDate: ${fromDate ?? null}";
 }

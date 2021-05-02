@@ -358,7 +358,7 @@ class Moqui {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? result = prefs.getString('finDoc$sales$docType');
-      //if (result != null) return finDocFromJson(result);
+      if (result != null) return finDocFromJson(result);
       return null;
     } catch (e) {
       return responseMessage(e);
@@ -376,6 +376,7 @@ class Moqui {
   }
 
   Future<dynamic> updateFinDoc(FinDoc finDoc) async {
+    finDoc = finDoc.copyWith(classificationId: classificationId);
     try {
       Authenticate? authenticate = await (getAuthenticate());
       client.options.headers['api_key'] = authenticate!.apiKey;
@@ -556,17 +557,6 @@ class Moqui {
     }
   }
 
-  Future<dynamic> checkAssetRentalAvailable(String productId,
-      DateTime rentalFromDate, DateTime rentalThruDate) async {
-    try {
-      Response response =
-          await client.get('rest/s1/growerp/100/AssetRentalAvailable');
-      return response.data["assetId"]; // null not available
-    } on DioError catch (e) {
-      return responseMessage(e);
-    }
-  }
-
   Future<dynamic> getAsset(
       {int? start,
       int? limit,
@@ -637,7 +627,6 @@ class Moqui {
       bool? all,
       String? search}) async {
     try {
-      print("===========get oppr: $opportunityId");
       Response response =
           await client.get('rest/s1/growerp/100/Opportunity', queryParameters: {
         'opportunityId': opportunityId,
@@ -646,7 +635,6 @@ class Moqui {
         'all': all.toString(),
         'search': search
       });
-      print("====repos: ${response.toString()}");
       if (opportunityId == null)
         return opportunitiesFromJson(response.toString());
       else

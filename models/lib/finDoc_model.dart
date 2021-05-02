@@ -197,6 +197,8 @@ class FinDocItem extends Equatable {
   final Decimal? quantity;
   final Decimal? price;
   final String? glAccountId;
+  final String? assetId;
+  final String? assetName;
   final DateTime? rentalFromDate;
   final DateTime? rentalThruDate;
 
@@ -208,6 +210,8 @@ class FinDocItem extends Equatable {
     this.quantity,
     this.price,
     this.glAccountId,
+    this.assetId,
+    this.assetName,
     this.rentalFromDate,
     this.rentalThruDate,
   });
@@ -223,6 +227,8 @@ class FinDocItem extends Equatable {
             ? Decimal.parse(json["price"])
             : Decimal.parse("0"),
         glAccountId: json["glAccountId"],
+        assetId: json["assetId"],
+        assetName: json["assetName"],
         rentalFromDate: DateTime.tryParse(json["rentalFromDate"] ?? ''),
         rentalThruDate: DateTime.tryParse(json["rentalThruDate"] ?? ''),
       );
@@ -235,6 +241,8 @@ class FinDocItem extends Equatable {
         "quantity": quantity.toString(),
         "price": price.toString(),
         "glAccountId": glAccountId,
+        "assetId": assetId,
+        "assetname": assetName,
         "rentalFromDate": rentalFromDate.toString(),
         "rentalThruDate": rentalThruDate.toString(),
       };
@@ -251,6 +259,8 @@ class FinDocItem extends Equatable {
         quantity,
         price,
         glAccountId,
+        assetId,
+        assetName,
         rentalFromDate,
         rentalThruDate,
       ];
@@ -263,6 +273,8 @@ class FinDocItem extends Equatable {
     Decimal? quantity,
     Decimal? price,
     String? glAccountId,
+    String? assetId,
+    String? assetName,
     DateTime? rentalFromDate,
     DateTime? rentalThruDate,
   }) =>
@@ -274,6 +286,8 @@ class FinDocItem extends Equatable {
         quantity: quantity ?? this.quantity,
         price: price ?? this.price,
         glAccountId: glAccountId ?? this.glAccountId,
+        assetId: assetId ?? this.assetId,
+        assetName: assetName ?? this.assetName,
         rentalFromDate: rentalFromDate ?? this.rentalFromDate,
         rentalThruDate: rentalThruDate ?? this.rentalThruDate,
       );

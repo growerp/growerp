@@ -22,11 +22,12 @@ import 'package:models/@models.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
 class FinDocsForm extends StatefulWidget {
-  final sales, docType;
+  final sales, docType, onlyRental;
   final DateTime? rentalFromDate, rentalThruDate;
   const FinDocsForm(
       {this.sales = true,
       this.docType,
+      this.onlyRental,
       this.rentalFromDate,
       this.rentalThruDate});
   @override
@@ -124,19 +125,24 @@ class _OrdersState extends State<FinDocsForm> {
         if (widget.rentalFromDate != null) {
           finDocs = finDocs!
               .where((el) =>
+                  el.items![0].rentalFromDate != null &&
                   el.items![0].rentalFromDate!
-                      .difference(widget.rentalFromDate!)
-                      .inDays ==
-                  0)
+                          .difference(widget.rentalFromDate!)
+                          .inDays ==
+                      0)
               .toList();
-        }
-        if (widget.rentalThruDate != null) {
+        } else if (widget.rentalThruDate != null) {
           finDocs = finDocs!
               .where((el) =>
+                  el.items![0].rentalThruDate != null &&
                   el.items![0].rentalThruDate!
-                      .difference(widget.rentalThruDate!)
-                      .inDays ==
-                  0)
+                          .difference(widget.rentalThruDate!)
+                          .inDays ==
+                      0)
+              .toList();
+        } else if (widget.onlyRental == true) {
+          finDocs = finDocs!
+              .where((el) => el.items![0].rentalFromDate != null)
               .toList();
         }
         hasReachedMax = state.hasReachedMax;
@@ -394,18 +400,24 @@ class _OrdersState extends State<FinDocsForm> {
                                     child: Row(children: [
                                       IconButton(
                                         icon: Icon(Icons.edit),
-                                        tooltip:
-                                            'Cancel ${finDocs![0].docType}',
+                                        tooltip: 'Edit ${finDocs![0].docType}',
                                         onPressed: () async {
                                           await showDialog(
                                               barrierDismissible: true,
                                               context: context,
                                               builder: (BuildContext context) {
-                                                return FinDocDialog(
-                                                    formArguments:
-                                                        FormArguments(
-                                                            object: finDocs![
-                                                                index]));
+                                                return widget.onlyRental == true
+                                                    ? ReservationDialog(
+                                                        formArguments:
+                                                            FormArguments(
+                                                                object:
+                                                                    finDocs![
+                                                                        index]))
+                                                    : (FinDocDialog(
+                                                        formArguments:
+                                                            FormArguments(
+                                                                object: finDocs![
+                                                                    index])));
                                               });
                                         },
                                       ),

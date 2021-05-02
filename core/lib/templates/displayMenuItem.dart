@@ -50,6 +50,7 @@ class _MenuItemState extends State<DisplayMenuItem>
   List<Widget>? tabList = [];
   List<Widget>? tabText = [];
   Map<int, FloatingActionButton> floatingActionButtonList = {};
+  FloatingActionButton? floatingActionButton;
   List<BottomNavigationBarItem>? bottomItems = [];
   TabController? _controller;
 
@@ -62,18 +63,29 @@ class _MenuItemState extends State<DisplayMenuItem>
     child = menuItem.child;
     leadAction = menuItem.leadAction;
     tabIndex = widget.tabIndex ?? 0;
+    if (menuItem.floatButtonForm != null) {
+      floatingActionButton = FloatingActionButton(
+          onPressed: () async {
+            await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return menuItem.floatButtonForm!;
+                });
+          },
+          tooltip: 'Add New',
+          child: Icon(Icons.add));
+    }
     if (tabItems != null)
       for (var i = 0; i < tabItems!.length; i++) {
         // form to display
-        tabList!.add(tabItems![i].form as Widget);
+        tabList!.add(tabItems![i].form);
         // text of tabs at top of screen (tablet, web)
         tabText!.add(Align(
-            alignment: Alignment.center,
-            child: Text(tabItems![i].label as String)));
+            alignment: Alignment.center, child: Text(tabItems![i].label)));
         // tabs at bottom of screen : phone
         bottomItems!.add(BottomNavigationBarItem(
-            icon: tabItems![i].icon as Widget,
-            label: tabItems![i].label as String));
+            icon: tabItems![i].icon, label: tabItems![i].label));
         // floating actionbutton at each tab
         if (tabItems![i].floatButtonRoute != null)
           floatingActionButtonList[i] = FloatingActionButton(
@@ -162,6 +174,7 @@ class _MenuItemState extends State<DisplayMenuItem>
                 title: companyLogo(context, authenticate, title),
                 actions: widget.actions),
             drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
+            floatingActionButton: floatingActionButton,
             body: child));
   }
 

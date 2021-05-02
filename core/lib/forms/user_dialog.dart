@@ -22,6 +22,8 @@ import 'package:core/blocs/@blocs.dart';
 import 'package:core/helper_functions.dart';
 import 'package:core/templates/@templates.dart';
 
+import '@forms.dart';
+
 class UserDialog extends StatelessWidget {
   final FormArguments formArguments;
   const UserDialog({Key? key, required this.formArguments}) : super(key: key);
@@ -37,12 +39,10 @@ class UserPage extends StatefulWidget {
   final User user;
   UserPage(this.message, this.user);
   @override
-  _UserState createState() => _UserState(message, user);
+  _UserState createState() => _UserState();
 }
 
 class _UserState extends State<UserPage> {
-  final String? message;
-  final User user;
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -50,17 +50,29 @@ class _UserState extends State<UserPage> {
   final _emailController = TextEditingController();
   final _companyController = TextEditingController();
 
-  User? updatedUser;
   bool loading = false;
   UserGroup? _selectedUserGroup;
   PickedFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
+  late User updatedUser;
   final ImagePicker _picker = ImagePicker();
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
-  _UserState(this.message, this.user);
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController.text = widget.user.firstName ?? '';
+    _lastNameController.text = widget.user.lastName ?? '';
+    _nameController.text = widget.user.name ?? '';
+    _emailController.text = widget.user.email ?? '';
+    _companyController.text = widget.user.companyName ?? '';
+    if (widget.user.userGroupId != null)
+      _selectedUserGroup = userGroups
+          .firstWhere((a) => a.userGroupId == widget.user.userGroupId);
+    updatedUser = widget.user.copyWith();
+  }
 
   void _onImageButtonPressed(ImageSource source,
       {BuildContext? context}) async {
@@ -96,7 +108,6 @@ class _UserState extends State<UserPage> {
   Widget build(BuildContext context) {
     User? user = widget.user;
     Authenticate? authenticate;
-    updatedUser = widget.user;
     return Dialog(
         insetPadding: EdgeInsets.all(10),
         shape: RoundedRectangleBorder(
@@ -158,9 +169,9 @@ class _UserState extends State<UserPage> {
                       textAlign: TextAlign.center,
                     );
                   }
-                  return _showForm(authenticate, updatedUser);
+                  return _showForm(authenticate);
                 })
-            : _showForm(authenticate, updatedUser),
+            : _showForm(authenticate),
       );
     }));
   }
@@ -175,7 +186,7 @@ class _UserState extends State<UserPage> {
       HelperFunctions.showMessage(context, '${state.message}', Colors.green);
     }
     if (state is UserSuccess) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(updatedUser);
     }
   }
 
@@ -188,19 +199,7 @@ class _UserState extends State<UserPage> {
     return null;
   }
 
-  Widget _showForm(authenticate, updatedUser) {
-    User? user = widget.user;
-    if (user != null) {
-      _firstNameController.text = user.firstName ?? '';
-      _lastNameController.text = user.lastName ?? '';
-      _nameController.text = user.name ?? '';
-      _emailController.text = user.email ?? '';
-      _companyController.text = user.companyName ?? '';
-      if (_selectedUserGroup == null && user.userGroupId != null)
-        _selectedUserGroup =
-            userGroups.firstWhere((a) => a.userGroupId == user.userGroupId);
-    }
-
+  Widget _showForm(authenticate) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
@@ -211,10 +210,10 @@ class _UserState extends State<UserPage> {
         textAlign: TextAlign.center,
       );
     }
-    return _UserDialog(widget.user, updatedUser);
+    return _userDialog();
   }
 
-  Widget _UserDialog(user, updatedUser) {
+  Widget _userDialog() {
     return Form(
         key: _formKey,
         child: ListView(children: <Widget>[
@@ -226,9 +225,9 @@ class _UserState extends State<UserPage> {
                   ? kIsWeb
                       ? Image.network(_imageFile!.path)
                       : Image.file(File(_imageFile!.path))
-                  : user!.image != null
-                      ? Image.memory(user.image!, height: 150)
-                      : Text(user.firstName?.substring(0, 1) ?? '',
+                  : widget.user.image != null
+                      ? Image.memory(widget.user.image!, height: 150)
+                      : Text(widget.user.firstName?.substring(0, 1) ?? '',
                           style: TextStyle(fontSize: 30, color: Colors.black))),
           SizedBox(height: 20),
           TextFormField(
@@ -277,7 +276,7 @@ class _UserState extends State<UserPage> {
           ),
           SizedBox(height: 10),
           Visibility(
-              visible: user!.userGroupId == null,
+              visible: updatedUser.userGroupId == null,
               child: DropdownButtonFormField<UserGroup>(
                 key: Key('dropDown'),
                 hint: Text('User Group'),
@@ -296,8 +295,8 @@ class _UserState extends State<UserPage> {
               )),
           SizedBox(height: 10),
           Visibility(
-              visible: user.userGroupId != 'GROWERP_M_ADMIN' &&
-                  user.userGroupId != 'GROWERP_M_EMPLOYEE',
+              visible: updatedUser.userGroupId != 'GROWERP_M_ADMIN' &&
+                  updatedUser.userGroupId != 'GROWERP_M_EMPLOYEE',
               child: TextFormField(
                 key: Key('companyName'),
                 decoration: InputDecoration(labelText: 'Company Name'),
@@ -308,56 +307,85 @@ class _UserState extends State<UserPage> {
                 },
               )),
           SizedBox(height: 10),
-          ElevatedButton(
-              key: Key('update'),
-              child: Text(user.partyId == null ? 'Create' : 'Update'),
-              onPressed: () async {
-                if (_formKey.currentState!.validate() && !loading) {
-                  updatedUser = User(
-                      partyId: user.partyId,
-                      firstName: _firstNameController.text,
-                      lastName: _lastNameController.text,
-                      email: _emailController.text,
-                      name: _nameController.text,
-                      userGroupId: _selectedUserGroup!.userGroupId,
-                      language: Localizations.localeOf(context)
-                          .languageCode
-                          .toString(),
-                      companyPartyId: user.companyPartyId,
-                      companyName: _companyController.text,
-                      image: await HelperFunctions.getResizedImage(
-                          _imageFile?.path));
-                  user.userGroupId == "GROWERP_M_EMPLOYEE"
-                      ? BlocProvider.of<EmployeeBloc>(context).add(UpdateUser(
-                          updatedUser,
-                        ))
-                      : user.userGroupId == "GROWERP_M_ADMIN"
-                          ? BlocProvider.of<AdminBloc>(context).add(UpdateUser(
-                              updatedUser,
-                            ))
-                          : user.userGroupId == "GROWERP_M_SUPPLIER"
-                              ? BlocProvider.of<SupplierBloc>(context)
-                                  .add(UpdateUser(
-                                  updatedUser,
-                                ))
-                              : user.userGroupId == "GROWERP_M_LEAD"
-                                  ? BlocProvider.of<LeadBloc>(context)
-                                      .add(UpdateUser(
-                                      updatedUser,
-                                    ))
-                                  : BlocProvider.of<CustomerBloc>(context)
-                                      .add(UpdateUser(
-                                      updatedUser,
-                                    ));
-                }
-              }),
+          Row(children: [
+            Expanded(
+                child: Text(updatedUser.address != null
+                    ? "${updatedUser.address!.city!} ${updatedUser.address!.country!}"
+                    : "No address yet")),
+            SizedBox(
+                width: 100,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    var result = await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AddressDialog(address: updatedUser.address);
+                        });
+                    if (result != null)
+                      setState(() {
+                        updatedUser = updatedUser.copyWith(address: result);
+                      });
+                  },
+                  child: Text(updatedUser.address != null
+                      ? 'Update\nAddress'
+                      : 'Add\nAddress'),
+                ))
+          ]),
           SizedBox(height: 10),
-          ElevatedButton(
-              key: Key('cancel'),
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              })
+          Row(children: [
+            Expanded(
+                child: ElevatedButton(
+                    key: Key('cancel'),
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    })),
+            SizedBox(width: 10),
+            Expanded(
+                child: ElevatedButton(
+                    key: Key('update'),
+                    child:
+                        Text(updatedUser.partyId == null ? 'Create' : 'Update'),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate() && !loading) {
+                        updatedUser = updatedUser.copyWith(
+                            firstName: _firstNameController.text,
+                            lastName: _lastNameController.text,
+                            email: _emailController.text,
+                            name: _nameController.text,
+                            userGroupId: _selectedUserGroup!.userGroupId,
+                            language: Localizations.localeOf(context)
+                                .languageCode
+                                .toString(),
+                            companyName: _companyController.text,
+                            image: await HelperFunctions.getResizedImage(
+                                _imageFile?.path));
+                        updatedUser.userGroupId == "GROWERP_M_EMPLOYEE"
+                            ? BlocProvider.of<EmployeeBloc>(context)
+                                .add(UpdateUser(updatedUser))
+                            : updatedUser.userGroupId == "GROWERP_M_ADMIN"
+                                ? BlocProvider.of<AdminBloc>(context)
+                                    .add(UpdateUser(updatedUser))
+                                : updatedUser.userGroupId ==
+                                        "GROWERP_M_SUPPLIER"
+                                    ? BlocProvider.of<SupplierBloc>(context)
+                                        .add(UpdateUser(updatedUser))
+                                    : updatedUser.userGroupId ==
+                                            "GROWERP_M_LEAD"
+                                        ? BlocProvider.of<LeadBloc>(context)
+                                            .add(UpdateUser(updatedUser))
+                                        : updatedUser.userGroupId ==
+                                                "GROWERP_M_CUSTOMER"
+                                            ? BlocProvider.of<CustomerBloc>(
+                                                    context)
+                                                .add(UpdateUser(updatedUser))
+                                            : print(
+                                                "Not recognized usergroupId: "
+                                                "${updatedUser.userGroupId}");
+                      }
+                    })),
+          ])
         ]));
   }
 }

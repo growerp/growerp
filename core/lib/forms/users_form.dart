@@ -217,114 +217,43 @@ class _UsersState extends State<UsersForm> {
         );
       }
 
+      dynamic blocListener = (context, state) {
+        if (state is UserProblem)
+          HelperFunctions.showMessage(
+              context, '${state.errorMessage}', Colors.red);
+        if (state is UserSuccess) {
+          HelperFunctions.showMessage(context, '${state.message}',
+              state.error ? Colors.red : Colors.green);
+        }
+      };
+
+      dynamic blocBuilder = (context, state) {
+        if (state is UserProblem)
+          return FatalErrorForm("Could not load leads!");
+        if (state is UserSuccess) {
+          isLoading = false;
+          users = state.users;
+          hasReachedMax = state.hasReachedMax;
+        }
+        return Stack(children: [showForm(), if (isLoading) LoadingIndicator()]);
+      };
+
       switch (widget.userGroupId) {
         case "GROWERP_M_LEAD":
-          return BlocConsumer<LeadBloc, UserState>(listener: (context, state) {
-            if (state is UserProblem)
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.red);
-            if (state is UserSuccess) {
-              HelperFunctions.showMessage(context, '${state.message}',
-                  state.error ? Colors.red : Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is UserProblem)
-              return FatalErrorForm("Could not load leads!");
-            if (state is UserLoading) LoadingIndicator();
-            if (state is UserSuccess) {
-              isLoading = false;
-              users = state.users;
-              hasReachedMax = state.hasReachedMax;
-            }
-            return showForm();
-          });
+          return BlocConsumer<LeadBloc, UserState>(
+              listener: blocListener, builder: blocBuilder);
         case "GROWERP_M_CUSTOMER":
           return BlocConsumer<CustomerBloc, UserState>(
-              listener: (context, state) {
-            if (state is UserProblem)
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.red);
-            if (state is UserSuccess) {
-              HelperFunctions.showMessage(context, '${state.message}',
-                  state.error ? Colors.red : Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is UserProblem)
-              return FatalErrorForm("Could not load customers!");
-            if (state is UserLoading) isLoading = true;
-            if (state is UserSuccess) {
-              isLoading = false;
-              users = state.users;
-              hasReachedMax = state.hasReachedMax;
-            }
-            return Stack(
-                children: [showForm(), if (isLoading) LoadingIndicator()]);
-          });
+              listener: blocListener, builder: blocBuilder);
         case "GROWERP_M_ADMIN":
-          return BlocConsumer<AdminBloc, UserState>(listener: (context, state) {
-            if (state is UserProblem)
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.red);
-            if (state is UserSuccess) {
-              HelperFunctions.showMessage(context, '${state.message}',
-                  state.error ? Colors.red : Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is UserProblem)
-              return FatalErrorForm("Could not load administrators!");
-            if (state is UserLoading) isLoading = true;
-            if (state is UserSuccess) {
-              isLoading = false;
-              users = state.users;
-              hasReachedMax = state.hasReachedMax;
-            }
-            return Stack(
-                children: [showForm(), if (isLoading) LoadingIndicator()]);
-          });
+          return BlocConsumer<AdminBloc, UserState>(
+              listener: blocListener, builder: blocBuilder);
         case "GROWERP_M_EMPLOYEE":
           return BlocConsumer<EmployeeBloc, UserState>(
-              listener: (context, state) {
-            if (state is UserProblem)
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.red);
-            if (state is UserSuccess) {
-              HelperFunctions.showMessage(context, '${state.message}',
-                  state.error ? Colors.red : Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is UserProblem)
-              return FatalErrorForm("Could not load employees!");
-            if (state is UserLoading) isLoading = true;
-            if (state is UserSuccess) {
-              isLoading = false;
-              users = state.users;
-              hasReachedMax = state.hasReachedMax;
-            }
-            return Stack(
-                children: [showForm(), if (isLoading) LoadingIndicator()]);
-          });
+              listener: blocListener, builder: blocBuilder);
         case "GROWERP_M_SUPPLIER":
           return BlocConsumer<SupplierBloc, UserState>(
-              listener: (context, state) {
-            if (state is UserProblem)
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.red);
-            if (state is UserSuccess) {
-              HelperFunctions.showMessage(context, '${state.message}',
-                  state.error ? Colors.red : Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is UserProblem)
-              return FatalErrorForm("Could not load suppliers!");
-            if (state is UserLoading) isLoading = true;
-            if (state is UserSuccess) {
-              isLoading = false;
-              users = state.users;
-              hasReachedMax = state.hasReachedMax;
-            }
-            return Stack(
-                children: [showForm(), if (isLoading) LoadingIndicator()]);
-          });
+              listener: blocListener, builder: blocBuilder);
         default:
           return Center(
               child: Text(

@@ -84,6 +84,25 @@ class Address extends Equatable {
         province,
         country,
       ];
+
+  Address copyWith({
+    String? addressId, // contactMechId in backend
+    String? address1,
+    String? address2,
+    String? postalCode,
+    String? city,
+    String? province,
+    String? country,
+  }) =>
+      Address(
+        addressId: addressId ?? this.addressId,
+        address1: address1 ?? this.address1,
+        address2: address2 ?? this.address2,
+        postalCode: postalCode ?? this.postalCode,
+        city: city ?? this.city,
+        province: province ?? this.province,
+        country: country ?? this.country,
+      );
 }
 
 class Country extends Equatable {

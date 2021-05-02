@@ -29,43 +29,59 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
       });
 
   return Row(children: <Widget>[
-    NavigationRail(
-        backgroundColor: Color(0xFF4baa9b),
-        leading: Center(
-            child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/user',
-                      arguments: FormArguments(object: authenticate.user));
-                },
-                child: Column(children: [
-                  SizedBox(height: 5),
-                  CircleAvatar(
-                      backgroundColor: Colors.green,
-                      radius: 15,
-                      child: authenticate.user?.image != null
-                          ? Image.memory(authenticate.user!.image!)
-                          : Text(
-                              authenticate.user?.firstName?.substring(0, 1) ??
-                                  '',
-                              style: TextStyle(
-                                  fontSize: 20, color: Colors.black))),
-                  Text("${authenticate.user!.firstName} "
-                      "${authenticate.user!.lastName}"),
-                ]))),
-        selectedIndex: menuIndex ?? 0,
-        onDestinationSelected: (int index) {
-          menuIndex = index;
-          if (menu![index].route == "/")
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
-          else
-            Navigator.pushNamed(context, menu[index].route,
-                arguments: FormArguments());
-        },
-        labelType: NavigationRailLabelType.all,
-        selectedLabelTextStyle: TextStyle(fontSize: 12, color: Colors.black),
-        unselectedLabelTextStyle: TextStyle(fontSize: 12, color: Colors.black),
-        destinations: items),
+    LayoutBuilder(
+      builder: (context, constraint) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraint.maxHeight),
+            child: IntrinsicHeight(
+              child: NavigationRail(
+                  backgroundColor: Color(0xFF4baa9b),
+                  leading: Center(
+                      child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/user',
+                                arguments:
+                                    FormArguments(object: authenticate.user));
+                          },
+                          child: Column(children: [
+                            SizedBox(height: 5),
+                            CircleAvatar(
+                                backgroundColor: Colors.green,
+                                radius: 15,
+                                child: authenticate.user?.image != null
+                                    ? Image.memory(authenticate.user!.image!)
+                                    : Text(
+                                        authenticate.user?.firstName
+                                                ?.substring(0, 1) ??
+                                            '',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black))),
+                            Text("${authenticate.user!.firstName} "
+                                "${authenticate.user!.lastName}"),
+                          ]))),
+                  selectedIndex: menuIndex ?? 0,
+                  onDestinationSelected: (int index) {
+                    menuIndex = index;
+                    if (menu![index].route == "/")
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/', (Route<dynamic> route) => false);
+                    else
+                      Navigator.pushNamed(context, menu[index].route,
+                          arguments: FormArguments());
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  selectedLabelTextStyle:
+                      TextStyle(fontSize: 12, color: Colors.black),
+                  unselectedLabelTextStyle:
+                      TextStyle(fontSize: 12, color: Colors.black),
+                  destinations: items),
+            ),
+          ),
+        );
+      },
+    ),
     Expanded(child: widget)
   ]);
 }

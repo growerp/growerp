@@ -44,7 +44,7 @@ class Asset extends Equatable {
   final String? parentAssetId;
   final String? productId;
   final String? productName;
-  final List<Reservation>? reservations;
+//  final List<Reservation>? reservations;
 
   Asset({
     this.assetId,
@@ -56,7 +56,7 @@ class Asset extends Equatable {
     this.parentAssetId,
     this.productId,
     this.productName,
-    this.reservations,
+    //  this.reservations,
   });
 
   factory Asset.fromJson(Map<String, dynamic> json) => Asset(
@@ -73,10 +73,10 @@ class Asset extends Equatable {
         parentAssetId: json["parentAssetId"],
         productId: json["productId"],
         productName: json["productName"],
-        reservations: json["reservations"] == null
-            ? []
-            : List<Reservation>.from(
-                json["reservations"].map((x) => Reservation.fromJson(x))),
+//        reservations: json["reservations"] == null
+//            ? []
+//            : List<Reservation>.from(
+//                json["reservations"].map((x) => Reservation.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -89,9 +89,9 @@ class Asset extends Equatable {
         "parentAssetId": parentAssetId,
         "productId": productId,
         "productName": productName,
-        "reservations": reservations != null
-            ? List<dynamic>.from(reservations!.map((x) => x.toJson()))
-            : null,
+//        "reservations": reservations != null
+//            ? List<dynamic>.from(reservations!.map((x) => x.toJson()))
+//            : null,
       };
 
   String toString() =>
@@ -108,10 +108,11 @@ class Asset extends Equatable {
         parentAssetId,
         productId,
         productName,
-        reservations,
+//        reservations,
       ];
 }
 
+/*
 class Reservation extends Equatable {
   final String? reservationId;
   final String? orderId;
@@ -188,7 +189,7 @@ class Reservation extends Equatable {
         rentalThruDate: rentalThruDate ?? this.rentalThruDate,
       );
 }
-
+*/
 Map<String, String> assetClassIds = {
   'Hotel Room': 'AsClsRoom',
   'Restaurant Table': 'AsClsTable',

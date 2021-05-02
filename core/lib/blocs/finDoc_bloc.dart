@@ -120,6 +120,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         yield FinDocLoading('Creating ${event.finDoc!.docType}...');
         dynamic result = await repos.updateFinDoc(event.finDoc);
         if (result is List<FinDoc> && result.isNotEmpty) {
+          yield FinDocUpdate(result[0]);
           currentState.finDocs!.add(result[0]);
           yield currentState.copyWith(
               message: "${result[0].docType} #${result[0].id()} created");
@@ -129,6 +130,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         yield FinDocLoading('Update ${event.finDoc.docType}');
         dynamic result = await repos.updateFinDoc(event.finDoc);
         if (result is List<FinDoc>) {
+          yield FinDocUpdate(result[0]);
           late int index;
           switch (result[0].docType) {
             case 'order':
@@ -154,10 +156,11 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         yield FinDocLoading('Deleting ${event.finDoc.docType}');
         dynamic result = await repos
             .updateFinDoc(event.finDoc.copyWith(statusId: "finDocCancelled"));
-        if (result is List<FinDoc>)
+        if (result is List<FinDoc>) {
+          yield FinDocUpdate(result[0]);
           yield currentState.copyWith(
               message: "${event.finDoc.docType} status to Cancelled");
-        else
+        } else
           yield FinDocProblem(result);
       }
     }
@@ -230,6 +233,14 @@ class FinDocProblem extends FinDocState {
   const FinDocProblem(this.errorMessage);
   @override
   List<Object?> get props => [errorMessage];
+}
+
+// to inform other blocs
+class FinDocUpdate extends FinDocState {
+  final FinDoc finDoc;
+  const FinDocUpdate(this.finDoc);
+  @override
+  List<Object?> get props => [finDoc];
 }
 
 class FinDocSuccess extends FinDocState {
