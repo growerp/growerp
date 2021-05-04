@@ -50,10 +50,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
         dynamic result = await repos.getAsset(
             start: 0,
             limit: event.limit,
-            assetClassId: classificationId == 'AppHotel'
-                ? assetClassIds['Hotel Room']
-                : null,
-            companyPartyId: event.companyPartyId,
+            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
             search: event.search);
         if (result is List<Asset>) {
           assets = result;
@@ -71,10 +68,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
           dynamic result = await repos.getAsset(
               start: 0,
               limit: event.limit,
-              assetClassId: classificationId == 'AppHotel'
-                  ? assetClassIds['Hotel Room']
-                  : null,
-              companyPartyId: event.companyPartyId,
+              assetClassId:
+                  classificationId == 'AppHotel' ? 'Hotel Room' : null,
               search: event.search);
           if (result is List<Asset>) {
             assets = result;
@@ -87,10 +82,10 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
           return;
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getAsset(
-              start: currentState.assets!.length,
-              limit: event.limit,
-              search: event.search,
-              companyPartyId: event.companyPartyId);
+            start: currentState.assets!.length,
+            limit: event.limit,
+            search: event.search,
+          );
           if (result is List<Asset>) {
             yield currentState.copyWith(
                 assets: currentState.assets! + result,
@@ -154,15 +149,11 @@ abstract class AssetEvent extends Equatable {
 }
 
 class FetchAsset extends AssetEvent {
-  final String? companyPartyId;
-  final String? categoryId;
   final int limit;
   final search;
-  FetchAsset(
-      {this.companyPartyId, this.categoryId, this.limit = 20, this.search});
+  FetchAsset({this.limit = 20, this.search});
   @override
-  String toString() => "FetchAsset company: $companyPartyId, "
-      "limit: $limit, search: $search";
+  String toString() => "FetchAsset limit: $limit, search: $search";
 }
 
 class DeleteAsset extends AssetEvent {

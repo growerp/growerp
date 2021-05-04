@@ -204,7 +204,7 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.2"
+    version: "0.13.3"
   http_parser:
     dependency: transitive
     description:
@@ -252,7 +252,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "294cc295dd1be9d095a76f91128cd7c7567b2222"
+      resolved-ref: a8a455d58c1e4ac762744ba17096307b5671bc01
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

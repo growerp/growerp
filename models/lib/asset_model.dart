@@ -44,7 +44,6 @@ class Asset extends Equatable {
   final String? parentAssetId;
   final String? productId;
   final String? productName;
-//  final List<Reservation>? reservations;
 
   Asset({
     this.assetId,
@@ -73,10 +72,6 @@ class Asset extends Equatable {
         parentAssetId: json["parentAssetId"],
         productId: json["productId"],
         productName: json["productName"],
-//        reservations: json["reservations"] == null
-//            ? []
-//            : List<Reservation>.from(
-//                json["reservations"].map((x) => Reservation.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -89,13 +84,10 @@ class Asset extends Equatable {
         "parentAssetId": parentAssetId,
         "productId": productId,
         "productName": productName,
-//        "reservations": reservations != null
-//            ? List<dynamic>.from(reservations!.map((x) => x.toJson()))
-//            : null,
       };
 
   String toString() =>
-      'Asset name: $assetName[$assetId] $productName[$productId]';
+      'Asset name: $assetName[$assetId] $productName[$productId $statusId]';
 
   @override
   List<Object?> get props => [
@@ -108,104 +100,36 @@ class Asset extends Equatable {
         parentAssetId,
         productId,
         productName,
-//        reservations,
-      ];
-}
-
-/*
-class Reservation extends Equatable {
-  final String? reservationId;
-  final String? orderId;
-  final String? orderItemSeqId;
-  final String? productId;
-  final String? assetId;
-  final DateTime? rentalFromDate;
-  final DateTime? rentalThruDate;
-
-  Reservation({
-    this.reservationId,
-    this.orderId,
-    this.orderItemSeqId,
-    this.productId,
-    this.assetId,
-    this.rentalFromDate,
-    this.rentalThruDate,
-  });
-
-  factory Reservation.fromJson(Map<String, dynamic> json) => Reservation(
-        reservationId: json["reservationId"],
-        orderId: json["orderId"],
-        orderItemSeqId: json["orderItemSeqId"],
-        productId: json["productId"],
-        assetId: json["assetId"],
-        rentalFromDate: json["rentalFromDate"] != null
-            ? DateTime.tryParse(json["rentalFromDate"] ?? '')
-            : null,
-        rentalThruDate: json["rentalThruDate"] != null
-            ? DateTime.tryParse(json["rentalThruDate"] ?? '')
-            : null,
-      );
-
-  Map<String, dynamic> toJson() => {
-        "reservationId": reservationId.toString(),
-        "orderId": orderItemSeqId,
-        "orderItemSeqId": orderItemSeqId,
-        "productId": productId,
-        "assetId": assetId,
-        "rentalFromDate": rentalFromDate.toString(),
-        "rentalThruDate": rentalThruDate.toString(),
-      };
-
-  String toString() =>
-      'Reservation: $reservationId product: $productId ${rentalFromDate.toString()} ';
-
-  @override
-  List<Object?> get props => [
-        reservationId,
-        orderId,
-        orderItemSeqId,
-        productId,
-        assetId,
-        rentalFromDate,
-        rentalThruDate,
       ];
 
-  Reservation copyWith({
-    String? reservationId,
-    String? orderId,
-    String? orderItemSeqId,
-    String? productId,
+  Asset copyWith({
     String? assetId,
-    DateTime? rentalFromDate,
-    DateTime? rentalThruDate,
+    String? assetClassId, // room, table etc
+    String? assetName, // include room number/name
+    String? statusId,
+    Decimal? quantityOnHand,
+    Decimal? availableToPromise,
+    String? parentAssetId,
+    String? productId,
+    String? productName,
   }) =>
-      Reservation(
-        reservationId: reservationId ?? this.reservationId,
-        orderId: orderId ?? this.orderId,
-        orderItemSeqId: orderItemSeqId ?? this.orderItemSeqId,
-        productId: productId ?? this.productId,
+      Asset(
         assetId: assetId ?? this.assetId,
-        rentalFromDate: rentalFromDate ?? this.rentalFromDate,
-        rentalThruDate: rentalThruDate ?? this.rentalThruDate,
+        assetClassId: assetClassId ?? this.assetClassId,
+        assetName: assetName ?? this.assetName,
+        statusId: statusId ?? this.statusId,
+        quantityOnHand: quantityOnHand ?? this.quantityOnHand,
+        availableToPromise: availableToPromise ?? this.availableToPromise,
+        parentAssetId: parentAssetId ?? this.parentAssetId,
+        productId: productId ?? this.productId,
+        productName: productName ?? this.productName,
       );
 }
-*/
-Map<String, String> assetClassIds = {
-  'Hotel Room': 'AsClsRoom',
-  'Restaurant Table': 'AsClsTable',
-  'Restaurant Table Area': 'AsClsTableArea',
-  'AsClsRoom': 'Hotel Room',
-  'AsClsTable': 'Restaurant Table',
-  'AsClsTableArea': 'Restaurant Table Area',
-};
+
+List<String> assetClassIds = [
+  'Hotel Room',
+  'Restaurant Table',
+  'Restaurant Table Area'
+];
 
 List<String> assetStatusValues = ['Available', 'Deactivated', 'In Use'];
-
-Map<String, String> assetStatusses = {
-  'Available': 'AstAvailable',
-  'Deactivated': 'AstDeactivated',
-  'In Use': 'AstInUse',
-  'AstAvailable': 'Available',
-  'AstDeactivated': 'Deactivated',
-  'AstInUse': 'In Use',
-};

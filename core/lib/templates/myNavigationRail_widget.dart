@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/user_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 import '';
@@ -39,10 +40,15 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                   backgroundColor: Color(0xFF4baa9b),
                   leading: Center(
                       child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/user',
-                                arguments:
-                                    FormArguments(object: authenticate.user));
+                          onTap: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return UserDialog(
+                                      formArguments: FormArguments(
+                                          object: authenticate.user));
+                                });
                           },
                           child: Column(children: [
                             SizedBox(height: 5),

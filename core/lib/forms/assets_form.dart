@@ -38,8 +38,6 @@ class _AssetsState extends State<AssetsForm> {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate!;
-        _assetBloc
-          ..add(FetchAsset(companyPartyId: authenticate!.company!.partyId));
         return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
           if (state is AssetProblem)
             HelperFunctions.showMessage(
@@ -188,10 +186,7 @@ class _AssetsState extends State<AssetsForm> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= _scrollThreshold) {
-      _assetBloc.add(FetchAsset(
-          companyPartyId: authenticate!.company!.partyId,
-          limit: limit,
-          search: searchString));
+      _assetBloc.add(FetchAsset(limit: limit, search: searchString));
     }
   }
 }

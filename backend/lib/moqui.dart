@@ -500,7 +500,7 @@ class Moqui {
         'categoryId': categoryId,
         'productId': productId,
         'productTypeId': productTypeIds[productTypeId],
-        'assetClassId': assetClassIds[assetClassId],
+        'assetClassId': assetClassId,
         'start': start,
         'limit': limit,
         'filter': filter,
@@ -548,15 +548,6 @@ class Moqui {
     }
   }
 
-  Future<dynamic> getAssetGannt() async {
-    try {
-      Response response = await client.get('rest/s1/growerp/100/AssetGannt');
-      return ganntLinesFromJson(response.toString());
-    } on DioError catch (e) {
-      return responseMessage(e);
-    }
-  }
-
   Future<dynamic> getAsset(
       {int? start,
       int? limit,
@@ -588,7 +579,7 @@ class Moqui {
   }
 
   Future<dynamic> updateAsset(Asset asset) async {
-    // no productId is add
+    // no assetId is add
     try {
       Response response;
       if (asset.assetId != null) {

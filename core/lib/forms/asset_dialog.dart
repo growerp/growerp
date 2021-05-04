@@ -47,19 +47,30 @@ class _AssetState extends State<AssetPage> {
   final Asset? asset;
   final _formKey = GlobalKey<FormState>();
   TextEditingController _nameController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
   TextEditingController _quantityOnHandController = TextEditingController();
   TextEditingController _productSearchBoxController = TextEditingController();
   String classificationId = GlobalConfiguration().get("classificationId");
 
   bool loading = false;
-  late Asset updatedAsset;
   Product? _selectedProduct;
+  String? _statusId = 'Available';
 
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   _AssetState(this.message, this.asset) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (asset != null) {
+      _statusId = asset!.statusId!;
+      _nameController.text = asset!.assetName!;
+      _quantityOnHandController.text = asset!.quantityOnHand.toString();
+      _selectedProduct =
+          Product(productId: asset!.productId, productName: asset!.productName);
+    }
   }
 
   @override
@@ -95,7 +106,7 @@ class _AssetState extends State<AssetPage> {
                           child: Container(
                               padding: EdgeInsets.all(20),
                               width: 400,
-                              height: 700,
+                              height: 500,
                               child: Center(
                                 child: _showForm(repos, isPhone),
                               )))))));
@@ -103,16 +114,6 @@ class _AssetState extends State<AssetPage> {
   }
 
   Widget _showForm(repos, isPhone) {
-    String? _statusId;
-    if (asset != null) {
-      _statusId = asset!.statusId;
-      _nameController.text = asset!.assetName ?? '';
-      _quantityOnHandController.text =
-          asset!.quantityOnHand == null ? '' : asset!.quantityOnHand.toString();
-      if (_selectedProduct == null && asset?.productId != null)
-        _selectedProduct = Product(
-            productId: asset!.productId, productName: asset!.productName);
-    }
     return Center(
         child: Container(
             child: Form(
@@ -142,12 +143,6 @@ class _AssetState extends State<AssetPage> {
                     },
                   ),
                   SizedBox(height: 20),
-                  TextFormField(
-                    key: Key('description'),
-                    maxLines: 5,
-                    decoration: InputDecoration(labelText: 'Description'),
-                    controller: _descriptionController,
-                  ),
                   Visibility(
                       visible: classificationId != 'AppHotel',
                       child: SizedBox(height: 20)),
@@ -226,17 +221,19 @@ class _AssetState extends State<AssetPage> {
                       child: Text(asset?.assetId == null ? 'Create' : 'Update'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate() && !loading) {
-                          updatedAsset = Asset(
-                            assetId: asset?.assetId,
-                            assetName: _nameController.text,
-                            quantityOnHand: _quantityOnHandController.text != ""
-                                ? Decimal.parse(_quantityOnHandController.text)
-                                : null,
-                            productId: _selectedProduct!.productId,
-                            statusId: _statusId,
-                          );
                           BlocProvider.of<AssetBloc>(context).add(UpdateAsset(
-                            updatedAsset,
+                            Asset(
+                              assetId: asset?.assetId,
+                              assetName: _nameController.text,
+                              quantityOnHand:
+                                  _quantityOnHandController.text != ""
+                                      ? Decimal.parse(
+                                          _quantityOnHandController.text)
+                                      : null,
+                              productId: _selectedProduct!.productId,
+                              statusId: _statusId,
+                              assetClassId: 'Hotel Room',
+                            ),
                           ));
                         }
                       }),
