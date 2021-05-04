@@ -339,15 +339,17 @@ class GanttChart extends StatelessWidget {
   }
 
   List<Widget> buildAssetReservations(
-      BuildContext context, int index, double screenWidth, reservations) {
+      BuildContext context, int startIndex, double screenWidth, reservations) {
     DateTime? lastDate = ganttFromDate!.subtract(Duration(days: 1));
     List<Widget> chartContent = [];
-    String? currentAssetId = reservations![index].assetId;
     double? halfDay, halfDayLength = 0;
-    if (reservations[index].fromDate == null)
+    if (reservations[startIndex].fromDate == null)
       return chartContent; // no reservations for this asset
+    int index = startIndex;
+    //print("====processing assetName: ${reservations[startIndex].assetName}");
     while (index < reservations!.length &&
-        reservations![index].assetId == currentAssetId) {
+        reservations![index].assetId == reservations![startIndex].assetId) {
+      //print("===processing ${reservations[index].finDoc.orderId} $index");
       // define the scale of 1 day
       late double dayScale;
       if (columnPeriod == DAY) dayScale = screenWidth / columnsOnScreen;
@@ -367,19 +369,20 @@ class GanttChart extends StatelessWidget {
       if (lastDate != null) {
         DateTime from = reservations![index].fromDate!;
         DateTime thru = reservations![index].thruDate!;
+        //print("====a===$index ${reservations![index].finDoc.orderId}");
         chartContent.add(MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-                onTap: () async {
-                  print(
-                      "===3==findoc in ganntform: ${reservations![index].finDoc} index: $index");
-                  await showDialog(
+                onTap: () {
+                  //print("==1==$index");
+                  showDialog(
                       barrierDismissible: true,
                       context: context,
                       builder: (BuildContext context) {
                         return ReservationDialog(
                             formArguments: FormArguments(
-                                object: reservations![index - 1].finDoc));
+                                object:
+                                    reservations![index].finDoc.copyWith()));
                       });
                 },
                 child: Container(
@@ -389,11 +392,7 @@ class GanttChart extends StatelessWidget {
                   width: (thru.difference(from).inDays) * dayScale +
                       halfDayLength!,
                   margin: EdgeInsets.only(
-                      left: (reservations![index]
-                                  .fromDate!
-                                  .difference(lastDate)
-                                  .inDays) *
-                              dayScale +
+                      left: (from.difference(lastDate).inDays) * dayScale +
                           halfDay,
                       top: 4.0,
                       bottom: 4.0),
@@ -401,7 +400,8 @@ class GanttChart extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
-                      reservations![index].customerName!,
+                      reservations![index].finDoc.orderId +
+                          reservations![index].customerName!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 10.0),
