@@ -17,11 +17,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/helper_functions.dart';
-import 'package:models/models.dart';
+import 'package:models/@models.dart';
 import 'package:core/blocs/@blocs.dart';
 
 class ProductForm extends StatefulWidget {
-  final Product product;
+  final Product? product;
 
   const ProductForm(this.product);
   @override
@@ -29,10 +29,10 @@ class ProductForm extends StatefulWidget {
 }
 
 class _ProductEcomFormState extends State<ProductForm> {
-  final Product product;
-  Decimal quantity;
-  OrderItem orderItem;
-  Map<String, dynamic> args;
+  final Product? product;
+  Decimal? quantity;
+  FinDocItem? orderItem;
+  Map<String, dynamic>? args;
   bool isFavorite = false;
 
   _ProductEcomFormState(this.product);
@@ -78,10 +78,10 @@ class _ProductEcomFormState extends State<ProductForm> {
           Padding(
             padding: EdgeInsets.only(left: screenWidth * 0.25),
             child: Hero(
-              tag: product.productId,
-              child: product.image != null
+              tag: product!.productId!,
+              child: product!.image != null
                   ? Image.memory(
-                      product.image,
+                      product!.image!,
                       height: 200,
                       width: screenWidth * 0.5,
                     )
@@ -91,7 +91,7 @@ class _ProductEcomFormState extends State<ProductForm> {
           Container(
             padding: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
             child: Text(
-              product.productName,
+              product!.productName!,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
               style: TextStyle(
@@ -117,7 +117,7 @@ class _ProductEcomFormState extends State<ProductForm> {
               children: <Widget>[
                 buildAmountButton(),
                 Text(
-                  (product.price * quantity).toString(),
+                  (product!.price! * quantity!).toString(),
                   style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -139,7 +139,7 @@ class _ProductEcomFormState extends State<ProductForm> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
-              "${product.description}",
+              "${product!.description}",
               maxLines: 3,
               overflow: TextOverflow.fade,
               style: TextStyle(fontSize: 18),
@@ -165,10 +165,10 @@ class _ProductEcomFormState extends State<ProductForm> {
           GestureDetector(
             child: Icon(Icons.remove),
             onTap: () {
-              setState(() {
-                if (quantity > Decimal.parse('1'))
-                  quantity -= Decimal.parse('1');
-              });
+//              setState(() {
+//                if (quantity! > Decimal.parse('1'))
+//                  quantity -= Decimal.parse('1');
+//              });
             },
             onLongPressStart: (_) {
               setState(() {
@@ -180,10 +180,10 @@ class _ProductEcomFormState extends State<ProductForm> {
           GestureDetector(
             child: Icon(Icons.add),
             onTap: () {
-              setState(() {
-                if (quantity < Decimal.parse('25'))
-                  quantity += Decimal.parse('1');
-              });
+//              setState(() {
+//                if (quantity! < Decimal.parse('25'))
+//                  quantity += Decimal.parse('1');
+//              });
             },
             onLongPressStart: (_) {
               setState(() {
@@ -235,16 +235,15 @@ class _ProductEcomFormState extends State<ProductForm> {
                   onPressed: () => {
                     HelperFunctions.showMessage(
                         context,
-                        'Added $quantity x ${product.productName}',
+                        'Added $quantity x ${product!.productName}',
                         Colors.green),
-                    orderItem = OrderItem(
-                        productId: product.productId,
+                    orderItem = FinDocItem(
+                        productId: product!.productId,
                         quantity: quantity,
-                        price: product.price,
-                        description: product.productName),
-                    BlocProvider.of<CartBloc>(context).add(
-                      UpdateCart(Order(orderItems: [orderItem])),
-                    )
+                        price: product!.price,
+                        description: product!.productName),
+                    BlocProvider.of<CartBloc>(context)
+                        .add(AddToCart(newItem: orderItem)),
                   },
                   splashColor: Theme.of(context).primaryColor,
                   color: Colors.amber[600],

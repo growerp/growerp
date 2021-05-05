@@ -15,8 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:models/models.dart';
-import 'package:core/routing_constants.dart';
+import 'package:models/@models.dart';
 import 'package:core/helper_functions.dart';
 
 class CartForm extends StatelessWidget {
@@ -28,7 +27,7 @@ class CartForm extends StatelessWidget {
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.home),
-              onPressed: () => Navigator.pushNamed(context, HomeRoute)),
+              onPressed: () => Navigator.pushNamed(context, '/')),
         ],
       ),
       body: Container(
@@ -63,13 +62,13 @@ class _CartList extends StatelessWidget {
               DataColumn(label: Text('Price')),
               DataColumn(label: Text('Total')),
             ],
-            rows: state.order.orderItems
+            rows: state.finDoc!.items!
                 .map((orderItem) => DataRow(cells: [
-                      DataCell(Text(orderItem.description)),
+                      DataCell(Text(orderItem.description!)),
                       DataCell(Text(orderItem.quantity.toString())),
                       DataCell(Text(orderItem.price.toString())),
                       DataCell(Text(
-                          (orderItem.price * orderItem.quantity).toString())),
+                          (orderItem.price! * orderItem.quantity!).toString())),
                     ]))
                 .toList(),
           );
@@ -89,8 +88,8 @@ class _CartTotal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hugeStyle =
-        Theme.of(context).textTheme.headline1.copyWith(fontSize: 48);
-    Order order;
+        Theme.of(context).textTheme.headline1!.copyWith(fontSize: 48);
+    FinDoc? order;
     return SizedBox(
         height: 200,
         child: Center(
@@ -98,8 +97,9 @@ class _CartTotal extends StatelessWidget {
           BlocListener<CartBloc, CartState>(listener: (context, state) {
             if (state is CartPaid) {
               Navigator.pushNamedAndRemoveUntil(
-                  context, HomeRoute, ModalRoute.withName(HomeRoute),
-                  arguments: "Order Accepted, id:${state.orderId}");
+                  context, '/', ModalRoute.withName('/'),
+                  arguments: FormArguments(
+                      message: "Order Accepted, id:${state.finDoc!.orderId}"));
             }
           }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
             return BlocBuilder<CartBloc, CartState>(
@@ -112,22 +112,19 @@ class _CartTotal extends StatelessWidget {
                     context, 'Cart error: $cartState.message}?', Colors.red);
               }
               if (cartState is CartLoaded) {
-                order = cartState.order;
+                order = cartState.finDoc;
                 return Row(children: <Widget>[
-                  Text((cartState.totalPrice ?? 0.00).toString(),
+                  Text((cartState.finDoc!.grandTotal ?? 0.00).toString(),
                       style: hugeStyle),
-                  RaisedButton(
-                      disabledColor: Colors.white,
-                      disabledTextColor: Colors.white,
+                  ElevatedButton(
                       child: Text('BUY', style: hugeStyle),
-                      color: Colors.orange,
-                      onPressed: order == null || order.orderItems.length == 0
+                      onPressed: order == null || order!.items!.length == 0
                           ? null
                           : () async {
                               dynamic result;
                               if (state is! AuthAuthenticated) {
                                 result = await Navigator.pushNamed(
-                                    context, LoginRoute,
+                                    context, '/login',
                                     arguments: 'Please login/register first?');
                               }
                               if (state is AuthAuthenticated ||
@@ -135,7 +132,7 @@ class _CartTotal extends StatelessWidget {
                                 HelperFunctions.showMessage(
                                     context, 'Sending order...', Colors.green);
                                 BlocProvider.of<CartBloc>(context)
-                                    .add(ConfirmCart());
+                                    .add(CreateFinDocFromCart(order!));
                               }
                             }),
                 ]);

@@ -1,5 +1,5 @@
 /*
- * This software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -12,17 +12,16 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:core/blocs/@blocs.dart';
-import 'package:core/forms/@forms.dart';
-import 'package:models/models.dart';
-import 'package:core/helper_functions.dart';
+import 'package:models/@models.dart';
 import '../routing_constants.dart';
 
 class HomeForm extends StatefulWidget {
-  final String message;
+  final String? message;
 
   const HomeForm([this.message]);
   @override
@@ -30,103 +29,116 @@ class HomeForm extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeForm> {
-  final String message;
-  Authenticate authenticate;
-  List<Product> products;
-  List<ProductCategory> categories;
-  String selectedCategoryId;
+  final _scrollController = ScrollController();
+  double _scrollThreshold = 200.0;
+  final String? message;
+  Authenticate? authenticate;
+  late ProductBloc _productBloc;
+  late CategoryBloc _categoryBloc;
+  List<Product>? products;
+  List<ProductCategory>? categories;
+  String? selectedCategoryId;
+  late int limit;
+  bool? search;
+  String? searchString;
 
   _HomeState([this.message]);
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _categoryBloc = BlocProvider.of<CategoryBloc>(context);
+    _productBloc = BlocProvider.of<ProductBloc>(context);
+    search = false;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state is AuthProblem) {
-        return Container(
-            child: Center(
-                child: Text("${state.errorMessage}",
-                    style:
-                        new TextStyle(fontSize: 18.0, color: Colors.black))));
-      }
-      if (state is AuthAuthenticated) authenticate = state.authenticate;
-      if (state is AuthUnauthenticated) authenticate = state.authenticate;
-      return Scaffold(
-          appBar: AppBar(
-              title: Text("${authenticate?.company?.name ?? 'Company??'} " +
-                  "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
-              actions: <Widget>[
-                IconButton(
-                    icon: Icon(Icons.settings),
-                    tooltip: 'Settings',
-                    onPressed: () async {
-                      await _settingsDialog(context, authenticate);
-                    }),
-                IconButton(
-                  icon: Icon(Icons.shopping_cart),
-                  tooltip: 'Cart',
-                  onPressed: () => Navigator.pushNamed(context, CartRoute),
-                ),
-                if (authenticate?.apiKey == null)
-                  IconButton(
-                      icon: Icon(Icons.exit_to_app),
-                      tooltip: 'Login',
-                      onPressed: () async {
-                        if (await Navigator.pushNamed(context, LoginRoute) ==
-                            true) {
-                          Navigator.popAndPushNamed(context, HomeRoute,
-                              arguments: 'Login Successful');
-                        }
-                      }),
-                if (authenticate?.apiKey != null)
-                  IconButton(
-                      icon: Icon(Icons.do_not_disturb),
-                      tooltip: 'Logout',
-                      onPressed: () => {
-                            BlocProvider.of<AuthBloc>(context).add(Logout()),
-                            Future<Null>.delayed(Duration(milliseconds: 300),
-                                () {
+    return MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(listener: (context, state) {
+            if (state is AuthProblem)
+              HelperFunctions.showMessage(
+                  context, state.errorMessage, Colors.red);
+          }),
+          BlocListener<CategoryBloc, CategoryState>(listener: (context, state) {
+            if (state is CategorySuccess) {
+              categories = state.categories;
+            }
+          }),
+          BlocListener<ProductBloc, ProductState>(listener: (context, state) {
+            print("===prod state: $state");
+            if (state is ProductSuccess) {
+              setState(() {
+                products = state.products;
+              });
+            }
+          }),
+        ],
+        child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+          if (state is AuthAuthenticated) authenticate = state.authenticate;
+          if (state is AuthUnauthenticated) authenticate = state.authenticate;
+          if (authenticate != null && categories == null)
+            _categoryBloc.add(
+                FetchCategory(companyPartyId: authenticate!.company!.partyId));
+          if (authenticate != null && categories != null && products == null)
+            _productBloc.add(FetchProduct(
+                companyPartyId: authenticate!.company!.partyId,
+                categoryId: categories![0].categoryId));
+          return Scaffold(
+              appBar: AppBar(
+                  title: Text(
+                      "${authenticate?.company?.name ?? 'Company??'} "), // +
+                  //    "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+                  actions: <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.settings),
+                        tooltip: 'Settings',
+                        onPressed: () async {
+                          await _settingsDialog(context, authenticate);
+                        }),
+                    IconButton(
+                      icon: Icon(Icons.shopping_cart),
+                      tooltip: 'Cart',
+                      onPressed: () => Navigator.pushNamed(context, CartRoute),
+                    ),
+                    if (authenticate?.apiKey == null)
+                      IconButton(
+                          icon: Icon(Icons.exit_to_app),
+                          tooltip: 'Login',
+                          onPressed: () async {
+                            if (await Navigator.pushNamed(
+                                    context, LoginRoute) ==
+                                true) {
                               Navigator.popAndPushNamed(context, HomeRoute,
-                                  arguments: 'Logout successful');
-                            })
-                          })
-              ]),
-          body: BlocConsumer<CatalogBloc, CatalogState>(
-              listener: (context, state) {
-            if (state is CatalogProblem) {
-              HelperFunctions.showMessage(
-                  context, '${state.errorMessage}', Colors.green);
-            }
-            if (state is CatalogLoading) {
-              HelperFunctions.showMessage(
-                  context, '${state.message}', Colors.green);
-            }
-          }, builder: (context, state) {
-            if (state is CatalogLoaded) {
-              categories = state.catalog?.categories;
-              selectedCategoryId ??= categories != null && categories.length > 0
-                  ? categories[0]?.categoryId
-                  : null;
-              products = state.catalog?.products;
-            } else
-              return SplashForm();
-/*            return Container(
-                child: Center(
-                    child: Text("screen text",
-                        style: new TextStyle(
-                            fontSize: 18.0, color: Colors.black))));
-*/
-            return SingleChildScrollView(
-                physics: ClampingScrollPhysics(),
-                child: ListView(shrinkWrap: true, children: <Widget>[
-                  _categoryList(),
-                  _productsGrid(),
-                ]));
-          }));
-    });
+                                  arguments: 'Login Successful');
+                            }
+                          }),
+                    if (authenticate?.apiKey != null)
+                      IconButton(
+                          icon: Icon(Icons.do_not_disturb),
+                          tooltip: 'Logout',
+                          onPressed: () => {
+                                BlocProvider.of<AuthBloc>(context)
+                                    .add(Logout()),
+                                Future<Null>.delayed(
+                                    Duration(milliseconds: 300), () {
+                                  Navigator.popAndPushNamed(context, HomeRoute,
+                                      arguments: 'Logout successful');
+                                })
+                              })
+                  ]),
+              body: SingleChildScrollView(
+                  physics: ClampingScrollPhysics(),
+                  child: ListView(shrinkWrap: true, children: <Widget>[
+                    _categoryList(),
+                    _productsGrid(),
+                  ])));
+        }));
   }
 
   Widget _categoryList() {
-    if (categories == null || categories.length == 0) {
+    if (categories == null || categories!.length == 0) {
       return Center(
         child: Text("No categories found to display",
             style: TextStyle(
@@ -144,7 +156,7 @@ class _HomeState extends State<HomeForm> {
               scrollDirection: Axis.horizontal,
               itemCount: categories?.length,
               itemBuilder: (context, index) {
-                var data = categories[index];
+                var data = categories![index];
                 return Column(children: <Widget>[
                   GestureDetector(
                     onTap: () =>
@@ -156,7 +168,7 @@ class _HomeState extends State<HomeForm> {
                       alignment: Alignment.center,
                       child: data.image != null
                           ? Image.memory(
-                              data.image,
+                              data.image!,
                               height: 40,
                               width: 40,
                             )
@@ -175,7 +187,7 @@ class _HomeState extends State<HomeForm> {
                     ),
                   ),
                   Row(children: <Widget>[
-                    Text(data.categoryName),
+                    Text(data.categoryName!),
                     Icon(
                       Icons.keyboard_arrow_right,
                       size: 14,
@@ -189,7 +201,7 @@ class _HomeState extends State<HomeForm> {
     Size size = MediaQuery.of(context).size;
     double screenWidth = size.width;
     double screenHeight = size.height;
-    if (products == null || products.length == 0)
+    if (products == null || products!.length == 0)
       return Center(
         child: Text("No products found to display",
             style: TextStyle(
@@ -199,7 +211,7 @@ class _HomeState extends State<HomeForm> {
       );
     else {
       List<Product> productList =
-          products.where((i) => i.categoryId == selectedCategoryId).toList();
+          products!.where((i) => i.categoryId == selectedCategoryId).toList();
       return ClipRRect(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(35),
@@ -240,8 +252,8 @@ class _HomeState extends State<HomeForm> {
                     crossAxisSpacing: 10,
                   ),
                 ),
-                _customTitle(categories != null && categories.length > 0
-                    ? categories
+                _customTitle(categories != null && categories!.length > 0
+                    ? categories!
                         .firstWhere((i) => i.categoryId == selectedCategoryId)
                         .categoryName
                     : '')
@@ -317,9 +329,26 @@ class _HomeState extends State<HomeForm> {
       )),
     );
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= _scrollThreshold) {
+      _productBloc.add(FetchProduct(
+          companyPartyId: authenticate!.company!.partyId,
+          limit: limit,
+          search: searchString));
+    }
+  }
 }
 
-_settingsDialog(BuildContext context, Authenticate authenticate) async {
+_settingsDialog(BuildContext context, Authenticate? authenticate) async {
   return showDialog<String>(
     context: context,
     barrierDismissible: true,
@@ -331,10 +360,11 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
           content: Container(
             height: 200,
             child: Column(children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 child: Text('Select an another company'),
                 onPressed: () async {
-                  authenticate.company.partyId = null;
+                  authenticate!.company =
+                      authenticate.company!.copyWith(partyId: null);
                   BlocProvider.of<AuthBloc>(context)
                       .add(UpdateAuth(authenticate));
                   await Navigator.popAndPushNamed(context, LoginRoute);
@@ -342,15 +372,15 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
               ),
               SizedBox(height: 20),
               Visibility(
-                  visible: authenticate.apiKey == null,
-                  child: RaisedButton(
+                  visible: authenticate!.apiKey == null,
+                  child: ElevatedButton(
                     child: Text('Register as a customer'),
                     onPressed: () {
                       Navigator.popAndPushNamed(context, RegisterRoute);
                     },
                   )),
               SizedBox(height: 20),
-              RaisedButton(
+              ElevatedButton(
                 child: Text('About'),
                 onPressed: () {
                   Navigator.popAndPushNamed(context, AboutRoute);

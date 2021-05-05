@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/widgets/@widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:bloc/bloc.dart';
@@ -20,12 +21,10 @@ import 'package:dio/dio.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/forms/@forms.dart';
-import 'package:models/models.dart';
-import 'package:ofbiz/ofbiz.dart';
-import 'package:moqui/moqui.dart';
 import 'package:core/styles/themes.dart';
 import 'router.dart' as router;
-import 'forms/@forms.dart';
+import 'forms/@forms.dart' as local;
+import 'package:backend/@backend.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,23 +42,20 @@ void main() async {
     create: (context) => repos,
     child: MultiBlocProvider(
       providers: [
-        BlocProvider<CatalogBloc>(create: (context) => CatalogBloc(repos)),
-        BlocProvider<CrmBloc>(create: (context) => CrmBloc(repos)),
+        BlocProvider<SalesOrderBloc>(
+            create: (context) => FinDocBloc(repos, true, 'order')),
+        BlocProvider<CustomerBloc>(
+            create: (context) => UserBloc(repos, "GROWERP_M_CUSTOMER")),
         BlocProvider<AuthBloc>(
-            // will load catalogBloc and crmBloc
-            create: (context) => AuthBloc(
-                repos,
-                BlocProvider.of<CatalogBloc>(context),
-                BlocProvider.of<CrmBloc>(context))
-              ..add(LoadAuth())),
-        BlocProvider<OrderBloc>(create: (context) => OrderBloc(repos)),
-        BlocProvider<CartBloc>(
+            create: (context) => AuthBloc(repos)..add(LoadAuth())),
+        BlocProvider<SalesCartBloc>(
             create: (context) => CartBloc(
-                BlocProvider.of<AuthBloc>(context),
-                BlocProvider.of<OrderBloc>(context),
-                BlocProvider.of<CatalogBloc>(context),
-                BlocProvider.of<CrmBloc>(context))
-              ..add(LoadCart(Order()))),
+                repos: repos,
+                sales: true,
+                finDocBloc:
+                    BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)),
+        BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
+        BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
       ],
       child: MyApp(),
     ),
@@ -69,10 +65,10 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    String classificationId = GlobalConfiguration().get("classificationId");
+    String? classificationId = GlobalConfiguration().get("classificationId");
     return MaterialApp(
         builder: (context, widget) => ResponsiveWrapper.builder(
-            BouncingScrollWrapper.builder(context, widget),
+            BouncingScrollWrapper.builder(context, widget!),
             maxWidth: 2460,
             minWidth: 450,
             defaultScale: true,
@@ -96,27 +92,7 @@ class MyApp extends StatelessWidget {
             return FatalErrorForm(
                 "No $classificationId company found in system\n"
                 "Go to the admin app to create one!");
-          return HomeForm();
+          return local.HomeForm();
         }));
-  }
-}
-
-class SimpleBlocObserver extends BlocObserver {
-  @override
-  void onEvent(Cubit cubit, Object event) {
-    print(">>>Bloc event { $event: }");
-    super.onEvent(cubit, event);
-  }
-
-  @override
-  void onTransition(Cubit cubit, Transition transition) {
-    print(">>>$transition");
-    super.onTransition(cubit, transition);
-  }
-
-  @override
-  void onError(Cubit cubit, Object error, StackTrace stackTrace) {
-    print(">>>error: $error");
-    super.onError(cubit, error, stackTrace);
   }
 }
