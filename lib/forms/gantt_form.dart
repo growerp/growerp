@@ -369,20 +369,18 @@ class GanttChart extends StatelessWidget {
       if (lastDate != null) {
         DateTime from = reservations![index].fromDate!;
         DateTime thru = reservations![index].thruDate!;
-        //print("====a===$index ${reservations![index].finDoc.orderId}");
+        // save local copy for onTap below
+        FinDoc localFinDoc = reservations![index].finDoc.copyWith();
         chartContent.add(MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
                 onTap: () {
-                  //print("==1==$index");
                   showDialog(
                       barrierDismissible: true,
                       context: context,
                       builder: (BuildContext context) {
                         return ReservationDialog(
-                            formArguments: FormArguments(
-                                object:
-                                    reservations![index].finDoc.copyWith()));
+                            formArguments: FormArguments(object: localFinDoc));
                       });
                 },
                 child: Container(
