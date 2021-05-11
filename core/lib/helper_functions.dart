@@ -22,7 +22,7 @@ import 'dart:io';
 import 'package:http/http.dart' show get;
 
 class HelperFunctions {
-  static showMessage(context, message, colors) {
+  static showMessage(BuildContext context, String? message, dynamic colors) {
     if (message != null && message != "null")
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -36,10 +36,11 @@ class HelperFunctions {
       );
   }
 
-  static showTopMessage(_scaffoldKey, message) {
+  static showTopMessage(dynamic _scaffoldKey, String? message,
+      [int? duration]) {
     if (message != null)
       scheduleMicrotask(() => _scaffoldKey.currentState.showSnackBar(SnackBar(
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: duration ?? 2),
             content: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

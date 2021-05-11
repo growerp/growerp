@@ -47,7 +47,7 @@ class _MyFinDocState extends State<FinDocPage> {
   final _formKeyHeader = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _userSearchBoxController = TextEditingController();
-  late CartBloc _cartBloc;
+  late SalesCartBloc _cartBloc;
   late FinDoc finDocUpdated;
   List<ItemType> itemTypes = [];
   User? _selectedUser;

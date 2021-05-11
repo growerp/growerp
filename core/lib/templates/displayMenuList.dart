@@ -19,13 +19,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/@models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class DisplayMenuItem extends StatefulWidget {
+class DisplayMenuList extends StatefulWidget {
   final List<MenuItem> menuList; // menu list to be used
   final int menuIndex; // navigator rail menu selected
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget>? actions;
-  DisplayMenuItem({
+  DisplayMenuList({
     Key? key,
     required this.menuList,
     required this.menuIndex,
@@ -38,7 +38,7 @@ class DisplayMenuItem extends StatefulWidget {
   _MenuItemState createState() => _MenuItemState();
 }
 
-class _MenuItemState extends State<DisplayMenuItem>
+class _MenuItemState extends State<DisplayMenuList>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();

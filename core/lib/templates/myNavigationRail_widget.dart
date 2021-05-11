@@ -12,10 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/@forms.dart';
 import 'package:core/forms/user_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
-import '';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
     Widget widget, int? menuIndex, List<MenuItem>? menu) {
@@ -28,6 +28,10 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             label: Text(option.title),
           )),
       });
+
+  if (items.isEmpty)
+    return FatalErrorForm("No access to any option here, "
+        "have: ${authenticate.user?.userGroupId} should have: ${menu![0].readGroups}");
 
   return Row(children: <Widget>[
     LayoutBuilder(

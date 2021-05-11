@@ -28,12 +28,6 @@ Route<dynamic> coreRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               CompanyInfoForm(settings.arguments as FormArguments));
-    case '/login':
-      return MaterialPageRoute(
-          builder: (context) => LoginForm(settings.arguments as String?));
-    case '/register':
-      return MaterialPageRoute(
-          builder: (context) => RegisterForm(settings.arguments as String?));
     case '/changePw':
       return MaterialPageRoute(
           builder: (context) =>
@@ -42,15 +36,15 @@ Route<dynamic> coreRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => AccountingForm());
     case '/acctSales':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuItem(
+          builder: (context) => DisplayMenuList(
               menuList: acctMenuItems, menuIndex: 1, tabIndex: 0));
     case '/acctPurchase':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuItem(
+          builder: (context) => DisplayMenuList(
               menuList: acctMenuItems, menuIndex: 2, tabIndex: 0));
     case '/ledger':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuItem(
+          builder: (context) => DisplayMenuList(
               menuList: acctMenuItems, menuIndex: 3, tabIndex: 0));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());

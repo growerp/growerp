@@ -171,7 +171,6 @@ class Moqui {
     required String firstName,
     required String lastName,
     String? currencyId,
-    String? classificationId,
     required String email,
     String? demoData,
   }) async {
@@ -302,6 +301,24 @@ class Moqui {
       else {
         return userFromJson(response.toString());
       }
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> registerUser(User user, String ownerPartyId) async {
+    print("====repos $user $ownerPartyId");
+    try {
+      Response response =
+          await client.put('rest/s1/growerp/100/RegisterUser', data: {
+        'user': userToJson(user),
+        'moquiSessionToken': sessionToken,
+        'classificationId': classificationId,
+        'ownerPartyId': ownerPartyId
+      });
+      print("==resp:==${response.toString()}");
+      print("==user==${userFromJson(response.toString())}");
+      return userFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
     }

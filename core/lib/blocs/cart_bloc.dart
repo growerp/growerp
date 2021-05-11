@@ -54,12 +54,14 @@ class CartBloc extends Bloc<CartEvent, CartState>
     } else if (event is AddToCart) {
       yield CartLoading();
       Decimal grandTotal = Decimal.parse('0');
-      event.finDoc!.items!
+      if (event.finDoc != null)
+        finDoc = event.finDoc!; // if header already present, not ecommerce
+      finDoc.items!
           .add(event.newItem!.copyWith(itemSeqId: finDoc.items!.length + 1));
-      event.finDoc!.items!.forEach((x) {
+      finDoc.items!.forEach((x) {
         grandTotal += x.quantity! * x.price!;
       });
-      finDoc = event.finDoc!.copyWith(grandTotal: grandTotal);
+      finDoc = finDoc.copyWith(grandTotal: grandTotal);
       await repos.saveCart(finDoc);
       yield CartLoaded(finDoc, "cart updated");
     } else if (event is ClearCart) {
@@ -126,7 +128,7 @@ class AddToCart extends CartEvent {
   final FinDocItem? newItem;
   const AddToCart({this.finDoc, this.newItem});
   @override
-  String toString() => 'Updating cart: $finDoc';
+  String toString() => 'Add to cart: $finDoc';
 }
 
 class DeleteItemFromCart extends CartEvent {

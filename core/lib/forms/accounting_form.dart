@@ -28,7 +28,7 @@ class AccountingForm extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         Authenticate authenticate = state.authenticate!;
-        return DisplayMenuItem(
+        return DisplayMenuList(
           menuList: acctMenuItems,
           menuIndex: 0,
           actions: <Widget>[

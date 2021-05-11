@@ -88,7 +88,7 @@ void main() {
     }
   });
 
-  group('Companies & Login >>>>>', () {
+/*  group('Companies & Login >>>>>', () {
     test('Companies', () async {
       try {
         Response response = await client.get('s1/growerp/100/Companies');
@@ -113,7 +113,7 @@ void main() {
       }
     });
   });
-
+*/
   group('Catalog >>>>>', () {
     test('create/get category ', () async {
       client.options.headers['api_key'] = apiKey;

@@ -20,15 +20,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   print(">>>NavigateTo { ${settings.name} " +
       "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
-    case '/login':
-      return MaterialPageRoute(
-          builder: (context) => LoginForm(settings.arguments as String?));
     case '/register':
       return MaterialPageRoute(
           builder: (context) => RegisterForm(settings.arguments as String?));
     case '/changepw':
       return MaterialPageRoute(
-          builder: (context) => ChangePwForm(changePwArgs: settings.arguments as ChangePwArgs?));
+          builder: (context) =>
+              ChangePwForm(changePwArgs: settings.arguments as ChangePwArgs?));
     case '/about':
       return MaterialPageRoute(builder: (context) => AboutForm());
     default:

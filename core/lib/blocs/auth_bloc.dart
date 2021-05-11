@@ -111,19 +111,50 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthUnauthenticated(authenticate, "you are logged out now");
     } else if (event is ResetPassword) {
       await repos.resetPassword(username: event.username);
-    } else if (event is UpdateAuth) {
-      authenticate = await repos.logout(event.authenticate);
-      yield AuthLoading();
-      await repos.persistAuthenticate(event.authenticate);
-      yield AuthUnauthenticated(event.authenticate);
     } else if (event is UpdateCompany) {
       yield AuthLoading("Updating company....");
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
-        authenticate!.company = result;
+        authenticate?.company = result;
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
         yield AuthProblem(result);
+      }
+      // add register bloc functions  register user and admin/company????
+    } else if (event is RegisterCompanyAdmin) {
+      yield AuthLoading();
+      final dynamic authenticate = await repos.register(
+          companyName: event.user.companyName,
+          currencyId: event.currencyId,
+          firstName: event.user.firstName,
+          lastName: event.user.lastName,
+          email: event.user.email);
+      if (authenticate is Authenticate) {
+        await repos.persistAuthenticate(authenticate);
+        yield AuthRegistered();
+        yield AuthUnauthenticated(
+            authenticate,
+            'Register Company and Admin successfull,'
+            ' you can now login with your email password');
+      } else {
+        yield AuthProblem(authenticate);
+      }
+    } else if (event is RegisterUserEcommerce) {
+      print("===authBloc: ${event.user} ${authenticate?.company!.partyId}");
+      yield AuthLoading();
+      final dynamic user = await repos.registerUser(
+          event.user.copyWith(userGroupId: 'GROWERP_M_CUSTOMER'),
+          authenticate?.company!.partyId);
+      if (user is User) {
+        authenticate?.user = user;
+        await repos.persistAuthenticate(authenticate);
+        yield AuthRegistered();
+        yield AuthUnauthenticated(
+            authenticate,
+            'Register successfull,'
+            ' you can now login with your email password');
+      } else {
+        yield AuthProblem(user);
       }
     }
   }
@@ -158,6 +189,21 @@ class UpdateCompany extends AuthEvent {
   String toString() => 'Update Company ${authenticate!.company.toString()} ';
 }
 
+class RegisterCompanyAdmin extends AuthEvent {
+  final User user;
+  final String currencyId;
+  RegisterCompanyAdmin(this.user, this.currencyId);
+  @override
+  String toString() => 'Register Company Admin User: $user';
+}
+
+class RegisterUserEcommerce extends AuthEvent {
+  final User user;
+  RegisterUserEcommerce(this.user);
+  @override
+  String toString() => 'Register Customer User: $user';
+}
+
 class LoggedIn extends AuthEvent {
   final Authenticate authenticate;
   const LoggedIn({required this.authenticate});
@@ -187,9 +233,12 @@ abstract class AuthState extends Equatable {
 
 class AuthInitial extends AuthState {}
 
+class AuthRegistered extends AuthState {}
+
 class AuthLoading extends AuthState {
   final String? message;
   AuthLoading([this.message]);
+  @override
   String toString() => 'Authloading msg: $message';
 }
 
