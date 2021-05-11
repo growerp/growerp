@@ -28,27 +28,27 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/company':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 0));
+              DisplayMenuList(menuList: menuItems, menuIndex: 1, tabIndex: 0));
     case '/admins':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 1));
+              DisplayMenuList(menuList: menuItems, menuIndex: 1, tabIndex: 1));
     case '/employees':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 1, tabIndex: 2));
+              DisplayMenuList(menuList: menuItems, menuIndex: 1, tabIndex: 2));
     case '/rooms':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 2, tabIndex: 0));
+              DisplayMenuList(menuList: menuItems, menuIndex: 2, tabIndex: 0));
     case '/reservations':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 3, tabIndex: 0));
+              DisplayMenuList(menuList: menuItems, menuIndex: 3, tabIndex: 0));
     case '/checkInOut':
       return MaterialPageRoute(
           builder: (context) =>
-              DisplayMenuItem(menuList: menuItems, menuIndex: 4, tabIndex: 0));
+              DisplayMenuList(menuList: menuItems, menuIndex: 4, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

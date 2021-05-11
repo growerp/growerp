@@ -15,19 +15,7 @@
 import 'package:core/forms/@forms.dart';
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
-
 import 'forms/gantt_form.dart';
-
-const MENU_DASHBOARD = 0;
-const MENU_COMPANY = 1;
-const MENU_CRM = 2;
-const MENU_CATALOG = 3;
-const MENU_SALES = 4;
-const MENU_PURCHASE = 5;
-const MENU_ACCOUNTING = 6;
-const MENU_ACCTSALES = 1;
-const MENU_ACCTPURCHASE = 2;
-const MENU_ACCTLEDGER = 3;
 
 List<MenuItem> menuItems = [
   MenuItem(

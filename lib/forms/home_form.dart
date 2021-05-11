@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/@forms.dart';
+import 'package:core/helper_functions.dart';
 import 'package:core/templates/companyLogo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,14 +24,28 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/templates/@templates.dart';
 import '../menuItem_data.dart';
 
-class HomeForm extends StatelessWidget {
+class HomeForm extends StatefulWidget {
+  final String? message;
+
+  const HomeForm({Key? key, this.message}) : super(key: key);
+  @override
+  _HomeFormState createState() => _HomeFormState(message);
+}
+
+class _HomeFormState extends State<HomeForm> {
+  final String? message;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  _HomeFormState(this.message) {
+    HelperFunctions.showTopMessage(scaffoldMessengerKey, message, 4);
+  }
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         Authenticate authenticate = state.authenticate!;
-        return DisplayMenuItem(
+        return DisplayMenuList(
           menuList: menuItems,
           menuIndex: 0,
           actions: <Widget>[
@@ -53,8 +69,6 @@ class HomeForm extends StatelessWidget {
       }
 
       if (state is AuthUnauthenticated) {
-        final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-            GlobalKey<ScaffoldMessengerState>();
         Authenticate? authenticate = state.authenticate;
         return ScaffoldMessenger(
             key: scaffoldMessengerKey,
@@ -71,28 +85,35 @@ class HomeForm extends StatelessWidget {
                           fontSize: isPhone ? 15 : 25,
                           color: Colors.black,
                           fontWeight: FontWeight.bold)),
-                  SizedBox(height: 20),
-                  Text("Login with an existing Id"),
-                  SizedBox(height: 20),
+                  SizedBox(height: 40),
+                  Visibility(
+                      visible: authenticate?.company != null,
+                      child: ElevatedButton(
+                          key: Key('loginButton'),
+                          child: Text('Login with an Existing ID'),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return LoginDialog(
+                                      formArguments: FormArguments());
+                                });
+                          })),
+                  SizedBox(height: 60),
                   ElevatedButton(
-                    key: Key('loginButton'),
-                    child: Text('Login'),
-                    onPressed: () async {
-                      await Navigator.pushNamed(context, '/login');
-                    },
-                  ),
-                  SizedBox(height: 50),
-                  Text(
-                      "Or create a new company and you being the administrator"),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    key: Key('newCompButton'),
-                    child: Text('Create a new company and admin'),
-                    onPressed: () {
-                      authenticate!.company = null;
-                      Navigator.popAndPushNamed(context, '/register');
-                    },
-                  ),
+                      key: Key('newCompButton'),
+                      child: Text('Create a new company and admin'),
+                      onPressed: () async {
+                        authenticate?.company = null;
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return RegisterDialog(
+                                  formArguments: FormArguments());
+                            });
+                      }),
                 ]))));
       }
       return LoadingIndicator();

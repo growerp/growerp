@@ -102,14 +102,10 @@ class MyApp extends StatelessWidget {
           builder: (context, state) {
             if (state is AuthProblem)
               return core.FatalErrorForm("Internet or server problem?");
-            if (state is AuthUnauthenticated) {
-              if (state.authenticate?.company == null) {
-                return core.RegisterForm(
-                    'No companies found in system, create one?');
-              } else
-                return HomeForm();
-            }
-            if (state is AuthAuthenticated) return HomeForm();
+            if (state is AuthAuthenticated)
+              return HomeForm(message: state.message);
+            if (state is AuthUnauthenticated)
+              return HomeForm(message: state.message);
             return core.SplashForm();
           },
         ));
