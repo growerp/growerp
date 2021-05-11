@@ -28,10 +28,7 @@ RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Enable flutter web
-RUN flutter channel master && \
-    flutter upgrade && \
-    flutter config --enable-web && \
-    flutter channel dev
+RUN flutter channel stable && flutter upgrade
 
 # Copy files to container and build
 # RUN mkdir /usr/local/
