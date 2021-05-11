@@ -12,26 +12,27 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/login_dialog.dart';
 import 'package:core/helper_functions.dart';
+import 'package:core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:models/@models.dart';
-import '../routing_constants.dart';
 
 class HomeForm extends StatefulWidget {
   final String? message;
 
-  const HomeForm([this.message]);
+  const HomeForm({Key? key, this.message}) : super(key: key);
   @override
   State<HomeForm> createState() => _HomeState(message);
 }
 
 class _HomeState extends State<HomeForm> {
+  final String? message;
   final _scrollController = ScrollController();
   double _scrollThreshold = 200.0;
-  final String? message;
   Authenticate? authenticate;
   late ProductBloc _productBloc;
   late CategoryBloc _categoryBloc;
@@ -41,8 +42,12 @@ class _HomeState extends State<HomeForm> {
   late int limit;
   bool? search;
   String? searchString;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+  _HomeState(this.message) {
+    HelperFunctions.showTopMessage(scaffoldMessengerKey, message, 4);
+  }
 
-  _HomeState([this.message]);
   @override
   void initState() {
     super.initState();
@@ -54,87 +59,94 @@ class _HomeState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-        listeners: [
-          BlocListener<AuthBloc, AuthState>(listener: (context, state) {
-            if (state is AuthProblem)
-              HelperFunctions.showMessage(
-                  context, state.errorMessage, Colors.red);
-          }),
-          BlocListener<CategoryBloc, CategoryState>(listener: (context, state) {
-            if (state is CategorySuccess) {
-              categories = state.categories;
-            }
-          }),
-          BlocListener<ProductBloc, ProductState>(listener: (context, state) {
-            print("===prod state: $state");
-            if (state is ProductSuccess) {
-              setState(() {
-                products = state.products;
-              });
-            }
-          }),
-        ],
-        child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-          if (state is AuthAuthenticated) authenticate = state.authenticate;
-          if (state is AuthUnauthenticated) authenticate = state.authenticate;
-          if (authenticate != null && categories == null)
-            _categoryBloc.add(
-                FetchCategory(companyPartyId: authenticate!.company!.partyId));
-          if (authenticate != null && categories != null && products == null)
+    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+      print("====$state");
+      if (state is AuthUnauthenticated) print("====$state ${state.message}");
+      if (state is AuthUnauthenticated) print("====$state ${state.message}");
+      if (state is AuthAuthenticated)
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+    }, builder: (context, state) {
+      if (state is AuthAuthenticated) authenticate = state.authenticate;
+      if (state is AuthUnauthenticated) authenticate = state.authenticate;
+      if (authenticate != null) {
+        _categoryBloc
+            .add(FetchCategory(companyPartyId: authenticate!.company!.partyId));
+        return BlocBuilder<CategoryBloc, CategoryState>(
+            builder: (context, state) {
+          if (state is CategorySuccess) {
+            categories = state.categories;
             _productBloc.add(FetchProduct(
                 companyPartyId: authenticate!.company!.partyId,
                 categoryId: categories![0].categoryId));
-          return Scaffold(
-              appBar: AppBar(
-                  title: Text(
-                      "${authenticate?.company?.name ?? 'Company??'} "), // +
-                  //    "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
-                  actions: <Widget>[
-                    IconButton(
-                        icon: Icon(Icons.settings),
-                        tooltip: 'Settings',
-                        onPressed: () async {
-                          await _settingsDialog(context, authenticate);
-                        }),
-                    IconButton(
-                      icon: Icon(Icons.shopping_cart),
-                      tooltip: 'Cart',
-                      onPressed: () => Navigator.pushNamed(context, CartRoute),
-                    ),
-                    if (authenticate?.apiKey == null)
-                      IconButton(
-                          icon: Icon(Icons.exit_to_app),
-                          tooltip: 'Login',
-                          onPressed: () async {
-                            if (await Navigator.pushNamed(
-                                    context, LoginRoute) ==
-                                true) {
-                              Navigator.popAndPushNamed(context, HomeRoute,
-                                  arguments: 'Login Successful');
-                            }
-                          }),
-                    if (authenticate?.apiKey != null)
-                      IconButton(
-                          icon: Icon(Icons.do_not_disturb),
-                          tooltip: 'Logout',
-                          onPressed: () => {
-                                BlocProvider.of<AuthBloc>(context)
-                                    .add(Logout()),
-                                Future<Null>.delayed(
-                                    Duration(milliseconds: 300), () {
-                                  Navigator.popAndPushNamed(context, HomeRoute,
-                                      arguments: 'Logout successful');
-                                })
-                              })
-                  ]),
-              body: SingleChildScrollView(
-                  physics: ClampingScrollPhysics(),
-                  child: ListView(shrinkWrap: true, children: <Widget>[
-                    _categoryList(),
-                    _productsGrid(),
-                  ])));
-        }));
+            selectedCategoryId =
+                selectedCategoryId ?? categories![0].categoryId;
+            return BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+              if (state is ProductSuccess) {
+                products = state.products;
+                return ScaffoldMessenger(
+                    key: scaffoldMessengerKey,
+                    child: Scaffold(
+                        appBar: AppBar(
+                            title: Text(
+                                "${authenticate?.company?.name ?? 'Company??'} "), // +
+                            //    "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+                            actions: <Widget>[
+                              IconButton(
+                                  icon: Icon(Icons.settings),
+                                  tooltip: 'Settings',
+                                  onPressed: () async {
+                                    await _settingsDialog(
+                                        context, authenticate);
+                                  }),
+                              IconButton(
+                                icon: Icon(Icons.shopping_cart),
+                                tooltip: 'Cart',
+                                onPressed: () =>
+                                    Navigator.pushNamed(context, '/cart'),
+                              ),
+                              if (authenticate?.apiKey == null)
+                                IconButton(
+                                    icon: Icon(Icons.exit_to_app),
+                                    tooltip: 'Login',
+                                    onPressed: () async {
+                                      await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return LoginDialog(
+                                                formArguments: FormArguments());
+                                          });
+                                    }),
+                              if (authenticate?.apiKey != null)
+                                IconButton(
+                                    key: Key('logoutButton'),
+                                    icon: Icon(Icons.do_not_disturb),
+                                    tooltip: 'Logout',
+                                    onPressed: () => {
+                                          BlocProvider.of<AuthBloc>(context)
+                                              .add(Logout()),
+                                        }),
+                            ]),
+                        body: SingleChildScrollView(
+                            physics: ClampingScrollPhysics(),
+                            child:
+                                ListView(shrinkWrap: true, children: <Widget>[
+                              _categoryList(),
+                              _productsGrid(),
+                            ]))));
+              }
+              print("========1=========");
+              return LoadingIndicator();
+            });
+          }
+          print("========2=========");
+          return LoadingIndicator();
+        });
+      }
+      print("========3=========");
+      return LoadingIndicator();
+    });
   }
 
   Widget _categoryList() {
@@ -263,8 +275,7 @@ class _HomeState extends State<HomeForm> {
 
   Widget _gridItem(product) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.pushNamed(context, ProductEcomRoute, arguments: product),
+      onTap: () => Navigator.pushNamed(context, '/product', arguments: product),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -367,7 +378,7 @@ _settingsDialog(BuildContext context, Authenticate? authenticate) async {
                       authenticate.company!.copyWith(partyId: null);
                   BlocProvider.of<AuthBloc>(context)
                       .add(UpdateAuth(authenticate));
-                  await Navigator.popAndPushNamed(context, LoginRoute);
+                  await Navigator.popAndPushNamed(context, '/login');
                 },
               ),
               SizedBox(height: 20),
@@ -376,14 +387,14 @@ _settingsDialog(BuildContext context, Authenticate? authenticate) async {
                   child: ElevatedButton(
                     child: Text('Register as a customer'),
                     onPressed: () {
-                      Navigator.popAndPushNamed(context, RegisterRoute);
+                      Navigator.popAndPushNamed(context, '/register');
                     },
                   )),
               SizedBox(height: 20),
               ElevatedButton(
                 child: Text('About'),
                 onPressed: () {
-                  Navigator.popAndPushNamed(context, AboutRoute);
+                  Navigator.popAndPushNamed(context, '/about');
                 },
               ),
             ]),

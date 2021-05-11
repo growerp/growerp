@@ -30,7 +30,7 @@ class ProductForm extends StatefulWidget {
 
 class _ProductEcomFormState extends State<ProductForm> {
   final Product? product;
-  Decimal? quantity;
+  Decimal quantity = Decimal.parse('1');
   FinDocItem? orderItem;
   Map<String, dynamic>? args;
   bool isFavorite = false;
@@ -39,7 +39,6 @@ class _ProductEcomFormState extends State<ProductForm> {
 
   @override
   Widget build(BuildContext context) {
-    quantity ??= Decimal.parse('1');
     return Scaffold(
         appBar: AppBar(
           title: Text('Product detail'),
@@ -117,7 +116,7 @@ class _ProductEcomFormState extends State<ProductForm> {
               children: <Widget>[
                 buildAmountButton(),
                 Text(
-                  (product!.price! * quantity!).toString(),
+                  (product!.price ?? Decimal.parse('0') * quantity).toString(),
                   style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -165,10 +164,10 @@ class _ProductEcomFormState extends State<ProductForm> {
           GestureDetector(
             child: Icon(Icons.remove),
             onTap: () {
-//              setState(() {
-//                if (quantity! > Decimal.parse('1'))
-//                  quantity -= Decimal.parse('1');
-//              });
+              setState(() {
+                if (quantity > Decimal.parse('1'))
+                  quantity -= Decimal.parse('1');
+              });
             },
             onLongPressStart: (_) {
               setState(() {
@@ -180,10 +179,10 @@ class _ProductEcomFormState extends State<ProductForm> {
           GestureDetector(
             child: Icon(Icons.add),
             onTap: () {
-//              setState(() {
-//                if (quantity! < Decimal.parse('25'))
-//                  quantity += Decimal.parse('1');
-//              });
+              setState(() {
+                if (quantity < Decimal.parse('25'))
+                  quantity += Decimal.parse('1');
+              });
             },
             onLongPressStart: (_) {
               setState(() {
@@ -197,10 +196,8 @@ class _ProductEcomFormState extends State<ProductForm> {
   }
 
   Widget buildActionsContainer() {
-    return BlocBuilder<CartBloc, CartState>(builder: (context, state) {
-      if (state is CartLoading) {
-        return CircularProgressIndicator();
-      }
+    return BlocBuilder<SalesCartBloc, CartState>(builder: (context, state) {
+      if (state is CartLoading) return CircularProgressIndicator();
       if (state is CartLoaded) {
         Size size = MediaQuery.of(context).size;
         double screenWidth = size.width;
@@ -242,7 +239,7 @@ class _ProductEcomFormState extends State<ProductForm> {
                         quantity: quantity,
                         price: product!.price,
                         description: product!.productName),
-                    BlocProvider.of<CartBloc>(context)
+                    BlocProvider.of<SalesCartBloc>(context)
                         .add(AddToCart(newItem: orderItem)),
                   },
                   splashColor: Theme.of(context).primaryColor,

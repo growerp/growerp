@@ -51,7 +51,7 @@ class CartForm extends StatelessWidget {
 class _CartList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CartBloc, CartState>(
+    return BlocBuilder<SalesCartBloc, CartState>(
       builder: (context, state) {
         if (state is CartLoading) return CircularProgressIndicator();
         if (state is CartLoaded) {
@@ -94,7 +94,7 @@ class _CartTotal extends StatelessWidget {
         height: 200,
         child: Center(
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          BlocListener<CartBloc, CartState>(listener: (context, state) {
+          BlocListener<SalesCartBloc, CartState>(listener: (context, state) {
             if (state is CartPaid) {
               Navigator.pushNamedAndRemoveUntil(
                   context, '/', ModalRoute.withName('/'),
@@ -102,7 +102,7 @@ class _CartTotal extends StatelessWidget {
                       message: "Order Accepted, id:${state.finDoc!.orderId}"));
             }
           }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-            return BlocBuilder<CartBloc, CartState>(
+            return BlocBuilder<SalesCartBloc, CartState>(
                 builder: (context, cartState) {
               if (cartState is CartLoading || cartState is CartPaying) {
                 return CircularProgressIndicator();
@@ -131,7 +131,7 @@ class _CartTotal extends StatelessWidget {
                                   result == true) {
                                 HelperFunctions.showMessage(
                                     context, 'Sending order...', Colors.green);
-                                BlocProvider.of<CartBloc>(context)
+                                BlocProvider.of<SalesCartBloc>(context)
                                     .add(CreateFinDocFromCart(order!));
                               }
                             }),

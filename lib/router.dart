@@ -12,10 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/coreRouter.dart';
 import 'package:flutter/material.dart';
-import 'routing_constants.dart';
-import 'forms/@forms.dart' as local;
-import 'package:core/forms/@forms.dart';
+import 'forms/@forms.dart';
 import 'package:models/@models.dart';
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
@@ -23,29 +22,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   print(">>>NavigateTo { ${settings.name} " +
       "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
-    case HomeRoute:
+    case '/':
+      return MaterialPageRoute(builder: (context) => HomeForm());
+    case '/cart':
+      return MaterialPageRoute(builder: (context) => CartForm());
+    case '/product':
       return MaterialPageRoute(
-          builder: (context) => local.HomeForm(settings.arguments as String?));
-    case LoginRoute:
-      return MaterialPageRoute(
-          builder: (context) => LoginForm(settings.arguments as String?));
-    case RegisterRoute:
-      return MaterialPageRoute(
-          builder: (context) => RegisterForm(settings.arguments as String?));
-    case ChangePwRoute:
-      return MaterialPageRoute(
-          builder: (context) =>
-              ChangePwForm(changePwArgs: settings.arguments as ChangePwArgs?));
-    case AboutRoute:
-      return MaterialPageRoute(builder: (context) => AboutForm());
-    case CartRoute:
-      return MaterialPageRoute(builder: (context) => local.CartForm());
-    case ProductEcomRoute:
-      return MaterialPageRoute(
-          builder: (context) =>
-              local.ProductForm(settings.arguments as Product?));
+          builder: (context) => ProductForm(settings.arguments as Product?));
     default:
-      return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(settings.name!));
+      return coreRoute(settings);
   }
 }

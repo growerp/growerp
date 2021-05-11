@@ -22,6 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/forms/@forms.dart';
 import 'package:core/styles/themes.dart';
+import 'package:models/@models.dart';
 import 'router.dart' as router;
 import 'forms/@forms.dart' as local;
 import 'package:backend/@backend.dart';
@@ -38,28 +39,44 @@ void main() async {
           ? Ofbiz(client: Dio())
           : null;
 
-  runApp(RepositoryProvider(
-    create: (context) => repos,
-    child: MultiBlocProvider(
-      providers: [
-        BlocProvider<SalesOrderBloc>(
-            create: (context) => FinDocBloc(repos, true, 'order')),
-        BlocProvider<CustomerBloc>(
-            create: (context) => UserBloc(repos, "GROWERP_M_CUSTOMER")),
-        BlocProvider<AuthBloc>(
-            create: (context) => AuthBloc(repos)..add(LoadAuth())),
-        BlocProvider<SalesCartBloc>(
-            create: (context) => CartBloc(
-                repos: repos,
-                sales: true,
-                finDocBloc:
-                    BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)),
-        BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
-        BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
-      ],
-      child: MyApp(),
-    ),
-  ));
+  runApp(Ecommerce(repos: repos!));
+}
+
+class Ecommerce extends StatelessWidget {
+  const Ecommerce({
+    Key? key,
+    required this.repos,
+  }) : super(key: key);
+
+  final Object repos;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepositoryProvider.value(
+      value: repos,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
+          BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
+          BlocProvider<SalesOrderBloc>(
+              create: (context) => FinDocBloc(repos, true, 'order')),
+          BlocProvider<CustomerBloc>(
+              create: (context) => UserBloc(repos, "GROWERP_M_CUSTOMER")),
+          BlocProvider<AuthBloc>(
+              create: (context) => AuthBloc(repos)..add(LoadAuth())),
+          BlocProvider<SalesCartBloc>(
+              create: (context) => CartBloc(
+                  repos: repos,
+                  sales: true,
+                  finDocBloc:
+                      BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc?)
+                ..add(LoadCart(
+                    FinDoc(sales: true, docType: 'order', items: [])))),
+        ],
+        child: MyApp(),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -83,16 +100,17 @@ class MyApp extends StatelessWidget {
         theme: Themes.formTheme,
         onGenerateRoute: router.generateRoute,
         home: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-          if (state is AuthLoading || state is AuthInitial) return SplashForm();
+          if (state is AuthProblem)
+            return FatalErrorForm("Internet or server problem?");
           if (state is AuthUnauthenticated &&
-              state.authenticate?.company ==
-                  null) if (classificationId == 'AppAdmin')
-            return RegisterForm('No companies found in system, create one?');
-          else
-            return FatalErrorForm(
-                "No $classificationId company found in system\n"
+              state.authenticate?.company == null)
+            return FatalErrorForm("No company found in system\n"
                 "Go to the admin app to create one!");
-          return local.HomeForm();
+          if (state is AuthAuthenticated)
+            return local.HomeForm(message: state.message);
+          if (state is AuthUnauthenticated)
+            return local.HomeForm(message: state.message);
+          return SplashForm();
         }));
   }
 }
