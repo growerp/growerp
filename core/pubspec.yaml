@@ -22,7 +22,8 @@ dependencies:
   responsive_framework: ^0.1.0
   flutter_simple_treeview: ^3.0.0-nullsafety.1
   dropdown_search: ^0.5.0
-  printing: ^5.0.4
+  printing: ^5.2.1
+  pdf: ^3.3.0
   about: ^2.0.0
   rxdart: ^0.26.0
 

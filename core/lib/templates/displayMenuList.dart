@@ -20,12 +20,14 @@ import 'package:models/@models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class DisplayMenuList extends StatefulWidget {
+  final scaffoldMessengerKey;
   final List<MenuItem> menuList; // menu list to be used
   final int menuIndex; // navigator rail menu selected
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget>? actions;
   DisplayMenuList({
+    this.scaffoldMessengerKey,
     Key? key,
     required this.menuList,
     required this.menuIndex,
@@ -40,8 +42,6 @@ class DisplayMenuList extends StatefulWidget {
 
 class _MenuItemState extends State<DisplayMenuList>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
   late int tabIndex;
   List<TabItem>? tabItems = [];
   late String title;
@@ -138,24 +138,24 @@ class _MenuItemState extends State<DisplayMenuList>
       if (tabItems == null) {
         // show simple page
         if (isPhone) // no navigation bar
-          return simplePage(authenticate, isPhone);
+          return simplePage(authenticate, isPhone, widget.scaffoldMessengerKey);
         else // tablet or web show navigation
           return myNavigationRail(
             context,
             authenticate!,
-            simplePage(authenticate, isPhone),
+            simplePage(authenticate, isPhone, widget.scaffoldMessengerKey),
             widget.menuIndex,
             widget.menuList,
           );
       } else {
         // show tabbar page
         if (isPhone)
-          return tabPage(authenticate, isPhone);
+          return tabPage(authenticate, isPhone, widget.scaffoldMessengerKey);
         else
           return myNavigationRail(
             context,
             authenticate!,
-            tabPage(authenticate, isPhone),
+            tabPage(authenticate, isPhone, widget.scaffoldMessengerKey),
             widget.menuIndex,
             widget.menuList,
           );
@@ -163,12 +163,14 @@ class _MenuItemState extends State<DisplayMenuList>
     });
   }
 
-  Widget simplePage(Authenticate? authenticate, bool isPhone) {
+  Widget simplePage(
+      Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
+    print("====current simple form: ${child.toString()}");
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
             appBar: AppBar(
-                key: Key('DashBoardAuth'),
+                key: Key(child.toString()),
                 automaticallyImplyLeading: isPhone,
                 leading: leadAction,
                 title: companyLogo(context, authenticate, title),
@@ -178,11 +180,14 @@ class _MenuItemState extends State<DisplayMenuList>
             body: child));
   }
 
-  Widget tabPage(Authenticate? authenticate, bool isPhone) {
+  Widget tabPage(
+      Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
+    print("====current tab form: ${tabList![tabIndex].toString()}");
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
             appBar: AppBar(
+                key: Key(tabList![tabIndex].toString()),
                 automaticallyImplyLeading: isPhone,
                 bottom: isPhone
                     ? null
@@ -211,7 +216,6 @@ class _MenuItemState extends State<DisplayMenuList>
                     onTap: (index) {
                       setState(() {
                         tabIndex = index;
-                        print("==2== $tabIndex");
                       });
                     })
                 : null,

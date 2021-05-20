@@ -58,7 +58,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         dynamic result = await repos.checkApikey();
         if (result is bool && result) {
           //print("===11====");
-          return AuthAuthenticated(authenticate);
+          return AuthAuthenticated(
+              authenticate, "Logged in to ${authenticate!.company!.name!}");
         } else {
           //print("===12====");
           authenticate!.apiKey = null; // revoked
