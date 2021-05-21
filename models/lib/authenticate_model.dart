@@ -18,6 +18,7 @@
 
 import 'dart:convert';
 import 'package:decimal/decimal.dart';
+import 'package:equatable/equatable.dart';
 
 import 'user_model.dart';
 import 'company_model.dart';
@@ -27,13 +28,13 @@ Authenticate authenticateFromJson(String str) =>
 
 String authenticateToJson(Authenticate data) => json.encode(data.toJson());
 
-class Authenticate {
-  String? apiKey;
-  String? moquiSessionToken;
-  Company? company;
-  User? user;
-  Stats? stats;
-  ItemTypes? itemTypes;
+class Authenticate extends Equatable {
+  final String? apiKey;
+  final String? moquiSessionToken;
+  final Company? company;
+  final User? user;
+  final Stats? stats;
+  final ItemTypes? itemTypes;
 
   Authenticate({
     this.apiKey,
@@ -64,6 +65,17 @@ class Authenticate {
         "stats": stats?.toJson(),
         "itemTypes": itemTypes == null ? null : itemTypes!.toJson()
       };
+
+  @override
+  List<Object?> get props => [
+        apiKey,
+        moquiSessionToken,
+        company,
+        user,
+        stats,
+        itemTypes,
+      ];
+
   @override
   String toString() =>
       'Company: $company '
@@ -73,6 +85,23 @@ class Authenticate {
           ? 'itemTypes: ${itemTypes!.sales!.length}/'
               '${itemTypes!.purchase!.length}'
           : '');
+
+  Authenticate copyWith({
+    String? apiKey,
+    String? moquiSessionToken,
+    Company? company,
+    User? user,
+    Stats? stats,
+    ItemTypes? itemTypes,
+  }) =>
+      Authenticate(
+        apiKey: apiKey ?? this.apiKey,
+        moquiSessionToken: moquiSessionToken ?? this.moquiSessionToken,
+        company: company ?? this.company,
+        user: user ?? this.user,
+        stats: stats ?? this.stats,
+        itemTypes: itemTypes ?? this.itemTypes,
+      );
 }
 
 Stats statsFromJson(String str) => Stats.fromJson(json.decode(str)["stats"]);

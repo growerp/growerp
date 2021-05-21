@@ -37,7 +37,7 @@ class _ProductsState extends State<ProductsForm> {
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
-        authenticate = state.authenticate!;
+        authenticate = state.authenticate;
         _productBloc
           ..add(FetchProduct(companyPartyId: authenticate!.company!.partyId));
         return BlocConsumer<ProductBloc, ProductState>(

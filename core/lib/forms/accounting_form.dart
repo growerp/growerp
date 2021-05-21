@@ -27,7 +27,7 @@ class AccountingForm extends StatelessWidget {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
-        Authenticate authenticate = state.authenticate!;
+        Authenticate authenticate = state.authenticate;
         return DisplayMenuList(
           menuList: acctMenuItems,
           menuIndex: 0,
@@ -62,7 +62,7 @@ class AcctDashBoard extends StatelessWidget {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
-        authenticate = state.authenticate!;
+        authenticate = state.authenticate;
         return Container(
             padding: EdgeInsets.symmetric(
                 vertical: isPhone ? 0.8 : 20, horizontal: isPhone ? 0.8 : 20),

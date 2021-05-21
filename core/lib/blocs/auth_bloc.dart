@@ -24,7 +24,7 @@ import 'package:models/@models.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
-  Authenticate? authenticate;
+  late Authenticate authenticate;
 
   AuthBloc(this.repos)
       : assert(repos != null),
@@ -34,41 +34,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
     // ################# local functions ###################
 
-    Future<void> findDefaultCompany() async {
+    Future<Company?> findDefaultCompany() async {
       //print("===15==1==");
       dynamic result = await repos.getCompanies();
       if (result is List<Company> && result.length > 0) {
         //print("===15==2==");
-        authenticate = Authenticate(company: result[0], user: null);
-        //print("======companies received: $result ");
-        await repos.persistAuthenticate(authenticate);
+        return result[0];
       } else {
         // no companies yet or all removed ...
         //print("===15==3==");
-        await repos.removeAuthenticate(); //clean all
+        return null;
       }
     }
 
-    Future<AuthState> checkApikey() async {
-      //print("===10==== apiKey: ${authenticate?.apiKey}");
-      if (authenticate?.apiKey == null) {
-        return AuthUnauthenticated(authenticate);
-      } else {
-        repos.setApikey(authenticate?.apiKey);
-        dynamic result = await repos.checkApikey();
-        if (result is bool && result) {
-          //print("===11====");
-          return AuthAuthenticated(
-              authenticate, "Logged in to ${authenticate!.company!.name!}");
-        } else {
-          //print("===12====");
-          authenticate!.apiKey = null; // revoked
-          repos.setApikey('');
-          //print("===13====");
-          await repos.persistAuthenticate(authenticate);
-          return AuthUnauthenticated(authenticate);
-        }
-      }
+    Future<dynamic> checkApikey(String? apiKey) async {
+      //print("===10==== apiKey: apiKey");
+      repos.setApikey(apiKey);
+      return await repos.checkApikey();
     }
 
     // ################# start bloc ###################
@@ -80,23 +62,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         String backend = GlobalConfiguration().getValue("backend");
         yield AuthProblem("$connected\nwith connector: $backend");
       } else {
-        authenticate = await repos.getAuthenticate();
-        if (authenticate?.company?.partyId != null) {
-          //print("===1====${authenticate!.apiKey}");
-          // check company
-          dynamic result =
-              await repos.checkCompany(authenticate!.company!.partyId);
-          if (result == false) await findDefaultCompany();
-          //print("===2====company: ${authenticate?.company?.partyId}");
-          // now check user apiKey
-          yield await checkApikey();
+        // from local storage
+        var localAuthenticate = await repos.getAuthenticate();
+        if (localAuthenticate == null) {
+          authenticate = Authenticate(company: await findDefaultCompany());
+          // start new with default company which can be null
+          yield AuthUnauthenticated(authenticate);
         } else {
-          //print("===3====${authenticate?.apiKey}");
-          await findDefaultCompany();
-          if (authenticate?.company?.partyId != null)
-            yield await checkApikey();
-          else {
-            //print("===4====no company found}");
+          authenticate = localAuthenticate;
+          var apiKeyOk = false, companyOk = false;
+          // check api key
+          if (authenticate.apiKey != null &&
+              await checkApikey(authenticate.apiKey)) apiKeyOk = true;
+          // check company
+          if (authenticate.company!.partyId != null &&
+              await repos.checkCompany(authenticate.company!.partyId))
+            companyOk = true;
+          if (apiKeyOk && companyOk) {
+            yield AuthAuthenticated(authenticate);
+          } else {
+            if (companyOk)
+              authenticate.copyWith(apiKey: null);
+            else
+              authenticate.copyWith(
+                  company: await findDefaultCompany(), apiKey: null);
             yield AuthUnauthenticated(authenticate);
           }
         }
@@ -116,7 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthLoading("Updating company....");
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
-        authenticate?.company = result;
+        authenticate.copyWith(company: result);
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
         yield AuthProblem(result);
@@ -141,13 +130,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield AuthProblem(authenticate);
       }
     } else if (event is RegisterUserEcommerce) {
-      print("===authBloc: ${event.user} ${authenticate?.company!.partyId}");
+      print("===authBloc: ${event.user} ${authenticate.company!.partyId}");
       yield AuthLoading();
       final dynamic user = await repos.registerUser(
           event.user.copyWith(userGroupId: 'GROWERP_M_CUSTOMER'),
-          authenticate?.company!.partyId);
+          authenticate.company!.partyId);
       if (user is User) {
-        authenticate?.user = user;
+        authenticate.copyWith(user: user);
         await repos.persistAuthenticate(authenticate);
         yield AuthRegistered();
         yield AuthUnauthenticated(
@@ -251,7 +240,7 @@ class AuthProblem extends AuthState {
 }
 
 class AuthAuthenticated extends AuthState {
-  final Authenticate? authenticate;
+  final Authenticate authenticate;
   final String? message;
   AuthAuthenticated(this.authenticate, [this.message]);
   @override
@@ -259,7 +248,7 @@ class AuthAuthenticated extends AuthState {
 }
 
 class AuthUnauthenticated extends AuthState {
-  final Authenticate? authenticate;
+  final Authenticate authenticate;
   final String? message;
   AuthUnauthenticated(this.authenticate, [this.message]);
   @override

@@ -22,7 +22,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginBloc({
     required this.repos,
-  })   : assert(repos != null),
+  })  : assert(repos != null),
         super(LoginInitial());
 
   @override
@@ -47,7 +47,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: event.password,
       );
       if (result is Authenticate) {
-        if (result.company == null) result.company = event.company;
+        if (result.company == null) result.copyWith(company: event.company);
         yield LoginOk(result);
       } else if (result == "passwordChange") {
         yield LoginChangePw(event.company, event.username, event.password);

@@ -37,7 +37,7 @@ class _AssetsState extends State<AssetsForm> {
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
-        authenticate = state.authenticate!;
+        authenticate = state.authenticate;
         return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
           if (state is AssetProblem)
             HelperFunctions.showMessage(

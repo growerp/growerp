@@ -30,7 +30,7 @@ class LoginDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     String? message = formArguments.message;
     var repos = context.read<Object>();
-    Authenticate? authenticate;
+    late Authenticate authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
       return BlocProvider(
@@ -52,7 +52,7 @@ class LoginHeader extends StatefulWidget {
 class _LoginHeaderState extends State<LoginHeader> {
   final String? message;
   final _formKey = GlobalKey<FormState>();
-  Authenticate? authenticate;
+  late Authenticate authenticate;
   bool _obscureText = true;
   String? companyPartyId;
   String? companyName;
@@ -101,8 +101,8 @@ class _LoginHeaderState extends State<LoginHeader> {
         child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
           if (state is AuthUnauthenticated) {
             authenticate = state.authenticate;
-            companyPartyId = authenticate?.company?.partyId;
-            companyName = authenticate?.company?.name;
+            companyPartyId = authenticate.company!.partyId;
+            companyName = authenticate.company!.name;
           }
           return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
             if (state is LoginLoading || state is LoginInitial)
@@ -155,7 +155,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                 );
               }).toList(),
               onChanged: (Company? newValue) {
-                authenticate!.company = newValue;
+                authenticate.copyWith(company: newValue);
                 BlocProvider.of<AuthBloc>(context)
                     .add(UpdateAuth(authenticate));
                 Navigator.pushNamedAndRemoveUntil(
@@ -171,8 +171,8 @@ class _LoginHeaderState extends State<LoginHeader> {
 
   Widget _loginToCurrentCompany(state) {
     final _usernameController = TextEditingController()
-      ..text = authenticate?.user?.name != null
-          ? authenticate!.user!.name!
+      ..text = authenticate.user?.name != null
+          ? authenticate.user!.name!
           : kReleaseMode
               ? ''
               : 'admin@growerp.com';
@@ -235,7 +235,7 @@ class _LoginHeaderState extends State<LoginHeader> {
                         state is! LogginInProgress)
                       BlocProvider.of<LoginBloc>(context).add(
                           LoginButtonPressed(
-                              company: authenticate!.company,
+                              company: authenticate.company,
                               username: _usernameController.text,
                               password: _passwordController.text));
                   }),
@@ -253,9 +253,9 @@ class _LoginHeaderState extends State<LoginHeader> {
                       onTap: () async {
                         final String username = await _sendResetPasswordDialog(
                             context,
-                            authenticate?.user?.name == null || kReleaseMode
+                            authenticate.user!.name == null || kReleaseMode
                                 ? 'admin@growerp.com'
-                                : authenticate?.user?.name);
+                                : authenticate.user!.name);
                         if (username.isNotEmpty) {
                           BlocProvider.of<AuthBloc>(context)
                               .add(ResetPassword(username: username));

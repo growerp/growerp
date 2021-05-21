@@ -136,7 +136,7 @@ class _MyFinDocState extends State<FinDocPage> {
                                 builder: (context, state) {
                               if (state is AuthAuthenticated)
                                 itemTypes =
-                                    state.authenticate!.itemTypes!.sales!;
+                                    state.authenticate.itemTypes!.sales!;
                               if (finDocUpdated.sales!)
                                 return BlocListener<SalesOrderBloc,
                                         FinDocState>(

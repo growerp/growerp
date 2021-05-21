@@ -130,7 +130,7 @@ class _CompanyState extends State<CompanyPage> {
                 }
               }, builder: (context, state) {
                 if (state is AuthUnauthenticated) {
-                  updatedCompany = state.authenticate!.company;
+                  updatedCompany = state.authenticate.company;
                 }
                 if (state is AuthAuthenticated) {
                   updatedCompany = authenticate!.company;
