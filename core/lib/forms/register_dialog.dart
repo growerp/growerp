@@ -92,7 +92,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           child: Container(
                               padding: EdgeInsets.all(20),
                               width: 400,
-                              height: 550,
+                              height: 600,
                               child: _registerForm(authenticate, state)))))));
     }));
   }
