@@ -165,7 +165,6 @@ class _MenuItemState extends State<DisplayMenuList>
 
   Widget simplePage(
       Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
-    print("====current simple form: ${child.toString()}");
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
@@ -182,7 +181,6 @@ class _MenuItemState extends State<DisplayMenuList>
 
   Widget tabPage(
       Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
-    print("====current tab form: ${tabList![tabIndex].toString()}");
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(

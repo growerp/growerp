@@ -23,7 +23,8 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
   menu?.forEach((option) => {
         if (option.readGroups.contains(authenticate.user?.userGroupId))
           items.add(NavigationRailDestination(
-            icon: Image.asset(option.image, height: 40),
+            icon: Image.asset(option.image,
+                height: 40, key: Key('tap${option.route}')),
             selectedIcon: Image.asset(option.selectedImage),
             label: Text(option.title),
           )),
@@ -41,9 +42,11 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             constraints: BoxConstraints(minHeight: constraint.maxHeight),
             child: IntrinsicHeight(
               child: NavigationRail(
+                  key: Key('navigationrail'),
                   backgroundColor: Color(0xFF4baa9b),
                   leading: Center(
                       child: InkWell(
+                          key: Key('tapUser'),
                           onTap: () async {
                             await showDialog(
                                 barrierDismissible: true,

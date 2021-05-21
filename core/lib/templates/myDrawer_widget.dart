@@ -28,55 +28,57 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
           }),
       });
   bool loggedIn = authenticate?.apiKey != null;
-  return loggedIn && isPhone
-      ? Drawer(
-          child: ListView.builder(
-          itemCount: options.length + 1,
-          itemBuilder: (context, i) {
-            if (i == 0)
-              return DrawerHeader(
-                  child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/user',
-                            arguments: FormArguments(
-                              object: authenticate!.user,
-                            ));
-                      },
-                      child: Column(children: [
-                        CircleAvatar(
-                            backgroundColor: Colors.green,
-                            radius: 40,
-                            child: authenticate?.user?.image != null
-                                ? Image.memory(authenticate!.user!.image!)
-                                : Text(
-                                    authenticate!.user?.firstName
-                                            ?.substring(0, 1) ??
-                                        '',
-                                    style: TextStyle(
-                                        fontSize: 30, color: Colors.black))),
-                        SizedBox(height: 20),
-                        Text(
-                            "${authenticate.user!.firstName} "
-                            "${authenticate.user!.lastName}",
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.black)),
-                      ])));
-            return ListTile(
-                contentPadding: EdgeInsets.all(5.0),
-                title: Text(options[i - 1]["title"]),
-                leading: Image.asset(
-                  options[i - 1]["selImage"],
-                ),
-                onTap: () {
-                  if (options[i - 1]["route"] == "/")
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/', (Route<dynamic> route) => false);
-                  else
-                    Navigator.pushNamed(context, options[i - 1]["route"],
-                        arguments:
-                            FormArguments(menuIndex: options[i - 1]["tab"]));
-                });
-          },
-        ))
-      : null;
+  if (loggedIn && isPhone)
+    return Drawer(
+      key: Key('drawer'),
+      child: ListView.builder(
+        itemCount: options.length + 1,
+        itemBuilder: (context, i) {
+          if (i == 0)
+            return DrawerHeader(
+                child: InkWell(
+                    key: Key('tapUser'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/user',
+                          arguments: FormArguments(
+                            object: authenticate!.user,
+                          ));
+                    },
+                    child: Column(children: [
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 40,
+                          child: authenticate?.user?.image != null
+                              ? Image.memory(authenticate!.user!.image!)
+                              : Text(
+                                  authenticate!.user?.firstName
+                                          ?.substring(0, 1) ??
+                                      '',
+                                  style: TextStyle(
+                                      fontSize: 30, color: Colors.black))),
+                      SizedBox(height: 20),
+                      Text(
+                          "${authenticate.user!.firstName} "
+                          "${authenticate.user!.lastName}",
+                          style: TextStyle(fontSize: 20, color: Colors.black)),
+                    ])));
+          return ListTile(
+              key: Key('tap${options[i - 1]["route"]}'),
+              contentPadding: EdgeInsets.all(5.0),
+              title: Text(options[i - 1]["title"]),
+              leading: Image.asset(
+                options[i - 1]["selImage"],
+              ),
+              onTap: () {
+                if (options[i - 1]["route"] == "/")
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/', (Route<dynamic> route) => false);
+                else
+                  Navigator.pushNamed(context, options[i - 1]["route"],
+                      arguments:
+                          FormArguments(menuIndex: options[i - 1]["tab"]));
+              });
+        },
+      ),
+    );
 }
