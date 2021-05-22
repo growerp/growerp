@@ -56,6 +56,7 @@ void main(List<String> arguments) {
     var lister = Directory(androidDir).list(recursive: false);
     lister.listen((file) => {
           if (basename(file.path) != 'keyword.strings' &&
+              basename(file.path) != 'images' &&
               basename(file.path) != 'title.strings')
             file.delete(),
         });
