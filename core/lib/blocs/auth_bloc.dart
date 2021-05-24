@@ -72,20 +72,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           authenticate = localAuthenticate;
           var apiKeyOk = false, companyOk = false;
           // check api key
-          if (authenticate.apiKey != null &&
-              await checkApikey(authenticate.apiKey)) apiKeyOk = true;
+          if (authenticate.apiKey != null) {
+            dynamic result = await checkApikey(authenticate.apiKey);
+            if (result == bool && result == true)
+              apiKeyOk = true;
+            else
+              authenticate = authenticate.copyWith(clearApiKey: true);
+          }
           // check company
-          if (authenticate.company!.partyId != null &&
-              await repos.checkCompany(authenticate.company!.partyId))
-            companyOk = true;
+          if (authenticate.company!.partyId != null) {
+            dynamic result =
+                await repos.checkCompany(authenticate.company!.partyId);
+            if (result is bool && result == true) companyOk = true;
+          }
+          // already logged in
           if (apiKeyOk && companyOk) {
             yield AuthAuthenticated(authenticate);
           } else {
-            if (companyOk)
-              authenticate.copyWith(apiKey: null);
-            else
-              authenticate.copyWith(
-                  company: await findDefaultCompany(), apiKey: null);
+            if (!companyOk) {
+              dynamic result = await findDefaultCompany();
+              if (result != null && result is Company)
+                authenticate = authenticate.copyWith(company: result);
+              else
+                authenticate = authenticate.copyWith(clearCompany: true);
+            }
+            repos.persistAuthenticate(authenticate);
             yield AuthUnauthenticated(authenticate);
           }
         }
@@ -130,7 +141,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield AuthProblem(authenticate);
       }
     } else if (event is RegisterUserEcommerce) {
-      print("===authBloc: ${event.user} ${authenticate.company!.partyId}");
       yield AuthLoading();
       final dynamic user = await repos.registerUser(
           event.user.copyWith(userGroupId: 'GROWERP_M_CUSTOMER'),

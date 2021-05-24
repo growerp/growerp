@@ -87,6 +87,8 @@ class Authenticate extends Equatable {
           : '');
 
   Authenticate copyWith({
+    bool clearApiKey = false,
+    bool clearCompany = false,
     String? apiKey,
     String? moquiSessionToken,
     Company? company,
@@ -95,9 +97,9 @@ class Authenticate extends Equatable {
     ItemTypes? itemTypes,
   }) =>
       Authenticate(
-        apiKey: apiKey ?? this.apiKey,
+        apiKey: clearApiKey == true ? null : apiKey ?? this.apiKey,
         moquiSessionToken: moquiSessionToken ?? this.moquiSessionToken,
-        company: company ?? this.company,
+        company: clearCompany == true ? null : company ?? this.company,
         user: user ?? this.user,
         stats: stats ?? this.stats,
         itemTypes: itemTypes ?? this.itemTypes,
