@@ -11,7 +11,7 @@ void main(List<String> arguments) {
   exitCode = 0;
   print('Creating screen images from integration tests');
   const androidDir = 'android/fastlane/metadata/android/en-US/';
-  const iosDir = 'ios/fastlane/screenshots/unframed/en-US/';
+  const iosDir = 'ios/fastlane/unframed/en-US/';
 
   var params = 'emulators';
   if (Platform.isMacOS) params = 'devices';
@@ -93,7 +93,7 @@ void main(List<String> arguments) {
               'global',
               'run',
               'frameit_chrome',
-              '--base-dir=ios/fastlane/screenshots/unframed',
+              '--base-dir=ios/fastlane/unframed',
               '--frames-dir=ios/fastlane/frames',
               '--chrome-binary=/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
               '--pixel-ratio=2'
