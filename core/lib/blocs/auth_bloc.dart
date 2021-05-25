@@ -116,7 +116,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield AuthLoading("Updating company....");
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
-        authenticate.copyWith(company: result);
+        authenticate = authenticate.copyWith(company: result);
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
         yield AuthProblem(result);
@@ -146,7 +146,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.user.copyWith(userGroupId: 'GROWERP_M_CUSTOMER'),
           authenticate.company!.partyId);
       if (user is User) {
-        authenticate.copyWith(user: user);
+        authenticate = authenticate.copyWith(user: user);
         await repos.persistAuthenticate(authenticate);
         yield AuthRegistered();
         yield AuthUnauthenticated(
@@ -156,6 +156,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       } else {
         yield AuthProblem(user);
       }
+    } else if (event is UpdateAuth) {
+      yield AuthLoading();
+      authenticate = event.authenticate;
+      if (authenticate.apiKey == null)
+        yield AuthUnauthenticated(authenticate);
+      else
+        yield AuthAuthenticated(authenticate);
     }
   }
 }
@@ -175,7 +182,7 @@ class LoadAuth extends AuthEvent {
 class Logout extends AuthEvent {}
 
 class UpdateAuth extends AuthEvent {
-  final Authenticate? authenticate;
+  final Authenticate authenticate;
   UpdateAuth(this.authenticate);
   @override
   String toString() => 'Update Authenticate ${authenticate.toString()}';

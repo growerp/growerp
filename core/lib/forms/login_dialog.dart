@@ -155,9 +155,8 @@ class _LoginHeaderState extends State<LoginHeader> {
                 );
               }).toList(),
               onChanged: (Company? newValue) {
-                authenticate.copyWith(company: newValue);
                 BlocProvider.of<AuthBloc>(context)
-                    .add(UpdateAuth(authenticate));
+                    .add(UpdateAuth(authenticate.copyWith(company: newValue)));
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/', ModalRoute.withName('/'),
                     arguments:
@@ -227,25 +226,28 @@ class _LoginHeaderState extends State<LoginHeader> {
                     ),
                   )),
               SizedBox(height: 20),
-              ElevatedButton(
-                  key: Key('login'),
-                  child: Text('Login'),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate() &&
-                        state is! LogginInProgress)
-                      BlocProvider.of<LoginBloc>(context).add(
-                          LoginButtonPressed(
-                              company: authenticate.company,
-                              username: _usernameController.text,
-                              password: _passwordController.text));
-                  }),
-              SizedBox(height: 20),
-              ElevatedButton(
-                  key: Key('cancel'),
-                  child: Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  }),
+              Row(children: [
+                ElevatedButton(
+                    key: Key('cancel'),
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    }),
+                SizedBox(width: 20),
+                Expanded(
+                    child: ElevatedButton(
+                        key: Key('login'),
+                        child: Text('Login'),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate() &&
+                              state is! LogginInProgress)
+                            BlocProvider.of<LoginBloc>(context).add(
+                                LoginButtonPressed(
+                                    company: authenticate.company,
+                                    username: _usernameController.text,
+                                    password: _passwordController.text));
+                        }))
+              ]),
               SizedBox(height: 30),
               Center(
                   child: GestureDetector(
@@ -276,7 +278,8 @@ class _LoginHeaderState extends State<LoginHeader> {
                             context: context,
                             builder: (BuildContext context) {
                               return RegisterDialog(
-                                  formArguments: FormArguments());
+                                  formArguments:
+                                      FormArguments(object: authenticate));
                             });
                       })),
               Container(
@@ -313,7 +316,7 @@ _sendResetPasswordDialog(BuildContext context, String? username) async {
           ElevatedButton(
             child: Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop(null);
+              Navigator.of(context).pop('');
             },
           ),
           ElevatedButton(

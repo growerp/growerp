@@ -250,7 +250,7 @@ class Moqui {
   Future<dynamic> logout(authenticate) async {
     try {
       await client.post('rest/logout');
-      authenticate.copyWith(apiKey: null);
+      authenticate = authenticate.copyWith(clearApiKey: true);
       await persistAuthenticate(authenticate);
       return authenticate;
     } on DioError catch (e) {

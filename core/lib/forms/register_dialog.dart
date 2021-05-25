@@ -26,14 +26,16 @@ class RegisterDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? message = formArguments.message;
-    return RegisterHeader(message);
+    return RegisterHeader(
+        message: formArguments.message,
+        authenticate: formArguments.object as Authenticate);
   }
 }
 
 class RegisterHeader extends StatefulWidget {
   final String? message;
-  const RegisterHeader(this.message);
+  final Authenticate authenticate;
+  const RegisterHeader({this.message, required this.authenticate});
 
   @override
   State<RegisterHeader> createState() => _RegisterHeaderState(message);
@@ -65,7 +67,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
 
   @override
   Widget build(BuildContext context) {
-    Authenticate? authenticate;
     return BlocListener<AuthBloc, AuthState>(listener: (context, state) {
       if (state is AuthProblem)
         HelperFunctions.showMessage(context, state.errorMessage, Colors.red);
@@ -76,7 +77,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
         Navigator.pop(context);
       }
     }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state is AuthUnauthenticated) authenticate = state.authenticate;
       return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Scaffold(
@@ -93,20 +93,21 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                               padding: EdgeInsets.all(20),
                               width: 400,
                               height: 600,
-                              child: _registerForm(authenticate, state)))))));
+                              child: _registerForm(
+                                  widget.authenticate, state)))))));
     }));
   }
 
-  Widget _registerForm(Authenticate? authenticate, AuthState state) {
+  Widget _registerForm(Authenticate authenticate, AuthState state) {
     return Form(
         key: _formKey,
         child: ListView(children: <Widget>[
           SizedBox(height: 20),
           Center(
               child: Text(
-                  authenticate?.company != null
+                  authenticate.company != null
                       ? "Enter a new customer for company\n "
-                          "${authenticate?.company!.name}"
+                          "${authenticate.company!.name}"
                       : "Enter a new company with admin user",
                   style: TextStyle(
                       fontSize: 20,
@@ -165,32 +166,41 @@ class _RegisterHeaderState extends State<RegisterHeader> {
             },
           ),
           Visibility(
-              visible: authenticate?.company?.partyId != null,
+              visible: authenticate.company?.partyId != null,
               child: Column(children: [
                 SizedBox(height: 20),
-                ElevatedButton(
-                    key: Key('newCustomer'),
-                    child: Text('Register as a customer'),
+                Row(children: [
+                  ElevatedButton(
+                    child: Text('Cancel'),
                     onPressed: () {
-                      if (_formKey.currentState!.validate() &&
-                          state is! UserLoading)
-                        BlocProvider.of<AuthBloc>(context)
-                            .add(RegisterUserEcommerce(
-                          User(
-                            companyName: _companyController.text,
-                            firstName: _firstNameController.text,
-                            lastName: _lastNameController.text,
-                            email: _emailController.text,
-                          ),
-                        ));
-                    })
+                      Navigator.of(context).pop(null);
+                    },
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                      child: ElevatedButton(
+                          key: Key('newCustomer'),
+                          child: Text('Register as a customer'),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate() &&
+                                state is! UserLoading)
+                              BlocProvider.of<AuthBloc>(context)
+                                  .add(RegisterUserEcommerce(
+                                User(
+                                  companyName: _companyController.text,
+                                  firstName: _firstNameController.text,
+                                  lastName: _lastNameController.text,
+                                  email: _emailController.text,
+                                ),
+                              ));
+                          })),
+                ])
               ])),
           SizedBox(height: 20),
           Visibility(
               // register new company and admin
-              visible: authenticate?.company?.partyId == null,
+              visible: authenticate.company == null,
               child: Column(children: [
-                SizedBox(height: 20),
                 DropdownButtonFormField<Currency>(
                   key: Key('dropDownCur'),
                   hint: Text('Currency'),
@@ -210,24 +220,34 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                   isExpanded: true,
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                    key: Key('newCompany'),
-                    child: Text('Register AND create a new Company'),
+                Row(children: [
+                  ElevatedButton(
+                    child: Text('Cancel'),
                     onPressed: () {
-                      if (_formKey.currentState!.validate() &&
-                          state is! AuthLoading)
-                        BlocProvider.of<AuthBloc>(context)
-                            .add(RegisterCompanyAdmin(
-                          User(
-                            companyName: _companyController.text,
-                            firstName: _firstNameController.text,
-                            lastName: _lastNameController.text,
-                            email: _emailController.text,
-                          ),
-                          (_currencySelected?.currencyId ??
-                              currencies[0].currencyId)!,
-                        ));
-                    }),
+                      Navigator.of(context).pop(null);
+                    },
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                      child: ElevatedButton(
+                          key: Key('newCompany'),
+                          child: Text('Register AND create a new Company'),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate() &&
+                                state is! AuthLoading)
+                              BlocProvider.of<AuthBloc>(context)
+                                  .add(RegisterCompanyAdmin(
+                                User(
+                                  companyName: _companyController.text,
+                                  firstName: _firstNameController.text,
+                                  lastName: _lastNameController.text,
+                                  email: _emailController.text,
+                                ),
+                                (_currencySelected?.currencyId ??
+                                    currencies[0].currencyId)!,
+                              ));
+                          })),
+                ])
               ]))
         ]));
   }
