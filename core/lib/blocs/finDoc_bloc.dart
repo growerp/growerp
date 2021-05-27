@@ -117,7 +117,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       }
     } else if (currentState is FinDocSuccess) {
       if (event is CreateFinDoc) {
-        yield FinDocLoading('Creating ${event.finDoc!.docType}...');
+        print("===in findocbloc====Creating ${event.finDoc.docType}..====");
+        yield FinDocLoading('Creating ${event.finDoc.docType}...');
         dynamic result = await repos.updateFinDoc(event.finDoc);
         if (result is List<FinDoc> && result.isNotEmpty) {
           yield FinDocUpdate(result[0]);
@@ -191,7 +192,7 @@ class FetchFinDoc extends FinDocEvent {
 }
 
 class CreateFinDoc extends FinDocEvent {
-  final FinDoc? finDoc;
+  final FinDoc finDoc;
   CreateFinDoc(this.finDoc);
   @override
   String toString() => 'CreateFinDoc $finDoc';

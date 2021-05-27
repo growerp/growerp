@@ -66,8 +66,6 @@ class PdfFormats {
       );
 
   static Widget buildFinDocInfo(FinDoc info) {
-    //  final paymentTerms =
-    //      '${info.creationDate!.difference(info.completionDate!).inDays} days';
     final titles = <String>[
       '${info.docType} Number:',
       '${info.docType} Date:',

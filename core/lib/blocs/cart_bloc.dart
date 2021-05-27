@@ -28,9 +28,9 @@ class CartBloc extends Bloc<CartEvent, CartState>
     with PurchCartBloc, SalesCartBloc {
   final repos;
   final bool? sales;
-  final FinDocBloc? finDocBloc;
+  final FinDocBloc finDocBloc;
   FinDoc finDoc = FinDoc(items: []);
-  CartBloc({this.repos, this.sales = true, this.finDocBloc})
+  CartBloc({this.repos, this.sales = true, required this.finDocBloc})
       : super(CartInitial());
 
   @override
@@ -65,8 +65,10 @@ class CartBloc extends Bloc<CartEvent, CartState>
       await repos.saveCart(finDoc);
       yield CartLoaded(finDoc, "cart updated");
     } else if (event is ClearCart) {
+      yield CartLoading();
       finDoc = FinDoc(
           sales: event.finDoc.sales, docType: event.finDoc.docType, items: []);
+      await repos.saveCart(finDoc);
       yield CartLoaded(finDoc, "cart cleared.");
     } else if (event is DeleteItemFromCart) {
       yield CartLoading();
@@ -81,9 +83,10 @@ class CartBloc extends Bloc<CartEvent, CartState>
       await repos.saveCart(finDoc);
       yield CartLoaded(finDoc, "Item# ${event.index} removed");
     } else if (event is CreateFinDocFromCart) {
+      print("======cart bloc==========creating order");
       yield CartLoading('Saving ${event.finDoc.docType}...');
       try {
-        finDocBloc!.add(CreateFinDoc(event.finDoc));
+        finDocBloc.add(CreateFinDoc(event.finDoc));
         add(ClearCart(event.finDoc));
         yield CartLoaded(finDoc, "${finDoc.docType} created, cart cleared..");
       } catch (e) {

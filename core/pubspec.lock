@@ -7,7 +7,7 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "21.0.0"
+    version: "22.0.0"
   about:
     dependency: "direct main"
     description:
@@ -21,7 +21,7 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0"
+    version: "1.7.1"
   archive:
     dependency: transitive
     description:
@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: "591821a6c441042f913c910ee479b4f03a2e24ca"
+      resolved-ref: "29e1e024b2ce65eaf2a1283b97329905fe3b99ab"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -156,7 +156,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   crypto:
     dependency: transitive
     description:
@@ -212,7 +212,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.1"
   file:
     dependency: transitive
     description:
@@ -259,7 +259,7 @@ packages:
       name: flutter_plugin_android_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   flutter_simple_treeview:
     dependency: "direct main"
     description:
@@ -325,7 +325,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.5+2"
+    version: "0.7.5+3"
   image_picker_for_web:
     dependency: transitive
     description:
@@ -402,7 +402,7 @@ packages:
       name: mockito
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.8"
+    version: "5.0.9"
   mocktail:
     dependency: transitive
     description:
@@ -415,7 +415,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "591821a6c441042f913c910ee479b4f03a2e24ca"
+      resolved-ref: "29e1e024b2ce65eaf2a1283b97329905fe3b99ab"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -579,7 +579,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.6"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -661,7 +661,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -794,7 +794,7 @@ packages:
       name: very_good_analysis
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.1.1"
   vm_service:
     dependency: transitive
     description:

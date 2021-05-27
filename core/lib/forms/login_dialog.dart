@@ -73,7 +73,8 @@ class _LoginHeaderState extends State<LoginHeader> {
     return MultiBlocListener(
         listeners: [
           BlocListener<AuthBloc, AuthState>(listener: (context, state) {
-            if (state is AuthAuthenticated) Navigator.pop(context, true);
+            if (state is AuthAuthenticated)
+              Navigator.of(context).pop(state.authenticate);
             if (state is AuthProblem) {
               HelperFunctions.showMessage(
                   context, '${state.errorMessage}', Colors.red);

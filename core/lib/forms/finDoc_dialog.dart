@@ -104,6 +104,13 @@ class _MyFinDocState extends State<FinDocPage> {
       }
       return Column(children: [
         SizedBox(height: 20),
+        Center(
+            child: Text('${finDoc.docType} #${finDoc.id()}',
+                style: TextStyle(
+                    fontSize: isPhone ? 10 : 20,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold))),
+        SizedBox(height: 20),
         _headerEntry(repos),
         SizedBox(height: 40, child: _updateButtons(itemTypes, repos)),
         _finDocItemList(),
@@ -193,7 +200,8 @@ class _MyFinDocState extends State<FinDocPage> {
                           searchBoxController: _userSearchBoxController,
                           isFilteredOnline: true,
                           key: Key('dropUser'),
-                          itemAsString: (User? u) => "${u!.companyName}",
+                          itemAsString: (User? u) =>
+                              "${u!.companyName},\n${u.firstName} ${u.lastName}",
                           onFind: (String filter) => getData(
                               "GROWERP_M_CUSTOMER",
                               _userSearchBoxController.text),

@@ -42,7 +42,7 @@ class FinDoc extends Equatable {
   final String? transactionId;
   final String? statusId;
   final DateTime? creationDate;
-  final DateTime? completionDate;
+  final DateTime? placedDate;
   final String? description;
   final User?
       otherUser; //a single person responsible for finDoc of a single company
@@ -59,7 +59,7 @@ class FinDoc extends Equatable {
     this.transactionId,
     this.statusId,
     this.creationDate,
-    this.completionDate,
+    this.placedDate,
     this.description,
     this.otherUser,
     this.grandTotal,
@@ -76,7 +76,7 @@ class FinDoc extends Equatable {
         transactionId: json["transactionId"],
         statusId: json["statusId"],
         creationDate: DateTime.tryParse(json["creationDate"] ?? ''),
-        completionDate: DateTime.tryParse(json["completionDate"] ?? ''),
+        placedDate: DateTime.tryParse(json["placedDate"] ?? ''),
         description: json["description"],
         otherUser:
             json["otherUser"] == null ? null : User.fromJson(json["otherUser"]),
@@ -99,7 +99,7 @@ class FinDoc extends Equatable {
         "transactionId": transactionId,
         "statusId": statusId,
         "creationDate": creationDate.toString(),
-        "completionDate": completionDate.toString(),
+        "placedDate": placedDate.toString(),
         "description": description,
         "otherUser": otherUser == null ? null : otherUser!.toJson(),
         "grandTotal": grandTotal.toString(),
@@ -139,7 +139,7 @@ class FinDoc extends Equatable {
         transactionId,
         statusId,
         creationDate,
-        completionDate,
+        placedDate,
         description,
         otherUser, //a single person responsible for finDoc of a single company
         grandTotal,
@@ -163,7 +163,7 @@ class FinDoc extends Equatable {
     String? transactionId,
     String? statusId,
     DateTime? creationDate,
-    DateTime? completionDate,
+    DateTime? placedDate,
     String? description,
     User?
         otherUser, //a single person responsible for finDoc of a single company
@@ -180,7 +180,7 @@ class FinDoc extends Equatable {
         transactionId: transactionId ?? this.transactionId,
         statusId: statusId ?? this.statusId,
         creationDate: creationDate ?? this.creationDate,
-        completionDate: completionDate ?? this.completionDate,
+        placedDate: placedDate ?? this.placedDate,
         description: description ?? this.description,
         otherUser: otherUser ?? this.otherUser,
         grandTotal: grandTotal ?? this.grandTotal,

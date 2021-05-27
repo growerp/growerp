@@ -126,7 +126,7 @@ class _AssetState extends State<AssetPage> {
                                   : "Asset# ") +
                               (asset == null ? "New" : "${asset!.assetId!}"),
                           style: TextStyle(
-                              fontSize: isPhone ? 10 : 15,
+                              fontSize: isPhone ? 10 : 20,
                               color: Colors.black,
                               fontWeight: FontWeight.bold))),
                   SizedBox(height: 30),

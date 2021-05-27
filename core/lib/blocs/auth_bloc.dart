@@ -48,9 +48,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     Future<dynamic> checkApikey(String? apiKey) async {
-      //print("===10==== apiKey: apiKey");
-      repos.setApikey(apiKey);
-      return await repos.checkApikey();
+      if (apiKey != null) {
+        repos.setApikey(apiKey);
+        return await repos.checkApikey();
+      } else
+        return Future.value(false);
     }
 
     // ################# start bloc ###################
@@ -62,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         String backend = GlobalConfiguration().getValue("backend");
         yield AuthProblem("$connected\nwith connector: $backend");
       } else {
-        // from local storage
+        // login data from local storage
         var localAuthenticate = await repos.getAuthenticate();
         if (localAuthenticate == null) {
           authenticate = Authenticate(company: await findDefaultCompany());
@@ -71,21 +73,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           authenticate = localAuthenticate;
           var apiKeyOk = false, companyOk = false;
-          // check api key
-          if (authenticate.apiKey != null) {
-            dynamic result = await checkApikey(authenticate.apiKey);
-            if (result == bool && result == true)
-              apiKeyOk = true;
-            else
-              authenticate = authenticate.copyWith(clearApiKey: true);
-          }
-          // check company
-          if (authenticate.company!.partyId != null) {
-            dynamic result =
-                await repos.checkCompany(authenticate.company!.partyId);
-            if (result is bool && result == true) companyOk = true;
-          }
-          // already logged in
+          // await for company valid and apikey ok
+          List<dynamic> li = await Future.wait<dynamic>([
+            checkApikey(authenticate.apiKey),
+            repos.checkCompany(authenticate.company!.partyId),
+          ]);
+          // check api key clear when not valid
+          if (li[0] is bool && li[0] == true)
+            apiKeyOk = true;
+          else
+            authenticate = authenticate.copyWith(clearApiKey: true);
+          // check company replace with default when not valid
+          if (li[1] is bool && li[1] == true) companyOk = true;
+          // already logged in ?
           if (apiKeyOk && companyOk) {
             yield AuthAuthenticated(authenticate);
           } else {
@@ -103,6 +103,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } else if (event is LoggedIn) {
       yield AuthLoading();
+      print("====auth loggedin: ${event.authenticate.apiKey}");
       await repos.persistAuthenticate(event.authenticate);
       authenticate = event.authenticate;
       yield AuthAuthenticated(authenticate, "Successfully logged in");

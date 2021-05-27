@@ -375,6 +375,7 @@ class Moqui {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? result = prefs.getString('finDoc$sales$docType');
+      print('====moqui===$result======');
       if (result != null) return finDocFromJson(result);
       return null;
     } catch (e) {
