@@ -136,8 +136,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield AuthRegistered();
         yield AuthUnauthenticated(
             authenticate,
-            'Register Company and Admin successfull,'
-            ' you can now login with your email password');
+            '     Register Company and Admin successfull,\n'
+            ' you can now login with the password sent by email');
       } else {
         yield AuthProblem(authenticate);
       }
@@ -152,8 +152,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         yield AuthRegistered();
         yield AuthUnauthenticated(
             authenticate,
-            'Register successfull,'
-            ' you can now login with your email password');
+            '          Register successfull,\n'
+            'you can now login with the password sent by email.');
       } else {
         yield AuthProblem(user);
       }
