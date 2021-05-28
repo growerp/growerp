@@ -109,45 +109,40 @@ class _CategoryState extends State<CategoryPage> {
       if (state is CategoryLoading) return Container();
       return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Builder(
-                  builder: (context) => GestureDetector(
-                      onTap: () {},
-                      child: Dialog(
-                          insetPadding: EdgeInsets.all(10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                              padding: EdgeInsets.all(20),
-                              width: 400,
-                              height: 600,
-                              child: ScaffoldMessenger(
-                                  key: scaffoldMessengerKey,
-                                  child: Scaffold(
-                                      floatingActionButton: imageButtons(
-                                          context, _onImageButtonPressed),
-                                      body: Center(
-                                        child: !kIsWeb &&
-                                                defaultTargetPlatform ==
-                                                    TargetPlatform.android
-                                            ? FutureBuilder<void>(
-                                                future: retrieveLostData(),
-                                                builder: (BuildContext context,
-                                                    AsyncSnapshot<void>
-                                                        snapshot) {
-                                                  if (snapshot.hasError) {
-                                                    return Text(
-                                                      'Pick image error: ${snapshot.error}}',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    );
-                                                  }
-                                                  return _showForm();
-                                                })
-                                            : _showForm(),
-                                      )))))))));
+          child: ScaffoldMessenger(
+              key: scaffoldMessengerKey,
+              child: GestureDetector(
+                  onTap: () {},
+                  child: Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Container(
+                          padding: EdgeInsets.all(20),
+                          width: 400,
+                          height: 600,
+                          child: Scaffold(
+                              backgroundColor: Colors.transparent,
+                              floatingActionButton:
+                                  imageButtons(context, _onImageButtonPressed),
+                              body: Builder(
+                                builder: (context) => !kIsWeb &&
+                                        defaultTargetPlatform ==
+                                            TargetPlatform.android
+                                    ? FutureBuilder<void>(
+                                        future: retrieveLostData(),
+                                        builder: (BuildContext context,
+                                            AsyncSnapshot<void> snapshot) {
+                                          if (snapshot.hasError) {
+                                            return Text(
+                                              'Pick image error: ${snapshot.error}}',
+                                              textAlign: TextAlign.center,
+                                            );
+                                          }
+                                          return _showForm();
+                                        })
+                                    : _showForm(),
+                              )))))));
     });
   }
 
@@ -177,7 +172,6 @@ class _CategoryState extends State<CategoryPage> {
     }
     return Center(
         child: Container(
-            width: 400,
             child: Form(
                 key: _formKey,
                 child: ListView(children: <Widget>[
@@ -219,31 +213,37 @@ class _CategoryState extends State<CategoryPage> {
                     },
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                      key: Key('update'),
-                      child: Text(
-                          category?.categoryId == null ? 'Create' : 'Update'),
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate() && !loading) {
-                          updatedCategory = ProductCategory(
-                              categoryId: category?.categoryId,
-                              categoryName: _nameController.text,
-                              description: _descrController.text,
-                              image: await HelperFunctions.getResizedImage(
-                                  _imageFile?.path));
-                          BlocProvider.of<CategoryBloc>(context)
-                              .add(UpdateCategory(
-                            updatedCategory,
-                          ));
-                        }
-                      }),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                      key: Key('cancel'),
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      })
+                  Row(children: [
+                    ElevatedButton(
+                        key: Key('cancel'),
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    SizedBox(width: 20),
+                    Expanded(
+                        child: ElevatedButton(
+                            key: Key('update'),
+                            child: Text(category?.categoryId == null
+                                ? 'Create'
+                                : 'Update'),
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate() &&
+                                  !loading) {
+                                updatedCategory = ProductCategory(
+                                    categoryId: category?.categoryId,
+                                    categoryName: _nameController.text,
+                                    description: _descrController.text,
+                                    image:
+                                        await HelperFunctions.getResizedImage(
+                                            _imageFile?.path));
+                                BlocProvider.of<CategoryBloc>(context)
+                                    .add(UpdateCategory(
+                                  updatedCategory,
+                                ));
+                              }
+                            })),
+                  ])
                 ]))));
   }
 }

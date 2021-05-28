@@ -55,7 +55,6 @@ class _ProductState extends State<ProductPage> {
   TextEditingController _categorySearchBoxController = TextEditingController();
 
   bool loading = false;
-  late Product updatedProduct;
   ProductCategory? _selectedCategory;
   PickedFile? _imageFile;
   dynamic _pickImageError;
@@ -66,6 +65,18 @@ class _ProductState extends State<ProductPage> {
       GlobalKey<ScaffoldMessengerState>();
   _ProductState(this.message, this.product) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (product!.productId != null) {
+      _nameController.text = product!.productName ?? '';
+      _descriptionController.text = product!.description ?? '';
+      _priceController.text = product!.price.toString();
+      _selectedCategory = ProductCategory(
+          categoryId: product!.categoryId, categoryName: product!.categoryName);
+    }
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -114,49 +125,45 @@ class _ProductState extends State<ProductPage> {
         Navigator.of(context).pop();
       }
     }, builder: (BuildContext context, state) {
+      String classificationId = GlobalConfiguration().get("classificationId");
       if (state is ProductLoading) return Container();
       return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Builder(
-                  builder: (context) => GestureDetector(
-                      onTap: () {},
-                      child: Dialog(
-                          insetPadding: EdgeInsets.all(10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                              padding: EdgeInsets.all(20),
-                              width: 400,
-                              height: 500,
-                              child: ScaffoldMessenger(
-                                  key: scaffoldMessengerKey,
-                                  child: Scaffold(
-                                      backgroundColor: Colors.transparent,
-                                      floatingActionButton: imageButtons(
-                                          context, _onImageButtonPressed),
-                                      body: Center(
-                                        child: !kIsWeb &&
-                                                defaultTargetPlatform ==
-                                                    TargetPlatform.android
-                                            ? FutureBuilder<void>(
-                                                future: retrieveLostData(),
-                                                builder: (BuildContext context,
-                                                    AsyncSnapshot<void>
-                                                        snapshot) {
-                                                  if (snapshot.hasError) {
-                                                    return Text(
-                                                      'Pick image error: ${snapshot.error}}',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    );
-                                                  }
-                                                  return _showForm(repos);
-                                                })
-                                            : _showForm(repos),
-                                      )))))))));
+          child: GestureDetector(
+              onTap: () {},
+              child: Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Container(
+                      padding: EdgeInsets.all(20),
+                      width: 400,
+                      height: 750,
+                      child: ScaffoldMessenger(
+                          key: scaffoldMessengerKey,
+                          child: Scaffold(
+                              backgroundColor: Colors.transparent,
+                              floatingActionButton:
+                                  imageButtons(context, _onImageButtonPressed),
+                              body: Builder(
+                                builder: (context) => !kIsWeb &&
+                                        defaultTargetPlatform ==
+                                            TargetPlatform.android
+                                    ? FutureBuilder<void>(
+                                        future: retrieveLostData(),
+                                        builder: (BuildContext context,
+                                            AsyncSnapshot<void> snapshot) {
+                                          if (snapshot.hasError) {
+                                            return Text(
+                                              'Pick image error: ${snapshot.error}}',
+                                              textAlign: TextAlign.center,
+                                            );
+                                          }
+                                          return _showForm(
+                                              repos, classificationId);
+                                        })
+                                    : _showForm(repos, classificationId),
+                              )))))));
     });
   }
 
@@ -169,17 +176,7 @@ class _ProductState extends State<ProductPage> {
     return null;
   }
 
-  Widget _showForm(repos) {
-    if (product != null) {
-      _nameController.text = product!.productName ?? '';
-      _descriptionController.text = product!.description ?? '';
-      _priceController.text =
-          product!.price == null ? '' : product!.price.toString();
-      if (_selectedCategory == null && product?.categoryId != null)
-        _selectedCategory = ProductCategory(
-            categoryId: product!.categoryId,
-            categoryName: product!.categoryName);
-    }
+  Widget _showForm(repos, classificationId) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
@@ -190,10 +187,8 @@ class _ProductState extends State<ProductPage> {
         textAlign: TextAlign.center,
       );
     }
-    String classificationId = GlobalConfiguration().get("classificationId");
     return Center(
         child: Container(
-            width: 400,
             child: Form(
                 key: _formKey,
                 child: ListView(children: <Widget>[
@@ -266,7 +261,7 @@ class _ProductState extends State<ProductPage> {
                           showSearchBox: true,
                           searchBoxController: _categorySearchBoxController,
                           isFilteredOnline: true,
-                          showClearButton: true,
+                          showClearButton: false,
                           key: Key('dropDownCategory'),
                           itemAsString: (ProductCategory? u) =>
                               "${u?.categoryName}",
@@ -275,6 +270,8 @@ class _ProductState extends State<ProductPage> {
                                 filter: _categorySearchBoxController.text);
                             return result;
                           },
+                          validator: (value) =>
+                              value == null ? "Select a category?" : null,
                           onChanged: (ProductCategory? newValue) {
                             _selectedCategory = newValue;
                           },
@@ -298,22 +295,23 @@ class _ProductState extends State<ProductPage> {
                             onPressed: () async {
                               if (_formKey.currentState!.validate() &&
                                   !loading) {
-                                updatedProduct = Product(
-                                    productId: product?.productId,
-                                    productName: _nameController.text,
-                                    assetClassId: classificationId == 'AppHotel'
-                                        ? 'Hotel Room'
-                                        : null,
-                                    description: _descriptionController.text,
-                                    price: Decimal.parse(_priceController.text),
-                                    categoryId: _selectedCategory?.categoryId!,
-                                    image:
-                                        await HelperFunctions.getResizedImage(
-                                            _imageFile?.path));
-                                BlocProvider.of<ProductBloc>(context)
-                                    .add(UpdateProduct(
-                                  updatedProduct,
-                                ));
+                                BlocProvider.of<ProductBloc>(context).add(
+                                    UpdateProduct(Product(
+                                        productId: product?.productId,
+                                        productName: _nameController.text,
+                                        assetClassId:
+                                            classificationId == 'AppHotel'
+                                                ? 'Hotel Room'
+                                                : null,
+                                        description:
+                                            _descriptionController.text,
+                                        price: Decimal.parse(
+                                            _priceController.text),
+                                        categoryId:
+                                            _selectedCategory?.categoryId!,
+                                        image: await HelperFunctions
+                                            .getResizedImage(
+                                                _imageFile?.path))));
                               }
                             })),
                   ])

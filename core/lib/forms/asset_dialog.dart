@@ -93,23 +93,25 @@ class _AssetState extends State<AssetPage> {
       if (state is AssetLoading) return Container();
       return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Builder(
-                  builder: (context) => GestureDetector(
-                      onTap: () {},
-                      child: Dialog(
-                          insetPadding: EdgeInsets.all(10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                              padding: EdgeInsets.all(20),
-                              width: 400,
-                              height: 500,
-                              child: Center(
-                                child: _showForm(repos, isPhone),
-                              )))))));
+          child: ScaffoldMessenger(
+              key: scaffoldMessengerKey,
+              child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: Builder(
+                      builder: (context) => GestureDetector(
+                          onTap: () {},
+                          child: Dialog(
+                              insetPadding: EdgeInsets.all(10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Container(
+                                  padding: EdgeInsets.all(20),
+                                  width: 400,
+                                  height: 500,
+                                  child: Center(
+                                    child: _showForm(repos, isPhone),
+                                  ))))))));
     });
   }
 
