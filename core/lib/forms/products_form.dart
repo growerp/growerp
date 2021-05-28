@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/widgets/@widgets.dart';
 import 'package:core/helper_functions.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:models/@models.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
@@ -34,6 +35,7 @@ class _ProductsState extends State<ProductsForm> {
 
   @override
   Widget build(BuildContext context) {
+    String classificationId = GlobalConfiguration().get("classificationId");
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
@@ -116,11 +118,15 @@ class _ProductsState extends State<ProductsForm> {
                                 Expanded(
                                     child: Text("Price",
                                         textAlign: TextAlign.center)),
+                                if (classificationId != 'AppHotel')
+                                  Expanded(
+                                      child: Text("Category",
+                                          textAlign: TextAlign.center)),
                                 Expanded(
-                                    child: Text("Category",
-                                        textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("Nbr Of Assets",
+                                    child: Text(
+                                        classificationId != 'AppHotel'
+                                            ? "Nbr Of Assets"
+                                            : "Number of Rooms",
                                         textAlign: TextAlign.center)),
                               ]),
                               Divider(color: Colors.black),
@@ -163,10 +169,11 @@ class _ProductsState extends State<ProductsForm> {
                                         "${authenticate!.company!.currencyId} "
                                         "${products[index].price}",
                                         textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        "${products[index].categoryName}",
-                                        textAlign: TextAlign.center)),
+                                if (classificationId != 'AppHotel')
+                                  Expanded(
+                                      child: Text(
+                                          "${products[index].categoryName}",
+                                          textAlign: TextAlign.center)),
                                 Expanded(
                                     child: Text("${products[index].assetCount}",
                                         textAlign: TextAlign.center)),

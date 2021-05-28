@@ -118,9 +118,10 @@ class _ReservationState extends State<ReservationPage> {
 
     Future<List<Product>> getProduct(filter) async {
       var response = await repos.getProduct(
-          filter: _productSearchBoxController.text,
-          assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
-          productTypeId: classificationId == 'AppHotel' ? 'Rental' : null);
+        filter: _productSearchBoxController.text,
+        assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
+        //       productTypeId: classificationId == 'AppHotel' ? 'Rental' : null
+      );
       return response;
     }
 

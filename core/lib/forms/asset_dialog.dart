@@ -186,7 +186,10 @@ class _AssetState extends State<AssetPage> {
                     itemAsString: (Product? u) => "${u?.productName}",
                     onFind: (String filter) async {
                       var result = await repos.getProduct(
-                          filter: _productSearchBoxController.text);
+                          filter: _productSearchBoxController.text,
+                          assetClassId: classificationId == 'AppHotel'
+                              ? 'Hotel Room'
+                              : null);
                       return result;
                     },
                     validator: (value) =>
@@ -216,34 +219,40 @@ class _AssetState extends State<AssetPage> {
                     isExpanded: true,
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                      key: Key('update'),
-                      child: Text(asset?.assetId == null ? 'Create' : 'Update'),
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate() && !loading) {
-                          BlocProvider.of<AssetBloc>(context).add(UpdateAsset(
-                            Asset(
-                              assetId: asset?.assetId,
-                              assetName: _nameController.text,
-                              quantityOnHand:
-                                  _quantityOnHandController.text != ""
-                                      ? Decimal.parse(
-                                          _quantityOnHandController.text)
-                                      : null,
-                              productId: _selectedProduct!.productId,
-                              statusId: _statusId,
-                              assetClassId: 'Hotel Room',
-                            ),
-                          ));
-                        }
-                      }),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                      key: Key('cancel'),
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      })
+                  Row(children: [
+                    ElevatedButton(
+                        key: Key('cancel'),
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    SizedBox(width: 20),
+                    Expanded(
+                      child: ElevatedButton(
+                          key: Key('update'),
+                          child: Text(
+                              asset?.assetId == null ? 'Create' : 'Update'),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate() && !loading) {
+                              BlocProvider.of<AssetBloc>(context)
+                                  .add(UpdateAsset(
+                                Asset(
+                                  assetId: asset?.assetId,
+                                  assetName: _nameController.text,
+                                  quantityOnHand:
+                                      _quantityOnHandController.text != ""
+                                          ? Decimal.parse(
+                                              _quantityOnHandController.text)
+                                          : null,
+                                  productId: _selectedProduct!.productId,
+                                  statusId: _statusId,
+                                  assetClassId: 'Hotel Room',
+                                ),
+                              ));
+                            }
+                          }),
+                    )
+                  ])
                 ]))));
   }
 }
