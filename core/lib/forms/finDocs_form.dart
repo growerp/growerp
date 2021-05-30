@@ -429,7 +429,7 @@ class _OrdersState extends State<FinDocsForm> {
                                           _finDocBloc.add(UpdateFinDoc(
                                               finDocs![index].copyWith(
                                                   statusId:
-                                                      'finDocCancelled')));
+                                                      'FinDocCancelled')));
                                         },
                                       ),
                                     ])),

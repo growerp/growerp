@@ -32,6 +32,9 @@ class _ProductsState extends State<ProductsForm> {
     search = false;
     limit = 20;
   }
+// https://medium.com/litslink/flutter-bloc-and-refreshindicator-72d10bbe6393
+// https://medium.com/flutter-community/listview-pagination-and-reloading-network-calls-in-flutter-90b1dd78fca2
+// https://stackoverflow.com/questions/55354018/flutter-listview-emptystate-with-refresh
 
   @override
   Widget build(BuildContext context) {

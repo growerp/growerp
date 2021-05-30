@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: "29e1e024b2ce65eaf2a1283b97329905fe3b99ab"
+      resolved-ref: "58788669ad43942d807368463b071d07e9573e1f"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -86,7 +86,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   built_collection:
     dependency: transitive
     description:
@@ -238,7 +238,7 @@ packages:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.0.0"
+    version: "7.0.1"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -415,7 +415,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "29e1e024b2ce65eaf2a1283b97329905fe3b99ab"
+      resolved-ref: "58788669ad43942d807368463b071d07e9573e1f"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

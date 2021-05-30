@@ -62,12 +62,14 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       if (currentState is FinDocInitial) {
         yield FinDocLoading("Getting $docType...");
         dynamic result = await repos.getFinDoc(
-            id: event.id,
-            sales: sales,
-            docType: docType,
-            start: 0,
-            limit: event.limit,
-            search: event.search);
+          id: event.id,
+          sales: sales,
+          docType: docType,
+          start: 0,
+          limit: event.limit,
+          search: event.search,
+          customerCompanyPartyId: event.customerCompanyPartyId,
+        );
         if (result is List<FinDoc>)
           yield FinDocSuccess(
             finDocs: result,
@@ -82,12 +84,14 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             (currentState.search != null &&
                 event.search != currentState.search)) {
           dynamic result = await repos.getFinDoc(
-              id: event.id,
-              sales: sales,
-              docType: event.docType,
-              start: 0,
-              limit: event.limit,
-              search: event.search);
+            id: event.id,
+            sales: sales,
+            docType: event.docType,
+            start: 0,
+            limit: event.limit,
+            search: event.search,
+            customerCompanyPartyId: event.customerCompanyPartyId,
+          );
           if (result is List<FinDoc>) {
             finDocs = result;
             yield FinDocSuccess(
@@ -156,7 +160,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       } else if (event is DeleteFinDoc) {
         yield FinDocLoading('Deleting ${event.finDoc.docType}');
         dynamic result = await repos
-            .updateFinDoc(event.finDoc.copyWith(statusId: "finDocCancelled"));
+            .updateFinDoc(event.finDoc.copyWith(statusId: "FinDocCancelled"));
         if (result is List<FinDoc>) {
           yield FinDocUpdate(result[0]);
           yield currentState.copyWith(
@@ -186,7 +190,13 @@ class FetchFinDoc extends FinDocEvent {
   final String? docType; // to get a single document id, docType
   final int? limit;
   final String? search;
-  FetchFinDoc({this.limit, this.search, this.id, this.docType});
+  final String? customerCompanyPartyId;
+  FetchFinDoc(
+      {this.limit,
+      this.search,
+      this.id,
+      this.docType,
+      this.customerCompanyPartyId});
   @override
   String toString() => "FetchFinDoc limit: $limit, search: $search";
 }

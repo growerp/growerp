@@ -424,7 +424,8 @@ class Moqui {
       String? docType,
       DateTime? startDate,
       String? id,
-      String? search}) async {
+      String? search,
+      String? customerCompanyPartyId}) async {
     try {
       Response response =
           await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
@@ -439,6 +440,7 @@ class Moqui {
         'limit': limit,
         'search': search,
         'classificationId': classificationId,
+        'customerCompanyPartyId': customerCompanyPartyId,
       });
       return finDocsFromJson(response.toString());
     } on DioError catch (e) {
