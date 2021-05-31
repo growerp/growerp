@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/login_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:core/blocs/@blocs.dart';
@@ -87,9 +88,13 @@ class _CartList extends StatelessWidget {
 class _CartTotal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SalesCartBloc _cartBloc =
+        BlocProvider.of<SalesCartBloc>(context) as CartBloc;
+    SalesOrderBloc _finDocBloc =
+        BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc;
     final hugeStyle =
         Theme.of(context).textTheme.headline1!.copyWith(fontSize: 48);
-    FinDoc? order;
+    late FinDoc order;
     return SizedBox(
         height: 200,
         child: Center(
@@ -112,27 +117,44 @@ class _CartTotal extends StatelessWidget {
                     context, 'Cart error: $cartState.message}?', Colors.red);
               }
               if (cartState is CartLoaded) {
-                order = cartState.finDoc;
+                order = cartState.finDoc!;
                 return Row(children: <Widget>[
                   Text((cartState.finDoc!.grandTotal ?? 0.00).toString(),
                       style: hugeStyle),
                   ElevatedButton(
                       child: Text('BUY', style: hugeStyle),
-                      onPressed: order == null || order!.items!.length == 0
+                      onPressed: order.items!.length == 0
                           ? null
                           : () async {
-                              dynamic result;
-                              if (state is! AuthAuthenticated) {
-                                result = await Navigator.pushNamed(
-                                    context, '/login',
-                                    arguments: 'Please login/register first?');
-                              }
-                              if (state is AuthAuthenticated ||
-                                  result == true) {
+                              print("=====buy pressec====state: $state====");
+                              if (state is AuthUnauthenticated) {
+                                dynamic result = await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return LoginDialog(
+                                          formArguments: FormArguments(
+                                              message:
+                                                  'Please login/register first?'));
+                                    });
+                                print("======cartform: login result: $result");
+                                if (result is Authenticate) {
+                                  print(
+                                      "======cartform: login result: $result");
+                                  HelperFunctions.showMessage(context,
+                                      'Sending order...', Colors.green);
+                                  _finDocBloc.add(FetchFinDoc(
+                                      customerCompanyPartyId:
+                                          result.user!.companyPartyId));
+                                  _cartBloc.add(CreateFinDocFromCart(
+                                      order.copyWith(otherUser: result.user)));
+                                }
+                              } else if (state is AuthAuthenticated) {
                                 HelperFunctions.showMessage(
                                     context, 'Sending order...', Colors.green);
-                                BlocProvider.of<SalesCartBloc>(context)
-                                    .add(CreateFinDocFromCart(order!));
+                                _cartBloc.add(CreateFinDocFromCart(
+                                    order.copyWith(
+                                        otherUser: state.authenticate.user)));
                               }
                             }),
                 ]);

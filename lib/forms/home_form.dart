@@ -33,7 +33,7 @@ class _HomeState extends State<HomeForm> {
   final String? message;
   final _scrollController = ScrollController();
   double _scrollThreshold = 200.0;
-  Authenticate? authenticate;
+  Authenticate authenticate = Authenticate();
   late ProductBloc _productBloc;
   late CategoryBloc _categoryBloc;
   List<Product>? products;
@@ -59,24 +59,32 @@ class _HomeState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
+    SalesOrderBloc _finDocBloc =
+        BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc;
+
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      print("====$state");
-      if (state is AuthUnauthenticated) print("====$state ${state.message}");
-      if (state is AuthUnauthenticated) print("====$state ${state.message}");
+      if (state is AuthUnauthenticated)
+        print("======Unauth==$state ${state.message}");
+      if (state is AuthUnauthenticated)
+        print("======Auth==$state ${state.message}");
       if (state is AuthAuthenticated)
         HelperFunctions.showMessage(context, '${state.message}', Colors.green);
     }, builder: (context, state) {
-      if (state is AuthAuthenticated) authenticate = state.authenticate;
+      if (state is AuthAuthenticated) {
+        authenticate = state.authenticate;
+        _finDocBloc.add(FetchFinDoc(
+            customerCompanyPartyId: authenticate.user!.companyPartyId));
+      }
       if (state is AuthUnauthenticated) authenticate = state.authenticate;
-      if (authenticate != null) {
+      if (authenticate.company != null) {
         _categoryBloc
-            .add(FetchCategory(companyPartyId: authenticate!.company!.partyId));
+            .add(FetchCategory(companyPartyId: authenticate.company!.partyId));
         return BlocBuilder<CategoryBloc, CategoryState>(
             builder: (context, state) {
           if (state is CategorySuccess) {
             categories = state.categories;
             _productBloc.add(FetchProduct(
-                companyPartyId: authenticate!.company!.partyId,
+                companyPartyId: authenticate.company!.partyId,
                 categoryId: categories![0].categoryId));
             selectedCategoryId =
                 selectedCategoryId ?? categories![0].categoryId;
@@ -89,8 +97,8 @@ class _HomeState extends State<HomeForm> {
                     child: Scaffold(
                         appBar: AppBar(
                             title: Text(
-                                "${authenticate?.company?.name ?? 'Company??'} "), // +
-                            //    "${authenticate?.apiKey != null ? "- username: " + authenticate?.user?.name : ''}"),
+                                "${authenticate.company?.name ?? 'Company??'} "), // +
+                            //    "${authenticate.apiKey != null ? "- username: " + authenticate.user?.name : ''}"),
                             actions: <Widget>[
                               IconButton(
                                   icon: Icon(Icons.settings),
@@ -105,20 +113,24 @@ class _HomeState extends State<HomeForm> {
                                 onPressed: () =>
                                     Navigator.pushNamed(context, '/cart'),
                               ),
-                              if (authenticate?.apiKey == null)
+                              if (authenticate.apiKey == null)
                                 IconButton(
                                     icon: Icon(Icons.exit_to_app),
                                     tooltip: 'Login',
                                     onPressed: () async {
-                                      await showDialog(
+                                      var result = await showDialog(
                                           barrierDismissible: true,
                                           context: context,
                                           builder: (BuildContext context) {
                                             return LoginDialog(
                                                 formArguments: FormArguments());
                                           });
+                                      if (result is Authenticate)
+                                        _finDocBloc.add(FetchFinDoc(
+                                            customerCompanyPartyId:
+                                                result.user!.companyPartyId));
                                     }),
-                              if (authenticate?.apiKey != null)
+                              if (authenticate.apiKey != null)
                                 IconButton(
                                     key: Key('logoutButton'),
                                     icon: Icon(Icons.do_not_disturb),
@@ -136,11 +148,9 @@ class _HomeState extends State<HomeForm> {
                               _productsGrid(),
                             ]))));
               }
-              print("========1=========");
               return LoadingIndicator();
             });
           }
-          print("========2=========");
           return LoadingIndicator();
         });
       }
@@ -352,14 +362,14 @@ class _HomeState extends State<HomeForm> {
     final currentScroll = _scrollController.position.pixels;
     if (maxScroll - currentScroll <= _scrollThreshold) {
       _productBloc.add(FetchProduct(
-          companyPartyId: authenticate!.company!.partyId,
+          companyPartyId: authenticate.company!.partyId,
           limit: limit,
           search: searchString));
     }
   }
 }
 
-_settingsDialog(BuildContext context, Authenticate? authenticate) async {
+_settingsDialog(BuildContext context, Authenticate authenticate) async {
   return showDialog<String>(
     context: context,
     barrierDismissible: true,
@@ -374,16 +384,14 @@ _settingsDialog(BuildContext context, Authenticate? authenticate) async {
               ElevatedButton(
                 child: Text('Select an another company'),
                 onPressed: () async {
-                  authenticate!.company =
-                      authenticate.company!.copyWith(partyId: null);
-                  BlocProvider.of<AuthBloc>(context)
-                      .add(UpdateAuth(authenticate));
+                  BlocProvider.of<AuthBloc>(context).add(
+                      UpdateAuth(authenticate.copyWith(clearCompany: true)));
                   await Navigator.popAndPushNamed(context, '/login');
                 },
               ),
               SizedBox(height: 20),
               Visibility(
-                  visible: authenticate!.apiKey == null,
+                  visible: authenticate.apiKey == null,
                   child: ElevatedButton(
                     child: Text('Register as a customer'),
                     onPressed: () {

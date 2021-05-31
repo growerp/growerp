@@ -35,9 +35,9 @@ void main() async {
   String backend = GlobalConfiguration().getValue("backend");
   var repos = backend == 'moqui'
       ? Moqui(client: Dio())
-      : backend == 'ofbiz'
-          ? Ofbiz(client: Dio())
-          : null;
+//      : backend == 'ofbiz'
+//          ? Ofbiz(client: Dio())
+      : null;
 
   runApp(Ecommerce(repos: repos!));
 }
@@ -56,8 +56,8 @@ class Ecommerce extends StatelessWidget {
       value: repos,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<CategoryBloc>(create: (context) => CategoryBloc(repos)),
-          BlocProvider<ProductBloc>(create: (context) => ProductBloc(repos)),
+          BlocProvider<CategoryBloc>(create: (_) => CategoryBloc(repos)),
+          BlocProvider<ProductBloc>(create: (_) => ProductBloc(repos)),
           BlocProvider<SalesOrderBloc>(
               create: (context) => FinDocBloc(repos, true, 'order')),
           BlocProvider<CustomerBloc>(
@@ -69,7 +69,7 @@ class Ecommerce extends StatelessWidget {
                   repos: repos,
                   sales: true,
                   finDocBloc:
-                      BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc?)
+                      BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)
                 ..add(LoadCart(
                     FinDoc(sales: true, docType: 'order', items: [])))),
         ],
@@ -82,8 +82,8 @@ class Ecommerce extends StatelessWidget {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    String? classificationId = GlobalConfiguration().get("classificationId");
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         builder: (context, widget) => ResponsiveWrapper.builder(
             BouncingScrollWrapper.builder(context, widget!),
             maxWidth: 2460,
@@ -103,7 +103,7 @@ class MyApp extends StatelessWidget {
           if (state is AuthProblem)
             return FatalErrorForm("Internet or server problem?");
           if (state is AuthUnauthenticated &&
-              state.authenticate?.company == null)
+              state.authenticate.company == null)
             return FatalErrorForm("No company found in system\n"
                 "Go to the admin app to create one!");
           if (state is AuthAuthenticated)

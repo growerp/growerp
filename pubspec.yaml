@@ -53,6 +53,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
 # from https://www.flaticon.com/
+# https://creativemarket.com/eucalyp Eucalyp
   assets:
     - assets/cfg/
     - assets/images/
