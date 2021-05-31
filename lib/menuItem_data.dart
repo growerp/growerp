@@ -84,7 +84,8 @@ List<MenuItem> menuItems = [
         form: ProductsForm(),
         label: "Room Types",
         icon: Icon(Icons.home),
-        floatButtonForm: ProductDialog(formArguments: FormArguments()),
+        floatButtonForm:
+            ProductDialog(formArguments: FormArguments(object: Product())),
       ),
     ],
   ),
