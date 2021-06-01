@@ -30,7 +30,7 @@ import 'package:core/forms/@forms.dart' as core;
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() async {
-  // enableFlutterDriverExtension();
+  //enableFlutterDriverExtension();
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset("app_settings");
   Bloc.observer = SimpleBlocObserver();
