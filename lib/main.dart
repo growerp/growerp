@@ -27,8 +27,10 @@ import 'generated/l10n.dart';
 import 'hotelRouter.dart' as router;
 import 'forms/@forms.dart';
 import 'package:core/forms/@forms.dart' as core;
+import 'package:flutter_driver/driver_extension.dart';
 
 void main() async {
+  // enableFlutterDriverExtension();
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset("app_settings");
   Bloc.observer = SimpleBlocObserver();

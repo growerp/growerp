@@ -1,4 +1,4 @@
-package org.growerp.master.master
+package org.growerp.hotel
 
 import io.flutter.embedding.android.FlutterActivity
 

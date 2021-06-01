@@ -49,7 +49,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/growerp.jpg"
+  image_path: "assets/images/hotel.jpg"
 
 flutter:
   uses-material-design: true
