@@ -103,7 +103,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } else if (event is LoggedIn) {
       yield AuthLoading();
-      print("====auth loggedin: ${event.authenticate.apiKey}");
+      print("====auth loggedin: ${event.authenticate}");
       await repos.persistAuthenticate(event.authenticate);
       authenticate = event.authenticate;
       yield AuthAuthenticated(authenticate, "Successfully logged in");

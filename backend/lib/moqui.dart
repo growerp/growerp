@@ -122,7 +122,7 @@ class Moqui {
 // -----------------------------general ------------------------
   Future<dynamic> getConnected() async {
     try {
-      Response response = await client.get('rest/moquiSessionToken');
+      Response response = await client.get('growerp/moquiSessionToken');
       this.sessionToken = response.toString();
       return sessionToken != null; // return true if session token ok
     } on DioError catch (e) {
@@ -249,7 +249,7 @@ class Moqui {
 
   Future<dynamic> logout(authenticate) async {
     try {
-      await client.post('rest/logout');
+      await client.post('growerp/logout');
       authenticate = authenticate.copyWith(clearApiKey: true);
       await persistAuthenticate(authenticate);
       return authenticate;

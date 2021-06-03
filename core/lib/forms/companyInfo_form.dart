@@ -13,6 +13,7 @@
  */
 
 import 'dart:io';
+import 'package:core/forms/fatalError_form.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,21 +32,26 @@ class CompanyInfoForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CompanyPage(formArguments.message, formArguments.menuIndex);
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state is AuthAuthenticated)
+        return CompanyPage(formArguments.message, state.authenticate);
+      return FatalErrorForm("Should be logged in!");
+    });
   }
 }
 
 class CompanyPage extends StatefulWidget {
   final String? message;
-  final int? tab;
-  CompanyPage(this.message, this.tab);
+  final Authenticate authenticate;
+  CompanyPage(this.message, this.authenticate);
 
   @override
-  _CompanyState createState() => _CompanyState(message);
+  _CompanyState createState() => _CompanyState(message, authenticate);
 }
 
 class _CompanyState extends State<CompanyPage> {
   final String? message;
+  final Authenticate authenticate;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -56,8 +62,9 @@ class _CompanyState extends State<CompanyPage> {
   final _provinceController = TextEditingController();
   final _vatPercController = TextEditingController();
   final _salesPercController = TextEditingController();
-  Company? updatedCompany;
-  Currency? _selectedCurrency;
+  late Company updatedCompany;
+  late Currency _selectedCurrency;
+  late bool isAdmin;
   Country? _selectedCountry;
   PickedFile? _imageFile;
   dynamic _pickImageError;
@@ -66,8 +73,37 @@ class _CompanyState extends State<CompanyPage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
-  _CompanyState(this.message) {
+  _CompanyState(this.message, this.authenticate) {
     HelperFunctions.showTopMessage(scaffoldMessengerKey, message);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updatedCompany = authenticate.company!;
+    isAdmin = (authenticate.user!.userGroupId == "GROWERP_M_ADMIN");
+
+    _selectedCurrency = currencies.firstWhere(
+        (element) => element.currencyId == updatedCompany.currencyId);
+    _nameController..text = updatedCompany.name!;
+    _emailController..text = updatedCompany.email!;
+    _address1Controller..text = updatedCompany.address!.address1 ?? '';
+    _address2Controller..text = updatedCompany.address!.address2 ?? '';
+    _provinceController..text = updatedCompany.address!.province ?? '';
+    _cityController..text = updatedCompany.address!.city ?? '';
+    _postalCodeController..text = updatedCompany.address!.postalCode ?? '';
+    _selectedCountry = updatedCompany.address!.country == null
+        ? Country()
+        : countries.firstWhere(
+            (element) => element.id == updatedCompany.address!.country!);
+    _vatPercController
+      ..text = updatedCompany.vatPerc.toString() == "0"
+          ? ''
+          : updatedCompany.vatPerc.toString();
+    _salesPercController
+      ..text = updatedCompany.salesPerc.toString() == "0"
+          ? ''
+          : updatedCompany.salesPerc.toString();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -102,59 +138,43 @@ class _CompanyState extends State<CompanyPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool? isAdmin;
-    Authenticate? authenticate;
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state is AuthAuthenticated) {
-        authenticate = state.authenticate;
-        isAdmin = authenticate?.user?.userGroupId == "GROWERP_M_ADMIN";
-      }
-      return ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Scaffold(
-              floatingActionButton:
-                  imageButtons(context, _onImageButtonPressed),
-              body:
-                  BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-                if (state is AuthAuthenticated) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.green);
-                }
-                if (state is AuthProblem) {
-                  HelperFunctions.showMessage(
-                      context, '${state.errorMessage}', Colors.red);
-                }
-                if (state is AuthLoading) {
-                  HelperFunctions.showMessage(
-                      context, '${state.message}', Colors.green);
-                }
-              }, builder: (context, state) {
-                if (state is AuthUnauthenticated) {
-                  updatedCompany = state.authenticate.company;
-                }
-                if (state is AuthAuthenticated) {
-                  updatedCompany = authenticate!.company;
-                }
-                return Center(
-                  child:
-                      !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-                          ? FutureBuilder<void>(
-                              future: retrieveLostData(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<void> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text(
-                                    'Pick image error: ${snapshot.error}}',
-                                    textAlign: TextAlign.center,
-                                  );
-                                }
-                                return _showForm(
-                                    authenticate, isAdmin, updatedCompany);
-                              })
-                          : _showForm(authenticate, isAdmin, updatedCompany),
-                );
-              })));
-    });
+    return ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Scaffold(
+            floatingActionButton: imageButtons(context, _onImageButtonPressed),
+            body: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+              if (state is AuthAuthenticated) {
+                HelperFunctions.showMessage(
+                    context, '${state.message}', Colors.green);
+              }
+              if (state is AuthProblem) {
+                HelperFunctions.showMessage(
+                    context, '${state.errorMessage}', Colors.red);
+              }
+              if (state is AuthLoading) {
+                HelperFunctions.showMessage(
+                    context, '${state.message}', Colors.green);
+              }
+            }, builder: (context, state) {
+              return Center(
+                child:
+                    !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+                        ? FutureBuilder<void>(
+                            future: retrieveLostData(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<void> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'Pick image error: ${snapshot.error}}',
+                                  textAlign: TextAlign.center,
+                                );
+                              }
+                              return _showForm(
+                                  authenticate, isAdmin, updatedCompany);
+                            })
+                        : _showForm(authenticate, isAdmin, updatedCompany),
+              );
+            })));
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -166,31 +186,10 @@ class _CompanyState extends State<CompanyPage> {
     return null;
   }
 
-  Widget _showForm(authenticate, isAdmin, updatedCompany) {
+  Widget _showForm(
+      Authenticate authenticate, bool isAdmin, Company updatedCompany) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    _nameController..text = updatedCompany.name;
-    _emailController..text = updatedCompany.email;
-    if (updatedCompany.address != null) {
-      _address1Controller..text = updatedCompany.address!.address1 ?? '';
-      _address2Controller..text = updatedCompany.address!.address2 ?? '';
-      _provinceController..text = updatedCompany.address!.province ?? '';
-      _cityController..text = updatedCompany.address.city ?? '';
-      _postalCodeController..text = updatedCompany.address!.postalCode ?? '';
-      if (_selectedCountry == null)
-        _selectedCountry = updatedCompany.address.country;
-    }
-    _vatPercController
-      ..text = updatedCompany.vatPerc.toString() == "0"
-          ? ''
-          : updatedCompany.vatPerc.toString();
-    _salesPercController
-      ..text = updatedCompany.salesPerc.toString() == "0"
-          ? ''
-          : updatedCompany.salesPerc.toString();
     final Text? retrieveError = _getRetrieveErrorWidget();
-    if (_selectedCurrency == null && updatedCompany?.currencyId != null)
-      _selectedCurrency = currencies
-          .firstWhere((a) => a.currencyId == updatedCompany.currencyId);
     if (retrieveError != null) {
       return retrieveError;
     }
@@ -227,11 +226,10 @@ class _CompanyState extends State<CompanyPage> {
                                           ? Image.network(_imageFile!.path)
                                           : Image.file(File(_imageFile!.path))
                                       : updatedCompany.image != null
-                                          ? Image.memory(updatedCompany.image)
+                                          ? Image.memory(updatedCompany.image!)
                                           : Text(
-                                              updatedCompany.name
-                                                      .substring(0, 1) ??
-                                                  '',
+                                              updatedCompany.name!
+                                                  .substring(0, 1),
                                               style: TextStyle(
                                                   fontSize: 30,
                                                   color: Colors.black))),
@@ -292,7 +290,7 @@ class _CompanyState extends State<CompanyPage> {
                                       }).toList(),
                                       onChanged: (Currency? newValue) {
                                         setState(() {
-                                          _selectedCurrency = newValue;
+                                          _selectedCurrency = newValue!;
                                         });
                                       },
                                       isExpanded: true,
@@ -432,7 +430,7 @@ class _CompanyState extends State<CompanyPage> {
                                               email: _emailController.text,
                                               name: _nameController.text,
                                               currencyId:
-                                                  _selectedCurrency!.currencyId,
+                                                  _selectedCurrency.currencyId,
                                               address: address,
                                               vatPerc: Decimal.parse(
                                                   _vatPercController
@@ -449,7 +447,6 @@ class _CompanyState extends State<CompanyPage> {
                                               image: await HelperFunctions
                                                   .getResizedImage(
                                                       _imageFile?.path));
-                                          authenticate.company = updatedCompany;
                                           BlocProvider.of<AuthBloc>(context)
                                               .add(UpdateCompany(authenticate,
                                                   updatedCompany));
