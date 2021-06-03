@@ -87,15 +87,17 @@ class _CompanyState extends State<CompanyPage> {
         (element) => element.currencyId == updatedCompany.currencyId);
     _nameController..text = updatedCompany.name!;
     _emailController..text = updatedCompany.email!;
-    _address1Controller..text = updatedCompany.address!.address1 ?? '';
-    _address2Controller..text = updatedCompany.address!.address2 ?? '';
-    _provinceController..text = updatedCompany.address!.province ?? '';
-    _cityController..text = updatedCompany.address!.city ?? '';
-    _postalCodeController..text = updatedCompany.address!.postalCode ?? '';
-    _selectedCountry = updatedCompany.address!.country == null
-        ? Country()
-        : countries.firstWhere(
-            (element) => element.id == updatedCompany.address!.country!);
+    if (updatedCompany.address != null) {
+      _address1Controller..text = updatedCompany.address!.address1!;
+      _address2Controller..text = updatedCompany.address!.address2!;
+      _provinceController..text = updatedCompany.address!.province!;
+      _cityController..text = updatedCompany.address!.city!;
+      _postalCodeController..text = updatedCompany.address!.postalCode!;
+      _selectedCountry = updatedCompany.address!.country == null
+          ? Country()
+          : countries.firstWhere(
+              (element) => element.id == updatedCompany.address!.country!);
+    }
     _vatPercController
       ..text = updatedCompany.vatPerc.toString() == "0"
           ? ''
