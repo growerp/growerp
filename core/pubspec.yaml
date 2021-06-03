@@ -28,11 +28,11 @@ dependencies:
   rxdart: ^0.26.0
 
   backend:
-    path: ../backend
-#    git:
-#      url: https://github.com/growerp/growerp.git
-#      ref: packages
-#      path: backend
+#    path: ../backend
+    git:
+      url: https://github.com/growerp/growerp.git
+      ref: packages
+      path: backend
 
 
 dev_dependencies:
