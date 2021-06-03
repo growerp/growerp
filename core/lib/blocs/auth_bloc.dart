@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'dart:html';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -24,7 +25,7 @@ import 'package:models/@models.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final repos;
-  late Authenticate authenticate;
+  Authenticate authenticate = Authenticate();
 
   AuthBloc(this.repos)
       : assert(repos != null),
@@ -34,23 +35,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Stream<AuthState> mapEventToState(AuthEvent event) async* {
     // ################# local functions ###################
 
-    Future<Company?> findDefaultCompany() async {
+    Future<void> findDefaultCompany() async {
       //print("===15==1==");
-      dynamic result = await repos.getCompanies();
+      dynamic result = await repos.getCompanies(start: 0, limit: 1);
       if (result is List<Company> && result.length > 0) {
         //print("===15==2==");
-        return result[0];
+        authenticate = authenticate.copyWith(company: result[0]);
       } else {
         // no companies yet or all removed ...
         //print("===15==3==");
-        return null;
+        authenticate = authenticate.copyWith(clearCompany: true);
       }
     }
 
-    Future<dynamic> checkApikey(String? apiKey) async {
+    Future<bool> checkApikey(String? apiKey) async {
       if (apiKey != null) {
         repos.setApikey(apiKey);
         return await repos.checkApikey();
+      } else
+        return Future.value(false);
+    }
+
+    Future<bool> checkCompany(Company? company) async {
+      if (company != null && company.partyId != null) {
+        return await repos.checkCompany(company.partyId);
       } else
         return Future.value(false);
     }
@@ -67,37 +75,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // login data from local storage
         var localAuthenticate = await repos.getAuthenticate();
         if (localAuthenticate == null) {
-          authenticate = Authenticate(company: await findDefaultCompany());
           // start new with default company which can be null
+          await findDefaultCompany();
           yield AuthUnauthenticated(authenticate);
         } else {
           authenticate = localAuthenticate;
-          var apiKeyOk = false, companyOk = false;
-          // await for company valid and apikey ok
-          List<dynamic> li = await Future.wait<dynamic>([
-            checkApikey(authenticate.apiKey),
-            repos.checkCompany(authenticate.company!.partyId),
-          ]);
-          // check api key clear when not valid
-          if (li[0] is bool && li[0] == true)
-            apiKeyOk = true;
-          else
-            authenticate = authenticate.copyWith(clearApiKey: true);
-          // check company replace with default when not valid
-          if (li[1] is bool && li[1] == true) companyOk = true;
-          // already logged in ?
-          if (apiKeyOk && companyOk) {
-            yield AuthAuthenticated(authenticate);
-          } else {
-            if (!companyOk) {
-              dynamic result = await findDefaultCompany();
-              if (result != null && result is Company)
-                authenticate = authenticate.copyWith(company: result);
-              else
-                authenticate = authenticate.copyWith(clearCompany: true);
+          // check apiKey and company exist
+          if (await checkApikey(authenticate.apiKey)) {
+            if (await checkCompany(authenticate.company)) {
+              // api valid and company exist
+              yield AuthAuthenticated(authenticate);
+            } else {
+              // api valid but company NOT exist: get default company
+              await findDefaultCompany();
+              repos.persistAuthenticate(authenticate);
+              yield AuthUnauthenticated(authenticate);
             }
-            repos.persistAuthenticate(authenticate);
-            yield AuthUnauthenticated(authenticate);
+          } else {
+            // api invalid so clear, check company
+            authenticate = authenticate.copyWith(clearApiKey: true);
+            if (await checkCompany(authenticate.company)) {
+              // company ok, apikey cleared
+              repos.persistAuthenticate(authenticate);
+              yield AuthUnauthenticated(authenticate);
+            } else {
+              //company invalid: get default, key cleared
+              await findDefaultCompany();
+              repos.persistAuthenticate(authenticate);
+              yield AuthUnauthenticated(authenticate);
+            }
           }
         }
       }

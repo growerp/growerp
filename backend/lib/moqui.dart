@@ -134,29 +134,34 @@ class Moqui {
     client.options.headers['api_key'] = apiKey;
   }
 
-  Future<dynamic> checkApikey() async {
+  Future<bool> checkApikey() async {
     try {
       Response response = await client.get('rest/s1/growerp/100/CheckApiKey');
       return response.data["ok"] == "ok"; // return true if session token ok
-    } on DioError catch (e) {
-      return responseMessage(e);
+    } on DioError catch (_) {
+      return Future.value(false);
     }
   }
 
-  Future<dynamic> checkCompany(String partyId) async {
+  Future<bool> checkCompany(String partyId) async {
     try {
       Response response = await client.get('rest/s1/growerp/100/CheckCompany',
           queryParameters: {'partyId': partyId});
       return response.data["ok"] == 'ok'; // return true if session token ok
-    } on DioError catch (e) {
-      return responseMessage(e);
+    } on DioError catch (_) {
+      return Future.value(false);
     }
   }
 
-  Future<dynamic> getCompanies([String? classificationId]) async {
+  Future<dynamic> getCompanies(
+      {String? classificationId, int? start, int? limit}) async {
     try {
       Response response = await client.get('rest/s1/growerp/100/Companies',
-          queryParameters: {"classificationId": classificationId});
+          queryParameters: {
+            "classificationId": classificationId,
+            'start': start,
+            'limit': limit
+          });
       return companiesFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
