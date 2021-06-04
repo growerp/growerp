@@ -13,7 +13,6 @@
  */
 
 import 'dart:async';
-import 'dart:html';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';

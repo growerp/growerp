@@ -66,10 +66,18 @@ class PrintingPage extends StatelessWidget {
             if (state is FinDocLoading) return LoadingIndicator();
             if (state is FinDocSuccess) {
               finDoc = state.finDocs![0];
-              return PdfPreview(
-                build: (format) =>
-                    PdfFormats.finDocPdf(format, authenticate.company!, finDoc),
-              );
+              return Stack(children: [
+                PdfPreview(
+                  build: (format) => PdfFormats.finDocPdf(
+                      format, authenticate.company!, finDoc),
+                ),
+                ElevatedButton(
+                    key: Key('back'),
+                    child: Text('Back'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    }),
+              ]);
             }
             return Container();
           });
