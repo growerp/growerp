@@ -17,7 +17,7 @@ class ProductsForm extends StatefulWidget {
 
 class _ProductsState extends State<ProductsForm> {
   final _scrollController = ScrollController();
-  double _scrollThreshold = 200.0;
+  final _searchController = TextEditingController();
   late ProductBloc _productBloc;
   Authenticate? authenticate;
   late int limit;
@@ -32,9 +32,6 @@ class _ProductsState extends State<ProductsForm> {
     search = false;
     limit = 20;
   }
-// https://medium.com/litslink/flutter-bloc-and-refreshindicator-72d10bbe6393
-// https://medium.com/flutter-community/listview-pagination-and-reloading-network-calls-in-flutter-90b1dd78fca2
-// https://stackoverflow.com/questions/55354018/flutter-listview-emptystate-with-refresh
 
   @override
   Widget build(BuildContext context) {
@@ -57,150 +54,170 @@ class _ProductsState extends State<ProductsForm> {
           if (state is ProductLoading) return LoadingIndicator();
           if (state is ProductSuccess) {
             List<Product>? products = state.products;
-            return ListView.builder(
-              itemCount: state.hasReachedMax! && products!.isNotEmpty
-                  ? products.length + 1
-                  : products!.length + 2,
-              controller: _scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0)
-                  return ListTile(
-                      onTap: (() {
-                        setState(() {
-                          search = !search;
-                        });
-                      }),
-                      leading:
-                          Image.asset('assets/images/search.png', height: 30),
-                      title: search
-                          ? Row(children: <Widget>[
-                              SizedBox(
-                                  width: ResponsiveWrapper.of(context)
-                                          .isSmallerThan(TABLET)
-                                      ? MediaQuery.of(context).size.width - 250
-                                      : MediaQuery.of(context).size.width - 350,
-                                  child: TextField(
-                                    textInputAction: TextInputAction.go,
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.transparent),
-                                      ),
-                                      hintText:
-                                          "search in ID, name and description...",
-                                    ),
-                                    onChanged: ((value) {
-                                      searchString = value;
-                                    }),
-                                    onSubmitted: ((value) {
-                                      _productBloc.add(FetchProduct(
-                                          search: value, limit: limit));
-                                      setState(() {
-                                        search = !search;
+            _searchController.text = state.search ?? '';
+            return RefreshIndicator(
+                onRefresh: (() async {
+                  _productBloc.add(FetchProduct(
+                      companyPartyId: authenticate!.company!.partyId,
+                      refresh: true));
+                }),
+                child: ListView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemCount: state.hasReachedMax! && products!.isNotEmpty
+                      ? products.length + 1
+                      : products!.length + 2,
+                  controller: _scrollController,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0)
+                      return ListTile(
+                          onTap: (() {
+                            setState(() {
+                              search = !search;
+                            });
+                          }),
+                          leading: Image.asset('assets/images/search.png',
+                              height: 30),
+                          title: search
+                              ? Row(children: <Widget>[
+                                  SizedBox(
+                                      width: ResponsiveWrapper.of(context)
+                                              .isSmallerThan(TABLET)
+                                          ? MediaQuery.of(context).size.width -
+                                              250
+                                          : MediaQuery.of(context).size.width -
+                                              350,
+                                      child: TextField(
+                                        controller: _searchController,
+                                        textInputAction: TextInputAction.go,
+                                        autofocus: true,
+                                        decoration: InputDecoration(
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent),
+                                          ),
+                                          hintText:
+                                              "search in ID, name and description...",
+                                        ),
+                                        onChanged: ((value) {
+                                          searchString = value;
+                                        }),
+                                        onSubmitted: ((value) {
+                                          _productBloc.add(FetchProduct(
+                                              companyPartyId: authenticate!
+                                                  .company!.partyId,
+                                              search: value,
+                                              limit: limit));
+                                          setState(() {
+                                            search = !search;
+                                          });
+                                        }),
+                                      )),
+                                  ElevatedButton(
+                                      child: Text('Search'),
+                                      onPressed: () {
+                                        _productBloc.add(FetchProduct(
+                                            companyPartyId:
+                                                authenticate!.company!.partyId,
+                                            search: searchString,
+                                            limit: limit));
+                                      })
+                                ])
+                              : Column(children: [
+                                  Row(children: <Widget>[
+                                    Expanded(
+                                        child: Text("Name[ID]",
+                                            textAlign: TextAlign.center)),
+                                    if (!ResponsiveWrapper.of(context)
+                                        .isSmallerThan(TABLET))
+                                      Expanded(
+                                          child: Text("Description",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text("Price",
+                                            textAlign: TextAlign.center)),
+                                    if (classificationId != 'AppHotel')
+                                      Expanded(
+                                          child: Text("Category",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text(
+                                            classificationId != 'AppHotel'
+                                                ? "Nbr Of Assets"
+                                                : "Number of Rooms",
+                                            textAlign: TextAlign.center)),
+                                  ]),
+                                  Divider(color: Colors.black),
+                                ]),
+                          trailing: Text(' '));
+                    if (index == 1 && products.isEmpty)
+                      return Center(
+                          heightFactor: 20,
+                          child: Text("no records found!",
+                              textAlign: TextAlign.center));
+                    index -= 1;
+                    return index >= products.length
+                        ? BottomLoader()
+                        : Dismissible(
+                            key: Key(products[index].productId!),
+                            direction: DismissDirection.startToEnd,
+                            child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  child: products[index].image != null
+                                      ? Image.memory(
+                                          products[index].image!,
+                                          height: 100,
+                                        )
+                                      : Text(
+                                          "${products[index].productName![0]}"),
+                                ),
+                                title: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                        child: Text(
+                                            "${products[index].productName}"
+                                            "[${products[index].productId}]")),
+                                    if (!ResponsiveWrapper.of(context)
+                                        .isSmallerThan(TABLET))
+                                      Expanded(
+                                          child: Text(
+                                              "${products[index].description}",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text(
+                                            "${authenticate!.company!.currencyId} "
+                                            "${products[index].price}",
+                                            textAlign: TextAlign.center)),
+                                    if (classificationId != 'AppHotel')
+                                      Expanded(
+                                          child: Text(
+                                              "${products[index].categoryName}",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text(
+                                            "${products[index].assetCount}",
+                                            textAlign: TextAlign.center)),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return ProductDialog(
+                                            formArguments: FormArguments(
+                                                object: products[index]));
                                       });
-                                    }),
-                                  )),
-                              ElevatedButton(
-                                  child: Text('Search'),
+                                },
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete_forever),
                                   onPressed: () {
-                                    _productBloc.add(FetchProduct(
-                                        search: searchString, limit: limit));
-                                  })
-                            ])
-                          : Column(children: [
-                              Row(children: <Widget>[
-                                Expanded(
-                                    child: Text("Name[ID]",
-                                        textAlign: TextAlign.center)),
-                                if (!ResponsiveWrapper.of(context)
-                                    .isSmallerThan(TABLET))
-                                  Expanded(
-                                      child: Text("Description",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("Price",
-                                        textAlign: TextAlign.center)),
-                                if (classificationId != 'AppHotel')
-                                  Expanded(
-                                      child: Text("Category",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        classificationId != 'AppHotel'
-                                            ? "Nbr Of Assets"
-                                            : "Number of Rooms",
-                                        textAlign: TextAlign.center)),
-                              ]),
-                              Divider(color: Colors.black),
-                            ]),
-                      trailing: Text(' '));
-                if (index == 1 && products.isEmpty)
-                  return Center(
-                      heightFactor: 20,
-                      child: Text("no records found!",
-                          textAlign: TextAlign.center));
-                index -= 1;
-                return index >= products.length
-                    ? BottomLoader()
-                    : Dismissible(
-                        key: Key(products[index].productId!),
-                        direction: DismissDirection.startToEnd,
-                        child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.green,
-                              child: products[index].image != null
-                                  ? Image.memory(
-                                      products[index].image!,
-                                      height: 100,
-                                    )
-                                  : Text("${products[index].productName![0]}"),
-                            ),
-                            title: Row(
-                              children: <Widget>[
-                                Expanded(
-                                    child: Text("${products[index].productName}"
-                                        "[${products[index].productId}]")),
-                                if (!ResponsiveWrapper.of(context)
-                                    .isSmallerThan(TABLET))
-                                  Expanded(
-                                      child: Text(
-                                          "${products[index].description}",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text(
-                                        "${authenticate!.company!.currencyId} "
-                                        "${products[index].price}",
-                                        textAlign: TextAlign.center)),
-                                if (classificationId != 'AppHotel')
-                                  Expanded(
-                                      child: Text(
-                                          "${products[index].categoryName}",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("${products[index].assetCount}",
-                                        textAlign: TextAlign.center)),
-                              ],
-                            ),
-                            onTap: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return ProductDialog(
-                                        formArguments: FormArguments(
-                                            object: products[index]));
-                                  });
-                            },
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete_forever),
-                              onPressed: () {
-                                _productBloc
-                                    .add(DeleteProduct(products[index]));
-                              },
-                            )));
-              },
-            );
+                                    _productBloc
+                                        .add(DeleteProduct(products[index]));
+                                  },
+                                )));
+                  },
+                ));
           }
           return Center(child: CircularProgressIndicator());
         });
@@ -218,7 +235,7 @@ class _ProductsState extends State<ProductsForm> {
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
+    if (currentScroll > 0 && maxScroll - currentScroll <= 200) {
       _productBloc.add(FetchProduct(
           companyPartyId: authenticate!.company!.partyId,
           limit: limit,

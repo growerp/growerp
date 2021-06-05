@@ -42,58 +42,45 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
+  Stream<ProductState> getProducts(
+      {required dynamic event, int start = 0, String? search}) async* {
+    yield ProductLoading();
+    dynamic result = await repos.getProduct(
+        start: start,
+        limit: event.limit,
+        assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
+        companyPartyId: event.companyPartyId,
+        search: search);
+    if (result is List<Product>) {
+      products = result;
+      yield ProductSuccess(
+          products: result,
+          search: search,
+          hasReachedMax: result.length < event.limit ? true : false);
+    } else
+      yield ProductProblem(result);
+  }
+
   @override
   Stream<ProductState> mapEventToState(ProductEvent event) async* {
     final ProductState currentState = state;
     if (event is FetchProduct) {
-      if (currentState is ProductInitial) {
-        dynamic result = await repos.getProduct(
-            start: 0,
-            limit: event.limit,
-            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
-            companyPartyId: event.companyPartyId,
-            search: event.search);
-        if (result is List<Product>) {
-          products = result;
-          yield ProductSuccess(
-              products: result,
-              hasReachedMax: result.length < event.limit ? true : false);
-        } else
-          yield ProductProblem(result);
-        return;
+      // refresh or initial
+      if (event.refresh || currentState is ProductInitial) {
+        yield* getProducts(
+            event: event,
+            search:
+                currentState is ProductSuccess ? currentState.search : null);
       } else if (currentState is ProductSuccess) {
         if (event.search != null && currentState.search == null ||
             (currentState.search != null &&
                 event.search != currentState.search)) {
-          yield ProductLoading();
-          dynamic result = await repos.getProduct(
-              start: 0,
-              limit: event.limit,
-              assetClassId:
-                  classificationId == 'AppHotel' ? 'Hotel Room' : null,
-              companyPartyId: event.companyPartyId,
-              search: event.search);
-          if (result is List<Product>) {
-            products = result;
-            yield ProductSuccess(
-                products: result,
-                search: event.search,
-                hasReachedMax: result.length < event.limit ? true : false);
-          } else
-            yield ProductProblem(result);
-          return;
+          // if we need to search
+          yield* getProducts(event: event, search: event.search);
         } else if (!_hasReachedMax(currentState)) {
-          dynamic result = await repos.getProduct(
-              start: currentState.products!.length,
-              limit: event.limit,
-              search: event.search,
-              companyPartyId: event.companyPartyId);
-          if (result is List<Product>) {
-            yield currentState.copyWith(
-                products: currentState.products! + result,
-                hasReachedMax: result.length < event.limit ? true : false);
-          } else
-            yield ProductProblem(result);
+          // get next page
+          yield* getProducts(
+              event: event, start: currentState.products!.length);
         }
       }
     } else if (event is UpdateProduct) {
@@ -150,20 +137,22 @@ abstract class ProductEvent extends Equatable {
 }
 
 class FetchProduct extends ProductEvent {
+  final bool refresh;
   final String? companyPartyId;
   final String? categoryId;
   final String? assetClassId;
   final int limit;
   final search;
   FetchProduct(
-      {this.companyPartyId,
+      {this.refresh = false,
+      this.companyPartyId,
       this.categoryId,
       this.assetClassId,
       this.limit = 20,
       this.search});
   @override
   String toString() => "FetchProduct company: $companyPartyId, "
-      "limit: $limit, search: $search";
+      "refresh: $refresh limit: $limit, search: $search";
 }
 
 class DeleteProduct extends ProductEvent {
