@@ -19,9 +19,11 @@ class _ProductsState extends State<ProductsForm> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
   late ProductBloc _productBloc;
-  Authenticate? authenticate;
+  Authenticate authenticate = Authenticate();
+  List<Product> products = const <Product>[];
   late int limit;
   late bool search;
+  late String classificationId;
   String? searchString;
 
   @override
@@ -30,18 +32,16 @@ class _ProductsState extends State<ProductsForm> {
     _scrollController.addListener(_onScroll);
     _productBloc = BlocProvider.of<ProductBloc>(context);
     search = false;
-    limit = 20;
+    classificationId = GlobalConfiguration().get("classificationId");
+    _productBloc..add(FetchProduct(limit: 20));
   }
 
   @override
   Widget build(BuildContext context) {
-    String classificationId = GlobalConfiguration().get("classificationId");
     limit = (MediaQuery.of(context).size.height / 35).round();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate;
-        _productBloc
-          ..add(FetchProduct(companyPartyId: authenticate!.company!.partyId));
         return BlocConsumer<ProductBloc, ProductState>(
             listener: (context, state) {
           if (state is ProductProblem)
@@ -51,21 +51,20 @@ class _ProductsState extends State<ProductsForm> {
             HelperFunctions.showMessage(
                 context, '${state.message}', Colors.green);
         }, builder: (context, state) {
-          if (state is ProductLoading) return LoadingIndicator();
           if (state is ProductSuccess) {
-            List<Product>? products = state.products;
+            products = state.products;
             _searchController.text = state.search ?? '';
             return RefreshIndicator(
                 onRefresh: (() async {
                   _productBloc.add(FetchProduct(
-                      companyPartyId: authenticate!.company!.partyId,
+                      companyPartyId: authenticate.company!.partyId,
                       refresh: true));
                 }),
                 child: ListView.builder(
                   physics: AlwaysScrollableScrollPhysics(),
-                  itemCount: state.hasReachedMax! && products!.isNotEmpty
+                  itemCount: state.hasReachedMax && products.isNotEmpty
                       ? products.length + 1
-                      : products!.length + 2,
+                      : products.length + 2,
                   controller: _scrollController,
                   itemBuilder: (BuildContext context, int index) {
                     if (index == 0)
@@ -103,8 +102,8 @@ class _ProductsState extends State<ProductsForm> {
                                         }),
                                         onSubmitted: ((value) {
                                           _productBloc.add(FetchProduct(
-                                              companyPartyId: authenticate!
-                                                  .company!.partyId,
+                                              companyPartyId:
+                                                  authenticate.company!.partyId,
                                               search: value,
                                               limit: limit));
                                           setState(() {
@@ -117,7 +116,7 @@ class _ProductsState extends State<ProductsForm> {
                                       onPressed: () {
                                         _productBloc.add(FetchProduct(
                                             companyPartyId:
-                                                authenticate!.company!.partyId,
+                                                authenticate.company!.partyId,
                                             search: searchString,
                                             limit: limit));
                                       })
@@ -185,7 +184,7 @@ class _ProductsState extends State<ProductsForm> {
                                               textAlign: TextAlign.center)),
                                     Expanded(
                                         child: Text(
-                                            "${authenticate!.company!.currencyId} "
+                                            "${authenticate.company!.currencyId} "
                                             "${products[index].price}",
                                             textAlign: TextAlign.center)),
                                     if (classificationId != 'AppHotel')
@@ -237,7 +236,7 @@ class _ProductsState extends State<ProductsForm> {
     final currentScroll = _scrollController.position.pixels;
     if (currentScroll > 0 && maxScroll - currentScroll <= 200) {
       _productBloc.add(FetchProduct(
-          companyPartyId: authenticate!.company!.partyId,
+          companyPartyId: authenticate.company!.partyId,
           limit: limit,
           search: searchString));
     }

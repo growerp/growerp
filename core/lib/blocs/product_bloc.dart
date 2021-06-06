@@ -43,8 +43,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   Stream<ProductState> getProducts(
-      {required dynamic event, int start = 0, String? search}) async* {
-    yield ProductLoading();
+      {required dynamic event,
+      List<Product> products = const <Product>[],
+      int start = 0,
+      String? search}) async* {
     dynamic result = await repos.getProduct(
         start: start,
         limit: event.limit,
@@ -52,9 +54,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         companyPartyId: event.companyPartyId,
         search: search);
     if (result is List<Product>) {
-      products = result;
       yield ProductSuccess(
-          products: result,
+          products: products + result,
           search: search,
           hasReachedMax: result.length < event.limit ? true : false);
     } else
@@ -76,11 +77,16 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             (currentState.search != null &&
                 event.search != currentState.search)) {
           // if we need to search
-          yield* getProducts(event: event, search: event.search);
+          yield* getProducts(
+              event: event,
+              products: currentState.products,
+              search: event.search);
         } else if (!_hasReachedMax(currentState)) {
           // get next page
           yield* getProducts(
-              event: event, start: currentState.products!.length);
+              event: event,
+              products: currentState.products,
+              start: currentState.products.length);
         }
       }
     } else if (event is UpdateProduct) {
@@ -91,11 +97,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (currentState is ProductSuccess) {
         if (result is Product) {
           if (adding) {
-            currentState.products?.add(result);
+            currentState.products.add(result);
           } else {
-            int index = currentState.products!
+            int index = currentState.products
                 .indexWhere((prod) => prod.productId == result.productId);
-            currentState.products!.replaceRange(index, index + 1, [result]);
+            currentState.products.replaceRange(index, index + 1, [result]);
           }
           yield ProductSuccess(
               products: currentState.products,
@@ -107,13 +113,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       }
     } else if (event is DeleteProduct) {
       if (currentState is ProductSuccess) {
-        int index = currentState.products!
+        int index = currentState.products
             .indexWhere((prod) => prod.productId == event.product.productId);
-        String? name = currentState.products![index].productName;
+        String? name = currentState.products[index].productName;
         yield ProductLoading('deleting product $name');
         dynamic result = await repos.deleteProduct(event.product.productId);
         if (result == event.product.productId) {
-          currentState.products!.removeAt(index);
+          currentState.products.removeAt(index);
           yield ProductSuccess(
                   products: currentState.products,
                   hasReachedMax: _hasReachedMax(currentState))
@@ -128,7 +134,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 }
 
 bool _hasReachedMax(ProductState state) =>
-    state is ProductSuccess && state.hasReachedMax!;
+    state is ProductSuccess && state.hasReachedMax;
 
 //#######################events###########################
 abstract class ProductEvent extends Equatable {
@@ -197,13 +203,16 @@ class ProductProblem extends ProductState {
 }
 
 class ProductSuccess extends ProductState {
-  final List<Product>? products;
-  final bool? hasReachedMax;
+  final List<Product> products;
+  final bool hasReachedMax;
   final String? message;
   final String? search;
 
   const ProductSuccess(
-      {this.products, this.hasReachedMax, this.message, this.search});
+      {required this.products,
+      required this.hasReachedMax,
+      this.message,
+      this.search});
 
   ProductSuccess copyWith({
     List<Product>? products,
@@ -219,9 +228,9 @@ class ProductSuccess extends ProductState {
       );
 
   @override
-  List<Object?> get props => [products, hasReachedMax];
+  List<Object?> get props => [products, hasReachedMax, message, search];
 
   @override
-  String toString() => 'ProductSuccess { #products: ${products?.length}, '
+  String toString() => 'ProductSuccess { #products: ${products.length}, '
       'hasReachedMax: $hasReachedMax }';
 }
