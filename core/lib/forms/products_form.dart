@@ -53,12 +53,10 @@ class _ProductsState extends State<ProductsForm> {
         }, builder: (context, state) {
           if (state is ProductSuccess) {
             products = state.products;
-            _searchController.text = state.search ?? '';
+            _searchController.text = state.searchString ?? '';
             return RefreshIndicator(
                 onRefresh: (() async {
-                  _productBloc.add(FetchProduct(
-                      companyPartyId: authenticate.company!.partyId,
-                      refresh: true));
+                  _productBloc.add(FetchProduct(refresh: true));
                 }),
                 child: ListView.builder(
                   physics: AlwaysScrollableScrollPhysics(),

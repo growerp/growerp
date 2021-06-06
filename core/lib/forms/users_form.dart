@@ -22,9 +22,8 @@ class _UsersState extends State<UsersForm> {
   double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
   var blocName;
-  Authenticate? authenticate;
-  List<User>? users;
-  bool? hasReachedMax;
+  Authenticate authenticate = Authenticate();
+  List<User> users = const <User>[];
   late int limit;
   bool showSearchField = false;
   String? searchString;
@@ -68,163 +67,172 @@ class _UsersState extends State<UsersForm> {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) authenticate = state.authenticate;
 
-      Widget showForm() {
-        if (users == null) return LoadingIndicator();
-        return ListView.builder(
-          itemCount: hasReachedMax! && users!.isNotEmpty
-              ? users!.length + 1
-              : users!.length + 2,
-          controller: _scrollController,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0)
-              return Column(children: [
-                ListTile(
-                    onTap: (() {
-                      setState(() {
-                        showSearchField = !showSearchField;
-                      });
-                    }),
-                    leading:
-                        Image.asset('assets/images/search.png', height: 30),
-                    subtitle: isPhone && !showSearchField
-                        ? Text("emailAddress")
-                        : null,
-                    title: showSearchField
-                        ? Row(children: <Widget>[
-                            SizedBox(
-                                width: ResponsiveWrapper.of(context)
-                                        .isSmallerThan(TABLET)
-                                    ? MediaQuery.of(context).size.width - 250
-                                    : MediaQuery.of(context).size.width - 350,
-                                child: TextField(
-                                  autofocus: true,
-                                  decoration: InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.transparent),
-                                    ),
-                                    hintText:
-                                        "search in ID, first and lastname...",
-                                  ),
-                                  onChanged: ((value) {
-                                    searchString = value;
-                                  }),
-                                  onSubmitted: ((value) {
-                                    _userBloc.add(FetchUser(
-                                        searchString: value, limit: limit));
-                                    setState(() {
-                                      showSearchField = false;
-                                    });
-                                  }),
-                                )),
-                            ElevatedButton(
-                                child: Text('Search'),
-                                onPressed: () {
-                                  _userBloc.add(FetchUser(
-                                      searchString: searchString,
-                                      limit: limit));
-                                  setState(() {
-                                    showSearchField = false;
-                                  });
-                                })
-                          ])
-                        : Row(
-                            children: <Widget>[
-                              Expanded(child: Text("Name")),
-                              if (isDeskTop)
-                                Expanded(child: Text("login name")),
-                              if (!isPhone) Expanded(child: Text("Email")),
-                              if (isDeskTop) Expanded(child: Text("Language")),
-                              if (isDeskTop &&
-                                  widget.userGroupId != "GROWERP_M_EMPLOYEE" &&
-                                  widget.userGroupId != "GROWERP_M_ADMIN")
+      Widget showForm(state) {
+        if (users.isEmpty) return LoadingIndicator();
+        return RefreshIndicator(
+            onRefresh: (() async {
+              _userBloc.add(FetchUser(refresh: true));
+            }),
+            child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
+              itemCount: state.hasReachedMax! && users.isNotEmpty
+                  ? users.length + 1
+                  : users.length + 2,
+              controller: _scrollController,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0)
+                  return Column(children: [
+                    ListTile(
+                        onTap: (() {
+                          setState(() {
+                            showSearchField = !showSearchField;
+                          });
+                        }),
+                        leading:
+                            Image.asset('assets/images/search.png', height: 30),
+                        subtitle: isPhone && !showSearchField
+                            ? Text("emailAddress")
+                            : null,
+                        title: showSearchField
+                            ? Row(children: <Widget>[
+                                SizedBox(
+                                    width: ResponsiveWrapper.of(context)
+                                            .isSmallerThan(TABLET)
+                                        ? MediaQuery.of(context).size.width -
+                                            250
+                                        : MediaQuery.of(context).size.width -
+                                            350,
+                                    child: TextField(
+                                      autofocus: true,
+                                      decoration: InputDecoration(
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.transparent),
+                                        ),
+                                        hintText:
+                                            "search in ID, first and lastname...",
+                                      ),
+                                      onChanged: ((value) {
+                                        searchString = value;
+                                      }),
+                                      onSubmitted: ((value) {
+                                        _userBloc.add(FetchUser(
+                                            searchString: value, limit: limit));
+                                        setState(() {
+                                          showSearchField = false;
+                                        });
+                                      }),
+                                    )),
+                                ElevatedButton(
+                                    child: Text('Search'),
+                                    onPressed: () {
+                                      _userBloc.add(FetchUser(
+                                          searchString: searchString,
+                                          limit: limit));
+                                      setState(() {
+                                        showSearchField = false;
+                                      });
+                                    })
+                              ])
+                            : Row(
+                                children: <Widget>[
+                                  Expanded(child: Text("Name")),
+                                  if (isDeskTop)
+                                    Expanded(child: Text("login name")),
+                                  if (!isPhone) Expanded(child: Text("Email")),
+                                  if (isDeskTop)
+                                    Expanded(child: Text("Language")),
+                                  if (isDeskTop &&
+                                      widget.userGroupId !=
+                                          "GROWERP_M_EMPLOYEE" &&
+                                      widget.userGroupId != "GROWERP_M_ADMIN")
+                                    Expanded(
+                                        child: Text("Company",
+                                            textAlign: TextAlign.center)),
+                                  if (isPhone &&
+                                      widget.userGroupId !=
+                                          "GROWERP_M_EMPLOYEE" &&
+                                      widget.userGroupId != "GROWERP_M_ADMIN")
+                                    Expanded(child: Text("Company"))
+                                ],
+                              ),
+                        trailing: Text(' ')),
+                    Divider(color: Colors.black),
+                  ]);
+                if (index == 1 && users.isEmpty)
+                  return Center(
+                      heightFactor: 20,
+                      child: Text("no records found!",
+                          textAlign: TextAlign.center));
+                index -= 1;
+                return index >= users.length
+                    ? BottomLoader()
+                    : Dismissible(
+                        key: Key(users[index].partyId!),
+                        direction: DismissDirection.startToEnd,
+                        child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.green,
+                              child: users[index].image != null
+                                  ? Image.memory(users[index].image!)
+                                  : Text(users[index].firstName![0]),
+                            ),
+                            subtitle:
+                                isPhone ? Text("${users[index].email}") : null,
+                            title: Row(
+                              children: <Widget>[
                                 Expanded(
-                                    child: Text("Company",
-                                        textAlign: TextAlign.center)),
-                              if (isPhone &&
-                                  widget.userGroupId != "GROWERP_M_EMPLOYEE" &&
-                                  widget.userGroupId != "GROWERP_M_ADMIN")
-                                Expanded(child: Text("Company"))
-                            ],
-                          ),
-                    trailing: Text(' ')),
-                Divider(color: Colors.black),
-              ]);
-            if (index == 1 && users!.isEmpty)
-              return Center(
-                  heightFactor: 20,
-                  child:
-                      Text("no records found!", textAlign: TextAlign.center));
-            index -= 1;
-            return index >= users!.length
-                ? BottomLoader()
-                : Dismissible(
-                    key: Key(users![index].partyId!),
-                    direction: DismissDirection.startToEnd,
-                    child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.green,
-                          child: users![index].image != null
-                              ? Image.memory(users![index].image!)
-                              : Text(users![index].firstName![0]),
-                        ),
-                        subtitle:
-                            isPhone ? Text("${users![index].email}") : null,
-                        title: Row(
-                          children: <Widget>[
-                            Expanded(
-                                child: Text("${users![index].firstName}, "
-                                    "${users![index].lastName}"
-                                    "[${users![index].partyId}]")),
-                            if (isDeskTop)
-                              Expanded(child: Text("${users![index].name}")),
-                            if (!isPhone)
-                              Expanded(child: Text("${users![index].email}")),
-                            if (isDeskTop)
-                              Expanded(
-                                  child: Text("${users![index].language}")),
-                            if (isDeskTop &&
-                                widget.userGroupId != "GROWERP_M_EMPLOYEE" &&
-                                widget.userGroupId != "GROWERP_M_ADMIN")
-                              Expanded(
-                                  child: Text("${users![index].companyName}",
-                                      textAlign: TextAlign.center)),
-                            if (isPhone &&
-                                widget.userGroupId != "GROWERP_M_EMPLOYEE" &&
-                                widget.userGroupId != "GROWERP_M_ADMIN")
-                              Expanded(
-                                  child: Text("${users![index].companyName}",
-                                      textAlign: TextAlign.center))
-                          ],
-                        ),
-                        onTap: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return UserDialog(
-                                    formArguments:
-                                        FormArguments(object: users![index]));
-                              });
-                        },
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete_forever),
-                          onPressed: () {
-                            _userBloc.add(DeleteUser(users![index]));
-                          },
-                        )));
-          },
-        );
+                                    child: Text("${users[index].firstName}, "
+                                        "${users[index].lastName}"
+                                        "[${users[index].partyId}]")),
+                                if (isDeskTop)
+                                  Expanded(child: Text("${users[index].name}")),
+                                if (!isPhone)
+                                  Expanded(
+                                      child: Text("${users[index].email}")),
+                                if (isDeskTop)
+                                  Expanded(
+                                      child: Text("${users[index].language}")),
+                                if (isDeskTop &&
+                                    widget.userGroupId !=
+                                        "GROWERP_M_EMPLOYEE" &&
+                                    widget.userGroupId != "GROWERP_M_ADMIN")
+                                  Expanded(
+                                      child: Text("${users[index].companyName}",
+                                          textAlign: TextAlign.center)),
+                                if (isPhone &&
+                                    widget.userGroupId !=
+                                        "GROWERP_M_EMPLOYEE" &&
+                                    widget.userGroupId != "GROWERP_M_ADMIN")
+                                  Expanded(
+                                      child: Text("${users[index].companyName}",
+                                          textAlign: TextAlign.center))
+                              ],
+                            ),
+                            onTap: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return UserDialog(
+                                        formArguments: FormArguments(
+                                            object: users[index]));
+                                  });
+                            },
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete_forever),
+                              onPressed: () {
+                                _userBloc.add(DeleteUser(users[index]));
+                              },
+                            )));
+              },
+            ));
       }
 
       dynamic blocListener = (context, state) {
         if (state is UserProblem)
           HelperFunctions.showMessage(
               context, '${state.errorMessage}', Colors.red);
-        if (state is UserSuccess) {
-          HelperFunctions.showMessage(context, '${state.message}',
-              state.error ? Colors.red : Colors.green);
-        }
       };
 
       dynamic blocBuilder = (context, state) {
@@ -233,9 +241,9 @@ class _UsersState extends State<UsersForm> {
         if (state is UserSuccess) {
           isLoading = false;
           users = state.users;
-          hasReachedMax = state.hasReachedMax;
         }
-        return Stack(children: [showForm(), if (isLoading) LoadingIndicator()]);
+        return Stack(
+            children: [showForm(state), if (isLoading) LoadingIndicator()]);
       };
 
       switch (widget.userGroupId) {
@@ -271,7 +279,7 @@ class _UsersState extends State<UsersForm> {
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
+    if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
       _userBloc.add(FetchUser(limit: limit, searchString: searchString));
     }
   }

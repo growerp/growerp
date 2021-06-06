@@ -46,17 +46,17 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       {required dynamic event,
       List<Product> products = const <Product>[],
       int start = 0,
-      String? search}) async* {
+      String? searchString}) async* {
     dynamic result = await repos.getProduct(
         start: start,
         limit: event.limit,
         assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
         companyPartyId: event.companyPartyId,
-        search: search);
+        search: searchString);
     if (result is List<Product>) {
       yield ProductSuccess(
           products: products + result,
-          search: search,
+          searchString: searchString,
           hasReachedMax: result.length < event.limit ? true : false);
     } else
       yield ProductProblem(result);
@@ -70,17 +70,18 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (event.refresh || currentState is ProductInitial) {
         yield* getProducts(
             event: event,
-            search:
-                currentState is ProductSuccess ? currentState.search : null);
+            searchString: currentState is ProductSuccess
+                ? currentState.searchString
+                : null);
       } else if (currentState is ProductSuccess) {
-        if (event.search != null && currentState.search == null ||
-            (currentState.search != null &&
-                event.search != currentState.search)) {
+        if (event.search != null && currentState.searchString == null ||
+            (currentState.searchString != null &&
+                event.search != currentState.searchString)) {
           // if we need to search
           yield* getProducts(
               event: event,
               products: currentState.products,
-              search: event.search);
+              searchString: event.search);
         } else if (!_hasReachedMax(currentState)) {
           // get next page
           yield* getProducts(
@@ -121,9 +122,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         if (result == event.product.productId) {
           currentState.products.removeAt(index);
           yield ProductSuccess(
-                  products: currentState.products,
-                  hasReachedMax: _hasReachedMax(currentState))
-              .copyWith(message: 'Product $name deleted');
+              products: currentState.products,
+              hasReachedMax: _hasReachedMax(currentState),
+              message: 'Product $name deleted');
         } else {
           yield ProductProblem(result);
         }
@@ -206,29 +207,16 @@ class ProductSuccess extends ProductState {
   final List<Product> products;
   final bool hasReachedMax;
   final String? message;
-  final String? search;
+  final String? searchString;
 
   const ProductSuccess(
       {required this.products,
       required this.hasReachedMax,
       this.message,
-      this.search});
-
-  ProductSuccess copyWith({
-    List<Product>? products,
-    bool? hasReachedMax,
-    String? message,
-    String? search,
-  }) =>
-      ProductSuccess(
-        products: products ?? this.products,
-        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        message: message ?? this.message,
-        search: search ?? this.search,
-      );
+      this.searchString});
 
   @override
-  List<Object?> get props => [products, hasReachedMax, message, search];
+  List<Object?> get props => [products, hasReachedMax, message, searchString];
 
   @override
   String toString() => 'ProductSuccess { #products: ${products.length}, '
