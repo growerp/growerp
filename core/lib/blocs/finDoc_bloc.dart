@@ -55,78 +55,65 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     );
   }
 
+  Stream<FinDocState> getFinDoc(
+      {required dynamic event,
+      List<FinDoc> finDocs = const <FinDoc>[],
+      int start = 0,
+      String? searchString}) async* {
+    dynamic result = await repos.getFinDoc(
+      id: event.id,
+      sales: sales,
+      docType: docType,
+      start: start,
+      limit: event.limit,
+      search: searchString,
+      customerCompanyPartyId: event.customerCompanyPartyId,
+    );
+    if (result is List<FinDoc>)
+      yield FinDocSuccess(
+        finDocs: finDocs + result,
+        searchString: searchString,
+        hasReachedMax: result.length < (event.limit ?? limit) ? true : false,
+      );
+    else
+      yield FinDocProblem(result);
+  }
+
   @override
   Stream<FinDocState> mapEventToState(FinDocEvent event) async* {
     final FinDocState currentState = state;
     if (event is FetchFinDoc) {
-      if (currentState is FinDocInitial) {
-        yield FinDocLoading("Getting $docType...");
-        dynamic result = await repos.getFinDoc(
-          id: event.id,
-          sales: sales,
-          docType: docType,
-          start: 0,
-          limit: event.limit,
-          search: event.search,
-          customerCompanyPartyId: event.customerCompanyPartyId,
-        );
-        if (result is List<FinDoc>)
-          yield FinDocSuccess(
-            finDocs: result,
-            hasReachedMax:
-                result.length < (event.limit ?? limit) ? true : false,
-          );
-        else
-          yield FinDocProblem(result);
-        return;
+      // refresh or initial
+      if (event.refresh || currentState is FinDocInitial) {
+        yield* getFinDoc(
+            event: event,
+            searchString: currentState is FinDocSuccess
+                ? currentState.searchString
+                : null);
       } else if (currentState is FinDocSuccess) {
-        if (event.search != null && currentState.search == null ||
-            (currentState.search != null &&
-                event.search != currentState.search)) {
-          dynamic result = await repos.getFinDoc(
-            id: event.id,
-            sales: sales,
-            docType: event.docType,
-            start: 0,
-            limit: event.limit,
-            search: event.search,
-            customerCompanyPartyId: event.customerCompanyPartyId,
-          );
-          if (result is List<FinDoc>) {
-            finDocs = result;
-            yield FinDocSuccess(
-                finDocs: result,
-                search: event.search,
-                hasReachedMax:
-                    result.length < (event.limit ?? limit) ? true : false);
-          } else
-            yield FinDocProblem(result);
+        // if we need to search
+        if (event.search != null && currentState.searchString == null ||
+            (currentState.searchString != null &&
+                event.search != currentState.searchString)) {
+          yield* getFinDoc(
+              event: event,
+              finDocs: currentState.finDocs,
+              searchString: event.search);
         } else if (!_hasReachedMax(currentState)) {
-          dynamic result = await repos.getFinDoc(
-              sales: sales,
-              docType: docType,
-              start: currentState.finDocs!.length,
-              limit: event.limit,
-              search: event.search);
-          if (result is List<FinDoc>) {
-            finDocs = result;
-            yield FinDocSuccess(
-                finDocs: currentState.finDocs! + result,
-                search: event.search,
-                hasReachedMax:
-                    result.length < (event.limit ?? limit) ? true : false);
-          } else
-            yield FinDocProblem(result);
+          // get next page
+          yield* getFinDoc(
+              event: event,
+              finDocs: currentState.finDocs,
+              start: currentState.finDocs.length);
         }
       }
     } else if (currentState is FinDocSuccess) {
       if (event is CreateFinDoc) {
-        print("===in findocbloc====Creating ${event.finDoc.docType}..====");
         yield FinDocLoading('Creating ${event.finDoc.docType}...');
         dynamic result = await repos.updateFinDoc(event.finDoc);
         if (result is List<FinDoc> && result.isNotEmpty) {
           yield FinDocUpdate(result[0]);
-          currentState.finDocs!.add(result[0]);
+          currentState.finDocs.add(result[0]);
           yield currentState.copyWith(
               message: "${result[0].docType} #${result[0].id()} created");
         } else
@@ -139,19 +126,19 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           late int index;
           switch (result[0].docType) {
             case 'order':
-              index = currentState.finDocs!
+              index = currentState.finDocs
                   .indexWhere((ord) => ord.orderId == result[0].orderId);
               break;
             case 'invoice':
-              index = currentState.finDocs!
+              index = currentState.finDocs
                   .indexWhere((ord) => ord.invoiceId == result[0].invoiceId);
               break;
             case 'payment':
-              index = currentState.finDocs!
+              index = currentState.finDocs
                   .indexWhere((ord) => ord.paymentId == result[0].paymentId);
               break;
           }
-          currentState.finDocs!.replaceRange(index, index + 1, [result[0]]);
+          currentState.finDocs.replaceRange(index, index + 1, [result[0]]);
           yield currentState.copyWith(
               message: "${result[0].docType} status updated to "
                   "${finDocStatusValues[result[0].statusId]}");
@@ -173,7 +160,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
 }
 
 bool _hasReachedMax(FinDocState state) =>
-    state is FinDocSuccess && state.hasReachedMax!;
+    state is FinDocSuccess && state.hasReachedMax;
 
 // ===================events =====================
 @immutable
@@ -186,19 +173,22 @@ abstract class FinDocEvent extends Equatable {
 class LoadFinDoc extends FinDocEvent {}
 
 class FetchFinDoc extends FinDocEvent {
+  final bool refresh;
   final String? id;
   final String? docType; // to get a single document id, docType
   final int? limit;
   final String? search;
   final String? customerCompanyPartyId;
   FetchFinDoc(
-      {this.limit,
+      {this.refresh = false,
+      this.limit,
       this.search,
       this.id,
       this.docType,
       this.customerCompanyPartyId});
   @override
-  String toString() => "FetchFinDoc limit: $limit, search: $search";
+  String toString() =>
+      "FetchFinDoc refresh: $refresh limit: $limit, search: $search";
 }
 
 class CreateFinDoc extends FinDocEvent {
@@ -255,37 +245,34 @@ class FinDocUpdate extends FinDocState {
 }
 
 class FinDocSuccess extends FinDocState {
-  final List<FinDoc>? finDocs;
+  final List<FinDoc> finDocs;
   final String? message;
-  final String? errorMessage;
-  final bool? hasReachedMax;
-  final String? search;
+  final bool hasReachedMax;
+  final String? searchString;
 
   const FinDocSuccess(
-      {this.finDocs,
+      {required this.finDocs,
+      required this.hasReachedMax,
       this.message,
-      this.errorMessage,
-      this.hasReachedMax,
-      this.search});
+      this.searchString});
 
   FinDocSuccess copyWith(
       {List<FinDoc>? finDocs,
       String? message,
       String? errorMessage,
       bool? hasReachedMax,
-      String? search}) {
+      String? searchString}) {
     return FinDocSuccess(
         finDocs: finDocs ?? this.finDocs,
         message: message ?? this.message,
-        errorMessage: errorMessage ?? this.errorMessage,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        search: search ?? this.search);
+        searchString: searchString ?? this.searchString);
   }
 
   @override
-  List<Object?> get props => [finDocs, hasReachedMax, search];
+  List<Object?> get props => [finDocs, hasReachedMax, searchString];
 
   @override
-  String toString() => 'FinDocSuccess { finDocs#: ${finDocs!.length}, '
+  String toString() => 'FinDocSuccess { finDocs#: ${finDocs.length}, '
       'hasReachedMax: $hasReachedMax }';
 }

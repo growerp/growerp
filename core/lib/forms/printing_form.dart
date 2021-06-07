@@ -65,7 +65,7 @@ class PrintingPage extends StatelessWidget {
               return FatalErrorForm("problem loading docs");
             if (state is FinDocLoading) return LoadingIndicator();
             if (state is FinDocSuccess) {
-              finDoc = state.finDocs![0];
+              finDoc = state.finDocs[0];
               return Stack(children: [
                 PdfPreview(
                   build: (format) => PdfFormats.finDocPdf(

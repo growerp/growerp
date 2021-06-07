@@ -74,10 +74,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                 ? currentState.searchString
                 : null);
       } else if (currentState is ProductSuccess) {
+        // if we need to search
         if (event.search != null && currentState.searchString == null ||
             (currentState.searchString != null &&
                 event.search != currentState.searchString)) {
-          // if we need to search
           yield* getProducts(
               event: event,
               products: currentState.products,
