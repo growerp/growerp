@@ -75,8 +75,8 @@ class AcctDashBoard extends StatelessWidget {
                   acctMenuItems[1],
                   "Sls open inv: "
                       "${authenticate.company!.currencyId} "
-                      "${authenticate.stats!.salesInvoicesNotPaidAmount}"
-                      "(${authenticate.stats!.salesInvoicesNotPaidCount})",
+                      "${authenticate.stats!.salesInvoicesNotPaidAmount ?? '0.00'} "
+                      "(${authenticate.stats!.salesInvoicesNotPaidCount ?? 0})",
                   "",
                   "",
                   "",
@@ -86,8 +86,8 @@ class AcctDashBoard extends StatelessWidget {
                   acctMenuItems[2],
                   "Pur unp inv: "
                       "${authenticate.company!.currencyId} "
-                      "${authenticate.stats!.purchInvoicesNotPaidAmount}"
-                      "(${authenticate.stats!.purchInvoicesNotPaidCount})",
+                      "${authenticate.stats!.purchInvoicesNotPaidAmount ?? '0.00'} "
+                      "(${authenticate.stats!.purchInvoicesNotPaidCount ?? 0})",
                   "",
                   "",
                   "",

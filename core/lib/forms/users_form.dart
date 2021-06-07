@@ -35,13 +35,13 @@ class _UsersState extends State<UsersForm> {
   ScrollController _scrollController = ScrollController();
   double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
-  var blocName;
   Authenticate authenticate = Authenticate();
   List<User> users = const <User>[];
   late int limit;
   bool showSearchField = false;
   String? searchString;
   bool isLoading = false;
+  bool hasReachedMax = false;
   late bool isDeskTop;
   late bool isPhone;
 
@@ -82,14 +82,13 @@ class _UsersState extends State<UsersForm> {
       if (state is AuthAuthenticated) authenticate = state.authenticate;
 
       Widget showForm(state) {
-        if (users.isEmpty) return LoadingIndicator();
         return RefreshIndicator(
             onRefresh: (() async {
               _userBloc.add(FetchUser(refresh: true, limit: limit));
             }),
             child: ListView.builder(
               physics: AlwaysScrollableScrollPhysics(),
-              itemCount: state.hasReachedMax! && users.isNotEmpty
+              itemCount: hasReachedMax && users.isNotEmpty
                   ? users.length + 1
                   : users.length + 2,
               controller: _scrollController,
@@ -173,7 +172,7 @@ class _UsersState extends State<UsersForm> {
                         trailing: Text(' ')),
                     Divider(color: Colors.black),
                   ]);
-                if (index == 1 && users.isEmpty)
+                if (index == 1 && users.isEmpty && !isLoading)
                   return Center(
                       heightFactor: 20,
                       child: Text("no records found!",
@@ -252,12 +251,16 @@ class _UsersState extends State<UsersForm> {
       dynamic blocBuilder = (context, state) {
         if (state is UserProblem)
           return FatalErrorForm("Could not load leads!");
+        if (state is UserLoading) {
+          isLoading = true;
+          return LoadingIndicator();
+        }
         if (state is UserSuccess) {
           isLoading = false;
           users = state.users;
+          hasReachedMax = state.hasReachedMax;
         }
-        return Stack(
-            children: [showForm(state), if (isLoading) LoadingIndicator()]);
+        return showForm(state);
       };
 
       switch (widget.userGroupId) {

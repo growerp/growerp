@@ -44,7 +44,7 @@ class _OrdersState extends State<FinDocsForm> {
   late bool showSearchField;
   String? searchString;
   bool isLoading = true;
-  bool? hasReachedMax = false;
+  bool hasReachedMax = false;
 
   _OrdersState();
 
@@ -53,43 +53,45 @@ class _OrdersState extends State<FinDocsForm> {
     super.initState();
     _scrollController.addListener(_onScroll);
     showSearchField = false;
-    if (widget.docType == 'order') {
-      if (widget.sales) {
-        tab = 4;
-        _finDocBloc = BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc
+    switch (widget.docType) {
+      case 'order':
+        if (widget.sales) {
+          tab = 4;
+          _finDocBloc = BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        } else {
+          tab = 5;
+          _finDocBloc = BlocProvider.of<PurchaseOrderBloc>(context)
+              as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        }
+        break;
+      case 'invoice':
+        if (widget.sales) {
+          tab = 0;
+          _finDocBloc = BlocProvider.of<SalesInvoiceBloc>(context) as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        } else {
+          tab = 0;
+          _finDocBloc = BlocProvider.of<PurchInvoiceBloc>(context) as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        }
+        break;
+      case 'payment':
+        if (widget.sales) {
+          tab = 0;
+          _finDocBloc = BlocProvider.of<SalesPaymentBloc>(context) as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        } else {
+          tab = 0;
+          _finDocBloc = BlocProvider.of<PurchPaymentBloc>(context) as FinDocBloc
+            ..add(FetchFinDoc(limit: limit));
+        }
+        break;
+      case 'transaction':
+        tab = 1;
+        _finDocBloc = BlocProvider.of<TransactionBloc>(context) as FinDocBloc
           ..add(FetchFinDoc(limit: limit));
-      } else {
-        tab = 5;
-        _finDocBloc = BlocProvider.of<PurchaseOrderBloc>(context) as FinDocBloc
-          ..add(FetchFinDoc(limit: limit));
-      }
-    }
-    if (widget.docType == 'invoice') {
-      if (widget.sales) {
-        tab = 0;
-        _finDocBloc = BlocProvider.of<SalesInvoiceBloc>(context) as FinDocBloc
-          ..add(FetchFinDoc(limit: limit));
-      } else {
-        tab = 0;
-        _finDocBloc = BlocProvider.of<PurchInvoiceBloc>(context) as FinDocBloc
-          ..add(FetchFinDoc(limit: limit));
-      }
-    }
-    if (widget.docType == 'payment') {
-      if (widget.sales) {
-        tab = 0;
-        _finDocBloc = BlocProvider.of<SalesPaymentBloc>(context) as FinDocBloc
-          ..add(FetchFinDoc(limit: limit));
-      } else {
-        tab = 0;
-        _finDocBloc = BlocProvider.of<PurchPaymentBloc>(context) as FinDocBloc
-          ..add(FetchFinDoc(limit: limit));
-      }
-    }
-    if (widget.docType == 'transaction') {
-      tab = 1;
-      _finDocBloc = BlocProvider.of<TransactionBloc>(context) as FinDocBloc
-        ..add(FetchFinDoc(limit: limit));
     }
   }
 
@@ -192,7 +194,7 @@ class _OrdersState extends State<FinDocsForm> {
         }),
         child: ListView.builder(
             physics: AlwaysScrollableScrollPhysics(),
-            itemCount: hasReachedMax! && finDocs.isNotEmpty
+            itemCount: hasReachedMax && finDocs.isNotEmpty
                 ? finDocs.length + 1
                 : finDocs.length + 2,
             controller: _scrollController,

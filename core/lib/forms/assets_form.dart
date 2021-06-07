@@ -31,8 +31,9 @@ class _AssetsState extends State<AssetsForm> {
   final _scrollController = ScrollController();
   double _scrollThreshold = 200.0;
   late AssetBloc _assetBloc;
-  Authenticate? authenticate;
-  late int limit;
+  Authenticate authenticate = Authenticate();
+  List<Asset> assets = [];
+  int limit = 20;
   late bool search;
   String? searchString;
 
@@ -61,126 +62,136 @@ class _AssetsState extends State<AssetsForm> {
         }, builder: (context, state) {
           if (state is AssetLoading) return LoadingIndicator();
           if (state is AssetSuccess) {
-            List<Asset>? assets = state.assets;
-            return ListView.builder(
-              itemCount: state.hasReachedMax! && assets!.isNotEmpty
-                  ? assets.length + 1
-                  : assets!.length + 2,
-              controller: _scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0)
-                  return ListTile(
-                      onTap: (() {
-                        setState(() {
-                          search = !search;
-                        });
-                      }),
-                      leading:
-                          Image.asset('assets/images/search.png', height: 30),
-                      title: search
-                          ? Row(children: <Widget>[
-                              SizedBox(
-                                  width: ResponsiveWrapper.of(context)
-                                          .isSmallerThan(TABLET)
-                                      ? MediaQuery.of(context).size.width - 250
-                                      : MediaQuery.of(context).size.width - 350,
-                                  child: TextField(
-                                    textInputAction: TextInputAction.go,
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.transparent),
-                                      ),
-                                      hintText:
-                                          "search in ID, name and description...",
-                                    ),
-                                    onChanged: ((value) {
-                                      searchString = value;
-                                    }),
-                                    onSubmitted: ((value) {
-                                      _assetBloc.add(FetchAsset(
-                                          search: value, limit: limit));
-                                      setState(() {
-                                        search = !search;
+            assets = state.assets;
+            return RefreshIndicator(
+                onRefresh: (() async {
+                  _assetBloc.add(FetchAsset(refresh: true, limit: limit));
+                }),
+                child: ListView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemCount: state.hasReachedMax! && assets.isNotEmpty
+                      ? assets.length + 1
+                      : assets.length + 2,
+                  controller: _scrollController,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0)
+                      return ListTile(
+                          onTap: (() {
+                            setState(() {
+                              search = !search;
+                            });
+                          }),
+                          leading: Image.asset('assets/images/search.png',
+                              height: 30),
+                          title: search
+                              ? Row(children: <Widget>[
+                                  SizedBox(
+                                      width: ResponsiveWrapper.of(context)
+                                              .isSmallerThan(TABLET)
+                                          ? MediaQuery.of(context).size.width -
+                                              250
+                                          : MediaQuery.of(context).size.width -
+                                              350,
+                                      child: TextField(
+                                        textInputAction: TextInputAction.go,
+                                        autofocus: true,
+                                        decoration: InputDecoration(
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent),
+                                          ),
+                                          hintText:
+                                              "search in ID, name and description...",
+                                        ),
+                                        onChanged: ((value) {
+                                          searchString = value;
+                                        }),
+                                        onSubmitted: ((value) {
+                                          _assetBloc.add(FetchAsset(
+                                              search: value, limit: limit));
+                                          setState(() {
+                                            search = !search;
+                                          });
+                                        }),
+                                      )),
+                                  ElevatedButton(
+                                      child: Text('Search'),
+                                      onPressed: () {
+                                        _assetBloc.add(FetchAsset(
+                                            search: searchString,
+                                            limit: limit));
+                                      })
+                                ])
+                              : Column(children: [
+                                  Row(children: <Widget>[
+                                    Expanded(
+                                        child: Text("Name[ID]",
+                                            textAlign: TextAlign.center)),
+                                    if (!ResponsiveWrapper.of(context)
+                                        .isSmallerThan(TABLET))
+                                      Expanded(
+                                          child: Text("Status",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text("Product",
+                                            textAlign: TextAlign.center)),
+                                  ]),
+                                  Divider(color: Colors.black),
+                                ]),
+                          trailing: Text(' '));
+                    if (index == 1 && assets.isEmpty)
+                      return Center(
+                          heightFactor: 20,
+                          child: Text("no records found!",
+                              textAlign: TextAlign.center));
+                    index -= 1;
+                    return index >= assets.length
+                        ? BottomLoader()
+                        : Dismissible(
+                            key: Key(assets[index].assetId!),
+                            direction: DismissDirection.startToEnd,
+                            child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  child: Text(assets[index].assetName != null
+                                      ? "${assets[index].assetName![0]}"
+                                      : "?"),
+                                ),
+                                title: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                        child: Text("${assets[index].assetName}"
+                                            "[${assets[index].assetId}]")),
+                                    if (!ResponsiveWrapper.of(context)
+                                        .isSmallerThan(TABLET))
+                                      Expanded(
+                                          child: Text(
+                                              "${assets[index].statusId}",
+                                              textAlign: TextAlign.center)),
+                                    Expanded(
+                                        child: Text(
+                                            "${assets[index].productName}",
+                                            textAlign: TextAlign.center)),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AssetDialog(
+                                            formArguments: FormArguments(
+                                                object: assets[index]));
                                       });
-                                    }),
-                                  )),
-                              ElevatedButton(
-                                  child: Text('Search'),
+                                },
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete_forever),
                                   onPressed: () {
-                                    _assetBloc.add(FetchAsset(
-                                        search: searchString, limit: limit));
-                                  })
-                            ])
-                          : Column(children: [
-                              Row(children: <Widget>[
-                                Expanded(
-                                    child: Text("Name[ID]",
-                                        textAlign: TextAlign.center)),
-                                if (!ResponsiveWrapper.of(context)
-                                    .isSmallerThan(TABLET))
-                                  Expanded(
-                                      child: Text("Status",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("Product",
-                                        textAlign: TextAlign.center)),
-                              ]),
-                              Divider(color: Colors.black),
-                            ]),
-                      trailing: Text(' '));
-                if (index == 1 && assets.isEmpty)
-                  return Center(
-                      heightFactor: 20,
-                      child: Text("no records found!",
-                          textAlign: TextAlign.center));
-                index -= 1;
-                return index >= assets.length
-                    ? BottomLoader()
-                    : Dismissible(
-                        key: Key(assets[index].assetId!),
-                        direction: DismissDirection.startToEnd,
-                        child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.green,
-                              child: Text(assets[index].assetName != null
-                                  ? "${assets[index].assetName![0]}"
-                                  : "?"),
-                            ),
-                            title: Row(
-                              children: <Widget>[
-                                Expanded(
-                                    child: Text("${assets[index].assetName}"
-                                        "[${assets[index].assetId}]")),
-                                if (!ResponsiveWrapper.of(context)
-                                    .isSmallerThan(TABLET))
-                                  Expanded(
-                                      child: Text("${assets[index].statusId}",
-                                          textAlign: TextAlign.center)),
-                                Expanded(
-                                    child: Text("${assets[index].productName}",
-                                        textAlign: TextAlign.center)),
-                              ],
-                            ),
-                            onTap: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AssetDialog(
-                                        formArguments: FormArguments(
-                                            object: assets[index]));
-                                  });
-                            },
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete_forever),
-                              onPressed: () {
-                                _assetBloc.add(DeleteAsset(assets[index]));
-                              },
-                            )));
-              },
-            );
+                                    _assetBloc.add(DeleteAsset(assets[index]));
+                                  },
+                                )));
+                  },
+                ));
           }
           return Center(child: CircularProgressIndicator());
         });
@@ -198,7 +209,7 @@ class _AssetsState extends State<AssetsForm> {
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= _scrollThreshold) {
+    if (currentScroll > 0 && maxScroll - currentScroll <= _scrollThreshold) {
       _assetBloc.add(FetchAsset(limit: limit, search: searchString));
     }
   }

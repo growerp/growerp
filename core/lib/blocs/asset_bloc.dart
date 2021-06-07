@@ -22,7 +22,7 @@ import 'package:rxdart/rxdart.dart';
 
 class AssetBloc extends Bloc<AssetEvent, AssetState> {
   final repos;
-  List<Asset>? assets;
+  List<Asset> assets = [];
 
   AssetBloc(
     this.repos,
@@ -42,56 +42,51 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     );
   }
 
+  Stream<AssetState> getAssets(
+      {required dynamic event,
+      final List<GanntLine> ganntLines = const <GanntLine>[],
+      List<Asset> assets = const <Asset>[],
+      int start = 0,
+      String? searchString}) async* {
+    dynamic result = await repos.getAsset(
+        start: start,
+        limit: event.limit,
+        assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
+        search: searchString);
+    if (result is List<Asset>) {
+      yield AssetSuccess(
+          ganntLines: ganntLines,
+          assets: assets + result,
+          search: searchString,
+          hasReachedMax: result.length < event.limit ? true : false);
+    } else
+      yield AssetProblem(result);
+  }
+
   @override
   Stream<AssetState> mapEventToState(AssetEvent event) async* {
     final AssetState currentState = state;
     if (event is FetchAsset) {
-      if (currentState is AssetInitial) {
-        dynamic result = await repos.getAsset(
-            start: 0,
-            limit: event.limit,
-            assetClassId: classificationId == 'AppHotel' ? 'Hotel Room' : null,
-            search: event.search);
-        if (result is List<Asset>) {
-          assets = result;
-          yield AssetSuccess(
-              assets: result,
-              hasReachedMax: result.length < event.limit ? true : false);
-        } else
-          yield AssetProblem(result);
-        return;
+      if (event.refresh || currentState is AssetInitial) {
+        yield* getAssets(
+            event: event,
+            searchString:
+                currentState is AssetSuccess ? currentState.search : null);
       } else if (currentState is AssetSuccess) {
+        // if we need to search
         if (event.search != null && currentState.search == null ||
             (currentState.search != null &&
                 event.search != currentState.search)) {
-          yield AssetLoading();
-          dynamic result = await repos.getAsset(
-              start: 0,
-              limit: event.limit,
-              assetClassId:
-                  classificationId == 'AppHotel' ? 'Hotel Room' : null,
-              search: event.search);
-          if (result is List<Asset>) {
-            assets = result;
-            yield AssetSuccess(
-                assets: result,
-                search: event.search,
-                hasReachedMax: result.length < event.limit ? true : false);
-          } else
-            yield AssetProblem(result);
-          return;
+          yield* getAssets(
+              event: event,
+              assets: currentState.assets,
+              searchString: event.search);
         } else if (!_hasReachedMax(currentState)) {
-          dynamic result = await repos.getAsset(
-            start: currentState.assets!.length,
-            limit: event.limit,
-            search: event.search,
-          );
-          if (result is List<Asset>) {
-            yield currentState.copyWith(
-                assets: currentState.assets! + result,
-                hasReachedMax: result.length < event.limit ? true : false);
-          } else
-            yield AssetProblem(result);
+          // get next page
+          yield* getAssets(
+              event: event,
+              assets: currentState.assets,
+              start: currentState.assets.length);
         }
       }
     } else if (event is UpdateAsset) {
@@ -102,13 +97,14 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       if (currentState is AssetSuccess) {
         if (result is Asset) {
           if (adding) {
-            currentState.assets?.add(result);
+            currentState.assets.add(result);
           } else {
-            int index = currentState.assets!
+            int index = currentState.assets
                 .indexWhere((prod) => prod.assetId == result.assetId);
-            currentState.assets!.replaceRange(index, index + 1, [result]);
+            currentState.assets.replaceRange(index, index + 1, [result]);
           }
           yield AssetSuccess(
+              ganntLines: currentState.ganntLines,
               assets: currentState.assets,
               hasReachedMax: _hasReachedMax(currentState),
               message: 'asset ${result.assetName}[${result.assetId}] ' +
@@ -119,14 +115,15 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       }
     } else if (event is DeleteAsset) {
       if (currentState is AssetSuccess) {
-        int index = currentState.assets!
+        int index = currentState.assets
             .indexWhere((prod) => prod.assetId == event.asset.assetId);
-        String? name = currentState.assets![index].assetName;
+        String? name = currentState.assets[index].assetName;
         yield AssetLoading('deleting asset $name');
         dynamic result = await repos.deleteAsset(event.asset.assetId);
         if (result == event.asset.assetId) {
-          currentState.assets!.removeAt(index);
+          currentState.assets.removeAt(index);
           yield AssetSuccess(
+                  ganntLines: currentState.ganntLines,
                   assets: currentState.assets,
                   hasReachedMax: _hasReachedMax(currentState))
               .copyWith(message: 'Asset $name deleted');
@@ -149,11 +146,13 @@ abstract class AssetEvent extends Equatable {
 }
 
 class FetchAsset extends AssetEvent {
+  final bool refresh;
   final int limit;
   final search;
-  FetchAsset({this.limit = 20, this.search});
+  FetchAsset({this.refresh = false, this.limit = 20, this.search});
   @override
-  String toString() => "FetchAsset limit: $limit, search: $search";
+  String toString() =>
+      "FetchAsset refresh: $refresh limit: $limit, search: $search";
 }
 
 class DeleteAsset extends AssetEvent {
@@ -198,15 +197,15 @@ class AssetProblem extends AssetState {
 }
 
 class AssetSuccess extends AssetState {
-  final List<GanntLine>? ganntLines;
-  final List<Asset>? assets;
+  final List<GanntLine> ganntLines;
+  final List<Asset> assets;
   final bool? hasReachedMax;
   final String? message;
   final String? search;
 
   const AssetSuccess(
-      {this.ganntLines,
-      this.assets,
+      {required this.ganntLines,
+      required this.assets,
       this.hasReachedMax,
       this.message,
       this.search});
@@ -230,6 +229,6 @@ class AssetSuccess extends AssetState {
   List<Object?> get props => [assets, hasReachedMax];
 
   @override
-  String toString() => 'AssetSuccess { #assets: ${assets?.length}, '
+  String toString() => 'AssetSuccess { #assets: ${assets.length}, '
       'hasReachedMax: $hasReachedMax }';
 }

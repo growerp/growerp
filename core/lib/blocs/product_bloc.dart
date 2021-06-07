@@ -22,7 +22,7 @@ import 'package:global_configuration/global_configuration.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final repos;
-  List<Product>? products;
+  List<Product> products = [];
 
   ProductBloc(
     this.repos,
