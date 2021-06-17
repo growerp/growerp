@@ -111,12 +111,7 @@ class _OrdersState extends State<FinDocsForm> {
     };
 
     dynamic blocConsumerBuilder = (context, state) {
-      if (state is FinDocProblem)
-        return FatalErrorForm("Could not load documents!");
-      if (state is FinDocLoading) {
-        isLoading = true;
-        return LoadingIndicator();
-      }
+      if (state is FinDocProblem) return FatalErrorForm(state.errorMessage);
       if (state is FinDocSuccess) {
         isLoading = false;
         finDocs = state.finDocs;
@@ -144,45 +139,49 @@ class _OrdersState extends State<FinDocsForm> {
               .toList();
         }
         hasReachedMax = state.hasReachedMax;
+        return finDocsPage();
       }
-      return finDocsPage();
+      isLoading = true;
+      return LoadingIndicator();
     };
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) {
         authenticate = state.authenticate;
-        if (widget.docType == 'order') {
-          if (widget.sales)
-            return BlocConsumer<SalesOrderBloc, FinDocState>(
+        switch (widget.docType) {
+          case 'order':
+            if (widget.sales)
+              return BlocConsumer<SalesOrderBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+            else
+              return BlocConsumer<PurchaseOrderBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+          case 'invoice':
+            if (widget.sales)
+              return BlocConsumer<SalesInvoiceBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+            else
+              return BlocConsumer<PurchInvoiceBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+          case 'payment':
+            if (widget.sales)
+              return BlocConsumer<SalesPaymentBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+            else
+              return BlocConsumer<PurchPaymentBloc, FinDocState>(
+                  listener: blocConsumerListener, builder: blocConsumerBuilder);
+          case 'transaction':
+            return BlocConsumer<TransactionBloc, FinDocState>(
                 listener: blocConsumerListener, builder: blocConsumerBuilder);
-          else
-            return BlocConsumer<PurchaseOrderBloc, FinDocState>(
-                listener: blocConsumerListener, builder: blocConsumerBuilder);
-        }
-        if (widget.docType == 'invoice') {
-          if (widget.sales)
-            return BlocConsumer<SalesInvoiceBloc, FinDocState>(
-                listener: blocConsumerListener, builder: blocConsumerBuilder);
-          else
-            return BlocConsumer<PurchInvoiceBloc, FinDocState>(
-                listener: blocConsumerListener, builder: blocConsumerBuilder);
-        }
-        if (widget.docType == 'payment') {
-          if (widget.sales)
-            return BlocConsumer<SalesPaymentBloc, FinDocState>(
-                listener: blocConsumerListener, builder: blocConsumerBuilder);
-          else
-            return BlocConsumer<PurchPaymentBloc, FinDocState>(
-                listener: blocConsumerListener, builder: blocConsumerBuilder);
-        }
-        if (widget.docType == 'transaction') {
-          return BlocConsumer<TransactionBloc, FinDocState>(
-              listener: blocConsumerListener, builder: blocConsumerBuilder);
+          default:
+            return Container(
+                child: Center(
+                    child: Text(
+                        "Not recognized document type: ${widget.docType}")));
         }
       }
-      return Container(
-          child: Center(
-              child: Text("Not recognized document type: ${widget.docType}")));
+      return FatalErrorForm(
+          "To list the ${widget.docType}, you needs to be logged in!");
     });
   }
 
@@ -213,8 +212,8 @@ class _OrdersState extends State<FinDocsForm> {
                           ? Row(children: <Widget>[
                               SizedBox(
                                   width: isPhone
-                                      ? MediaQuery.of(context).size.width - 250
-                                      : MediaQuery.of(context).size.width - 350,
+                                      ? MediaQuery.of(context).size.width - 150
+                                      : MediaQuery.of(context).size.width - 250,
                                   child: TextField(
                                     textInputAction: TextInputAction.go,
                                     autofocus: true,
@@ -247,38 +246,31 @@ class _OrdersState extends State<FinDocsForm> {
                                   })
                             ])
                           : Row(children: <Widget>[
-                              Expanded(
+                              SizedBox(
+                                  width: 80,
                                   child: Text(
                                       // capitalize first char
                                       "${widget.docType[0].toUpperCase()}"
                                       "${widget.docType.substring(1)} ID")),
+                              SizedBox(width: 10),
+                              SizedBox(width: 120, child: Text("Date")),
                               Expanded(
                                   child: Text(widget.sales == null
                                       ? 'Other User'
-                                      : widget.sales
-                                          ? "Customer"
-                                          : "Supplier")),
-                              Expanded(child: Text("Date")),
-                              if (!isPhone) Expanded(child: Text("Total")),
-                              Expanded(
-                                  child: Text("Status",
-                                      textAlign: TextAlign.center)),
+                                      : (widget.sales
+                                              ? "Customer"
+                                              : "Supplier") +
+                                          ' name & Company')),
                               if (!ResponsiveWrapper.of(context)
                                       .isSmallerThan(TABLET) &&
                                   widget.docType != 'payment')
-                                Expanded(
-                                    child: Text("#items",
-                                        textAlign: TextAlign.center)),
+                                SizedBox(width: 80, child: Text("#items")),
                             ]),
                       subtitle: Row(children: <Widget>[
-                        Expanded(child: Text("")),
-                        Visibility(
-                            visible: !isPhone,
-                            child: Expanded(child: Text("City"))),
-                        Visibility(
-                            visible: !isPhone,
-                            child: Expanded(child: Text("Country"))),
-                        Expanded(child: Text("Email address"), flex: 1),
+                        SizedBox(width: 100),
+                        SizedBox(width: 80, child: Text("Total")),
+                        SizedBox(width: 120, child: Text("Status")),
+                        SizedBox(width: 120, child: Text("Email Address")),
                       ]),
                       trailing: isPhone
                           ? Text('             ')
@@ -301,64 +293,45 @@ class _OrdersState extends State<FinDocsForm> {
                           leading: CircleAvatar(
                             backgroundColor: Colors.green,
                             child: Text(
-                                "${finDocs[index].otherUser!.lastName![0]}"),
+                                "${finDocs[index].otherUser!.companyName![0]}"),
                           ),
                           title: Row(
                             children: <Widget>[
-                              Expanded(child: Text("${finDocs[index].id()}")),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text("${finDocs[index].id()}")),
+                              SizedBox(width: 10),
+                              SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                      "${finDocs[index].creationDate?.toString().substring(0, 11)}")),
                               Expanded(
                                   child: Text(
-                                      "${finDocs[index].otherUser!.firstName}, "
-                                      "${finDocs[index].otherUser!.lastName}")),
-                              Expanded(
-                                  child: Text(
-                                "${finDocs[index].creationDate?.toString().substring(0, 11)}",
-                              )),
-                              if (!isPhone)
-                                Expanded(
-                                    child: Text("${finDocs[index].grandTotal}",
-                                        textAlign: TextAlign.center)),
-                              Expanded(
-                                  child: Text(
-                                      "${finDocStatusValues[finDocs[index].statusId!]}",
-                                      textAlign: TextAlign.center)),
-                              if (!isPhone && widget.docType != 'payment')
-                                Expanded(
+                                      "${finDocs[index].otherUser!.firstName ?? ''} "
+                                      "${finDocs[index].otherUser!.lastName ?? ''} "
+                                      "${finDocs[index].otherUser!.companyName ?? ''}")),
+                              if (!ResponsiveWrapper.of(context)
+                                      .isSmallerThan(TABLET) &&
+                                  widget.docType != 'payment')
+                                SizedBox(
+                                    width: 80,
                                     child: Text(
-                                        "${finDocs[index].items?.length}",
-                                        textAlign: TextAlign.center)),
+                                        "${finDocs[index].items?.length}")),
                             ],
                           ),
                           subtitle: Row(children: <Widget>[
-                            Expanded(
-                              child: Text(""),
-                            ),
-                            Visibility(
-                                visible: !isPhone,
-                                child: Expanded(
-                                    child: Text(
-                                        finDocs[index].otherUser!.address !=
-                                                null
-                                            ? finDocs[index]
-                                                .otherUser!
-                                                .address!
-                                                .city!
-                                            : ""))),
-                            Visibility(
-                                visible: !isPhone,
-                                child: Expanded(
-                                    child: Text(
-                                        finDocs[index].otherUser!.address !=
-                                                null
-                                            ? finDocs[index]
-                                                .otherUser!
-                                                .address!
-                                                .country!
-                                            : ""))),
-                            Expanded(
-                                flex: 1,
+                            SizedBox(width: 100),
+                            SizedBox(
+                                width: 80,
+                                child: Text("${finDocs[index].grandTotal}")),
+                            SizedBox(
+                                width: 120,
                                 child: Text(
-                                  "${finDocs[index].otherUser!.email}",
+                                    "${finDocStatusValues[finDocs[index].statusId!]}")),
+                            SizedBox(
+                                width: 120,
+                                child: Text(
+                                  "${finDocs[index].otherUser!.email ?? ''}",
                                 )),
                           ]),
                           children: List.from(finDocs[index].items!.map((e) =>

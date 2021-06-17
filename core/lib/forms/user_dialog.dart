@@ -13,6 +13,7 @@
  */
 
 import 'dart:io';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +22,7 @@ import 'package:models/@models.dart';
 import 'package:core/blocs/@blocs.dart';
 import 'package:core/helper_functions.dart';
 import 'package:core/templates/@templates.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
 
 import '@forms.dart';
 
@@ -30,6 +32,7 @@ class UserDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(">>>NavigateTo { UserDialog $formArguments");
     return UserPage(formArguments.message, formArguments.object as User);
   }
 }
@@ -49,9 +52,11 @@ class _UserState extends State<UserPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _companyController = TextEditingController();
+  final _companySearchBoxController = TextEditingController();
 
   bool loading = false;
   UserGroup? _selectedUserGroup;
+  Company? _selectedCompany;
   PickedFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -59,13 +64,14 @@ class _UserState extends State<UserPage> {
   final ImagePicker _picker = ImagePicker();
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
+  late bool isPhone;
 
   @override
   void initState() {
     super.initState();
     _firstNameController.text = widget.user.firstName ?? '';
     _lastNameController.text = widget.user.lastName ?? '';
-    _nameController.text = widget.user.name ?? '';
+    _nameController.text = widget.user.loginName ?? '';
     _emailController.text = widget.user.email ?? '';
     _companyController.text = widget.user.companyName ?? '';
     if (widget.user.userGroupId != null)
@@ -106,6 +112,8 @@ class _UserState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
+    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    var repos = context.read<Object>();
     User? user = widget.user;
     Authenticate? authenticate;
     return Dialog(
@@ -116,7 +124,7 @@ class _UserState extends State<UserPage> {
         child: Container(
             padding: EdgeInsets.all(20),
             width: 400,
-            height: 650,
+            height: 750,
             child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
               if (state is AuthAuthenticated) authenticate = state.authenticate;
               return ScaffoldMessenger(
@@ -129,34 +137,35 @@ class _UserState extends State<UserPage> {
                               listener: (context, state) {
                                 listListener(state);
                               },
-                              child: listChild(authenticate))
+                              child: listChild(authenticate, repos))
                           : user.userGroupId == "GROWERP_M_ADMIN"
                               ? BlocListener<AdminBloc, UserState>(
                                   listener: (context, state) {
                                     listListener(state);
                                   },
-                                  child: listChild(authenticate))
+                                  child: listChild(authenticate, repos))
                               : user.userGroupId == "GROWERP_M_SUPPLIER"
                                   ? BlocListener<SupplierBloc, UserState>(
                                       listener: (context, state) {
                                         listListener(state);
                                       },
-                                      child: listChild(authenticate))
+                                      child: listChild(authenticate, repos))
                                   : user.userGroupId == "GROWERP_M_LEAD"
                                       ? BlocListener<LeadBloc, UserState>(
                                           listener: (context, state) {
                                             listListener(state);
                                           },
-                                          child: listChild(authenticate))
+                                          child: listChild(authenticate, repos))
                                       : BlocListener<CustomerBloc, UserState>(
                                           listener: (context, state) {
                                             listListener(state);
                                           },
-                                          child: listChild(authenticate))));
+                                          child:
+                                              listChild(authenticate, repos))));
             })));
   }
 
-  Widget listChild(authenticate) {
+  Widget listChild(authenticate, repos) {
     return Center(child: Builder(builder: (BuildContext context) {
       return Center(
         child: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
@@ -169,9 +178,9 @@ class _UserState extends State<UserPage> {
                       textAlign: TextAlign.center,
                     );
                   }
-                  return _showForm(authenticate);
+                  return _showForm(authenticate, repos);
                 })
-            : _showForm(authenticate),
+            : _showForm(authenticate, repos),
       );
     }));
   }
@@ -199,7 +208,7 @@ class _UserState extends State<UserPage> {
     return null;
   }
 
-  Widget _showForm(authenticate) {
+  Widget _showForm(authenticate, repos) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
@@ -210,13 +219,30 @@ class _UserState extends State<UserPage> {
         textAlign: TextAlign.center,
       );
     }
-    return _userDialog();
+    return _userDialog(repos, authenticate.company.name);
   }
 
-  Widget _userDialog() {
+  Widget _userDialog(repos, String companyName) {
+    Future<List<Company>> getOwnedCompanies(filter) async {
+      var response =
+          await repos.getCompanies(filter: _companySearchBoxController.text);
+      return response;
+    }
+
     return Form(
         key: _formKey,
         child: ListView(children: <Widget>[
+          Center(
+              child: Text(
+                  'User ${widget.user.groupDescription} #${updatedUser.partyId ?? " New"}',
+                  style: TextStyle(
+                      fontSize: isPhone ? 10 : 20,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold))),
+          Visibility(
+              visible: updatedUser.userGroupId == 'GROWERP_M_ADMIN' ||
+                  updatedUser.userGroupId == 'GROWERP_M_EMPLOYEE',
+              child: Center(child: Text(companyName))),
           SizedBox(height: 30),
           CircleAvatar(
               backgroundColor: Colors.green,
@@ -250,30 +276,40 @@ class _UserState extends State<UserPage> {
             },
           ),
           SizedBox(height: 10),
-          TextFormField(
-            key: Key('name'),
-            decoration: InputDecoration(labelText: 'User Login Name'),
-            controller: _nameController,
-            validator: (value) {
-              if (value!.isEmpty) return 'Please enter a login name?';
-              return null;
-            },
-          ),
+          Visibility(
+              visible:
+                  !widget.user.loginDisabled || widget.user.loginName == null,
+              child: TextFormField(
+                key: Key('name'),
+                decoration: InputDecoration(
+                    labelText: 'User Login Name '
+                        '${widget.user.userGroupId == "GROWERP_M_ADMIN" ? "" : "(Empty: none)"}'),
+                controller: _nameController,
+                validator: (value) {
+                  if (widget.user.userGroupId == "GROWERP_M_ADMIN" &&
+                      value!.isEmpty)
+                    return 'An administrator needs a userlogin!';
+                  return null;
+                },
+              )),
           SizedBox(height: 10),
-          TextFormField(
-            key: Key('email'),
-            decoration: InputDecoration(labelText: 'Email address'),
-            controller: _emailController,
-            validator: (String? value) {
-              if (value!.isEmpty) return 'Please enter Email address?';
-              if (!RegExp(
-                      r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                  .hasMatch(value)) {
-                return 'This is not a valid email';
-              }
-              return null;
-            },
-          ),
+          Visibility(
+              visible: widget.user.email == null ||
+                  !widget.user.email!.contains('example.com'),
+              child: TextFormField(
+                key: Key('email'),
+                decoration: InputDecoration(labelText: 'Email address'),
+                controller: _emailController,
+                validator: (String? value) {
+                  if (value!.isEmpty) return 'Please enter Email address?';
+                  if (!RegExp(
+                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                      .hasMatch(value)) {
+                    return 'This is not a valid email';
+                  }
+                  return null;
+                },
+              )),
           SizedBox(height: 10),
           Visibility(
               visible: updatedUser.userGroupId == null,
@@ -297,41 +333,80 @@ class _UserState extends State<UserPage> {
           Visibility(
               visible: updatedUser.userGroupId != 'GROWERP_M_ADMIN' &&
                   updatedUser.userGroupId != 'GROWERP_M_EMPLOYEE',
-              child: TextFormField(
-                key: Key('companyName'),
-                decoration: InputDecoration(labelText: 'Company Name'),
-                controller: _companyController,
-                validator: (value) {
-                  if (value!.isEmpty) return 'Please enter a company name?';
-                  return null;
-                },
-              )),
-          SizedBox(height: 10),
-          Row(children: [
-            Expanded(
-                child: Text(updatedUser.address != null
-                    ? "${updatedUser.address!.city!} ${updatedUser.address!.country!}"
-                    : "No address yet")),
-            SizedBox(
-                width: 100,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    var result = await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AddressDialog(address: updatedUser.address);
-                        });
-                    if (result != null)
-                      setState(() {
-                        updatedUser = updatedUser.copyWith(address: result);
-                      });
+              child: Column(children: [
+                TextFormField(
+                  key: Key('newCompanyName'),
+                  decoration: InputDecoration(labelText: 'New Company Name'),
+                  controller: _companyController,
+                  validator: (value) {
+                    if (value!.isEmpty && _selectedCompany == null)
+                      return 'Please enter an existing or new company?';
+                    return null;
                   },
-                  child: Text(updatedUser.address != null
-                      ? 'Update\nAddress'
-                      : 'Add\nAddress'),
-                ))
-          ]),
+                ),
+                SizedBox(height: 10),
+                DropdownSearch<Company>(
+                  label: 'Existing Company',
+                  dialogMaxWidth: 300,
+                  autoFocusSearchBox: true,
+                  selectedItem: _selectedCompany,
+                  dropdownSearchDecoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0)),
+                  ),
+                  searchBoxDecoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0)),
+                  ),
+                  showSearchBox: true,
+                  searchBoxController: _companySearchBoxController,
+                  isFilteredOnline: true,
+                  key: Key('dropCompany'),
+                  itemAsString: (Company? u) => "${u!.name}",
+                  onFind: (String filter) =>
+                      getOwnedCompanies(_companySearchBoxController.text),
+                  onChanged: (Company? newValue) {
+                    setState(() {
+                      _selectedCompany = newValue;
+                    });
+                  },
+                  validator: (value) =>
+                      value == null && _companyController.text == ''
+                          ? "Select an existing or Create a new company"
+                          : null,
+                )
+              ])),
+          SizedBox(height: 10),
+          Visibility(
+              visible: updatedUser.userGroupId != 'GROWERP_M_ADMIN' &&
+                  updatedUser.userGroupId != 'GROWERP_M_EMPLOYEE',
+              child: Row(children: [
+                Expanded(
+                    child: Text(updatedUser.companyAddress != null
+                        ? "${updatedUser.companyAddress!.city!} ${updatedUser.companyAddress!.country!}"
+                        : "No address yet")),
+                SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        var result = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AddressDialog(
+                                  address: updatedUser.companyAddress);
+                            });
+                        if (result != null)
+                          setState(() {
+                            updatedUser =
+                                updatedUser.copyWith(companyAddress: result);
+                          });
+                      },
+                      child: Text(updatedUser.companyAddress != null
+                          ? 'Update\nAddress'
+                          : 'Add\nAddress'),
+                    ))
+              ])),
           SizedBox(height: 10),
           Row(children: [
             Expanded(
@@ -353,7 +428,7 @@ class _UserState extends State<UserPage> {
                             firstName: _firstNameController.text,
                             lastName: _lastNameController.text,
                             email: _emailController.text,
-                            name: _nameController.text,
+                            loginName: _nameController.text,
                             userGroupId: _selectedUserGroup!.userGroupId,
                             language: Localizations.localeOf(context)
                                 .languageCode
@@ -361,28 +436,35 @@ class _UserState extends State<UserPage> {
                             companyName: _companyController.text,
                             image: await HelperFunctions.getResizedImage(
                                 _imageFile?.path));
-                        updatedUser.userGroupId == "GROWERP_M_EMPLOYEE"
-                            ? BlocProvider.of<EmployeeBloc>(context)
-                                .add(UpdateUser(updatedUser))
-                            : updatedUser.userGroupId == "GROWERP_M_ADMIN"
-                                ? BlocProvider.of<AdminBloc>(context)
-                                    .add(UpdateUser(updatedUser))
-                                : updatedUser.userGroupId ==
-                                        "GROWERP_M_SUPPLIER"
-                                    ? BlocProvider.of<SupplierBloc>(context)
-                                        .add(UpdateUser(updatedUser))
-                                    : updatedUser.userGroupId ==
-                                            "GROWERP_M_LEAD"
-                                        ? BlocProvider.of<LeadBloc>(context)
-                                            .add(UpdateUser(updatedUser))
-                                        : updatedUser.userGroupId ==
-                                                "GROWERP_M_CUSTOMER"
-                                            ? BlocProvider.of<CustomerBloc>(
-                                                    context)
-                                                .add(UpdateUser(updatedUser))
-                                            : print(
-                                                "Not recognized usergroupId: "
-                                                "${updatedUser.userGroupId}");
+                        if (_imageFile?.path != null &&
+                            updatedUser.image == null)
+                          HelperFunctions.showMessage(
+                              context,
+                              "Image upload error or larger than 50K",
+                              Colors.red);
+                        else
+                          updatedUser.userGroupId == "GROWERP_M_EMPLOYEE"
+                              ? BlocProvider.of<EmployeeBloc>(context)
+                                  .add(UpdateUser(updatedUser))
+                              : updatedUser.userGroupId == "GROWERP_M_ADMIN"
+                                  ? BlocProvider.of<AdminBloc>(context)
+                                      .add(UpdateUser(updatedUser))
+                                  : updatedUser.userGroupId ==
+                                          "GROWERP_M_SUPPLIER"
+                                      ? BlocProvider.of<SupplierBloc>(context)
+                                          .add(UpdateUser(updatedUser))
+                                      : updatedUser.userGroupId ==
+                                              "GROWERP_M_LEAD"
+                                          ? BlocProvider.of<LeadBloc>(context)
+                                              .add(UpdateUser(updatedUser))
+                                          : updatedUser.userGroupId ==
+                                                  "GROWERP_M_CUSTOMER"
+                                              ? BlocProvider.of<CustomerBloc>(
+                                                      context)
+                                                  .add(UpdateUser(updatedUser))
+                                              : print(
+                                                  "Not recognized usergroupId: "
+                                                  "${updatedUser.userGroupId}");
                       }
                     })),
           ])

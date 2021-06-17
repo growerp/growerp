@@ -33,27 +33,29 @@ String usersToJson(List<User> data) =>
     "}";
 
 class User extends Equatable {
-  final String? partyId;
-  final String? userId;
+  final String? partyId; // allocated by system cannot be changed.
+  final String? userId; // allocated by system cannot be changed.
   final String? firstName;
   final String? lastName;
-  final String? name;
-  final String? email;
+  final bool loginDisabled; // login account is required if disabled just dummy
+  final String? loginName;
+  final String? email; // company email address of this person
   final String? groupDescription; // admin, employee, customer, supplier etc...
   final String? userGroupId;
   final String? language;
   final String? externalId; // when customer register they give their telno
   final Uint8List? image;
-  final String? companyPartyId;
+  final String? companyPartyId; // allocated by system cannot be changed.
   final String? companyName;
-  final Address? address;
+  final Address? companyAddress;
 
   User({
     this.partyId,
     this.userId,
     this.firstName,
     this.lastName,
-    this.name,
+    this.loginDisabled = true,
+    this.loginName,
     this.email,
     this.groupDescription,
     this.userGroupId,
@@ -62,7 +64,7 @@ class User extends Equatable {
     this.image,
     this.companyPartyId,
     this.companyName,
-    this.address,
+    this.companyAddress,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -70,7 +72,10 @@ class User extends Equatable {
         userId: json["userId"],
         firstName: json["firstName"],
         lastName: json["lastName"],
-        name: json["name"],
+        loginDisabled: json["loginDisabled"] != null
+            ? json["loginDisabled"].toLowerCase() == "true"
+            : true,
+        loginName: json["loginName"],
         email: json["email"],
         groupDescription: json["groupDescription"],
         userGroupId: json["userGroupId"],
@@ -79,8 +84,9 @@ class User extends Equatable {
         image: json["image"] == null ? null : base64.decode(json["image"]),
         companyPartyId: json["companyPartyId"],
         companyName: json["companyName"],
-        address:
-            json["address"] == null ? null : Address.fromJson(json["address"]),
+        companyAddress: json["companyAddress"] == null
+            ? null
+            : Address.fromJson(json["companyAddress"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -88,7 +94,8 @@ class User extends Equatable {
         "userId": userId,
         "firstName": firstName,
         "lastName": lastName,
-        "name": name,
+        "loginDisabled": loginDisabled.toString(),
+        "loginName": loginName,
         "email": email,
         "groupDescription": groupDescription,
         "userGroupId": userGroupId,
@@ -97,7 +104,8 @@ class User extends Equatable {
         "image": image != null ? base64.encode(image!) : null,
         "companyPartyId": companyPartyId,
         "companyName": companyName,
-        "address": address == null ? null : address!.toJson(),
+        "companyAddress":
+            companyAddress == null ? null : addressToJson(companyAddress!),
       };
 
   @override
@@ -106,7 +114,8 @@ class User extends Equatable {
         userId,
         firstName,
         lastName,
-        name,
+        loginDisabled,
+        loginName,
         email,
         groupDescription,
         userGroupId,
@@ -115,7 +124,7 @@ class User extends Equatable {
         image,
         companyPartyId,
         companyName,
-        address,
+        companyAddress,
       ];
   @override
   String toString() {
@@ -128,7 +137,8 @@ class User extends Equatable {
     String? userId,
     String? firstName,
     String? lastName,
-    String? name,
+    bool? loginDisabled,
+    String? loginName,
     String? email,
     String? groupDescription,
     String? userGroupId,
@@ -137,14 +147,15 @@ class User extends Equatable {
     Uint8List? image,
     String? companyPartyId,
     String? companyName,
-    Address? address,
+    Address? companyAddress,
   }) =>
       User(
         partyId: partyId ?? this.partyId,
         userId: userId ?? this.userId,
         firstName: firstName ?? this.firstName,
         lastName: lastName ?? this.lastName,
-        name: name ?? this.name,
+        loginDisabled: loginDisabled ?? this.loginDisabled,
+        loginName: loginName ?? this.loginName,
         email: email ?? this.email,
         groupDescription: groupDescription ?? this.groupDescription,
         userGroupId: userGroupId ?? this.userGroupId,
@@ -153,7 +164,7 @@ class User extends Equatable {
         image: image ?? this.image,
         companyPartyId: companyPartyId ?? this.companyPartyId,
         companyName: companyName ?? this.companyName,
-        address: address ?? this.address,
+        companyAddress: companyAddress ?? this.companyAddress,
       );
 }
 

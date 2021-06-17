@@ -13,6 +13,7 @@
  */
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
@@ -295,23 +296,30 @@ class _ProductState extends State<ProductPage> {
                             onPressed: () async {
                               if (_formKey.currentState!.validate() &&
                                   !loading) {
-                                BlocProvider.of<ProductBloc>(context).add(
-                                    UpdateProduct(Product(
-                                        productId: product?.productId,
-                                        productName: _nameController.text,
-                                        assetClassId:
-                                            classificationId == 'AppHotel'
-                                                ? 'Hotel Room'
-                                                : null,
-                                        description:
-                                            _descriptionController.text,
-                                        price: Decimal.parse(
-                                            _priceController.text),
-                                        categoryId:
-                                            _selectedCategory?.categoryId!,
-                                        image: await HelperFunctions
-                                            .getResizedImage(
-                                                _imageFile?.path))));
+                                Uint8List? image =
+                                    await HelperFunctions.getResizedImage(
+                                        _imageFile?.path);
+                                if (_imageFile?.path != null && image == null)
+                                  HelperFunctions.showMessage(
+                                      context,
+                                      "Image upload error or larger than 50K",
+                                      Colors.red);
+                                else
+                                  BlocProvider.of<ProductBloc>(context).add(
+                                      UpdateProduct(Product(
+                                          productId: product?.productId,
+                                          productName: _nameController.text,
+                                          assetClassId:
+                                              classificationId == 'AppHotel'
+                                                  ? 'Hotel Room'
+                                                  : null,
+                                          description:
+                                              _descriptionController.text,
+                                          price: Decimal.parse(
+                                              _priceController.text),
+                                          categoryId:
+                                              _selectedCategory?.categoryId!,
+                                          image: image)));
                               }
                             })),
                   ])

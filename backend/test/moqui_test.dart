@@ -78,7 +78,7 @@ void main() {
       // used later for login test
       login.addAll({
         'companyPartyId': result.company!.partyId,
-        'username': result.user?.name,
+        'username': result.user?.loginName,
         'password': password
       });
       expect(true, result is Authenticate);

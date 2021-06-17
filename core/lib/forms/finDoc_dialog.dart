@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/widgets/loading_indicator.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/foundation.dart';
@@ -49,7 +50,6 @@ class _MyFinDocState extends State<FinDocPage> {
   final _userSearchBoxController = TextEditingController();
   late SalesCartBloc _cartBloc;
   late FinDoc finDocUpdated;
-  List<ItemType> itemTypes = [];
   User? _selectedUser;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -112,7 +112,7 @@ class _MyFinDocState extends State<FinDocPage> {
                     fontWeight: FontWeight.bold))),
         SizedBox(height: 20),
         _headerEntry(repos),
-        SizedBox(height: 40, child: _updateButtons(itemTypes, repos)),
+        SizedBox(height: 40, child: _updateButtons(repos)),
         _finDocItemList(),
         SizedBox(height: 10),
         Center(
@@ -141,9 +141,6 @@ class _MyFinDocState extends State<FinDocPage> {
                             height: 1 / columns.toDouble() * 1200,
                             child: BlocBuilder<AuthBloc, AuthState>(
                                 builder: (context, state) {
-                              if (state is AuthAuthenticated)
-                                itemTypes =
-                                    state.authenticate.itemTypes!.sales!;
                               if (finDocUpdated.sales!)
                                 return BlocListener<SalesOrderBloc,
                                         FinDocState>(
@@ -226,7 +223,7 @@ class _MyFinDocState extends State<FinDocPage> {
     );
   }
 
-  Widget _updateButtons(itemTypes, repos) {
+  Widget _updateButtons(repos) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
@@ -242,8 +239,8 @@ class _MyFinDocState extends State<FinDocPage> {
               key: Key('addItem'),
               child: Text('Add other Item'),
               onPressed: () async {
-                final dynamic finDocItem =
-                    await _addAnotherItemDialog(context, itemTypes);
+                final dynamic finDocItem = await _addAnotherItemDialog(
+                    context, repos, finDocUpdated.sales!);
                 if (finDocItem != null)
                   _cartBloc.add(AddToCart(
                       finDoc: finDocUpdated.copyWith(
@@ -347,18 +344,7 @@ class _MyFinDocState extends State<FinDocPage> {
                         child: Text(items![index].itemSeqId.toString()),
                       ),
                       title: Row(children: <Widget>[
-                        Expanded(
-                            child: Text(
-                                itemTypes
-                                    .firstWhere(
-                                        (x) =>
-                                            x.itemTypeId ==
-                                            items[index].itemTypeId,
-                                        orElse: () => ItemType(
-                                            itemTypeId: '',
-                                            description: 'null or invalid'))
-                                    .description!,
-                                textAlign: TextAlign.center)),
+                        Expanded(child: Text("${items[index].itemTypeName}")),
                         Expanded(
                             child: Text("${items[index].description}",
                                 textAlign: TextAlign.center)),
@@ -388,12 +374,16 @@ class _MyFinDocState extends State<FinDocPage> {
   }
 }
 
-_addAnotherItemDialog(BuildContext context, List<ItemType> itemTypes) async {
+Future _addAnotherItemDialog(
+    BuildContext context, dynamic repos, bool sales) async {
   final _priceController = TextEditingController();
   final _itemDescriptionController = TextEditingController();
   final _quantityController = TextEditingController();
-  //FinDocItem finDocItem = FinDocItem();
   ItemType? _selectedItemType;
+  List<ItemType> itemTypes = [];
+  var result = await repos.getItemTypes(sales: sales);
+  if (result is List<ItemType>) itemTypes = result;
+  if (itemTypes.isEmpty) LoadingIndicator();
   return showDialog<FinDocItem>(
     context: context,
     barrierDismissible: true,
@@ -406,20 +396,19 @@ _addAnotherItemDialog(BuildContext context, List<ItemType> itemTypes) async {
             height: 300,
             child: Column(children: <Widget>[
               DropdownButtonFormField<ItemType>(
-                  hint: Text('Item type'),
-                  value: _selectedItemType,
-                  items: itemTypes.map((item) {
-                    return DropdownMenuItem<ItemType>(
-                        child: Text(item.description!), value: item);
-                  }).toList(),
-                  validator: (value) {
-                    if (value == null) return 'Select Item Type?';
-                    return null;
-                  },
-                  onChanged: (ItemType? newValue) {
-                    _itemDescriptionController.text = newValue!.description!;
-                    _selectedItemType = newValue;
-                  }),
+                key: Key('dropDown'),
+                hint: Text('ItemType'),
+                value: _selectedItemType,
+                validator: (value) => value == null ? 'field required' : null,
+                items: itemTypes.map((item) {
+                  return DropdownMenuItem<ItemType>(
+                      child: Text(item.itemTypeName), value: item);
+                }).toList(),
+                onChanged: (ItemType? newValue) {
+                  _selectedItemType = newValue;
+                },
+                isExpanded: true,
+              ),
               SizedBox(height: 20),
               TextFormField(
                   key: Key('itemDescription'),
@@ -471,7 +460,7 @@ _addAnotherItemDialog(BuildContext context, List<ItemType> itemTypes) async {
   );
 }
 
-_addProductItemDialog(BuildContext context, repos) async {
+Future _addProductItemDialog(BuildContext context, repos) async {
   final _priceController = TextEditingController();
   final _itemDescriptionController = TextEditingController();
   final _quantityController = TextEditingController();

@@ -53,7 +53,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
     ..text = kReleaseMode ? '' : 'Doe';
   final _emailController = TextEditingController()
     ..text = kReleaseMode ? '' : 'admin@growerp.com';
-
+  bool demoData = true;
   _RegisterHeaderState(this.message);
 
   @override
@@ -92,7 +92,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           child: Container(
                               padding: EdgeInsets.all(20),
                               width: 400,
-                              height: 600,
+                              height: 700,
                               child: _registerForm(
                                   widget.authenticate, state)))))));
     }));
@@ -219,7 +219,24 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                   },
                   isExpanded: true,
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
+                Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25.0),
+                      border: Border.all(
+                          color: Colors.black45,
+                          style: BorderStyle.solid,
+                          width: 0.80),
+                    ),
+                    child: CheckboxListTile(
+                        title: Text("Generate demo data"),
+                        value: demoData,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            demoData = value == true;
+                          });
+                        })),
+                SizedBox(height: 10),
                 Row(children: [
                   ElevatedButton(
                     child: Text('Cancel'),
@@ -235,17 +252,17 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           onPressed: () {
                             if (_formKey.currentState!.validate() &&
                                 state is! AuthLoading)
-                              BlocProvider.of<AuthBloc>(context)
-                                  .add(RegisterCompanyAdmin(
-                                User(
-                                  companyName: _companyController.text,
-                                  firstName: _firstNameController.text,
-                                  lastName: _lastNameController.text,
-                                  email: _emailController.text,
-                                ),
-                                (_currencySelected?.currencyId ??
-                                    currencies[0].currencyId)!,
-                              ));
+                              BlocProvider.of<AuthBloc>(context).add(
+                                  RegisterCompanyAdmin(
+                                      User(
+                                        companyName: _companyController.text,
+                                        firstName: _firstNameController.text,
+                                        lastName: _lastNameController.text,
+                                        email: _emailController.text,
+                                      ),
+                                      (_currencySelected?.currencyId ??
+                                          currencies[0].currencyId)!,
+                                      demoData));
                           })),
                 ])
               ]))

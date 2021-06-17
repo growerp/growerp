@@ -107,7 +107,7 @@ class Company extends Equatable {
 
   @override
   String toString() => 'Company name: $name[$partyId] Curr: $currencyId '
-      'imgSize: ${image?.length}';
+      'imgSize: ${image?.length} addr: $address';
 
   Company copyWith({
     String? partyId,

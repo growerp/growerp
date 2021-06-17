@@ -15,11 +15,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:core/widgets/loading_indicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as IMG;
 import 'dart:io';
 import 'package:http/http.dart' show get;
+import 'package:responsive_framework/responsive_framework.dart';
 
 class HelperFunctions {
   static showMessage(BuildContext context, String? message, dynamic colors) {
@@ -53,6 +55,7 @@ class HelperFunctions {
 
   static Future<Uint8List?> getResizedImage(imagePath) async {
     if (imagePath != null) {
+      LoadingIndicator();
       Uint8List imageData;
       if (kIsWeb) {
         var response = await get(Uri.parse(imagePath));
@@ -60,9 +63,12 @@ class HelperFunctions {
       } else {
         imageData = File(imagePath).readAsBytesSync();
       }
+      print("===1====image size: ${imageData.length}");
+      if (imageData.length > 50000) return null;
       IMG.Image img = IMG.decodeImage(imageData)!;
       IMG.Image resized = IMG.copyResize(img, width: 400);
       imageData = IMG.encodeJpg(resized) as Uint8List;
+      print("===2====image size: ${imageData.length}");
       return imageData;
     } else
       return null;

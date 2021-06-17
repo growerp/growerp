@@ -84,10 +84,13 @@ class Product extends Equatable {
         assetClassId: json["assetClassId"],
         productName: json["productName"],
         description: json["description"],
-        price: Decimal.parse(json["price"]),
+        price: json["price"] != null
+            ? Decimal.parse(json["price"])
+            : Decimal.parse("0.00"),
         categoryId: json["categoryId"],
         categoryName: json["categoryName"],
-        assetCount: int.parse(json["assetCount"]),
+        assetCount:
+            json["assetCount"] != null ? int.parse(json["assetCount"]) : 0,
         image: json["image"] != null ? base64.decode(json["image"]) : null,
       );
 

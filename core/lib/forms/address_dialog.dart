@@ -29,7 +29,6 @@ class AddressDialog extends StatefulWidget {
 class _AddressState extends State<AddressDialog> {
   final Address? address;
   final Key? key;
-  Address? updatedAddress;
   TextEditingController _address1Controller = TextEditingController();
   TextEditingController _address2Controller = TextEditingController();
   TextEditingController _postalCodeController = TextEditingController();
@@ -46,11 +45,11 @@ class _AddressState extends State<AddressDialog> {
   void initState() {
     super.initState();
     if (address != null) {
-      _address1Controller.text = address!.address1!;
+      _address1Controller.text = address!.address1 ?? '';
       _address2Controller.text = address!.address2 ?? '';
-      _postalCodeController.text = address!.postalCode!;
-      _cityController.text = address!.city!;
-      _provinceController.text = address!.province!;
+      _postalCodeController.text = address!.postalCode ?? '';
+      _cityController.text = address!.city ?? '';
+      _provinceController.text = address!.province ?? '';
       _selectedCountry =
           countries.firstWhere((element) => element.name == address!.country);
     }

@@ -154,15 +154,31 @@ class Moqui {
   }
 
   Future<dynamic> getCompanies(
-      {String? classificationId, int? start, int? limit}) async {
+      {String? classificationId,
+      int? start,
+      int? limit,
+      String? filter}) async {
     try {
-      Response response = await client.get('rest/s1/growerp/100/Companies',
-          queryParameters: {
-            "classificationId": classificationId,
-            'start': start,
-            'limit': limit
-          });
+      Response response =
+          await client.get('rest/s1/growerp/100/Companies', queryParameters: {
+        "classificationId": classificationId,
+        'start': start,
+        'limit': limit,
+        'filter': filter,
+      });
       return companiesFromJson(response.toString());
+    } on DioError catch (e) {
+      return responseMessage(e);
+    }
+  }
+
+  Future<dynamic> getItemTypes({bool sales = true}) async {
+    try {
+      Response response =
+          await client.get('rest/s1/growerp/100/ItemTypes', queryParameters: {
+        "sales": sales,
+      });
+      return itemTypesFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
     }
@@ -171,13 +187,12 @@ class Moqui {
   /// The demo store can only register as a customer.
   /// Any other store it depends on the person logging in.
   Future<dynamic> register({
-    String? companyName,
-    String? companyPartyId, // if empty will create new company too!
+    required String companyName,
     required String firstName,
     required String lastName,
-    String? currencyId,
+    required String currencyId,
     required String email,
-    String? demoData,
+    bool demoData = true,
   }) async {
     try {
       var locale;
@@ -187,16 +202,17 @@ class Moqui {
         data: {
           'username': email,
           'emailAddress': email,
-          'newPassword': 'qqqqqq9!',
+          'newPassword': kReleaseMode ? null : 'qqqqqq9!',
           'firstName': firstName,
           'lastName': lastName,
-          'locale': locale,
           'companyName': companyName,
+          'locale': locale,
           'currencyId': currencyId,
           'companyEmailAddress': email,
           'classificationId': classificationId,
-          'environment': kReleaseMode,
-          'moquiSessionToken': sessionToken
+          'productionEnvironment': kReleaseMode.toString(),
+          'moquiSessionToken': sessionToken,
+          'demoData': demoData.toString()
         },
       );
       return authenticateFromJson(response.toString());
@@ -280,8 +296,12 @@ class Moqui {
   Future<Authenticate?> getAuthenticate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? result = prefs.getString('authenticate');
-    if (result != null) return authenticateFromJson(result);
-    return null;
+    // ignore informaton with a bad format
+    try {
+      if (result != null) return authenticateFromJson(result);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<dynamic> getUser(
@@ -312,7 +332,6 @@ class Moqui {
   }
 
   Future<dynamic> registerUser(User user, String ownerPartyId) async {
-    print("====repos $user $ownerPartyId");
     try {
       Response response =
           await client.put('rest/s1/growerp/100/RegisterUser', data: {
@@ -321,8 +340,6 @@ class Moqui {
         'classificationId': classificationId,
         'ownerPartyId': ownerPartyId
       });
-      print("==resp:==${response.toString()}");
-      print("==user==${userFromJson(response.toString())}");
       return userFromJson(response.toString());
     } on DioError catch (e) {
       return responseMessage(e);
@@ -377,14 +394,13 @@ class Moqui {
 
   Future<dynamic> getCart(
       {required bool sales, required String docType}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? result = prefs.getString('finDoc$sales$docType');
+    // ignore informaton with a bad format
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? result = prefs.getString('finDoc$sales$docType');
-      print('====moqui===$result======');
       if (result != null) return finDocFromJson(result);
+    } catch (_) {
       return null;
-    } catch (e) {
-      return responseMessage(e);
     }
   }
 

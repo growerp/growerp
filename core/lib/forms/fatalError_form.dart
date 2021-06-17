@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/blocs/auth_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/@models.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +38,46 @@ class FatalErrorForm extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushNamed(context, route!,
                         arguments: FormArguments());
-                  }))
+                  })),
+          SizedBox(height: 20),
+          ElevatedButton(
+              key: Key('restart'),
+              child: Text('Restart'),
+              onPressed: () async {
+                BlocProvider.of<AuthBloc>(context).add(Logout());
+                RestartWidget.restartApp(context);
+              }),
         ])));
+  }
+}
+
+class RestartWidget extends StatefulWidget {
+  RestartWidget({required this.child});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()!.restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
   }
 }

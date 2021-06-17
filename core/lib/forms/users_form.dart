@@ -172,7 +172,7 @@ class _UsersState extends State<UsersForm> {
                         trailing: Text(' ')),
                     Divider(color: Colors.black),
                   ]);
-                if (index == 1 && users.isEmpty && !isLoading)
+                if (index == 1 && users.isEmpty)
                   return Center(
                       heightFactor: 20,
                       child: Text("no records found!",
@@ -190,22 +190,34 @@ class _UsersState extends State<UsersForm> {
                                   ? Image.memory(users[index].image!)
                                   : Text(users[index].firstName![0]),
                             ),
-                            subtitle:
-                                isPhone ? Text("${users[index].email}") : null,
+                            subtitle: isPhone
+                                ? Text(
+                                    users[index].email!.contains('example.com')
+                                        ? " "
+                                        : "${users[index].email}")
+                                : null,
                             title: Row(
                               children: <Widget>[
                                 Expanded(
-                                    child: Text("${users[index].firstName}, "
+                                    child: Text("${users[index].firstName} "
                                         "${users[index].lastName}"
                                         "[${users[index].partyId}]")),
                                 if (isDeskTop)
-                                  Expanded(child: Text("${users[index].name}")),
+                                  Expanded(
+                                      child: Text(!users[index].loginDisabled
+                                          ? "${users[index].loginName}"
+                                          : " ")),
                                 if (!isPhone)
                                   Expanded(
-                                      child: Text("${users[index].email}")),
+                                      child: Text(users[index]
+                                              .email!
+                                              .contains('example.com')
+                                          ? " "
+                                          : "${users[index].email}")),
                                 if (isDeskTop)
                                   Expanded(
-                                      child: Text("${users[index].language}")),
+                                      child: Text(
+                                          "${users[index].language ?? ''}")),
                                 if (isDeskTop &&
                                     widget.userGroupId !=
                                         "GROWERP_M_EMPLOYEE" &&
@@ -246,21 +258,23 @@ class _UsersState extends State<UsersForm> {
         if (state is UserProblem)
           HelperFunctions.showMessage(
               context, '${state.errorMessage}', Colors.red);
+        if (state is UserSuccess) {
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
+        }
       };
 
       dynamic blocBuilder = (context, state) {
         if (state is UserProblem)
           return FatalErrorForm("Could not load leads!");
-        if (state is UserLoading) {
-          isLoading = true;
-          return LoadingIndicator();
-        }
         if (state is UserSuccess) {
           isLoading = false;
           users = state.users;
           hasReachedMax = state.hasReachedMax;
+          return showForm(state);
         }
-        return showForm(state);
+        isLoading = true;
+        return LoadingIndicator();
       };
 
       switch (widget.userGroupId) {

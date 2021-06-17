@@ -91,7 +91,7 @@ class AccntSuccess extends AccntState {
 }
 
 class AccntProblem extends AccntState {
-  final String? errorMessage;
+  final String errorMessage;
 
   const AccntProblem(this.errorMessage);
 

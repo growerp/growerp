@@ -192,6 +192,7 @@ class FinDoc extends Equatable {
 class FinDocItem extends Equatable {
   final int? itemSeqId;
   final String? itemTypeId;
+  final String? itemTypeName;
   final String? productId;
   final String? description;
   final Decimal? quantity;
@@ -205,6 +206,7 @@ class FinDocItem extends Equatable {
   FinDocItem({
     this.itemSeqId,
     this.itemTypeId,
+    this.itemTypeName,
     this.productId,
     this.description,
     this.quantity,
@@ -219,6 +221,7 @@ class FinDocItem extends Equatable {
   factory FinDocItem.fromJson(Map<String, dynamic> json) => FinDocItem(
         itemSeqId: int.parse(json["itemSeqId"]),
         itemTypeId: json["itemTypeId"],
+        itemTypeName: json["itemTypeName"],
         productId: json["productId"],
         description: json["description"],
         quantity:
@@ -236,6 +239,7 @@ class FinDocItem extends Equatable {
   Map<String, dynamic> toJson() => {
         "itemSeqId": itemSeqId.toString(),
         "itemTypeId": itemTypeId,
+        "itemTypeName": itemTypeName,
         "productId": productId,
         "description": description,
         "quantity": quantity.toString(),
@@ -254,6 +258,7 @@ class FinDocItem extends Equatable {
   List<Object?> get props => [
         itemSeqId,
         itemTypeId,
+        itemTypeName,
         productId,
         description,
         quantity,
@@ -268,6 +273,7 @@ class FinDocItem extends Equatable {
   FinDocItem copyWith({
     int? itemSeqId,
     String? itemTypeId,
+    String? itemTypeName,
     String? productId,
     String? description,
     Decimal? quantity,
@@ -281,6 +287,7 @@ class FinDocItem extends Equatable {
       FinDocItem(
         itemSeqId: itemSeqId ?? this.itemSeqId,
         itemTypeId: itemTypeId ?? this.itemTypeId,
+        itemTypeName: itemTypeName ?? this.itemTypeName,
         productId: productId ?? this.productId,
         description: description ?? this.description,
         quantity: quantity ?? this.quantity,

@@ -39,7 +39,9 @@ class Address extends Equatable {
   final String? postalCode;
   final String? city;
   final String? province;
+  final String? provinceId;
   final String? country;
+  final String? countryId;
 
   Address({
     this.addressId, // contactMechId in backend
@@ -48,7 +50,9 @@ class Address extends Equatable {
     this.postalCode,
     this.city,
     this.province,
+    this.provinceId,
     this.country,
+    this.countryId,
   });
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
@@ -58,7 +62,9 @@ class Address extends Equatable {
         postalCode: json["postalCode"],
         city: json["city"],
         province: json["province"],
+        provinceId: json["provinceId"],
         country: json["country"],
+        countryId: json["countryId"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -68,7 +74,9 @@ class Address extends Equatable {
         "postalCode": postalCode,
         "city": city,
         "province": province,
+        "provinceId": provinceId,
         "country": country,
+        "countryId": countryId,
       };
 
   @override
@@ -82,7 +90,9 @@ class Address extends Equatable {
         postalCode,
         city,
         province,
+        provinceId,
         country,
+        countryId,
       ];
 
   Address copyWith({
@@ -92,7 +102,9 @@ class Address extends Equatable {
     String? postalCode,
     String? city,
     String? province,
+    String? provinceId,
     String? country,
+    String? countryd,
   }) =>
       Address(
         addressId: addressId ?? this.addressId,
@@ -101,17 +113,19 @@ class Address extends Equatable {
         postalCode: postalCode ?? this.postalCode,
         city: city ?? this.city,
         province: province ?? this.province,
+        provinceId: provinceId ?? this.provinceId,
         country: country ?? this.country,
+        countryId: countryId ?? this.countryId,
       );
 }
 
 class Country extends Equatable {
-  final String? id;
-  final String? name;
+  final String id;
+  final String name;
 
   Country({
-    this.id,
-    this.name,
+    required this.id,
+    required this.name,
   });
 
   @override

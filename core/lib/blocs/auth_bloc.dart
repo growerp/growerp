@@ -23,7 +23,7 @@ import 'package:models/@models.dart';
 /// It contains company and user information and signals connection errrors,
 /// keeps the token and apiKey in the [Authenticate] class.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final repos;
+  final dynamic repos;
   Authenticate authenticate = Authenticate();
 
   AuthBloc(this.repos)
@@ -122,6 +122,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       dynamic result = await repos.updateCompany(event.company);
       if (result is Company) {
         authenticate = authenticate.copyWith(company: result);
+        repos.persistAuthenticate(authenticate);
         yield AuthAuthenticated(authenticate, 'Company updated');
       } else {
         yield AuthProblem(result);
@@ -204,7 +205,8 @@ class UpdateCompany extends AuthEvent {
 class RegisterCompanyAdmin extends AuthEvent {
   final User user;
   final String currencyId;
-  RegisterCompanyAdmin(this.user, this.currencyId);
+  bool demoData = true;
+  RegisterCompanyAdmin(this.user, this.currencyId, this.demoData);
   @override
   String toString() => 'Register Company Admin User: $user';
 }
@@ -234,7 +236,7 @@ class LoggingOut extends AuthEvent {
   final Authenticate? authenticate;
   const LoggingOut({this.authenticate});
   @override
-  String toString() => 'loggedOut with: ${authenticate?.user?.name}';
+  String toString() => 'loggedOut with: ${authenticate?.user?.loginName}';
 }
 
 // ################## state ###################
@@ -255,7 +257,7 @@ class AuthLoading extends AuthState {
 }
 
 class AuthProblem extends AuthState {
-  final String? errorMessage;
+  final String errorMessage;
   AuthProblem(this.errorMessage);
   @override
   String toString() => 'AuthProblem: errorMessage: $errorMessage';

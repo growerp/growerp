@@ -59,6 +59,8 @@ class _LoginHeaderState extends State<LoginHeader> {
   List<Company>? companies;
   Company? _companySelected;
   _LoginHeaderState(this.message);
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -104,6 +106,14 @@ class _LoginHeaderState extends State<LoginHeader> {
             authenticate = state.authenticate;
             companyPartyId = authenticate.company!.partyId;
             companyName = authenticate.company!.name;
+            if (_usernameController.text.isEmpty)
+              _usernameController.text = authenticate.user?.loginName != null
+                  ? authenticate.user!.loginName!
+                  : kReleaseMode
+                      ? ''
+                      : 'admin@growerp.com';
+            if (_passwordController.text.isEmpty && !kReleaseMode)
+              _passwordController.text = 'qqqqqq9!';
           }
           return BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
             if (state is LoginLoading || state is LoginInitial)
@@ -170,14 +180,6 @@ class _LoginHeaderState extends State<LoginHeader> {
   }
 
   Widget _loginToCurrentCompany(state) {
-    final _usernameController = TextEditingController()
-      ..text = authenticate.user?.name != null
-          ? authenticate.user!.name!
-          : kReleaseMode
-              ? ''
-              : 'admin@growerp.com';
-    final _passwordController = TextEditingController()
-      ..text = kReleaseMode ? '' : 'qqqqqq9!';
     return Container(
         padding: EdgeInsets.all(20),
         width: 400,
@@ -256,9 +258,9 @@ class _LoginHeaderState extends State<LoginHeader> {
                       onTap: () async {
                         final String username = await _sendResetPasswordDialog(
                             context,
-                            authenticate.user!.name == null || kReleaseMode
+                            authenticate.user!.loginName == null || kReleaseMode
                                 ? 'admin@growerp.com'
-                                : authenticate.user!.name);
+                                : authenticate.user!.loginName);
                         if (username.isNotEmpty) {
                           BlocProvider.of<AuthBloc>(context)
                               .add(ResetPassword(username: username));

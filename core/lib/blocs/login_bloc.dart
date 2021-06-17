@@ -125,7 +125,7 @@ class LoginOk extends LoginState {
   @override
   List<Object> get props => [authenticate];
   @override
-  String toString() => 'LoginOk { username: ${authenticate.user!.name} }';
+  String toString() => 'LoginOk { username: ${authenticate.user!.loginName} }';
 }
 
 class LogginInProgress extends LoginState {}

@@ -237,10 +237,17 @@ class _CategoryState extends State<CategoryPage> {
                                     image:
                                         await HelperFunctions.getResizedImage(
                                             _imageFile?.path));
-                                BlocProvider.of<CategoryBloc>(context)
-                                    .add(UpdateCategory(
-                                  updatedCategory,
-                                ));
+                                if (_imageFile?.path != null &&
+                                    updatedCategory.image == null)
+                                  HelperFunctions.showMessage(
+                                      context,
+                                      "Image upload error or larger than 50K",
+                                      Colors.red);
+                                else
+                                  BlocProvider.of<CategoryBloc>(context)
+                                      .add(UpdateCategory(
+                                    updatedCategory,
+                                  ));
                               }
                             })),
                   ])

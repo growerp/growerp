@@ -281,21 +281,22 @@ Opportunity opportunity = opportunityFromJson('''
 ''');
 List<Opportunity> opportunities = [opportunity, opportunity];
 
-ItemTypes itemTypes = itemTypesFromJson('''
-{ "itemTypes": {
-  "sales":[
+List<ItemType> itemTypesSales = itemTypesFromJson('''
+{ "itemTypes": [
     {"itemTypeId":"ItemProduct","description":"Product"},
     {"itemTypeId":"ItemSalesTax","description":"Sales Tax"},
     {"itemTypeId":"ItemServiceProduct","description":"Service Product"},
     {"itemTypeId":"ItemShipping","description":"Shipping and Handling"},
     {"itemTypeId":"ItemVatTax","description":"VAT Tax (not added to totals)"}
-  ],
-  "purchase":[
+  ]};
+''');
+
+List<ItemType> itemTypesPurchase = itemTypesFromJson('''
+{ "itemTypes": [
     {"itemTypeId":"ItemProduct","description":"Product"},
     {"itemTypeId":"ItemSalesTax","description":"Sales Tax"},
     {"itemTypeId":"ItemServiceProduct","description":"Service Product"},
     {"itemTypeId":"ItemShipping","description":"Shipping and Handling"},
     {"itemTypeId":"ItemVatTax","description":"VAT Tax (not added to totals)"}
-  ]
-}}
+  ]};
 ''');

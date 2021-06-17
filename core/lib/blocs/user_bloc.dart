@@ -99,9 +99,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
           } else {
             int index = currentState.users
                 .indexWhere((p) => p.partyId == result.partyId);
-            print("userbloc userupdate before: ${currentState.users[index]}");
             currentState.users.replaceRange(index, index + 1, [result]);
-            print("userbloc userupdate after: ${currentState.users[index]}");
           }
           yield currentState.copyWith(
               message: 'User ' + (adding ? 'added' : 'updated'));

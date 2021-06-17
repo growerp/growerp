@@ -31,10 +31,9 @@ String authenticateToJson(Authenticate data) => json.encode(data.toJson());
 class Authenticate extends Equatable {
   final String? apiKey;
   final String? moquiSessionToken;
-  final Company? company;
-  final User? user;
+  final Company? company; //postall address not used here, use user comp address
+  final User? user; // user has a company and companyAddress
   final Stats? stats;
-  final ItemTypes? itemTypes;
 
   Authenticate({
     this.apiKey,
@@ -42,7 +41,6 @@ class Authenticate extends Equatable {
     this.company,
     this.user,
     this.stats,
-    this.itemTypes,
   });
 
   factory Authenticate.fromJson(Map<String, dynamic> json) => Authenticate(
@@ -52,9 +50,6 @@ class Authenticate extends Equatable {
             json["company"] != null ? Company.fromJson(json["company"]) : null,
         user: json["user"] != null ? User.fromJson(json["user"]) : null,
         stats: json["stats"] != null ? Stats.fromJson(json["stats"]) : null,
-        itemTypes: json["itemTypes"] == null
-            ? null
-            : ItemTypes.fromJson(json["itemTypes"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -63,7 +58,6 @@ class Authenticate extends Equatable {
         "company": company?.toJson(),
         "user": user?.toJson(),
         "stats": stats?.toJson(),
-        "itemTypes": itemTypes == null ? null : itemTypes!.toJson()
       };
 
   @override
@@ -73,18 +67,12 @@ class Authenticate extends Equatable {
         company,
         user,
         stats,
-        itemTypes,
       ];
 
   @override
-  String toString() =>
-      'Company: $company '
-          'User: $user apiKey: '
-          '....${apiKey?.substring(apiKey!.length - 10)} ' +
-      (itemTypes != null
-          ? 'itemTypes: ${itemTypes!.sales!.length}/'
-              '${itemTypes!.purchase!.length}'
-          : '');
+  String toString() => 'Company: $company '
+      'User: $user apiKey: '
+      '....${apiKey?.substring(apiKey!.length - 10)} ';
 
   Authenticate copyWith({
     bool clearApiKey = false,
@@ -94,7 +82,6 @@ class Authenticate extends Equatable {
     Company? company,
     User? user,
     Stats? stats,
-    ItemTypes? itemTypes,
   }) =>
       Authenticate(
         apiKey: clearApiKey == true ? null : apiKey ?? this.apiKey,
@@ -102,7 +89,6 @@ class Authenticate extends Equatable {
         company: clearCompany == true ? null : company ?? this.company,
         user: user ?? this.user,
         stats: stats ?? this.stats,
-        itemTypes: itemTypes ?? this.itemTypes,
       );
 }
 
@@ -111,37 +97,39 @@ String statsToJson(Stats data) =>
     '{"stats":' + json.encode(data.toJson()) + "}";
 
 class Stats {
-  int? admins;
-  int? employees;
-  int? suppliers;
-  int? leads;
-  int? customers;
-  int? openSlsOrders;
-  int? openPurOrders;
-  int? opportunities;
-  int? myOpportunities;
-  int? categories;
-  int? products;
-  int? salesInvoicesNotPaidCount;
+  int admins;
+  int employees;
+  int suppliers;
+  int leads;
+  int customers;
+  int openSlsOrders;
+  int openPurOrders;
+  int opportunities;
+  int myOpportunities;
+  int categories;
+  int products;
+  int assets;
+  int salesInvoicesNotPaidCount;
   Decimal? salesInvoicesNotPaidAmount;
-  int? purchInvoicesNotPaidCount;
+  int purchInvoicesNotPaidCount;
   Decimal? purchInvoicesNotPaidAmount;
 
   Stats({
-    this.admins,
-    this.employees,
-    this.suppliers,
-    this.leads,
-    this.customers,
-    this.openSlsOrders,
-    this.openPurOrders,
-    this.opportunities,
-    this.myOpportunities,
-    this.categories,
-    this.products,
-    this.salesInvoicesNotPaidCount,
+    this.admins = 0,
+    this.employees = 0,
+    this.suppliers = 0,
+    this.leads = 0,
+    this.customers = 0,
+    this.openSlsOrders = 0,
+    this.openPurOrders = 0,
+    this.opportunities = 0,
+    this.myOpportunities = 0,
+    this.categories = 0,
+    this.products = 0,
+    this.assets = 0,
+    this.salesInvoicesNotPaidCount = 0,
     this.salesInvoicesNotPaidAmount,
-    this.purchInvoicesNotPaidCount,
+    this.purchInvoicesNotPaidCount = 0,
     this.purchInvoicesNotPaidAmount,
   });
 
@@ -154,15 +142,18 @@ class Stats {
         openSlsOrders: int.parse(json["openSlsOrders"]),
         openPurOrders: int.parse(json["openPurOrders"]),
         opportunities: int.parse(json["opportunities"]),
-//        myOpportunities: int.parse(json["myOpportunities"]),
+        myOpportunities: int.parse(json["myOpportunities"]),
         categories: int.parse(json["categories"]),
         products: int.parse(json["products"]),
-//        salesInvoicesNotPaidCount: int.parse(json["salesInvoicesNotPaidCount"]),
-//        salesInvoicesNotPaidAmount:
-//            Decimal.parse(json["salesInvoicesNotPaidAmount"]),
-//        purchInvoicesNotPaidCount: int.parse(json["purchInvoicesNotPaidCount"]),
-//        purchInvoicesNotPaidAmount:
-//            Decimal.parse(json["purchInvoicesNotPaidAmount"]),
+        assets: int.parse(json["assets"]),
+        salesInvoicesNotPaidCount: int.parse(json["salesInvoicesNotPaidCount"]),
+        salesInvoicesNotPaidAmount: json["salesInvoicesNotPaidAmount"] != null
+            ? Decimal.parse(json["salesInvoicesNotPaidAmount"])
+            : Decimal.parse("0.00"),
+        purchInvoicesNotPaidCount: int.parse(json["purchInvoicesNotPaidCount"]),
+        purchInvoicesNotPaidAmount: json["purchInvoicesNotPaidAmount"] != null
+            ? Decimal.parse(json["purchInvoicesNotPaidAmount"])
+            : Decimal.parse("0.00"),
       );
 
   Map<String, dynamic> toJson() => {
@@ -177,6 +168,7 @@ class Stats {
         "myOpportunities": myOpportunities.toString(),
         "categories": categories.toString(),
         "products": products.toString(),
+        "assets": assets.toString(),
         "salesInvoicesNotPaidCount": salesInvoicesNotPaidCount.toString(),
         "salesInvoicesNotPaidAmount": salesInvoicesNotPaidAmount.toString(),
         "purchInvoicesNotPaidCount": purchInvoicesNotPaidCount.toString(),
@@ -185,60 +177,5 @@ class Stats {
   @override
   String toString() {
     return 'Statistics, admins: $admins';
-  }
-}
-// To parse this JSON data, do
-//
-//     final itemTypes = itemTypesFromJson(jsonString);
-
-ItemTypes itemTypesFromJson(String str) =>
-    ItemTypes.fromJson(json.decode(str)["itemTypes"]);
-String itemTypesToJson(ItemTypes data) =>
-    '{"itemTypes":' + json.encode(data.toJson()) + "}";
-
-class ItemTypes {
-  ItemTypes({
-    this.sales,
-    this.purchase,
-  });
-
-  List<ItemType>? sales;
-  List<ItemType>? purchase;
-
-  factory ItemTypes.fromJson(Map<String, dynamic> json) => ItemTypes(
-        sales:
-            List<ItemType>.from(json["sales"].map((x) => ItemType.fromJson(x))),
-        purchase: List<ItemType>.from(
-            json["purchase"].map((x) => ItemType.fromJson(x))),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "sales": List<dynamic>.from(sales!.map((x) => x.toJson())),
-        "purchase": List<dynamic>.from(purchase!.map((x) => x.toJson())),
-      };
-}
-
-class ItemType {
-  ItemType({
-    this.itemTypeId,
-    this.description,
-  });
-
-  String? itemTypeId;
-  String? description;
-
-  factory ItemType.fromJson(Map<String, dynamic> json) => ItemType(
-        itemTypeId: json["itemTypeId"],
-        description: json["description"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "itemTypeId": itemTypeId,
-        "description": description,
-      };
-
-  @override
-  String toString() {
-    return 'Itemtype: $itemTypeId';
   }
 }
