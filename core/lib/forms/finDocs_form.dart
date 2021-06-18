@@ -253,7 +253,6 @@ class _OrdersState extends State<FinDocsForm> {
                                       "${widget.docType[0].toUpperCase()}"
                                       "${widget.docType.substring(1)} ID")),
                               SizedBox(width: 10),
-                              SizedBox(width: 120, child: Text("Date")),
                               Expanded(
                                   child: Text(widget.sales == null
                                       ? 'Other User'
@@ -267,10 +266,11 @@ class _OrdersState extends State<FinDocsForm> {
                                 SizedBox(width: 80, child: Text("#items")),
                             ]),
                       subtitle: Row(children: <Widget>[
-                        SizedBox(width: 100),
+                        SizedBox(width: 80, child: Text("Date")),
                         SizedBox(width: 80, child: Text("Total")),
                         SizedBox(width: 120, child: Text("Status")),
-                        SizedBox(width: 120, child: Text("Email Address")),
+                        if (!isPhone)
+                          SizedBox(width: 120, child: Text("Email Address")),
                       ]),
                       trailing: isPhone
                           ? Text('             ')
@@ -301,10 +301,6 @@ class _OrdersState extends State<FinDocsForm> {
                                   width: 80,
                                   child: Text("${finDocs[index].id()}")),
                               SizedBox(width: 10),
-                              SizedBox(
-                                  width: 120,
-                                  child: Text(
-                                      "${finDocs[index].creationDate?.toString().substring(0, 11)}")),
                               Expanded(
                                   child: Text(
                                       "${finDocs[index].otherUser!.firstName ?? ''} "
@@ -320,7 +316,10 @@ class _OrdersState extends State<FinDocsForm> {
                             ],
                           ),
                           subtitle: Row(children: <Widget>[
-                            SizedBox(width: 100),
+                            SizedBox(
+                                width: 80,
+                                child: Text(
+                                    "${finDocs[index].creationDate?.toString().substring(0, 11)}")),
                             SizedBox(
                                 width: 80,
                                 child: Text("${finDocs[index].grandTotal}")),
@@ -328,11 +327,12 @@ class _OrdersState extends State<FinDocsForm> {
                                 width: 120,
                                 child: Text(
                                     "${finDocStatusValues[finDocs[index].statusId!]}")),
-                            SizedBox(
-                                width: 120,
-                                child: Text(
-                                  "${finDocs[index].otherUser!.email ?? ''}",
-                                )),
+                            if (!isPhone)
+                              SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    "${finDocs[index].otherUser!.email ?? ''}",
+                                  )),
                           ]),
                           children: List.from(finDocs[index].items!.map((e) =>
                               Row(
@@ -370,21 +370,21 @@ class _OrdersState extends State<FinDocsForm> {
                                           finDocs[index].statusId!] ??
                                       true,
                                   child: Row(children: [
-                                    IconButton(
-                                      icon: Icon(Icons.print),
-                                      tooltip:
-                                          'PDF/Print ${finDocs[0].docType}',
-                                      onPressed: () async {
-                                        await Navigator.pushNamed(
-                                            context, '/printer',
-                                            arguments: FormArguments(
-                                                menuIndex: tab,
-                                                object: finDocs[index]));
-                                      },
-                                    ),
                                     Visibility(
                                         visible: !isPhone,
                                         child: Row(children: [
+                                          IconButton(
+                                            icon: Icon(Icons.print),
+                                            tooltip:
+                                                'PDF/Print ${finDocs[0].docType}',
+                                            onPressed: () async {
+                                              await Navigator.pushNamed(
+                                                  context, '/printer',
+                                                  arguments: FormArguments(
+                                                      menuIndex: tab,
+                                                      object: finDocs[index]));
+                                            },
+                                          ),
                                           IconButton(
                                             icon: Icon(Icons.edit),
                                             tooltip:
