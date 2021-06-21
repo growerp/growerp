@@ -135,7 +135,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           currencyId: event.currencyId,
           firstName: event.user.firstName,
           lastName: event.user.lastName,
-          email: event.user.email);
+          email: event.user.email,
+          demoData: event.demoData);
       if (authenticate is Authenticate) {
         await repos.persistAuthenticate(authenticate);
         yield AuthRegistered();
