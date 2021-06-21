@@ -12,12 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/forms/user_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 
-Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
+Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
     List<MenuItem>? menu) {
-  String? groupId = authenticate?.user?.userGroupId;
+  String? groupId = authenticate.user?.userGroupId;
   List options = [];
   menu?.forEach((option) => {
         if (option.readGroups.contains(groupId))
@@ -27,7 +28,7 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
             "title": option.title,
           }),
       });
-  bool loggedIn = authenticate?.apiKey != null;
+  bool loggedIn = authenticate.apiKey != null;
   if (loggedIn && isPhone)
     return Drawer(
       key: Key('drawer'),
@@ -38,20 +39,24 @@ Widget? myDrawer(BuildContext context, Authenticate? authenticate, bool isPhone,
             return DrawerHeader(
                 child: InkWell(
                     key: Key('tapUser'),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/user',
-                          arguments: FormArguments(
-                            object: authenticate!.user,
-                          ));
+                    onTap: () async {
+                      await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return UserDialog(
+                                formArguments:
+                                    FormArguments(object: authenticate.user));
+                          });
                     },
                     child: Column(children: [
                       CircleAvatar(
                           backgroundColor: Colors.green,
                           radius: 40,
-                          child: authenticate?.user?.image != null
-                              ? Image.memory(authenticate!.user!.image!)
+                          child: authenticate.user?.image != null
+                              ? Image.memory(authenticate.user!.image!)
                               : Text(
-                                  authenticate!.user?.firstName
+                                  authenticate.user?.firstName
                                           ?.substring(0, 1) ??
                                       '',
                                   style: TextStyle(

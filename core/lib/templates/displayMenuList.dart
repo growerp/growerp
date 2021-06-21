@@ -47,8 +47,8 @@ class _MenuItemState extends State<DisplayMenuList>
   late String title;
   Widget? leadAction;
   Widget? child;
-  List<Widget>? tabList = [];
-  List<Widget>? tabText = [];
+  List<Widget> tabList = [];
+  List<Widget> tabText = [];
   Map<int, FloatingActionButton> floatingActionButtonList = {};
   FloatingActionButton? floatingActionButton;
   List<BottomNavigationBarItem>? bottomItems = [];
@@ -65,6 +65,7 @@ class _MenuItemState extends State<DisplayMenuList>
     tabIndex = widget.tabIndex ?? 0;
     if (menuItem.floatButtonForm != null) {
       floatingActionButton = FloatingActionButton(
+          key: Key("addNew"),
           onPressed: () async {
             await showDialog(
                 barrierDismissible: true,
@@ -79,9 +80,9 @@ class _MenuItemState extends State<DisplayMenuList>
     if (tabItems != null)
       for (var i = 0; i < tabItems!.length; i++) {
         // form to display
-        tabList!.add(tabItems![i].form);
+        tabList.add(tabItems![i].form);
         // text of tabs at top of screen (tablet, web)
-        tabText!.add(Align(
+        tabText.add(Align(
             alignment: Alignment.center, child: Text(tabItems![i].label)));
         // tabs at bottom of screen : phone
         bottomItems!.add(BottomNavigationBarItem(
@@ -89,6 +90,7 @@ class _MenuItemState extends State<DisplayMenuList>
         // floating actionbutton at each tab
         if (tabItems![i].floatButtonRoute != null)
           floatingActionButtonList[i] = FloatingActionButton(
+              key: Key("addNew"),
               onPressed: () async {
                 await Navigator.pushNamed(
                     context, tabItems![tabIndex].floatButtonRoute!,
@@ -98,6 +100,7 @@ class _MenuItemState extends State<DisplayMenuList>
               child: Icon(Icons.add));
         if (tabItems![i].floatButtonForm != null) {
           floatingActionButtonList[i] = FloatingActionButton(
+              key: Key("addNew"),
               onPressed: () async {
                 await showDialog(
                     barrierDismissible: true,
@@ -112,7 +115,7 @@ class _MenuItemState extends State<DisplayMenuList>
       }
 
     _controller = TabController(
-      length: tabList!.length,
+      length: tabList.length,
       vsync: this,
       initialIndex: widget.tabIndex ?? 0,
     );
@@ -132,7 +135,7 @@ class _MenuItemState extends State<DisplayMenuList>
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    Authenticate? authenticate;
+    late Authenticate authenticate;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state is AuthAuthenticated) authenticate = state.authenticate;
       if (tabItems == null) {
@@ -142,7 +145,7 @@ class _MenuItemState extends State<DisplayMenuList>
         else // tablet or web show navigation
           return myNavigationRail(
             context,
-            authenticate!,
+            authenticate,
             simplePage(authenticate, isPhone, widget.scaffoldMessengerKey),
             widget.menuIndex,
             widget.menuList,
@@ -154,7 +157,7 @@ class _MenuItemState extends State<DisplayMenuList>
         else
           return myNavigationRail(
             context,
-            authenticate!,
+            authenticate,
             tabPage(authenticate, isPhone, widget.scaffoldMessengerKey),
             widget.menuIndex,
             widget.menuList,
@@ -174,22 +177,23 @@ class _MenuItemState extends State<DisplayMenuList>
                 leading: leadAction,
                 title: companyLogo(context, authenticate, title),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
+            drawer: myDrawer(context, authenticate!, isPhone, widget.menuList),
             floatingActionButton: floatingActionButton,
             body: child));
   }
 
   Widget tabPage(
-      Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
+      Authenticate authenticate, bool isPhone, scaffoldMessengerKey) {
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
             appBar: AppBar(
-                key: Key(tabList![tabIndex].toString()),
+                key: Key(tabList[tabIndex].toString()),
                 automaticallyImplyLeading: isPhone,
                 bottom: isPhone
                     ? null
                     : TabBar(
+                        key: Key(tabText[tabIndex].toString()),
                         controller: _controller,
                         labelPadding: EdgeInsets.all(10.0),
                         labelColor: Colors.black,
@@ -200,7 +204,7 @@ class _MenuItemState extends State<DisplayMenuList>
                                 topLeft: Radius.circular(10),
                                 topRight: Radius.circular(10)),
                             color: Colors.white),
-                        tabs: tabText!,
+                        tabs: tabText,
                       ),
                 title: companyLogo(context, authenticate, title),
                 actions: widget.actions),
@@ -218,10 +222,10 @@ class _MenuItemState extends State<DisplayMenuList>
                     })
                 : null,
             body: isPhone
-                ? Center(child: tabList![tabIndex])
+                ? Center(child: tabList[tabIndex])
                 : TabBarView(
                     controller: _controller,
-                    children: tabList!,
+                    children: tabList,
                   )));
   }
 }
