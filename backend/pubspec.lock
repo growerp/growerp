@@ -49,7 +49,7 @@ packages:
       name: built_collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "5.1.0"
   built_value:
     dependency: transitive
     description:
@@ -140,7 +140,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   fake_async:
     dependency: transitive
     description:
@@ -161,7 +161,7 @@ packages:
       name: file
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.1"
+    version: "6.1.2"
   fixnum:
     dependency: transitive
     description:
@@ -252,7 +252,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "7b3d8c5eb636bf58d60420f3653c3e13cb55bff1"
+      resolved-ref: "54bfebd9046377ac13043f4a2134913308559177"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -297,7 +297,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.11.0"
+    version: "1.11.1"
   platform:
     dependency: transitive
     description:
@@ -449,7 +449,7 @@ packages:
       name: very_good_analysis
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   watcher:
     dependency: transitive
     description:

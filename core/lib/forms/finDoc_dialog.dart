@@ -132,6 +132,7 @@ class _MyFinDocState extends State<FinDocPage> {
                 builder: (context) => GestureDetector(
                     onTap: () {},
                     child: Dialog(
+                        key: Key('${finDoc.docType}FinDocDialog'),
                         insetPadding: EdgeInsets.all(10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),

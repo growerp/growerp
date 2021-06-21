@@ -145,6 +145,7 @@ class _CompanyState extends State<CompanyPage> {
         return ScaffoldMessenger(
             key: scaffoldMessengerKey,
             child: Scaffold(
+                key: Key('CompanyInfoForm'),
                 floatingActionButton:
                     imageButtons(context, _onImageButtonPressed),
                 body: Center(

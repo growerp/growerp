@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: "7b3d8c5eb636bf58d60420f3653c3e13cb55bff1"
+      resolved-ref: "54bfebd9046377ac13043f4a2134913308559177"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -93,7 +93,7 @@ packages:
       name: built_collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "5.1.0"
   built_value:
     dependency: transitive
     description:
@@ -198,7 +198,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   fake_async:
     dependency: transitive
     description:
@@ -219,7 +219,7 @@ packages:
       name: file
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.1"
+    version: "6.1.2"
   fixnum:
     dependency: transitive
     description:
@@ -415,7 +415,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "7b3d8c5eb636bf58d60420f3653c3e13cb55bff1"
+      resolved-ref: "54bfebd9046377ac13043f4a2134913308559177"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -432,7 +432,7 @@ packages:
       name: node_preamble
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   package_config:
     dependency: transitive
     description:
@@ -481,14 +481,14 @@ packages:
       name: pdf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.3.0"
+    version: "3.4.0"
   pedantic:
     dependency: transitive
     description:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.11.0"
+    version: "1.11.1"
   petitparser:
     dependency: transitive
     description:
@@ -523,7 +523,7 @@ packages:
       name: printing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.2.1"
+    version: "5.3.0"
   process:
     dependency: transitive
     description:
@@ -565,7 +565,7 @@ packages:
       name: responsive_framework
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   rxdart:
     dependency: "direct main"
     description:
@@ -794,7 +794,7 @@ packages:
       name: very_good_analysis
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   vm_service:
     dependency: transitive
     description:

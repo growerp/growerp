@@ -117,6 +117,7 @@ class _UserState extends State<UserPage> {
     User? user = widget.user;
     Authenticate? authenticate;
     return Dialog(
+        key: Key('${user.groupDescription}UserDialog'),
         insetPadding: EdgeInsets.all(10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

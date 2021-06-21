@@ -64,12 +64,13 @@ class _AddressState extends State<AddressDialog> {
         child: GestureDetector(
             onTap: () {},
             child: Dialog(
+                key: Key('AddressDialog'),
                 insetPadding: EdgeInsets.all(10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Container(
-                    height: 600,
+                    height: 700,
                     width: 400,
                     child: _editAddress(context, repos)))));
   }
@@ -86,8 +87,8 @@ class _AddressState extends State<AddressDialog> {
                     Center(
                         child: Text(
                             (address == null
-                                ? "New Address"
-                                : "Address #${address!.addressId}"),
+                                ? "New Company Address"
+                                : "Company Address #${address!.addressId}"),
                             style: TextStyle(
                                 fontSize: 15,
                                 color: Colors.black,

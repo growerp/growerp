@@ -133,6 +133,7 @@ class _ProductState extends State<ProductPage> {
           child: GestureDetector(
               onTap: () {},
               child: Dialog(
+                  key: Key('ProductDialog'),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),

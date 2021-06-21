@@ -40,7 +40,7 @@ void main(List<String> arguments) {
         // run integration test
         {
           'executable': 'flutter',
-          'arguments': ['driver'],
+          'arguments': ['driver', '--target=test_driver/menu.dart'],
           'environment': {'imagePrefix': '$imgPath$emulatorId-'}
         },
         // close emulator
@@ -65,6 +65,7 @@ void main(List<String> arguments) {
     lister.listen((file) => {
           if (basename(file.path) != 'keyword.strings' &&
               basename(file.path) != 'images' &&
+              basename(file.path) != 'changelogs' &&
               basename(file.path) != 'en-US' && // for ios
               basename(file.path) != 'title.strings')
             file.delete(),
@@ -77,8 +78,9 @@ void main(List<String> arguments) {
         // frameit in last step
         if (el[3].trim() == 'android') {
           await ProcessEmulator(androidDir, el[0].trim());
-        } else if (el[2].trim() == 'ios'){
-          var result = await Process.start('flutter', ['driver', '-d', '${el[1].trim()}' ],
+        } else if (el[2].trim() == 'ios') {
+          var result = await Process.start(
+              'flutter', ['driver', '-d', '${el[1].trim()}'],
               environment: {'imagePrefix': '$iosDir${el[0].trim()}-'});
           await stdout.addStream(result.stdout);
         }

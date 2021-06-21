@@ -18,6 +18,7 @@ import 'package:models/@models.dart';
 Widget companyLogo(context, authenticate, title) {
   return Row(children: [
     InkWell(
+      key: Key('tapCompany'),
       onTap: () {
         Navigator.pushNamed(context, '/company', arguments: FormArguments());
       },

@@ -114,6 +114,7 @@ class _CategoryState extends State<CategoryPage> {
               child: GestureDetector(
                   onTap: () {},
                   child: Dialog(
+                      key: Key('CategoryDialog'),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),

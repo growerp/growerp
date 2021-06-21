@@ -44,16 +44,12 @@ class RegisterHeader extends StatefulWidget {
 class _RegisterHeaderState extends State<RegisterHeader> {
   final String? message;
   final _formKey = GlobalKey<FormState>();
-  Currency? _currencySelected = kReleaseMode ? null : currencies[0];
-  final _companyController = TextEditingController()
-    ..text = kReleaseMode ? '' : 'Demo company from John Doe';
-  final _firstNameController = TextEditingController()
-    ..text = kReleaseMode ? '' : 'John';
-  final _lastNameController = TextEditingController()
-    ..text = kReleaseMode ? '' : 'Doe';
-  final _emailController = TextEditingController()
-    ..text = kReleaseMode ? '' : 'admin@growerp.com';
-  bool demoData = true;
+  final _companyController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  late bool _demoData;
+  late Currency _currencySelected;
   _RegisterHeaderState(this.message);
 
   @override
@@ -63,6 +59,12 @@ class _RegisterHeaderState extends State<RegisterHeader> {
         HelperFunctions.showMessage(context, '$message', Colors.green);
     });
     super.initState();
+    _companyController..text = kReleaseMode ? '' : 'Demo company from John Doe';
+    _firstNameController..text = kReleaseMode ? '' : 'John';
+    _lastNameController..text = kReleaseMode ? '' : 'Doe';
+    _emailController..text = kReleaseMode ? '' : 'admin@growerp.com';
+    _demoData = kReleaseMode ? false : true;
+    _currencySelected = currencies[0];
   }
 
   @override
@@ -214,7 +216,7 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                   }).toList(),
                   onChanged: (Currency? newValue) {
                     setState(() {
-                      _currencySelected = newValue;
+                      _currencySelected = newValue!;
                     });
                   },
                   isExpanded: true,
@@ -229,11 +231,12 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           width: 0.80),
                     ),
                     child: CheckboxListTile(
+                        key: Key('demoData'),
                         title: Text("Generate demo data"),
-                        value: demoData,
+                        value: _demoData,
                         onChanged: (bool? value) {
                           setState(() {
-                            demoData = value == true;
+                            _demoData = value!;
                           });
                         })),
                 SizedBox(height: 10),
@@ -250,19 +253,19 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           key: Key('newCompany'),
                           child: Text('Register AND create a new Company'),
                           onPressed: () {
+                            print("=====demoData: $_demoData");
                             if (_formKey.currentState!.validate() &&
                                 state is! AuthLoading)
-                              BlocProvider.of<AuthBloc>(context).add(
-                                  RegisterCompanyAdmin(
+                              BlocProvider.of<AuthBloc>(context)
+                                  .add(RegisterCompanyAdmin(
                                       User(
                                         companyName: _companyController.text,
                                         firstName: _firstNameController.text,
                                         lastName: _lastNameController.text,
                                         email: _emailController.text,
                                       ),
-                                      (_currencySelected?.currencyId ??
-                                          currencies[0].currencyId)!,
-                                      demoData));
+                                      (_currencySelected.currencyId!),
+                                      _demoData));
                           })),
                 ])
               ]))

@@ -101,6 +101,7 @@ class _AssetState extends State<AssetPage> {
                       builder: (context) => GestureDetector(
                           onTap: () {},
                           child: Dialog(
+                              key: Key('AssetDialog'),
                               insetPadding: EdgeInsets.all(10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),

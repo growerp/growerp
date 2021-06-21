@@ -324,7 +324,7 @@ class _OrdersState extends State<FinDocsForm> {
                                 width: 80,
                                 child: Text("${finDocs[index].grandTotal}")),
                             SizedBox(
-                                width: 120,
+                                width: 80,
                                 child: Text(
                                     "${finDocStatusValues[finDocs[index].statusId!]}")),
                             if (!isPhone)
