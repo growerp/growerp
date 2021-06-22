@@ -21,7 +21,7 @@ import 'package:equatable/equatable.dart';
 List<ItemType> itemTypesFromJson(String str) => List<ItemType>.from(
     json.decode(str)["itemTypes"].map((x) => ItemType.fromJson(x)));
 String itemTypesToJson(List<ItemType> data) =>
-    '{"intemTypes":' +
+    '{"itemTypes":' +
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
 
@@ -41,7 +41,7 @@ class ItemType extends Equatable {
 
   Map<String, dynamic> toJson() => {
         "itemTypeId": itemTypeId,
-        "description": itemTypeName,
+        "itemTypeName": itemTypeName,
       };
 
   @override

@@ -27,9 +27,9 @@ void main() {
     expect(user, user.copyWith());
   });
   test('itemTypes', () {
-    String json2 = itemTypesToJson(itemTypes);
-    ItemTypes newObjs = itemTypesFromJson(json2);
-    expect(itemTypesToJson(newObjs), itemTypesToJson(itemTypes));
+    String json2 = itemTypesToJson(salesItems);
+    List<ItemType> newObjs = itemTypesFromJson(json2);
+    expect(itemTypesToJson(newObjs), itemTypesToJson(salesItems));
   });
 
   test('category', () {

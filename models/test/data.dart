@@ -14,6 +14,7 @@
 
 import 'dart:typed_data';
 
+import 'package:decimal/decimal.dart';
 import 'package:models/@models.dart';
 import 'dart:math';
 
@@ -79,16 +80,15 @@ List<User> users = usersFromJson('''
 ''');
 
 List<ItemType> salesItems = [
-  ItemType(itemTypeId: "slstype1", description: "slstype 1 description"),
-  ItemType(itemTypeId: "slstype2", description: "slstype 2 description"),
-  ItemType(itemTypeId: "slstype3", description: "slstype 3 description")
+  ItemType(itemTypeId: "slstype1", itemTypeName: "slstype 1 description"),
+  ItemType(itemTypeId: "slstype2", itemTypeName: "slstype 2 description"),
+  ItemType(itemTypeId: "slstype3", itemTypeName: "slstype 3 description")
 ];
 List<ItemType> purchaseItems = [
-  ItemType(itemTypeId: "slstype1", description: "slstype 1 description"),
-  ItemType(itemTypeId: "slstype2", description: "slstype 2 description"),
-  ItemType(itemTypeId: "slstype3", description: "slstype 3 description")
+  ItemType(itemTypeId: "purchtype1", itemTypeName: "purchtype 1 description"),
+  ItemType(itemTypeId: "purchtype2", itemTypeName: "purchtype 2 description"),
+  ItemType(itemTypeId: "purchtype3", itemTypeName: "purchtype 3 description")
 ];
-ItemTypes itemTypes = ItemTypes(purchase: purchaseItems, sales: salesItems);
 List<int> list =
     'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='.codeUnits;
 Uint8List imageString = Uint8List.fromList(list);
@@ -101,6 +101,8 @@ Company company = Company(
   classificationDescr: "App for Ecommerce and shop",
   email: "dummy@example.com",
   image: imageString,
+  vatPerc: Decimal.parse("0"),
+  salesPerc: Decimal.parse("0"),
 );
 
 List<Company> companies = [
@@ -112,6 +114,8 @@ List<Company> companies = [
     classificationId: "AppFreelancer",
     classificationDescr: "App for Ecommerce and shop",
     email: "dummy@example.com",
+    vatPerc: Decimal.parse("22"),
+    salesPerc: Decimal.parse("33"),
   )
 ];
 
