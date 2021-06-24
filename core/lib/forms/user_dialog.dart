@@ -313,7 +313,7 @@ class _UserState extends State<UserPage> {
               )),
           SizedBox(height: 10),
           Visibility(
-              visible: updatedUser.userGroupId == null,
+              visible: updatedUser.userGroupId == 'GROWERP_M_ADMIN',
               child: DropdownButtonFormField<UserGroup>(
                 key: Key('dropDown'),
                 hint: Text('User Group'),

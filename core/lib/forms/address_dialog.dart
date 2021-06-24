@@ -95,6 +95,7 @@ class _AddressState extends State<AddressDialog> {
                                 fontWeight: FontWeight.bold))),
                     SizedBox(height: 20),
                     TextFormField(
+                      key: Key('address1'),
                       decoration: InputDecoration(labelText: 'Address line 1'),
                       controller: _address1Controller,
                       validator: (value) {
@@ -105,11 +106,13 @@ class _AddressState extends State<AddressDialog> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
+                      key: Key('address2'),
                       decoration: InputDecoration(labelText: 'Address line 2'),
                       controller: _address2Controller,
                     ),
                     SizedBox(height: 20),
                     TextFormField(
+                      key: Key('postal'),
                       decoration: InputDecoration(labelText: 'PostalCode'),
                       controller: _postalCodeController,
                       validator: (value) {
@@ -120,6 +123,7 @@ class _AddressState extends State<AddressDialog> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
+                      key: Key('city'),
                       decoration: InputDecoration(labelText: 'City'),
                       controller: _cityController,
                       validator: (value) {
@@ -129,6 +133,7 @@ class _AddressState extends State<AddressDialog> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
+                      key: Key('province'),
                       decoration: InputDecoration(labelText: 'Province/State'),
                       controller: _provinceController,
                       validator: (value) {

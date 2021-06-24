@@ -253,7 +253,6 @@ class _RegisterHeaderState extends State<RegisterHeader> {
                           key: Key('newCompany'),
                           child: Text('Register AND create a new Company'),
                           onPressed: () {
-                            print("=====demoData: $_demoData");
                             if (_formKey.currentState!.validate() &&
                                 state is! AuthLoading)
                               BlocProvider.of<AuthBloc>(context)

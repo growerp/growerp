@@ -145,7 +145,6 @@ class _CompanyState extends State<CompanyPage> {
         return ScaffoldMessenger(
             key: scaffoldMessengerKey,
             child: Scaffold(
-                key: Key('CompanyInfoForm'),
                 floatingActionButton:
                     imageButtons(context, _onImageButtonPressed),
                 body: Center(
@@ -226,10 +225,8 @@ class _CompanyState extends State<CompanyPage> {
                       TextFormField(
                         readOnly: !isAdmin,
                         key: Key('email'),
-                        decoration: InputDecoration(
-                            contentPadding: new EdgeInsets.symmetric(
-                                vertical: 30.0, horizontal: 10.0),
-                            labelText: 'Company Email address'),
+                        decoration:
+                            InputDecoration(labelText: 'Company Email address'),
                         controller: _emailController,
                         validator: (value) {
                           if (value!.isEmpty)
@@ -243,37 +240,25 @@ class _CompanyState extends State<CompanyPage> {
                         },
                       ),
                       SizedBox(height: 10),
-                      IgnorePointer(
-                          ignoring: !isAdmin,
-                          child: Container(
-                            width: 400,
-                            height: 60,
-                            padding: EdgeInsets.symmetric(horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25.0),
-                              border: Border.all(
-                                  color: Colors.black45,
-                                  style: BorderStyle.solid,
-                                  width: 0.80),
-                            ),
-                            child: DropdownButton<Currency>(
-                              key: Key('dropDown'),
-                              underline: SizedBox(), // remove underline
-                              hint: Text('Currency'),
-                              value: _selectedCurrency,
-                              items: currencies.map((item) {
-                                return DropdownMenuItem<Currency>(
-                                    child: Text(item.description!),
-                                    value: item);
-                              }).toList(),
-                              onChanged: (Currency? newValue) {
+                      DropdownButtonFormField<Currency>(
+                        decoration: InputDecoration(labelText: 'Currency'),
+                        hint: Text('Currency'),
+                        value: _selectedCurrency,
+                        items: currencies.map((item) {
+                          return DropdownMenuItem<Currency>(
+                              child:
+                                  Text(item.description!, key: Key('currency')),
+                              value: item);
+                        }).toList(),
+                        onChanged: isAdmin
+                            ? (Currency? newValue) {
                                 setState(() {
                                   _selectedCurrency = newValue!;
                                 });
-                              },
-                              isExpanded: true,
-                            ),
-                          )),
+                              }
+                            : null,
+                        isExpanded: true,
+                      ),
                       SizedBox(height: 10),
                       Row(children: [
                         Expanded(
@@ -311,19 +296,22 @@ class _CompanyState extends State<CompanyPage> {
                         SizedBox(
                             width: 100,
                             child: ElevatedButton(
-                              onPressed: () async {
-                                var result = await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AddressDialog(
-                                          address: companyAddress);
-                                    });
-                                if (result is Address)
-                                  setState(() {
-                                    companyAddress = result;
-                                  });
-                              },
+                              key: Key('address'),
+                              onPressed: isAdmin
+                                  ? () async {
+                                      var result = await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AddressDialog(
+                                                address: companyAddress);
+                                          });
+                                      if (result is Address)
+                                        setState(() {
+                                          companyAddress = result;
+                                        });
+                                    }
+                                  : null,
                               child: Text(company.address != null
                                   ? 'Update\nAddress'
                                   : 'Add\nAddress'),
@@ -337,37 +325,43 @@ class _CompanyState extends State<CompanyPage> {
                               child: Text(company.partyId == null
                                   ? 'Create'
                                   : 'Update'),
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  //        && !Loading)
-                                  company = Company(
-                                      partyId: company.partyId,
-                                      email: _emailController.text,
-                                      name: _nameController.text,
-                                      currencyId: _selectedCurrency.currencyId,
-                                      address: companyAddress,
-                                      vatPerc: Decimal.parse(
-                                          _vatPercController.text.isEmpty
-                                              ? '0'
-                                              : _vatPercController.text),
-                                      salesPerc: Decimal.parse(
-                                          _salesPercController.text.isEmpty
-                                              ? '0'
-                                              : _salesPercController.text),
-                                      image:
-                                          await HelperFunctions.getResizedImage(
-                                              _imageFile?.path));
-                                  if (_imageFile?.path != null &&
-                                      company.image == null)
-                                    HelperFunctions.showMessage(
-                                        context,
-                                        "Image upload error or larger than 50K",
-                                        Colors.red);
-                                  else
-                                    BlocProvider.of<AuthBloc>(context).add(
-                                        UpdateCompany(authenticate, company));
-                                }
-                              }))
+                              onPressed: isAdmin
+                                  ? () async {
+                                      if (_formKey.currentState!.validate()) {
+                                        //        && !Loading)
+                                        company = Company(
+                                            partyId: company.partyId,
+                                            email: _emailController.text,
+                                            name: _nameController.text,
+                                            currencyId:
+                                                _selectedCurrency.currencyId,
+                                            address: companyAddress,
+                                            vatPerc: Decimal.parse(
+                                                _vatPercController.text.isEmpty
+                                                    ? '0'
+                                                    : _vatPercController.text),
+                                            salesPerc: Decimal.parse(
+                                                _salesPercController
+                                                        .text.isEmpty
+                                                    ? '0'
+                                                    : _salesPercController
+                                                        .text),
+                                            image: await HelperFunctions
+                                                .getResizedImage(
+                                                    _imageFile?.path));
+                                        if (_imageFile?.path != null &&
+                                            company.image == null)
+                                          HelperFunctions.showMessage(
+                                              context,
+                                              "Image upload error or larger than 50K",
+                                              Colors.red);
+                                        else
+                                          BlocProvider.of<AuthBloc>(context)
+                                              .add(UpdateCompany(
+                                                  authenticate, company));
+                                      }
+                                    }
+                                  : null))
                     ])))));
   }
 }
