@@ -167,7 +167,7 @@ class _MenuItemState extends State<DisplayMenuList>
   }
 
   Widget simplePage(
-      Authenticate? authenticate, bool isPhone, scaffoldMessengerKey) {
+      Authenticate authenticate, bool isPhone, scaffoldMessengerKey) {
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
@@ -175,9 +175,9 @@ class _MenuItemState extends State<DisplayMenuList>
                 key: Key(child.toString()),
                 automaticallyImplyLeading: isPhone,
                 leading: leadAction,
-                title: companyLogo(context, authenticate, title),
+                title: AppBarTitle(context, authenticate, title),
                 actions: widget.actions),
-            drawer: myDrawer(context, authenticate!, isPhone, widget.menuList),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
             floatingActionButton: floatingActionButton,
             body: child));
   }
@@ -206,7 +206,7 @@ class _MenuItemState extends State<DisplayMenuList>
                             color: Colors.white),
                         tabs: tabText,
                       ),
-                title: companyLogo(context, authenticate, title),
+                title: AppBarTitle(context, authenticate, title),
                 actions: widget.actions),
             drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
             floatingActionButton: floatingActionButtonList[tabIndex],

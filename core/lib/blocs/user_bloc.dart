@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:core/blocs/@blocs.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/@models.dart';
 import 'package:rxdart/rxdart.dart';
@@ -28,9 +29,10 @@ mixin SupplierBloc on Bloc<UserEvent, UserState> {}
 
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, AdminBloc, SupplierBloc {
+  final authBloc;
   final repos;
   final String? userGroupId;
-  UserBloc(this.repos, [this.userGroupId])
+  UserBloc(this.repos, [this.userGroupId, this.authBloc])
       : assert(repos != null, userGroupId != null),
         super(UserInitial());
 
@@ -92,14 +94,20 @@ class UserBloc extends Bloc<UserEvent, UserState>
       yield UserLoading((adding ? "Adding " : "Updating") +
           " user ${event.user.firstName} ${event.user.lastName}");
       dynamic result = await repos.updateUser(event.user);
+      if (currentState is UserInitial) {
+        // when user list not shown yet
+        if (result is User) authBloc.add(UpdateAuthUser(result));
+      }
       if (currentState is UserSuccess) {
         if (result is User) {
           if (adding) {
             currentState.users.add(result);
           } else {
+            // update
             int index = currentState.users
                 .indexWhere((p) => p.partyId == result.partyId);
             currentState.users.replaceRange(index, index + 1, [result]);
+            authBloc.add(UpdateAuthUser(result));
           }
           yield currentState.copyWith(
               message: 'User ' + (adding ? 'added' : 'updated'));

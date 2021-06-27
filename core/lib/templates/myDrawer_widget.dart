@@ -63,12 +63,13 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                                           '',
                                       style: TextStyle(
                                           fontSize: 30, color: Colors.black))),
-                          SizedBox(height: 20),
-                          Text(
-                              "${authenticate.user!.firstName} "
-                              "${authenticate.user!.lastName}",
+                          SizedBox(height: 10),
+                          Text("${authenticate.user!.firstName} ",
                               style:
-                                  TextStyle(fontSize: 20, color: Colors.black)),
+                                  TextStyle(fontSize: 15, color: Colors.black)),
+                          Text("${authenticate.user!.lastName}",
+                              style:
+                                  TextStyle(fontSize: 15, color: Colors.black)),
                         ])));
               return ListTile(
                   key: Key('tap${options[i - 1]["route"]}'),

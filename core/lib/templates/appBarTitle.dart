@@ -15,7 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
 
-Widget companyLogo(context, authenticate, title) {
+Widget AppBarTitle(
+    BuildContext context, Authenticate authenticate, String title) {
   return Row(children: [
     InkWell(
       key: Key('tapCompany'),
@@ -25,14 +26,17 @@ Widget companyLogo(context, authenticate, title) {
       child: CircleAvatar(
           backgroundColor: Colors.green,
           radius: 15,
-          child: authenticate?.company?.image != null
-              ? Image.memory(authenticate?.company?.image)
-              : Text(authenticate?.company?.name?.substring(0, 1) ?? '',
+          child: authenticate.company!.image != null
+              ? Image.memory(authenticate.company!.image!)
+              : Text(authenticate.company?.name?.substring(0, 1) ?? '',
                   style: TextStyle(fontSize: 20, color: Colors.black))),
     ),
     SizedBox(width: 10),
-    Flexible(
-        child: Text("$title",
-            style: TextStyle(fontSize: 20, color: Colors.black))),
+    Column(children: [
+      Text(title, style: TextStyle(fontSize: 20, color: Colors.black)),
+      Text(authenticate.company!.name ?? '??',
+          key: Key('appBarCompanyName'),
+          style: TextStyle(fontSize: 10, color: Colors.black)),
+    ]),
   ]);
 }

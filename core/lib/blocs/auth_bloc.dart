@@ -166,10 +166,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else if (event is UpdateAuth) {
       yield AuthLoading();
       authenticate = event.authenticate;
+      await repos.persistAuthenticate(authenticate);
       if (authenticate.apiKey == null)
         yield AuthUnauthenticated(authenticate);
       else
         yield AuthAuthenticated(authenticate);
+    } else if (event is UpdateAuthUser) {
+      if (event.user.partyId == authenticate.user!.partyId) {
+        authenticate = authenticate.copyWith(user: event.user);
+        await repos.persistAuthenticate(authenticate);
+      }
     }
   }
 }
@@ -192,7 +198,14 @@ class UpdateAuth extends AuthEvent {
   final Authenticate authenticate;
   UpdateAuth(this.authenticate);
   @override
-  String toString() => 'Update Authenticate ${authenticate.toString()}';
+  String toString() => 'Update Authenticate $authenticate';
+}
+
+class UpdateAuthUser extends AuthEvent {
+  final User user;
+  UpdateAuthUser(this.user);
+  @override
+  String toString() => 'Update Authenticate ${user}';
 }
 
 class UpdateCompany extends AuthEvent {
@@ -206,8 +219,8 @@ class UpdateCompany extends AuthEvent {
 class RegisterCompanyAdmin extends AuthEvent {
   final User user;
   final String currencyId;
-  bool demoData = true;
-  RegisterCompanyAdmin(this.user, this.currencyId, this.demoData);
+  final bool demoData;
+  RegisterCompanyAdmin(this.user, this.currencyId, [this.demoData = true]);
   @override
   String toString() => 'Register Company Admin User: $user';
 }

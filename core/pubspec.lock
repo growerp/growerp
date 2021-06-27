@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: "54bfebd9046377ac13043f4a2134913308559177"
+      resolved-ref: b3f60356837de75f8071f91fa8d68544ec931c10
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

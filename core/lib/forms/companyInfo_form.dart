@@ -241,14 +241,13 @@ class _CompanyState extends State<CompanyPage> {
                       ),
                       SizedBox(height: 10),
                       DropdownButtonFormField<Currency>(
+                        key: Key('currency'),
                         decoration: InputDecoration(labelText: 'Currency'),
                         hint: Text('Currency'),
                         value: _selectedCurrency,
                         items: currencies.map((item) {
                           return DropdownMenuItem<Currency>(
-                              child:
-                                  Text(item.description!, key: Key('currency')),
-                              value: item);
+                              child: Text(item.description!), value: item);
                         }).toList(),
                         onChanged: isAdmin
                             ? (Currency? newValue) {
@@ -263,6 +262,7 @@ class _CompanyState extends State<CompanyPage> {
                       Row(children: [
                         Expanded(
                             child: TextFormField(
+                          key: Key('vatPerc'),
                           readOnly: !isAdmin,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -276,6 +276,7 @@ class _CompanyState extends State<CompanyPage> {
                         SizedBox(width: 10),
                         Expanded(
                             child: TextFormField(
+                          key: Key('salesPerc'),
                           readOnly: !isAdmin,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -290,9 +291,11 @@ class _CompanyState extends State<CompanyPage> {
                       SizedBox(height: 10),
                       Row(children: [
                         Expanded(
-                            child: Text(companyAddress != null
-                                ? "${companyAddress!.city!} ${companyAddress!.country!}"
-                                : "No address yet")),
+                            child: Text(
+                                companyAddress != null
+                                    ? "${companyAddress!.city!} ${companyAddress!.country!}"
+                                    : "No address yet",
+                                key: Key('addressLabel'))),
                         SizedBox(
                             width: 100,
                             child: ElevatedButton(
@@ -321,7 +324,7 @@ class _CompanyState extends State<CompanyPage> {
                       Visibility(
                           visible: isAdmin,
                           child: ElevatedButton(
-                              key: Key('update'),
+                              key: Key('updateCompany'),
                               child: Text(company.partyId == null
                                   ? 'Create'
                                   : 'Update'),

@@ -1,5 +1,5 @@
 export 'myNavigationRail_widget.dart';
 export 'myDrawer_widget.dart';
-export 'companyLogo.dart';
+export 'appBarTitle.dart';
 export 'imageButtons.dart';
 export 'displayMenuList.dart';

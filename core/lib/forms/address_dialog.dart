@@ -170,17 +170,16 @@ class _AddressState extends State<AddressDialog> {
                     ),
                     SizedBox(height: 20),
                     Row(children: [
-                      Expanded(
-                          child: ElevatedButton(
-                        child: Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      )),
+                      ElevatedButton(
+                          child: Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          }),
                       SizedBox(width: 20),
                       Expanded(
                           child: ElevatedButton(
-                        child: Text('Ok'),
+                        key: Key('updateAddress'),
+                        child: Text('Update'),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             Navigator.of(context).pop(Address(

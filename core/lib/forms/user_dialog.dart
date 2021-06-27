@@ -281,7 +281,7 @@ class _UserState extends State<UserPage> {
               visible:
                   !widget.user.loginDisabled || widget.user.loginName == null,
               child: TextFormField(
-                key: Key('name'),
+                key: Key('username'),
                 decoration: InputDecoration(
                     labelText: 'User Login Name '
                         '${widget.user.userGroupId == "GROWERP_M_ADMIN" ? "" : "(Empty: none)"}'),
@@ -315,7 +315,7 @@ class _UserState extends State<UserPage> {
           Visibility(
               visible: updatedUser.userGroupId == 'GROWERP_M_ADMIN',
               child: DropdownButtonFormField<UserGroup>(
-                key: Key('dropDown'),
+                key: Key('userGroup'),
                 hint: Text('User Group'),
                 value: _selectedUserGroup,
                 validator: (value) => value == null ? 'field required' : null,
@@ -420,7 +420,7 @@ class _UserState extends State<UserPage> {
             SizedBox(width: 10),
             Expanded(
                 child: ElevatedButton(
-                    key: Key('update'),
+                    key: Key('updateUser'),
                     child:
                         Text(updatedUser.partyId == null ? 'Create' : 'Update'),
                     onPressed: () async {
