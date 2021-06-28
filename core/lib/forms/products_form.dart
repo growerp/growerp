@@ -164,7 +164,7 @@ class _ProductsState extends State<ProductsForm> {
                       return Center(
                           heightFactor: 20,
                           child: Text("no records found!",
-                              textAlign: TextAlign.center));
+                              key: Key('empty'), textAlign: TextAlign.center));
                     index -= 1;
                     return index >= products.length
                         ? BottomLoader()

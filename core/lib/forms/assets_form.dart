@@ -143,7 +143,7 @@ class _AssetsState extends State<AssetsForm> {
                       return Center(
                           heightFactor: 20,
                           child: Text("no records found!",
-                              textAlign: TextAlign.center));
+                              key: Key('empty'), textAlign: TextAlign.center));
                     index -= 1;
                     return index >= assets.length
                         ? BottomLoader()

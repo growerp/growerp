@@ -20,7 +20,7 @@ import 'package:rxdart/rxdart.dart';
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final repos;
-  List<ProductCategory>? categories;
+  List<ProductCategory> categories = [];
 
   CategoryBloc(this.repos) : super(CategoryInitial());
 
@@ -71,13 +71,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           return;
         } else if (!_hasReachedMax(currentState)) {
           dynamic result = await repos.getCategory(
-              start: currentState.categories!.length,
+              start: currentState.categories.length,
               limit: event.limit,
               search: event.search,
               companyPartyId: event.companyPartyId);
           if (result is List<ProductCategory>) {
             yield currentState.copyWith(
-                categories: currentState.categories! + result,
+                categories: currentState.categories + result,
                 search: event.search,
                 hasReachedMax: result.length < event.limit ? true : false);
           } else
@@ -89,32 +89,31 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       yield CategoryLoading((adding ? 'adding' : 'updating') +
           ' category ${event.category.categoryName}');
       dynamic result = await repos.updateCategory(event.category);
-      if (result is ProductCategory) {
-        if (event.category.categoryId == null) {
-          categories?.add(result);
+      if (currentState is CategorySuccess) {
+        if (result is ProductCategory) {
+          if (event.category.categoryId == null) {
+            currentState.categories.add(result);
+          } else {
+            int index = currentState.categories
+                .indexWhere((prod) => prod.categoryId == result.categoryId);
+            currentState.categories.replaceRange(index, index + 1, [result]);
+          }
+          yield currentState.copyWith(
+              message: 'Category ' + (adding ? 'added' : 'updated'));
         } else {
-          int index = categories!
-              .indexWhere((prod) => prod.categoryId == result.categoryId);
-          categories!.replaceRange(index, index + 1, [result]);
+          yield CategoryProblem(result);
         }
-        yield CategorySuccess(
-            categories: categories,
-            hasReachedMax: _hasReachedMax(currentState),
-            message: 'Category ' + (adding ? 'added' : 'updated'));
-      } else {
-        yield CategoryProblem(result);
       }
     } else if (event is DeleteCategory) {
       if (currentState is CategorySuccess) {
-        int index = currentState.categories!
+        int index = currentState.categories
             .indexWhere((cat) => cat.categoryId == event.category.categoryId);
-        String? name = currentState.categories![index].categoryName;
+        String? name = currentState.categories[index].categoryName;
         yield CategoryLoading('deleting category $name');
         dynamic result = await repos.deleteCategory(event.category.categoryId);
         if (result == event.category.categoryId) {
-          currentState.categories!.removeAt(index);
-          yield CategorySuccess(categories: categories)
-              .copyWith(message: 'Category $name deleted');
+          currentState.categories.removeAt(index);
+          yield currentState.copyWith(message: 'Category $name deleted');
         } else {
           yield CategoryProblem(result);
         }
@@ -186,13 +185,16 @@ class CategoryProblem extends CategoryState {
 }
 
 class CategorySuccess extends CategoryState {
-  final List<ProductCategory>? categories;
+  final List<ProductCategory> categories;
   final bool? hasReachedMax;
   final String? message;
   final String? search;
 
   const CategorySuccess(
-      {this.categories, this.hasReachedMax, this.message, this.search});
+      {required this.categories,
+      this.hasReachedMax,
+      this.message,
+      this.search});
 
   CategorySuccess copyWith(
       {List<ProductCategory>? categories,
@@ -210,6 +212,6 @@ class CategorySuccess extends CategoryState {
   List<Object?> get props => [categories, hasReachedMax];
 
   @override
-  String toString() => 'CategorySuccess { #categories: ${categories!.length}, '
+  String toString() => 'CategorySuccess { #categories: ${categories.length}, '
       'hasReachedMax: $hasReachedMax }';
 }

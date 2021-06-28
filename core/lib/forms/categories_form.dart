@@ -60,11 +60,11 @@ class _CategoriesState extends State<CategoriesForm> {
           if (state is CategoryProblem)
             return Center(child: Text("${state.errorMessage}"));
           if (state is CategorySuccess) {
-            List<ProductCategory>? categories = state.categories;
+            List<ProductCategory> categories = state.categories;
             return ListView.builder(
-              itemCount: state.hasReachedMax! && categories!.isNotEmpty
+              itemCount: state.hasReachedMax! && categories.isNotEmpty
                   ? categories.length + 1
-                  : categories!.length + 2,
+                  : categories.length + 2,
               controller: _scrollController,
               itemBuilder: (BuildContext context, int index) {
                 if (index == 0)
@@ -132,12 +132,12 @@ class _CategoriesState extends State<CategoriesForm> {
                   return Center(
                       heightFactor: 20,
                       child: Text("no records found!",
-                          textAlign: TextAlign.center));
+                          key: Key('empty'), textAlign: TextAlign.center));
                 index -= 1;
                 return index >= categories.length
                     ? BottomLoader()
                     : Dismissible(
-                        key: Key(categories[index].categoryId!),
+                        key: Key('categoryItem'),
                         direction: DismissDirection.startToEnd,
                         child: ListTile(
                             leading: CircleAvatar(
@@ -154,8 +154,7 @@ class _CategoriesState extends State<CategoriesForm> {
                               children: <Widget>[
                                 Expanded(
                                     child: Text(
-                                        "${categories[index].categoryName}"
-                                        "[${categories[index].categoryId}]")),
+                                        "${categories[index].categoryName}")),
                                 if (!ResponsiveWrapper.of(context)
                                     .isSmallerThan(TABLET))
                                   Expanded(

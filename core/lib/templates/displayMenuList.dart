@@ -45,6 +45,7 @@ class _MenuItemState extends State<DisplayMenuList>
   late int tabIndex;
   List<TabItem>? tabItems = [];
   late String title;
+  late String route;
   Widget? leadAction;
   Widget? child;
   List<Widget> tabList = [];
@@ -60,6 +61,7 @@ class _MenuItemState extends State<DisplayMenuList>
     MenuItem menuItem = widget.menuList[widget.menuIndex];
     tabItems = menuItem.tabItems;
     title = menuItem.title;
+    route = menuItem.route; // used also for key
     child = menuItem.child;
     leadAction = menuItem.leadAction;
     tabIndex = widget.tabIndex ?? 0;
@@ -86,7 +88,9 @@ class _MenuItemState extends State<DisplayMenuList>
             alignment: Alignment.center, child: Text(tabItems![i].label)));
         // tabs at bottom of screen : phone
         bottomItems!.add(BottomNavigationBarItem(
-            icon: tabItems![i].icon, label: tabItems![i].label));
+            icon: tabItems![i].icon,
+            label: tabItems![i].label,
+            tooltip: (i + 1).toString()));
         // floating actionbutton at each tab
         if (tabItems![i].floatButtonRoute != null)
           floatingActionButtonList[i] = FloatingActionButton(
@@ -171,6 +175,7 @@ class _MenuItemState extends State<DisplayMenuList>
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
+            key: Key(route),
             appBar: AppBar(
                 key: Key(child.toString()),
                 automaticallyImplyLeading: isPhone,
@@ -187,13 +192,12 @@ class _MenuItemState extends State<DisplayMenuList>
     return ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Scaffold(
+            key: Key(route),
             appBar: AppBar(
-                key: Key(tabList[tabIndex].toString()),
                 automaticallyImplyLeading: isPhone,
                 bottom: isPhone
                     ? null
                     : TabBar(
-                        key: Key(tabText[tabIndex].toString()),
                         controller: _controller,
                         labelPadding: EdgeInsets.all(10.0),
                         labelColor: Colors.black,
@@ -222,8 +226,11 @@ class _MenuItemState extends State<DisplayMenuList>
                     })
                 : null,
             body: isPhone
-                ? Center(child: tabList[tabIndex])
+                ? Center(
+                    child: tabList[tabIndex],
+                    key: Key(tabList[tabIndex].toString()))
                 : TabBarView(
+                    key: Key(tabList[tabIndex].toString()),
                     controller: _controller,
                     children: tabList,
                   )));

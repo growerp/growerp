@@ -203,7 +203,7 @@ class _CategoryState extends State<CategoryPage> {
                   ),
                   SizedBox(height: 30),
                   TextFormField(
-                    key: Key('descr'),
+                    key: Key('description'),
                     decoration: InputDecoration(labelText: 'Description'),
                     controller: _descrController,
                     maxLines: 5,
