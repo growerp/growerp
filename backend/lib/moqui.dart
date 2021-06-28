@@ -499,12 +499,14 @@ class Moqui {
         //update
         response = await client.patch('rest/s1/growerp/100/Category', data: {
           'category': categoryToJson(category),
+          'classificationId': classificationId,
           'moquiSessionToken': sessionToken
         });
       } else {
         //create
         response = await client.put('rest/s1/growerp/100/Category', data: {
           'category': categoryToJson(category),
+          'classificationId': classificationId,
           'moquiSessionToken': sessionToken
         });
       }
