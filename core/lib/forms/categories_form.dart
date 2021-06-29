@@ -114,7 +114,7 @@ class _CategoriesState extends State<CategoriesForm> {
                           : Column(children: [
                               Row(children: <Widget>[
                                 Expanded(
-                                    child: Text("Name[ID]",
+                                    child: Text("Name",
                                         textAlign: TextAlign.center)),
                                 if (!ResponsiveWrapper.of(context)
                                     .isSmallerThan(TABLET))
@@ -154,16 +154,19 @@ class _CategoriesState extends State<CategoriesForm> {
                               children: <Widget>[
                                 Expanded(
                                     child: Text(
-                                        "${categories[index].categoryName}")),
+                                        "${categories[index].categoryName}",
+                                        key: Key("name$index"))),
                                 if (!ResponsiveWrapper.of(context)
                                     .isSmallerThan(TABLET))
                                   Expanded(
                                       child: Text(
                                           "${categories[index].description}",
+                                          key: Key("description$index"),
                                           textAlign: TextAlign.center)),
                                 Expanded(
                                     child: Text(
-                                        "${categories[index].nbrOfProducts} ",
+                                        "${categories[index].nbrOfProducts}",
+                                        key: Key("products$index"),
                                         textAlign: TextAlign.center)),
                               ],
                             ),
@@ -183,6 +186,7 @@ class _CategoriesState extends State<CategoriesForm> {
                               });
                             },
                             trailing: IconButton(
+                              key: Key('delete$index'),
                               icon: Icon(Icons.delete_forever),
                               onPressed: () {
                                 _categoryBloc

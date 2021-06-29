@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as IMG;
 import 'dart:io';
 import 'package:http/http.dart' show get;
-import 'package:responsive_framework/responsive_framework.dart';
 
 class HelperFunctions {
   static showMessage(BuildContext context, String? message, dynamic colors) {
