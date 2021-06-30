@@ -136,7 +136,7 @@ class _ProductsState extends State<ProductsForm> {
                               : Column(children: [
                                   Row(children: <Widget>[
                                     Expanded(
-                                        child: Text("Name[ID]",
+                                        child: Text("Name",
                                             textAlign: TextAlign.center)),
                                     if (!ResponsiveWrapper.of(context)
                                         .isSmallerThan(TABLET))
@@ -169,7 +169,7 @@ class _ProductsState extends State<ProductsForm> {
                     return index >= products.length
                         ? BottomLoader()
                         : Dismissible(
-                            key: Key(products[index].productId!),
+                            key: Key('productItem'),
                             direction: DismissDirection.startToEnd,
                             child: ListTile(
                                 leading: CircleAvatar(
@@ -186,27 +186,29 @@ class _ProductsState extends State<ProductsForm> {
                                   children: <Widget>[
                                     Expanded(
                                         child: Text(
-                                            "${products[index].productName}"
-                                            "[${products[index].productId}]")),
+                                            "${products[index].productName}",
+                                            key: Key('name$index'))),
                                     if (!ResponsiveWrapper.of(context)
                                         .isSmallerThan(TABLET))
                                       Expanded(
                                           child: Text(
                                               "${products[index].description}",
+                                              key: Key('description$index'),
                                               textAlign: TextAlign.center)),
                                     Expanded(
-                                        child: Text(
-                                            "${authenticate.company!.currencyId} "
-                                            "${products[index].price}",
+                                        child: Text("${products[index].price}",
+                                            key: Key('price$index'),
                                             textAlign: TextAlign.center)),
                                     if (classificationId != 'AppHotel')
                                       Expanded(
                                           child: Text(
                                               "${products[index].categoryName}",
+                                              key: Key('categoryName$index'),
                                               textAlign: TextAlign.center)),
                                     Expanded(
                                         child: Text(
                                             "${products[index].assetCount}",
+                                            key: Key('assetCount$index'),
                                             textAlign: TextAlign.center)),
                                   ],
                                 ),
@@ -221,6 +223,7 @@ class _ProductsState extends State<ProductsForm> {
                                       });
                                 },
                                 trailing: IconButton(
+                                  key: Key('delete$index'),
                                   icon: Icon(Icons.delete_forever),
                                   onPressed: () {
                                     _productBloc

@@ -193,7 +193,7 @@ class _ProductState extends State<ProductPage> {
         child: Container(
             child: Form(
                 key: _formKey,
-                child: ListView(children: <Widget>[
+                child: ListView(key: Key('listView'), children: <Widget>[
                   SizedBox(height: 30),
                   CircleAvatar(
                       backgroundColor: Colors.green,
@@ -248,6 +248,7 @@ class _ProductState extends State<ProductPage> {
                       child: Column(children: [
                         SizedBox(height: 10),
                         DropdownSearch<ProductCategory>(
+                          key: Key('categoryDropDown'),
                           label: 'Category',
                           dialogMaxWidth: 300,
                           autoFocusSearchBox: true,
@@ -264,7 +265,6 @@ class _ProductState extends State<ProductPage> {
                           searchBoxController: _categorySearchBoxController,
                           isFilteredOnline: true,
                           showClearButton: false,
-                          key: Key('dropDownCategory'),
                           itemAsString: (ProductCategory? u) =>
                               "${u?.categoryName}",
                           onFind: (String filter) async {

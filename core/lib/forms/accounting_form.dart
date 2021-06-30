@@ -71,7 +71,7 @@ class AcctDashBoard extends StatelessWidget {
               padding: EdgeInsets.all(3.0),
               children: <Widget>[
                 makeDashboardItem(
-                  'tap/accntSales',
+                  'accntSales',
                   context,
                   acctMenuItems[1],
                   "Sls open inv: "
@@ -83,7 +83,7 @@ class AcctDashBoard extends StatelessWidget {
                   "",
                 ),
                 makeDashboardItem(
-                  'tap/accntPurchase',
+                  'accntPurchase',
                   context,
                   acctMenuItems[2],
                   "Pur unp inv: "
@@ -95,7 +95,7 @@ class AcctDashBoard extends StatelessWidget {
                   "",
                 ),
                 makeDashboardItem(
-                  'tap/ledger',
+                  'accntLedger',
                   context,
                   acctMenuItems[3],
                   "Accounts",
