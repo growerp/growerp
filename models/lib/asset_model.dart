@@ -42,6 +42,8 @@ class Asset extends Equatable {
   final Decimal? quantityOnHand;
   final Decimal? availableToPromise;
   final String? parentAssetId;
+  final DateTime? receivedDate;
+  final DateTime? expectedEndOfLife;
   final String? productId;
   final String? productName;
 
@@ -53,6 +55,8 @@ class Asset extends Equatable {
     this.quantityOnHand,
     this.availableToPromise,
     this.parentAssetId,
+    this.receivedDate,
+    this.expectedEndOfLife,
     this.productId,
     this.productName,
     //  this.reservations,
@@ -70,6 +74,8 @@ class Asset extends Equatable {
             ? Decimal.parse(json["availableToPromise"])
             : Decimal.parse("0"),
         parentAssetId: json["parentAssetId"],
+        receivedDate: DateTime.tryParse(json["receivedDate"] ?? ''),
+        expectedEndOfLife: DateTime.tryParse(json["expectedEndOfLife"] ?? ''),
         productId: json["productId"],
         productName: json["productName"],
       );
@@ -82,6 +88,8 @@ class Asset extends Equatable {
         "quantityOnHand": quantityOnHand.toString(),
         "availableToPromise": availableToPromise.toString(),
         "parentAssetId": parentAssetId,
+        "receivedDate": receivedDate.toString(),
+        "expectedEndOfLife": expectedEndOfLife.toString(),
         "productId": productId,
         "productName": productName,
       };
@@ -98,6 +106,8 @@ class Asset extends Equatable {
         quantityOnHand,
         availableToPromise,
         parentAssetId,
+        receivedDate,
+        expectedEndOfLife,
         productId,
         productName,
       ];
@@ -110,6 +120,8 @@ class Asset extends Equatable {
     Decimal? quantityOnHand,
     Decimal? availableToPromise,
     String? parentAssetId,
+    DateTime? receivedDate,
+    DateTime? expectedEndOfLife,
     String? productId,
     String? productName,
   }) =>
@@ -121,6 +133,8 @@ class Asset extends Equatable {
         quantityOnHand: quantityOnHand ?? this.quantityOnHand,
         availableToPromise: availableToPromise ?? this.availableToPromise,
         parentAssetId: parentAssetId ?? this.parentAssetId,
+        receivedDate: receivedDate ?? this.receivedDate,
+        expectedEndOfLife: expectedEndOfLife ?? this.expectedEndOfLife,
         productId: productId ?? this.productId,
         productName: productName ?? this.productName,
       );
