@@ -138,7 +138,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   .indexWhere((ord) => ord.paymentId == result[0].paymentId);
               break;
           }
-          currentState.finDocs.replaceRange(index, index + 1, [result[0]]);
+          currentState.finDocs[index] = result[0];
           yield currentState.copyWith(
               message: "${result[0].docType} status updated to "
                   "${finDocStatusValues[result[0].statusId]}");

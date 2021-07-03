@@ -41,7 +41,8 @@ class _AssetsState extends State<AssetsForm> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _assetBloc = BlocProvider.of<AssetBloc>(context);
+    _assetBloc = BlocProvider.of<AssetBloc>(context)
+      ..add(FetchAsset(limit: limit));
     search = false;
     limit = 20;
   }
@@ -69,7 +70,7 @@ class _AssetsState extends State<AssetsForm> {
                 }),
                 child: ListView.builder(
                   physics: AlwaysScrollableScrollPhysics(),
-                  itemCount: state.hasReachedMax! && assets.isNotEmpty
+                  itemCount: state.hasReachedMax && assets.isNotEmpty
                       ? assets.length + 1
                       : assets.length + 2,
                   controller: _scrollController,
@@ -148,7 +149,7 @@ class _AssetsState extends State<AssetsForm> {
                     return index >= assets.length
                         ? BottomLoader()
                         : Dismissible(
-                            key: Key(assets[index].assetId!),
+                            key: Key('assetItem'),
                             direction: DismissDirection.startToEnd,
                             child: ListTile(
                                 leading: CircleAvatar(
@@ -160,17 +161,20 @@ class _AssetsState extends State<AssetsForm> {
                                 title: Row(
                                   children: <Widget>[
                                     Expanded(
-                                        child: Text("${assets[index].assetName}"
-                                            "[${assets[index].assetId}]")),
+                                        child: Text(
+                                            "${assets[index].assetName}",
+                                            key: Key('name$index'))),
                                     if (!ResponsiveWrapper.of(context)
                                         .isSmallerThan(TABLET))
                                       Expanded(
                                           child: Text(
                                               "${assets[index].statusId}",
+                                              key: Key('statusId$index'),
                                               textAlign: TextAlign.center)),
                                     Expanded(
                                         child: Text(
                                             "${assets[index].productName}",
+                                            key: Key('product$index'),
                                             textAlign: TextAlign.center)),
                                   ],
                                 ),
@@ -185,6 +189,7 @@ class _AssetsState extends State<AssetsForm> {
                                       });
                                 },
                                 trailing: IconButton(
+                                  key: Key('delete$index'),
                                   icon: Icon(Icons.delete_forever),
                                   onPressed: () {
                                     _assetBloc.add(DeleteAsset(assets[index]));

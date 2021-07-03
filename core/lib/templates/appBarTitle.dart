@@ -26,7 +26,7 @@ Widget AppBarTitle(
       child: CircleAvatar(
           backgroundColor: Colors.green,
           radius: 15,
-          child: authenticate.company!.image != null
+          child: authenticate.company?.image != null
               ? Image.memory(authenticate.company!.image!)
               : Text(authenticate.company?.name?.substring(0, 1) ?? '',
                   style: TextStyle(fontSize: 20, color: Colors.black))),
@@ -34,7 +34,7 @@ Widget AppBarTitle(
     SizedBox(width: 10),
     Column(children: [
       Text(title, style: TextStyle(fontSize: 20, color: Colors.black)),
-      Text(authenticate.company!.name ?? '??',
+      Text(authenticate.company?.name ?? '??',
           key: Key('appBarCompanyName'),
           style: TextStyle(fontSize: 10, color: Colors.black)),
     ]),

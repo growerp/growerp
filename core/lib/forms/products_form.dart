@@ -34,7 +34,7 @@ class _ProductsState extends State<ProductsForm> {
   final _searchController = TextEditingController();
   late ProductBloc _productBloc;
   Authenticate authenticate = Authenticate();
-  List<Product> products = const <Product>[];
+  List<Product> products = [];
   late int limit;
   late bool search;
   late String classificationId;
@@ -44,10 +44,10 @@ class _ProductsState extends State<ProductsForm> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _productBloc = BlocProvider.of<ProductBloc>(context);
+    _productBloc = BlocProvider.of<ProductBloc>(context)
+      ..add(FetchProduct(limit: 20));
     search = false;
     classificationId = GlobalConfiguration().get("classificationId");
-    _productBloc..add(FetchProduct(limit: 20));
   }
 
   @override

@@ -91,8 +91,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       }
     } else if (event is UpdateAsset) {
       bool adding = event.asset.assetId == null;
-      yield AssetLoading(
-          (adding ? 'adding' : 'updating') + ' asset ${event.asset.assetName}');
+      yield AssetLoading((adding ? 'adding' : 'updating') + ' ${event.asset}');
       dynamic result = await repos.updateAsset(event.asset);
       if (currentState is AssetSuccess) {
         if (result is Asset) {
@@ -101,12 +100,9 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
           } else {
             int index = currentState.assets
                 .indexWhere((prod) => prod.assetId == result.assetId);
-            currentState.assets.replaceRange(index, index + 1, [result]);
+            currentState.assets[index] = result;
           }
-          yield AssetSuccess(
-              ganntLines: currentState.ganntLines,
-              assets: currentState.assets,
-              hasReachedMax: _hasReachedMax(currentState),
+          yield currentState.copyWith(
               message: 'asset ${result.assetName}[${result.assetId}] ' +
                   (adding ? ' added' : 'updated'));
         } else {
@@ -114,19 +110,15 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
         }
       }
     } else if (event is DeleteAsset) {
+      yield AssetLoading(('deleting asset ${event.asset.assetName}'));
+      dynamic result = await repos.deleteAsset(event.asset.assetId);
       if (currentState is AssetSuccess) {
-        int index = currentState.assets
-            .indexWhere((prod) => prod.assetId == event.asset.assetId);
-        String? name = currentState.assets[index].assetName;
-        yield AssetLoading('deleting asset $name');
-        dynamic result = await repos.deleteAsset(event.asset.assetId);
-        if (result == event.asset.assetId) {
+        if (result is String && result == event.asset.assetId) {
+          int index =
+              currentState.assets.indexWhere((prod) => prod.assetId == result);
           currentState.assets.removeAt(index);
-          yield AssetSuccess(
-                  ganntLines: currentState.ganntLines,
-                  assets: currentState.assets,
-                  hasReachedMax: _hasReachedMax(currentState))
-              .copyWith(message: 'Asset $name deleted');
+          yield currentState.copyWith(
+              message: 'Asset ${event.asset.assetName} deleted');
         } else {
           yield AssetProblem(result);
         }
@@ -137,7 +129,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
 }
 
 bool _hasReachedMax(AssetState state) =>
-    state is AssetSuccess && state.hasReachedMax!;
+    state is AssetSuccess && state.hasReachedMax;
 
 //#######################events###########################
 abstract class AssetEvent extends Equatable {
@@ -199,14 +191,14 @@ class AssetProblem extends AssetState {
 class AssetSuccess extends AssetState {
   final List<GanntLine> ganntLines;
   final List<Asset> assets;
-  final bool? hasReachedMax;
+  final bool hasReachedMax;
   final String? message;
   final String? search;
 
   const AssetSuccess(
       {required this.ganntLines,
       required this.assets,
-      this.hasReachedMax,
+      required this.hasReachedMax,
       this.message,
       this.search});
 

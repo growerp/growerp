@@ -96,7 +96,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           } else {
             int index = currentState.categories
                 .indexWhere((prod) => prod.categoryId == result.categoryId);
-            currentState.categories.replaceRange(index, index + 1, [result]);
+            currentState.categories[index] = result;
           }
           yield currentState.copyWith(
               message: 'Category ' + (adding ? 'added' : 'updated'));

@@ -102,11 +102,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           } else {
             int index = currentState.products
                 .indexWhere((prod) => prod.productId == result.productId);
-            currentState.products.replaceRange(index, index + 1, [result]);
+            currentState.products[index] = result;
           }
-          yield ProductSuccess(
-              products: currentState.products,
-              hasReachedMax: _hasReachedMax(currentState),
+          yield currentState.copyWith(
               message: 'product ' + (adding ? 'added' : 'updated'));
         } else {
           yield ProductProblem(result);
@@ -121,10 +119,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         dynamic result = await repos.deleteProduct(event.product.productId);
         if (result == event.product.productId) {
           currentState.products.removeAt(index);
-          yield ProductSuccess(
-              products: currentState.products,
-              hasReachedMax: _hasReachedMax(currentState),
-              message: 'Product $name deleted');
+          yield currentState.copyWith(message: 'Product $name deleted');
         } else {
           yield ProductProblem(result);
         }
@@ -173,7 +168,8 @@ class UpdateProduct extends ProductEvent {
   final Product product;
   UpdateProduct(this.product);
   @override
-  String toString() => "UpdateProduct: $product";
+  String toString() =>
+      "${product.productId == null ? 'Add' : 'Update'}Product: $product";
 }
 
 //#######################state############################
@@ -214,6 +210,19 @@ class ProductSuccess extends ProductState {
       required this.hasReachedMax,
       this.message,
       this.searchString});
+
+  ProductSuccess copyWith({
+    List<Product>? products,
+    bool? hasReachedMax,
+    String? message,
+    String? searchString,
+  }) =>
+      ProductSuccess(
+        products: products ?? this.products,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        message: message ?? this.message,
+        searchString: searchString ?? this.searchString,
+      );
 
   @override
   List<Object?> get props => [products, hasReachedMax, message, searchString];

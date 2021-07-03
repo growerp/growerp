@@ -66,7 +66,7 @@ class _AssetState extends State<AssetPage> {
     super.initState();
     if (asset != null) {
       _statusId = asset!.statusId!;
-      _nameController.text = asset!.assetName!;
+      _nameController.text = asset!.assetName ?? '';
       _quantityOnHandController.text = asset!.quantityOnHand.toString();
       _selectedProduct =
           Product(productId: asset!.productId, productName: asset!.productName);
@@ -184,8 +184,8 @@ class _AssetState extends State<AssetPage> {
                     showSearchBox: true,
                     searchBoxController: _productSearchBoxController,
                     isFilteredOnline: true,
-                    showClearButton: true,
-                    key: Key('dropDownProduct'),
+                    showClearButton: false,
+                    key: Key('productDropDown'),
                     itemAsString: (Product? u) => "${u?.productName}",
                     onFind: (String filter) async {
                       var result = await repos.getProduct(
@@ -203,7 +203,7 @@ class _AssetState extends State<AssetPage> {
                   ),
                   SizedBox(height: 20),
                   DropdownButtonFormField<String>(
-                    key: Key('dropDown'),
+                    key: Key('statusDropDown'),
                     hint: Text('Status'),
                     value: _statusId,
                     validator: (value) =>
@@ -237,6 +237,7 @@ class _AssetState extends State<AssetPage> {
                               asset?.assetId == null ? 'Create' : 'Update'),
                           onPressed: () async {
                             if (_formKey.currentState!.validate() && !loading) {
+                              print("====dialog: ${_nameController.text}");
                               BlocProvider.of<AssetBloc>(context)
                                   .add(UpdateAsset(
                                 Asset(

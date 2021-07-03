@@ -106,7 +106,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
             // update
             int index = currentState.users
                 .indexWhere((p) => p.partyId == result.partyId);
-            currentState.users.replaceRange(index, index + 1, [result]);
+            currentState.users[index] = result;
             authBloc.add(UpdateAuthUser(result));
           }
           yield currentState.copyWith(
