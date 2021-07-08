@@ -63,9 +63,9 @@ class HelperFunctions {
         imageData = File(imagePath).readAsBytesSync();
       }
       print("===1====image size: ${imageData.length}");
-      if (imageData.length > 50000) return null;
+      if (imageData.length > 200000) return null;
       IMG.Image img = IMG.decodeImage(imageData)!;
-      IMG.Image resized = IMG.copyResize(img, width: 400);
+      IMG.Image resized = IMG.copyResize(img, width: 200);
       imageData = IMG.encodeJpg(resized) as Uint8List;
       print("===2====image size: ${imageData.length}");
       return imageData;

@@ -196,7 +196,7 @@ class _CompanyState extends State<CompanyPage> {
                 key: _formKey,
                 child: Padding(
                     padding: EdgeInsets.all(15),
-                    child: ListView(children: <Widget>[
+                    child: ListView(key: Key('listView'), children: <Widget>[
                       CircleAvatar(
                           backgroundColor: Colors.green,
                           radius: 80,
@@ -356,7 +356,7 @@ class _CompanyState extends State<CompanyPage> {
                                             company.image == null)
                                           HelperFunctions.showMessage(
                                               context,
-                                              "Image upload error or larger than 50K",
+                                              "Image upload error or larger than 200K",
                                               Colors.red);
                                         else
                                           BlocProvider.of<AuthBloc>(context)

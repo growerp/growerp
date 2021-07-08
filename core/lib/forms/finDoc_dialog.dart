@@ -70,7 +70,7 @@ class _MyFinDocState extends State<FinDocPage> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     int columns = isPhone ? 1 : 2;
-    if (finDocUpdated.sales!) {
+    if (finDocUpdated.sales) {
       _cartBloc = BlocProvider.of<SalesCartBloc>(context) as CartBloc;
     } else {
       _cartBloc = BlocProvider.of<PurchCartBloc>(context) as CartBloc;
@@ -132,7 +132,9 @@ class _MyFinDocState extends State<FinDocPage> {
                 builder: (context) => GestureDetector(
                     onTap: () {},
                     child: Dialog(
-                        key: Key('${finDoc.docType}FinDocDialog'),
+                        key: Key(
+                            "FinDocDialog${finDoc.sales ? 'Sales' : 'Purchase'}"
+                            "${finDoc.docType}"),
                         insetPadding: EdgeInsets.all(10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -142,7 +144,7 @@ class _MyFinDocState extends State<FinDocPage> {
                             height: 1 / columns.toDouble() * 1200,
                             child: BlocBuilder<AuthBloc, AuthState>(
                                 builder: (context, state) {
-                              if (finDocUpdated.sales!)
+                              if (finDocUpdated.sales)
                                 return BlocListener<SalesOrderBloc,
                                         FinDocState>(
                                     listener: blocListener,
@@ -182,7 +184,7 @@ class _MyFinDocState extends State<FinDocPage> {
                       childAspectRatio: (6),
                       children: <Widget>[
                         DropdownSearch<User>(
-                          label: finDocUpdated.sales! ? 'Customer' : 'Supplier',
+                          label: finDocUpdated.sales ? 'Customer' : 'Supplier',
                           dialogMaxWidth: 300,
                           autoFocusSearchBox: true,
                           selectedItem: _selectedUser,
@@ -197,7 +199,7 @@ class _MyFinDocState extends State<FinDocPage> {
                           showSearchBox: true,
                           searchBoxController: _userSearchBoxController,
                           isFilteredOnline: true,
-                          key: Key('dropUser'),
+                          key: Key('customer'),
                           itemAsString: (User? u) =>
                               "${u!.companyName},\n${u.firstName} ${u.lastName}",
                           onFind: (String filter) => getData(
@@ -209,7 +211,7 @@ class _MyFinDocState extends State<FinDocPage> {
                             });
                           },
                           validator: (value) => value == null
-                              ? "Select ${finDocUpdated.sales! ? 'Customer' : 'Supplier'}!"
+                              ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
                               : null,
                         ),
                         TextFormField(
@@ -241,7 +243,7 @@ class _MyFinDocState extends State<FinDocPage> {
               child: Text('Add other Item'),
               onPressed: () async {
                 final dynamic finDocItem = await _addAnotherItemDialog(
-                    context, repos, finDocUpdated.sales!);
+                    context, repos, finDocUpdated.sales);
                 if (finDocItem != null)
                   _cartBloc.add(AddToCart(
                       finDoc: finDocUpdated.copyWith(
@@ -298,11 +300,11 @@ class _MyFinDocState extends State<FinDocPage> {
                 Navigator.of(context).pop();
               }),
           ElevatedButton(
+              key: Key('update'),
               child: Text((finDocUpdated.idIsNull() ? 'Create ' : 'Update ') +
                   '${finDocUpdated.docType}'),
               onPressed: () {
                 if (finDocUpdated.items!.length > 0) {
-                  print("==create findoc: $finDocUpdated");
                   _cartBloc.add(CreateFinDocFromCart(finDocUpdated));
                 }
               }),
@@ -437,12 +439,14 @@ Future _addAnotherItemDialog(
             ])),
         actions: <Widget>[
           ElevatedButton(
+            key: Key('cancel'),
             child: Text('Cancel'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           ElevatedButton(
+            key: Key('ok'),
             child: Text('Ok'),
             onPressed: () {
               Navigator.of(context).pop(FinDocItem(
@@ -479,6 +483,7 @@ Future _addProductItemDialog(BuildContext context, repos) async {
     barrierDismissible: true,
     builder: (BuildContext context) {
       return AlertDialog(
+        key: Key('addProductItemDialog'),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(32.0))),
         title: Text('Add a Product', textAlign: TextAlign.center),
@@ -501,7 +506,7 @@ Future _addProductItemDialog(BuildContext context, repos) async {
                 showSearchBox: true,
                 searchBoxController: _productSearchBoxController,
                 isFilteredOnline: true,
-                key: Key('dropProduct'),
+                key: Key('product'),
                 itemAsString: (Product? u) => "${u!.productName}",
                 onFind: (String filter) =>
                     getProduct(_productSearchBoxController.text),
@@ -539,13 +544,13 @@ Future _addProductItemDialog(BuildContext context, repos) async {
             ])),
         actions: <Widget>[
           ElevatedButton(
-            child: Text('Cancel'),
+            child: Text('cancel'),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           ElevatedButton(
-            child: Text('Ok'),
+            child: Text('ok'),
             onPressed: () {
               Navigator.of(context).pop(FinDocItem(
                 itemTypeId: 'ItemProduct',

@@ -148,189 +148,199 @@ class _ReservationState extends State<ReservationPage> {
             width: 300,
             child: Form(
                 key: _formKey,
-                child: ListView(
-                  children: <Widget>[
-                    SizedBox(height: 30),
-                    Center(
-                        child: Text(
-                            widget.finDoc.orderId == null
-                                ? (classificationId == 'AppHotel'
-                                    ? "New Reservation"
-                                    : "New order")
-                                : (classificationId == 'AppHotel'
-                                        ? "Reservation #"
-                                        : "Order #") +
-                                    widget.finDoc.orderId!,
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold))),
-                    SizedBox(height: 20),
-                    Row(children: [
-                      Expanded(
-                          child: DropdownSearch<User>(
-                        label: 'Customer',
-                        dialogMaxWidth: 300,
-                        autoFocusSearchBox: true,
-                        selectedItem: _selectedUser,
-                        dropdownSearchDecoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0)),
-                        ),
-                        searchBoxDecoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0)),
-                        ),
-                        showSearchBox: true,
-                        searchBoxController: _userSearchBoxController,
-                        isFilteredOnline: true,
-                        key: Key('dropUser'),
-                        itemAsString: (User? u) =>
-                            "${u!.firstName} ${u.lastName}, ${u.companyName}",
-                        onFind: (String filter) => getData("GROWERP_M_CUSTOMER",
-                            _userSearchBoxController.text),
-                        onChanged: (User? newValue) {
-                          setState(() {
-                            _selectedUser = newValue;
-                          });
-                        },
-                        validator: (value) =>
-                            value == null ? 'field required' : null,
-                      )),
-                      SizedBox(width: 10),
-                      SizedBox(
-                          width: 100,
-                          child: ElevatedButton(
-                            child: Text('Create New\n Customer'),
-                            onPressed: () async {
-                              var result = await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return UserDialog(
-                                        formArguments: FormArguments(
-                                            object: User(
-                                                userGroupId:
-                                                    "GROWERP_M_CUSTOMER")));
-                                  });
+                child: SingleChildScrollView(
+                    key: Key('listView'),
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(height: 30),
+                        Center(
+                            child: Text(
+                                widget.finDoc.orderId == null
+                                    ? (classificationId == 'AppHotel'
+                                        ? "New Reservation"
+                                        : "New order")
+                                    : (classificationId == 'AppHotel'
+                                            ? "Reservation #"
+                                            : "Order #") +
+                                        widget.finDoc.orderId!,
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold))),
+                        SizedBox(height: 20),
+                        Row(children: [
+                          Expanded(
+                              child: DropdownSearch<User>(
+                            label: 'Customer',
+                            dialogMaxWidth: 300,
+                            autoFocusSearchBox: true,
+                            selectedItem: _selectedUser,
+                            dropdownSearchDecoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25.0)),
+                            ),
+                            searchBoxDecoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25.0)),
+                            ),
+                            showSearchBox: true,
+                            searchBoxController: _userSearchBoxController,
+                            isFilteredOnline: true,
+                            key: Key('dropUser'),
+                            itemAsString: (User? u) =>
+                                "${u!.firstName} ${u.lastName}, ${u.companyName}",
+                            onFind: (String filter) => getData(
+                                "GROWERP_M_CUSTOMER",
+                                _userSearchBoxController.text),
+                            onChanged: (User? newValue) {
                               setState(() {
-                                if (result is User) _selectedUser = result;
+                                _selectedUser = newValue;
                               });
                             },
+                            validator: (value) =>
+                                value == null ? 'field required' : null,
                           )),
-                    ]),
-                    SizedBox(height: 20),
-                    DropdownSearch<Product>(
-                      label: classificationId == 'AppHotel'
-                          ? 'Room Type'
-                          : 'Product',
-                      dialogMaxWidth: 300,
-                      autoFocusSearchBox: true,
-                      selectedItem: _selectedProduct,
-                      dropdownSearchDecoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0)),
-                      ),
-                      searchBoxDecoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0)),
-                      ),
-                      showSearchBox: true,
-                      searchBoxController: _productSearchBoxController,
-                      isFilteredOnline: true,
-                      key: Key('dropProduct'),
-                      itemAsString: (Product? u) => "${u!.productName}",
-                      onFind: (String filter) =>
-                          getProduct(_productSearchBoxController.text),
-                      onChanged: (Product? newValue) {
-                        _selectedProduct = newValue;
-                        _priceController.text = newValue!.price.toString();
-                      },
-                      validator: (value) =>
-                          value == null ? 'field required' : null,
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Price/Amount'),
-                      controller: _priceController,
-                      validator: (value) {
-                        if (value!.isEmpty) return 'Enter Price or Amount?';
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    Row(children: [
-                      Expanded(
-                          child: Center(
-                              child: Text("Begindate:" +
-                                  "${_selectedDate.toLocal()}".split(' ')[0]))),
-                      SizedBox(
-                          width: 100,
-                          child: ElevatedButton(
-                            onPressed: () => _selectDate(context),
-                            child: Text(' Update\nBegindate'),
+                          SizedBox(width: 10),
+                          SizedBox(
+                              width: 100,
+                              child: ElevatedButton(
+                                child: Text('Create New\n Customer'),
+                                onPressed: () async {
+                                  var result = await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return UserDialog(
+                                            formArguments: FormArguments(
+                                                object: User(
+                                                    userGroupId:
+                                                        "GROWERP_M_CUSTOMER")));
+                                      });
+                                  setState(() {
+                                    if (result is User) _selectedUser = result;
+                                  });
+                                },
+                              )),
+                        ]),
+                        SizedBox(height: 20),
+                        DropdownSearch<Product>(
+                          label: classificationId == 'AppHotel'
+                              ? 'Room Type'
+                              : 'Product',
+                          dialogMaxWidth: 300,
+                          autoFocusSearchBox: true,
+                          selectedItem: _selectedProduct,
+                          dropdownSearchDecoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0)),
+                          ),
+                          searchBoxDecoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0)),
+                          ),
+                          showSearchBox: true,
+                          searchBoxController: _productSearchBoxController,
+                          isFilteredOnline: true,
+                          key: Key('dropProduct'),
+                          itemAsString: (Product? u) => "${u!.productName}",
+                          onFind: (String filter) =>
+                              getProduct(_productSearchBoxController.text),
+                          onChanged: (Product? newValue) {
+                            _selectedProduct = newValue;
+                            _priceController.text = newValue!.price.toString();
+                          },
+                          validator: (value) =>
+                              value == null ? 'field required' : null,
+                        ),
+                        SizedBox(height: 20),
+                        TextFormField(
+                          decoration:
+                              InputDecoration(labelText: 'Price/Amount'),
+                          controller: _priceController,
+                          validator: (value) {
+                            if (value!.isEmpty) return 'Enter Price or Amount?';
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        Row(children: [
+                          Expanded(
+                              child: Center(
+                                  child: Text("Begindate:" +
+                                      "${_selectedDate.toLocal()}"
+                                          .split(' ')[0]))),
+                          SizedBox(
+                              width: 100,
+                              child: ElevatedButton(
+                                onPressed: () => _selectDate(context),
+                                child: Text(' Update\nBegindate'),
+                              )),
+                        ]),
+                        SizedBox(height: 20),
+                        Row(children: [
+                          Expanded(
+                              child: TextFormField(
+                            decoration:
+                                InputDecoration(labelText: 'Number of days'),
+                            controller: _daysController,
                           )),
-                    ]),
-                    SizedBox(height: 20),
-                    Row(children: [
-                      Expanded(
-                          child: TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Number of days'),
-                        controller: _daysController,
-                      )),
-                      SizedBox(width: 10),
-                      Expanded(
-                          child: TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Number of rooms'),
-                        controller: _quantityController,
-                      )),
-                    ]),
-                    SizedBox(height: 20),
-                    Row(children: [
-                      Expanded(
-                          child: ElevatedButton(
-                        child: Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      )),
-                      SizedBox(width: 20),
-                      Expanded(
-                          child: ElevatedButton(
-                        child: Text(widget.finDoc.orderId == null
-                            ? 'Create'
-                            : 'Update'),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            BlocProvider.of<SalesOrderBloc>(context).add(
-                                CreateFinDoc(FinDoc(
-                                    orderId: widget.finDoc.orderId,
-                                    sales: true,
-                                    docType: 'order',
-                                    otherUser: _selectedUser,
-                                    statusId: 'FinDocCreated',
-                                    items: [
-                                  FinDocItem(
-                                    itemTypeId: 'ItemRental',
-                                    productId: _selectedProduct!.productId,
-                                    price: Decimal.parse(_priceController.text),
-                                    description: _selectedProduct!.productName,
-                                    rentalFromDate: _selectedDate,
-                                    rentalThruDate: _selectedDate.add(Duration(
-                                        days: int.parse(_daysController.text))),
-                                    quantity: _quantityController.text.isEmpty
-                                        ? Decimal.parse('1')
-                                        : Decimal.parse(
-                                            _quantityController.text),
-                                  )
-                                ])));
-                          }
-                        },
-                      )),
-                    ]),
-                  ],
-                ))));
+                          SizedBox(width: 10),
+                          Expanded(
+                              child: TextFormField(
+                            decoration:
+                                InputDecoration(labelText: 'Number of rooms'),
+                            controller: _quantityController,
+                          )),
+                        ]),
+                        SizedBox(height: 20),
+                        Row(children: [
+                          Expanded(
+                              child: ElevatedButton(
+                            child: Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )),
+                          SizedBox(width: 20),
+                          Expanded(
+                              child: ElevatedButton(
+                            child: Text(widget.finDoc.orderId == null
+                                ? 'Create'
+                                : 'Update'),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                BlocProvider.of<SalesOrderBloc>(context).add(
+                                    CreateFinDoc(FinDoc(
+                                        orderId: widget.finDoc.orderId,
+                                        sales: true,
+                                        docType: 'order',
+                                        otherUser: _selectedUser,
+                                        statusId: 'FinDocCreated',
+                                        items: [
+                                      FinDocItem(
+                                        itemTypeId: 'ItemRental',
+                                        productId: _selectedProduct!.productId,
+                                        price: Decimal.parse(
+                                            _priceController.text),
+                                        description:
+                                            _selectedProduct!.productName,
+                                        rentalFromDate: _selectedDate,
+                                        rentalThruDate: _selectedDate.add(
+                                            Duration(
+                                                days: int.parse(
+                                                    _daysController.text))),
+                                        quantity:
+                                            _quantityController.text.isEmpty
+                                                ? Decimal.parse('1')
+                                                : Decimal.parse(
+                                                    _quantityController.text),
+                                      )
+                                    ])));
+                              }
+                            },
+                          )),
+                        ]),
+                      ],
+                    )))));
   }
 }

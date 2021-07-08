@@ -34,8 +34,8 @@ String finDocsToJson(List<FinDoc> data) =>
     "}";
 
 class FinDoc extends Equatable {
-  final String? docType; // invoice, payment etc
-  final bool? sales;
+  final String docType; // invoice, payment etc
+  final bool sales;
   final String? orderId;
   final String? invoiceId;
   final String? paymentId;
@@ -51,8 +51,8 @@ class FinDoc extends Equatable {
   final List<FinDocItem>? items;
 
   FinDoc({
-    this.docType,
-    this.sales,
+    this.docType = 'order',
+    this.sales = true,
     this.orderId,
     this.invoiceId,
     this.paymentId,
@@ -69,7 +69,7 @@ class FinDoc extends Equatable {
 
   factory FinDoc.fromJson(Map<String, dynamic> json) => FinDoc(
         docType: json["docType"],
-        sales: json["sales"] == null ? null : json["sales"] == "true",
+        sales: json["sales"] != null && json["sales"] == "true",
         orderId: json["orderId"],
         invoiceId: json["invoiceId"],
         paymentId: json["paymentId"],

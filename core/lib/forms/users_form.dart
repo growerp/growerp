@@ -176,12 +176,12 @@ class _UsersState extends State<UsersForm> {
                   return Center(
                       heightFactor: 20,
                       child: Text("no records found!",
-                          textAlign: TextAlign.center));
+                          key: Key('empty'), textAlign: TextAlign.center));
                 index -= 1;
                 return index >= users.length
                     ? BottomLoader()
                     : Dismissible(
-                        key: Key(users[index].partyId!),
+                        key: Key('userItem'),
                         direction: DismissDirection.startToEnd,
                         child: ListTile(
                             leading: CircleAvatar(
@@ -199,31 +199,39 @@ class _UsersState extends State<UsersForm> {
                             title: Row(
                               children: <Widget>[
                                 Expanded(
-                                    child: Text("${users[index].firstName} "
-                                        "${users[index].lastName}"
-                                        "[${users[index].partyId}]")),
+                                    child: Text(
+                                  "${users[index].firstName} "
+                                  "${users[index].lastName}"
+                                  "[${users[index].partyId}]",
+                                  key: Key('firstName'),
+                                )),
                                 if (isDeskTop)
                                   Expanded(
-                                      child: Text(!users[index].loginDisabled
+                                      child: Text((!users[index].loginDisabled
                                           ? "${users[index].loginName}"
                                           : " ")),
+                                      key: Key('username')),
                                 if (!isPhone)
                                   Expanded(
-                                      child: Text(users[index]
-                                              .email!
-                                              .contains('example.com')
-                                          ? " "
-                                          : "${users[index].email}")),
+                                      child: Text(
+                                    users[index].email!.contains('example.com')
+                                        ? " "
+                                        : "${users[index].email}",
+                                    key: Key('email'),
+                                  )),
                                 if (isDeskTop)
                                   Expanded(
                                       child: Text(
-                                          "${users[index].language ?? ''}")),
+                                    "${users[index].language ?? ''}",
+                                    key: Key('language'),
+                                  )),
                                 if (isDeskTop &&
                                     widget.userGroupId !=
                                         "GROWERP_M_EMPLOYEE" &&
                                     widget.userGroupId != "GROWERP_M_ADMIN")
                                   Expanded(
                                       child: Text("${users[index].companyName}",
+                                          key: Key('companyName'),
                                           textAlign: TextAlign.center)),
                                 if (isPhone &&
                                     widget.userGroupId !=
@@ -231,6 +239,7 @@ class _UsersState extends State<UsersForm> {
                                     widget.userGroupId != "GROWERP_M_ADMIN")
                                   Expanded(
                                       child: Text("${users[index].companyName}",
+                                          key: Key('companyName'),
                                           textAlign: TextAlign.center))
                               ],
                             ),

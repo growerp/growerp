@@ -144,6 +144,7 @@ class _AddressState extends State<AddressDialog> {
                     ),
                     SizedBox(height: 20),
                     DropdownSearch<Country>(
+                      key: Key('country'),
                       label: 'Country',
                       dialogMaxWidth: 300,
                       autoFocusSearchBox: true,

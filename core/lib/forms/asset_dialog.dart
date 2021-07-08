@@ -121,7 +121,7 @@ class _AssetState extends State<AssetPage> {
         child: Container(
             child: Form(
                 key: _formKey,
-                child: ListView(children: <Widget>[
+                child: ListView(key: Key('listView'), children: <Widget>[
                   Center(
                       child: Text(
                           (classificationId == 'AppHotel'
@@ -237,7 +237,6 @@ class _AssetState extends State<AssetPage> {
                               asset?.assetId == null ? 'Create' : 'Update'),
                           onPressed: () async {
                             if (_formKey.currentState!.validate() && !loading) {
-                              print("====dialog: ${_nameController.text}");
                               BlocProvider.of<AssetBloc>(context)
                                   .add(UpdateAsset(
                                 Asset(

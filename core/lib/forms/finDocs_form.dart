@@ -22,10 +22,12 @@ import 'package:models/@models.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
 class FinDocsForm extends StatefulWidget {
+  final Key? key;
   final sales, docType, onlyRental;
   final DateTime? rentalFromDate, rentalThruDate;
   const FinDocsForm(
-      {this.sales = true,
+      {this.key,
+      this.sales = true,
       this.docType,
       this.onlyRental,
       this.rentalFromDate,

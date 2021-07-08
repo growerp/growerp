@@ -116,7 +116,7 @@ class CreateFinDocFromCart extends CartEvent {
   CreateFinDocFromCart(this.finDoc);
   @override
   String toString() =>
-      (finDoc.idIsNull() ? 'Create ' : 'Update ') + finDoc.docType!;
+      (finDoc.idIsNull() ? 'Create ' : 'Update ') + finDoc.docType;
 }
 
 class ModifyHeaderCart extends CartEvent {

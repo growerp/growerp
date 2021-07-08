@@ -175,7 +175,7 @@ class _CategoryState extends State<CategoryPage> {
         child: Container(
             child: Form(
                 key: _formKey,
-                child: ListView(children: <Widget>[
+                child: ListView(key: Key('listView'), children: <Widget>[
                   SizedBox(height: 30),
                   CircleAvatar(
                       backgroundColor: Colors.green,
@@ -196,9 +196,9 @@ class _CategoryState extends State<CategoryPage> {
                     decoration: InputDecoration(labelText: 'Category Name'),
                     controller: _nameController,
                     validator: (value) {
-                      if (value!.isEmpty)
-                        return 'Please enter a category name?';
-                      return null;
+                      return value!.isEmpty
+                          ? 'Please enter a category name?'
+                          : null;
                     },
                   ),
                   SizedBox(height: 30),
@@ -242,7 +242,7 @@ class _CategoryState extends State<CategoryPage> {
                                     updatedCategory.image == null)
                                   HelperFunctions.showMessage(
                                       context,
-                                      "Image upload error or larger than 50K",
+                                      "Image upload error or larger than 200K",
                                       Colors.red);
                                 else
                                   BlocProvider.of<CategoryBloc>(context)

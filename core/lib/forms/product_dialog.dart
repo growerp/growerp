@@ -193,137 +193,144 @@ class _ProductState extends State<ProductPage> {
         child: Container(
             child: Form(
                 key: _formKey,
-                child: ListView(key: Key('listView'), children: <Widget>[
-                  SizedBox(height: 30),
-                  CircleAvatar(
-                      backgroundColor: Colors.green,
-                      radius: 80,
-                      child: _imageFile != null
-                          ? kIsWeb
-                              ? Image.network(_imageFile!.path)
-                              : Image.file(File(_imageFile!.path))
-                          : product?.image != null
-                              ? Image.memory(
-                                  product!.image!,
-                                )
-                              : Text(
-                                  product?.productName?.substring(0, 1) ?? '',
-                                  style: TextStyle(
-                                      fontSize: 30, color: Colors.black))),
-                  SizedBox(height: 30),
-                  TextFormField(
-                    key: Key('name'),
-                    decoration: InputDecoration(
-                        labelText: classificationId == 'AppHotel'
-                            ? 'Room Type Name'
-                            : 'Product Name'),
-                    controller: _nameController,
-                    validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a name?';
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    key: Key('description'),
-                    maxLines: 5,
-                    decoration: InputDecoration(labelText: 'Description'),
-                    controller: _descriptionController,
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    key: Key('price'),
-                    decoration: InputDecoration(labelText: 'Price'),
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-                    ],
-                    controller: _priceController,
-                    validator: (value) {
-                      if (value!.isEmpty) return 'Please enter a price?';
-                      return null;
-                    },
-                  ),
-                  Visibility(
-                      visible: classificationId != 'AppHotel',
-                      child: Column(children: [
-                        SizedBox(height: 10),
-                        DropdownSearch<ProductCategory>(
-                          key: Key('categoryDropDown'),
-                          label: 'Category',
-                          dialogMaxWidth: 300,
-                          autoFocusSearchBox: true,
-                          selectedItem: _selectedCategory,
-                          dropdownSearchDecoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
-                          searchBoxDecoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
-                          showSearchBox: true,
-                          searchBoxController: _categorySearchBoxController,
-                          isFilteredOnline: true,
-                          showClearButton: false,
-                          itemAsString: (ProductCategory? u) =>
-                              "${u?.categoryName}",
-                          onFind: (String filter) async {
-                            var result = await repos.getCategory(
-                                filter: _categorySearchBoxController.text);
-                            return result;
-                          },
-                          validator: (value) =>
-                              value == null ? "Select a category?" : null,
-                          onChanged: (ProductCategory? newValue) {
-                            _selectedCategory = newValue;
-                          },
-                        )
-                      ])),
-                  SizedBox(height: 20),
-                  Row(children: [
-                    ElevatedButton(
-                        key: Key('cancel'),
-                        child: Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        }),
-                    SizedBox(width: 20),
-                    Expanded(
-                        child: ElevatedButton(
-                            key: Key('update'),
-                            child: Text(product?.productId == null
-                                ? 'Create'
-                                : 'Update'),
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate() &&
-                                  !loading) {
-                                Uint8List? image =
-                                    await HelperFunctions.getResizedImage(
-                                        _imageFile?.path);
-                                if (_imageFile?.path != null && image == null)
-                                  HelperFunctions.showMessage(
-                                      context,
-                                      "Image upload error or larger than 50K",
-                                      Colors.red);
-                                else
-                                  BlocProvider.of<ProductBloc>(context).add(
-                                      UpdateProduct(Product(
-                                          productId: product?.productId,
-                                          productName: _nameController.text,
-                                          assetClassId:
-                                              classificationId == 'AppHotel'
-                                                  ? 'Hotel Room'
-                                                  : null,
-                                          description:
-                                              _descriptionController.text,
-                                          price: Decimal.parse(
-                                              _priceController.text),
-                                          categoryId:
-                                              _selectedCategory?.categoryId!,
-                                          image: image)));
-                              }
-                            })),
-                  ])
-                ]))));
+                child: SingleChildScrollView(
+                    key: Key('listView'),
+                    child: Column(children: <Widget>[
+                      SizedBox(height: 30),
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 80,
+                          child: _imageFile != null
+                              ? kIsWeb
+                                  ? Image.network(_imageFile!.path)
+                                  : Image.file(File(_imageFile!.path))
+                              : product?.image != null
+                                  ? Image.memory(
+                                      product!.image!,
+                                    )
+                                  : Text(
+                                      product?.productName?.substring(0, 1) ??
+                                          '',
+                                      style: TextStyle(
+                                          fontSize: 30, color: Colors.black))),
+                      SizedBox(height: 30),
+                      TextFormField(
+                        key: Key('name'),
+                        decoration: InputDecoration(
+                            labelText: classificationId == 'AppHotel'
+                                ? 'Room Type Name'
+                                : 'Product Name'),
+                        controller: _nameController,
+                        validator: (value) {
+                          return value!.isEmpty ? 'Please enter a name?' : null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      TextFormField(
+                        key: Key('description'),
+                        maxLines: 5,
+                        decoration: InputDecoration(labelText: 'Description'),
+                        controller: _descriptionController,
+                      ),
+                      SizedBox(height: 20),
+                      TextFormField(
+                        key: Key('price'),
+                        decoration: InputDecoration(labelText: 'Price'),
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+                        ],
+                        controller: _priceController,
+                        validator: (value) {
+                          return value!.isEmpty
+                              ? 'Please enter a price?'
+                              : null;
+                        },
+                      ),
+                      Visibility(
+                          visible: classificationId != 'AppHotel',
+                          child: Column(children: [
+                            SizedBox(height: 10),
+                            DropdownSearch<ProductCategory>(
+                              key: Key('categoryDropDown'),
+                              label: 'Category',
+                              dialogMaxWidth: 300,
+                              autoFocusSearchBox: true,
+                              selectedItem: _selectedCategory,
+                              dropdownSearchDecoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25.0)),
+                              ),
+                              searchBoxDecoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(25.0)),
+                              ),
+                              showSearchBox: true,
+                              searchBoxController: _categorySearchBoxController,
+                              isFilteredOnline: true,
+                              showClearButton: false,
+                              itemAsString: (ProductCategory? u) =>
+                                  "${u?.categoryName}",
+                              onFind: (String filter) async {
+                                var result = await repos.getCategory(
+                                    filter: _categorySearchBoxController.text);
+                                return result;
+                              },
+                              validator: (value) {
+                                return value == null
+                                    ? "Select a category?"
+                                    : null;
+                              },
+                              onChanged: (ProductCategory? newValue) {
+                                _selectedCategory = newValue;
+                              },
+                            )
+                          ])),
+                      SizedBox(height: 20),
+                      Row(children: [
+                        ElevatedButton(
+                            key: Key('cancel'),
+                            child: Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            }),
+                        SizedBox(width: 20),
+                        Expanded(
+                            child: ElevatedButton(
+                                key: Key('update'),
+                                child: Text(product?.productId == null
+                                    ? 'Create'
+                                    : 'Update'),
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate() &&
+                                      !loading) {
+                                    Uint8List? image =
+                                        await HelperFunctions.getResizedImage(
+                                            _imageFile?.path);
+                                    if (_imageFile?.path != null &&
+                                        image == null)
+                                      HelperFunctions.showMessage(
+                                          context,
+                                          "Image upload error or larger than 200K",
+                                          Colors.red);
+                                    else
+                                      BlocProvider.of<ProductBloc>(context).add(
+                                          UpdateProduct(Product(
+                                              productId: product?.productId,
+                                              productName: _nameController.text,
+                                              assetClassId:
+                                                  classificationId == 'AppHotel'
+                                                      ? 'Hotel Room'
+                                                      : null,
+                                              description:
+                                                  _descriptionController.text,
+                                              price: Decimal.parse(
+                                                  _priceController.text),
+                                              categoryId: _selectedCategory
+                                                  ?.categoryId!,
+                                              image: image)));
+                                  }
+                                })),
+                      ])
+                    ])))));
   }
 }

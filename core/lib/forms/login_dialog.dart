@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/forms/register_dialog.dart';
 import 'package:core/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -183,7 +182,7 @@ class _LoginHeaderState extends State<LoginHeader> {
     return Container(
         padding: EdgeInsets.all(20),
         width: 400,
-        height: 500,
+        height: 400,
         child: Form(
           key: _formKey,
           child: ListView(
@@ -270,20 +269,6 @@ class _LoginHeaderState extends State<LoginHeader> {
                               'send to $username',
                               Colors.green);
                         }
-                      })),
-              SizedBox(height: 30),
-              Center(
-                  child: GestureDetector(
-                      child: Text('register new account for\n$companyName'),
-                      onTap: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return RegisterDialog(
-                                  formArguments:
-                                      FormArguments(object: authenticate));
-                            });
                       })),
               Container(
                 child: state is LogginInProgress ? LoadingIndicator() : null,

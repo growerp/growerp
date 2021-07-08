@@ -103,171 +103,176 @@ class _RegisterHeaderState extends State<RegisterHeader> {
   Widget _registerForm(Authenticate authenticate, AuthState state) {
     return Form(
         key: _formKey,
-        child: ListView(children: <Widget>[
-          SizedBox(height: 20),
-          Center(
-              child: Text(
-                  authenticate.company != null
-                      ? "Enter a new customer for company\n "
-                          "${authenticate.company!.name}"
-                      : "Enter a new company with admin user",
+        child: SingleChildScrollView(
+            key: Key('listView'),
+            child: Column(children: <Widget>[
+              SizedBox(height: 20),
+              Center(
+                  child: Text(
+                      authenticate.company != null
+                          ? "Enter a new customer for company\n "
+                              "${authenticate.company!.name}"
+                          : "Enter a new company with admin user",
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold))),
+              SizedBox(height: 20),
+              TextFormField(
+                key: Key('firstName'),
+                decoration: InputDecoration(labelText: 'First Name'),
+                controller: _firstNameController,
+                validator: (value) {
+                  if (value!.isEmpty) return 'Please enter your first name?';
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                key: Key('lastName'),
+                decoration: InputDecoration(labelText: 'Last Name'),
+                controller: _lastNameController,
+                validator: (value) {
+                  if (value!.isEmpty) return 'Please enter your last name?';
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              Text('A temporary password will be send by email',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold))),
-          SizedBox(height: 20),
-          TextFormField(
-            key: Key('firstName'),
-            decoration: InputDecoration(labelText: 'First Name'),
-            controller: _firstNameController,
-            validator: (value) {
-              if (value!.isEmpty) return 'Please enter your first name?';
-              return null;
-            },
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            key: Key('lastName'),
-            decoration: InputDecoration(labelText: 'Last Name'),
-            controller: _lastNameController,
-            validator: (value) {
-              if (value!.isEmpty) return 'Please enter your last name?';
-              return null;
-            },
-          ),
-          SizedBox(height: 20),
-          Text('A temporary password will be send by email',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.orange,
-              )),
-          SizedBox(height: 10),
-          TextFormField(
-            key: Key('email'),
-            decoration: InputDecoration(labelText: 'Email address = Username'),
-            controller: _emailController,
-            validator: (String? value) {
-              if (value!.isEmpty) return 'Please enter Email address?';
-              if (!RegExp(
-                      r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                  .hasMatch(value)) {
-                return 'This is not a valid email';
-              }
-              return null;
-            },
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            key: Key('companyName'),
-            decoration: InputDecoration(labelText: 'Business name'),
-            controller: _companyController,
-            validator: (value) {
-              if (value!.isEmpty)
-                return 'Please enter business name("Private" for Private person)';
-              return null;
-            },
-          ),
-          Visibility(
-              visible: authenticate.company?.partyId != null,
-              child: Column(children: [
-                SizedBox(height: 20),
-                Row(children: [
-                  ElevatedButton(
-                    child: Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context).pop(null);
-                    },
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                      child: ElevatedButton(
-                          key: Key('newCustomer'),
-                          child: Text('Register as a customer'),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate() &&
-                                state is! UserLoading)
-                              BlocProvider.of<AuthBloc>(context)
-                                  .add(RegisterUserEcommerce(
-                                User(
-                                  companyName: _companyController.text,
-                                  firstName: _firstNameController.text,
-                                  lastName: _lastNameController.text,
-                                  email: _emailController.text,
-                                ),
-                              ));
-                          })),
-                ])
-              ])),
-          SizedBox(height: 20),
-          Visibility(
-              // register new company and admin
-              visible: authenticate.company == null,
-              child: Column(children: [
-                DropdownButtonFormField<Currency>(
-                  key: Key('dropDownCur'),
-                  hint: Text('Currency'),
-                  value: _currencySelected,
-                  validator: (value) =>
-                      value == null ? 'Currency field required!' : null,
-                  items: currencies.map((item) {
-                    return DropdownMenuItem<Currency>(
-                        child: Text(item.description ?? 'Currency??'),
-                        value: item);
-                  }).toList(),
-                  onChanged: (Currency? newValue) {
-                    setState(() {
-                      _currencySelected = newValue!;
-                    });
-                  },
-                  isExpanded: true,
-                ),
-                SizedBox(height: 10),
-                Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(
-                          color: Colors.black45,
-                          style: BorderStyle.solid,
-                          width: 0.80),
+                    color: Colors.orange,
+                  )),
+              SizedBox(height: 10),
+              TextFormField(
+                key: Key('email'),
+                decoration:
+                    InputDecoration(labelText: 'Email address = Username'),
+                controller: _emailController,
+                validator: (String? value) {
+                  if (value!.isEmpty) return 'Please enter Email address?';
+                  if (!RegExp(
+                          r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                      .hasMatch(value)) {
+                    return 'This is not a valid email';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                key: Key('companyName'),
+                decoration: InputDecoration(labelText: 'Business name'),
+                controller: _companyController,
+                validator: (value) {
+                  if (value!.isEmpty)
+                    return 'Please enter business name("Private" for Private person)';
+                  return null;
+                },
+              ),
+              Visibility(
+                  visible: authenticate.company?.partyId != null,
+                  child: Column(children: [
+                    SizedBox(height: 20),
+                    Row(children: [
+                      ElevatedButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop(null);
+                        },
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                          child: ElevatedButton(
+                              key: Key('newCustomer'),
+                              child: Text('Register as a customer'),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate() &&
+                                    state is! UserLoading)
+                                  BlocProvider.of<AuthBloc>(context)
+                                      .add(RegisterUserEcommerce(
+                                    User(
+                                      companyName: _companyController.text,
+                                      firstName: _firstNameController.text,
+                                      lastName: _lastNameController.text,
+                                      email: _emailController.text,
+                                    ),
+                                  ));
+                              })),
+                    ])
+                  ])),
+              SizedBox(height: 20),
+              Visibility(
+                  // register new company and admin
+                  visible: authenticate.company == null,
+                  child: Column(children: [
+                    DropdownButtonFormField<Currency>(
+                      key: Key('dropDownCur'),
+                      hint: Text('Currency'),
+                      value: _currencySelected,
+                      validator: (value) =>
+                          value == null ? 'Currency field required!' : null,
+                      items: currencies.map((item) {
+                        return DropdownMenuItem<Currency>(
+                            child: Text(item.description ?? 'Currency??'),
+                            value: item);
+                      }).toList(),
+                      onChanged: (Currency? newValue) {
+                        setState(() {
+                          _currencySelected = newValue!;
+                        });
+                      },
+                      isExpanded: true,
                     ),
-                    child: CheckboxListTile(
-                        key: Key('demoData'),
-                        title: Text("Generate demo data"),
-                        value: _demoData,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _demoData = value!;
-                          });
-                        })),
-                SizedBox(height: 10),
-                Row(children: [
-                  ElevatedButton(
-                    child: Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context).pop(null);
-                    },
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                      child: ElevatedButton(
-                          key: Key('newCompany'),
-                          child: Text('Register AND create a new Company'),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate() &&
-                                state is! AuthLoading)
-                              BlocProvider.of<AuthBloc>(context)
-                                  .add(RegisterCompanyAdmin(
-                                      User(
-                                        companyName: _companyController.text,
-                                        firstName: _firstNameController.text,
-                                        lastName: _lastNameController.text,
-                                        email: _emailController.text,
-                                      ),
-                                      (_currencySelected.currencyId!),
-                                      _demoData));
-                          })),
-                ])
-              ]))
-        ]));
+                    SizedBox(height: 10),
+                    Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25.0),
+                          border: Border.all(
+                              color: Colors.black45,
+                              style: BorderStyle.solid,
+                              width: 0.80),
+                        ),
+                        child: CheckboxListTile(
+                            key: Key('demoData'),
+                            title: Text("Generate demo data"),
+                            value: _demoData,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _demoData = value!;
+                              });
+                            })),
+                    SizedBox(height: 10),
+                    Row(children: [
+                      ElevatedButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop(null);
+                        },
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                          child: ElevatedButton(
+                              key: Key('newCompany'),
+                              child: Text('Register AND create a new Company'),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate() &&
+                                    state is! AuthLoading)
+                                  BlocProvider.of<AuthBloc>(context)
+                                      .add(RegisterCompanyAdmin(
+                                          User(
+                                            companyName:
+                                                _companyController.text,
+                                            firstName:
+                                                _firstNameController.text,
+                                            lastName: _lastNameController.text,
+                                            email: _emailController.text,
+                                          ),
+                                          (_currencySelected.currencyId!),
+                                          _demoData));
+                              })),
+                    ])
+                  ]))
+            ])));
   }
 }

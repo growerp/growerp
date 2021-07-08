@@ -16,6 +16,7 @@ import 'package:core/forms/@forms.dart';
 import 'package:core/forms/user_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:models/@models.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
     Widget widget, int? menuIndex, List<MenuItem>? menu) {
@@ -58,7 +59,10 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                 });
                           },
                           child: Column(children: [
-                            SizedBox(height: 5),
+                            SizedBox(
+                                height: ResponsiveWrapper.of(context).isTablet
+                                    ? 25
+                                    : 5),
                             CircleAvatar(
                                 backgroundColor: Colors.green,
                                 radius: 15,
@@ -71,8 +75,8 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                         style: TextStyle(
                                             fontSize: 20,
                                             color: Colors.black))),
-                            Text("${authenticate.user!.firstName} "
-                                "${authenticate.user!.lastName}"),
+                            Text("${authenticate.user!.firstName}"),
+                            Text("${authenticate.user!.lastName}"),
                           ]))),
                   selectedIndex: menuIndex ?? 0,
                   onDestinationSelected: (int index) {

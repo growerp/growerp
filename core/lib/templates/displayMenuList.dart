@@ -84,8 +84,11 @@ class _MenuItemState extends State<DisplayMenuList>
         // form to display
         tabList.add(tabItems![i].form);
         // text of tabs at top of screen (tablet, web)
+        String key =
+            "tap${tabItems![i].form.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '')}";
         tabText.add(Align(
-            alignment: Alignment.center, child: Text(tabItems![i].label)));
+            alignment: Alignment.center,
+            child: Text(tabItems![i].label, key: Key(key))));
         // tabs at bottom of screen : phone
         bottomItems!.add(BottomNavigationBarItem(
             icon: tabItems![i].icon,
@@ -228,9 +231,13 @@ class _MenuItemState extends State<DisplayMenuList>
             body: isPhone
                 ? Center(
                     child: tabList[tabIndex],
-                    key: Key(tabList[tabIndex].toString()))
+                    key: Key(tabList[tabIndex]
+                        .toString()
+                        .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '')))
                 : TabBarView(
-                    key: Key(tabList[tabIndex].toString()),
+                    key: Key(tabList[tabIndex]
+                        .toString()
+                        .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '')),
                     controller: _controller,
                     children: tabList,
                   )));
