@@ -163,9 +163,9 @@ class _ProductsState extends State<ProductsForm> {
                     if (index == 1 && products.isEmpty)
                       return Center(
                           heightFactor: 20,
-                          child: Text("no records found!",
+                          child: Text("no products found!",
                               key: Key('empty'), textAlign: TextAlign.center));
-                    index -= 1;
+                    index--;
                     return index >= products.length
                         ? BottomLoader()
                         : Dismissible(

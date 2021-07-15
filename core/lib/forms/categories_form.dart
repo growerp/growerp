@@ -131,9 +131,9 @@ class _CategoriesState extends State<CategoriesForm> {
                 if (index == 1 && categories.isEmpty)
                   return Center(
                       heightFactor: 20,
-                      child: Text("no records found!",
+                      child: Text("no categories found!",
                           key: Key('empty'), textAlign: TextAlign.center));
-                index -= 1;
+                index--;
                 return index >= categories.length
                     ? BottomLoader()
                     : Dismissible(

@@ -452,7 +452,7 @@ class Moqui {
           await client.get('rest/s1/growerp/100/FinDoc', queryParameters: {
         'sales': sales,
         'docType': docType,
-        'open': 'open',
+        'open': open,
         'id': id,
         'startDate': '${startDate?.year.toString()}-'
             '${startDate?.month.toString().padLeft(2, '0')}-'

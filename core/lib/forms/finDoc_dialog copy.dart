@@ -31,24 +31,7 @@ class FinDocDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FinDoc finDoc = formArguments.object as FinDoc;
-    if (finDoc.sales)
-      return BlocProvider<SalesCartBloc>(
-          create: (context) => CartBloc(
-              repos: context.read<Object>(),
-              sales: true,
-              finDocBloc:
-                  BlocProvider.of<SalesOrderBloc>(context) as FinDocBloc)
-            ..add(LoadCart(finDoc)),
-          child: FinDocPage(formArguments.message, finDoc));
-    return BlocProvider<PurchCartBloc>(
-        create: (context) => CartBloc(
-            repos: context.read<Object>(),
-            sales: false,
-            finDocBloc:
-                BlocProvider.of<PurchaseOrderBloc>(context) as FinDocBloc)
-          ..add(LoadCart(finDoc)),
-        child: FinDocPage(formArguments.message, finDoc));
+    return FinDocPage(formArguments.message, formArguments.object as FinDoc);
   }
 }
 
@@ -67,7 +50,6 @@ class _MyFinDocState extends State<FinDocPage> {
   final _descriptionController = TextEditingController();
   final _userSearchBoxController = TextEditingController();
   late SalesCartBloc _cartBloc;
-  late var repos;
   late FinDoc finDocUpdated;
   User? _selectedUser;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -83,17 +65,18 @@ class _MyFinDocState extends State<FinDocPage> {
     finDocUpdated = finDoc.copyWith();
     _selectedUser = finDocUpdated.otherUser;
     _descriptionController.text = finDocUpdated.description ?? "";
-    if (finDocUpdated.sales) {
-      _cartBloc = BlocProvider.of<SalesCartBloc>(context) as CartBloc;
-    } else {
-      _cartBloc = BlocProvider.of<PurchCartBloc>(context) as CartBloc;
-    }
-    repos = context.read<Object>();
   }
 
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    //  int columns = isPhone ? 1 : 2;
+    if (finDocUpdated.sales) {
+      _cartBloc = BlocProvider.of<SalesCartBloc>(context) as CartBloc;
+    } else {
+      _cartBloc = BlocProvider.of<PurchCartBloc>(context) as CartBloc;
+    }
+    var repos = context.read<Object>();
 
     dynamic blocListener = (context, state) {
       if (state is FinDocProblem)
@@ -131,12 +114,10 @@ class _MyFinDocState extends State<FinDocPage> {
         _finDocItemList(),
         SizedBox(height: 10),
         Center(
-            child: Text(
-                "Grand total : " +
-                    (finDocUpdated.grandTotal == null
-                        ? ""
-                        : finDocUpdated.grandTotal.toString()),
-                key: Key('grandTotal'))),
+            child: Text("Grant total : " +
+                (finDocUpdated.grandTotal == null
+                    ? "0.00"
+                    : finDocUpdated.grandTotal.toString()))),
         SizedBox(height: 40, child: _generalButtons()),
       ]);
     };
@@ -360,81 +341,81 @@ class _MyFinDocState extends State<FinDocPage> {
 
   Widget _finDocItemList() {
     List<FinDocItem> items = finDocUpdated.items ?? [];
-
     return Expanded(
-        child: ListView.builder(
-            itemCount: items.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return ListTile(
-                  leading: !isPhone
-                      ? CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                        )
-                      : null,
-                  title: Column(children: [
-                    Row(children: <Widget>[
-                      if (!isPhone)
+        child: CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+            child: ListTile(
+          leading: !isPhone
+              ? CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                )
+              : null,
+          title: Column(children: [
+            Row(children: <Widget>[
+              if (!isPhone)
+                Expanded(child: Text("Item Type", textAlign: TextAlign.center)),
+              Expanded(child: Text("Descr.", textAlign: TextAlign.center)),
+              Expanded(child: Text("    Qty", textAlign: TextAlign.center)),
+              Expanded(child: Text("Price", textAlign: TextAlign.center)),
+              if (!isPhone)
+                Expanded(child: Text("SubTotal", textAlign: TextAlign.center)),
+              Expanded(child: Text(" ", textAlign: TextAlign.center)),
+            ]),
+            Divider(color: Colors.black),
+          ]),
+        )),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return InkWell(
+                  onLongPress: () async {
+                    _cartBloc.add(DeleteItemFromCart(index));
+                  },
+                  child: ListTile(
+                      leading: !isPhone
+                          ? CircleAvatar(
+                              backgroundColor: Colors.green,
+                              child: Text(items[index].itemSeqId.toString()),
+                            )
+                          : null,
+                      title: Row(children: <Widget>[
+                        if (!isPhone)
+                          Expanded(
+                              child: Text("${items[index].itemTypeName}",
+                                  textAlign: TextAlign.left,
+                                  key: Key('itemType$index'))),
                         Expanded(
-                            child:
-                                Text("Item Type", textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Descr.", textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("    Qty", textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Price", textAlign: TextAlign.center)),
-                      if (!isPhone)
+                            child: Text("${items[index].description}",
+                                key: Key('itemDescription$index'),
+                                textAlign: TextAlign.left)),
                         Expanded(
-                            child:
-                                Text("SubTotal", textAlign: TextAlign.center)),
-                      Expanded(child: Text(" ", textAlign: TextAlign.center)),
-                    ]),
-                    Divider(color: Colors.black),
-                  ]),
-                );
-              }
-              final item = items[index - 1];
-              return ListTile(
-                  key: Key('productItem'),
-                  leading: !isPhone
-                      ? CircleAvatar(
-                          backgroundColor: Colors.green,
-                          child: Text(items[index].itemSeqId.toString()),
-                        )
-                      : null,
-                  title: Row(children: <Widget>[
-                    if (!isPhone)
-                      Expanded(
-                          child: Text("${item.itemTypeName}",
-                              textAlign: TextAlign.left,
-                              key: Key('itemType$index'))),
-                    Expanded(
-                        child: Text("${item.description}",
-                            key: Key('itemDescription$index'),
-                            textAlign: TextAlign.left)),
-                    Expanded(
-                        child: Text("${item.quantity}",
-                            textAlign: TextAlign.center,
-                            key: Key('itemQuantity$index'))),
-                    Expanded(
-                        child:
-                            Text("${item.price}", key: Key('itemPrice$index'))),
-                    if (!isPhone)
-                      Expanded(
-                        child: Text(
-                            "${(item.price! * item.quantity!).toString()}",
-                            textAlign: TextAlign.center),
-                        key: Key('subTotal$index'),
-                      ),
-                  ]),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete_forever),
-                    onPressed: () {
-                      _cartBloc.add(DeleteItemFromCart(index - 1));
-                    },
-                  ));
-            }));
+                            child: Text("${items[index].quantity}",
+                                textAlign: TextAlign.center,
+                                key: Key('itemQuantity$index'))),
+                        Expanded(
+                            child: Text("${items[index].price}",
+                                key: Key('itemPrice$index'))),
+                        if (!isPhone)
+                          Expanded(
+                            child: Text(
+                                "${(items[index].price! * items[index].quantity!).toString()}",
+                                textAlign: TextAlign.center),
+                            key: Key('subTotal$index'),
+                          ),
+                      ]),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete_forever),
+                        onPressed: () {
+                          _cartBloc.add(DeleteItemFromCart(index));
+                        },
+                      )));
+            },
+            childCount: items.length,
+          ),
+        ),
+      ],
+    ));
   }
 }
 

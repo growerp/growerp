@@ -41,12 +41,10 @@ class CartBloc extends Bloc<CartEvent, CartState>
         // if new, get last finDoc
         var result = await repos.getCart(
             sales: event.finDoc.sales, docType: event.finDoc.docType);
-        if (result is FinDoc)
-          finDoc = result;
-        else
-          finDoc = event.finDoc; // nothing found so show empty
-      }
-      yield CartLoaded(finDoc, "cart initial load.");
+        if (result is FinDoc) finDoc = result;
+      } else
+        finDoc = event.finDoc;
+      yield CartLoaded(event.finDoc, "cart initial load.");
     } else if (event is ModifyHeaderCart) {
       yield CartLoading();
       await repos.saveCart(event.finDoc);
@@ -54,8 +52,11 @@ class CartBloc extends Bloc<CartEvent, CartState>
     } else if (event is AddToCart) {
       yield CartLoading();
       Decimal grandTotal = Decimal.parse('0');
-      if (event.finDoc != null)
-        finDoc = event.finDoc!; // if header already present, not ecommerce
+      if (event.finDoc != null) {
+        finDoc.copyWith(
+            otherUser: event.finDoc!.otherUser,
+            description: event.finDoc!.description);
+      }
       finDoc.items!
           .add(event.newItem!.copyWith(itemSeqId: finDoc.items!.length + 1));
       finDoc.items!.forEach((x) {
@@ -81,12 +82,14 @@ class CartBloc extends Bloc<CartEvent, CartState>
       });
       finDoc = finDoc.copyWith(grandTotal: grandTotal);
       await repos.saveCart(finDoc);
-      yield CartLoaded(finDoc, "Item# ${event.index} removed");
+      yield CartLoaded(finDoc, "Item# ${event.index! + 1} removed");
     } else if (event is CreateFinDocFromCart) {
-      print("======cart bloc==========creating order");
       yield CartLoading('Saving ${event.finDoc.docType}...');
       try {
-        finDocBloc.add(CreateFinDoc(event.finDoc));
+        if (event.finDoc.id() == 'New')
+          finDocBloc.add(CreateFinDoc(event.finDoc));
+        else
+          finDocBloc.add(UpdateFinDoc(event.finDoc));
         add(ClearCart(event.finDoc));
         yield CartLoaded(finDoc, "${finDoc.docType} created, cart cleared..");
       } catch (e) {

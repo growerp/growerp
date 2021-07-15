@@ -23,13 +23,15 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 
 class FinDocsForm extends StatefulWidget {
   final Key? key;
-  final sales, docType, onlyRental;
+  final bool sales;
+  final String docType;
+  final bool onlyRental;
   final DateTime? rentalFromDate, rentalThruDate;
   const FinDocsForm(
       {this.key,
       this.sales = true,
-      this.docType,
-      this.onlyRental,
+      this.docType = '_NA_',
+      this.onlyRental = false,
       this.rentalFromDate,
       this.rentalThruDate});
   @override
@@ -202,94 +204,22 @@ class _OrdersState extends State<FinDocsForm> {
             itemBuilder: (BuildContext context, int index) {
               if (index == 0)
                 return Column(children: [
-                  ListTile(
-                      onTap: (() {
-                        setState(() {
-                          showSearchField = !showSearchField;
-                        });
-                      }),
-                      leading:
-                          Image.asset('assets/images/search.png', height: 30),
-                      title: showSearchField
-                          ? Row(children: <Widget>[
-                              SizedBox(
-                                  width: isPhone
-                                      ? MediaQuery.of(context).size.width - 150
-                                      : MediaQuery.of(context).size.width - 250,
-                                  child: TextField(
-                                    textInputAction: TextInputAction.go,
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.transparent),
-                                      ),
-                                      hintText: "search in ID, " +
-                                          (widget.sales
-                                              ? "customer"
-                                              : "supplier"),
-                                    ),
-                                    onChanged: ((value) {
-                                      searchString = value;
-                                    }),
-                                    onSubmitted: ((value) {
-                                      _finDocBloc.add(FetchFinDoc(
-                                          search: value, limit: limit));
-                                      setState(() {
-                                        showSearchField = !showSearchField;
-                                      });
-                                    }),
-                                  )),
-                              ElevatedButton(
-                                  child: Text('Search'),
-                                  onPressed: () {
-                                    _finDocBloc.add(FetchFinDoc(
-                                        search: searchString, limit: limit));
-                                  })
-                            ])
-                          : Row(children: <Widget>[
-                              SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                      // capitalize first char
-                                      "${widget.docType[0].toUpperCase()}"
-                                      "${widget.docType.substring(1)} ID")),
-                              SizedBox(width: 10),
-                              Expanded(
-                                  child: Text(widget.sales == null
-                                      ? 'Other User'
-                                      : (widget.sales
-                                              ? "Customer"
-                                              : "Supplier") +
-                                          ' name & Company')),
-                              if (!ResponsiveWrapper.of(context)
-                                      .isSmallerThan(TABLET) &&
-                                  widget.docType != 'payment')
-                                SizedBox(width: 80, child: Text("#items")),
-                            ]),
-                      subtitle: Row(children: <Widget>[
-                        SizedBox(width: 80, child: Text("Date")),
-                        SizedBox(width: 80, child: Text("Total")),
-                        SizedBox(width: 120, child: Text("Status")),
-                        if (!isPhone)
-                          SizedBox(width: 120, child: Text("Email Address")),
-                      ]),
-                      trailing: isPhone
-                          ? Text('             ')
-                          : Text('                            ')),
+                  header(isPhone),
                   Divider(color: Colors.black),
                 ]);
 
               if (index == 1 && finDocs.isEmpty && !isLoading)
                 return Center(
                     heightFactor: 20,
-                    child:
-                        Text("no records found!", textAlign: TextAlign.center));
-              index -= 1;
+                    child: Text(
+                        "no ${widget.sales ? 'sales' : 'purchase'} "
+                        "${widget.docType}s found!",
+                        textAlign: TextAlign.center));
+              index--;
               return index >= finDocs.length
                   ? BottomLoader()
                   : Dismissible(
-                      key: Key(finDocs[index].id()!),
+                      key: Key('finDocItem'),
                       direction: DismissDirection.startToEnd,
                       child: ExpansionTile(
                           leading: CircleAvatar(
@@ -307,10 +237,9 @@ class _OrdersState extends State<FinDocsForm> {
                                   child: Text(
                                       "${finDocs[index].otherUser!.firstName ?? ''} "
                                       "${finDocs[index].otherUser!.lastName ?? ''} "
-                                      "${finDocs[index].otherUser!.companyName ?? ''}")),
-                              if (!ResponsiveWrapper.of(context)
-                                      .isSmallerThan(TABLET) &&
-                                  widget.docType != 'payment')
+                                      "${finDocs[index].otherUser!.companyName ?? ''}",
+                                      key: Key("otherUser$index"))),
+                              if (!isPhone && widget.docType != 'payment')
                                 SizedBox(
                                     width: 80,
                                     child: Text(
@@ -323,121 +252,179 @@ class _OrdersState extends State<FinDocsForm> {
                                 child: Text(
                                     "${finDocs[index].creationDate?.toString().substring(0, 11)}")),
                             SizedBox(
-                                width: 80,
-                                child: Text("${finDocs[index].grandTotal}")),
+                                width: 76,
+                                child: Text("${finDocs[index].grandTotal}",
+                                    key: Key("grandTotal$index"))),
                             SizedBox(
-                                width: 80,
+                                width: 90,
                                 child: Text(
-                                    "${finDocStatusValues[finDocs[index].statusId!]}")),
+                                    "${finDocStatusValues[finDocs[index].statusId!]}",
+                                    key: Key("statusId$index"))),
                             if (!isPhone)
-                              SizedBox(
-                                  width: 120,
+                              Expanded(
                                   child: Text(
-                                    "${finDocs[index].otherUser!.email ?? ''}",
-                                  )),
+                                "${finDocs[index].otherUser!.email ?? ''}",
+                                key: Key('email$index'),
+                              )),
+                            if (!isPhone)
+                              Expanded(
+                                  child: Text(
+                                "${finDocs[index].description ?? ''}",
+                                key: Key('email$index'),
+                              )),
                           ]),
-                          children: List.from(finDocs[index].items!.map((e) =>
-                              Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    SizedBox(width: 50),
-                                    Expanded(
-                                        child: ListTile(
-                                            leading: CircleAvatar(
-                                              backgroundColor: Colors.green,
-                                              maxRadius: 10,
-                                              child: Text(
-                                                  "${e.itemSeqId.toString()}"),
-                                            ),
-                                            title: Text(finDocs[index]
-                                                        .docType !=
-                                                    "transaction"
-                                                ? "ProductId: ${e.productId} "
-                                                        "Description: ${e.description} "
-                                                        "Quantity: ${e.quantity.toString()} "
-                                                        "Price: ${e.price.toString()} "
-                                                        "SubTotal: ${(e.quantity! * e.price!).toString()}" +
-                                                    (e.rentalFromDate == null
-                                                        ? ''
-                                                        : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
-                                                            "${e.rentalThruDate.toString().substring(0, 10)}")
-                                                : "ProductId: ${e.productId} "
-                                                    "Description: ${e.description} ")))
-                                  ]))),
+                          children: items(finDocs, index),
                           trailing: Container(
                               width: isPhone ? 100 : 160,
                               child: Visibility(
-                                  visible: finDocStatusFixed[
-                                          finDocs[index].statusId!] ??
-                                      true,
-                                  child: Row(children: [
-                                    Visibility(
-                                        visible: !isPhone,
-                                        child: Row(children: [
-                                          IconButton(
-                                            icon: Icon(Icons.print),
-                                            tooltip:
-                                                'PDF/Print ${finDocs[0].docType}',
-                                            onPressed: () async {
-                                              await Navigator.pushNamed(
-                                                  context, '/printer',
-                                                  arguments: FormArguments(
-                                                      menuIndex: tab,
-                                                      object: finDocs[index]));
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.edit),
-                                            tooltip:
-                                                'Edit ${finDocs[0].docType}',
-                                            onPressed: () async {
-                                              await showDialog(
-                                                  barrierDismissible: true,
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return widget.onlyRental ==
-                                                            true
-                                                        ? ReservationDialog(
-                                                            formArguments:
-                                                                FormArguments(
-                                                                    object: finDocs[
-                                                                        index]))
-                                                        : (FinDocDialog(
-                                                            formArguments:
-                                                                FormArguments(
-                                                                    object: finDocs[
-                                                                        index])));
-                                                  });
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete_forever),
-                                            tooltip:
-                                                'Cancel ${finDocs[0].docType}',
-                                            onPressed: () {
-                                              _finDocBloc.add(UpdateFinDoc(
-                                                  finDocs[index].copyWith(
-                                                      statusId:
-                                                          'FinDocCancelled')));
-                                            },
-                                          ),
-                                        ])),
-                                    IconButton(
-                                        icon: Icon(Icons.arrow_upward),
-                                        tooltip: nextFinDocStatus[
-                                            finDocStatusValues[
-                                                finDocs[index].statusId!]!],
-                                        onPressed: () {
-                                          _finDocBloc.add(UpdateFinDoc(
-                                              finDocs[index].copyWith(
-                                                  statusId: nextFinDocStatus[
-                                                      finDocs[index]
-                                                          .statusId!])));
-                                        })
-                                  ])))));
+                                visible: finDocStatusFixed[
+                                        finDocs[index].statusId!] ??
+                                    true,
+                                child: buttons(index, isPhone),
+                              ))));
             }));
+  }
+
+  Widget header(bool isPhone) {
+    return ListTile(
+        onTap: (() {
+          setState(() {
+            showSearchField = !showSearchField;
+          });
+        }),
+        leading: Image.asset('assets/images/search.png', height: 30),
+        title: showSearchField
+            ? Row(children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  textInputAction: TextInputAction.go,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      hintText: "search in ID, "
+                          "${widget.sales ? 'customer' : 'supplier'}"),
+                  onChanged: ((value) {
+                    searchString = value;
+                  }),
+                  onSubmitted: ((value) {
+                    _finDocBloc.add(FetchFinDoc(search: value, limit: limit));
+                    setState(() {
+                      showSearchField = !showSearchField;
+                    });
+                  }),
+                )),
+                ElevatedButton(
+                    child: Text('Search'),
+                    onPressed: () {
+                      _finDocBloc
+                          .add(FetchFinDoc(search: searchString, limit: limit));
+                    })
+              ])
+            : Row(children: <Widget>[
+                SizedBox(
+                    width: 80,
+                    child: Text(
+                        // capitalize first char
+                        "${widget.docType[0].toUpperCase()}"
+                        "${widget.docType.substring(1)} ID")),
+                SizedBox(width: 10),
+                Expanded(
+                    child: Text((widget.sales ? "Customer" : "Supplier") +
+                        ' name & Company')),
+                if (!isPhone && widget.docType != 'payment')
+                  SizedBox(width: 80, child: Text("#items")),
+              ]),
+        subtitle: Row(children: <Widget>[
+          SizedBox(width: 80, child: Text("Date")),
+          SizedBox(width: 76, child: Text("Total")),
+          SizedBox(width: 90, child: Text("Status")),
+          if (!isPhone) Expanded(child: Text("Email Address")),
+          if (!isPhone) Expanded(child: Text("Order description")),
+        ]),
+        trailing: isPhone
+            ? Text('             ')
+            : Text('                            '));
+  }
+
+  List<Widget> items(List<FinDoc> findocs, int index) {
+    return List.from(finDocs[index].items!.map(
+        (e) => Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              SizedBox(width: 50),
+              Expanded(
+                  child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.green,
+                        maxRadius: 10,
+                        child: Text("${e.itemSeqId.toString()}"),
+                      ),
+                      title: Text(finDocs[index].docType != "transaction"
+                          ? "ProductId: ${e.productId} "
+                                  "Description: ${e.description} "
+                                  "Quantity: ${e.quantity.toString()} "
+                                  "Price: ${e.price.toString()} "
+                                  "SubTotal: ${(e.quantity! * e.price!).toString()}" +
+                              (e.rentalFromDate == null
+                                  ? ''
+                                  : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
+                                      "${e.rentalThruDate.toString().substring(0, 10)}")
+                          : "ProductId: ${e.productId} "
+                              "Description: ${e.description} ")))
+            ])));
+  }
+
+  Widget buttons(int index, bool isPhone) {
+    return Row(children: [
+      Visibility(
+          visible: !isPhone,
+          child: Row(children: [
+            IconButton(
+                icon: Icon(Icons.arrow_upward),
+                tooltip: nextFinDocStatus[
+                    finDocStatusValues[finDocs[index].statusId!]!],
+                onPressed: () {
+                  _finDocBloc.add(UpdateFinDoc(finDocs[index].copyWith(
+                      statusId: nextFinDocStatus[finDocs[index].statusId!])));
+                }),
+            IconButton(
+              key: Key('print$index'),
+              icon: Icon(Icons.print),
+              tooltip: 'PDF/Print ${finDocs[0].docType}',
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/printer',
+                    arguments:
+                        FormArguments(menuIndex: tab, object: finDocs[index]));
+              },
+            ),
+          ])),
+      IconButton(
+        icon: Icon(Icons.edit),
+        key: Key('edit$index'),
+        tooltip: 'Edit ${finDocs[0].docType}',
+        onPressed: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) {
+                return widget.onlyRental == true
+                    ? ReservationDialog(
+                        formArguments: FormArguments(object: finDocs[index]))
+                    : (FinDocDialog(
+                        formArguments: FormArguments(object: finDocs[index])));
+              });
+        },
+      ),
+      IconButton(
+        key: Key('delete$index'),
+        icon: Icon(Icons.delete_forever),
+        tooltip: 'Cancel ${finDocs[0].docType}',
+        onPressed: () {
+          _finDocBloc.add(UpdateFinDoc(
+              finDocs[index].copyWith(statusId: 'FinDocCancelled')));
+        },
+      ),
+    ]);
   }
 
   @override

@@ -252,7 +252,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: "0ee279ad1a6a4ca429841b16e7ea9bf8ef3c3e51"
+      resolved-ref: ce3576c2f45ca5a3b0376927e1c61802b2f18a53
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -311,7 +311,7 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   process:
     dependency: transitive
     description:

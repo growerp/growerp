@@ -143,9 +143,9 @@ class _AssetsState extends State<AssetsForm> {
                     if (index == 1 && assets.isEmpty)
                       return Center(
                           heightFactor: 20,
-                          child: Text("no records found!",
+                          child: Text("no assets found!",
                               key: Key('empty'), textAlign: TextAlign.center));
-                    index -= 1;
+                    index--;
                     return index >= assets.length
                         ? BottomLoader()
                         : Dismissible(
