@@ -42,7 +42,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   built_collection:
     dependency: transitive
     description:
@@ -56,7 +56,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.1.0"
+    version: "8.1.1"
   characters:
     dependency: transitive
     description:
@@ -119,7 +119,7 @@ packages:
       name: dart_style
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   decimal:
     dependency: transitive
     description:
@@ -246,13 +246,13 @@ packages:
       name: mockito
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.10"
+    version: "5.0.11"
   models:
     dependency: "direct main"
     description:
       path: models
       ref: packages
-      resolved-ref: ce3576c2f45ca5a3b0376927e1c61802b2f18a53
+      resolved-ref: "5fda551a4e61dd9d2f8d744bcee9587c023d9e8e"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -386,7 +386,7 @@ packages:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   source_span:
     dependency: transitive
     description:

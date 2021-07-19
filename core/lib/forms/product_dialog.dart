@@ -56,7 +56,8 @@ class _ProductState extends State<ProductPage> {
   TextEditingController _categorySearchBoxController = TextEditingController();
 
   bool loading = false;
-  ProductCategory? _selectedCategory;
+  ProductCategory _selectedCategory = ProductCategory(categoryName: '');
+  String _selectedTypeId = productTypes[0];
   PickedFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -77,6 +78,7 @@ class _ProductState extends State<ProductPage> {
       _priceController.text = product!.price.toString();
       _selectedCategory = ProductCategory(
           categoryId: product!.categoryId, categoryName: product!.categoryName);
+      _selectedTypeId = product!.productTypeId ?? productTypes[0];
     }
   }
 
@@ -228,7 +230,7 @@ class _ProductState extends State<ProductPage> {
                       SizedBox(height: 20),
                       TextFormField(
                         key: Key('description'),
-                        maxLines: 5,
+                        maxLines: 3,
                         decoration: InputDecoration(labelText: 'Description'),
                         controller: _descriptionController,
                       ),
@@ -281,9 +283,27 @@ class _ProductState extends State<ProductPage> {
                                     : null;
                               },
                               onChanged: (ProductCategory? newValue) {
-                                _selectedCategory = newValue;
+                                _selectedCategory = newValue!;
                               },
-                            )
+                            ),
+                            SizedBox(height: 10),
+                            DropdownButtonFormField<String>(
+                              key: Key('productTypeDropDown'),
+                              value: _selectedTypeId,
+                              decoration:
+                                  InputDecoration(labelText: 'Product Type'),
+                              validator: (value) {
+                                return value!.isEmpty ? 'field required' : null;
+                              },
+                              items: productTypes.map((item) {
+                                return DropdownMenuItem<String>(
+                                    child: Text(item), value: item);
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                _selectedTypeId = newValue!;
+                              },
+                              isExpanded: true,
+                            ),
                           ])),
                       SizedBox(height: 20),
                       Row(children: [
@@ -325,8 +345,9 @@ class _ProductState extends State<ProductPage> {
                                                   _descriptionController.text,
                                               price: Decimal.parse(
                                                   _priceController.text),
-                                              categoryId: _selectedCategory
-                                                  ?.categoryId!,
+                                              categoryId:
+                                                  _selectedCategory.categoryId!,
+                                              productTypeId: _selectedTypeId,
                                               image: image)));
                                   }
                                 })),

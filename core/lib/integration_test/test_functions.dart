@@ -91,7 +91,8 @@ class Test {
         reason: '>>>logged out home screen not found');
   }
 
-  static Future<void> createCategoryFromMain(WidgetTester tester) async {
+  static Future<void> createCategoryFromMain(WidgetTester tester,
+      {String? name}) async {
     await tester.tap(find.byKey(Key('dbCatalog')));
     await tester.pump(Duration(seconds: 5));
     if (Test.isPhone())
@@ -103,7 +104,8 @@ class Test {
     for (int x = 1; x < 3; x++) {
       await tester.tap(find.byKey(Key('addNew')));
       await tester.pump(Duration(seconds: 5));
-      await tester.enterText(find.byKey(Key('name')), 'categoryName$x');
+      await tester.enterText(
+          find.byKey(Key('name')), name == null ? 'categoryName$x' : '$name$x');
       await tester.enterText(find.byKey(Key('description')), 'categoryDesc$x');
       await tester.tap(find.byKey(Key('update')));
       await tester.pumpAndSettle(Duration(seconds: 5));
@@ -117,7 +119,13 @@ class Test {
     await tester.pumpAndSettle(Duration(seconds: 5));
   }
 
-  static Future<void> createProductFromMain(WidgetTester tester) async {
+  static Future<void> createRentalProduct(WidgetTester tester) async {
+    await createCategoryFromMain(tester,
+        name: 'RentalCategoryName'); // need a category to create test
+  }
+
+  static Future<void> createProductFromMain(WidgetTester tester,
+      {String productType = 'Physical Good'}) async {
     await createCategoryFromMain(tester); // need a category to create test
     await tester.tap(find.byKey(Key('dbCatalog')));
     await tester.pumpAndSettle(Duration(seconds: 5));
@@ -136,6 +144,10 @@ class Test {
       await tester.tap(find.byKey(Key('categoryDropDown')));
       await tester.pumpAndSettle(Duration(seconds: 1));
       await tester.tap(find.text('categoryName$x').last);
+      await tester.pump(Duration(seconds: 1));
+      await tester.tap(find.byKey(Key('productTypeDropDown')));
+      await tester.pumpAndSettle(Duration(seconds: 1));
+      await tester.tap(find.text(productType).last);
       await tester.pump(Duration(seconds: 1));
       await tester.drag(find.byKey(Key('listView')), Offset(0.0, -500.0));
       await tester.pump(Duration(seconds: 1));

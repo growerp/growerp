@@ -542,7 +542,7 @@ class Moqui {
         'companyPartyId': companyPartyId,
         'categoryId': categoryId,
         'productId': productId,
-        'productTypeId': productTypeIds[productTypeId],
+        'productTypeId': productTypeId,
         'assetClassId': assetClassId,
         'start': start,
         'limit': limit,

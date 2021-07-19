@@ -48,7 +48,7 @@ packages:
     description:
       path: backend
       ref: packages
-      resolved-ref: ce3576c2f45ca5a3b0376927e1c61802b2f18a53
+      resolved-ref: "5fda551a4e61dd9d2f8d744bcee9587c023d9e8e"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"
@@ -409,7 +409,7 @@ packages:
       name: mockito
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.10"
+    version: "5.0.11"
   mocktail:
     dependency: transitive
     description:
@@ -422,7 +422,7 @@ packages:
     description:
       path: models
       ref: packages
-      resolved-ref: ce3576c2f45ca5a3b0376927e1c61802b2f18a53
+      resolved-ref: "5fda551a4e61dd9d2f8d744bcee9587c023d9e8e"
       url: "https://github.com/growerp/growerp.git"
     source: git
     version: "0.0.1"

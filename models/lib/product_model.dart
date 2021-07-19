@@ -150,11 +150,14 @@ class Product extends Equatable {
       );
 }
 
-Map<String, String> productTypeIds = {
-  'PtService': 'Service',
-  'PtAsset': 'Physical Good',
-  'PtAssetUse': 'Rental',
-  'Service': 'PtService',
-  'Physical Good': 'PtAsset',
-  'Rental': 'PtAssetUse',
-};
+List<String> productTypes = ['Physical Good', 'Service', 'Rental'];
+
+// conversion is done on the server.
+//Map<String, String> productTypeIds = {
+//  'PtService': 'Service',
+//  'PtAsset': 'Physical Good',
+//  'PtAssetUse': 'Rental',
+//  'Service': 'PtService',
+//  'Physical Good': 'PtAsset',
+//  'Rental': 'PtAssetUse',
+//};
