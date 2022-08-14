@@ -1,0 +1,33 @@
+Integration tests using integration test package.(WidgetTest)
+=============================================================
+
+On mobile.
+----------
+
+run tests on mobile:
+    flutter drive \
+     --driver=test_driver/integration_test.dart \
+     --target=integration_test/all_test.dart
+
+on chrome
+---------
+
+Download chromedriver and install in path:
+https://flutter.dev/docs/cookbook/testing/integration/introduction#6b-web
+
+start in a terminal: ./chromedriver --port=4444
+
+Separate terminal:
+    flutter drive \
+     --driver=test_driver/integration_test.dart \
+     --target=integration_test/all_test.dart
+
+Chat test
+---------
+
+1. make sure the debug company of John doe exists.
+2. start the chat echo: flutter run -t lib/chatEcho_main.dart
+    and login with default debug parameters.
+3. run the chat test in a separate process: 
+    flutter test chat_test.dart
+    

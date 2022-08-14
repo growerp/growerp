@@ -1,0 +1,29 @@
+    <!--suppress ALL --><html lang="en"><head><title>present me</title>
+    <style>
+      :root {
+        --height: 600;
+      }
+      body { background-color: #efefef; }
+      img {
+        max-height: calc(var(--height) * 1px);
+        margin-left: 16px;
+      }
+      input {
+        width: 400px;
+      }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let h = document.getElementById('height');
+      let root = document.documentElement;
+      h.addEventListener('input', function () {
+        console.log('setting to ' + h.value);
+        root.style.setProperty('--height', h.value);
+      });
+    });
+    </script>
+    </head>
+    <div><label for="height">Preview Height:</label> <input type="range" min="100" max="2000" value="600" id="height" /></div>
+    <h1>Framed Screenshots</h2><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-accounting.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-accounting.png" /><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-catalog.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-catalog.png" /><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-company.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-company.png" /><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-gantt.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-gantt.png" /><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-ledger.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-ledger.png" /><img src="iPad Pro (12.9-inch) (2nd generation) (mobile)-sales.png" alt="iPad Pro (12.9-inch) (2nd generation) (mobile)-sales.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-accounting.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-accounting.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-catalog.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-catalog.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-company.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-company.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-gantt.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-gantt.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-ledger.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-ledger.png" /><img src="iPad Pro (12.9-inch) (3rd generation) (mobile)-sales.png" alt="iPad Pro (12.9-inch) (3rd generation) (mobile)-sales.png" /><img src="iPhone 12 Pro Max (mobile)-accounting.png" alt="iPhone 12 Pro Max (mobile)-accounting.png" /><img src="iPhone 12 Pro Max (mobile)-catalog.png" alt="iPhone 12 Pro Max (mobile)-catalog.png" /><img src="iPhone 12 Pro Max (mobile)-company.png" alt="iPhone 12 Pro Max (mobile)-company.png" /><img src="iPhone 12 Pro Max (mobile)-gantt.png" alt="iPhone 12 Pro Max (mobile)-gantt.png" /><img src="iPhone 12 Pro Max (mobile)-ledger.png" alt="iPhone 12 Pro Max (mobile)-ledger.png" /><img src="iPhone 12 Pro Max (mobile)-sales.png" alt="iPhone 12 Pro Max (mobile)-sales.png" /><img src="iPhone 8 Plus (mobile)-accounting.png" alt="iPhone 8 Plus (mobile)-accounting.png" /><img src="iPhone 8 Plus (mobile)-catalog.png" alt="iPhone 8 Plus (mobile)-catalog.png" /><img src="iPhone 8 Plus (mobile)-company.png" alt="iPhone 8 Plus (mobile)-company.png" /><img src="iPhone 8 Plus (mobile)-gantt.png" alt="iPhone 8 Plus (mobile)-gantt.png" /><img src="iPhone 8 Plus (mobile)-ledger.png" alt="iPhone 8 Plus (mobile)-ledger.png" /><img src="iPhone 8 Plus (mobile)-sales.png" alt="iPhone 8 Plus (mobile)-sales.png" />
+    <body></body></html>
+    

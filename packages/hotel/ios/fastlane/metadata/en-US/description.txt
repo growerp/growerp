@@ -1,0 +1,2 @@
+
+An application to manage your hotel with reservations, check-in, check-out, invoice printing and even accounting.

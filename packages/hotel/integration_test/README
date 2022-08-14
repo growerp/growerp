@@ -1,0 +1,44 @@
+Integration tests using integration test package.(WidgetTest)
+=============================================================
+
+These tests are for specific Hotel functions. The general tests
+can be found in the admin master branch.
+
+Automated run:
+--------------
+in the hotel directory and Moqui in:  growerpMoqui:
+flutter pub run utils:runIntegration.dart
+
+
+On mobile.
+----------
+
+single test with screenshot on error:
+flutter drive  \
+    --driver=test_driver/integration_test.dart \
+    --target=integration_test/reservation_test.dart \
+    --screenshot=.
+    --keep-app-running
+
+to run all tests with screenshot on error:
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/main_tests.dart \ 
+  --screenshot=.
+  --keep-app-running
+
+on chrome (not working yet)
+---------
+
+Download chromedriver and install in path:
+https://flutter.dev/docs/cookbook/testing/integration/introduction#6b-web
+
+start in a terminal: ./chromedriver --port=4444
+
+Separate terminal:
+
+flutter drive  -d web-server \
+    --driver=test_driver/integration_test.dart \
+    --target=integration_test/newCompany_test.dart \
+    --no-headless
+
