@@ -64,10 +64,8 @@ class _ProductsState extends State<ProductList> {
             previous.status == ProductStatus.loading,
         listener: (context, state) {
           if (state.status == ProductStatus.failure)
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: const Text('productList form'),
-              duration: const Duration(seconds: 1),
-            ));
+            HelperFunctions.showMessage(
+                context, '${state.message}', Colors.red);
           if (state.status == ProductStatus.success) {
             started = true;
             HelperFunctions.showMessage(

@@ -58,8 +58,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       return;
     try {
       // start from record zero for initial and refresh
-      emit(state.copyWith(status: ProductStatus.loading));
       if (state.status == ProductStatus.initial || event.refresh) {
+        emit(state.copyWith(status: ProductStatus.loading));
         ApiResult<List<Product>> compResult =
             await repos.getProduct(start: 0, limit: _productLimit);
         return emit(compResult.when(

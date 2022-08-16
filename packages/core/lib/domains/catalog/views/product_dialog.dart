@@ -159,6 +159,21 @@ class _ProductState extends State<ProductDialogFull> {
                     height: isPhone ? 900 : 600,
                     padding: EdgeInsets.all(20),
                     child: listChild(classificationId, isPhone, categoryState)),
+                Container(
+                    height: 50,
+                    width: isPhone ? 400 : 800,
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColorDark,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        )),
+                    child: Center(
+                        child: Text('Product Information',
+                            style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)))),
                 Positioned(top: 5, right: 5, child: DialogCloseButton())
               ])),
           if (productState.status == ProductStatus.updateLoading ||
@@ -430,6 +445,7 @@ class _ProductState extends State<ProductDialogFull> {
               child: SingleChildScrollView(
                   key: Key('listView'),
                   child: Column(children: <Widget>[
+                    SizedBox(height: 50),
                     Center(
                         child: Text(
                       'Product #${product.productId.isEmpty ? " New" : product.productId}',

@@ -136,11 +136,13 @@ class _CategoryState extends State<CategoryDialogFull> {
               ),
               child: Stack(clipBehavior: Clip.none, children: [
                 Container(
-                    padding: EdgeInsets.all(20),
                     width: 400,
-                    child: Center(child: listChild(productState))),
+                    height: 650,
+                    padding: EdgeInsets.all(20),
+                    child: listChild(productState)),
                 Container(
                     height: 50,
+                    width: 400,
                     decoration: BoxDecoration(
                         color: Theme.of(context).primaryColorDark,
                         borderRadius: BorderRadius.only(

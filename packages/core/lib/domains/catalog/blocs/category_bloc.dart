@@ -57,8 +57,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         event.searchString.isEmpty) return;
     try {
       // start from record zero for initial and refresh
-      emit(state.copyWith(status: CategoryStatus.loading));
       if (state.status == CategoryStatus.initial || event.refresh) {
+        emit(state.copyWith(status: CategoryStatus.loading));
         ApiResult<List<Category>> compResult = await repos.getCategory(
             companyPartyId: event.companyPartyId,
             searchString: event.searchString);

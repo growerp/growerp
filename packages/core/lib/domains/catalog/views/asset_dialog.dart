@@ -95,10 +95,25 @@ class _AssetState extends State<AssetDialog> {
                           Container(
                               padding: EdgeInsets.all(20),
                               width: 400,
-                              height: 500,
+                              height: 450,
                               child: Center(
                                 child: _showForm(repos, isPhone),
                               )),
+                          Container(
+                              height: 50,
+                              width: 400,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColorDark,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  )),
+                              child: Center(
+                                  child: Text('Asset Information',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)))),
                           Positioned(
                               top: 10, right: 10, child: DialogCloseButton())
                         ]))))));
