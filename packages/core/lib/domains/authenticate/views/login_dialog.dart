@@ -19,14 +19,11 @@ import 'package:flutter/foundation.dart';
 import 'package:core/domains/domains.dart';
 
 class LoginDialog extends StatefulWidget {
-  final String? message;
-  const LoginDialog([this.message]);
   @override
-  State<LoginDialog> createState() => _LoginHeaderState(message);
+  State<LoginDialog> createState() => _LoginHeaderState();
 }
 
 class _LoginHeaderState extends State<LoginDialog> {
-  final String? message;
   final _formKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   bool _obscureText = true;
@@ -34,15 +31,19 @@ class _LoginHeaderState extends State<LoginDialog> {
   String? companyName;
   List<Company>? companies;
   Company? _companySelected;
-  _LoginHeaderState(this.message);
+  String? oldPassword;
+  String? username;
+  _LoginHeaderState();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formKey1 = GlobalKey<FormState>();
+  final _password3Controller = TextEditingController();
+  final _password4Controller = TextEditingController();
+  bool _obscureText3 = true;
+  bool _obscureText4 = true;
 
   @override
   void initState() {
-    Future<Null>.delayed(Duration(milliseconds: 0), () {
-      HelperFunctions.showMessage(context, '$message', Colors.green);
-    });
     super.initState();
   }
 
@@ -51,12 +52,9 @@ class _LoginHeaderState extends State<LoginDialog> {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-          Navigator.of(context).pop(state.authenticate);
-          break;
-        case AuthStatus.passwordChange:
-          Navigator.pushNamed(context, '/changePw',
-              arguments: ChangePwArgs(
-                  _usernameController.text, _passwordController.text));
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/', ModalRoute.withName('/'),
+              arguments: FormArguments(message: state.message));
           break;
         case AuthStatus.failure:
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
@@ -65,6 +63,10 @@ class _LoginHeaderState extends State<LoginDialog> {
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return LoadingIndicator();
+      if (state.status == AuthStatus.passwordChange) {
+        username = _usernameController.text;
+        oldPassword = _passwordController.text;
+      }
       authenticate = state.authenticate!;
       companyPartyId = authenticate.company!.partyId;
       companyName = authenticate.company!.name;
@@ -77,10 +79,12 @@ class _LoginHeaderState extends State<LoginDialog> {
       if (_passwordController.text.isEmpty && !kReleaseMode)
         _passwordController.text = 'qqqqqq9!';
       Widget loginType;
-      if (companyPartyId == null) {
+      if (oldPassword != null && username != null) {
+        loginType = _changePassword(username, oldPassword);
+      } else if (companyPartyId == null) {
         loginType = _changeEcommerceCompany();
       } else {
-        loginType = _loginToCurrentCompany(state, context);
+        loginType = _loginToCurrentCompany();
       }
       return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
@@ -98,12 +102,94 @@ class _LoginHeaderState extends State<LoginDialog> {
     });
   }
 
+  Widget _changePassword(String? username, String? oldPassword) {
+    return PopUp(
+        height: 500,
+        context: context,
+        title: "Create New Password",
+        child: Form(
+          key: _formKey1,
+          child: Column(children: <Widget>[
+            SizedBox(height: 40),
+            Text("username: $username"),
+            SizedBox(height: 20),
+            TextFormField(
+              key: Key("password1"),
+              autofocus: true,
+              controller: _password3Controller,
+              obscureText: _obscureText3,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                helperText: 'At least 8 characters, including alpha, number '
+                    '&\nspecial character, no previous password.',
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText3 = !_obscureText3;
+                    });
+                  },
+                  child: Icon(
+                      _obscureText3 ? Icons.visibility : Icons.visibility_off),
+                ),
+              ),
+              validator: (value) {
+                if (value!.isEmpty) return 'Please enter first password?';
+                final regExpRequire =
+                    RegExp(r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
+                if (!regExpRequire.hasMatch(value))
+                  return 'At least 8 characters, including alpha, number & special character.';
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            TextFormField(
+              key: Key("password2"),
+              obscureText: _obscureText4,
+              decoration: InputDecoration(
+                labelText: 'Verify Password',
+                helperText: 'Enter the new password again.',
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscureText4 = !_obscureText4;
+                    });
+                  },
+                  child: Icon(
+                      _obscureText4 ? Icons.visibility : Icons.visibility_off),
+                ),
+              ),
+              controller: _password4Controller,
+              validator: (value) {
+                if (value!.isEmpty) return 'Enter password again to verify?';
+                if (value != _password4Controller.text)
+                  return 'Password is not matching';
+                return null;
+              },
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+                child: Text('Submit new Password'),
+                onPressed: () {
+                  if (_formKey1.currentState!.validate())
+                    context.read<AuthBloc>().add(
+                          AuthChangePassword(
+                            username!,
+                            oldPassword!,
+                            _password4Controller.text,
+                          ),
+                        );
+                }),
+          ]),
+        ));
+  }
+
   Widget _changeEcommerceCompany() {
+    final _formKey2 = GlobalKey<FormState>();
     return Container(
         width: 400,
         height: 400,
         child: Form(
-          key: _formKey,
+          key: _formKey2,
           child: SingleChildScrollView(
             child: DropdownButton(
               key: ValueKey('drop_down'),
@@ -129,13 +215,13 @@ class _LoginHeaderState extends State<LoginDialog> {
         ));
   }
 
-  Widget _loginToCurrentCompany(AuthState state, BuildContext context) {
+  Widget _loginToCurrentCompany() {
     return PopUp(
         context: context,
         title: "Login with Existing user name",
         child: Form(
             key: _formKey,
-            child: ListView(children: <Widget>[
+            child: Column(children: <Widget>[
               SizedBox(height: 20),
               TextFormField(
                 autofocus: _usernameController.text.isEmpty,
@@ -242,15 +328,6 @@ class _LoginHeaderState extends State<LoginDialog> {
         );
       },
     );
-  }
-
-  Future<Object>? PopUpWait(
-      {required BuildContext context,
-      required Widget child,
-      String title = '',
-      double height = 400}) {
-    PopUp(context: context, child: child);
-    return Future.value(Object());
   }
 }
 
