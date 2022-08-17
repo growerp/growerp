@@ -1,5 +1,13 @@
 # GrowERP releases
 
+## Fifth beta release August 17 2022
+1. improved documentation
+2. improved category and product interface
+3. Added category & product CSV up/download
+4. Improved integration tests, now 14 in total.
+5. Removed repository history, size reduced by 75%. 
+	history now in https://github.com/growerp/growerpuntil20220814 
+
 ## Fourth beta release July 7, 2022.
 First comments from end users arrived.
 1. Upload images was limited to 200K, now larger although after upload the size will be reduced to about 200k
