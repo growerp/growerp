@@ -333,9 +333,13 @@ class _CategoryState extends State<CategoryDialogFull> {
                           Container(
                               child: InputDecorator(
                                   decoration: InputDecoration(
-                                      labelText: 'Related Products, total: '
-                                          '${category.nbrOfProducts}, '
-                                          'shown first ${category.products.length}',
+                                      labelText: 'Related Products' +
+                                          (category.nbrOfProducts >
+                                                  category.products.length
+                                              ? ' total: '
+                                                  '${category.nbrOfProducts}, '
+                                                  'shown first ${category.products.length}'
+                                              : ''),
                                       border: OutlineInputBorder(
                                         borderRadius:
                                             BorderRadius.circular(25.0),

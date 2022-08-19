@@ -11,7 +11,7 @@ dependencies:
   decimal: ^2.1.0
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.0.1
+  flutter_bloc: ^8.1.1
   flutter_localizations:
         sdk: flutter
   flutter_phoenix: ^1.0.0
