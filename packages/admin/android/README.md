@@ -29,7 +29,7 @@ flutter pub global run frameit_chrome \
     --chrome-binary="/usr/bin/google-chrome-stable" \
     --pixel-ratio=1
 
-### futher
+### further
 1. Move the framed images in fastlane/metadata/framed/en-US to the respective directories under: metadata/android/en-US/images: phoneScreenshots, seveninchScreenshots,teninchScreenshots 
 2. increase in pubspec.yaml version+buildnr
     buildnr should always increase, version is shown to the user

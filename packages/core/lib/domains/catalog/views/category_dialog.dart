@@ -223,7 +223,7 @@ class _CategoryState extends State<CategoryDialogFull> {
     _selectedProducts.asMap().forEach((index, product) {
       _relProducts.add(InputChip(
           label: Text(
-            product.productName!,
+            product.productName ?? '',
             key: Key(product.productId),
           ),
           deleteIcon: const Icon(
@@ -333,7 +333,9 @@ class _CategoryState extends State<CategoryDialogFull> {
                           Container(
                               child: InputDecorator(
                                   decoration: InputDecoration(
-                                      labelText: 'Related Products',
+                                      labelText: 'Related Products, total: '
+                                          '${category.nbrOfProducts}, '
+                                          'shown first ${category.products.length}',
                                       border: OutlineInputBorder(
                                         borderRadius:
                                             BorderRadius.circular(25.0),

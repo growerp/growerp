@@ -51,7 +51,7 @@ class CategoryListItem extends StatelessWidget {
                           key: Key("description$index"),
                           textAlign: TextAlign.center)),
                 Expanded(
-                    child: Text("${category.products.length}",
+                    child: Text("${category.nbrOfProducts}",
                         key: Key("products$index"),
                         textAlign: TextAlign.center)),
               ],
