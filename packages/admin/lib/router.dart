@@ -33,7 +33,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/company':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+              menuList: menuOptions, menuIndex: 1, tabIndex: 3));
     case '/crm':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
