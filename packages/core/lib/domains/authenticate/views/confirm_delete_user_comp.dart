@@ -48,8 +48,9 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(32.0))),
     title: Text(
-        "Delete user ${userGroup == UserGroup.Admin ? ' and optionally company?' : ''}"),
-    content: Text("Please note this cannot be undone!"),
+        "Delete yourself ${userGroup == UserGroup.Admin ? ' and optionally company?' : ''}"),
+    content: Text("Please note you will be blocked using the system."
+        "\nThis cannot be undone!"),
     actions: actions,
   );
 

@@ -25,6 +25,9 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:core/domains/domains.dart';
 import 'package:core/api_repository.dart';
 
+final GlobalKey<ScaffoldMessengerState> UserDialogKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 /// User dialog with a required User class input containing the userGroup
 class UserDialog extends StatelessWidget {
   final User user;
@@ -122,14 +125,17 @@ class _UserState extends State<UserPage> {
     return BlocConsumer<UserBloc, UserState>(listener: (context, state) {
       if (state.status == UserStatus.failure) {
         loading = false;
-        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        UserDialogKey.currentState!
+            .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
       }
       if (state.status == UserStatus.success) {
         Navigator.of(context).pop(updatedUser);
       }
     }, builder: (context, state) {
-      if (state.status == UserStatus.loading) return LoadingIndicator();
-      return scaffoldWidget(user, context);
+      return Stack(children: [
+        scaffoldWidget(user, context),
+        if (state.status == UserStatus.loading) LoadingIndicator(),
+      ]);
     });
   }
 
@@ -146,12 +152,29 @@ class _UserState extends State<UserPage> {
               child: Container(
                   padding: EdgeInsets.all(20),
                   width: isPhone ? 400 : 1000,
-                  height: isPhone ? 1020 : 800,
-                  child: Scaffold(
-                      backgroundColor: Colors.transparent,
-                      floatingActionButton:
-                          imageButtons(context, _onImageButtonPressed),
-                      body: listChild()))),
+                  height: isPhone ? 1020 : 600,
+                  child: ScaffoldMessenger(
+                      key: UserDialogKey,
+                      child: Scaffold(
+                          backgroundColor: Colors.transparent,
+                          floatingActionButton:
+                              imageButtons(context, _onImageButtonPressed),
+                          body: listChild())))),
+          Container(
+              height: 50,
+              width: isPhone ? 400 : 1000,
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColorDark,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  )),
+              child: Center(
+                  child: Text('User Information',
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)))),
           Positioned(top: 5, right: 5, child: DialogCloseButton())
         ]));
   }
@@ -473,8 +496,17 @@ class _UserState extends State<UserPage> {
                   if (_imageFile?.path != null && updatedUser.image == null)
                     HelperFunctions.showMessage(
                         context, "Image upload error!", Colors.red);
-                  else
+                  else {
                     context.read<UserBloc>().add(UserUpdate(updatedUser));
+                    if (context
+                            .read<AuthBloc>()
+                            .state
+                            .authenticate!
+                            .user!
+                            .partyId ==
+                        updatedUser.partyId)
+                      context.read<AuthBloc>().add(AuthUserUpdate(updatedUser));
+                  }
                 }
               }))
     ]);
@@ -506,6 +538,7 @@ class _UserState extends State<UserPage> {
         child: SingleChildScrollView(
             key: Key('listView'),
             child: Column(children: <Widget>[
+              SizedBox(height: 40),
               Center(
                   child: Text(
                 'User ${widget.user.userGroup.toString()} #${updatedUser.partyId ?? " New"}',

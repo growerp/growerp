@@ -33,6 +33,7 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.repos, this.chat) : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
+    on<AuthUserUpdate>(_onAuthUserUpdate);
     on<AuthUpdateCompany>(_onAuthUpdateCompany);
     on<AuthUpdateUser>(_onAuthUpdateUser);
     on<AuthDeleteUser>(_onAuthDeleteUser);
@@ -46,6 +47,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final APIRepository repos;
   final ChatServer chat;
+
+  Future<void> _onAuthUserUpdate(
+    AuthUserUpdate event,
+    Emitter<AuthState> emit,
+  ) async {
+    return emit(state.copyWith(
+        authenticate: state.authenticate!.copyWith(user: event.user)));
+  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,

@@ -22,6 +22,11 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
+class AuthUserUpdate extends AuthEvent {
+  final User user;
+  AuthUserUpdate(this.user);
+}
+
 class AuthUpdateUser extends AuthEvent {
   final User user;
   AuthUpdateUser(this.user);

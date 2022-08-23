@@ -24,6 +24,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:core/domains/domains.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+final GlobalKey<ScaffoldMessengerState> CompanyDialogKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class CompanyForm extends StatelessWidget {
   final FormArguments formArguments;
   CompanyForm(this.formArguments);
@@ -123,7 +126,8 @@ class _CompanyState extends State<CompanyPage> {
               context, '${state.message}', Colors.green);
           break;
         case AuthStatus.failure:
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          CompanyDialogKey.currentState!
+              .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
           break;
         default:
       }
@@ -315,50 +319,51 @@ class _CompanyState extends State<CompanyPage> {
                 child: Text((company.paymentMethod != null ? 'Update' : 'Add') +
                     ' Payment Method')))
       ]),
-      Row(children: [
-        Expanded(
-            child: Visibility(
-                visible: isAdmin,
-                child: ElevatedButton(
-                    key: Key('update'),
-                    child: Text(
-                      company.partyId == null ? 'Create' : 'Update',
-                    ),
-                    onPressed: isAdmin
-                        ? () async {
-                            if (_formKey.currentState!.validate()) {
-                              company = Company(
-                                  partyId: company.partyId,
-                                  email: _emailController.text,
-                                  name: _nameController.text,
-                                  telephoneNr: _telephoneController.text,
-                                  currency: _selectedCurrency,
-                                  address: company.address,
-                                  paymentMethod:
-                                      authenticate.company?.paymentMethod,
-                                  vatPerc: Decimal.parse(
-                                      _vatPercController.text.isEmpty
-                                          ? '0'
-                                          : _vatPercController.text),
-                                  salesPerc: Decimal.parse(
-                                      _salesPercController.text.isEmpty
-                                          ? '0'
-                                          : _salesPercController.text),
-                                  image: await HelperFunctions.getResizedImage(
-                                      _imageFile?.path));
-                              if (_imageFile?.path != null &&
-                                  company.image == null)
-                                HelperFunctions.showMessage(
-                                    context, "Image upload error!", Colors.red);
-                              else
-                                context
-                                    .read<AuthBloc>()
-                                    .add(AuthUpdateCompany(company));
-                            }
-                          }
-                        : null)))
-      ])
     ];
+
+    Widget _update = Row(children: [
+      Expanded(
+          child: Visibility(
+              visible: isAdmin,
+              child: ElevatedButton(
+                  key: Key('update'),
+                  child: Text(
+                    company.partyId == null ? 'Create' : 'Update',
+                  ),
+                  onPressed: isAdmin
+                      ? () async {
+                          if (_formKey.currentState!.validate()) {
+                            company = Company(
+                                partyId: company.partyId,
+                                email: _emailController.text,
+                                name: _nameController.text,
+                                telephoneNr: _telephoneController.text,
+                                currency: _selectedCurrency,
+                                address: company.address,
+                                paymentMethod:
+                                    authenticate.company?.paymentMethod,
+                                vatPerc: Decimal.parse(
+                                    _vatPercController.text.isEmpty
+                                        ? '0'
+                                        : _vatPercController.text),
+                                salesPerc: Decimal.parse(
+                                    _salesPercController.text.isEmpty
+                                        ? '0'
+                                        : _salesPercController.text),
+                                image: await HelperFunctions.getResizedImage(
+                                    _imageFile?.path));
+                            if (_imageFile?.path != null &&
+                                company.image == null)
+                              HelperFunctions.showMessage(
+                                  context, "Image upload error!", Colors.red);
+                            else
+                              context
+                                  .read<AuthBloc>()
+                                  .add(AuthUpdateCompany(company));
+                          }
+                        }
+                      : null)))
+    ]);
 
     List<Widget> rows = [];
     if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
@@ -419,6 +424,7 @@ class _CompanyState extends State<CompanyPage> {
                                               color: Colors.black))),
                           SizedBox(height: 10),
                           Column(children: (rows.isEmpty ? column : rows)),
+                          _update,
                         ]))))));
   }
 }
