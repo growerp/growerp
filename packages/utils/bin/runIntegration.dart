@@ -37,11 +37,11 @@ void main(List<String> arguments) async {
   await Process.runSync('git', ['pull'], workingDirectory: '$home/growerp');
   await Process.runSync('flutter', ['pub', 'get'],
       workingDirectory: '$home/growerp/packages/core');
-  await Process.runSync('flutter', ['pub', 'get'],
-      workingDirectory: '$home/growerp/packages/admin');
   await Process.runSync('flutter',
       ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
       workingDirectory: '$home/growerp/packages/core');
+  await Process.runSync('flutter', ['pub', 'get'],
+      workingDirectory: '$home/growerp/packages/admin');
 
   // growerp-chat
   print("update chat");
