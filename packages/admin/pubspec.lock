@@ -133,7 +133,7 @@ packages:
       path: "../core"
       relative: true
     source: path
-    version: "0.3.0+1"
+    version: "0.5.0+1"
   coverage:
     dependency: transitive
     description:

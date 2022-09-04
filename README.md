@@ -22,12 +22,6 @@ We also created a first vertical app for Hotel owners which will be released lat
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1531267095
 
 ### Install flutter admin app locally
-Please note we currectly use the beta version of flutter 
-to switch to beta:
-```
-flutter channel beta
-flutter upgrade
-```
 to install:
 ```
 git clone https://github.com/growerp/growerp.git 

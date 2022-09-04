@@ -12,11 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:core/api_repository.dart';
+import 'package:core/domains/common/widgets/observer.dart';
+import 'package:core/domains/integration_test.dart';
+import 'package:core/services/chat_server.dart';
 import 'package:hotel/main.dart';
-import 'package:dio/dio.dart';
-import 'package:core/integration_test/test_functions.dart';
-import 'package:backend/moqui.dart';
-import 'package:core/widgets/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,45 +37,43 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-    Bloc.observer = SimpleBlocObserver();
+    Bloc.observer = AppBlocObserver();
   });
 
   group('Order Rental tests>>>>>', () {
     testWidgets("Prepare>>>>>>", (WidgetTester tester) async {
-      await Test.createCompanyAndAdmin(
-          tester, HotelApp(repos: Moqui(client: Dio())));
-      await Test.login(tester, HotelApp(repos: Moqui(client: Dio())));
-      await Test.createAssetFromMain(tester);
-      String random = Test.getRandom();
-      await Test.createUser(tester, 'customer', random);
-      await Test.createReservation(tester);
+      await CommonTest.startApp(
+          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      await CompanyTest.createCompany(tester);
+      await AssetTest.addAssets(tester, assets);
+      String random = CommonTest.getRandom();
+      await UserTest.selectCustomers(tester);
+      await UserTest.addCustomers(tester, customers.sublist(0, 1));
+      await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
     }, skip: false);
 
     testWidgets("check orders for rental data >>>>>",
         (WidgetTester tester) async {
-      await Test.login(tester, HotelApp(repos: Moqui(client: Dio())));
-      //    username: 'e953@example.org');
-      if (Test.isPhone()) {
-        await tester.tap(find.byTooltip('Open navigation menu'));
-        await tester.pump(Duration(seconds: 10));
-      }
+      await CommonTest.startApp(
+          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      await CompanyTest.createCompany(tester);
       await tester.tap(find.byKey(Key('tap/sales')));
       await tester.pump(Duration(seconds: 1));
       expect(find.byKey(Key('FinDocsFormSalesOrder')), findsOneWidget);
       // check list
       for (int x in [0, 1]) {
-        expect(Test.getTextField('statusId$x'), equals('Created'));
+        expect(CommonTest.getTextField('statusId$x'), equals('Created'));
         await tester.tap(find.byKey(Key('ID$x')));
         await tester.pump(Duration(seconds: 10));
-        expect(Test.getTextField('itemLine$x'),
+        expect(CommonTest.getTextField('itemLine$x'),
             contains(x == 0 ? '$todayStringIntl' : '$plus2StringIntl'));
       }
     }, skip: false);
     testWidgets("check blocked dates for new reservation>>>>>",
         (WidgetTester tester) async {
-      await Test.login(tester, HotelApp(repos: Moqui(client: Dio())));
-      //    username: 'e841@example.org');
-      if (Test.isPhone()) {
+      await CommonTest.startApp(
+          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      if (CommonTest.isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));
         await tester.pump(Duration(seconds: 10));
       }
