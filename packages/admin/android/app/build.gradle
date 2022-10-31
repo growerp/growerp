@@ -50,7 +50,6 @@ android {
     defaultConfig {
         applicationId "org.growerp.admin"
         minSdkVersion 21
-        targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

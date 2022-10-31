@@ -6,7 +6,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'services/api_result.dart';
 import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 import 'domains/domains.dart';
 import 'package:core/domains/catalog/models/category_model.dart' as cat;
 
@@ -1158,6 +1158,22 @@ class APIRepository {
       });
       return getResponse<Website>(
           "website", response, (json) => Website.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<bool>> obsUpload(Obsidian obsidian) async {
+    try {
+      final response = await dioClient.post(
+          'rest/s1/growerp/100/Obsidian', apiKey!,
+          data: <String, dynamic>{
+            'obsidian': jsonEncode(obsidian.toJson()),
+            'classificationId': classificationId,
+            'moquiSessionToken': sessionToken
+          });
+      return ApiResult.success(
+          data: jsonDecode(response.toString())['ok'] == 'ok');
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

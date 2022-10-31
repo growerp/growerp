@@ -23,7 +23,7 @@ packages:
     source: hosted
     version: "4.6.0"
   archive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: archive
       url: "https://pub.dartlang.org"
@@ -287,7 +287,7 @@ packages:
       name: equatable
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.4"
+    version: "2.0.5"
   fake_async:
     dependency: transitive
     description:

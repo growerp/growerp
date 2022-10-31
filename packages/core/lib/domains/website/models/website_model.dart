@@ -30,6 +30,7 @@ class Website with _$Website {
     @Default([]) List<Category> websiteCategories,
     @Default([]) List<Category> productCategories,
     @Default('') String colorJson,
+    @Default('') String obsidianName,
   }) = _Website;
 
   factory Website.fromJson(Map<String, dynamic> json) =>

@@ -13,25 +13,30 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:core/api_repository.dart';
 import 'package:core/services/api_result.dart';
 import 'package:core/services/network_exceptions.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:core/domains/domains.dart';
+import 'package:archive/archive_io.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'website_event.dart';
 part 'website_state.dart';
 
 /// Websitebloc controls the connection to the backend
 ///
-/// It contains company and user information and signals connection errrors,
-/// keeps the token and apiKey in the [Websiteenticate] class.
+/// It contains company and user information and signals connection errrors
 ///
 class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
   WebsiteBloc(this.repos) : super(const WebsiteState()) {
     on<WebsiteFetch>(_onWebsiteFetch);
     on<WebsiteUpdate>(_onWebsiteUpdate);
+    on<WebsiteObsUpload>(_onWebsiteObsUpload);
   }
 
   final APIRepository repos;
@@ -65,6 +70,43 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
               status: WebsiteStatus.success,
               website: data,
               message: 'website updated...');
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: WebsiteStatus.failure, message: error.toString())));
+  }
+
+  Future<void> _onWebsiteObsUpload(
+    WebsiteObsUpload event,
+    Emitter<WebsiteState> emit,
+  ) async {
+    emit(state.copyWith(status: WebsiteStatus.loading));
+    Obsidian? input;
+    if (event.path != null) {
+      Directory appDocDirectory = await getApplicationDocumentsDirectory();
+      final zipFile = '${appDocDirectory.path}/out.zip';
+      var inputDir = Directory(event.path!);
+      var encoder = ZipFileEncoder();
+      encoder.create(zipFile);
+      for (FileSystemEntity entity
+          in inputDir.listSync(recursive: true, followLinks: false)) {
+        if (entity.path.contains('.obsidian')) continue;
+        if (entity is File)
+          encoder.addFile(
+              File(entity.path), entity.path.substring(event.path!.length + 1));
+      }
+      encoder.close();
+      input = event.obsidian.copyWith(zip: await File(zipFile).readAsBytes());
+    } else
+      input = event.obsidian;
+
+    ApiResult<bool> result = await repos.obsUpload(input);
+    return emit(result.when(
+        success: (data) {
+          return state.copyWith(
+              status: WebsiteStatus.success,
+              message: input?.zip != null
+                  ? 'obsidian zip file uploaded..'
+                  : 'obsidian removed');
         },
         failure: (NetworkExceptions error) => state.copyWith(
             status: WebsiteStatus.failure, message: error.toString())));

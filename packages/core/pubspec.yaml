@@ -17,7 +17,7 @@ dependencies:
   reorderables:
   intl: ^0.17.0
   global_configuration: ^2.0.0-nullsafety.0
-  equatable: ^2.0.0
+  equatable: ^2.0.5
   flutter_bloc: ^8.1.1
   bloc_concurrency: ^0.2.0
   meta: ^1.3.0
@@ -49,6 +49,7 @@ dependencies:
   path_provider: ^2.0.11
   file_picker: ^5.0.1
   fast_csv: ^0.1.44
+  archive: ^3.3.0
 
 dev_dependencies:
   flutter_test:

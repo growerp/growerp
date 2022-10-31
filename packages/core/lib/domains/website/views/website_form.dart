@@ -13,8 +13,9 @@
  */
 
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:core/domains/common/functions/helper_functions.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,6 +63,7 @@ class _WebsiteState extends State<WebsitePage> {
   List<Category> _availableCategories = [];
   TextEditingController _urlController = TextEditingController();
   TextEditingController _titleController = TextEditingController();
+  TextEditingController _obsidianController = TextEditingController();
 
   @override
   void initState() {
@@ -101,6 +103,7 @@ class _WebsiteState extends State<WebsitePage> {
             case WebsiteStatus.success:
               _urlController.text = state.website!.hostName.split('.')[0];
               _titleController.text = state.website!.title;
+              _obsidianController.text = state.website!.obsidianName;
               _updatedContent = List.of(state.website!.websiteContent);
               _selectedCategories = List.of(state.website!.productCategories);
               return Scaffold(body: Center(child: _showForm(state)));
@@ -579,6 +582,53 @@ class _WebsiteState extends State<WebsitePage> {
             ),
             SizedBox(height: 10),
             Wrap(children: colorCatButtons, spacing: 10)
+          ])),
+      Container(
+          width: 400,
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25.0),
+            border: Border.all(
+                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
+          ),
+          child: Row(children: [
+            Expanded(
+                child: TextFormField(
+                    key: Key('title'),
+                    controller: _obsidianController,
+                    decoration:
+                        new InputDecoration(labelText: 'Title of the vault'))),
+            SizedBox(width: 10),
+            ElevatedButton(
+                key: Key('upload'),
+                child: Text('Upload Obsidian Vault'),
+                onPressed: () async {
+                  FilePickerResult? result;
+                  String? path;
+                  if (foundation.kIsWeb)
+                    result = await FilePicker.platform.pickFiles(
+                        allowedExtensions: ['zip'], type: FileType.custom);
+                  else
+                    path = await FilePicker.platform.getDirectoryPath();
+
+                  context.read<WebsiteBloc>().add(WebsiteObsUpload(
+                      Obsidian(
+                          title: _obsidianController.text,
+                          zip: result?.files.first.bytes!),
+                      path));
+                }),
+            SizedBox(width: 10),
+            Visibility(
+                visible: _obsidianController.text.isNotEmpty,
+                child: ElevatedButton(
+                    key: Key('obsidianDelete'),
+                    child: Text('Delete'),
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.red)),
+                    onPressed: () async {
+                      context.read<WebsiteBloc>().add(WebsiteObsUpload(
+                          Obsidian(title: _obsidianController.text), null));
+                    }))
           ])),
     ];
 

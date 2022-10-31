@@ -22,6 +22,12 @@ abstract class WebsiteEvent extends Equatable {
 
 class WebsiteFetch extends WebsiteEvent {}
 
+class WebsiteObsUpload extends WebsiteEvent {
+  final Obsidian obsidian;
+  final String? path;
+  WebsiteObsUpload(this.obsidian, this.path);
+}
+
 class WebsiteUpdate extends WebsiteEvent {
   final Website website;
   WebsiteUpdate(this.website);
