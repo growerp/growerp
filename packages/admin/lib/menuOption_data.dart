@@ -35,12 +35,9 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
     tabItems: [
       TabItem(
-        form: const WebsiteForm(
-          key: Key('Website'),
-          userGroup: UserGroup.Employee,
-        ),
-        label: 'Website',
-        icon: const Icon(Icons.webhook),
+        form: CompanyForm(FormArguments()),
+        label: 'Company Info',
+        icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const UserListForm(
@@ -59,9 +56,12 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: CompanyForm(FormArguments()),
-        label: 'Company Info',
-        icon: const Icon(Icons.home),
+        form: const WebsiteForm(
+          key: Key('Website'),
+          userGroup: UserGroup.Employee,
+        ),
+        label: 'Website',
+        icon: const Icon(Icons.webhook),
       ),
     ],
   ),
