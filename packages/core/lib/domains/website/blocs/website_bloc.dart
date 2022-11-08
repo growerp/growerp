@@ -89,8 +89,7 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       encoder.create(zipFile);
       for (FileSystemEntity entity
           in inputDir.listSync(recursive: true, followLinks: false)) {
-        if (entity.path.contains('.obsidian')) continue;
-        if (entity is File)
+        if (entity is File && !entity.path.contains('.obsidian'))
           encoder.addFile(
               File(entity.path), entity.path.substring(event.path!.length + 1));
       }
@@ -99,11 +98,14 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
     } else
       input = event.obsidian;
 
-    ApiResult<bool> result = await repos.obsUpload(input);
+    ApiResult<Website> result = await repos.obsUpload(input);
+    emit(state.copyWith(status: WebsiteStatus.loading));
+
     return emit(result.when(
         success: (data) {
           return state.copyWith(
               status: WebsiteStatus.success,
+              website: data,
               message: input?.zip != null
                   ? 'obsidian zip file uploaded..'
                   : 'obsidian removed');

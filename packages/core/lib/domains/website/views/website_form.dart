@@ -593,8 +593,8 @@ class _WebsiteState extends State<WebsitePage> {
           ),
           child: Row(children: [
             Expanded(
-                child: TextFormField(
-                    key: Key('title'),
+                child: TextField(
+                    key: Key('obsTitle'),
                     controller: _obsidianController,
                     decoration:
                         new InputDecoration(labelText: 'Title of the vault'))),
@@ -611,11 +611,12 @@ class _WebsiteState extends State<WebsitePage> {
                   else
                     path = await FilePicker.platform.getDirectoryPath();
 
-                  context.read<WebsiteBloc>().add(WebsiteObsUpload(
-                      Obsidian(
-                          title: _obsidianController.text,
-                          zip: result?.files.first.bytes!),
-                      path));
+                  if (path != null || result != null)
+                    context.read<WebsiteBloc>().add(WebsiteObsUpload(
+                        Obsidian(
+                            title: _obsidianController.text,
+                            zip: result?.files.first.bytes!),
+                        path));
                 }),
             SizedBox(width: 10),
             Visibility(
