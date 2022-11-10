@@ -1,0 +1,150 @@
+{
+  "main": {
+    "id": "ec42cbb8e088b8d1",
+    "type": "split",
+    "children": [
+      {
+        "id": "5bcb60cc1e109511",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "71e070a028729766",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "media/website.png"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "50f6eb58a2ca765f",
+    "type": "split",
+    "children": [
+      {
+        "id": "cf189eb8b517bb24",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3e1cbc4fc81746df",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "5eaef352ace2aa85",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "bdd5b9c949b7ec83",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "633410cb3c4e66be",
+    "type": "split",
+    "children": [
+      {
+        "id": "06ab4d3d1d11df20",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8a8cba40e262227c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "media/website.png",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "e81c366ab1126033",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "media/website.png",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "92ea5af1549d4704",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "a4410c2faa138501",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "media/website.png"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "71e070a028729766",
+  "lastOpenFiles": [
+    "media/websiteAdmin.png",
+    "media/website.png",
+    "1 Introduction/1a What is GrowERP.md",
+    "2 End User documentation/2b Website.md",
+    "2 End User documentation/2e Inventory management.md",
+    "3 Technical documentation/3b API.md",
+    "3 Technical documentation/3d Stripe.md",
+    "3 Technical documentation/3c Packages.md",
+    "3 Technical documentation/3a Technical Introduction.md",
+    "2 End User documentation/2i Authentication & Usertypes.md"
+  ]
+}
