@@ -51,3 +51,16 @@ The categories you created can be added to this section show them in the 'shop' 
 ## promote on other platforms.
 
 If you like to promote a single product on other platforms, go to your own website here and click on the product. Now copy the full internet address at the top of your browser and past it as a link in the text you created somewhere else.
+
+## Obsidian upload
+You can upload an obsidian vault which will be displayed in Html at the website as an option on the tab bar.
+
+This is provided to have a documentation website of your products or services.
+Only some Obsidian features are supported.
+
+1. Links to local pages or externa; pages
+2. inclusion of local images
+3. Inclusion of external markdown files with the example code:
+``` 
+	![](https:example.com/your_md file page.md )
+```

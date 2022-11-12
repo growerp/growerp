@@ -11,9 +11,11 @@
             "id": "71e070a028729766",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "media/website.png"
+                "file": "2 End User documentation/2b Website.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -83,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "media/website.png",
+                "file": "2 End User documentation/2b Website.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "media/website.png",
+                "file": "2 End User documentation/2b Website.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -123,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "media/website.png"
+                "file": "2 End User documentation/2b Website.md"
               }
             }
           }
@@ -136,15 +138,15 @@
   },
   "active": "71e070a028729766",
   "lastOpenFiles": [
-    "media/websiteAdmin.png",
-    "media/website.png",
-    "1 Introduction/1a What is GrowERP.md",
+    "2 End User documentation/2d Sales Order management..md",
     "2 End User documentation/2b Website.md",
-    "2 End User documentation/2e Inventory management.md",
-    "3 Technical documentation/3b API.md",
-    "3 Technical documentation/3d Stripe.md",
     "3 Technical documentation/3c Packages.md",
+    "3 Technical documentation/3b API.md",
     "3 Technical documentation/3a Technical Introduction.md",
-    "2 End User documentation/2i Authentication & Usertypes.md"
+    "media/website.png",
+    "media/websiteAdmin.png",
+    "1 Introduction/1a What is GrowERP.md",
+    "2 End User documentation/2e Inventory management.md",
+    "3 Technical documentation/3d Stripe.md"
   ]
 }
