@@ -111,7 +111,7 @@ flutter run
     <table>
         <tr>
             <td style="text-align: center">
-                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/docs/_media/htmlWebsite.png" width="600">
+                    <img src="https://raw.githubusercontent.com/growerp/growerp/master/GrowERPObs/media/website.png" width="600">
             </td>            
         </tr>
     </table>
