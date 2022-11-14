@@ -1,1 +1,0 @@
-[](https://raw.githubusercontent.com/growerp/mantle-stripe/master/README.md ':include :type=md')

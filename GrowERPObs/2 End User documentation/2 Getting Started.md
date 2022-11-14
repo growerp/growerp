@@ -2,7 +2,7 @@
 
 In order to get you started quickly below a cheat sheet to get publish your product on the internet where customers can order your product directly.
 
-This page is just a quick start, more extensive descriptions by user functions you can find [here](end_user/../functional_overview.md).
+This page is just a quick start, more extensive descriptions by user functions you can find [[2 End User documentation/1 Overview]]
 
 We have made this system available directly from the cloud either by using a mobile APP or using the application at your PC.
 
@@ -50,10 +50,10 @@ Now make your product available for internet sale: register, create the product 
 
 #### Promote your product
 
-* Now use your [marketing and sales](end_user/../marketing_sales.md) skills to use your social media like twitter, facebook etc to promote the product by providing the internet address of the product you just entered.
+* Now use your [[4 Marketing & sales]] skills to use your social media like twitter, facebook etc to promote the product by providing the internet address of the product you just entered.
 
 #### When you get orders?
 
-* They will appear in the [sales order section](end_user/../sales_order_entry.md) where you can accept and approve them, then go the inventory section to create a package label with a destination postal address, [also approve and send here](end_user/../inventory_management.md) which completes the sale.
+* They will appear in the [[5 Order management]] where you can accept and approve them, then go the [[inventory section]] to create a package label with a destination postal address, then approve the shipment, which completes the sale.
 
-* [Accounting](end_user/../accounting.md) has been running in the background which has created a payment, invoice and updated your ledger for your accounting records.
+* [[7 Accounting]]has been running in the background which has created a payment, invoice and updated your ledger for your accounting records.

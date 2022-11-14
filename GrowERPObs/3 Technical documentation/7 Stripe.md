@@ -1,1 +1,1 @@
-[](https://raw.githubusercontent.com/growerp/mantle-stripe/master/README.md)
+![](https://raw.githubusercontent.com/growerp/mantle-stripe/master/README.md)

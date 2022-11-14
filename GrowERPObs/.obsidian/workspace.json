@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/5 Order management.md",
+                "file": "GrowERP documentation.md",
                 "mode": "source",
                 "source": false
               }
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/5 Order management.md",
+                "file": "GrowERP documentation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/5 Order management.md",
+                "file": "GrowERP documentation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/5 Order management.md"
+                "file": "GrowERP documentation.md"
               }
             }
           }
@@ -149,17 +149,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "3e1cbc4fc81746df",
+  "active": "15835e0e5d0ffd23",
   "lastOpenFiles": [
+    "2 End User documentation/4 Marketing & sales.md",
+    "2 End User documentation/1 Overview.md",
+    "GrowERP documentation.md",
     "3 Technical documentation/9 Andriod Playstore publication.md",
     "3 Technical documentation/8 IOS AppStore publication.md",
     "3 Technical documentation/7 Stripe.md",
     "3 Technical documentation/6 Website.md",
     "3 Technical documentation/5 Chat Server.md",
     "3 Technical documentation/4 Moqui Backend.md",
-    "3 Technical documentation/3 Packages.md",
-    "3 Technical documentation/2 API.md",
-    "3 Technical documentation/1 Technical Introduction.md",
-    "2 End User documentation/9 Authentication & Usertypes.md"
+    "3 Technical documentation/3 Packages.md"
   ]
 }

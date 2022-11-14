@@ -1,16 +1,26 @@
 # Releases
-## [Fifth beta release August 17 2022](https://www.growerp.com/#/general/releases?id=fifth-beta-release-august-17-2022)
+
+## Sixth beta release November 18 2022
+
+1. Now possble to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation for your product. Functions supported:
+	1. internal and external linking
+	2. Inclusion of external md files.
+	3. Inline images
+	4. Mobile upload from local obsidian vault
+	5. Web browser upload via zipped obsidian vault.
+2. GrowERP website now completely using GrowERP itself
+
+## Fifth beta release August 17 2022
 
 1.  improved documentation
 2.  improved category and product interface
 3.  Added category & product CSV up/download
 4.  Improved integration tests, now 14 in total.
-5.  Removed repository history, size reduced by 75%. history now in [https://github.com/growerp/growerpuntil20220814](https://github.com/growerp/growerpuntil20220814)
+5.  Removed repository history, size reduced by 75%. history now in repository [growerpuntil20220814](https://github.com/growerp/growerpuntil20220814)
 
-## [Fourth beta release July 7, 2022.](https://www.growerp.com/#/general/releases?id=fourth-beta-release-july-7-2022)
+## Fourth beta release July 7, 2022.
 
 First comments from end users arrived.
-
 1.  Upload images was limited to 200K, now larger although after upload the size will be reduced to about 200k
 2.  At the html website one can now add menu dropdowns which are generated from the markdown documents
 3.  On the html website available categories can now be reduced even to the stage they do not show at all.
@@ -19,26 +29,22 @@ First comments from end users arrived.
 6.  The above changes mean, that the website can now be used just as a textual website without any e-commerce products.
 7.  Web application has now an improved user interface taking advantage of the larger screen.
 
-## [Third beta release July 1, 2022.](https://www.growerp.com/#/general/releases?id=third-beta-release-july-1-2022)
+## Third beta release July 1, 2022.
 
-1.  Automatically generated [e-commerce website](https://www.growerp.com/#/../end_user/marketing_sales)
-    
+1.  Automatically generated website.
     -   Maintenance from flutter frontend:
         -   logo, products and categories
         -   title, about, support, using markdown format
     -   using improved demo data
     -   multi currency
     -   multi company
-2.  [Api documented and available](https://www.growerp.com/#/technical_user/api) for testing with Flutter frontend
-    
+2.  Api documented and available: [[2 API]] for testing with Flutter frontend
     -   in/output parameters definition
     -   authorization
-    -   test/production public API sites at test.growerp.org/backend.growerp.com
-3.  [Stripe payment gateway](https://www.growerp.com/#/technical_user/stripe).
-    
+    -   test/production public API sites at test.growerp.org//rest
+3.  [[7 Stripe]] gateway    
     -   working with E-commerce website and flutter frontend.
 4.  Flutter frontend improvements:
-    
     -   Added E-commerce website maintenance to flutter frontend at company -> website
     -   adding categories to products and adding products to categories improved
     -   no mandatory assignment of a product to at least a single category
@@ -50,7 +56,7 @@ First comments from end users arrived.
     -   upgraded app in app/play store.
     -   More documentation.
 
-## [Second beta release May 3, 2022](https://www.growerp.com/#/general/releases?id=second-beta-release-may-3-2022)
+## Second beta release May 3, 2022]
 
 1.  Input of invoice/payment without an order with automatic posting.
 2.  better integration tests.
@@ -59,10 +65,9 @@ First comments from end users arrived.
 5.  Invoice and payment creation without Order
 6.  Started documentation in docsify package
 
-## [First beta release feb 28, 2022](https://www.growerp.com/#/general/releases?id=first-beta-release-feb-28-2022)
+## First beta release feb 28, 2022
 
 Changes since September 2021:
-
 1.  All packages now in a single git branch.
 2.  Reorganized the project into a domain organization see: packages/core/lib/domains
 3.  Well organized integration tests for all functions.

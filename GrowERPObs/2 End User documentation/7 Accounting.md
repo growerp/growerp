@@ -8,3 +8,6 @@ Not received payments will appear in the incoming payment list and can be confir
 ## Accounts payable
 
 When purchase orders are approved and invoice and payment is created which can be compared with the incoming invoice from the supplier. It can be checked in the incoming shipment list if the order is accepted by the inventory function. When yes the payment be paid by the '↑' (arrow up) button.
+
+## Ledger
+Most of the business activities are automatically posted to the ledger, of which the content can be sent to your accountant.

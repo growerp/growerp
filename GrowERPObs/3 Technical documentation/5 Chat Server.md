@@ -1,1 +1,1 @@
-[](https://raw.githubusercontent.com/growerp/growerp-chat/master/README.md)
+![](https://raw.githubusercontent.com/growerp/growerp-chat/master/README.md)

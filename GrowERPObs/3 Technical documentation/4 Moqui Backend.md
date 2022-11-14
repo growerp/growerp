@@ -1,1 +1,2 @@
-[filename](https://raw.githubusercontent.com/growerp/growerp-moqui/master/README.md)
+![](https://raw.githubusercontent.com/growerp/growerp-moqui/master/README.md)
+
