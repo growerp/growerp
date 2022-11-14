@@ -1,3 +1,4 @@
+# Accounting
 Accounting is mostly automatic, creating invoices/payments from orders. When approved and applied will automatically post to the ledger. 
   
 ## Accounts receivable

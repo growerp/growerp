@@ -1,4 +1,4 @@
-
+# What is GrowERP?
 GrowERP is an easy understandable system to solve the problem of normally smaller companies starting with ERP and E-Commerce. These starters select some of the smaller ERP systems and find out after some time that either the functionality is limited or that it cannot be easily adapted to specific business requirements.
 
 All of the components of GrowERP are open source and can be used as you desire without limitations. You can install locally or use our installation in the cloud.

@@ -4,22 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "5bcb60cc1e109511",
+        "id": "51e799bc098fba24",
         "type": "tabs",
         "children": [
           {
-            "id": "71e070a028729766",
+            "id": "d83b274492f05565",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/2b Website.md",
+                "file": "2 End User documentation/1 Overview.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "15835e0e5d0ffd23",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2 End User documentation/5 Order management.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -85,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/2b Website.md",
+                "file": "2 End User documentation/5 Order management.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/2b Website.md",
+                "file": "2 End User documentation/5 Order management.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/2b Website.md"
+                "file": "2 End User documentation/5 Order management.md"
               }
             }
           }
@@ -136,17 +149,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "71e070a028729766",
+  "active": "3e1cbc4fc81746df",
   "lastOpenFiles": [
-    "2 End User documentation/2d Sales Order management..md",
-    "2 End User documentation/2b Website.md",
-    "3 Technical documentation/3c Packages.md",
-    "3 Technical documentation/3b API.md",
-    "3 Technical documentation/3a Technical Introduction.md",
-    "media/website.png",
-    "media/websiteAdmin.png",
-    "1 Introduction/1a What is GrowERP.md",
-    "2 End User documentation/2e Inventory management.md",
-    "3 Technical documentation/3d Stripe.md"
+    "3 Technical documentation/9 Andriod Playstore publication.md",
+    "3 Technical documentation/8 IOS AppStore publication.md",
+    "3 Technical documentation/7 Stripe.md",
+    "3 Technical documentation/6 Website.md",
+    "3 Technical documentation/5 Chat Server.md",
+    "3 Technical documentation/4 Moqui Backend.md",
+    "3 Technical documentation/3 Packages.md",
+    "3 Technical documentation/2 API.md",
+    "3 Technical documentation/1 Technical Introduction.md",
+    "2 End User documentation/9 Authentication & Usertypes.md"
   ]
 }

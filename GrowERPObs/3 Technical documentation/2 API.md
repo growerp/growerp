@@ -1,3 +1,4 @@
+# API
 The GrowERP backend is documented in the openAPI standard:
 
 test system at [test.growerp.org](https://test.growerp.org/toolstatic/lib/swagger-ui/index.html?url=https://test.growerp.org/rest/service.swagger/growerp#/100)

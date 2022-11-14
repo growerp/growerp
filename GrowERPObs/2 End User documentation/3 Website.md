@@ -1,4 +1,4 @@
-## Introduction
+# Website Introduction
 
 The system generates a website for every company/admin which can be viewed by using the internet address as is shown on top of the website maintenance page in the main menu company section.
 
@@ -58,9 +58,9 @@ You can upload an obsidian vault which will be displayed in Html at the website 
 This is provided to have a documentation website of your products or services.
 Only some Obsidian features are supported.
 
-1. Links to local pages or externa; pages
+1. Links to local pages or external pages
 2. inclusion of local images
 3. Inclusion of external markdown files with the example code:
 ``` 
-	![](https:example.com/your_md file page.md )
+	![](https://example.com/your md file page.md )
 ```

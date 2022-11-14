@@ -1,3 +1,4 @@
+# Inventory management
 Inventory management is a function which processes physical product items. They can be received (purchases or returns) or send out (sales).
 
 shipment will appear in the in/out shipment list when an order is approved and the order has physical products.
