@@ -3,7 +3,7 @@
 ## Sixth beta release November 18 2022
 
 1. Now possble to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation for your product. Functions supported:
-	1. internal and external linking
+	1. Internal and external linking
 	2. Inclusion of external md files.
 	3. Inline images
 	4. Mobile upload from local obsidian vault

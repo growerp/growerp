@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "1 Introduction/4 Releases.md",
                 "mode": "source",
                 "source": false
               }
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "1 Introduction/4 Releases.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "1 Introduction/4 Releases.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "GrowERP documentation.md"
+                "file": "1 Introduction/4 Releases.md"
               }
             }
           }
@@ -151,15 +151,15 @@
   },
   "active": "15835e0e5d0ffd23",
   "lastOpenFiles": [
+    "2 End User documentation/2 Getting Started.md",
+    "2 End User documentation/3 Website.md",
     "2 End User documentation/4 Marketing & sales.md",
+    "2 End User documentation/5 Order management.md",
+    "2 End User documentation/6 Inventory management.md",
     "2 End User documentation/1 Overview.md",
+    "1 Introduction/1 Overview.md",
+    "1 Introduction/2 What is GrowERP.md",
     "GrowERP documentation.md",
-    "3 Technical documentation/9 Andriod Playstore publication.md",
-    "3 Technical documentation/8 IOS AppStore publication.md",
-    "3 Technical documentation/7 Stripe.md",
-    "3 Technical documentation/6 Website.md",
-    "3 Technical documentation/5 Chat Server.md",
-    "3 Technical documentation/4 Moqui Backend.md",
-    "3 Technical documentation/3 Packages.md"
+    "3 Technical documentation/9 Andriod Playstore publication.md"
   ]
 }

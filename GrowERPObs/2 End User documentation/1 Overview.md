@@ -1,4 +1,4 @@
-# 2 Functional System overview
+# Functional System overview
 
 This purpose of this system is to run a company from a single person to about 100 employees.
 

@@ -50,7 +50,7 @@ Now make your product available for internet sale: register, create the product 
 
 #### Promote your product
 
-* Now use your [[4 Marketing & sales]] skills to use your social media like twitter, facebook etc to promote the product by providing the internet address of the product you just entered.
+* Now use your [[4 Marketing & sales]] skills and use your social media like twitter, facebook etc to promote the product by providing the internet address of the product you just entered.
 
 #### When you get orders?
 

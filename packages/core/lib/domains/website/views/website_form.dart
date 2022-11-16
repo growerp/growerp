@@ -56,6 +56,7 @@ class WebsitePage extends StatefulWidget {
 class _WebsiteState extends State<WebsitePage> {
   final _formKey1 = GlobalKey<FormState>();
   final _formKey2 = GlobalKey<FormState>();
+  final _formKey3 = GlobalKey<FormState>();
 
   late WebsiteBloc _websiteBloc;
   List<Content> _updatedContent = [];
@@ -64,6 +65,7 @@ class _WebsiteState extends State<WebsitePage> {
   TextEditingController _urlController = TextEditingController();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _obsidianController = TextEditingController();
+  TextEditingController _measurementIdController = TextEditingController();
 
   @override
   void initState() {
@@ -104,6 +106,7 @@ class _WebsiteState extends State<WebsitePage> {
               _urlController.text = state.website!.hostName.split('.')[0];
               _titleController.text = state.website!.title;
               _obsidianController.text = state.website!.obsidianName;
+              _measurementIdController.text = state.website!.measurementId;
               _updatedContent = List.of(state.website!.websiteContent);
               _selectedCategories = List.of(state.website!.productCategories);
               return Scaffold(body: Center(child: _showForm(state)));
@@ -631,6 +634,38 @@ class _WebsiteState extends State<WebsitePage> {
                           Obsidian(title: _obsidianController.text), null));
                     }))
           ])),
+      Form(
+          key: _formKey3,
+          child: Container(
+              width: 400,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25.0),
+                border: Border.all(
+                    color: Colors.black45,
+                    style: BorderStyle.solid,
+                    width: 0.80),
+              ),
+              child: Row(children: [
+                Expanded(
+                  child: TextFormField(
+                      key: Key('measurementId'),
+                      controller: _measurementIdController,
+                      decoration: new InputDecoration(
+                          labelText: 'Statistics Id of the website')),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                    key: Key('measurementId'),
+                    child: Text('update'),
+                    onPressed: () async {
+                      if (_formKey2.currentState!.validate()) {
+                        _websiteBloc.add(WebsiteUpdate(Website(
+                            id: state.website!.id,
+                            measurementId: _measurementIdController.text)));
+                      }
+                    }),
+              ]))),
     ];
 
     List<Widget> rows = [];
