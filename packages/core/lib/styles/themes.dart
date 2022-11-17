@@ -53,7 +53,7 @@ class Themes {
     unselectedWidgetColor: Colors.black,
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-      primary: Color(0xFF4baa9b),
+      backgroundColor: Color(0xFF4baa9b),
     )),
   );
 }

@@ -16,7 +16,6 @@ import 'dart:convert';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:core/services/jsonConverters.dart';
-import 'package:flutter/foundation.dart';
 
 part 'timeEntry_model.freezed.dart';
 part 'timeEntry_model.g.dart';

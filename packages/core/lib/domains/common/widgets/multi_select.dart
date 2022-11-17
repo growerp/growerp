@@ -52,8 +52,6 @@ class MultiSelectState<T> extends State<MultiSelect> {
     selectedItems = List.of(widget.selectedItems as List<T>);
   }
 
-  final GlobalKey<ScaffoldMessengerState> _my1scaffoldkey =
-      GlobalKey<ScaffoldMessengerState>();
   @override
   Widget build(BuildContext context) {
     return PopUpDialogNoScaffold(

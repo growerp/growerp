@@ -13,7 +13,6 @@
  */
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:core/domains/common/functions/helper_functions.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;

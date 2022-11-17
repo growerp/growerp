@@ -14,7 +14,6 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/foundation.dart';
 
 part 'stats_model.freezed.dart';
 part 'stats_model.g.dart';

@@ -15,7 +15,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:core/services/jsonConverters.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/domains/domains.dart';
 
 part 'opportunity_model.freezed.dart';

@@ -13,7 +13,6 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/domains/domains.dart';
 
 part 'location_model.freezed.dart';

@@ -16,7 +16,6 @@ import 'package:core/domains/warehouse/models/location_model.dart';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:core/services/jsonConverters.dart';
-import 'package:flutter/foundation.dart';
 
 part 'finDoc_item_model.freezed.dart';
 part 'finDoc_item_model.g.dart';

@@ -6,7 +6,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'services/api_result.dart';
 import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';
-import 'dart:io' show File, Platform;
+import 'dart:io' show Platform;
 import 'domains/domains.dart';
 import 'package:core/domains/catalog/models/category_model.dart' as cat;
 

@@ -14,7 +14,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:core/domains/domains.dart';
@@ -24,7 +23,6 @@ import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:fast_csv/fast_csv.dart' as _fast_csv;
-import 'package:flutter/foundation.dart' as foundation;
 import '../../../api_repository.dart';
 
 part 'product_event.dart';

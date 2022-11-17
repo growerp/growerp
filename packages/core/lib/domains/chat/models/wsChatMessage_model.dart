@@ -13,7 +13,6 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/foundation.dart';
 
 part 'wsChatMessage_model.freezed.dart';
 part 'wsChatMessage_model.g.dart';

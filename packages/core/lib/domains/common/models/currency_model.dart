@@ -13,7 +13,6 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:flutter/foundation.dart';
 
 part 'currency_model.freezed.dart';
 part 'currency_model.g.dart';

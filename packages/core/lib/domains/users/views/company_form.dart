@@ -175,7 +175,6 @@ class _CompanyState extends State<CompanyPage> {
   }
 
   Widget _showForm(bool isAdmin, Company company, AuthState state) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
