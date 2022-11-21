@@ -24,6 +24,8 @@ platform :ios do
     sync_code_signing(type: "appstore")
   end
   lane :upload do
-    upload_to_testflight
+    upload_to_testflight(
+    itc_provider: "P64T65C668"
+    )
   end  
 end
