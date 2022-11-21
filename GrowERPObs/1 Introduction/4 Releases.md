@@ -1,14 +1,15 @@
 # Releases
 
-## Sixth beta release November 18 2022
+## Production release November 23 2022 (V0.5.0)
 
 1. Now possble to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation for your product. Functions supported:
 	1. Internal and external linking
 	2. Inclusion of external md files.
 	3. Inline images
-	4. Mobile upload from local obsidian vault
-	5. Web browser upload via zipped obsidian vault.
+	4. Mobile/Web upload from local obsidian vault
 2. GrowERP website now completely using GrowERP itself
+	1. added google statistics
+	2. [Mailerlite](https://mailerllte.com) API interface
 
 ## Fifth beta release August 17 2022
 

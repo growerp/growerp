@@ -28,7 +28,7 @@ RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # set flutter channel
-RUN flutter channel beta && flutter upgrade
+RUN flutter channel stable && flutter upgrade
 
 # Copy files to container and build
 RUN git clone https://github.com/growerp/growerp.git /usr/local/growerp

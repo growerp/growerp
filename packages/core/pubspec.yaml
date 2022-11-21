@@ -1,7 +1,7 @@
 name: core
 description: The Core of the GrowERP frontend to be used with Moqui.org
 version: 0.5.0+1
-homepage: https://www.growerp.org
+homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 
 environment:
