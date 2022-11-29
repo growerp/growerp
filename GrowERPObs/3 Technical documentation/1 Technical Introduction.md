@@ -7,30 +7,13 @@ It is a simplified frontend however with the ability to still use with, or in ad
 
 The system is implemented with [https://pub.dev/packages/flutter_bloc](https://pub.dev/packages/flutter_bloc) state management with the [https://bloclibrary.dev](https://bloclibrary.dev) documentation, data models, automated integration tests and a separated rest interface for the different backend systems.
 
-The system configuration file is in /assets/cfg/app_settings.json. Select OFBiz or Moqui here.
+The backend is using the [Moqui ERP and framework](https://www.moqui.org)
 
-For test purposes we can provide access to Moqui or OFBiz systems in the cloud.
+The system configuration file is in /assets/cfg/app_settings.json. Select Moqui and for older versions select OFBiz.
+
+The backend Moqui system needs some extra components such as for GrowERP itself, Stripe for payment processor and the PopReststore for the website generated for every company.
+
+For test purposes we can provide access to Moqui or OFBiz backend systems in the cloud.
 
 Additional ERP systems can be added on request, A REST interface is required. The implementation time is 40+ hours.
 
-# To run the system locally.
-
-After installation of [Java 11](https://openjdk.java.net/install/):
-
-Moqui backend: (preferred) [https://github.com/growerp/growerp-moqui/README.md](https://github.com/growerp/growerp-moqui/README.md)
-
-OR for older version only,Apache OFBiz backend: [https://github.com/growerp/growerp-ofbiz/blob/master/README.adoc](https://github.com/growerp/growerp-ofbiz/blob/master/README.adoc)
-
-clone and run the WebSocket chat server(optional) [https://github.com/growerp/growerp-chat](https://github.com/growerp/growerp-chat)
-
-Flutter app, after [installation of Flutter](https://flutter.dev/docs/get-started/install):
-
-```
-git clone https://github.com/growerp/growerp
-$ cd growerp/packages/core
-$ flutter pub run build_runner build
-$ ../admin
-$ flutter run
-```
-
-create your first company!

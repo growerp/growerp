@@ -2,14 +2,15 @@
 
 ## Production release November 23 2022 (V0.5.0)
 
-1. Now possble to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation for your product. Functions supported:
+1. It is now possible to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation of your product on the generated Website. Functions supported:
 	1. Internal and external linking
 	2. Inclusion of external md files.
 	3. Inline images
 	4. Mobile/Web upload from local obsidian vault
-2. GrowERP website now completely using GrowERP itself
-	1. added google statistics
-	2. [Mailerlite](https://mailerllte.com) API interface
+6. GrowERP website now completely using GrowERP itself
+	1. Added Google analytics
+	2. [BirdSend](https://birdsend.co/) API interface for GrowERP promotion, (later for every user?)
+7. The system at [growerp.com](https://admin.growerp.com) is now in production, while [growerp.org](https://admin.growerp.org) is our test system.
 
 ## Fifth beta release August 17 2022
 
@@ -39,7 +40,7 @@ First comments from end users arrived.
     -   using improved demo data
     -   multi currency
     -   multi company
-2.  Api documented and available: [[2 API]] for testing with Flutter frontend
+2.  Api documented and available: [[4 API]] for testing with Flutter frontend
     -   in/output parameters definition
     -   authorization
     -   test/production public API sites at test.growerp.org//rest
