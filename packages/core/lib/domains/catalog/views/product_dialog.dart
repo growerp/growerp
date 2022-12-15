@@ -339,12 +339,15 @@ class _ProductState extends State<ProductDialogFull> {
                   value: item);
             }).toList(),
             onChanged: (String? newValue) {
-              _selectedTypeId = newValue!;
+              setState(() {
+                _selectedTypeId = newValue!;
+              });
             },
             isExpanded: true,
           )),
       Visibility(
-          visible: classificationId != 'AppHotel',
+          visible:
+              classificationId != 'AppHotel' && _selectedTypeId != 'Service',
           child: Row(
             children: [
               Expanded(

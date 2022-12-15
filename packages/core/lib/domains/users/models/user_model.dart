@@ -46,6 +46,7 @@ class User with _$User {
     @Uint8ListConverter() Uint8List? image,
     String? companyPartyId, // allocated by system cannot be changed.
     String? companyName,
+    String? companyRole,
     Address? companyAddress,
     PaymentMethod? companyPaymentMethod,
   }) = _User;

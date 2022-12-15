@@ -17,3 +17,23 @@ For test purposes we can provide access to Moqui or OFBiz backend systems in the
 
 Additional ERP systems can be added on request, A REST interface is required. The implementation time is 40+ hours.
 
+## Data organization
+
+Obviously the frontend is following the backend datamodel to a great extend, however a bit less flexible. Separation by owner is done in the API interface to the backend.
+
+### On a user level
+All data within an created company and admin is controlled or linked to the ownerPartyId with a special partyTypeId 'owner' .
+
+The major database party (owner/company/user) view used:
+	owner -> (rel) company  -> (rel) person -> user account --> sec userGroup
+										    |-> postal/telephone etc
+
+When a user logs in, the system can retrieve the above from the user account.
+The ownerCompanyParty is now the second level, the first level is just an empty placeholder. For convenience the ownerPartyId at the top holds the owner company partyId at the secondlevel.
+
+currently just employees and admins of the owner company can login. Customers can login to the e-commerce website.
+
+A customer user has a single login for all owner websites and will be linked to an new owner when the customer uses a not yet owner website.
+
+### other entities
+Other entities like products, categories etc use the 'ownerPartyId' field to separate between owners. It contains from now on the 

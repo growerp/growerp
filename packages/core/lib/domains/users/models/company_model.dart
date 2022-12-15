@@ -39,6 +39,7 @@ class Company with _$Company {
   Company._();
   factory Company({
     String? partyId,
+    String? role,
     String? name,
     String? email,
     String? telephoneNr,

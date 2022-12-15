@@ -380,8 +380,7 @@ class _UserState extends State<UserPage> {
             isExpanded: true,
           )),
       Visibility(
-          visible: updatedUser.userGroup != UserGroup.Admin &&
-              updatedUser.userGroup != UserGroup.Employee &&
+          visible: updatedUser.companyRole != 'OrgInternal' &&
               updatedUser.partyId != null,
           child: Row(children: [
             Expanded(
@@ -413,8 +412,7 @@ class _UserState extends State<UserPage> {
                 ))
           ])),
       Visibility(
-          visible: updatedUser.userGroup != UserGroup.Admin &&
-              updatedUser.userGroup != UserGroup.Employee &&
+          visible: updatedUser.companyRole != 'OrgInternal' &&
               updatedUser.partyId != null,
           child: Row(children: [
             Expanded(
