@@ -29,7 +29,7 @@ class Opportunity with _$Opportunity {
     String? opportunityName,
     String? description,
     Decimal? estAmount,
-    int? estProbability,
+    Decimal? estProbability,
     String? stageId,
     String? nextStep,
     User? employeeUser,

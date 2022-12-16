@@ -354,7 +354,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[0], // initial logged admin[0]
     leadUser: leads[0],
     estAmount: Decimal.parse('10000'),
-    estProbability: int.parse('10'),
+    estProbability: Decimal.parse('10'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 2',
@@ -364,7 +364,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[1],
     leadUser: leads[1],
     estAmount: Decimal.parse('40000'),
-    estProbability: int.parse('40'),
+    estProbability: Decimal.parse('40'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 3',
@@ -374,7 +374,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[0], // initial logged admin[0]
     leadUser: leads[0],
     estAmount: Decimal.parse('30000'),
-    estProbability: int.parse('30'),
+    estProbability: Decimal.parse('30'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 4',
@@ -384,7 +384,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[1],
     leadUser: leads[1],
     estAmount: Decimal.parse('40000'),
-    estProbability: int.parse('40'),
+    estProbability: Decimal.parse('40'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 5',
@@ -394,7 +394,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[0], // initial logged admin[0]
     leadUser: leads[0],
     estAmount: Decimal.parse('50000'),
-    estProbability: int.parse('50'),
+    estProbability: Decimal.parse('50'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 6',
@@ -404,7 +404,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[1],
     leadUser: leads[1],
     estAmount: Decimal.parse('60000'),
-    estProbability: int.parse('60'),
+    estProbability: Decimal.parse('60'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 7',
@@ -414,7 +414,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[0], // initial logged admin[0]
     leadUser: leads[0],
     estAmount: Decimal.parse('70000'),
-    estProbability: int.parse('70'),
+    estProbability: Decimal.parse('70'),
   ),
   Opportunity(
     opportunityName: 'Dummy Opp Name 8',
@@ -424,7 +424,7 @@ List<Opportunity> opportunities = [
     employeeUser: administrators[1],
     leadUser: leads[1],
     estAmount: Decimal.parse('80000'),
-    estProbability: int.parse('80'),
+    estProbability: Decimal.parse('80'),
   ),
 ];
 

@@ -294,7 +294,7 @@ class _OpportunityState extends State<OpportunityDialog> {
                         description: _descriptionController.text,
                         estAmount: Decimal.parse(_estAmountController.text),
                         estProbability:
-                            int.parse(_estProbabilityController.text),
+                            Decimal.parse(_estProbabilityController.text),
                         stageId: _selectedStageId,
                         nextStep: _estNextStepController.text,
                         employeeUser: _selectedAccount,
