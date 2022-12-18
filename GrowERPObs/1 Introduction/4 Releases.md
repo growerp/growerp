@@ -1,7 +1,8 @@
 # Releases
 
 ## Production release December 20 2022 (V0.6.0)
-1. User organization change from owner/user/company to owner/company/user
+
+1. User backend organization change from owner/user/company to owner/company/user
 2. Finished documents like order/invoices/payment also shown when not older than one week.
 3. Userlogin can be reused as customer with any other company within the system.
 4. Removed internal coding for single company use. With new user organization change no special coding required when used in single mode.
