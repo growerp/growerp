@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/1 Technical Introduction.md",
+                "file": "1 Introduction/4 Releases.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "3 Technical documentation/1 Technical Introduction.md",
+                "file": "1 Introduction/4 Releases.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "3 Technical documentation/1 Technical Introduction.md",
+                "file": "1 Introduction/4 Releases.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "3 Technical documentation/1 Technical Introduction.md"
+                "file": "1 Introduction/4 Releases.md"
               }
             }
           }
@@ -150,10 +150,10 @@
   },
   "active": "15835e0e5d0ffd23",
   "lastOpenFiles": [
+    "3 Technical documentation/1 Technical Introduction.md",
     "1 Introduction/4 Releases.md",
     "2 End User documentation/1 Overview.md",
     "3 Technical documentation/2 Flutter frontend.md",
-    "3 Technical documentation/1 Technical Introduction.md",
     "3 Technical documentation/3 Packages.md",
     "2 End User documentation/2 Getting Started.md",
     "2 End User documentation/3 Website.md",

@@ -76,8 +76,12 @@ class ProductTest {
       await CommonTest.dragUntil(tester, key: 'productTypeDropDown');
       await CommonTest.enterDropDown(
           tester, 'productTypeDropDown', product.productTypeId!);
-      if (product.useWarehouse == true)
-        await CommonTest.tapByKey(tester, 'useWarehouse');
+      if (product.productTypeId != 'Service') {
+        if (product.useWarehouse == true)
+          await CommonTest.tapByKey(tester, 'useWarehouse');
+      }
+      // needed when service is removed
+      await CommonTest.dragUntil(tester, key: 'update');
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
@@ -122,8 +126,10 @@ class ProductTest {
 //      }
       expect(
           CommonTest.getDropdown('productTypeDropDown'), product.productTypeId);
-//      expect(
+//      if (product.productTypeId != 'service') {
+//        expect(
 //          CommonTest.getCheckboxListTile('useWarehouse'), product.useWarehouse);
+//      }
       newProducts.add(product.copyWith(productId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

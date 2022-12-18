@@ -1,5 +1,11 @@
 # Releases
 
+## Production release December 20 2022 (V0.6.0)
+1. User organization change from owner/user/company to owner/company/user
+2. Finished documents like order/invoices/payment also shown when not older than one week.
+3. Userlogin can be reused as customer with any other company within the system.
+4. Removed internal coding for single company use. With new user organization change no special coding required when used in single mode.
+
 ## Production release November 23 2022 (V0.5.0)
 
 1. It is now possible to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation of your product on the generated Website. Functions supported:
@@ -44,7 +50,7 @@ First comments from end users arrived.
     -   in/output parameters definition
     -   authorization
     -   test/production public API sites at test.growerp.org//rest
-3.  [[7 Stripe]] gateway    
+3.  [[Stripe]] gateway    
     -   working with E-commerce website and flutter frontend.
 4.  Flutter frontend improvements:
     -   Added E-commerce website maintenance to flutter frontend at company -> website
