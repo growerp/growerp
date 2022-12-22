@@ -231,7 +231,6 @@ class UserTest {
 
   static Future<void> deleteAdministrators(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    await CommonTest.refresh(tester);
     int count = test.administrators.length;
     if (count != administrators.length) return;
     await deleteUser(tester, count + 1);
@@ -242,7 +241,6 @@ class UserTest {
 
   static Future<void> deleteEmployees(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    await CommonTest.refresh(tester);
     int count = test.employees.length;
     if (count != employees.length) return;
     await deleteUser(tester, count);
@@ -252,7 +250,6 @@ class UserTest {
 
   static Future<void> deleteLeads(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    await CommonTest.refresh(tester);
     int count = test.leads.length;
     if (count != leads.length) return;
     await deleteUser(tester, count);
@@ -262,7 +259,6 @@ class UserTest {
 
   static Future<void> deleteCustomers(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    await CommonTest.refresh(tester);
     int count = test.customers.length;
     if (count != customers.length) return;
     await deleteUser(tester, count);

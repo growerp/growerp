@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/4 Releases.md",
+                "file": "2 End User documentation/6 Inventory management.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1 Introduction/4 Releases.md",
+                "file": "2 End User documentation/6 Inventory management.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1 Introduction/4 Releases.md",
+                "file": "2 End User documentation/6 Inventory management.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1 Introduction/4 Releases.md"
+                "file": "2 End User documentation/6 Inventory management.md"
               }
             }
           }
@@ -148,17 +148,27 @@
     "width": 300,
     "collapsed": true
   },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
   "active": "15835e0e5d0ffd23",
   "lastOpenFiles": [
-    "3 Technical documentation/1 Technical Introduction.md",
-    "1 Introduction/4 Releases.md",
+    "2 End User documentation/5 Order management.md",
+    "2 End User documentation/6 Inventory management.md",
+    "1 Introduction/1 Overview.md",
     "2 End User documentation/1 Overview.md",
     "3 Technical documentation/2 Flutter frontend.md",
+    "3 Technical documentation/1 Technical Introduction.md",
+    "3 Technical documentation/3 Moqui Backend.md",
+    "1 Introduction/4 Releases.md",
     "3 Technical documentation/3 Packages.md",
-    "2 End User documentation/2 Getting Started.md",
-    "2 End User documentation/3 Website.md",
-    "2 End User documentation/4 Marketing & sales.md",
-    "2 End User documentation/5 Order management.md",
-    "2 End User documentation/6 Inventory management.md"
+    "2 End User documentation/2 Getting Started.md"
   ]
 }
