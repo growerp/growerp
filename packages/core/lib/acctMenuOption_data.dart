@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:core/domains/domains.dart';
+import '../domains/domains.dart';
 
 const MENU_ACCOUNTING = 6;
 const MENU_ACCTSALES = 1;

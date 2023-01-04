@@ -13,14 +13,14 @@
  */
 
 import 'dart:async';
-import 'package:core/api_repository.dart';
-import 'package:core/domains/common/functions/functions.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/services/chat_server.dart';
-import 'package:core/services/network_exceptions.dart';
+import '../../../api_repository.dart';
+import '../../common/functions/functions.dart';
+import '../../../services/api_result.dart';
+import '../../../services/chat_server.dart';
+import '../../../services/network_exceptions.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:core/domains/domains.dart';
+import '../../../domains/domains.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';

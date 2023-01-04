@@ -14,12 +14,12 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:core/api_repository.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/services/network_exceptions.dart';
+import '../../../api_repository.dart';
+import '../../../services/api_result.dart';
+import '../../../services/network_exceptions.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
 

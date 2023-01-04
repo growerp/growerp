@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 /// item on the main menu, containing tabitems on a lower level.
 class MenuOption {

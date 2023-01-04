@@ -1,5 +1,18 @@
-import 'dart:convert';
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
 
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -8,7 +21,7 @@ import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';
 import 'dart:io' show Platform;
 import 'domains/domains.dart';
-import 'package:core/domains/catalog/models/category_model.dart' as cat;
+import '../domains/catalog/models/category_model.dart' as cat;
 
 class APIRepository {
   String classificationId = GlobalConfiguration().get('classificationId');
@@ -37,9 +50,11 @@ class APIRepository {
     var dio = Dio();
     _baseUrl = kReleaseMode
         ? '$databaseUrl/'
-        : (kIsWeb || Platform.isIOS || Platform.isLinux)
+        : databaseUrlDebug.isNotEmpty
             ? '$databaseUrlDebug/'
-            : 'http://10.0.2.2:8080/';
+            : (kIsWeb || Platform.isIOS || Platform.isLinux)
+                ? 'http://localHost:8080/'
+                : 'http://10.0.2.2:8080/';
 
     print('Production config url: $databaseUrl');
     print('Using base backend url: $_baseUrl');
@@ -817,77 +832,6 @@ class APIRepository {
           });
       return getResponse<Asset>(
           "asset", response, (json) => Asset.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<Opportunity>>> getOpportunity({
-    int? start,
-    int? limit,
-    String? opportunityId,
-    bool? my,
-    String? searchString,
-  }) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/Opportunity', apiKey!,
-          queryParameters: <String, dynamic>{
-            'opportunityId': opportunityId,
-            'start': start,
-            'limit': limit,
-            'my': my.toString(),
-            'search': searchString
-          });
-      return getResponseList<Opportunity>(
-          "opportunities", response, (json) => Opportunity.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<Opportunity>> createOpportunity(
-      Opportunity opportunity) async {
-    try {
-      final response = await dioClient.post(
-          'rest/s1/growerp/100/Opportunity', apiKey!,
-          data: <String, dynamic>{
-            'opportunity': jsonEncode(opportunity.toJson()),
-            'moquiSessionToken': sessionToken
-          });
-      return getResponse<Opportunity>(
-          "opportunity", response, (json) => Opportunity.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<Opportunity>> updateOpportunity(
-      Opportunity opportunity) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/Opportunity', apiKey!,
-          data: <String, dynamic>{
-            'opportunity': jsonEncode(opportunity.toJson()),
-            'moquiSessionToken': sessionToken
-          });
-      return getResponse<Opportunity>(
-          "opportunity", response, (json) => Opportunity.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<Opportunity>> deleteOpportunity(
-      Opportunity opportunity) async {
-    try {
-      final response = await dioClient.delete(
-          'rest/s1/growerp/100/Opportunity', apiKey!,
-          queryParameters: <String, dynamic>{
-            'opportunity': jsonEncode(opportunity.toJson()),
-          });
-      return getResponse<Opportunity>(
-          "opportunity", response, (json) => Opportunity.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

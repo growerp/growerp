@@ -16,8 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:date_utils/date_utils.dart' as Utils;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:core/extensions.dart';
-import 'package:core/domains/domains.dart';
+import '../../../../extensions.dart';
+import '../../domains.dart';
 
 import '../../../api_repository.dart';
 

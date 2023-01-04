@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/services/jsonConverters.dart';
+import '../../../services/jsonConverters.dart';
 import '../../domains.dart';
 
 part 'company_model.freezed.dart';

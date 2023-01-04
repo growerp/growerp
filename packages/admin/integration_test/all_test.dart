@@ -17,7 +17,6 @@ import 'category_test.dart' as category;
 import 'product_test.dart' as product;
 import 'asset_test.dart' as asset;
 import 'user_test.dart' as user;
-import 'opportunity_test.dart' as opportunity;
 import 'payment_sales_test.dart' as sales_payment;
 import 'payment_purchase_test.dart' as purchase_payment;
 import 'invoice_sales_test.dart' as sales_invoice;
@@ -33,7 +32,6 @@ void main() {
   product.main();
   asset.main();
   user.main();
-  opportunity.main();
   sales_payment.main();
   purchase_payment.main();
   sales_invoice.main();

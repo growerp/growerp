@@ -1,6 +1,5 @@
 export 'authenticate/authenticate.dart';
 export 'common/common.dart';
-export 'opportunities/opportunities.dart';
 export 'tasks/tasks.dart';
 export 'catalog/catalog.dart';
 export 'warehouse/warehouse.dart';

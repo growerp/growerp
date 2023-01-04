@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:core/domains/domains.dart';
+import '../../../domains/domains.dart';
 import '../../common/integration_test/commonTest.dart';
 
 class AuthTest {

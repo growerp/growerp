@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:core/domains/common/common.dart';
+import '../../common/common.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;

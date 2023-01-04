@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as IMG;
 import 'dart:io';
 import 'package:http/http.dart' show get;
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 class HelperFunctions {
   static showMessage(BuildContext context, String? message, dynamic colors) {

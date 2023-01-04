@@ -15,7 +15,7 @@
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/services/jsonConverters.dart';
+import '../../../services/jsonConverters.dart';
 import 'product_model.dart';
 
 part 'category_model.freezed.dart';

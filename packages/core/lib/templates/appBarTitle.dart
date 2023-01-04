@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:core/domains/domains.dart';
+import '../domains/domains.dart';
 
 Widget appBarTitle(
     BuildContext context, Authenticate authenticate, String title) {

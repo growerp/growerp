@@ -13,15 +13,15 @@
  */
 
 import 'dart:io';
-import 'package:core/domains/common/functions/helper_functions.dart';
-import 'package:core/templates/@templates.dart';
+import '../../common/functions/helper_functions.dart';
+import '../../../templates/@templates.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 final GlobalKey<ScaffoldMessengerState> CompanyDialogKey =

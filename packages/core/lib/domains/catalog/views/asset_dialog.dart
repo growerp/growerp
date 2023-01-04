@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/helper_functions.dart';
-import 'package:core/services/api_result.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +19,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 import '../../../api_repository.dart';
+import '../../common/functions/functions.dart';
+import '../../../services/api_result.dart';
 
 class AssetDialog extends StatefulWidget {
   final Asset asset;

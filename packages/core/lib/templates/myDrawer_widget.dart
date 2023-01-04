@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:core/domains/domains.dart';
+import '../domains/domains.dart';
 
 Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
     List<MenuOption>? menu) {

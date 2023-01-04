@@ -14,9 +14,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:core/templates/@templates.dart';
-import 'package:core/acctMenuOption_data.dart';
-import 'package:core/domains/domains.dart';
+import '../../../acctMenuOption_data.dart';
+import '../../../templates/@templates.dart';
+import '../../../domains/domains.dart';
 
 class AccountingForm extends StatelessWidget {
   @override

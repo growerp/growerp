@@ -13,12 +13,12 @@
  */
 
 import 'dart:async';
-import 'package:core/api_repository.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/services/network_exceptions.dart';
+import '../../../api_repository.dart';
+import '../../../services/api_result.dart';
+import '../../../services/network_exceptions.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 part 'content_event.dart';
 part 'content_state.dart';

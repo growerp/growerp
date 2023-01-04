@@ -8,6 +8,8 @@ environment:
 dependencies:
   core:
     path: ../core/
+  growerp_marketing:
+    path: ../growerp_marketing/
   decimal: ^2.1.0
   flutter:
     sdk: flutter

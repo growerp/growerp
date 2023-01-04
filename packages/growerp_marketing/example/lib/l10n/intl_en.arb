@@ -1,0 +1,5 @@
+{
+    "pageHomeWelcome": "Welcome {name}",
+    "screenNotFound":"Screen {screen} not found",
+    "classificationNotDefined": "No {classificationId} company found in system\n Go to the admin app to create one!"
+}

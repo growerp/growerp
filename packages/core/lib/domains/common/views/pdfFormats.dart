@@ -12,9 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 import 'dart:typed_data';
-import 'package:core/domains/findoc/models/finDoc_model.dart';
-import 'package:core/domains/users/models/company_model.dart';
-import 'package:core/domains/users/models/user_model.dart';
+import '../../../domains/findoc/models/finDoc_model.dart';
+import '../../../domains/users/models/company_model.dart';
+import '../../../domains/users/models/user_model.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';

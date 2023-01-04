@@ -12,10 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/warehouse/models/location_model.dart';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/services/jsonConverters.dart';
+import '../../../domains/warehouse/models/location_model.dart';
+import '../../../services/jsonConverters.dart';
 
 part 'finDoc_item_model.freezed.dart';
 part 'finDoc_item_model.g.dart';

@@ -14,6 +14,7 @@
 
 import 'package:core/domains/domains.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_marketing/opportunities/views/views.dart';
 import 'forms/@forms.dart' as local;
 
 List<MenuOption> menuOptions = [

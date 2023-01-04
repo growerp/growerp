@@ -18,8 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domains.dart';
 
 List<T> getJsonList<T>(
-    String result, T Function(Map<String, dynamic> json) fromJson) {
-  final l = json.decode(result) as Iterable;
+    String string, T Function(Map<String, dynamic> json) fromJson) {
+  final l = json.decode(string) as Iterable;
   return List<T>.from(l.map<T>(
       // ignore: avoid_as, avoid_annotating_with_dynamic
       (dynamic i) => fromJson(i as Map<String, dynamic>)));
@@ -34,11 +34,37 @@ String createJsonList<T>(List<T> result, T Function(String json) toJson()) {
   return jsonEncode(result.map((i) => toJson()).toList()).toString();
 }
 
-String createJsonObject<T>(String result, T Function(String json) toJson()) {
+String createJsonObject<T>(T object, T Function(String json) toJson()) {
   return jsonEncode(toJson());
 }
 
 class PersistFunctions {
+/*  static Future<void> persistList<T>(List<T> list) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        T.toString(),createJsonList<T>(list, (json) => T.fromJson(json))); 
+  }
+
+  static Future<List<T>> getPersistedList<T>() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? result = prefs.getString(T.toString());
+    if (result != null)
+      return getJsonList<T>(result, (string) => T.toJson(string));
+          return Future.value([]);
+  }
+
+  static Future<void> persistObject<T>(T object) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(T.toString(), jsonEncode(object));
+  }
+
+  static Future<T> getPersistedObject<T>() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? result = prefs.getString(T.toString());
+    if (result != null) return jsonDecode(result);
+    return Future.value(null);
+  }
+*/
   static Future<void> persistAuthenticate(
     Authenticate authenticate,
   ) async {

@@ -12,10 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/tasks/bloc/task_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
+import '../../../domains/tasks/bloc/task_bloc.dart';
 
 class TaskListHeader extends StatefulWidget {
   const TaskListHeader({Key? key}) : super(key: key);

@@ -12,8 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/functions.dart';
-import 'package:core/domains/domains.dart';
+import '../../common/functions/functions.dart';
+import '../../../domains/domains.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../common/integration_test/commonTest.dart';

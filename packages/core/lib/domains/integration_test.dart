@@ -7,7 +7,6 @@ export 'catalog/integration_test/category_test.dart';
 export 'catalog/integration_test/product_test.dart';
 export 'catalog/integration_test/asset_test.dart';
 export 'findoc/integration_test/orderTest.dart';
-export 'opportunities/integration_test/opportunity_test.dart';
 export 'tasks/integration_test/taskTest.dart';
 export 'users/integration_test/userTest.dart';
 export 'warehouse/integration_test/warehouseTest.dart';

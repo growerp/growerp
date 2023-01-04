@@ -12,14 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/functions.dart';
-import 'package:core/domains/domains.dart';
-import 'package:core/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
-
+import '../../common/functions/functions.dart';
+import '../../domains.dart';
+import '../../../../extensions.dart';
 import '../../../api_repository.dart';
 
 class FinDocListForm extends StatelessWidget {

@@ -15,9 +15,9 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:core/domains/authenticate/blocs/auth_bloc.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/services/network_exceptions.dart';
+import '../../authenticate/blocs/auth_bloc.dart';
+import '../../../services/api_result.dart';
+import '../../../services/network_exceptions.dart';
 import 'package:equatable/equatable.dart';
 import '../../../api_repository.dart';
 import '../models/models.dart';

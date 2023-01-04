@@ -12,8 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/persist_functions.dart';
-import 'package:core/domains/domains.dart';
+import '../../common/functions/persist_functions.dart';
+import '../../domains.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';

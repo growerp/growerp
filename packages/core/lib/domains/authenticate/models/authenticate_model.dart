@@ -13,7 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/domains/domains.dart';
+import '../../../domains/domains.dart';
 
 part 'authenticate_model.freezed.dart';
 part 'authenticate_model.g.dart';

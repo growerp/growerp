@@ -14,7 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 import '../../../api_repository.dart';
 import '../../common/functions/helper_functions.dart';

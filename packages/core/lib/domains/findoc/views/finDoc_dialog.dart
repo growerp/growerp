@@ -12,10 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/helper_functions.dart';
-import 'package:core/extensions.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/domains/domains.dart';
+import '../../common/functions/helper_functions.dart';
+import '../../../../extensions.dart';
+import '../../../services/api_result.dart';
+import '../../domains.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';

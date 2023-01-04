@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
-import 'package:core/domains/domains.dart';
+import '../domains/domains.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
     Widget widget, int? menuIndex, List<MenuOption>? menu) {

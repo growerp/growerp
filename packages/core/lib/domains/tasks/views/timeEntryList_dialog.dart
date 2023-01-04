@@ -12,11 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/functions/helper_functions.dart';
+import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 
 class TimeEntryListDialog extends StatefulWidget {
   final String taskId;

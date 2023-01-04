@@ -35,7 +35,6 @@ class SaveTest with _$SaveTest {
     @Default([]) List<Product> products,
     @Default([]) List<Asset> assets,
     @Default([]) List<Location> locations,
-    @Default([]) List<Opportunity> opportunities,
     @Default([]) List<Task> tasks,
     @Default([]) List<FinDoc> orders,
     @Default([]) List<FinDoc> payments,

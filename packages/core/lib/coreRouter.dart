@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/templates/@templates.dart';
+import 'templates/@templates.dart';
 import 'package:flutter/material.dart';
 import 'acctMenuOption_data.dart';
 import 'domains/domains.dart';

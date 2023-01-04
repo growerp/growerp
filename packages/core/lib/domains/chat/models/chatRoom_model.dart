@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/domains.dart';
+import '../../domains.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'chatRoom_model.freezed.dart';
