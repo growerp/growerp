@@ -12,8 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/api_repository.dart';
-import 'package:core/services/chat_server.dart';
+import 'package:growerp_core/api_repository.dart';
+import 'package:growerp_core/services/chat_server.dart';
 import 'menuOption_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,11 +22,11 @@ import 'generated/l10n.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:core/styles/themes.dart';
+import 'package:growerp_core/styles/themes.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:core/domains/domains.dart';
+import 'package:growerp_core/domains/domains.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {

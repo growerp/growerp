@@ -13,7 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/domains/domains.dart';
+import 'package:growerp_core/domains/domains.dart';
 import '../models/opportunity_model.dart';
 
 part 'marketing_test_model.freezed.dart';

@@ -12,17 +12,17 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/api_repository.dart';
-import 'package:core/domains/common/functions/helper_functions.dart';
-import 'package:core/domains/common/widgets/dialogCloseButton.dart';
-import 'package:core/services/api_result.dart';
+import 'package:growerp_core/api_repository.dart';
+import 'package:growerp_core/domains/common/functions/helper_functions.dart';
+import 'package:growerp_core/domains/common/widgets/dialogCloseButton.dart';
+import 'package:growerp_core/services/api_result.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:core/domains/users/models/models.dart';
+import 'package:growerp_core/domains/users/models/models.dart';
 import '../models/models.dart';
 import '../bloc/opportunity_bloc.dart';
 

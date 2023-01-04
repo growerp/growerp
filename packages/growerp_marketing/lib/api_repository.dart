@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:global_configuration/global_configuration.dart';
-import 'package:core/services/api_result.dart';
-import 'package:core/services/network_exceptions.dart';
-import 'package:core/api_repository.dart';
+import 'package:growerp_core/services/api_result.dart';
+import 'package:growerp_core/services/network_exceptions.dart';
+import 'package:growerp_core/api_repository.dart';
 import 'opportunities/models/models.dart';
 
 class Marketing_APIRepository extends APIRepository {

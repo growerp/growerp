@@ -17,10 +17,10 @@
 // start with: flutter run -t lib/chatEcho_main.dart
 
 import 'dart:async';
-import 'package:core/api_repository.dart';
-import 'package:core/domains/domains.dart';
-import 'package:core/services/chat_server.dart';
-import 'package:core/styles/themes.dart';
+import 'package:growerp_core/api_repository.dart';
+import 'package:growerp_core/domains/domains.dart';
+import 'package:growerp_core/services/chat_server.dart';
+import 'package:growerp_core/styles/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

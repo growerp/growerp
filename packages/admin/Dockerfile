@@ -32,7 +32,10 @@ RUN flutter channel stable && flutter upgrade
 
 # Copy files to container and build
 RUN git clone https://github.com/growerp/growerp.git /usr/local/growerp
-RUN cd /usr/local/growerp/packages/core && \
+RUN cd /usr/local/growerp/packages/growerp_core && \
+    flutter pub get && \
+    flutter pub run build_runner build
+RUN cd /usr/local/growerp/packages/growerp_marketing && \
     flutter pub get && \
     flutter pub run build_runner build
 WORKDIR /usr/local/growerp/packages/admin

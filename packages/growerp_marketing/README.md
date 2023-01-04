@@ -1,4 +1,4 @@
-A CRM plugin for the GrowERP system.
+A Marketing plugin for the GrowERP system.
 
 
 

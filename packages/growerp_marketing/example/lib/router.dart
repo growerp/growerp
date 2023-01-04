@@ -12,12 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/coreRouter.dart';
-import 'package:core/domains/domains.dart';
-import 'package:core/templates/@templates.dart';
+import 'package:growerp_core/coreRouter.dart';
+import 'package:growerp_core/domains/domains.dart';
+import 'package:growerp_core/templates/@templates.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/domains/catalog/models/category_model.dart' as cat;
+import 'package:growerp_core/domains/catalog/models/category_model.dart' as cat;
 
 import 'menuOption_data.dart';
 

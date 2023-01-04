@@ -14,10 +14,10 @@
 
 import 'dart:convert';
 
-import 'package:core/domains/common/functions/persist_functions.dart';
+import 'package:growerp_core/domains/common/functions/persist_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:core/domains/common/integration_test/commonTest.dart';
+import 'package:growerp_core/domains/common/integration_test/commonTest.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import 'marketing_test_model.dart';

@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/domains.dart';
+import 'package:growerp_core/domains/domains.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_marketing/opportunities/views/views.dart';
 import 'forms/@forms.dart' as local;
@@ -61,7 +61,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'assets/images/crmGrey.png',
     selectedImage: 'assets/images/crm.png',
-    title: 'CRM',
+    title: 'Marketing',
     route: '/crm',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     tabItems: [

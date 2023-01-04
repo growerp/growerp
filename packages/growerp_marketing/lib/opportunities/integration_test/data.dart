@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/domains/common/integration_test/data.dart';
+import 'package:growerp_core/domains/common/integration_test/data.dart';
 import 'package:decimal/decimal.dart';
 import 'package:growerp_marketing/opportunities/models/opportunity_model.dart';
 
