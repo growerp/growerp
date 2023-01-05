@@ -15,7 +15,7 @@
 import 'dart:async';
 import '../../common/functions/persist_functions.dart';
 import 'package:decimal/decimal.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../api_repository.dart';

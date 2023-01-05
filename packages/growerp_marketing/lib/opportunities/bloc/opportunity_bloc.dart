@@ -13,7 +13,7 @@
  */
 
 import 'dart:async';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import '../models/opportunity_model.dart';
 import 'package:growerp_core/services/api_result.dart';

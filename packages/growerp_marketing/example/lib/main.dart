@@ -17,51 +17,20 @@ import 'package:growerp_core/services/chat_server.dart';
 import 'menuOption_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// ignore: depend_on_referenced_packages
+import 'package:responsive_framework/responsive_framework.dart';
 import 'generated/l10n.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/styles/themes.dart';
 import 'router.dart' as router;
-import 'package:http/http.dart' as http;
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/domains/domains.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await GlobalConfiguration().loadFromAsset('app_settings');
-
-  // can change backend url by pressing long the title on the home screen.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  GlobalConfiguration().updateValue('appName', packageInfo.appName);
-  GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
-  GlobalConfiguration().updateValue('version', packageInfo.version);
-  GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
-
-  String ip = prefs.getString('ip') ?? '';
-  String chat = prefs.getString('chat') ?? '';
-  String singleCompany = prefs.getString('companyPartyId') ?? '';
-  if (ip.isNotEmpty) {
-    late http.Response response;
-    try {
-      response = await http.get(Uri.parse('${ip}rest/s1/growerp/Ping'));
-      if (response.statusCode == 200) {
-        GlobalConfiguration().updateValue('databaseUrl', ip);
-        GlobalConfiguration().updateValue('chatUrl', chat);
-        GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        print('=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
-      }
-    } catch (error) {
-      print('===$ip does not respond...not updating databaseUrl: $error');
-    }
-  }
-
   Bloc.observer = AppBlocObserver();
-//  Bloc.transformer = AppEventTransformer();
   runApp(Phoenix(
       child: TopApp(dbServer: APIRepository(), chatServer: ChatServer())));
 }
@@ -94,7 +63,7 @@ class TopApp extends StatelessWidget {
               create: (context) => ChatMessageBloc(
                   dbServer, chatServer, context.read<AuthBloc>())),
         ],
-        child: MyApp(),
+        child: const MyApp(),
       ),
     );
   }
@@ -102,6 +71,8 @@ class TopApp extends StatelessWidget {
 
 class MyApp extends StatelessWidget {
   static String title = 'GrowERP administrator.';
+
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

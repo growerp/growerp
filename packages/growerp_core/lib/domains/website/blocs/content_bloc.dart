@@ -16,7 +16,7 @@ import 'dart:async';
 import '../../../api_repository.dart';
 import '../../../services/api_result.dart';
 import '../../../services/network_exceptions.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domains.dart';
 

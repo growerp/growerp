@@ -18,7 +18,7 @@ import '../../common/functions/functions.dart';
 import '../../../services/api_result.dart';
 import '../../../services/chat_server.dart';
 import '../../../services/network_exceptions.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../domains/domains.dart';
 
