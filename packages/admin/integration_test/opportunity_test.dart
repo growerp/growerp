@@ -1,4 +1,4 @@
-import 'package:example/main.dart';
+import 'package:admin/main.dart';
 import 'package:growerp_core/api_repository.dart';
 import 'package:growerp_core/domains/integration_test.dart';
 import 'package:growerp_core/services/chat_server.dart';

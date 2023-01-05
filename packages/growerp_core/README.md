@@ -1,13 +1,10 @@
-# growerp_core
-
 This is the core package of the GrowERP frontend.
-You can use it with the other packages like admin, freelance, hotel etc.
 
-After getting it from Github run the build command:
-
-$ cd packages/growerp_core
-$ flutter pub run build_runner build
-
-Then to run for example admin:
-$ cd packages/admin
-$ flutter run.
+It is called from an Flutter application like the app in the example directory.
+It provides the core of the system:
+- Initialize the REST interface
+- Access security
+- Multi user access
+- Company creation and maintance
+- User maintenace
+- Task maintenance.

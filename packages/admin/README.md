@@ -1,10 +1,5 @@
-# example
+# GrowERP Flutter ERP Admin App.
 
-An example package for the GrowERP marketing package.
+This is the admin app, showing the capabilities of the growerp application.
 
-It uses the local backend system
-    from https://github.com/growerp/growerp-moqui
-
-You can also use our test backend system 
-    set in: example/assets/cfg/app_settings.json
-        databaseUrlDebug: https://test.growerp.org
+check the readme at  https://github.com/growerp/growerp for more information.

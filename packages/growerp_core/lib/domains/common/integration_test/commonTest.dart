@@ -14,7 +14,6 @@
 
 import 'dart:io';
 import 'dart:math';
-import '../../common/functions/functions.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,10 +21,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
-import '../../domains.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
-
+import '../../common/functions/functions.dart';
+import '../../domains.dart';
 import '../../../extensions.dart';
 
 class CommonTest {

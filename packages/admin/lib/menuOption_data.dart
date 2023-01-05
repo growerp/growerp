@@ -201,8 +201,8 @@ List<MenuOption> menuOptions = [
       route: '/accounting',
       readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
   MenuOption(
-      image: 'packages/core/images/infoGrey.png',
-      selectedImage: 'packages/core/images/info.png',
+      image: 'packages/growerp_core/images/infoGrey.png',
+      selectedImage: 'packages/growerp_core/images/info.png',
       title: 'About',
       route: '/about',
       readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
