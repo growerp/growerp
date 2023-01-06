@@ -1,6 +1,6 @@
-## 0.6.0-dev.2
+## 0.6.0-dev.5
 
-* resolved package version conflicts
+* freezed files not saved
 
 ## 0.6.0-dev.1
 

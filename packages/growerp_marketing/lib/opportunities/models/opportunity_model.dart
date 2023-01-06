@@ -14,8 +14,8 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'jsonConverters.dart';
 import 'package:growerp_core/domains/users/models/models.dart';
+import 'package:growerp_core/services/jsonConverters.dart';
 
 part 'opportunity_model.freezed.dart';
 part 'opportunity_model.g.dart';

@@ -13,7 +13,6 @@
  */
 
 import 'dart:convert';
-
 import 'package:growerp_core/domains/common/functions/persist_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,11 +35,7 @@ class OpportunityTest {
   static Future<void> addOpportunities(
       WidgetTester tester, List<Opportunity> opportunities,
       {bool check = true}) async {
-<<<<<<< HEAD:packages/core/lib/domains/opportunities/integration_test/opportunity_test.dart
-    SaveTest test = await PersistFunctions.getTest();
-=======
     MarketingTest test = await getMarketingTest();
->>>>>>> 2177197 (moved crm in its own package, prepared core for rename):packages/growerp_marketing/lib/opportunities/integration_test/opportunity_test.dart
     test = test.copyWith(opportunities: []); // delete just for test only-------
     if (test.opportunities.isEmpty) {
       // not yet created

@@ -1,3 +1,7 @@
+## 0.6.0-dev.3
+
+* freezed files not saved.
+
 ## 0.6.0-dev.2
 
 * resolved packages conflict.

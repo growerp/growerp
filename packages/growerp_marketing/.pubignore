@@ -1,3 +1,7 @@
+# do not Ignore generated files for pub.dev
+!*.g.dart
+!*.freezed.dart
+
 # Miscellaneous
 *.class
 *.log
