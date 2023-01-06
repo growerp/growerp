@@ -6,8 +6,7 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
-  growerp_core:
-    path: ../../growerp_core/
+  growerp_core: ^0.6.0-dev.1
   growerp_marketing:
     path: ../
   decimal: ^2.1.0
