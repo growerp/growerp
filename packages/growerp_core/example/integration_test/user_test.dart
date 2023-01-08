@@ -1,6 +1,4 @@
 import 'package:example/main.dart';
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/services/chat_server.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
@@ -30,8 +28,7 @@ void main() {
   }
 
   testWidgets('''GrowERP user test''', (tester) async {
-    await CommonTest.startApp(
-        tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
+    await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         clear: true);
     await CompanyTest.createCompany(tester);
     await UserTest.selectAdministrators(tester);

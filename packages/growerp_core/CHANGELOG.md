@@ -1,3 +1,8 @@
+## 0.6.0-dev.6
+
+* moved code from example into core
+* cleaned up example code
+
 ## 0.6.0-dev.5
 
 * freezed files not saved

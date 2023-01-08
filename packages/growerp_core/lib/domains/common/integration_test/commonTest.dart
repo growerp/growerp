@@ -23,9 +23,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../../api_repository.dart';
+import '../../../services/chat_server.dart';
 import '../../common/functions/functions.dart';
 import '../../domains.dart';
 import '../../../extensions.dart';
+import '../widgets/top_app.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
@@ -43,6 +46,28 @@ class CommonTest {
     await BlocOverrides.runZoned(
         () async => await tester.pumpWidget(Phoenix(child: TopApp)),
         blocObserver: AppBlocObserver());
+    await tester.pumpAndSettle(Duration(seconds: 5));
+  }
+
+  static Future<void> startTestApp(
+      WidgetTester tester,
+      Route<dynamic> Function(RouteSettings) router,
+      List<MenuOption> menuOptions,
+      {bool clear = false}) async {
+    int seq = Random.secure().nextInt(1024);
+    SaveTest test = await PersistFunctions.getTest();
+    print("====startapp seq: $seq");
+    if (clear == true) {
+      await PersistFunctions.persistTest(SaveTest(sequence: seq));
+    } else {
+      await PersistFunctions.persistTest(test.copyWith(sequence: seq));
+    }
+    Bloc.observer = AppBlocObserver();
+    runApp(TopApp(
+        dbServer: APIRepository(),
+        chatServer: ChatServer(),
+        router: router,
+        menuOptions: menuOptions));
     await tester.pumpAndSettle(Duration(seconds: 5));
   }
 
