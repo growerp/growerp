@@ -1,10 +1,9 @@
-import 'package:admin/main.dart';
-import 'package:growerp_core/api_repository.dart';
+import 'package:admin/menuOption_data.dart';
 import 'package:growerp_core/domains/integration_test.dart';
-import 'package:growerp_core/services/chat_server.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:admin/router.dart' as router;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +13,8 @@ void main() {
   });
 
   testWidgets('''GrowERP payment sales test''', (tester) async {
-    await CommonTest.startApp(
-        tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
-        clear: true);
+    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await UserTest.selectCustomers(tester);
     await UserTest.addCustomers(tester, customers.sublist(0, 2), check: false);

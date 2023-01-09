@@ -17,6 +17,7 @@
 // start with: flutter run -t lib/chatEcho_main.dart
 
 import 'dart:async';
+import 'package:flutter_phoenix/generated/i18n.dart';
 import 'package:growerp_core/api_repository.dart';
 import 'package:growerp_core/domains/domains.dart';
 import 'package:growerp_core/services/chat_server.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'generated/l10n.dart';
 import 'router.dart' as router;
 
 Future main() async {
@@ -35,11 +35,9 @@ Future main() async {
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 
-  BlocOverrides.runZoned(
-    () => runApp(Phoenix(
-        child: ChatApp(dbServer: APIRepository(), chatServer: ChatServer()))),
-    blocObserver: AppBlocObserver(),
-  );
+  Bloc.observer = AppBlocObserver();
+  runApp(Phoenix(
+      child: ChatApp(dbServer: APIRepository(), chatServer: ChatServer())));
 }
 
 class ChatApp extends StatelessWidget {

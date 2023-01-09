@@ -13,6 +13,7 @@
  */
 
 import 'package:admin/main.dart';
+import 'package:admin/menuOption_data.dart';
 import 'package:growerp_core/api_repository.dart';
 import 'package:growerp_core/domains/integration_test.dart';
 import 'package:growerp_core/services/chat_server.dart';
@@ -20,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:admin/router.dart' as router;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -30,11 +32,8 @@ void main() {
 
   testWidgets("prepare empty system for chat test>>>>>>",
       (WidgetTester tester) async {
-    await CommonTest.startApp(
-      tester,
-      TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
-      clear: true,
-    );
+    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        clear: true); // use data from previous run, ifnone same as true
     // userlogin in mainadmin data.dart should be used for chatecho
     await CompanyTest.createCompany(tester);
     await UserTest.selectAdministrators(tester);
@@ -42,10 +41,8 @@ void main() {
   }, skip: true);
 // now start chatEco_main.dart with the userlog in when the company created
   testWidgets("Chatroom maintenance>>>>>>", (WidgetTester tester) async {
-    await CommonTest.startApp(
-      tester,
-      TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
-    );
+    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        clear: true); // use data from previous run, ifnone same as true
     // chatrooms screen
     await CommonTest.tapByTooltip(tester, 'Chat');
     expect(find.byKey(Key('ChatRoomListDialog')), findsOneWidget);
@@ -73,10 +70,8 @@ void main() {
   }, skip: true);
   testWidgets("chat with chat echo in other process>>>>>>",
       (WidgetTester tester) async {
-    await CommonTest.startApp(
-      tester,
-      TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
-    );
+    await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        clear: true); // use data from previous run, ifnone same as true
 //    await CommonTest.logout(tester);
 //    await CommonTest.login(tester,
 //        username: 'email3@example.org',
