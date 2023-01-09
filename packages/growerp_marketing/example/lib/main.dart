@@ -12,121 +12,163 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/api_repository.dart';
 import 'package:growerp_core/services/chat_server.dart';
-import 'menuOption_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-// ignore: depend_on_referenced_packages
-import 'package:responsive_framework/responsive_framework.dart';
-import 'generated/l10n.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/styles/themes.dart';
-import 'router.dart' as router;
+import 'package:growerp_core/templates/displayMenuOption.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/domains/domains.dart';
+import 'package:growerp_marketing/opportunities/views/views.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   runApp(Phoenix(
-      child: TopApp(dbServer: APIRepository(), chatServer: ChatServer())));
+      child: TopApp(
+          dbServer: APIRepository(),
+          chatServer: ChatServer(),
+          title: 'GrowERP.',
+          router: generateRoute,
+          menuOptions: menuOptions)));
 }
 
-class TopApp extends StatelessWidget {
-  const TopApp({Key? key, required this.dbServer, required this.chatServer})
-      : super(key: key);
-
-  final APIRepository dbServer;
-  final ChatServer chatServer;
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => dbServer),
-        RepositoryProvider(create: (context) => chatServer),
-      ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>(
-              create: (context) =>
-                  AuthBloc(dbServer, chatServer)..add(AuthLoad())),
-          BlocProvider<ChatRoomBloc>(
-            create: (context) =>
-                ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
-                  ..add(ChatRoomFetch()),
-          ),
-          BlocProvider<ChatMessageBloc>(
-              create: (context) => ChatMessageBloc(
-                  dbServer, chatServer, context.read<AuthBloc>())),
-        ],
-        child: const MyApp(),
+// Menu definition
+List<MenuOption> menuOptions = [
+  MenuOption(
+    image: 'assets/images/dashBoardGrey.png',
+    selectedImage: 'assets/images/dashBoard.png',
+    title: 'Main',
+    route: '/',
+    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    child: MainMenuForm(),
+  ),
+  MenuOption(
+    image: 'assets/images/companyGrey.png',
+    selectedImage: 'assets/images/company.png',
+    title: 'Company',
+    route: '/company',
+    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    tabItems: [
+      TabItem(
+        form: CompanyForm(FormArguments()),
+        label: 'Company Info',
+        icon: const Icon(Icons.home),
       ),
-    );
+      TabItem(
+        form: const UserListForm(
+          key: Key('Admin'),
+          userGroup: UserGroup.Admin,
+        ),
+        label: 'Admins',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('Employee'),
+          userGroup: UserGroup.Employee,
+        ),
+        label: 'Employees',
+        icon: const Icon(Icons.school),
+      ),
+    ],
+  ),
+  MenuOption(
+    image: 'assets/images/crmGrey.png',
+    selectedImage: 'assets/images/crm.png',
+    title: 'Marketing',
+    route: '/crm',
+    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    tabItems: [
+      TabItem(
+        form: OpportunityListForm(),
+        label: 'My Opportunities',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('Lead'),
+          userGroup: UserGroup.Lead,
+        ),
+        label: 'Leads',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('Customer'),
+          userGroup: UserGroup.Customer,
+        ),
+        label: 'Customers',
+        icon: const Icon(Icons.school),
+      ),
+    ],
+  ),
+];
+
+// routing
+Route<dynamic> generateRoute(RouteSettings settings) {
+  if (kDebugMode) {
+    print('>>>NavigateTo { ${settings.name} '
+        'with: ${settings.arguments.toString()} }');
+  }
+  switch (settings.name) {
+    case '/':
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: menuOptions));
+    case '/company':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/crm':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+    default:
+      return MaterialPageRoute(
+          builder: (context) => FatalErrorForm(
+              "Routing not found for request: ${settings.name}"));
   }
 }
 
-class MyApp extends StatelessWidget {
-  static String title = 'GrowERP administrator.';
+// main menu
+class MainMenuForm extends StatelessWidget {
+  const MainMenuForm({super.key});
 
-  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        // close keyboard
-        onTap: () {
-          final currentFocus = FocusScope.of(context);
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state.status == AuthStatus.authenticated) {
+        Authenticate authenticate = state.authenticate!;
+        return DashBoardForm(dashboardItems: [
+          makeDashboardItem(
+            'dbCompany',
+            context,
+            menuOptions[1],
+            authenticate.company!.name!.length > 20
+                ? "${authenticate.company!.name!.substring(0, 20)}..."
+                : "${authenticate.company!.name}",
+            "Administrators: ${authenticate.stats?.admins ?? 0}",
+            "Other Employees: ${authenticate.stats?.employees ?? 0}",
+            "",
+          ),
+          makeDashboardItem(
+            'dbCrm',
+            context,
+            menuOptions[2],
+            "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
+            "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
+            "",
+            "",
+          ),
+        ]);
+      }
 
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
-        },
-        child: MaterialApp(
-            title: title,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            builder: (context, widget) => ResponsiveWrapper.builder(
-                BouncingScrollWrapper.builder(context, widget!),
-                maxWidth: 2460,
-                defaultScale: true,
-                breakpoints: [
-                  const ResponsiveBreakpoint.resize(450, name: MOBILE),
-                  const ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                  const ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-                  const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
-                ],
-                background: Container(color: const Color(0xFFF5F5F5))),
-            theme: Themes.formTheme,
-            onGenerateRoute: router.generateRoute,
-            home: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state.status == AuthStatus.failure) {
-                  return const FatalErrorForm('server connection problem');
-                }
-                if (state.status == AuthStatus.authenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
-                }
-                if (state.status == AuthStatus.unAuthenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
-                }
-                if (state.status == AuthStatus.changeIp) return ChangeIpForm();
-                return SplashForm();
-              },
-            )));
+      return LoadingIndicator();
+    });
   }
 }

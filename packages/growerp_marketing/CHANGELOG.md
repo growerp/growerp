@@ -1,3 +1,7 @@
+## 0.6.0-dev.4
+
+* upgrade to new core version dev-6
+
 ## 0.6.0-dev.3
 
 * freezed files not saved.

@@ -401,14 +401,14 @@ packages:
       name: growerp_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.5"
+    version: "0.6.0-dev.6"
   growerp_marketing:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.6.0-dev.2"
+    version: "0.6.0-dev.3"
   highlight:
     dependency: transitive
     description:
