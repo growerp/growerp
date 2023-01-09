@@ -1,3 +1,8 @@
+## 0.6.0-dev.7
+
+* re-enable example directory
+* add available platforms
+
 ## 0.6.0-dev.6
 
 * moved code from example into core
