@@ -14,7 +14,7 @@ export 'src/domains/common/widgets/observer.dart';
 export 'src/services/chat_server.dart';
 export 'src/domains/common/models/models.dart';
 export 'src/domains/users/models/models.dart';
-export 'src/templates/displayMenuOption.dart';
+export 'src/templates/display_menu_option.dart';
 export 'src/domains/common/views/views.dart';
 export 'src/domains/authenticate/authenticate.dart';
 export 'src/domains/integration_test.dart';
