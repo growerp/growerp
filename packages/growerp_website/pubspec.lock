@@ -58,7 +58,7 @@ packages:
     source: hosted
     version: "8.1.0"
   bloc_concurrency:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: bloc_concurrency
       url: "https://pub.dartlang.org"
@@ -261,7 +261,7 @@ packages:
     source: hosted
     version: "4.0.1"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       url: "https://pub.dartlang.org"
@@ -296,7 +296,7 @@ packages:
     source: hosted
     version: "6.1.2"
   file_picker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: file_picker
       url: "https://pub.dartlang.org"
@@ -315,7 +315,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_bloc:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_bloc
       url: "https://pub.dartlang.org"
@@ -381,7 +381,7 @@ packages:
     source: hosted
     version: "3.0.2"
   flutter_test:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -398,7 +398,7 @@ packages:
     source: hosted
     version: "2.2.0"
   freezed_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: freezed_annotation
       url: "https://pub.dartlang.org"
@@ -431,7 +431,7 @@ packages:
     source: hosted
     version: "2.1.0"
   global_configuration:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: global_configuration
       url: "https://pub.dartlang.org"
@@ -447,10 +447,10 @@ packages:
   growerp_core:
     dependency: "direct main"
     description:
-      path: "../growerp_core"
-      relative: true
-    source: path
-    version: "0.6.0-dev.7"
+      name: growerp_core
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0-dev.8"
   highlight:
     dependency: transitive
     description:
@@ -494,7 +494,7 @@ packages:
     source: hosted
     version: "3.3.0"
   image_picker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker
       url: "https://pub.dartlang.org"
@@ -529,7 +529,7 @@ packages:
     source: hosted
     version: "2.6.2"
   integration_test:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -800,7 +800,7 @@ packages:
     source: hosted
     version: "0.5.1"
   responsive_framework:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: responsive_framework
       url: "https://pub.dartlang.org"
@@ -959,7 +959,7 @@ packages:
     source: hosted
     version: "2.1.0"
   stream_transform:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: stream_transform
       url: "https://pub.dartlang.org"

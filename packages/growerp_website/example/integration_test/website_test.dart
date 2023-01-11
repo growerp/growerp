@@ -14,7 +14,7 @@ void main() {
   });
 
   Future<void> selectWebsite(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'dbWebsite', 'WebsiteFormWebsite');
+    await CommonTest.selectOption(tester, 'dbWebsite', 'WebsiteForm');
   }
 
   testWidgets('''GrowERP website test''', (tester) async {

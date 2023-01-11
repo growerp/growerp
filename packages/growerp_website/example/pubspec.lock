@@ -377,17 +377,17 @@ packages:
   growerp_core:
     dependency: transitive
     description:
-      path: "../../growerp_core"
-      relative: true
-    source: path
-    version: "0.6.0-dev.7"
+      name: growerp_core
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0-dev.8"
   growerp_website:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.5.0-dev.1"
+    version: "0.6.0-dev.1"
   highlight:
     dependency: transitive
     description:

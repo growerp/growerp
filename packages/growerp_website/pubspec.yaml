@@ -1,6 +1,6 @@
 name: growerp_website
 description:  A website component for the GrowERP system.
-version: 0.5.0-dev.1
+version: 0.6.0-dev.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_website
 
@@ -19,8 +19,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: # ^0.6.0-dev.6
-    path: ../growerp_core/
+  growerp_core: ^0.6.0-dev.8
+  #  path: ../growerp_core/
+  flutter_bloc: ^8.1.1
+  equatable: ^2.0.5
+  responsive_framework: ^0.2.0
   archive: ^3.3.0
   path_provider: ^2.0.11
   reorderables: ^0.5.1
@@ -28,6 +31,16 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   from_css_color: ^2.0.0
   markdown_widget: ^1.2.8
+  freezed_annotation: ^2.0.3
+  bloc_concurrency: ^0.2.0
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  image_picker: ^0.8.5
+  global_configuration: ^2.0.0-nullsafety.0
+  file_picker: ^5.0.1
+  stream_transform: ^2.1.0
 
 dev_dependencies:
   freezed: ^2.0.3

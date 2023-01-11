@@ -37,3 +37,34 @@ A customer user has a single login for all owner websites and will be linked to 
 
 ### other entities
 Other entities like products, categories etc use the 'ownerPartyId' field to separate between owners. It contains from now on the 
+
+## Module organization
+## 3 layer screen approach
+
+1. The application
+	1. Menu structure
+	2. User access
+	3. routing
+2. The core screen system
+	1. template layout
+		1. appBar
+		2. navigation rail/left menu selection
+		3. top/bottom tab selection.
+		4. main menu
+	2. screen definitions
+	3. registration/login
+	4. multi company
+	5. employee/admin
+	6. supplier/customer/lead
+	7. companies
+	8. tasks
+3. The package plugins
+	1. Marketing
+	2. Sales/purchase Order
+	3. Accounting
+	4. Website
+	5. Catalog
+	7. Inventory
+	8. Chat
+
+The main principle of presenting screens is to show the screen by calling the template with the parameter of the screen name. A screen can be single widget of a screen with tabs which are shown by the template.

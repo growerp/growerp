@@ -1,11 +1,6 @@
-# Flutter front-end
-
-## App organization
-
-All screens within GrowERP operate within a template which contain the topbar and the main selection menu, either switch open on the left for mobile or placed on the left for larger screens. It also contains an optional secondary tab selection menu either on top for the larger screens or at the bottom for mobile.
 
 
-## Installation.
+# Installation.
 
 After installation of [Java 11](https://openjdk.java.net/install/):
 

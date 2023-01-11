@@ -19,8 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 class WebsiteTest {
   // used in the admin app
   static Future<void> selectWebsite(WidgetTester tester) async {
-    await CommonTest.selectOption(
-        tester, 'tapCompany', 'WebsiteFormWebsite', '4');
+    await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteForm', '4');
   }
 
   static Future<void> updateWebsite(WidgetTester tester) async {

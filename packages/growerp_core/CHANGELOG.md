@@ -1,3 +1,7 @@
+## 0.6.0-dev.8
+
+* moved website into its own package
+
 ## 0.6.0-dev.7
 
 * re-enable example directory
