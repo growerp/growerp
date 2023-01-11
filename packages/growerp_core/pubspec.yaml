@@ -44,7 +44,7 @@ dependencies:
   stream_transform: ^2.1.0
   collection: ^1.16.0
   http: ^0.13.5
-
+  flutter_lints: ^2.0.1
 
   #NETWORK
   json_annotation: ^4.4.0
@@ -52,7 +52,6 @@ dependencies:
 
   #UTILITIES
   freezed_annotation: ^2.0.3
-  freezed: ^2.0.3
   credit_card_validator: ^2.0.1
   markdown_widget: ^1.2.8
   url_launcher: ^6.1.4
@@ -71,6 +70,7 @@ dependencies:
 dev_dependencies:
   flutter_driver:
     sdk: flutter
+  freezed: ^2.0.3
   mockito: ^5.0.2
   very_good_analysis: ^3.0.0
   bloc_test: ^9.0.1

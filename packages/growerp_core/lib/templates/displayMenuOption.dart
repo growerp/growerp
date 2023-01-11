@@ -54,7 +54,7 @@ class _MenuOptionState extends State<DisplayMenuOption>
   FloatingActionButton? floatingActionButton;
   List<BottomNavigationBarItem> bottomItems = [];
   TabController? _controller;
-  late String formKey;
+  late String displayMOFormKey;
 
   @override
   void initState() {
@@ -82,19 +82,21 @@ class _MenuOptionState extends State<DisplayMenuOption>
           child: Icon(Icons.add));
     }
     if (tabItems.isEmpty)
-      formKey = child.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
+      displayMOFormKey =
+          child.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
     for (var i = 0; i < tabItems.length; i++) {
       // form key for testing
-      formKey = tabItems[i]
+      displayMOFormKey = tabItems[i]
           .form
           .toString()
           .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
+      print("=== current form key: $displayMOFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
       tabText.add(Align(
           alignment: Alignment.center,
-          child: Text(tabItems[i].label, key: Key('tap$formKey'))));
+          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
       // tabs at bottom of screen : phone
       bottomItems.add(BottomNavigationBarItem(
           icon: tabItems[i].icon,
@@ -215,12 +217,13 @@ class _MenuOptionState extends State<DisplayMenuOption>
   }
 
   Widget simplePage(Authenticate authenticate, bool isPhone) {
-    final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-        GlobalKey<ScaffoldMessengerState>();
+    displayMOFormKey =
+        child.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
+    print("=== current form key: $displayMOFormKey");
     return Scaffold(
-        key: rootScaffoldMessengerKey,
+        key: Key(route),
         appBar: AppBar(
-            key: Key(child.toString()),
+            key: Key(displayMOFormKey),
             automaticallyImplyLeading: isPhone,
             leading: leadAction,
             title: appBarTitle(context, authenticate, title),
@@ -231,9 +234,10 @@ class _MenuOptionState extends State<DisplayMenuOption>
   }
 
   Widget tabPage(Authenticate authenticate, bool isPhone) {
-    formKey = tabList[tabIndex]
+    displayMOFormKey = tabList[tabIndex]
         .toString()
         .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
+    print("=== current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -271,9 +275,9 @@ class _MenuOptionState extends State<DisplayMenuOption>
                 })
             : null,
         body: isPhone
-            ? Center(child: tabList[tabIndex], key: Key(formKey))
+            ? Center(child: tabList[tabIndex], key: Key(displayMOFormKey))
             : TabBarView(
-                key: Key(formKey),
+                key: Key(displayMOFormKey),
                 controller: _controller,
                 children: tabList,
               ));

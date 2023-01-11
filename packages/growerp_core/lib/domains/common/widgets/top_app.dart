@@ -41,30 +41,28 @@ class TopApp extends StatelessWidget {
   final List<MenuOption> menuOptions;
 
   @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => dbServer),
-        RepositoryProvider(create: (context) => chatServer),
-      ],
-      child: MultiBlocProvider(
+  Widget build(BuildContext context) => MultiRepositoryProvider(
         providers: [
-          BlocProvider<AuthBloc>(
-              create: (context) =>
-                  AuthBloc(dbServer, chatServer)..add(AuthLoad())),
-          BlocProvider<ChatRoomBloc>(
-            create: (context) =>
-                ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
-                  ..add(ChatRoomFetch()),
-          ),
-          BlocProvider<ChatMessageBloc>(
-              create: (context) => ChatMessageBloc(
-                  dbServer, chatServer, context.read<AuthBloc>())),
+          RepositoryProvider(create: (context) => dbServer),
+          RepositoryProvider(create: (context) => chatServer),
         ],
-        child: MyApp(title, router, menuOptions),
-      ),
-    );
-  }
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<AuthBloc>(
+                create: (context) =>
+                    AuthBloc(dbServer, chatServer)..add(AuthLoad())),
+            BlocProvider<ChatRoomBloc>(
+              create: (context) =>
+                  ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
+                    ..add(ChatRoomFetch()),
+            ),
+            BlocProvider<ChatMessageBloc>(
+                create: (context) => ChatMessageBloc(
+                    dbServer, chatServer, context.read<AuthBloc>())),
+          ],
+          child: MyApp(title, router, menuOptions),
+        ),
+      );
 }
 
 class MyApp extends StatelessWidget {
