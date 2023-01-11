@@ -2,7 +2,7 @@ import 'package:example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -14,22 +14,22 @@ void main() {
   });
 
   Future<void> selectLeads(WidgetTester tester) async {
-    await UserTest.selectUsers(tester, 'dbOtherusers', 'UserListFormLead', '1');
+    await UserTest.selectUsers(tester, 'dbOtherUsers', 'UserListFormLead', '1');
   }
 
   Future<void> selectCustomers(WidgetTester tester) async {
     await UserTest.selectUsers(
-        tester, 'dbOtherusers', 'UserListFormCustomer', '2');
+        tester, 'dbOtherUsers', 'UserListFormCustomer', '2');
   }
 
   Future<void> selectSuppliers(WidgetTester tester) async {
     await UserTest.selectUsers(
-        tester, 'dbOtherusers', 'UserListFormSupplier', '3');
+        tester, 'dbOtherUsers', 'UserListFormSupplier', '3');
   }
 
   testWidgets('''GrowERP user test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        clear: true);
+        clear: true, title: 'GrowERP user test');
     await CompanyTest.createCompany(tester);
     await UserTest.selectAdministrators(tester);
     await UserTest.addAdministrators(tester, administrators.sublist(0, 3));

@@ -53,7 +53,8 @@ class CommonTest {
       WidgetTester tester,
       Route<dynamic> Function(RouteSettings) router,
       List<MenuOption> menuOptions,
-      {bool clear = false}) async {
+      {bool clear = false,
+      String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
     print("====startapp seq: $seq");
@@ -67,6 +68,7 @@ class CommonTest {
         dbServer: APIRepository(),
         chatServer: ChatServer(),
         router: router,
+        title: title,
         menuOptions: menuOptions));
     await tester.pumpAndSettle(Duration(seconds: 5));
   }

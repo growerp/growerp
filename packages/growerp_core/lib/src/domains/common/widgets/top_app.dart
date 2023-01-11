@@ -67,9 +67,9 @@ class TopApp extends StatelessWidget {
 
 class MyApp extends StatelessWidget {
   final String title;
-  final router;
-  final menuOptions;
-  MyApp(this.title, this.router, this.menuOptions);
+  final Route<dynamic> Function(RouteSettings) router;
+  final List<MenuOption> menuOptions;
+  const MyApp(this.title, this.router, this.menuOptions, {super.key});
 
   @override
   Widget build(BuildContext context) {

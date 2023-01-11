@@ -13,7 +13,7 @@
  */
 
 import '../../common/functions/helper_functions.dart';
-import '../../../../extensions.dart';
+import '../../../extensions.dart';
 import '../../domains.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';

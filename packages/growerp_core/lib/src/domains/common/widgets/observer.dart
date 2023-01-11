@@ -12,30 +12,31 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppBlocObserver extends BlocObserver {
   @override
   void onEvent(Bloc bloc, Object? event) {
     super.onEvent(bloc, event);
-    print(event);
+    debugPrint(event.toString());
   }
 
   @override
   void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
-    print(error);
+    debugPrint(error.toString());
     super.onError(bloc, error, stackTrace);
   }
 
   @override
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
-    print(change);
+    debugPrint(change.toString());
   }
 
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    print(transition);
+    debugPrint(transition.toString());
   }
 }

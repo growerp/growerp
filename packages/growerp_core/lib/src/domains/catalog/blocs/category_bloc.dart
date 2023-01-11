@@ -59,14 +59,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       // start from record zero for initial and refresh
       if (state.status == CategoryStatus.initial || event.refresh) {
         emit(state.copyWith(status: CategoryStatus.loading));
-        ApiResult<List<Category>> compResult = await repos.getCategory(
+        ApiResult<List> compResult = await repos.getCategory(
             companyPartyId: event.companyPartyId,
             searchString: event.searchString);
         return emit(compResult.when(
             success: (data) {
               return state.copyWith(
                 status: CategoryStatus.success,
-                categories: data,
+                categories: data as List<Category>,
                 hasReachedMax: data.length < _categoryLimit ? true : false,
                 searchString: '',
                 message: event.refresh == true ? 'List refreshed....' : null,
@@ -79,13 +79,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
-        ApiResult<List<Category>> compResult = await repos.getCategory(
+        ApiResult<List> compResult = await repos.getCategory(
             companyPartyId: event.companyPartyId,
             searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: CategoryStatus.success,
-                  categories: data,
+                  categories: data as List<Category>,
                   hasReachedMax: data.length < _categoryLimit ? true : false,
                   searchString: event.searchString,
                 ),
@@ -94,13 +94,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       }
       // get next page also for search
 
-      ApiResult<List<Category>> compResult = await repos.getCategory(
+      ApiResult<List> compResult = await repos.getCategory(
           companyPartyId: event.companyPartyId,
           searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: CategoryStatus.success,
-                categories: List.of(state.categories)..addAll(data),
+                categories: List.of(state.categories)
+                  ..addAll(data as List<Category>),
                 hasReachedMax: data.length < _categoryLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
@@ -119,8 +120,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(status: CategoryStatus.updateLoading));
       List<Category> categories = List.from(state.categories);
       if (event.category.categoryId.isNotEmpty) {
-        ApiResult<Category> compResult =
-            await repos.updateCategory(event.category);
+        ApiResult compResult = await repos.updateCategory(event.category);
         return emit(compResult.when(
             success: (data) {
               int index = categories.indexWhere(
@@ -135,8 +135,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                 status: CategoryStatus.failure, message: error.toString())));
       } else {
         // add
-        ApiResult<Category> compResult =
-            await repos.createCategory(event.category);
+        ApiResult compResult = await repos.createCategory(event.category);
         return emit(compResult.when(
             success: (data) {
               categories.insert(0, data);
@@ -161,8 +160,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     try {
       emit(state.copyWith(status: CategoryStatus.loading));
       List<Category> categories = List.from(state.categories);
-      ApiResult<Category> compResult =
-          await repos.deleteCategory(event.category);
+      ApiResult compResult = await repos.deleteCategory(event.category);
       return emit(compResult.when(
           success: (data) {
             int index = categories.indexWhere(

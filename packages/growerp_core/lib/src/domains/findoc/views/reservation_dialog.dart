@@ -20,7 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:intl/intl.dart';
 import '../../common/functions/helper_functions.dart';
 import '../../domains.dart';
-import '../../../../extensions.dart';
+import '../../../extensions.dart';
 import '../../../services/api_result.dart';
 import '../../../api_repository.dart';
 

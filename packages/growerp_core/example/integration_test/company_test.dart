@@ -1,5 +1,5 @@
 import 'package:example/main.dart';
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:growerp_core/src/domains/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';

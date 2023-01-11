@@ -12,10 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../common/functions/helper_functions.dart';
-import '../../../../extensions.dart';
-import '../../../services/api_result.dart';
-import '../../domains.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +20,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
-
+import '../../common/functions/helper_functions.dart';
+import '../../../extensions.dart';
+import '../../../services/api_result.dart';
+import '../../domains.dart';
 import '../../../api_repository.dart';
 
 class FinDocDialog extends StatelessWidget {

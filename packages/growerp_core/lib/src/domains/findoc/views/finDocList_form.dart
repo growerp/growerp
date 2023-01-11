@@ -18,7 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import '../../common/functions/functions.dart';
 import '../../domains.dart';
-import '../../../../extensions.dart';
+import '../../../extensions.dart';
 import '../../../api_repository.dart';
 
 class FinDocListForm extends StatelessWidget {

@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../domains/domains.dart';
-import '../../../templates/@templates.dart';
+import '../templates/@templates.dart';
 
 class DisplayMenuOption extends StatefulWidget {
   final MenuOption? menuOption; // display not an item from the list like chat
@@ -25,7 +25,7 @@ class DisplayMenuOption extends StatefulWidget {
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget>? actions; // actions at the appBar
-  DisplayMenuOption({
+  const DisplayMenuOption({
     Key? key,
     this.menuOption,
     required this.menuList,
@@ -36,10 +36,10 @@ class DisplayMenuOption extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _MenuOptionState createState() => _MenuOptionState();
+  MenuOptionState createState() => MenuOptionState();
 }
 
-class _MenuOptionState extends State<DisplayMenuOption>
+class MenuOptionState extends State<DisplayMenuOption>
     with SingleTickerProviderStateMixin {
   late int tabIndex;
   List<TabItem> tabItems = [];
@@ -69,7 +69,7 @@ class _MenuOptionState extends State<DisplayMenuOption>
     tabIndex = widget.tabIndex ?? 0;
     if (menuOption.floatButtonForm != null) {
       floatingActionButton = FloatingActionButton(
-          key: Key("addNew"),
+          key: const Key("addNew"),
           onPressed: () async {
             await showDialog(
                 barrierDismissible: true,
@@ -79,18 +79,17 @@ class _MenuOptionState extends State<DisplayMenuOption>
                 });
           },
           tooltip: 'Add New',
-          child: Icon(Icons.add));
+          child: const Icon(Icons.add));
     }
-    if (tabItems.isEmpty)
+    if (tabItems.isEmpty) {
       displayMOFormKey =
-          child.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
+          child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+    }
     for (var i = 0; i < tabItems.length; i++) {
       // form key for testing
-      displayMOFormKey = tabItems[i]
-          .form
-          .toString()
-          .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
-      print("=== current form key: $displayMOFormKey");
+      displayMOFormKey =
+          tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+      debugPrint("=== current form key: $displayMOFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
@@ -103,19 +102,20 @@ class _MenuOptionState extends State<DisplayMenuOption>
           label: tabItems[i].label,
           tooltip: (i + 1).toString()));
       // floating actionbutton at each tab; not work with domain org
-      if (tabItems[i].floatButtonRoute != null)
+      if (tabItems[i].floatButtonRoute != null) {
         floatingActionButtonList[i] = FloatingActionButton(
-            key: Key("addNew"),
+            key: const Key("addNew"),
             onPressed: () async {
               await Navigator.pushNamed(
                   context, tabItems[tabIndex].floatButtonRoute!,
                   arguments: tabItems[tabIndex].floatButtonArgs);
             },
             tooltip: 'Add New',
-            child: Icon(Icons.add));
+            child: const Icon(Icons.add));
+      }
       if (tabItems[i].floatButtonForm != null) {
         floatingActionButtonList[i] = FloatingActionButton(
-            key: Key("addNew"),
+            key: const Key("addNew"),
             onPressed: () async {
               await showDialog(
                   barrierDismissible: true,
@@ -125,7 +125,7 @@ class _MenuOptionState extends State<DisplayMenuOption>
                   });
             },
             tooltip: 'Add New',
-            child: Icon(Icons.add));
+            child: const Icon(Icons.add));
       }
     }
 
@@ -151,29 +151,31 @@ class _MenuOptionState extends State<DisplayMenuOption>
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     actions = widget.actions ?? [];
-    if (isPhone && route != '/')
+    if (isPhone && route != '/') {
       actions.add(IconButton(
-          key: Key('homeButton'),
-          icon: Icon(Icons.home),
+          key: const Key('homeButton'),
+          icon: const Icon(Icons.home),
           tooltip: 'Go Home',
           onPressed: () {
-            if (route.startsWith('/acct'))
+            if (route.startsWith('/acct')) {
               Navigator.pushNamed(context, '/accounting',
                   arguments: FormArguments());
-            else
+            } else {
               Navigator.pushNamed(context, '/', arguments: FormArguments());
+            }
           }));
+    }
 
     actions.add(IconButton(
         //  key: Key('topChatButton'), // causes a duplicate key?
-        icon: Icon(Icons.chat),
+        icon: const Icon(Icons.chat),
         tooltip: 'Chat',
         onPressed: () async => {
               await showDialog(
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return ChatRoomListDialog();
+                  return const ChatRoomListDialog();
                 },
               )
             }));
@@ -190,9 +192,9 @@ class _MenuOptionState extends State<DisplayMenuOption>
       }
       if (tabItems.isEmpty) {
         // show simple page
-        if (isPhone) // no navigation bar
+        if (isPhone) {
           return simplePage(authenticate, isPhone);
-        else // tablet or web show navigation
+        } else {
           return myNavigationRail(
             context,
             authenticate,
@@ -200,11 +202,12 @@ class _MenuOptionState extends State<DisplayMenuOption>
             widget.menuIndex,
             widget.menuList,
           );
+        }
       } else {
         // show tabbar page
-        if (isPhone)
+        if (isPhone) {
           return tabPage(authenticate, isPhone);
-        else
+        } else {
           return myNavigationRail(
             context,
             authenticate,
@@ -212,14 +215,14 @@ class _MenuOptionState extends State<DisplayMenuOption>
             widget.menuIndex,
             widget.menuList,
           );
+        }
       }
     });
   }
 
   Widget simplePage(Authenticate authenticate, bool isPhone) {
-    displayMOFormKey =
-        child.toString().replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
-    print("=== current form key: $displayMOFormKey");
+    displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+    debugPrint("=== current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -234,10 +237,9 @@ class _MenuOptionState extends State<DisplayMenuOption>
   }
 
   Widget tabPage(Authenticate authenticate, bool isPhone) {
-    displayMOFormKey = tabList[tabIndex]
-        .toString()
-        .replaceAll(new RegExp(r'[^(a-z,A-Z)]'), '');
-    print("=== current form key: $displayMOFormKey");
+    displayMOFormKey =
+        tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+    debugPrint("=== current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -246,11 +248,11 @@ class _MenuOptionState extends State<DisplayMenuOption>
                 ? null
                 : TabBar(
                     controller: _controller,
-                    labelPadding: EdgeInsets.all(10.0),
+                    labelPadding: const EdgeInsets.all(10.0),
                     labelColor: Colors.black,
                     unselectedLabelColor: Colors.white,
                     indicatorSize: TabBarIndicatorSize.label,
-                    indicator: BoxDecoration(
+                    indicator: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),
                             topRight: Radius.circular(10)),
@@ -275,7 +277,7 @@ class _MenuOptionState extends State<DisplayMenuOption>
                 })
             : null,
         body: isPhone
-            ? Center(child: tabList[tabIndex], key: Key(displayMOFormKey))
+            ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
             : TabBarView(
                 key: Key(displayMOFormKey),
                 controller: _controller,

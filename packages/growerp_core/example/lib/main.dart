@@ -13,15 +13,11 @@
  */
 
 import 'package:flutter/foundation.dart';
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/domains/common/widgets/top_app.dart';
-import 'package:growerp_core/services/chat_server.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/templates/displayMenuOption.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:growerp_core/domains/domains.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +27,7 @@ Future main() async {
       child: TopApp(
           dbServer: APIRepository(),
           chatServer: ChatServer(),
-          title: 'GrowERP.',
+          title: 'GrowERP package: growerp_core.',
           router: generateRoute,
           menuOptions: menuOptions)));
 }

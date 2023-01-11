@@ -71,13 +71,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-  build:
-    dependency: transitive
-    description:
-      name: build
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.3.1"
   build_config:
     dependency: transitive
     description:
@@ -176,13 +169,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
-  dart_style:
-    dependency: transitive
-    description:
-      name: dart_style
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.4"
   date_utils:
     dependency: transitive
     description:
@@ -348,13 +334,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  freezed:
-    dependency: transitive
-    description:
-      name: freezed
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.0"
   freezed_annotation:
     dependency: transitive
     description:
@@ -401,7 +380,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.6.0-dev.7"
+    version: "0.6.0-dev.8"
   highlight:
     dependency: transitive
     description:
@@ -895,13 +874,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  source_gen:
-    dependency: transitive
-    description:
-      name: source_gen
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.6"
   source_map_stack_trace:
     dependency: transitive
     description:

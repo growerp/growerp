@@ -21,7 +21,7 @@ import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';
 import 'dart:io' show Platform;
 import 'domains/domains.dart';
-import '../domains/catalog/models/category_model.dart' as cat;
+import 'domains/catalog/models/category_model.dart' as cat;
 
 class APIRepository {
   String classificationId = GlobalConfiguration().get('classificationId');

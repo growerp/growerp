@@ -81,7 +81,8 @@ dev_dependencies:
   dependency_validator: ^3.2.0
 # run dependency validator: flutter pub run dependency_validator
 
-
 flutter:
   uses-material-design: true
-# from https://www.flaticon.com/
+
+flutter_intl:
+  enabled: true
