@@ -19,12 +19,14 @@ import 'package:flutter/foundation.dart';
 import '../../../domains/domains.dart';
 
 class LoginDialog extends StatefulWidget {
+  const LoginDialog({super.key});
+
   @override
   State<LoginDialog> createState() => _LoginHeaderState();
 }
 
 class _LoginHeaderState extends State<LoginDialog> {
-  final _formKey = GlobalKey<FormState>();
+  final _loginFormKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   bool _obscureText = true;
   String? companyPartyId;
@@ -36,15 +38,17 @@ class _LoginHeaderState extends State<LoginDialog> {
   _LoginHeaderState();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _formKey1 = GlobalKey<FormState>();
+  final _loginFormKey1 = GlobalKey<FormState>();
   final _password3Controller = TextEditingController();
   final _password4Controller = TextEditingController();
   bool _obscureText3 = true;
   bool _obscureText4 = true;
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
     super.initState();
+    _authBloc = context.read<AuthBloc>();
   }
 
   @override
@@ -70,14 +74,16 @@ class _LoginHeaderState extends State<LoginDialog> {
       authenticate = state.authenticate!;
       companyPartyId = authenticate.company!.partyId;
       companyName = authenticate.company!.name;
-      if (_usernameController.text.isEmpty)
+      if (_usernameController.text.isEmpty) {
         _usernameController.text = authenticate.user?.loginName != null
             ? authenticate.user!.loginName!
             : kReleaseMode
                 ? ''
                 : 'test@example.com';
-      if (_passwordController.text.isEmpty && !kReleaseMode)
+      }
+      if (_passwordController.text.isEmpty && !kReleaseMode) {
         _passwordController.text = 'qqqqqq9!';
+      }
       Widget loginType;
       if (oldPassword != null && username != null) {
         loginType = _changePassword(username, oldPassword);
@@ -94,7 +100,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                   builder: (context) => GestureDetector(
                       onTap: () {},
                       child: Dialog(
-                          insetPadding: EdgeInsets.all(10),
+                          insetPadding: const EdgeInsets.all(10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -103,18 +109,18 @@ class _LoginHeaderState extends State<LoginDialog> {
   }
 
   Widget _changePassword(String? username, String? oldPassword) {
-    return PopUp(
+    return popUp(
         height: 500,
         context: context,
         title: "Create New Password",
         child: Form(
-          key: _formKey1,
+          key: _loginFormKey1,
           child: Column(children: <Widget>[
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Text("username: $username"),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextFormField(
-              key: Key("password1"),
+              key: const Key("password1"),
               autofocus: true,
               controller: _password3Controller,
               obscureText: _obscureText3,
@@ -136,14 +142,15 @@ class _LoginHeaderState extends State<LoginDialog> {
                 if (value!.isEmpty) return 'Please enter first password?';
                 final regExpRequire =
                     RegExp(r'^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).{8,}');
-                if (!regExpRequire.hasMatch(value))
+                if (!regExpRequire.hasMatch(value)) {
                   return 'At least 8 characters, including alpha, number & special character.';
+                }
                 return null;
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextFormField(
-              key: Key("password2"),
+              key: const Key("password2"),
               obscureText: _obscureText4,
               decoration: InputDecoration(
                 labelText: 'Verify Password',
@@ -161,45 +168,47 @@ class _LoginHeaderState extends State<LoginDialog> {
               controller: _password4Controller,
               validator: (value) {
                 if (value!.isEmpty) return 'Enter password again to verify?';
-                if (value != _password4Controller.text)
+                if (value != _password4Controller.text) {
                   return 'Password is not matching';
+                }
                 return null;
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
-                child: Text('Submit new Password'),
+                child: const Text('Submit new Password'),
                 onPressed: () {
-                  if (_formKey1.currentState!.validate())
-                    context.read<AuthBloc>().add(
-                          AuthChangePassword(
-                            username!,
-                            oldPassword!,
-                            _password4Controller.text,
-                          ),
-                        );
+                  if (_loginFormKey1.currentState!.validate()) {
+                    _authBloc.add(
+                      AuthChangePassword(
+                        username!,
+                        oldPassword!,
+                        _password4Controller.text,
+                      ),
+                    );
+                  }
                 }),
           ]),
         ));
   }
 
   Widget _changeEcommerceCompany() {
-    final _formKey2 = GlobalKey<FormState>();
-    return Container(
+    final loginFormKey2 = GlobalKey<FormState>();
+    return SizedBox(
         width: 400,
         height: 400,
         child: Form(
-          key: _formKey2,
+          key: loginFormKey2,
           child: SingleChildScrollView(
             child: DropdownButton(
-              key: ValueKey('drop_down'),
-              underline: SizedBox(), // remove underline
-              hint: Text('Company'),
+              key: const ValueKey('drop_down'),
+              underline: const SizedBox(), // remove underline
+              hint: const Text('Company'),
               value: _companySelected,
               items: companies?.map((item) {
                 return DropdownMenuItem<Company>(
-                  child: Text(item.name ?? 'Company??'),
                   value: item,
+                  child: Text(item.name ?? 'Company??'),
                 );
               }).toList(),
               onChanged: (Company? newValue) {
@@ -216,27 +225,27 @@ class _LoginHeaderState extends State<LoginDialog> {
   }
 
   Widget _loginToCurrentCompany() {
-    return PopUp(
+    return popUp(
         context: context,
         title: "Login with Existing user name",
         child: Form(
-            key: _formKey,
+            key: _loginFormKey,
             child: Column(children: <Widget>[
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 autofocus: _usernameController.text.isEmpty,
-                key: Key('username'),
-                decoration: InputDecoration(labelText: 'Username/Email'),
+                key: const Key('username'),
+                decoration: const InputDecoration(labelText: 'Username/Email'),
                 controller: _usernameController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter username or email?';
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                   autofocus: _usernameController.text.isNotEmpty,
-                  key: Key('password'),
+                  key: const Key('password'),
                   validator: (value) {
                     if (value!.isEmpty) return 'Please enter your password?';
                     return null;
@@ -256,33 +265,33 @@ class _LoginHeaderState extends State<LoginDialog> {
                           : Icons.visibility_off),
                     ),
                   )),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(children: [
                 Expanded(
                     child: ElevatedButton(
-                        key: Key('login'),
-                        child: Text('Login'),
+                        key: const Key('login'),
+                        child: const Text('Login'),
                         onPressed: () {
-                          if (_formKey.currentState!.validate())
+                          if (_loginFormKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(AuthLogin(
                                 authenticate.company,
                                 _usernameController.text,
                                 _passwordController.text));
+                          }
                         }))
               ]),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Center(
                   child: GestureDetector(
-                      child: Text('forgot/change password?'),
+                      child: const Text('forgot/change password?'),
                       onTap: () async {
                         String username = authenticate.user?.loginName ??
                             (kReleaseMode ? '' : 'test@example.com');
                         username =
                             await _sendResetPasswordDialog(context, username);
                         if (username.isNotEmpty) {
-                          context
-                              .read<AuthBloc>()
-                              .add(AuthResetPassword(username: username));
+                          _authBloc.add(AuthResetPassword(username: username));
+                          // ignore: use_build_context_synchronously
                           HelperFunctions.showMessage(
                               context,
                               'An email with password has been '
@@ -299,27 +308,27 @@ class _LoginHeaderState extends State<LoginDialog> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(32.0))),
-          title: Text(
+          title: const Text(
               'Email you registered with?\nWe will send you a reset password',
               textAlign: TextAlign.center),
           content: TextFormField(
               initialValue: username,
               autofocus: true,
-              decoration: new InputDecoration(labelText: 'Email:'),
+              decoration: const InputDecoration(labelText: 'Email:'),
               onChanged: (value) {
                 username = value;
               }),
           actions: <Widget>[
             ElevatedButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop('');
               },
             ),
             ElevatedButton(
-              child: Text('Ok'),
+              child: const Text('Ok'),
               onPressed: () {
                 Navigator.of(context).pop(username);
               },
@@ -331,7 +340,7 @@ class _LoginHeaderState extends State<LoginDialog> {
   }
 }
 
-Widget PopUp({
+Widget popUp({
   required BuildContext context,
   required Widget child,
   String title = '',
@@ -339,7 +348,7 @@ Widget PopUp({
   double width = 400,
 }) {
   return Stack(clipBehavior: Clip.none, children: [
-    Container(
+    SizedBox(
         width: width,
         height: height,
         child: Column(children: [
@@ -347,17 +356,18 @@ Widget PopUp({
               height: 50,
               decoration: BoxDecoration(
                   color: Theme.of(context).primaryColorDark,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   )),
               child: Center(
                   child: Text(title,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.bold)))),
-          Expanded(child: Padding(padding: EdgeInsets.all(20), child: child)),
+          Expanded(
+              child: Padding(padding: const EdgeInsets.all(20), child: child)),
         ])),
     Positioned(top: 10, right: 10, child: DialogCloseButton())
   ]);

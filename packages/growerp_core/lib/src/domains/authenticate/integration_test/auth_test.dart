@@ -48,7 +48,7 @@ class AuthTest {
   static Future<void> loginIfRequired(
       WidgetTester tester, String loginName, String password) async {
     try {
-      expect(find.byKey(Key('HomeFormAuth')), findsOneWidget);
+      expect(find.byKey(const Key('HomeFormAuth')), findsOneWidget);
     } catch (_) {
       await login(tester, loginName, password);
     }
@@ -114,13 +114,12 @@ class AuthTest {
 
   static Future<void> logoutIfRequired(WidgetTester tester) async {
     try {
-      expect(find.byKey(Key('HomeFormUnAuth')), findsOneWidget);
+      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     } catch (_) {
       // assumes still logged in, so logout
-      print("Dashboard logged in , needs to logout");
       await CommonTest.tapByKey(tester, 'logoutButton');
-      await tester.pump(Duration(seconds: 5));
-      expect(find.byKey(Key('HomeFormUnAuth')), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     }
   }
 
@@ -131,7 +130,7 @@ class AuthTest {
   static Future<void> pressRegisterAndcreateNewAdminAndCompany(
       WidgetTester tester) async {
     await CommonTest.tapByKey(tester, 'newCompany', seconds: 5);
-    await tester.pumpAndSettle(Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
     await tester.pumpAndSettle();
   }
 }

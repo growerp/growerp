@@ -22,19 +22,19 @@ import '../../domains.dart';
 confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
   // set up the buttons
   Widget cancelButton = ElevatedButton(
-    child: Text("cancel"),
+    child: const Text("cancel"),
     onPressed: () {
       Navigator.of(context).pop();
     },
   );
   Widget alsoCompanyDeleteButton = ElevatedButton(
-    child: Text("User AND Company delete"),
+    child: const Text("User AND Company delete"),
     onPressed: () {
       Navigator.of(context).pop(true);
     },
   );
   Widget justUserDeleteButton = ElevatedButton(
-    child: Text("Only User delete"),
+    child: const Text("Only User delete"),
     onPressed: () {
       Navigator.of(context).pop(false);
     },
@@ -45,11 +45,11 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
 
   // set up the AlertDialog
   AlertDialog alert = AlertDialog(
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(32.0))),
     title: Text(
         "Delete yourself ${userGroup == UserGroup.Admin ? ' and optionally company?' : ''}"),
-    content: Text("Please note you will be blocked using the system."
+    content: const Text("Please note you will be blocked using the system."
         "\nThis cannot be undone!"),
     actions: actions,
   );

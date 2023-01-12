@@ -28,18 +28,18 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
           }),
       });
   bool loggedIn = authenticate.apiKey != null;
-  if (loggedIn && isPhone)
+  if (loggedIn && isPhone) {
     return SizedBox(
         width: MediaQuery.of(context).size.width * 0.40,
         child: Drawer(
-          key: Key('drawer'),
+          key: const Key('drawer'),
           child: ListView.builder(
             itemCount: options.length + 1,
             itemBuilder: (context, i) {
-              if (i == 0)
+              if (i == 0) {
                 return DrawerHeader(
                     child: InkWell(
-                        key: Key('tapUser'),
+                        key: const Key('tapUser'),
                         onTap: () async {
                           await showDialog(
                               barrierDismissible: true,
@@ -58,34 +58,37 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                                       authenticate.user?.firstName
                                               ?.substring(0, 1) ??
                                           '',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 30, color: Colors.black))),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text("${authenticate.user!.firstName} ",
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.black)),
+                              style: const TextStyle(
+                                  fontSize: 15, color: Colors.black)),
                           Text("${authenticate.user!.lastName}",
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.black)),
+                              style: const TextStyle(
+                                  fontSize: 15, color: Colors.black)),
                         ])));
+              }
               return ListTile(
                   key: Key('tap${options[i - 1]["route"]}'),
-                  contentPadding: EdgeInsets.all(5.0),
+                  contentPadding: const EdgeInsets.all(5.0),
                   title: Text(options[i - 1]["title"]),
                   leading: Image.asset(
                     options[i - 1]["selImage"],
                   ),
                   onTap: () {
-                    if (options[i - 1]["route"] == "/")
+                    if (options[i - 1]["route"] == "/") {
                       Navigator.of(context).pushNamedAndRemoveUntil(
                           '/', (Route<dynamic> route) => false);
-                    else
+                    } else {
                       Navigator.pushNamed(context, options[i - 1]["route"],
                           arguments:
                               FormArguments(menuIndex: options[i - 1]["tab"]));
+                    }
                   });
             },
           ),
         ));
-  return Text('error: should not arrive here');
+  }
+  return const Text('error: should not arrive here');
 }

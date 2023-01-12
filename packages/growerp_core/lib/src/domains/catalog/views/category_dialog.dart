@@ -14,7 +14,7 @@
 
 import 'dart:io';
 import '../../common/functions/helper_functions.dart';
-import '../../../templates/@templates.dart';
+import '../../../templates/templates.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

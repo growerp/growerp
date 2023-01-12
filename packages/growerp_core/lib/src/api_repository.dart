@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -56,8 +57,7 @@ class APIRepository {
                 ? 'http://localHost:8080/'
                 : 'http://10.0.2.2:8080/';
 
-    print('Production config url: $databaseUrl');
-    print('Using base backend url: $_baseUrl');
+    debugPrint('Using base backend url: $_baseUrl');
 
     dioClient = DioClient(_baseUrl, dio, interceptors: []);
   }
@@ -81,7 +81,7 @@ class APIRepository {
   Future<ApiResult<bool>> getConnected() async {
     try {
       final response = await dioClient.get('growerp/moquiSessionToken', null);
-      this.sessionToken = response.toString();
+      sessionToken = response.toString();
       return ApiResult.success(
           data: sessionToken != null); // return true if session token ok
     } on Exception catch (e) {
@@ -176,8 +176,6 @@ class APIRepository {
     bool demoData = true,
   }) async {
     try {
-      var locale;
-      // if (!kIsWeb) locale = await Devicelocale.currentLocale;
       final response = await dioClient.post(
         'rest/s1/growerp/100/UserAndCompany',
         null,
@@ -188,7 +186,7 @@ class APIRepository {
           'firstName': firstName,
           'lastName': lastName,
           'companyName': companyName,
-          'locale': locale,
+//          'locale': locale,
           'currencyId': currencyId,
           'companyEmailAddress': email,
           'classificationId': classificationId,
@@ -207,12 +205,12 @@ class APIRepository {
   Future<ApiResult<Authenticate>> login(
       {required String username, required String password}) async {
     try {
-      final response = await dioClient
-          .post('rest/s1/growerp/100/Login', null, data: <String, dynamic>{
-        'username': username,
-        'password': password,
-        'moquiSessionToken': this.sessionToken
-      });
+      final response = await dioClient.post('rest/s1/growerp/100/Login', null,
+          data: <String, dynamic>{
+            'username': username,
+            'password': password,
+            'moquiSessionToken': sessionToken
+          });
       return getResponse<Authenticate>(
           "authenticate", response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {
@@ -225,9 +223,9 @@ class APIRepository {
       await dioClient.post('rest/s1/growerp/100/ResetPassword', null,
           data: <String, dynamic>{
             'username': username,
-            'moquiSessionToken': this.sessionToken
+            'moquiSessionToken': sessionToken
           });
-      return ApiResult.success(data: null);
+      return const ApiResult.success(data: null);
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -243,7 +241,7 @@ class APIRepository {
         'username': username,
         'oldPassword': oldPassword,
         'newPassword': newPassword,
-        'moquiSessionToken': this.sessionToken
+        'moquiSessionToken': sessionToken
       });
       return getResponse<Authenticate>(
           "authenticate", response, (json) => Authenticate.fromJson(json));
@@ -478,7 +476,9 @@ class APIRepository {
       List<dynamic> list = List.from(json);
       List<String> stringList = [];
       // change members from dynamic to string
-      for (String string in list) stringList.add(string);
+      for (String string in list) {
+        stringList.add(string);
+      }
       return ApiResult.success(data: stringList);
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
@@ -493,7 +493,7 @@ class APIRepository {
       String? searchString}) async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/Categories', apiKey ?? null,
+          'rest/s1/growerp/100/Categories', apiKey,
           queryParameters: <String, dynamic>{
             'start': start,
             'limit': limit,
@@ -515,9 +515,8 @@ class APIRepository {
       final response = await dioClient.post(
           'rest/s1/growerp/100/ImportExport/Categories', apiKey!,
           data: <String, dynamic>{
-            'categoryList': '{"categories":' +
-                jsonEncode(categories.map((x) => x.toJson()).toList()) +
-                '}',
+            'categoryList':
+                '{"categories":${jsonEncode(categories.map((x) => x.toJson()).toList())}}',
             'classificationId': classificationId,
             'moquiSessionToken': sessionToken
           });
@@ -531,7 +530,7 @@ class APIRepository {
   Future<ApiResult<String>> exportCategories() async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/ImportExport/Categories', apiKey ?? null,
+          'rest/s1/growerp/100/ImportExport/Categories', apiKey,
           queryParameters: <String, dynamic>{
             'classificationId': classificationId,
           });
@@ -668,7 +667,7 @@ class APIRepository {
       String? searchString}) async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/Products', apiKey ?? null,
+          'rest/s1/growerp/100/Products', apiKey,
           queryParameters: <String, dynamic>{
             'companyPartyId': companyPartyId,
             'categoryId': categoryId,
@@ -739,9 +738,8 @@ class APIRepository {
       final response = await dioClient.post(
           'rest/s1/growerp/100/ImportExport/Products', apiKey!,
           data: <String, dynamic>{
-            'productList': '{"products":' +
-                jsonEncode(products.map((x) => x.toJson()).toList()) +
-                '}',
+            'productList':
+                '{"products":${jsonEncode(products.map((x) => x.toJson()).toList())}}',
             'classificationId': classificationId,
             'moquiSessionToken': sessionToken
           });
@@ -755,7 +753,7 @@ class APIRepository {
   Future<ApiResult<String>> exportProducts() async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/ImportExport/Products', apiKey ?? null,
+          'rest/s1/growerp/100/ImportExport/Products', apiKey,
           queryParameters: <String, dynamic>{
             'classificationId': classificationId,
           });

@@ -12,11 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import '../../domains.dart';
+import '../../common/functions/helper_functions.dart';
 
 class NewCompanyDialog extends StatelessWidget {
   final FormArguments formArguments;
@@ -34,9 +34,10 @@ class NewCompanyDialog extends StatelessWidget {
 class NewCompanyHeader extends StatefulWidget {
   final String? message;
   final Authenticate authenticate;
-  const NewCompanyHeader({this.message, required this.authenticate});
+  const NewCompanyHeader({super.key, this.message, required this.authenticate});
 
   @override
+  // ignore: no_logic_in_create_state
   State<NewCompanyHeader> createState() => _NewCompanyHeaderState(message);
 }
 
@@ -53,15 +54,16 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
 
   @override
   void initState() {
-    Future<Null>.delayed(Duration(milliseconds: 0), () {
-      if (message != null)
+    Future<void>.delayed(const Duration(milliseconds: 0), () {
+      if (message != null) {
         HelperFunctions.showMessage(context, '$message', Colors.green);
+      }
     });
     super.initState();
-    _companyController..text = kReleaseMode ? '' : 'Demo company from John Doe';
-    _firstNameController..text = kReleaseMode ? '' : 'John';
-    _lastNameController..text = kReleaseMode ? '' : 'Doe';
-    _emailController..text = kReleaseMode ? '' : 'test@example.com';
+    _companyController.text = kReleaseMode ? '' : 'Demo company from John Doe';
+    _firstNameController.text = kReleaseMode ? '' : 'John';
+    _lastNameController.text = kReleaseMode ? '' : 'Doe';
+    _emailController.text = kReleaseMode ? '' : 'test@example.com';
     _demoData = kReleaseMode ? false : true;
     _currencySelected = currencies[0];
   }
@@ -69,8 +71,9 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(listener: (context, state) {
-      if (state.status == AuthStatus.failure)
+      if (state.status == AuthStatus.failure) {
         HelperFunctions.showMessage(context, state.message, Colors.red);
+      }
       if (state.status == AuthStatus.registered) {
         Navigator.pop(context);
       }
@@ -79,13 +82,13 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
       return Scaffold(
           backgroundColor: Colors.transparent,
           body: Dialog(
-              insetPadding: EdgeInsets.all(10),
+              insetPadding: const EdgeInsets.all(10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Stack(clipBehavior: Clip.none, children: [
                 Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     width: 400,
                     height: 650,
                     child: _registerForm(widget.authenticate, state)),
@@ -98,50 +101,50 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
     return Form(
         key: _formKey,
         child: SingleChildScrollView(
-            key: Key('listView'),
+            key: const Key('listView'),
             child: Column(children: <Widget>[
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                   child: Text(
                       authenticate.company != null
                           ? "Enter a new customer for company\n "
                               "${authenticate.company!.name}"
                           : "Enter a new company with admin user",
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 20,
                           color: Colors.black,
                           fontWeight: FontWeight.bold))),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
-                key: Key('firstName'),
-                decoration: InputDecoration(labelText: 'First Name'),
+                key: const Key('firstName'),
+                decoration: const InputDecoration(labelText: 'First Name'),
                 controller: _firstNameController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter your first name?';
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
-                key: Key('lastName'),
-                decoration: InputDecoration(labelText: 'Last Name'),
+                key: const Key('lastName'),
+                decoration: const InputDecoration(labelText: 'Last Name'),
                 controller: _lastNameController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter your last name?';
                   return null;
                 },
               ),
-              SizedBox(height: 20),
-              Text('A temporary password will be send by email',
+              const SizedBox(height: 20),
+              const Text('A temporary password will be send by email',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.orange,
                   )),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
-                key: Key('email'),
-                decoration:
-                    InputDecoration(labelText: 'Email address = Username'),
+                key: const Key('email'),
+                decoration: const InputDecoration(
+                    labelText: 'Email address = Username'),
                 controller: _emailController,
                 validator: (String? value) {
                   if (value!.isEmpty) return 'Please enter Email address?';
@@ -153,28 +156,29 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
-                key: Key('companyName'),
-                decoration: InputDecoration(labelText: 'Business name'),
+                key: const Key('companyName'),
+                decoration: const InputDecoration(labelText: 'Business name'),
                 controller: _companyController,
                 validator: (value) {
-                  if (value!.isEmpty)
+                  if (value!.isEmpty) {
                     return 'Please enter business name("Private" for Private person)';
+                  }
                   return null;
                 },
               ),
               Visibility(
                   visible: authenticate.company?.partyId != null,
                   child: Column(children: [
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Row(children: [
                       Expanded(
                           child: ElevatedButton(
-                              key: Key('newCustomer'),
-                              child: Text('Register as a customer'),
+                              key: const Key('newCustomer'),
+                              child: const Text('Register as a customer'),
                               onPressed: () {
-                                if (_formKey.currentState!.validate())
+                                if (_formKey.currentState!.validate()) {
                                   context
                                       .read<AuthBloc>()
                                       .add(AuthRegisterUserEcommerce(
@@ -185,24 +189,25 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                                           email: _emailController.text,
                                         ),
                                       ));
+                                }
                               })),
                     ])
                   ])),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Visibility(
                   // register new company and admin
                   visible: authenticate.company == null,
                   child: Column(children: [
                     DropdownButtonFormField<Currency>(
-                      key: Key('currency'),
-                      decoration: InputDecoration(labelText: 'Currency'),
-                      hint: Text('Currency'),
+                      key: const Key('currency'),
+                      decoration: const InputDecoration(labelText: 'Currency'),
+                      hint: const Text('Currency'),
                       value: _currencySelected,
                       validator: (value) =>
                           value == null ? 'Currency field required!' : null,
                       items: currencies.map((item) {
                         return DropdownMenuItem<Currency>(
-                            child: Text(item.description!), value: item);
+                            value: item, child: Text(item.description!));
                       }).toList(),
                       onChanged: (Currency? newValue) {
                         setState(() {
@@ -211,7 +216,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                       },
                       isExpanded: true,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25.0),
@@ -221,22 +226,23 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                               width: 0.80),
                         ),
                         child: CheckboxListTile(
-                            key: Key('demoData'),
-                            title: Text("Generate demo data"),
+                            key: const Key('demoData'),
+                            title: const Text("Generate demo data"),
                             value: _demoData,
                             onChanged: (bool? value) {
                               setState(() {
                                 _demoData = value!;
                               });
                             })),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(children: [
                       Expanded(
                           child: ElevatedButton(
-                              key: Key('newCompany'),
-                              child: Text('Register AND create a new Company'),
+                              key: const Key('newCompany'),
+                              child: const Text(
+                                  'Register AND create a new Company'),
                               onPressed: () {
-                                if (_formKey.currentState!.validate())
+                                if (_formKey.currentState!.validate()) {
                                   context
                                       .read<AuthBloc>()
                                       .add(AuthRegisterCompanyAndAdmin(
@@ -250,6 +256,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                                           ),
                                           (_currencySelected.currencyId!),
                                           _demoData));
+                                }
                               })),
                     ])
                   ]))

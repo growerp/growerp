@@ -29,9 +29,10 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
           )),
       });
 
-  if (items.isEmpty)
+  if (items.isEmpty) {
     return FatalErrorForm("No access to any option here, "
         "have: ${authenticate.user?.userGroup} should have: ${menu![0].readGroups}");
+  }
 
   return Row(children: <Widget>[
     LayoutBuilder(
@@ -41,11 +42,11 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
             constraints: BoxConstraints(minHeight: constraint.maxHeight),
             child: IntrinsicHeight(
               child: NavigationRail(
-                  key: Key('navigationrail'),
-                  backgroundColor: Color(0xFF4baa9b),
+                  key: const Key('navigationrail'),
+                  backgroundColor: const Color(0xFF4baa9b),
                   leading: Center(
                       child: InkWell(
-                          key: Key('tapUser'),
+                          key: const Key('tapUser'),
                           onTap: () async {
                             await showDialog(
                                 barrierDismissible: true,
@@ -68,7 +69,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                         authenticate.user?.firstName
                                                 ?.substring(0, 1) ??
                                             '',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 20,
                                             color: Colors.black))),
                             Text("${authenticate.user!.firstName}"),
@@ -77,18 +78,19 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                   selectedIndex: menuIndex ?? 0,
                   onDestinationSelected: (int index) {
                     menuIndex = index;
-                    if (menu![index].route == "/")
+                    if (menu![index].route == "/") {
                       Navigator.of(context).pushNamedAndRemoveUntil(
                           '/', (Route<dynamic> route) => false);
-                    else
+                    } else {
                       Navigator.pushNamed(context, menu[index].route,
                           arguments: FormArguments());
+                    }
                   },
                   labelType: NavigationRailLabelType.all,
                   selectedLabelTextStyle:
-                      TextStyle(fontSize: 12, color: Colors.black),
+                      const TextStyle(fontSize: 12, color: Colors.black),
                   unselectedLabelTextStyle:
-                      TextStyle(fontSize: 12, color: Colors.black),
+                      const TextStyle(fontSize: 12, color: Colors.black),
                   destinations: items),
             ),
           ),

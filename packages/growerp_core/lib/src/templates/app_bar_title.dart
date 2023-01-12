@@ -19,10 +19,11 @@ Widget appBarTitle(
     BuildContext context, Authenticate authenticate, String title) {
   return Row(children: [
     InkWell(
-      key: Key('tapCompany'),
+      key: const Key('tapCompany'),
       onTap: () {
-        if (authenticate.apiKey != null) // company detail only when logged in
+        if (authenticate.apiKey != null) {
           Navigator.pushNamed(context, '/company', arguments: FormArguments());
+        }
       },
       child: CircleAvatar(
           backgroundColor: Colors.green,
@@ -34,14 +35,14 @@ Widget appBarTitle(
                           authenticate.company!.name!.isNotEmpty
                       ? authenticate.company!.name!.substring(0, 1)
                       : '?',
-                  style: TextStyle(fontSize: 20, color: Colors.black))),
+                  style: const TextStyle(fontSize: 20, color: Colors.black))),
     ),
-    SizedBox(width: 10),
+    const SizedBox(width: 10),
     Column(children: [
-      Text(title, style: TextStyle(fontSize: 20, color: Colors.black)),
+      Text(title, style: const TextStyle(fontSize: 20, color: Colors.black)),
       Text(authenticate.company?.name ?? '??',
-          key: Key('appBarCompanyName'),
-          style: TextStyle(fontSize: 10, color: Colors.black)),
+          key: const Key('appBarCompanyName'),
+          style: const TextStyle(fontSize: 10, color: Colors.black)),
     ]),
   ]);
 }

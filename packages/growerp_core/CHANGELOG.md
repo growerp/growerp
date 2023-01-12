@@ -1,3 +1,8 @@
+## 0.7.0-dev.1
+
+* moved core package to src dir
+* various changes to confirm to dart standards
+
 ## 0.6.0-dev.8
 
 * moved website into its own package

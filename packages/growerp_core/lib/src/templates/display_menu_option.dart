@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../domains/domains.dart';
-import '../templates/@templates.dart';
+import 'templates.dart';
 
 class DisplayMenuOption extends StatefulWidget {
   final MenuOption? menuOption; // display not an item from the list like chat

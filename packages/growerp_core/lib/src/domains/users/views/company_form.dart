@@ -14,7 +14,7 @@
 
 import 'dart:io';
 import '../../common/functions/helper_functions.dart';
-import '../../../templates/@templates.dart';
+import '../../../templates/templates.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -24,12 +24,12 @@ class AuthLoad extends AuthEvent {}
 
 class AuthUserUpdate extends AuthEvent {
   final User user;
-  AuthUserUpdate(this.user);
+  const AuthUserUpdate(this.user);
 }
 
 class AuthUpdateUser extends AuthEvent {
   final User user;
-  AuthUpdateUser(this.user);
+  const AuthUpdateUser(this.user);
   @override
   String toString() => 'Update User: $user';
 }
@@ -37,14 +37,14 @@ class AuthUpdateUser extends AuthEvent {
 class AuthDeleteUser extends AuthEvent {
   final User user;
   final bool deleteCompany;
-  AuthDeleteUser(this.user, this.deleteCompany);
+  const AuthDeleteUser(this.user, this.deleteCompany);
   @override
   String toString() => 'Delete User: $user Company: $deleteCompany';
 }
 
 class AuthUpdateCompany extends AuthEvent {
   final Company? company;
-  AuthUpdateCompany(this.company);
+  const AuthUpdateCompany(this.company);
   @override
   String toString() => 'Update Company $company';
 }
@@ -53,7 +53,7 @@ class AuthRegisterCompanyAndAdmin extends AuthEvent {
   final User user;
   final String currencyId;
   final bool demoData;
-  AuthRegisterCompanyAndAdmin(this.user, this.currencyId,
+  const AuthRegisterCompanyAndAdmin(this.user, this.currencyId,
       [this.demoData = true]);
   @override
   String toString() => 'Register Company Admin User: $user';
@@ -61,7 +61,7 @@ class AuthRegisterCompanyAndAdmin extends AuthEvent {
 
 class AuthRegisterUserEcommerce extends AuthEvent {
   final User user;
-  AuthRegisterUserEcommerce(this.user);
+  const AuthRegisterUserEcommerce(this.user);
   @override
   String toString() => 'Register Customer User: $user';
 }

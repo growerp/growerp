@@ -16,27 +16,27 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-Widget imageButtons(BuildContext context, _onImageButtonPressed) {
+Widget imageButtons(BuildContext context, onImageButtonPressed) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     children: <Widget>[
-      SizedBox(height: 100),
+      const SizedBox(height: 100),
       FloatingActionButton(
-        key: Key('gallery'),
+        key: const Key('gallery'),
         onPressed: () {
-          _onImageButtonPressed(ImageSource.gallery, context: context);
+          onImageButtonPressed(ImageSource.gallery, context: context);
         },
         heroTag: 'image0',
         tooltip: 'Pick Image from gallery',
         child: const Icon(Icons.photo_library),
       ),
-      SizedBox(height: 20),
+      const SizedBox(height: 20),
       Visibility(
         visible: !kIsWeb,
         child: FloatingActionButton(
-          key: Key('camera'),
+          key: const Key('camera'),
           onPressed: () {
-            _onImageButtonPressed(ImageSource.camera, context: context);
+            onImageButtonPressed(ImageSource.camera, context: context);
           },
           heroTag: 'image1',
           tooltip: 'Take a Photo',

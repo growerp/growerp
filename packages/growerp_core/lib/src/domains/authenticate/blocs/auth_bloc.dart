@@ -13,13 +13,13 @@
  */
 
 import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import '../../../api_repository.dart';
 import '../../common/functions/functions.dart';
 import '../../../services/api_result.dart';
 import '../../../services/chat_server.dart';
 import '../../../services/network_exceptions.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../../domains/domains.dart';
 
 part 'auth_event.dart';
@@ -65,8 +65,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     var connect = connectResult.when(
         success: (data) => data,
         failure: (NetworkExceptions error) => error.toString());
-    if (connect is String) return emit(// no connection
+    if (connect is String) {
+      return emit(// no connection
           state.copyWith(status: AuthStatus.failure, message: connect));
+    }
     // get default company
     ApiResult<List<Company>> defResult = await repos.getCompanies(limit: 1);
     Company defaultCompany = defResult.when(
@@ -82,10 +84,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await repos.checkCompany(localAuthenticate.company!.partyId!);
       bool ok = (checkResult.when(
           success: (bool data) => data, failure: (_) => false));
-      if (!ok)
+      if (!ok) {
         return emit(state.copyWith(
             status: AuthStatus.unAuthenticated,
             authenticate: Authenticate(company: defaultCompany)));
+      }
       // test apiKey and get Authenticate
       repos.setApiKey(
           localAuthenticate.apiKey!, localAuthenticate.moquiSessionToken!);
@@ -195,8 +198,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         failure: (NetworkExceptions error) => state.copyWith(
             status: AuthStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));
-    if (state.status == AuthStatus.unAuthenticated)
+    if (state.status == AuthStatus.unAuthenticated) {
       await PersistFunctions.persistAuthenticate(state.authenticate!);
+    }
   }
 
   Future<void> _onAuthRegisterUserEcommerce(
@@ -217,8 +221,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         },
         failure: (NetworkExceptions error) => state.copyWith(
             status: AuthStatus.failure, message: error.toString())));
-    if (state.status == AuthStatus.registered)
+    if (state.status == AuthStatus.registered) {
       await PersistFunctions.persistAuthenticate(state.authenticate!);
+    }
   }
 
   Future<void> _onAuthLoggedOut(
@@ -233,9 +238,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             message: "you are logged out now"),
         failure: (NetworkExceptions error) => state.copyWith(
             status: AuthStatus.failure, message: error.toString())));
-    if (state.status == AuthStatus.unAuthenticated)
+    if (state.status == AuthStatus.unAuthenticated) {
       await PersistFunctions.persistAuthenticate(
           state.authenticate!.copyWith(apiKey: null));
+    }
   }
 
   Future<void> _onAuthLogin(
@@ -249,16 +255,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     emit(apiResult.when(
         success: (auth) {
-          if (auth.apiKey == 'passwordChange')
+          if (auth.apiKey == 'passwordChange') {
             return state.copyWith(
                 status: AuthStatus.passwordChange,
                 authenticate: state.authenticate,
                 message: 'need to change password');
-          else
+          } else {
             return state.copyWith(
                 status: AuthStatus.authenticated,
                 authenticate: auth,
                 message: 'You are logged in now...');
+          }
         },
         failure: (error) => state.copyWith(
             status: AuthStatus.failure,

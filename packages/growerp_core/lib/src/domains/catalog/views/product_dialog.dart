@@ -24,7 +24,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import '../../domains.dart';
-import '../../../templates/@templates.dart';
+import '../../../templates/templates.dart';
 import '../../../api_repository.dart';
 
 final GlobalKey<ScaffoldMessengerState> ProductDialogKey =

@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../acct_menu_option_data.dart';
-import '../../../templates/@templates.dart';
+import '../../../templates/templates.dart';
 import '../../../domains/domains.dart';
 
 class AccountingForm extends StatelessWidget {
