@@ -7,3 +7,4 @@ export 'src/domains/common/functions/functions.dart';
 export 'src/services/jsonConverters.dart';
 export 'src/domains/domains.dart';
 export 'src/domains/integration_test.dart';
+export 'src/domains/models/models.dart';

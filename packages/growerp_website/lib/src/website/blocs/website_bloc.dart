@@ -15,8 +15,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:growerp_core/services/api_result.dart';
-import 'package:growerp_core/services/network_exceptions.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:archive/archive_io.dart';
@@ -100,8 +99,9 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
       }
       encoder.close();
       input = event.obsidian.copyWith(zip: await File(zipFile).readAsBytes());
-    } else
+    } else {
       input = event.obsidian;
+    }
 
     ApiResult result = await repos.obsUpload(input);
     emit(state.copyWith(status: WebsiteStatus.loading));

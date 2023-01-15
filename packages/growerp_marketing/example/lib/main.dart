@@ -13,15 +13,12 @@
  */
 
 import 'package:flutter/foundation.dart';
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/services/chat_server.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_core/templates/displayMenuOption.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:growerp_core/domains/domains.dart';
-import 'package:growerp_marketing/opportunities/views/views.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +42,7 @@ List<MenuOption> menuOptions = [
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
-    child: MainMenuForm(),
+    child: const MainMenuForm(),
   ),
   MenuOption(
     image: 'assets/images/companyGrey.png',
@@ -81,12 +78,12 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'assets/images/crmGrey.png',
     selectedImage: 'assets/images/crm.png',
-    title: 'Marketing',
+    title: 'Marketing\n',
     route: '/crm',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     tabItems: [
       TabItem(
-        form: OpportunityListForm(),
+        form: const OpportunityListForm(),
         label: 'My Opportunities',
         icon: const Icon(Icons.home),
       ),

@@ -13,11 +13,9 @@
  */
 
 import 'dart:typed_data';
-
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import 'package:growerp_core/services/jsonConverters.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 part 'obsidian_model.freezed.dart';
 part 'obsidian_model.g.dart';

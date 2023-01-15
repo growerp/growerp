@@ -15,6 +15,7 @@
 import 'package:growerp_core/domains/domains.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_marketing/opportunities/views/views.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'forms/@forms.dart' as local;
 
 List<MenuOption> menuOptions = [
@@ -57,10 +58,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const WebsiteForm(
-          key: Key('Website'),
-          userGroup: UserGroup.Employee,
-        ),
+        form: const WebsiteForm(key: Key('Website')),
         label: 'Website',
         icon: const Icon(Icons.webhook),
       ),

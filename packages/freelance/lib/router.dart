@@ -14,7 +14,7 @@
 
 import 'package:core/coreRouter.dart';
 import 'package:core/domains/domains.dart';
-import 'package:core/templates/@templates.dart';
+import 'package:core/templates/templates.dart';
 import 'package:flutter/material.dart';
 
 import 'menuOption_data.dart';

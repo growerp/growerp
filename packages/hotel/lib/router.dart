@@ -15,7 +15,7 @@
 import 'package:core/coreRouter.dart';
 import 'package:core/domains/domains.dart';
 import 'package:flutter/material.dart';
-import 'package:core/templates/@templates.dart';
+import 'package:core/templates/templates.dart';
 import 'package:hotel/menuItem_data.dart';
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c

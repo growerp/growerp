@@ -28,7 +28,7 @@ import '../../../services/chat_server.dart';
 import '../../common/functions/functions.dart';
 import '../../domains.dart';
 import '../../../extensions.dart';
-import '../widgets/top_app.dart';
+import '../../models/models.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
@@ -37,7 +37,7 @@ class CommonTest {
       {bool clear = false}) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = Random.secure().nextInt(1024) + test.sequence;
-    print("====startapp seq: $seq");
+    debugPrint("====startapp seq: $seq");
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {
@@ -46,7 +46,7 @@ class CommonTest {
     await BlocOverrides.runZoned(
         () async => await tester.pumpWidget(Phoenix(child: TopApp)),
         blocObserver: AppBlocObserver());
-    await tester.pumpAndSettle(Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
   }
 
   static Future<void> startTestApp(
@@ -57,7 +57,7 @@ class CommonTest {
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
-    print("====startapp seq: $seq");
+    debugPrint("====startapp seq: $seq");
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {
@@ -70,7 +70,7 @@ class CommonTest {
         router: router,
         title: title,
         menuOptions: menuOptions));
-    await tester.pumpAndSettle(Duration(seconds: 5));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
   }
 
   static takeScreenshot(WidgetTester tester,
@@ -88,11 +88,12 @@ class CommonTest {
     if (!option.startsWith('accnt')) await gotoMainMenu(tester);
     await tapByKey(tester, option, seconds: 3);
     if (tapNumber != null) {
-      if (isPhone())
+      if (isPhone()) {
         await tester.tap(find.byTooltip(tapNumber));
-      else
+      } else {
         await tester.tap(find.byKey(Key("tap$formName")));
-      await tester.pumpAndSettle(Duration(seconds: 5));
+      }
+      await tester.pumpAndSettle(const Duration(seconds: 5));
     }
     await checkWidgetKey(tester, formName);
   }
@@ -103,18 +104,16 @@ class CommonTest {
     SaveTest test = await PersistFunctions.getTest();
     if ((test.company == null || test.admin == null) &&
         (username == null || password == null)) {
-      print("Need company test to be run first");
+      debugPrint("Need company test to be run first");
       return;
     }
     if (find
-        .byKey(Key('HomeFormAuth'))
+        .byKey(const Key('HomeFormAuth'))
         .toString()
         .startsWith('zero widgets with key')) {
       await pressLoginWithExistingId(tester);
-      await enterText(
-          tester, 'username', username == null ? test.admin!.email! : username);
-      await enterText(
-          tester, 'password', password == null ? 'qqqqqq9!' : password);
+      await enterText(tester, 'username', username ?? test.admin!.email!);
+      await enterText(tester, 'password', password ?? 'qqqqqq9!');
       await pressLogin(tester);
       await checkText(tester, 'Main'); // dashboard
     }
@@ -126,15 +125,17 @@ class CommonTest {
 
   static Future<void> doSearch(WidgetTester tester,
       {required String searchString, int seconds = 5}) async {
-    if (tester.any(find.byKey(Key('searchButton'))) == false)
+    if (tester.any(find.byKey(const Key('searchButton'))) == false) {
       await tapByKey(tester, 'search');
+    }
     await enterText(tester, 'searchField', searchString);
     await tapByKey(tester, 'searchButton', seconds: seconds);
   }
 
   static Future<void> closeSearch(WidgetTester tester) async {
-    if (tester.any(find.byKey(Key('searchButton'))) == true)
-      await tapByKey(tester, 'search'); // cancel search
+    if (tester.any(find.byKey(const Key('searchButton'))) == true) {
+      await tapByKey(tester, 'search');
+    } // cancel search
   }
 
   static Future<void> pressLoginWithExistingId(WidgetTester tester) async {
@@ -149,10 +150,10 @@ class CommonTest {
     if (hasKey('HomeFormUnAuth')) return; // already logged out
     await gotoMainMenu(tester);
     if (hasKey('HomeFormAuth')) {
-      print("Dashboard logged in , needs to logout");
+      debugPrint("Dashboard logged in , needs to logout");
       await tapByKey(tester, 'logoutButton');
-      await tester.pump(Duration(seconds: 5));
-      expect(find.byKey(Key('HomeFormUnAuth')), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     }
   }
 
@@ -163,10 +164,11 @@ class CommonTest {
     bool found = false;
     while (times++ < 10 && found == false) {
       found = tester.any(find.byKey(Key(keyName), skipOffstage: true));
-      await tester.pump(Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
     }
-    if (found)
-      print("=== waited for key $keyName to show: ${times * 0.5} seconds");
+    if (found) {
+      debugPrint("=== waited for key $keyName to show: ${times * 0.5} seconds");
+    }
     //expect(found, true,
     //    reason: 'key $keyName not found even after 6 seconds wait!');
     return found;
@@ -177,10 +179,11 @@ class CommonTest {
     bool found = true;
     while (times++ < 10 && found == true) {
       found = tester.any(find.byType(SnackBar));
-      await tester.pump(Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
     }
-    if (!found)
-      print("=== waited for message to disappear: ${times * 0.5} seconds");
+    if (!found) {
+      debugPrint("=== waited for message to disappear: ${times * 0.5} seconds");
+    }
 //    expect(found, false,
 //        reason: 'Snackbar still found, even after 6 seconds wait!');
     return found;
@@ -209,7 +212,8 @@ class CommonTest {
   /// [lowLevel]
   static Future<void> drag(WidgetTester tester,
       {int seconds = 1, String listViewName = 'listView'}) async {
-    await tester.drag(find.byKey(Key(listViewName)).last, Offset(0, -400));
+    await tester.drag(
+        find.byKey(Key(listViewName)).last, const Offset(0, -400));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
@@ -218,24 +222,26 @@ class CommonTest {
     int times = 0;
     bool found = false;
     do {
-      await tester.drag(find.byKey(Key(listViewName)).last, Offset(0, -400));
-      await tester.pumpAndSettle(Duration(milliseconds: 1000));
+      await tester.drag(
+          find.byKey(Key(listViewName)).last, const Offset(0, -400));
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       found = tester.any(find.byKey(Key(key)));
     } while (times++ < 10 && found == false);
-    print("======dragged $times times");
+    await tester.pump();
+    debugPrint("======dragged $times times");
   }
 
   /// [lowLevel]
   static Future<void> refresh(WidgetTester tester,
       {int seconds = 5, String listViewName = 'listView'}) async {
-    await tester.drag(find.byKey(Key(listViewName)).last, Offset(0, 400));
+    await tester.drag(find.byKey(Key(listViewName)).last, const Offset(0, 400));
     await tester.pump(Duration(seconds: seconds));
   }
 
   static Future<void> enterText(
       WidgetTester tester, String key, String value) async {
     await tester.tap(find.byKey(Key(key)));
-    await tester.pump(Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     await tester.enterText(find.byKey(Key(key)), value);
     await tester.pump();
   }
@@ -245,7 +251,8 @@ class CommonTest {
       {int seconds = 1}) async {
     await tapByKey(tester, key);
     await tester.enterText(find.byType(TextField).last, value);
-    await tester.pumpAndSettle(Duration(seconds: 5)); // wait for search result
+    await tester
+        .pumpAndSettle(const Duration(seconds: 5)); // wait for search result
     await tester
         .tap(find.textContaining(RegExp(value, caseSensitive: false)).last);
     await tester.pumpAndSettle(Duration(seconds: seconds));
@@ -257,7 +264,7 @@ class CommonTest {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
     await tester.tap(find.textContaining(value).last);
-    await tester.pumpAndSettle(Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   }
 
   static String getDropdown(String key) {
@@ -312,8 +319,9 @@ class CommonTest {
   }
 
   static bool hasKey(String key) {
-    if (find.byKey(Key(key)).toString().startsWith('zero widgets with key'))
+    if (find.byKey(Key(key)).toString().startsWith('zero widgets with key')) {
       return false;
+    }
     return true;
   }
 
@@ -323,7 +331,7 @@ class CommonTest {
       if (isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));
         await tester.pump();
-        await tester.pumpAndSettle(Duration(seconds: 5));
+        await tester.pumpAndSettle(const Duration(seconds: 5));
       }
       await tapByKey(tester, menuOption);
     }
@@ -362,15 +370,18 @@ class CommonTest {
 
   static Future<void> selectDropDown(
       WidgetTester tester, String key, String value,
-      {seconds: 1}) async {
+      {seconds = 1}) async {
     await tapByKey(tester, key, seconds: seconds);
     await tapByText(tester, value);
   }
 
   static String getRandom() {
-    Text tff =
-        find.byKey(Key('appBarCompanyName')).evaluate().single.widget as Text;
-    return tff.data!.replaceAll(new RegExp(r'[^0-9]'), '');
+    Text tff = find
+        .byKey(const Key('appBarCompanyName'))
+        .evaluate()
+        .single
+        .widget as Text;
+    return tff.data!.replaceAll(RegExp(r'[^0-9]'), '');
   }
 
   static int getWidgetCountByKey(WidgetTester tester, String key) {
@@ -431,7 +442,7 @@ class CommonTest {
         contains(
             paymentMethod.creditCardNumber!.substring(length - 4, length)));
     expect(getTextField('paymentMethodLabel'),
-        contains(paymentMethod.expireMonth! + '/'));
+        contains('${paymentMethod.expireMonth!}/'));
     expect(getTextField('paymentMethodLabel'),
         contains(paymentMethod.expireYear!));
   }
@@ -457,18 +468,18 @@ class CommonTest {
         .setMockMethodCallHandler(channel, handler);
   }
 
-  static void mockImage_picker() {
+  static void mockImagePicker() {
     const MethodChannel channel =
         MethodChannel('plugins.flutter.io/image_picker');
 
-    _handler(MethodCall methodCall) async {
+    handler(MethodCall methodCall) async {
       ByteData data = await rootBundle.load('assets/images/crm.png');
       Uint8List bytes = data.buffer.asUint8List();
       Directory tempDir = await getTemporaryDirectory();
       File file = await File(
         '${tempDir.path}/tmp.tmp',
       ).writeAsBytes(bytes);
-      print('=========' + file.path);
+      debugPrint('=========${file.path}');
       return [
         // file.path;
         {
@@ -483,20 +494,20 @@ class CommonTest {
     TestWidgetsFlutterBinding.ensureInitialized();
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, _handler);
+        .setMockMethodCallHandler(channel, handler);
   }
 
-  static void mockUrl_launcher() {
+  static void mockUrlLauncher() {
     const MethodChannel channel =
         MethodChannel('plugins.flutter.io/url_launcher');
 
-    _handler(MethodCall methodCall) async {
-      print("=========" + methodCall.toString());
+    handler(MethodCall methodCall) async {
+      debugPrint("=========$methodCall");
     }
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, _handler);
+        .setMockMethodCallHandler(channel, handler);
   }
 }

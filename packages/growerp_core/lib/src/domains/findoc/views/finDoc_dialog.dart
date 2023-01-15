@@ -33,7 +33,7 @@ class FinDocDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
-    if (finDoc.sales)
+    if (finDoc.sales) {
       return BlocProvider<SalesCartBloc>(
           create: (context) => CartBloc(
               docType: finDoc.docType!,
@@ -42,6 +42,7 @@ class FinDocDialog extends StatelessWidget {
               repos: context.read<APIRepository>())
             ..add(CartFetch(finDoc)),
           child: FinDocPage(finDoc));
+    }
     return BlocProvider<PurchaseCartBloc>(
         create: (context) => CartBloc(
             docType: finDoc.docType!,

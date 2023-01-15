@@ -6,10 +6,12 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
-  growerp_core: ^0.6.0-dev.6
-  #  path: ../growerp_core/
+  growerp_core: # ^0.6.0-dev.8
+    path: ../growerp_core/
   growerp_marketing: ^0.6.0-dev.3
   #  path: ../growerp_marketing/
+  growerp_website: #^0.6.0-dev.1
+    path: ../growerp_website/
   decimal: ^2.1.0
   flutter:
     sdk: flutter

@@ -1,3 +1,9 @@
+## 0.7.0-dev.1
+
+* move to src dir.
+* changes according dart standards.
+* adapted to growerp_core 0.7.0-dev.1
+
 ## 0.6.0-dev.5
 
 * add platforms

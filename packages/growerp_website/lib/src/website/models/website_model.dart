@@ -13,7 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_core/domains/catalog/models/category_model.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'content_model.dart';
 
 part 'website_model.freezed.dart';

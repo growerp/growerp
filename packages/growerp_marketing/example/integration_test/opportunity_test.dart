@@ -1,10 +1,9 @@
 import 'package:example/main.dart';
-import 'package:growerp_core/domains/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_marketing/opportunities/integration_test/data.dart';
-import 'package:growerp_marketing/opportunities/integration_test/opportunity_test.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +15,6 @@ void main() {
   testWidgets('''GrowERP opportunity test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-// use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await UserTest.selectAdministrators(tester);
     await UserTest.addAdministrators(tester, administrators.sublist(0, 2),

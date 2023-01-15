@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -45,7 +45,7 @@ class WebsiteTest {
   }
 
   static Future<void> updateTextSection(tester) async {
-    while (tester.any(find.byKey(Key("deleteTextChip")))) {
+    while (tester.any(find.byKey(const Key("deleteTextChip")))) {
       await CommonTest.tapByKey(tester, "deleteTextChip");
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
     }
@@ -60,7 +60,7 @@ class WebsiteTest {
   }
 
   static Future<void> updateImages(tester) async {
-    while (tester.any(find.byKey(Key("deleteImageChip")))) {
+    while (tester.any(find.byKey(const Key("deleteImageChip")))) {
       await CommonTest.tapByKey(tester, "deleteImageChip");
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
     }
@@ -68,14 +68,14 @@ class WebsiteTest {
     await CommonTest.tapByKey(tester, 'addImage');
     await CommonTest.enterText(tester, 'imageName', 'testingImage');
     await CommonTest.tapByKey(tester, 'update', seconds: 3);
-    expect(tester.any(find.byKey(Key('testingImage'))), equals(true),
+    expect(tester.any(find.byKey(const Key('testingImage'))), equals(true),
         reason: 'testingImage found?');
     await CommonTest.tapByKey(tester, "testingImage");
     await CommonTest.enterText(tester, 'imageName', 'newTestingImage');
     await CommonTest.tapByKey(tester, 'update', seconds: 3);
-    expect(tester.any(find.byKey(Key('testingImage'))), equals(false),
+    expect(tester.any(find.byKey(const Key('testingImage'))), equals(false),
         reason: 'testingImage NOT found?');
-    expect(tester.any(find.byKey(Key('newTestingImage'))), equals(true),
+    expect(tester.any(find.byKey(const Key('newTestingImage'))), equals(true),
         reason: 'newTestingImage found?');
   }
 

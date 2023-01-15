@@ -298,6 +298,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.3"
+  flutter_lints:
+    dependency: transitive
+    description:
+      name: flutter_lints
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -394,7 +401,7 @@ packages:
       name: growerp_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.6"
+    version: "0.6.0-dev.8"
   growerp_marketing:
     dependency: "direct main"
     description:
@@ -402,6 +409,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.0-dev.3"
+  growerp_website:
+    dependency: "direct main"
+    description:
+      name: growerp_website
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0-dev.1"
   highlight:
     dependency: transitive
     description:
@@ -512,6 +526,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
+  lints:
+    dependency: transitive
+    description:
+      name: lints
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   logging:
     dependency: transitive
     description:

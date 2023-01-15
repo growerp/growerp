@@ -396,19 +396,19 @@ packages:
     source: hosted
     version: "2.0.0-nullsafety.1"
   growerp_core:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: growerp_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.6"
+    version: "0.7.0-dev.1"
   growerp_marketing:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.6.0-dev.3"
+    version: "0.6.0-dev.5"
   highlight:
     dependency: transitive
     description:

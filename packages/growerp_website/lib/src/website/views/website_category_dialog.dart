@@ -12,13 +12,10 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/domains/common/functions/helper_functions.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/domains/domains.dart';
-import 'package:growerp_core/api_repository.dart';
-
 import '../website.dart';
 
 class WebsiteCategoryDialog extends StatelessWidget {

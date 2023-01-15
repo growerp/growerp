@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
+import 'package:growerp_website/growerp_website.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

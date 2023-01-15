@@ -6,11 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:growerp_core/templates/imageButtons.dart';
-import 'package:growerp_core/domains/common/functions/helper_functions.dart';
-import 'package:growerp_core/domains/domains.dart';
-import '../../../growerp_website.dart';
-import '../website.dart';
+import 'package:growerp_core/growerp_core.dart';
+import '../../api_repository.dart';
+import '../blocs/blocs.dart';
+import '../models/models.dart';
 
 class WebsiteContentDialog extends StatelessWidget {
   final String websiteId;

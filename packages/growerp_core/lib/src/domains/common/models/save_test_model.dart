@@ -31,15 +31,15 @@ class SaveTest with _$SaveTest {
     @Default([]) List<User> leads,
     @Default([]) List<User> suppliers,
     @Default([]) List<User> customers,
-    @Default([]) List<Category> categories,
-    @Default([]) List<Product> products,
-    @Default([]) List<Asset> assets,
     @Default([]) List<Location> locations,
     @Default([]) List<Task> tasks,
     @Default([]) List<FinDoc> orders,
     @Default([]) List<FinDoc> payments,
     @Default([]) List<FinDoc> invoices,
     @Default([]) List<ChatRoom> chatRooms,
+    @Default([]) List<Asset> assets,
+    @Default([]) List<Product> products,
+    @Default([]) List<Category> categories,
   }) = _SaveTest;
   SaveTest._();
 
