@@ -59,7 +59,7 @@ class FinDocListItem extends StatelessWidget {
                 SizedBox(
                     width: 80,
                     child: Text("${finDoc.id()}", key: Key('id$index'))),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                     child: Text(
                         "${finDoc.otherUser?.firstName ?? ''} "
@@ -109,7 +109,7 @@ class FinDocListItem extends StatelessWidget {
                       onPressed: () {
                         finDocBloc.add(FinDocConfirmPayment(finDoc));
                       },
-                      child: Text(
+                      child: const Text(
                         "Set to 'Paid'",
                         textAlign: TextAlign.right,
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -119,7 +119,7 @@ class FinDocListItem extends StatelessWidget {
                       ? (sales
                           ? IconButton(
                               key: Key('nextStatus$index'),
-                              icon: Icon(Icons.send),
+                              icon: const Icon(Icons.send),
                               tooltip:
                                   FinDocStatusVal.nextStatus(finDoc.status!)
                                       .toString(),
@@ -130,7 +130,7 @@ class FinDocListItem extends StatelessWidget {
                               })
                           : IconButton(
                               key: Key('nextStatus$index'),
-                              icon: Icon(Icons.call_received),
+                              icon: const Icon(Icons.call_received),
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,
@@ -145,7 +145,7 @@ class FinDocListItem extends StatelessWidget {
                               finDoc.status == FinDocStatusVal.Approved
                           ? IconButton(
                               key: Key('nextStatus$index'),
-                              icon: Icon(Icons.check_box_sharp),
+                              icon: const Icon(Icons.check_box_sharp),
                               tooltip:
                                   FinDocStatusVal.nextStatus(finDoc.status!)
                                       .toString(),
@@ -175,7 +175,7 @@ class FinDocListItem extends StatelessWidget {
             child: Row(children: [
               IconButton(
                 key: Key('delete$index'),
-                icon: Icon(Icons.delete_forever),
+                icon: const Icon(Icons.delete_forever),
                 tooltip: 'Cancel ${finDoc.docType}',
                 onPressed: () {
                   finDocBloc.add(FinDocUpdate(
@@ -184,7 +184,7 @@ class FinDocListItem extends StatelessWidget {
               ),
               IconButton(
                 key: Key('print$index'),
-                icon: Icon(Icons.print),
+                icon: const Icon(Icons.print),
                 tooltip: 'PDF/Print ${finDoc.docType}',
                 onPressed: () async {
                   await Navigator.pushNamed(context, '/printer',
@@ -194,7 +194,7 @@ class FinDocListItem extends StatelessWidget {
             ])),
         IconButton(
             key: Key('nextStatus$index'),
-            icon: Icon(Icons.arrow_upward),
+            icon: const Icon(Icons.arrow_upward),
             tooltip: finDoc.status != null
                 ? FinDocStatusVal.nextStatus(finDoc.status!).toString()
                 : '',
@@ -209,7 +209,7 @@ class FinDocListItem extends StatelessWidget {
               FinDocType.payment,
             ].contains(finDoc.docType),
             child: IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               key: Key('edit$index'),
               tooltip: 'Edit ${finDoc.docType}',
               onPressed: () async {
@@ -238,7 +238,7 @@ class FinDocListItem extends StatelessWidget {
   List<Widget> items(FinDoc findoc) {
     List<Widget> finDocItems = List.from(finDoc.items.mapIndexed((index, e) =>
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          SizedBox(width: 50),
+          const SizedBox(width: 50),
           Expanded(
               child: ListTile(
                   leading: CircleAvatar(
@@ -270,7 +270,7 @@ class FinDocListItem extends StatelessWidget {
         ])));
     if (finDoc.address != null)
       finDocItems.add(ListTile(
-          leading: SizedBox(width: 50),
+          leading: const SizedBox(width: 50),
           title: Text("Shipping method: ${finDoc.shipmentMethod} "
               "telephone: ${finDoc.telephoneNr}\n"
               "${findoc.address!.address1} ${findoc.address!.address2} "

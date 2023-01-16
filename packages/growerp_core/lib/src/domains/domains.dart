@@ -1,7 +1,6 @@
 export 'authenticate/authenticate.dart';
 export 'common/common.dart';
 export 'tasks/tasks.dart';
-export 'warehouse/warehouse.dart';
 export 'findoc/findoc.dart';
 export 'users/users.dart';
 export 'chat/chat.dart';

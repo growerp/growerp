@@ -15,7 +15,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../services/jsonConverters.dart';
-import '../warehouse/models/location_model.dart';
 import 'models.dart';
 
 part 'asset_model.freezed.dart';

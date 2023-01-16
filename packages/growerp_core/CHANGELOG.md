@@ -1,3 +1,7 @@
+## 0.7.0-dev.2
+
+* removed warehouse to inventory package
+
 ## 0.7.0-dev.1
 
 * moved core package to src dir
