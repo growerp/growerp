@@ -447,10 +447,17 @@ packages:
   growerp_core:
     dependency: "direct main"
     description:
-      path: "../growerp_core"
-      relative: true
-    source: path
-    version: "0.6.0-dev.8"
+      name: growerp_core
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.0-dev.2"
+  growerp_select_dialog:
+    dependency: "direct main"
+    description:
+      name: growerp_select_dialog
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0"
   highlight:
     dependency: transitive
     description:

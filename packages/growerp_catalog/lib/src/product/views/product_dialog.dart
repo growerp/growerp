@@ -49,13 +49,10 @@ class ProductDialogFull extends StatefulWidget {
   final Product product;
   const ProductDialogFull(this.product, {super.key});
   @override
-  ProductDialogState createState() => ProductDialogState(product);
+  ProductDialogState createState() => ProductDialogState();
 }
 
 class ProductDialogState extends State<ProductDialogFull> {
-  final Product product;
-  ProductDialogState(this.product);
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -77,18 +74,20 @@ class ProductDialogState extends State<ProductDialogFull> {
   void initState() {
     super.initState();
     _productBloc = context.read<ProductBloc>();
-    _nameController.text = product.productName ?? '';
-    _descriptionController.text = product.description ?? '';
+    _nameController.text = widget.product.productName ?? '';
+    _descriptionController.text = widget.product.description ?? '';
     _priceController.text =
-        product.price == null ? '' : product.price.toString();
-    _listPriceController.text =
-        product.listPrice == null ? '' : product.listPrice.toString();
-    _assetsController.text =
-        product.assetCount == null ? '' : product.assetCount.toString();
-    _selectedCategories = List.of(product.categories);
-    _selectedTypeId = product.productTypeId;
+        widget.product.price == null ? '' : widget.product.price.toString();
+    _listPriceController.text = widget.product.listPrice == null
+        ? ''
+        : widget.product.listPrice.toString();
+    _assetsController.text = widget.product.assetCount == null
+        ? ''
+        : widget.product.assetCount.toString();
+    _selectedCategories = List.of(widget.product.categories);
+    _selectedTypeId = widget.product.productTypeId;
     classificationId = GlobalConfiguration().get("classificationId");
-    useWarehouse = product.useWarehouse;
+    useWarehouse = widget.product.useWarehouse;
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -391,7 +390,8 @@ class ProductDialogState extends State<ProductDialogFull> {
         Expanded(
             child: ElevatedButton(
                 key: const Key('update'),
-                child: Text(product.productId.isEmpty ? 'Create' : 'Update'),
+                child: Text(
+                    widget.product.productId.isEmpty ? 'Create' : 'Update'),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     Uint8List? image =
@@ -401,7 +401,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                           context, "Image upload error!", Colors.red);
                     } else {
                       _productBloc.add(ProductUpdate(Product(
-                          productId: product.productId,
+                          productId: widget.product.productId,
                           productName: _nameController.text,
                           assetClassId: classificationId == 'AppHotel'
                               ? 'Hotel Room'
@@ -459,7 +459,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                     const SizedBox(height: 50),
                     Center(
                         child: Text(
-                      'Product #${product.productId.isEmpty ? " New" : product.productId}',
+                      'Product #${widget.product.productId.isEmpty ? " New" : widget.product.productId}',
                       style: const TextStyle(
                           fontSize: 10,
                           color: Colors.black,
@@ -474,10 +474,13 @@ class ProductDialogState extends State<ProductDialogFull> {
                             ? foundation.kIsWeb
                                 ? Image.network(_imageFile!.path, scale: 0.3)
                                 : Image.file(File(_imageFile!.path), scale: 0.3)
-                            : product.image != null
-                                ? Image.memory(product.image!, scale: 0.3)
+                            : widget.product.image != null
+                                ? Image.memory(widget.product.image!,
+                                    scale: 0.3)
                                 : Text(
-                                    product.productName?.substring(0, 1) ?? '',
+                                    widget.product.productName
+                                            ?.substring(0, 1) ??
+                                        '',
                                     style: const TextStyle(
                                         fontSize: 30, color: Colors.black))),
                     const SizedBox(height: 10),

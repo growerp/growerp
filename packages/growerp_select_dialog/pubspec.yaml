@@ -1,0 +1,17 @@
+name: growerp_select_dialog
+description: Package designed to select an item from a list, with the option to filter and even search the items online, tailored to the GrowERP environment.
+version: 0.6.0
+homepage: https://flutterando.com.br/
+#git: https://github.com/davidsdearaujo/growerp_select_dialog
+git: https://github.com/growerp/growerp
+
+environment:
+  sdk: '>=2.18.5 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  test: ^1.16.6

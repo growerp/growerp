@@ -1,5 +1,5 @@
-export 'finDocList_form.dart';
-export 'finDoc_dialog.dart';
+export 'findoc_List_form.dart';
+export 'findoc_dialog.dart';
 export 'reservation_dialog.dart';
 export 'shipment_receive_dialog.dart';
 //export 'gantt_form.dart1';

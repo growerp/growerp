@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,17 +101,17 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: ProductListForm(),
+          form: const ProductListForm(),
           label: 'Products',
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: AssetListForm(),
+          form: const AssetListForm(),
           label: 'Assets',
           icon: const Icon(Icons.money),
         ),
         TabItem(
-          form: CategoryListForm(),
+          form: const CategoryListForm(),
           label: 'Categories',
           icon: const Icon(Icons.business),
         ),

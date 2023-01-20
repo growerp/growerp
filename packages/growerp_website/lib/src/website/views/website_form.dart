@@ -23,6 +23,7 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
+import 'package:growerp_select_dialog/growerp_select_dialog.dart';
 import '../../api_repository.dart';
 import '../website.dart';
 
@@ -38,10 +39,6 @@ class WebsiteForm extends StatelessWidget {
             create: (BuildContext context) =>
                 WebsiteBloc(context.read<WebsiteAPIRepository>())
                   ..add(WebsiteFetch())),
-        BlocProvider<CategoryBloc>(
-            create: (BuildContext context) =>
-                CategoryBloc(context.read<APIRepository>())
-                  ..add(const CategoryFetch())),
       ], child: const WebsitePage()));
 }
 
@@ -49,15 +46,15 @@ class WebsitePage extends StatefulWidget {
   const WebsitePage({super.key});
 
   @override
-  _WebsiteState createState() => _WebsiteState();
+  WebsiteFormState createState() => WebsiteFormState();
 }
 
-class _WebsiteState extends State<WebsitePage> {
+class WebsiteFormState extends State<WebsitePage> {
   late WebsiteBloc _websiteBloc;
   late WebsiteAPIRepository _websiteProvider;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
-  List<Category> _availableCategories = [];
+  final List<Category> _availableCategories = [];
   final _urlController = TextEditingController();
   final _titleController = TextEditingController();
   final _obsidianController = TextEditingController();
@@ -75,52 +72,35 @@ class _WebsiteState extends State<WebsitePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<CategoryBloc, CategoryState>(
-        listener: (context, state) async {
-      switch (state.status) {
-        case CategoryStatus.failure:
-          HelperFunctions.showMessage(context,
-              'Error getting categories: ${state.message}', Colors.red);
+    return BlocConsumer<WebsiteBloc, WebsiteState>(
+        listener: (context, websiteState) {
+      switch (websiteState.status) {
+        case WebsiteStatus.success:
+          HelperFunctions.showMessage(
+              context, '${websiteState.message}', Colors.green);
+          break;
+        case WebsiteStatus.failure:
+          HelperFunctions.showMessage(
+              context, '${websiteState.message}', Colors.red);
           break;
         default:
       }
-    }, builder: (context, catState) {
-      if (catState.status == CategoryStatus.success) {
-        _availableCategories = catState.categories;
-        return BlocConsumer<WebsiteBloc, WebsiteState>(
-            listener: (context, websiteState) {
-          switch (websiteState.status) {
-            case WebsiteStatus.success:
-              HelperFunctions.showMessage(
-                  context, '${websiteState.message}', Colors.green);
-              break;
-            case WebsiteStatus.failure:
-              HelperFunctions.showMessage(
-                  context, '${websiteState.message}', Colors.red);
-              break;
-            default:
-          }
-        }, builder: (context, websiteState) {
-          switch (websiteState.status) {
-            case WebsiteStatus.success:
-              _urlController.text =
-                  websiteState.website!.hostName.split('.')[0];
-              _titleController.text = websiteState.website!.title;
-              _obsidianController.text = websiteState.website!.obsidianName;
-              _measurementIdController.text =
-                  websiteState.website!.measurementId;
-              _updatedContent = List.of(websiteState.website!.websiteContent);
-              _selectedCategories =
-                  List.of(websiteState.website!.productCategories);
-              return Scaffold(body: Center(child: _showForm(websiteState)));
-            case WebsiteStatus.failure:
-              return const Center(child: Text("error happened"));
-            default:
-              return LoadingIndicator();
-          }
-        });
+    }, builder: (context, websiteState) {
+      switch (websiteState.status) {
+        case WebsiteStatus.success:
+          _urlController.text = websiteState.website!.hostName.split('.')[0];
+          _titleController.text = websiteState.website!.title;
+          _obsidianController.text = websiteState.website!.obsidianName;
+          _measurementIdController.text = websiteState.website!.measurementId;
+          _updatedContent = List.of(websiteState.website!.websiteContent);
+          _selectedCategories =
+              List.of(websiteState.website!.productCategories);
+          return Scaffold(body: Center(child: _showForm(websiteState)));
+        case WebsiteStatus.failure:
+          return const Center(child: Text("error happened"));
+        default:
+          return LoadingIndicator();
       }
-      return LoadingIndicator();
     });
   }
 
@@ -184,10 +164,14 @@ class _WebsiteState extends State<WebsitePage> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return BlocProvider.value(
-                    value: _websiteBloc,
-                    child: WebsiteContentDialog(
-                        state.website!.id, Content(text: '# ')));
+                return RepositoryProvider.value(
+                    value: _websiteProvider,
+                    child: RepositoryProvider.value(
+                        value: _websiteProvider,
+                        child: BlocProvider.value(
+                            value: _websiteBloc,
+                            child: WebsiteContentDialog(
+                                state.website!.id, Content(text: '# ')))));
               });
 
           if (updContent != null) {
@@ -211,9 +195,12 @@ class _WebsiteState extends State<WebsitePage> {
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return BlocProvider.value(
-                      value: _websiteBloc,
-                      child: WebsiteContentDialog(state.website!.id, content));
+                  return RepositoryProvider.value(
+                      value: _websiteProvider,
+                      child: BlocProvider.value(
+                          value: _websiteBloc,
+                          child: WebsiteContentDialog(
+                              state.website!.id, content)));
                 });
             if (updContent != null) {
               setState(() {
@@ -252,7 +239,9 @@ class _WebsiteState extends State<WebsitePage> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return WebsiteContentDialog(state.website!.id, Content());
+                return RepositoryProvider.value(
+                    value: _websiteProvider,
+                    child: WebsiteContentDialog(state.website!.id, Content()));
               });
           if (updContent != null) {
             setState(() {
@@ -262,24 +251,79 @@ class _WebsiteState extends State<WebsitePage> {
         }));
 
     // create website category buttons
-    List<Widget> catButtons = [];
+    List<Map<String, dynamic>> catButtons = [];
     state.website!.websiteCategories.asMap().forEach((index, category) {
-      catButtons.add(ElevatedButton(
-          key: Key(category.categoryName),
-          child: Text(
-            category.categoryName,
+      List<Widget> productWidgets = [];
+      category.products.asMap().forEach((productIndex, product) {
+        productWidgets.add(InputChip(
+          label: Text(
+            product.productName ?? '',
+            key: Key(product.productName ?? ''),
           ),
-          onPressed: () async {
-            await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return BlocProvider.value(
-                      value: _websiteBloc,
-                      child:
-                          WebsiteCategoryDialog(state.website!.id, category));
-                });
-          }));
+          deleteIcon:
+              Icon(Icons.cancel, key: Key('delete${product.productName!}')),
+          onDeleted: () async {
+            var productList = List.of(
+                _websiteBloc.state.website!.websiteCategories[index].products);
+            productList.removeAt(productIndex);
+            context.read<WebsiteBloc>().add(WebsiteUpdate(Website(
+                    id: _websiteBloc.state.website!.id,
+                    websiteCategories: [
+                      category.copyWith(products: productList)
+                    ])));
+          },
+        ));
+      });
+
+      Future<List<Product>> getProduct(String filter) async {
+        ApiResult<List<Product>> result =
+            await _websiteProvider.getProduct(searchString: filter);
+        return result.when(
+            success: (data) => data,
+            failure: (_) => [Product(productName: 'get data error!')]);
+      }
+
+      productWidgets.add(IconButton(
+        key: const Key('addHomeCategoryProduct'),
+        iconSize: 30,
+        icon: const Icon(Icons.add_circle),
+        color: Colors.deepOrange,
+        padding: const EdgeInsets.all(0.0),
+        onPressed: () async {
+          SelectDialog.showModal<Product>(
+            context,
+            label: "Find and (un)select products",
+            alwaysShowScrollBar: true,
+            multipleSelectedValues: category.products,
+            onFind: (String filter) async => await getProduct(filter),
+            itemBuilder: (context, item, isSelected) {
+              return ListTile(
+                trailing: isSelected ? const Icon(Icons.check) : null,
+                title: Text(item.productName ?? ''),
+                subtitle: Text(item.price.toString()),
+                selected: isSelected,
+              );
+            },
+            onMultipleItemsChange: (List<Product> selected) {
+              _websiteBloc.add(WebsiteUpdate(Website(
+                  id: state.website!.id,
+                  websiteCategories: [category.copyWith(products: selected)])));
+            },
+            okButtonBuilder: (context, onPressed) {
+              return Align(
+                alignment: Alignment.centerRight,
+                child: FloatingActionButton(
+                  onPressed: onPressed,
+                  mini: true,
+                  child: const Icon(Icons.check),
+                ),
+              );
+            },
+          );
+        },
+      ));
+      catButtons.add(
+          {"categoryName": category.categoryName, "products": productWidgets});
     });
 
     // create product browse categories
@@ -312,6 +356,14 @@ class _WebsiteState extends State<WebsitePage> {
       ));
     });
 
+    Future<List<Category>> getCategory(String filter) async {
+      ApiResult<List<Category>> result =
+          await _websiteProvider.getCategory(searchString: filter);
+      return result.when(
+          success: (data) => data,
+          failure: (_) => [Category(categoryName: 'get data error!')]);
+    }
+
     browseCatButtons.add(IconButton(
       key: const Key('addShopCategory'),
       iconSize: 30,
@@ -319,22 +371,35 @@ class _WebsiteState extends State<WebsitePage> {
       color: Colors.deepOrange,
       padding: const EdgeInsets.all(0.0),
       onPressed: () async {
-        var result = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return MultiSelect<Category>(
-                title: 'Select one or more categories',
-                items: _availableCategories,
-                selectedItems: _selectedCategories,
-              );
-            });
-        if (result != null) {
-          setState(() {
-            _selectedCategories = result;
-          });
-          _websiteBloc.add(WebsiteUpdate(Website(
-              id: state.website!.id, productCategories: _selectedCategories)));
-        }
+        SelectDialog.showModal<Category>(
+          context,
+          label: "Find and (un)select categories",
+          alwaysShowScrollBar: true,
+          multipleSelectedValues: state.website!.productCategories,
+          onFind: (String filter) async => await getCategory(filter),
+          itemBuilder: (context, item, isSelected) {
+            return ListTile(
+              trailing: isSelected ? const Icon(Icons.check) : null,
+              title: Text(item.categoryName),
+              subtitle: Text(item.description),
+              selected: isSelected,
+            );
+          },
+          onMultipleItemsChange: (List<Category> selected) {
+            _websiteBloc.add(WebsiteUpdate(
+                Website(id: state.website!.id, productCategories: selected)));
+          },
+          okButtonBuilder: (context, onPressed) {
+            return Align(
+              alignment: Alignment.centerRight,
+              child: FloatingActionButton(
+                onPressed: onPressed,
+                mini: true,
+                child: const Icon(Icons.check),
+              ),
+            );
+          },
+        );
       },
     ));
 
@@ -555,22 +620,23 @@ class _WebsiteState extends State<WebsitePage> {
             const SizedBox(height: 10),
             Wrap(runSpacing: 10, spacing: 10, children: imageButtons)
           ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Home Page Categories',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      for (Map cat in catButtons)
+        Container(
+            width: 400,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25.0),
+              border: Border.all(
+                  color: Colors.black45, style: BorderStyle.solid, width: 0.80),
             ),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, children: catButtons)
-          ])),
+            child: Column(children: [
+              Text(
+                cat["categoryName"],
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Wrap(spacing: 10, children: cat["products"])
+            ])),
       Container(
           width: 400,
           padding: const EdgeInsets.all(10),

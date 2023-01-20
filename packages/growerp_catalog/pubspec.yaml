@@ -19,8 +19,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: #^0.6.0-dev.8
-    path: ../growerp_core/
+  growerp_core: ^0.7.0-dev.2
+  #  path: ../growerp_core/
   flutter_bloc: ^8.1.1
   equatable: ^2.0.5
   responsive_framework: ^0.2.0
@@ -42,6 +42,9 @@ dependencies:
   file_picker: ^5.0.1
   stream_transform: ^2.1.0
   json_annotation: ^4.7.0
+  decimal: ^2.1.0
+  fast_csv: ^0.1.44
+  dropdown_search: ^4.0.1
 
 dev_dependencies:
   freezed: ^2.0.3

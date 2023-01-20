@@ -52,61 +52,65 @@ class FinDocListForm extends StatelessWidget {
       additionalItemButtonRoute: additionalItemButtonRoute,
     );
     if (docType == FinDocType.order) {
-      if (sales)
+      if (sales) {
         return BlocProvider<SalesOrderBloc>(
             create: (context) =>
                 FinDocBloc(context.read<APIRepository>(), sales, docType)
-                  ..add(FinDocFetch()),
+                  ..add(const FinDocFetch()),
             child: finDocList);
+      }
       return BlocProvider<PurchaseOrderBloc>(
           create: (BuildContext context) =>
               FinDocBloc(context.read<APIRepository>(), sales, docType)
-                ..add(FinDocFetch()),
+                ..add(const FinDocFetch()),
           child: finDocList);
     }
     if (docType == FinDocType.invoice) {
-      if (sales)
+      if (sales) {
         return BlocProvider<SalesInvoiceBloc>(
             create: (context) =>
                 FinDocBloc(context.read<APIRepository>(), sales, docType)
-                  ..add(FinDocFetch()),
+                  ..add(const FinDocFetch()),
             child: finDocList);
+      }
       return BlocProvider<PurchaseInvoiceBloc>(
           create: (BuildContext context) =>
               FinDocBloc(context.read<APIRepository>(), sales, docType)
-                ..add(FinDocFetch()),
+                ..add(const FinDocFetch()),
           child: finDocList);
     }
     if (docType == FinDocType.payment) {
-      if (sales)
+      if (sales) {
         return BlocProvider<SalesPaymentBloc>(
             create: (context) =>
                 FinDocBloc(context.read<APIRepository>(), sales, docType)
-                  ..add(FinDocFetch()),
+                  ..add(const FinDocFetch()),
             child: finDocList);
+      }
       return BlocProvider<PurchasePaymentBloc>(
           create: (BuildContext context) =>
               FinDocBloc(context.read<APIRepository>(), sales, docType)
-                ..add(FinDocFetch()),
+                ..add(const FinDocFetch()),
           child: finDocList);
     }
     if (docType == FinDocType.shipment) {
-      if (sales)
+      if (sales) {
         return BlocProvider<OutgoingShipmentBloc>(
             create: (context) =>
                 FinDocBloc(context.read<APIRepository>(), sales, docType)
-                  ..add(FinDocFetch()),
+                  ..add(const FinDocFetch()),
             child: finDocList);
+      }
       return BlocProvider<IncomingShipmentBloc>(
           create: (BuildContext context) =>
               FinDocBloc(context.read<APIRepository>(), sales, docType)
-                ..add(FinDocFetch()),
+                ..add(const FinDocFetch()),
           child: finDocList);
     }
     return BlocProvider<TransactionBloc>(
         create: (context) =>
             FinDocBloc(context.read<APIRepository>(), sales, docType)
-              ..add(FinDocFetch()),
+              ..add(const FinDocFetch()),
         child: finDocList);
   }
 }
@@ -193,39 +197,37 @@ class FinDocListState extends State<FinDocList> {
     Widget finDocsPage() {
       bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
       return RefreshIndicator(
-          onRefresh: (() async => _finDocBloc.add(FinDocFetch(refresh: true))),
+          onRefresh: (() async =>
+              _finDocBloc.add(const FinDocFetch(refresh: true))),
           child: ListView.builder(
-              key: Key('listView'),
-              physics: AlwaysScrollableScrollPhysics(),
+              key: const Key('listView'),
+              physics: const AlwaysScrollableScrollPhysics(),
               itemCount:
                   hasReachedMax ? finDocs.length + 1 : finDocs.length + 2,
               controller: _scrollController,
               itemBuilder: (BuildContext context, int index) {
-                if (index == 0)
+                if (index == 0) {
                   return Column(children: [
                     FinDocListHeader(
                         isPhone: isPhone,
                         sales: widget.sales,
                         docType: widget.docType,
                         finDocBloc: _finDocBloc),
-                    Divider(color: Colors.black),
+                    const Divider(color: Colors.black),
                     Visibility(
                         visible: finDocs.isEmpty,
                         child: Center(
                             heightFactor: 20,
                             child: Text(
-                                "no (open)" +
-                                    (widget.docType == FinDocType.shipment
-                                        ? "${widget.sales ? 'outgoing' : 'incoming'} "
-                                        : "${widget.sales ? 'sales' : 'purchase'} ") +
-                                    "${entityName}s found!",
+                                "no (open)${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
                                 textAlign: TextAlign.center)))
                   ]);
+                }
                 index--;
                 return index >= finDocs.length
                     ? BottomLoader()
                     : Dismissible(
-                        key: Key('finDocItem'),
+                        key: const Key('finDocItem'),
                         direction: DismissDirection.startToEnd,
                         child: FinDocListItem(
                           finDoc: finDocs[index],
@@ -256,23 +258,24 @@ class FinDocListState extends State<FinDocList> {
     return Builder(builder: (BuildContext context) {
       // used in the blocbuilder below
 
-      dynamic listener = (context, state) {
-        if (state.status == FinDocStatus.failure)
+      listener(context, state) {
+        if (state.status == FinDocStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+        }
         if (state.status == FinDocStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
         }
-      };
+      }
 
-      dynamic builder = (context, state) {
+      builder(context, state) {
         if (state.status == FinDocStatus.success ||
             state.status == FinDocStatus.failure) {
           finDocs = state.finDocs;
           hasReachedMax = state.hasReachedMax;
           // if rental (hotelroom) need to show checkin/out orders
           if (widget.onlyRental && widget.status != null) {
-            if (widget.status == FinDocStatusVal.Created) // = checkin
+            if (widget.status == FinDocStatusVal.Created) {
               finDocs = finDocs
                   .where((el) =>
                       el.items[0].rentalFromDate != null &&
@@ -280,7 +283,8 @@ class FinDocListState extends State<FinDocList> {
                       el.items[0].rentalFromDate!
                           .isSameDate(CustomizableDateTime.current))
                   .toList();
-            if (widget.status == FinDocStatusVal.Approved) // = checkout
+            }
+            if (widget.status == FinDocStatusVal.Approved) {
               finDocs = finDocs
                   .where((el) =>
                       el.items[0].rentalThruDate != null &&
@@ -288,6 +292,7 @@ class FinDocListState extends State<FinDocList> {
                       el.items[0].rentalThruDate!
                           .isSameDate(CustomizableDateTime.current))
                   .toList();
+            }
           } else if (widget.onlyRental == true) {
             finDocs = finDocs
                 .where((el) => el.items[0].rentalFromDate != null)
@@ -301,7 +306,7 @@ class FinDocListState extends State<FinDocList> {
                 FinDocType.payment,
               ].contains(widget.docType)
                   ? FloatingActionButton(
-                      key: Key("addNew"),
+                      key: const Key("addNew"),
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
@@ -320,40 +325,44 @@ class FinDocListState extends State<FinDocList> {
                             });
                       },
                       tooltip: 'Add New',
-                      child: Icon(Icons.add))
+                      child: const Icon(Icons.add))
                   : null,
               body: finDocsPage());
         } else {
           return const Center(child: CircularProgressIndicator());
         }
-      };
+      }
 
       // finally create the Blocbuilder
       if (widget.docType == FinDocType.order) {
-        if (widget.sales)
+        if (widget.sales) {
           return BlocConsumer<SalesOrderBloc, FinDocState>(
               listener: listener, builder: builder);
+        }
         return BlocConsumer<PurchaseOrderBloc, FinDocState>(
             listener: listener, builder: builder);
       }
       if (widget.docType == FinDocType.invoice) {
-        if (widget.sales)
+        if (widget.sales) {
           return BlocConsumer<SalesInvoiceBloc, FinDocState>(
               listener: listener, builder: builder);
+        }
         return BlocConsumer<PurchaseInvoiceBloc, FinDocState>(
             listener: listener, builder: builder);
       }
       if (widget.docType == FinDocType.payment) {
-        if (widget.sales)
+        if (widget.sales) {
           return BlocConsumer<SalesPaymentBloc, FinDocState>(
               listener: listener, builder: builder);
+        }
         return BlocConsumer<PurchasePaymentBloc, FinDocState>(
             listener: listener, builder: builder);
       }
       if (widget.docType == FinDocType.shipment) {
-        if (widget.sales)
+        if (widget.sales) {
           return BlocConsumer<OutgoingShipmentBloc, FinDocState>(
               listener: listener, builder: builder);
+        }
         return BlocConsumer<IncomingShipmentBloc, FinDocState>(
             listener: listener, builder: builder);
       }
@@ -371,7 +380,7 @@ class FinDocListState extends State<FinDocList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _finDocBloc.add(FinDocFetch());
+    if (_isBottom) _finDocBloc.add(const FinDocFetch());
   }
 
   bool get _isBottom {
