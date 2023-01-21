@@ -12,9 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/domains/domains.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_marketing/opportunities/views/views.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'forms/@forms.dart' as local;
 
@@ -72,7 +74,7 @@ List<MenuOption> menuOptions = [
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     tabItems: [
       TabItem(
-        form: OpportunityListForm(),
+        form: const OpportunityListForm(),
         label: 'My Opportunities',
         icon: const Icon(Icons.home),
       ),
@@ -109,17 +111,17 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: ProductListForm(),
+          form: const ProductListForm(),
           label: 'Products',
           icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: AssetListForm(),
+          form: const AssetListForm(),
           label: 'Assets',
           icon: const Icon(Icons.money),
         ),
         TabItem(
-          form: CategoryListForm(),
+          form: const CategoryListForm(),
           label: 'Categories',
           icon: const Icon(Icons.business),
         ),

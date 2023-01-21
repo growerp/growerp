@@ -1,5 +1,5 @@
-import 'package:admin/menuOption_data.dart';
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:admin/menu_option_data.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';

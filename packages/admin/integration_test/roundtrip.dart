@@ -1,9 +1,12 @@
-import 'package:admin/menuOption_data.dart';
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:admin/menu_option_data.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
+import 'data.dart' as data;
 
 /// the full business roundtrip for physical products
 /// purchase products and receive in warehouse
@@ -22,21 +25,23 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, categories.sublist(0, 2),
+    await CategoryTest.addCategories(tester, data.categories.sublist(0, 2),
         check: false);
     await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, products.sublist(0, 2), check: false);
+    await ProductTest.addProducts(tester, data.products.sublist(0, 2),
+        check: false);
     await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
+    await UserTest.addSuppliers(tester, data.suppliers.sublist(0, 2),
+        check: false);
     await OrderTest.selectPurchaseOrders(tester);
-    await OrderTest.createPurchaseOrder(tester, purchaseOrders);
+    await OrderTest.createPurchaseOrder(tester, data.purchaseOrders);
     await OrderTest.checkPurchaseOrder(tester);
-    await OrderTest.sendPurchaseOrder(tester, purchaseOrders);
-    await WarehouseTest.selectIncomingShipments(tester);
-    await WarehouseTest.checkIncomingShipments(tester);
-    await WarehouseTest.acceptShipmentInWarehouse(tester);
-    await WarehouseTest.selectWareHouseLocations(tester);
-    await WarehouseTest.checkWarehouseQOH(tester);
+    await OrderTest.sendPurchaseOrder(tester, data.purchaseOrders);
+    await InventoryTest.selectIncomingShipments(tester);
+    await InventoryTest.checkIncomingShipments(tester);
+    await InventoryTest.acceptShipmentInInventory(tester);
+    await InventoryTest.selectWareHouseLocations(tester);
+    await InventoryTest.checkInventoryQOH(tester);
     await InvoiceTest.selectPurchaseInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
@@ -65,13 +70,13 @@ void main() {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
     await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, [customers[0]], check: false);
+    await UserTest.addCustomers(tester, [data.customers[0]], check: false);
     await OrderTest.selectSalesOrders(tester);
-    await OrderTest.createSalesOrder(tester, salesOrders);
+    await OrderTest.createSalesOrder(tester, data.salesOrders);
     await OrderTest.checkSalesOrder(tester);
     await OrderTest.approveSalesOrder(tester);
-    await WarehouseTest.selectOutgoingShipments(tester);
-    await WarehouseTest.sendOutGoingShipments(tester);
+    await InventoryTest.selectOutgoingShipments(tester);
+    await InventoryTest.sendOutGoingShipments(tester);
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);

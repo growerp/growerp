@@ -14,8 +14,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../menuOption_data.dart';
-import 'package:growerp_core/domains/domains.dart';
+import '../menu_option_data.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class AdminDbForm extends StatelessWidget {
   @override
@@ -63,7 +63,7 @@ class AdminDbForm extends StatelessWidget {
             "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
           ),
           makeDashboardItem(
-            'dbWarehouse',
+            'dbInventory',
             context,
             menuOptions[5],
             "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",

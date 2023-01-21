@@ -1,3 +1,7 @@
+## 0.6.0-dev.3
+
+* Adapted to new core package
+
 ## 0.6.0-dev.2
 
 * Adapted to core package 0.7.0-dev.2

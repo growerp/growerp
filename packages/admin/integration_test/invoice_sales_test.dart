@@ -1,9 +1,11 @@
-import 'package:admin/menuOption_data.dart';
-import 'package:growerp_core/domains/integration_test.dart';
+import 'package:admin/menu_option_data.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
+import 'data.dart' as data;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -19,15 +21,17 @@ void main() {
     await CompanyTest.createCompany(tester);
     await CommonTest.login(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, categories.sublist(0, 2),
+    await CategoryTest.addCategories(tester, data.categories.sublist(0, 2),
         check: false);
     await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, products.sublist(0, 3), check: false);
+    await ProductTest.addProducts(tester, data.products.sublist(0, 3),
+        check: false);
     await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, customers.sublist(0, 2), check: false);
+    await UserTest.addCustomers(tester, data.customers.sublist(0, 2),
+        check: false);
     await InvoiceTest.selectSalesInvoices(tester);
-    await InvoiceTest.addInvoices(tester, salesInvoices.sublist(0, 1));
-    await InvoiceTest.updateInvoices(tester, salesInvoices.sublist(1, 2));
+    await InvoiceTest.addInvoices(tester, data.salesInvoices.sublist(0, 1));
+    await InvoiceTest.updateInvoices(tester, data.salesInvoices.sublist(1, 2));
     await InvoiceTest.sendOrApproveInvoices(tester);
     await PaymentTest.selectSalesPayments(tester);
     await PaymentTest.sendReceivePayment(tester);

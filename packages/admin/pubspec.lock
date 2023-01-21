@@ -395,27 +395,48 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0-nullsafety.1"
+  growerp_catalog:
+    dependency: "direct main"
+    description:
+      name: growerp_catalog
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.0-dev.2"
   growerp_core:
     dependency: "direct main"
     description:
       name: growerp_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.8"
+    version: "0.7.0-dev.3"
+  growerp_inventory:
+    dependency: "direct main"
+    description:
+      name: growerp_inventory
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.0-dev.2"
   growerp_marketing:
     dependency: "direct main"
     description:
       name: growerp_marketing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.3"
+    version: "0.7.0-dev.3"
+  growerp_select_dialog:
+    dependency: transitive
+    description:
+      name: growerp_select_dialog
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.0"
   growerp_website:
     dependency: "direct main"
     description:
       name: growerp_website
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.0-dev.1"
+    version: "0.6.0-dev.3"
   highlight:
     dependency: transitive
     description:

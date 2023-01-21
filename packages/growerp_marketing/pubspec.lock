@@ -475,10 +475,10 @@ packages:
   growerp_core:
     dependency: "direct main"
     description:
-      name: growerp_core
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.7.0-dev.1"
+      path: "../growerp_core"
+      relative: true
+    source: path
+    version: "0.7.0-dev.3"
   highlight:
     dependency: transitive
     description:

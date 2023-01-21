@@ -8,3 +8,5 @@ export 'src/services/jsonConverters.dart';
 export 'src/domains/domains.dart';
 export 'src/domains/integration_test.dart';
 export 'src/domains/models/models.dart';
+export 'src/core_router.dart';
+export 'src/styles/themes.dart';

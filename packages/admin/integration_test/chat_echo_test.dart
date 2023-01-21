@@ -12,11 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:admin/main.dart';
-import 'package:admin/menuOption_data.dart';
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/domains/integration_test.dart';
-import 'package:growerp_core/services/chat_server.dart';
+import 'package:admin/menu_option_data.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -45,17 +42,17 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     // chatrooms screen
     await CommonTest.tapByTooltip(tester, 'Chat');
-    expect(find.byKey(Key('ChatRoomListDialog')), findsOneWidget);
+    expect(find.byKey(const Key('ChatRoomListDialog')), findsOneWidget);
     // open new chat
     await CommonTest.tapByKey(tester, 'addNew');
-    expect(find.byKey(Key('ChatRoomDialog')), findsOneWidget);
+    expect(find.byKey(const Key('ChatRoomDialog')), findsOneWidget);
     await CommonTest.tapByKey(tester, 'userDropDown');
     await CommonTest.tapByText(tester, 'administrator1');
     await CommonTest.tapByKey(tester, 'update');
-    expect(find.byKey(Key('chatRoomItem')), findsNWidgets(1));
+    expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(1));
     // select created chat
     await CommonTest.tapByKey(tester, 'chatRoomName0');
-    expect(find.byKey(Key('ChatDialog')), findsOneWidget);
+    expect(find.byKey(const Key('ChatDialog')), findsOneWidget);
     // enter chat message
     await CommonTest.enterText(tester, 'messageContent', 'hello!');
     await CommonTest.tapByKey(tester, 'send');
@@ -64,7 +61,7 @@ void main() {
     await CommonTest.tapByKey(tester, 'cancel');
     // delete chatroom
     await CommonTest.tapByKey(tester, 'delete0');
-    expect(find.byKey(Key('chatRoomItem')), findsNWidgets(0));
+    expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(0));
     // leave chatrooms form
     await CommonTest.tapByKey(tester, 'cancel');
   }, skip: true);
@@ -85,7 +82,7 @@ void main() {
     await CommonTest.tapByKey(tester, 'update', seconds: 5);
     // select created chat
     await CommonTest.tapByKey(tester, 'chatRoomName0');
-    expect(find.byKey(Key('ChatDialog')), findsOneWidget);
+    expect(find.byKey(const Key('ChatDialog')), findsOneWidget);
     // enter chat message
     await CommonTest.enterText(tester, 'messageContent', 'hello!');
     await CommonTest.tapByKey(tester, 'send', seconds: 5);

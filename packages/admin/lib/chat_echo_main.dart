@@ -18,10 +18,7 @@
 
 import 'dart:async';
 import 'package:flutter_phoenix/generated/i18n.dart';
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/domains/domains.dart';
-import 'package:growerp_core/services/chat_server.dart';
-import 'package:growerp_core/styles/themes.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -156,10 +153,10 @@ class ChatRooms extends StatefulWidget {
   const ChatRooms({Key? key}) : super(key: key);
 
   @override
-  _ChatRoomsState createState() => _ChatRoomsState();
+  ChatRoomsEchoState createState() => ChatRoomsEchoState();
 }
 
-class _ChatRoomsState extends State<ChatRooms> {
+class ChatRoomsEchoState extends State<ChatRooms> {
   late ChatRoomBloc _chatRoomBloc;
   List<ChatMessage> messages = [];
   Authenticate authenticate = Authenticate();
@@ -188,8 +185,9 @@ class _ChatRoomsState extends State<ChatRooms> {
         return BlocConsumer<ChatRoomBloc, ChatRoomState>(
             listener: (context, state) {},
             builder: (context, state) {
-              if (state.status == ChatRoomStatus.failure)
+              if (state.status == ChatRoomStatus.failure) {
                 return Center(child: Text('Error: ${state.message}'));
+              }
               if (state.status == ChatRoomStatus.success) {
                 chatRooms = state.chatRooms;
                 if (chatRooms.isEmpty) {

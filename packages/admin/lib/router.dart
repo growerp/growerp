@@ -12,14 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/coreRouter.dart';
-import 'package:growerp_core/domains/domains.dart';
-import 'package:growerp_core/templates/templates.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_core/domains/catalog/models/category_model.dart' as cat;
+import 'package:growerp_core/growerp_core.dart' as cat;
+import 'package:growerp_catalog/growerp_catalog.dart';
 
-import 'menuOption_data.dart';
+import 'menu_option_data.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {

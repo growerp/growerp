@@ -1,3 +1,7 @@
+## 0.7.0-dev.3
+
+* add missing files for public usage
+
 ## 0.7.0-dev.2
 
 * removed warehouse to inventory package

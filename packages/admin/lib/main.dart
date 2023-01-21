@@ -12,9 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/api_repository.dart';
-import 'package:growerp_core/services/chat_server.dart';
-import 'menuOption_data.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'menu_option_data.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -22,7 +21,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:growerp_core/domains/domains.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
@@ -49,10 +47,11 @@ Future main() async {
         GlobalConfiguration().updateValue('databaseUrl', ip);
         GlobalConfiguration().updateValue('chatUrl', chat);
         GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        print('=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
+        debugPrint(
+            '=== New ip: $ip , chat: $chat company: $singleCompany Updated!');
       }
     } catch (error) {
-      print('===$ip does not respond...not updating databaseUrl: $error');
+      debugPrint('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
 

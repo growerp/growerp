@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   growerp_website:
     path: ../
-  growerp_catalog: ^0.7.0-dev.1
+  growerp_catalog: ^0.7.0-dev.2
 
 dev_dependencies:
   flutter_test:
