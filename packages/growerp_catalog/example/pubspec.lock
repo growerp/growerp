@@ -310,7 +310,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.7.0-dev.2"
+    version: "0.7.0-dev.3"
   growerp_core:
     dependency: transitive
     description:
