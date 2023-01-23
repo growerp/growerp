@@ -1,6 +1,6 @@
 name: growerp_marketing
 description: A marketing package for the GrowERP system
-version: 0.7.0-dev.3
+version: 0.8.0-dev.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_marketing
 
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^0.7.0-dev.3
+  growerp_core: ^0.8.0-dev.1
   #  path: ../growerp_core/
   decimal: ^2.1.0
   reorderables: ^0.5.1

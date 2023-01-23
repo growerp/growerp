@@ -1,0 +1,117 @@
+name: growerp_order_accounting
+description: A package providing order and accounting functions such as order, invoice, payments and ledger for the GrowERP system both for sales and purchase.
+version: 0.8.0-dev.1
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+environment:
+  sdk: '>=2.18.5 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  growerp_core: ^0.8.0-dev.1
+  #  path: ../growerp_core/
+  decimal: ^2.1.0
+  reorderables: ^0.5.1
+  intl: ^0.17.0
+  global_configuration: ^2.0.0-nullsafety.0
+  equatable: ^2.0.5
+  flutter_bloc: ^8.1.1
+  bloc_concurrency: ^0.2.0
+  meta: ^1.3.0
+  image_picker: ^0.8.5
+  responsive_framework: ^0.2.0
+  flutter_simple_treeview: ^3.0.0-nullsafety.1
+  dropdown_search: ^4.0.1
+  printing: ^5.9.2
+  pdf: ^3.3.0
+  about: ^2.1.1
+  flutter_phoenix: ^1.0.0
+  web_socket_channel: ^2.1.0
+  shared_preferences: ^2.0.15
+  date_utils: ^0.2.0
+  cupertino_icons: ^1.0.5
+  stream_transform: ^2.1.0
+  collection: ^1.16.0
+
+  #NETWORK
+  json_annotation: ^4.7.0
+  dio: ^4.0.4
+
+  #UTILITIES
+  freezed_annotation: ^2.0.3
+  freezed: ^2.0.3
+  credit_card_validator: ^2.0.1
+  markdown_widget: ^1.2.8
+  url_launcher: ^6.1.4
+  flutter_colorpicker: ^1.0.3
+  from_css_color: ^2.0.0
+  path_provider: ^2.0.11
+  file_picker: ^5.0.1
+  fast_csv: ^0.1.44
+  archive: ^3.3.0
+
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.0.2
+  very_good_analysis: ^3.0.0
+  bloc_test: ^9.0.1
+  flutter_launcher_icons: ^0.9.0
+  build_runner: ^2.1.11
+  mobx_codegen: ^2.0.4
+  json_serializable: ^6.2.0
+  dependency_validator: ^3.2.0
+# run dependency validator: flutter pub run dependency_validator
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+  # To add assets to your package, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+  #
+  # For details regarding assets in packages, see
+  # https://flutter.dev/assets-and-images/#from-packages
+  #
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
+
+  # To add custom fonts to your package, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts in packages, see
+  # https://flutter.dev/custom-fonts/#from-packages

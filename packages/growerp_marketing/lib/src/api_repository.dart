@@ -19,7 +19,7 @@ import 'opportunities/models/models.dart';
 class MarketingAPIRepository extends APIRepository {
   String? apiKey;
 
-  MarketingAPIRepository(this.apiKey) : super() {}
+  MarketingAPIRepository(this.apiKey) : super();
 
   Future<ApiResult<List<Opportunity>>> getOpportunity({
     int? start,

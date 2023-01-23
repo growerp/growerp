@@ -20,46 +20,41 @@ import '../../domains.dart';
 /// null when cancelled
 ///
 confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
-  // set up the buttons
-  Widget cancelButton = ElevatedButton(
-    child: const Text("cancel"),
-    onPressed: () {
-      Navigator.of(context).pop();
-    },
-  );
-  Widget alsoCompanyDeleteButton = ElevatedButton(
-    child: const Text("User AND Company delete"),
-    onPressed: () {
-      Navigator.of(context).pop(true);
-    },
-  );
-  Widget justUserDeleteButton = ElevatedButton(
-    child: const Text("Only User delete"),
-    onPressed: () {
-      Navigator.of(context).pop(false);
-    },
-  );
-
-  List<Widget> actions = [cancelButton, justUserDeleteButton];
-  if (userGroup == UserGroup.Admin) actions.add(alsoCompanyDeleteButton);
-
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(32.0))),
-    title: Text(
-        "Delete yourself ${userGroup == UserGroup.Admin ? ' and optionally company?' : ''}"),
-    content: const Text("Please note you will be blocked using the system."
+  List<Widget> actions = [
+    const Text("Please note you will be blocked using the system."
         "\nThis cannot be undone!"),
-    actions: actions,
-  );
+    const SizedBox(height: 20),
+    ElevatedButton(
+        child: const Text("Only User delete"),
+        onPressed: () {
+          Navigator.of(context).pop(false);
+        }),
+  ];
+  if (userGroup == UserGroup.Admin) {
+    actions.add(ElevatedButton(
+      child: const Text("User AND Company delete"),
+      onPressed: () {
+        Navigator.of(context).pop(true);
+      },
+    ));
+  }
 
   // show the dialog
   return showDialog(
     context: context,
     barrierDismissible: true,
     builder: (BuildContext context) {
-      return alert;
+      return Dialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(25.0))),
+          child: popUp(
+              height: 300,
+              context: context,
+              title:
+                  "Delete yourself ${userGroup == UserGroup.Admin ? ' and opt. company?' : ''}",
+              child: Column(
+                children: actions,
+              )));
     },
   );
 }

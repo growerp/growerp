@@ -1,6 +1,6 @@
 name: growerp_catalog
 description:  A catalog component for the Growerp ERP System containing, products, categories and assets
-version: 0.7.0-dev.3
+version: 0.8.0-dev.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^0.7.0-dev.3
+  growerp_core: ^0.8.0-dev.1
   #  path: ../growerp_core/
   flutter_bloc: ^8.1.1
   equatable: ^2.0.5

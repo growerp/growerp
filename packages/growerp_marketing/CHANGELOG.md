@@ -1,5 +1,5 @@
-## 0.7.0-dev.3
-* Upgrade version core
+## 0.8.0-dev.1
+* Upgrade growerp_core
 
 ## 0.7.0-dev.2
 * Upgrade version core

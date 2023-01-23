@@ -1,6 +1,6 @@
-## 0.6.0-dev.3
+## 0.8.0-dev.1
 
-* Adapted to new core package
+* Upgrade core package
 
 ## 0.6.0-dev.2
 

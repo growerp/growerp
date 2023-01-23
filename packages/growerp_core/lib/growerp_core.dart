@@ -10,3 +10,4 @@ export 'src/domains/integration_test.dart';
 export 'src/domains/models/models.dart';
 export 'src/core_router.dart';
 export 'src/styles/themes.dart';
+export 'src/extensions.dart';

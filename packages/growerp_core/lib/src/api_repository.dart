@@ -371,118 +371,6 @@ class APIRepository {
     }
   }
 
-  Future<ApiResult<FinDoc>> updateFinDoc(FinDoc finDoc) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/FinDoc', apiKey!, data: <String, dynamic>{
-        'finDoc': jsonEncode(finDoc.toJson()),
-        'moquiSessionToken': sessionToken
-      });
-      return getResponse<FinDoc>(
-          "finDoc", response, (json) => FinDoc.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<FinDoc>> createFinDoc(FinDoc finDoc) async {
-    try {
-      final response = await dioClient.post(
-          'rest/s1/growerp/100/FinDoc', apiKey!, data: <String, dynamic>{
-        'finDoc': jsonEncode(finDoc.toJson()),
-        'moquiSessionToken': sessionToken
-      });
-      return getResponse<FinDoc>(
-          "finDoc", response, (json) => FinDoc.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<FinDoc>> receiveShipment(FinDoc finDoc) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/FinDocShipment', apiKey!,
-          data: <String, dynamic>{
-            'finDoc': jsonEncode(finDoc.toJson()),
-            'moquiSessionToken': sessionToken
-          });
-      return getResponse<FinDoc>(
-          "finDoc", response, (json) => FinDoc.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  /*Future<ApiResult<FinDoc>> confirmPurchasePayment(String paymentId) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/Payment', apiKey!, data: <String, dynamic>{
-        'paymentId': paymentId,
-        'moquiSessionToken': sessionToken
-      });
-      return getResponse<FinDoc>(
-          "finDoc", response, (json) => FinDoc.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-*/
-  Future<ApiResult<List<FinDoc>>> getFinDoc(
-      {int? start,
-      int? limit,
-      bool? open,
-      bool? sales,
-      FinDocType? docType,
-      DateTime? startDate,
-      String? finDocId,
-      String? searchString,
-      String? customerCompanyPartyId}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/FinDoc', apiKey!,
-          queryParameters: <String, dynamic>{
-            'sales': sales,
-            'docType': docType,
-            'open': open,
-            'finDocId': finDocId,
-            'startDate': '${startDate?.year.toString()}-'
-                '${startDate?.month.toString().padLeft(2, '0')}-'
-                '${startDate?.day.toString().padLeft(2, '0')}',
-            'start': start,
-            'limit': limit,
-            'search': searchString,
-            'classificationId': classificationId,
-            'customerCompanyPartyId': customerCompanyPartyId,
-          });
-      return getResponseList<FinDoc>(
-          "finDocs", response, (json) => FinDoc.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<String>>> getRentalOccupancy(
-      {required String productId}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/RentalOccupancy', apiKey!,
-          queryParameters: <String, dynamic>{
-            'productId': productId,
-          });
-      var json = jsonDecode(response.toString())['rentalFullDates'];
-      List<dynamic> list = List.from(json);
-      List<String> stringList = [];
-      // change members from dynamic to string
-      for (String string in list) {
-        stringList.add(string);
-      }
-      return ApiResult.success(data: stringList);
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
   Future<ApiResult<List<GlAccount>>> getGlAccount() async {
     try {
       final response =
@@ -688,6 +576,37 @@ class APIRepository {
           });
       return getResponse<TimeEntry>(
           "timeEntry", response, (json) => TimeEntry.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<Product>>> getProduct(
+      {int? start,
+      int? limit,
+      String? companyPartyId,
+      String? categoryId,
+      String? productId,
+      String? productTypeId,
+      String? assetClassId,
+      String? filter,
+      String? searchString}) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/Products', apiKey,
+          queryParameters: <String, dynamic>{
+            'companyPartyId': companyPartyId,
+            'categoryId': categoryId,
+            'productId': productId,
+            'productTypeId': productTypeId,
+            'assetClassId': assetClassId,
+            'start': start,
+            'limit': limit,
+            'filter': filter,
+            'search': searchString
+          });
+      return getResponseList<Product>(
+          "products", response, (json) => Product.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

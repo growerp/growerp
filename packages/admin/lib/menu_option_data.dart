@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'forms/@forms.dart' as local;
 
@@ -167,8 +168,8 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'assets/images/supplierGrey.png',
     selectedImage: 'assets/images/supplier.png',
-    title: 'Warehouse',
-    route: '/warehouse',
+    title: 'Inventory',
+    route: '/inventory',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     tabItems: [
       TabItem(
@@ -206,38 +207,4 @@ List<MenuOption> menuOptions = [
       title: 'About',
       route: '/about',
       readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
-];
-List<MenuOption> acctMenuOptions = [
-  MenuOption(
-      image: 'assets/images/accountingGrey.png',
-      selectedImage: 'assets/images/accounting.png',
-      title: '     Acct\nDashBoard',
-      route: '/accounting',
-      readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin]),
-  MenuOption(
-      image: 'assets/images/orderGrey.png',
-      selectedImage: 'assets/images/order.png',
-      title: ' Acct\nSales',
-      route: '/acctSales',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
-  MenuOption(
-      image: 'assets/images/supplierGrey.png',
-      selectedImage: 'assets/images/supplier.png',
-      title: '    Acct\nPurchase',
-      route: '/acctPurchase',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
-      writeGroups: [UserGroup.Admin]),
-  MenuOption(
-      image: 'assets/images/accountingGrey.png',
-      selectedImage: 'assets/images/accounting.png',
-      title: 'Ledger',
-      route: '/acctLedger',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
-      writeGroups: [UserGroup.Admin]),
-  MenuOption(
-      image: 'assets/images/dashBoardGrey.png',
-      selectedImage: 'assets/images/dashBoard.png',
-      title: 'Main',
-      route: '/',
-      readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin]),
 ];

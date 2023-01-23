@@ -1,9 +1,5 @@
 export 'authenticate/integration_test/auth_test.dart';
-export 'accounting/integration_test/invoice_test.dart';
-export 'accounting/integration_test/payment_test.dart';
-export 'accounting/integration_test/transaction_test.dart';
 export 'common/integration_test/commonTest.dart';
-export 'findoc/integration_test/orderTest.dart';
 export 'tasks/integration_test/taskTest.dart';
 export 'users/integration_test/userTest.dart';
 export 'users/integration_test/companyTest.dart';

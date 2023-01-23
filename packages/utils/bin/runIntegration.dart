@@ -18,8 +18,9 @@ import 'dart:io';
 
 Moqui installed in $home/growerpMoqui
 Chat installed in $home/growerpChat
+flutter installed at $home/growerp
 
-android studio installed with emulator configured
+android studio installed with emulator 'Pixel 4' configured
 
 */
 

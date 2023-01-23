@@ -17,7 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart' as cat;
 import 'package:growerp_catalog/growerp_catalog.dart';
-
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'menu_option_data.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -49,10 +49,28 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
-    case '/warehouse':
+    case '/inventory':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 5, tabIndex: 0));
+    case '/printer':
+      return MaterialPageRoute(
+          builder: (context) =>
+              PrintingForm(finDocIn: settings.arguments as FinDoc));
+    case '/accounting':
+      return MaterialPageRoute(builder: (context) => const AccountingForm());
+    case '/acctSales':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
+    case '/acctPurchase':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
+    case '/acctLedger':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

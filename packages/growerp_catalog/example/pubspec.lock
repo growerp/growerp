@@ -314,9 +314,9 @@ packages:
   growerp_core:
     dependency: transitive
     description:
-      name: growerp_core
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../growerp_core"
+      relative: true
+    source: path
     version: "0.7.0-dev.3"
   highlight:
     dependency: transitive

@@ -102,7 +102,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                       child: Dialog(
                           insetPadding: const EdgeInsets.all(10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(25),
                           ),
                           child: loginType)))));
     });
@@ -285,11 +285,11 @@ class _LoginHeaderState extends State<LoginDialog> {
                   child: GestureDetector(
                       child: const Text('forgot/change password?'),
                       onTap: () async {
-                        String username = authenticate.user?.loginName ??
+                        String? username = authenticate.user?.loginName ??
                             (kReleaseMode ? '' : 'test@example.com');
                         username =
                             await _sendResetPasswordDialog(context, username);
-                        if (username.isNotEmpty) {
+                        if (username != null) {
                           _authBloc.add(AuthResetPassword(username: username));
                           // ignore: use_build_context_synchronously
                           HelperFunctions.showMessage(
@@ -304,39 +304,59 @@ class _LoginHeaderState extends State<LoginDialog> {
 
   _sendResetPasswordDialog(BuildContext context, String? username) async {
     return showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(32.0))),
-          title: const Text(
-              'Email you registered with?\nWe will send you a reset password',
-              textAlign: TextAlign.center),
-          content: TextFormField(
-              initialValue: username,
-              autofocus: true,
-              decoration: const InputDecoration(labelText: 'Email:'),
-              onChanged: (value) {
-                username = value;
-              }),
-          actions: <Widget>[
-            ElevatedButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop('');
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop(username);
-              },
-            ),
-          ],
-        );
-      },
-    );
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(32.0))),
+              child: Stack(clipBehavior: Clip.none, children: [
+                SizedBox(
+                    width: 400,
+                    height: 250,
+                    child: Column(children: [
+                      Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColorDark,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              )),
+                          child: const Center(
+                              child: Text(
+                                  'Email you registered with?\nWe will send you a reset password',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)))),
+                      Expanded(
+                        child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(children: [
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                  initialValue: username,
+                                  autofocus: true,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Email:'),
+                                  onChanged: (value) {
+                                    username = value;
+                                  }),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                child: const Text('Ok'),
+                                onPressed: () {
+                                  Navigator.of(context).pop(username);
+                                },
+                              ),
+                            ])),
+                      ),
+                    ])),
+                const Positioned(top: 10, right: 10, child: DialogCloseButton())
+              ]));
+        });
   }
 }
 
@@ -369,6 +389,6 @@ Widget popUp({
           Expanded(
               child: Padding(padding: const EdgeInsets.all(20), child: child)),
         ])),
-    Positioned(top: 10, right: 10, child: DialogCloseButton())
+    const Positioned(top: 10, right: 10, child: DialogCloseButton())
   ]);
 }

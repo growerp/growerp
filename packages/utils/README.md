@@ -13,6 +13,6 @@ will create screenshots using the (old driver) integration tests for all the emu
 
 will install the front/backend system and run all integration tests from the admin package
 
-1. clone/pull https://githhub.com/growerp/growerp
+1. clone https://githhub.com/growerp/growerp
 2. cd growerp/packages/admin
 3. flutter pub run utils:runIntegration
