@@ -34,7 +34,7 @@ EventTransformer<E> locationDroppable<E>(Duration duration) {
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
   LocationBloc(this.repos) : super(const LocationState()) {
     on<LocationFetch>(_onLocationFetch,
-        transformer: locationDroppable(Duration(milliseconds: 100)));
+        transformer: locationDroppable(const Duration(milliseconds: 100)));
     on<LocationUpdate>(_onLocationUpdate);
     on<LocationDelete>(_onLocationDelete);
   }

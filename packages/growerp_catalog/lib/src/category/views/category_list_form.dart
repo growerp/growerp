@@ -137,7 +137,7 @@ class CategoriesListState extends State<CategoryList> {
                         }
                         index--;
                         return index >= state.categories.length
-                            ? BottomLoader()
+                            ? const BottomLoader()
                             : Dismissible(
                                 key: const Key('categoryItem'),
                                 direction: DismissDirection.startToEnd,
@@ -147,7 +147,7 @@ class CategoriesListState extends State<CategoryList> {
                       },
                     ))),
             if (state.status == CategoryStatus.updateLoading)
-              LoadingIndicator(),
+              const LoadingIndicator(),
           ]);
         });
   }

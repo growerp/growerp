@@ -24,49 +24,45 @@ import 'package:image_picker/image_picker.dart';
 import '../../domains.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-final GlobalKey<ScaffoldMessengerState> CompanyDialogKey =
+final GlobalKey<ScaffoldMessengerState> companyDialogKey =
     GlobalKey<ScaffoldMessengerState>();
 
 class CompanyForm extends StatelessWidget {
   final FormArguments formArguments;
-  CompanyForm(this.formArguments);
+  const CompanyForm(this.formArguments, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      return CompanyPage(formArguments.message, state.authenticate!);
+      return CompanyPage(state.authenticate!);
     });
   }
 }
 
 class CompanyPage extends StatefulWidget {
-  final String? message;
   final Authenticate authenticate;
-  CompanyPage(this.message, this.authenticate);
+  const CompanyPage(this.authenticate, {super.key});
 
   @override
-  _CompanyState createState() => _CompanyState(message, authenticate);
+  CompanyPageState createState() => CompanyPageState();
 }
 
-class _CompanyState extends State<CompanyPage> {
-  final String? message;
+class CompanyPageState extends State<CompanyPage> {
   final _formKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   late Company company;
   late User user;
-  TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _telephoneController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _vatPercController = TextEditingController();
-  TextEditingController _salesPercController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _vatPercController = TextEditingController();
+  final TextEditingController _salesPercController = TextEditingController();
   late Currency _selectedCurrency;
   late bool isAdmin;
   XFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
-
-  _CompanyState(this.message, this.authenticate);
 
   @override
   void initState() {
@@ -77,14 +73,15 @@ class _CompanyState extends State<CompanyPage> {
     isAdmin = authenticate.user!.userGroup == UserGroup.Admin;
     _selectedCurrency = currencies.firstWhere(
         (element) => element.currencyId == company.currency?.currencyId);
-    _nameController..text = company.name!;
-    _emailController..text = company.email!;
-    _vatPercController
-      ..text = company.vatPerc == null ? '' : company.vatPerc.toString();
-    _salesPercController
-      ..text = company.salesPerc == null ? '' : company.salesPerc.toString();
-    if (company.telephoneNr != null)
-      _telephoneController..text = company.telephoneNr!;
+    _nameController.text = company.name!;
+    _emailController.text = company.email!;
+    _vatPercController.text =
+        company.vatPerc == null ? '' : company.vatPerc.toString();
+    _salesPercController.text =
+        company.salesPerc == null ? '' : company.salesPerc.toString();
+    if (company.telephoneNr != null) {
+      _telephoneController.text = company.telephoneNr!;
+    }
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -126,7 +123,7 @@ class _CompanyState extends State<CompanyPage> {
               context, '${state.message}', Colors.green);
           break;
         case AuthStatus.failure:
-          CompanyDialogKey.currentState!
+          companyDialogKey.currentState!
               .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
           break;
         default:
@@ -160,7 +157,7 @@ class _CompanyState extends State<CompanyPage> {
                               })
                           : _showForm(isAdmin, company, state)));
         default:
-          return LoadingIndicator();
+          return const LoadingIndicator();
       }
     });
   }
@@ -186,11 +183,11 @@ class _CompanyState extends State<CompanyPage> {
       );
     }
 
-    List<Widget> _widgets = [
+    List<Widget> widgets = [
       TextFormField(
         readOnly: !isAdmin,
-        key: Key('companyName'),
-        decoration: InputDecoration(labelText: 'Company Name'),
+        key: const Key('companyName'),
+        decoration: const InputDecoration(labelText: 'Company Name'),
         controller: _nameController,
         validator: (value) {
           if (value!.isEmpty) return 'Please enter the company Name?';
@@ -199,8 +196,8 @@ class _CompanyState extends State<CompanyPage> {
       ),
       TextFormField(
         readOnly: !isAdmin,
-        key: Key('email'),
-        decoration: InputDecoration(labelText: 'Company Email address'),
+        key: const Key('email'),
+        decoration: const InputDecoration(labelText: 'Company Email address'),
         controller: _emailController,
         validator: (value) {
           if (value!.isEmpty) return 'Please enter Email address?';
@@ -213,18 +210,18 @@ class _CompanyState extends State<CompanyPage> {
         },
       ),
       TextFormField(
-        key: Key('telephoneNr'),
-        decoration: InputDecoration(labelText: 'Telephone number'),
+        key: const Key('telephoneNr'),
+        decoration: const InputDecoration(labelText: 'Telephone number'),
         controller: _telephoneController,
       ),
       DropdownButtonFormField<Currency>(
-        key: Key('currency'),
-        decoration: InputDecoration(labelText: 'Currency'),
-        hint: Text('Currency'),
+        key: const Key('currency'),
+        decoration: const InputDecoration(labelText: 'Currency'),
+        hint: const Text('Currency'),
         value: _selectedCurrency,
         items: currencies.map((item) {
           return DropdownMenuItem<Currency>(
-              child: Text(item.description!), value: item);
+              value: item, child: Text(item.description!));
         }).toList(),
         onChanged: isAdmin
             ? (Currency? newValue) {
@@ -238,25 +235,25 @@ class _CompanyState extends State<CompanyPage> {
       Row(children: [
         Expanded(
             child: TextFormField(
-          key: Key('vatPerc'),
+          key: const Key('vatPerc'),
           readOnly: !isAdmin,
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
           ],
-          decoration: InputDecoration(labelText: 'VAT. percentage'),
+          decoration: const InputDecoration(labelText: 'VAT. percentage'),
           controller: _vatPercController,
         )),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
             child: TextFormField(
-          key: Key('salesPerc'),
+          key: const Key('salesPerc'),
           readOnly: !isAdmin,
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
           ],
-          decoration: InputDecoration(labelText: 'Sales Tax percentage'),
+          decoration: const InputDecoration(labelText: 'Sales Tax percentage'),
           controller: _salesPercController,
         ))
       ]),
@@ -267,11 +264,11 @@ class _CompanyState extends State<CompanyPage> {
                     ? "${company.address?.city} "
                         "${company.address?.country!}"
                     : "No address yet",
-                key: Key('addressLabel'))),
+                key: const Key('addressLabel'))),
         SizedBox(
             width: 100,
             child: ElevatedButton(
-              key: Key('address'),
+              key: const Key('address'),
               onPressed: isAdmin
                   ? () async {
                       var result = await showDialog(
@@ -280,9 +277,11 @@ class _CompanyState extends State<CompanyPage> {
                           builder: (BuildContext context) {
                             return AddressDialog(address: company.address);
                           });
-                      if (result is Address)
+                      if (!mounted) return;
+                      if (result is Address) {
                         context.read<AuthBloc>().add(AuthUpdateCompany(
                             company.copyWith(address: result)));
+                      }
                     }
                   : null,
               child: Text(
@@ -295,11 +294,11 @@ class _CompanyState extends State<CompanyPage> {
                 company.paymentMethod != null
                     ? "${company.paymentMethod?.ccDescription}"
                     : "No payment methods yet",
-                key: Key('paymentMethodLabel'))),
+                key: const Key('paymentMethodLabel'))),
         SizedBox(
             width: 100,
             child: ElevatedButton(
-                key: Key('paymentMethod'),
+                key: const Key('paymentMethod'),
                 onPressed: isAdmin
                     ? () async {
                         var result = await showDialog(
@@ -309,26 +308,24 @@ class _CompanyState extends State<CompanyPage> {
                               return PaymentMethodDialog(
                                   paymentMethod: company.paymentMethod);
                             });
+                        if (!mounted) return;
                         if (result is PaymentMethod) {
                           context.read<AuthBloc>().add(AuthUpdateCompany(
                               company.copyWith(paymentMethod: result)));
                         }
                       }
                     : null,
-                child: Text((company.paymentMethod != null ? 'Update' : 'Add') +
-                    ' Payment Method')))
+                child: Text(
+                    '${company.paymentMethod != null ? 'Update' : 'Add'} Payment Method')))
       ]),
     ];
 
-    Widget _update = Row(children: [
+    Widget update = Row(children: [
       Expanded(
           child: Visibility(
               visible: isAdmin,
               child: ElevatedButton(
-                  key: Key('update'),
-                  child: Text(
-                    company.partyId == null ? 'Create' : 'Update',
-                  ),
+                  key: const Key('update'),
                   onPressed: isAdmin
                       ? () async {
                           if (_formKey.currentState!.validate()) {
@@ -351,79 +348,83 @@ class _CompanyState extends State<CompanyPage> {
                                         : _salesPercController.text),
                                 image: await HelperFunctions.getResizedImage(
                                     _imageFile?.path));
+                            if (!mounted) return;
                             if (_imageFile?.path != null &&
-                                company.image == null)
+                                company.image == null) {
                               HelperFunctions.showMessage(
                                   context, "Image upload error!", Colors.red);
-                            else
+                            } else {
                               context
                                   .read<AuthBloc>()
                                   .add(AuthUpdateCompany(company));
+                            }
                           }
                         }
-                      : null)))
+                      : null,
+                  child: Text(
+                    company.partyId == null ? 'Create' : 'Update',
+                  ))))
     ]);
 
     List<Widget> rows = [];
     if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
       // change list in two columns
-      for (var i = 0; i < _widgets.length; i++)
+      for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(
           children: [
             Expanded(
-                child:
-                    Padding(padding: EdgeInsets.all(10), child: _widgets[i++])),
+                child: Padding(
+                    padding: const EdgeInsets.all(10), child: widgets[i++])),
             Expanded(
                 child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: i < _widgets.length ? _widgets[i] : Container()))
+                    padding: const EdgeInsets.all(10),
+                    child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));
+      }
     }
     List<Widget> column = [];
-    for (var i = 0; i < _widgets.length; i++)
-      column.add(Padding(padding: EdgeInsets.all(10), child: _widgets[i]));
+    for (var i = 0; i < widgets.length; i++) {
+      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+    }
 
     return Center(
-        child: Container(
-            child: SingleChildScrollView(
-                key: Key('listView'),
-                child: Form(
-                    key: _formKey,
-                    child: Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Column(children: [
-                          Center(
-                              child: Text(
-                            'id:#${company.partyId}',
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                            key: Key('header'),
-                          )),
-                          SizedBox(height: 10),
-                          CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 80,
-                              child: _imageFile != null
-                                  ? kIsWeb
-                                      ? Image.network(_imageFile!.path,
-                                          scale: 0.3)
-                                      : Image.file(File(_imageFile!.path),
-                                          scale: 0.3)
-                                  : company.image != null
-                                      ? Image.memory(company.image!, scale: 0.3)
-                                      : Text(
-                                          company.name!.isNotEmpty
-                                              ? company.name!.substring(0, 1)
-                                              : '?',
-                                          style: TextStyle(
-                                              fontSize: 30,
-                                              color: Colors.black))),
-                          SizedBox(height: 10),
-                          Column(children: (rows.isEmpty ? column : rows)),
-                          _update,
-                        ]))))));
+        child: SingleChildScrollView(
+            key: const Key('listView'),
+            child: Form(
+                key: _formKey,
+                child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Column(children: [
+                      Center(
+                          child: Text(
+                        'id:#${company.partyId}',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
+                        key: const Key('header'),
+                      )),
+                      const SizedBox(height: 10),
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 80,
+                          child: _imageFile != null
+                              ? kIsWeb
+                                  ? Image.network(_imageFile!.path, scale: 0.3)
+                                  : Image.file(File(_imageFile!.path),
+                                      scale: 0.3)
+                              : company.image != null
+                                  ? Image.memory(company.image!, scale: 0.3)
+                                  : Text(
+                                      company.name!.isNotEmpty
+                                          ? company.name!.substring(0, 1)
+                                          : '?',
+                                      style: const TextStyle(
+                                          fontSize: 30, color: Colors.black))),
+                      const SizedBox(height: 10),
+                      Column(children: (rows.isEmpty ? column : rows)),
+                      update,
+                    ])))));
   }
 }

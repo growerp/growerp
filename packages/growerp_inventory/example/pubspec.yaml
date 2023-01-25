@@ -12,6 +12,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   growerp_inventory:
     path: ../
+  growerp_order_accounting:
+    path: ../../growerp_order_accounting/
 
 dev_dependencies:
   flutter_test:

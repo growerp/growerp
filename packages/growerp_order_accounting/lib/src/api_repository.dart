@@ -16,9 +16,7 @@ import 'dart:convert';
 import 'package:growerp_core/growerp_core.dart';
 
 class FinDocAPIRepository extends APIRepository {
-  String? apiKey;
-
-  FinDocAPIRepository(this.apiKey) : super();
+  FinDocAPIRepository(super.apiKey);
 
   Future<ApiResult<FinDoc>> updateFinDoc(FinDoc finDoc) async {
     try {

@@ -35,5 +35,5 @@ class Obsidian extends Equatable with _$Obsidian {
   List<Object?> get props => [title];
 
   @override
-  String toString() => '$title';
+  String toString() => title;
 }

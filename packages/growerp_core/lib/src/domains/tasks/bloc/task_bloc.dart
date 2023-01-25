@@ -37,7 +37,7 @@ EventTransformer<E> taskDroppable<E>(Duration duration) {
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   TaskBloc(this.repos) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
-        transformer: taskDroppable(Duration(milliseconds: 100)));
+        transformer: taskDroppable(const Duration(milliseconds: 100)));
     on<TaskUpdate>(_onTaskUpdate);
     on<TaskTimeEntryUpdate>(_onTimeEntryUpdate); //add,delete
     on<TaskTimeEntryDelete>(_onTimeEntryDelete);
@@ -48,8 +48,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     TaskFetch event,
     Emitter<TaskState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty)
+    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
+    }
     try {
       // start from record zero for initial and refresh
       if (state.status == TaskStatus.initial || event.refresh) {
@@ -139,10 +140,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     try {
       ApiResult<TimeEntry> compResult;
-      if (event.timeEntry.timeEntryId != null)
+      if (event.timeEntry.timeEntryId != null) {
         compResult = await repos.updateTimeEntry(event.timeEntry);
-      else
+      } else {
         compResult = await repos.createTimeEntry(event.timeEntry);
+      }
 
       emit(compResult.when(
           success: (data) {

@@ -4,7 +4,7 @@ export 'src/templates/templates.dart';
 export 'src/services/network_exceptions.dart';
 export 'src/services/api_result.dart';
 export 'src/domains/common/functions/functions.dart';
-export 'src/services/jsonConverters.dart';
+export 'src/services/json_converters.dart';
 export 'src/domains/domains.dart';
 export 'src/domains/integration_test.dart';
 export 'src/domains/models/models.dart';

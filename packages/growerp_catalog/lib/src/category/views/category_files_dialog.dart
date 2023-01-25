@@ -50,11 +50,12 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
         categoryFilesDialogKey.currentState!
             .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
         await Future.delayed(const Duration(milliseconds: 1000));
+        if (!mounted) return;
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {
       return Stack(children: [
-        PopUpDialog(
+        popUpDialog(
             scaffoldkey: categoryFilesDialogKey,
             context: context,
             title: "Category Up/Download",
@@ -91,7 +92,8 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
               const SizedBox(height: 20),
               const Text("A data file will be send by email"),
             ]),
-        if (state.status == CategoryStatus.filesLoading) LoadingIndicator(),
+        if (state.status == CategoryStatus.filesLoading)
+          const LoadingIndicator(),
       ]);
     });
   }

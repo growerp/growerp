@@ -31,12 +31,14 @@ class AccountingForm extends StatelessWidget {
           menuIndex: 0,
         );
       }
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }
 
 class AcctDashBoard extends StatelessWidget {
+  const AcctDashBoard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
@@ -89,7 +91,7 @@ class AcctDashBoard extends StatelessWidget {
           ],
         );
       }
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

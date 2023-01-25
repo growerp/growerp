@@ -54,14 +54,14 @@ class MultiSelectState<T> extends State<MultiSelect> {
 
   @override
   Widget build(BuildContext context) {
-    return PopUpDialogNoScaffold(
-      key: Key('multiSelect'),
+    return popUpDialogNoScaffold(
+      key: const Key('multiSelect'),
       width: 350,
       context: context,
       title: widget.title,
       children: [
         widget.items.isEmpty
-            ? Center(
+            ? const Center(
                 child: Text('nothing found, add some?',
                     style: TextStyle(color: Colors.red)))
             : ListBody(
@@ -78,7 +78,7 @@ class MultiSelectState<T> extends State<MultiSelect> {
         Row(children: [
           Expanded(
               child: ElevatedButton(
-            key: Key('ok'),
+            key: const Key('ok'),
             onPressed: (() {
               return Navigator.pop(context, selectedItems);
             }),

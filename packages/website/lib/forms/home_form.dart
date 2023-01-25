@@ -157,7 +157,7 @@ class CallToActionTabletDesktop extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 color: Colors.black,
               )),
-          onTap: () => launch('https://twitter.com/grow_erp'),
+          onTap: () => launchUrl(Uri.parse('https://twitter.com/grow_erp')),
         ));
   }
 }

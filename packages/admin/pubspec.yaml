@@ -6,18 +6,18 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
-  growerp_core: ^0.8.0-dev.1
-  #  path: ../growerp_core/
-  growerp_marketing: ^0.8.0-dev.1
-  #  path: ../growerp_marketing/
-  growerp_website: ^0.8.0-dev.1
-  #  path: ../growerp_website/
-  growerp_inventory: ^0.8.0-dev.1
-  #  path: ../growerp_inventory/
-  growerp_catalog: ^0.8.0-dev.1
-  #  path: ../growerp_catalog/
-  growerp_order_accounting: ^0.8.0-dev.1
-  #  path: ../growerp_order_accounting/
+  growerp_core: #^0.8.0-dev.1
+    path: ../growerp_core/
+  growerp_marketing: #^0.8.0-dev.1
+    path: ../growerp_marketing/
+  growerp_website: #^0.8.0-dev.1
+    path: ../growerp_website/
+  growerp_inventory: #^0.8.0-dev.1
+    path: ../growerp_inventory/
+  growerp_catalog: #^0.8.0-dev.1
+    path: ../growerp_catalog/
+  growerp_order_accounting: #^0.8.0-dev.1
+    path: ../growerp_order_accounting/
   decimal: ^2.1.0
   flutter:
     sdk: flutter

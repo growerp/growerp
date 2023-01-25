@@ -43,7 +43,6 @@ void main() {
     await ProductTest.selectProducts(tester);
     await ProductTest.addProducts(tester, website.products.sublist(0, 2),
         check: false);
-
     await selectWebsite(tester);
     await WebsiteTest.updateWebsite(tester);
   });

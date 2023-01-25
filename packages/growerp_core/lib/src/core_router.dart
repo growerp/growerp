@@ -25,10 +25,10 @@ Route<dynamic> coreRoute(RouteSettings settings) {
           builder: (context) =>
               CompanyForm(settings.arguments as FormArguments));
     case '/about':
-      return MaterialPageRoute(builder: (context) => AboutForm());
+      return MaterialPageRoute(builder: (context) => const AboutForm());
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
-              "Routing not found for request: ${settings.name}"));
+              message: "Routing not found for request: ${settings.name}"));
   }
 }

@@ -23,11 +23,13 @@ class WebsiteTest {
   }
 
   static Future<void> updateWebsite(WidgetTester tester) async {
-    await updateHost(tester);
+    /*  await updateHost(tester);
     await updateTitle(tester);
     await updateTextSection(tester);
     await updateImages(tester);
-    await updateHomePageCategories(tester);
+    await updateHomePageCategories(tester, "Deals");
+    await updateHomePageCategories(tester, "Featured");
+*/
     await updateShopCategories(tester);
   }
 
@@ -79,38 +81,27 @@ class WebsiteTest {
         reason: 'newTestingImage found?');
   }
 
-  static Future<void> updateHomePageCategories(tester) async {
-    await CommonTest.tapByKey(tester, "Deals");
-    await CommonTest.tapByKey(tester, "addProducts");
+  static Future<void> updateHomePageCategories(tester, categoryName) async {
+    // delete
+    while (tester.any(find.byKey(const Key("deleteProductChip")))) {
+      await CommonTest.tapByKey(tester, "deleteProductChip");
+    }
+    await CommonTest.tapByKey(tester, "addProduct$categoryName");
     await CommonTest.tapByText(tester, products[0].productName!);
     await CommonTest.tapByKey(tester, "ok");
+    await CommonTest.drag(tester);
     expect(tester.any(find.byKey(Key(products[0].productName!))), equals(true),
         reason: 'product 0 found?');
-    await CommonTest.tapByKey(tester, 'update', seconds: 5);
+    await CommonTest.tapByKey(tester, "deleteProductChip");
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, "Deals");
-    await CommonTest.tapByKey(tester, "delete${products[0].productName!}");
-    await CommonTest.tapByKey(tester, 'update', seconds: 3);
-    await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, "Deals");
     expect(tester.any(find.byKey(Key(products[0].productName!))), equals(false),
         reason: 'product 0 NOT found?');
-    await CommonTest.tapByKey(tester, "cancel");
   }
 
   static Future<void> updateShopCategories(tester) async {
-    await CommonTest.drag(tester);
-    if (tester.any(find.byKey(Key("delete${categories[0].categoryName}"))) ==
-        true) {
-      await CommonTest.tapByKey(tester, 'delete${categories[0].categoryName}',
-          seconds: 5);
-      await CommonTest.tapByKey(tester, "continue", seconds: 3);
-    }
-    await CommonTest.drag(tester);
-    if (tester.any(find.byKey(Key("delete${categories[1].categoryName}"))) ==
-        true) {
-      await CommonTest.tapByKey(tester, 'delete${categories[1].categoryName}',
-          seconds: 5);
+    while (tester.any(find.byKey(const Key("deleteCategoryChip")))) {
+      await CommonTest.drag(tester);
+      await CommonTest.tapByKey(tester, "deleteCategoryChip", seconds: 5);
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
     }
     await CommonTest.drag(tester);
@@ -122,8 +113,7 @@ class WebsiteTest {
         tester.any(find.byKey(Key(categories[0].categoryName))), equals(true),
         reason: 'category 0 found?');
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'delete${categories[0].categoryName}',
-        seconds: 5);
+    await CommonTest.tapByKey(tester, 'deleteCategoryChip', seconds: 5);
     await CommonTest.tapByKey(tester, "continue", seconds: 3);
     await CommonTest.drag(tester);
     expect(

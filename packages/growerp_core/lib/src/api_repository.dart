@@ -23,11 +23,11 @@ import 'dart:io' show Platform;
 import 'domains/domains.dart';
 
 class APIRepository {
+  String? apiKey;
   String classificationId = GlobalConfiguration().get('classificationId');
   String databaseUrl = GlobalConfiguration().get('databaseUrl');
   String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
   String? sessionToken;
-  String? apiKey;
 
   late DioClient dioClient;
   late String _baseUrl;
@@ -45,7 +45,7 @@ class APIRepository {
   int receiveTimeoutTest =
       GlobalConfiguration().getValue<int>('receiveTimeoutTest') * 1000;
 
-  APIRepository() {
+  APIRepository([this.apiKey]) {
     var dio = Dio();
     _baseUrl = kReleaseMode
         ? '$databaseUrl/'

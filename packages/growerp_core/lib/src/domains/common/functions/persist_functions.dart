@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domains.dart';
 
@@ -22,7 +23,8 @@ T getJsonObject<T>(
   return fromJson(json.decode(result) as Map<String, dynamic>);
 }
 
-String createJsonObject<T>(T object, T Function(String json) toJson()) {
+String createJsonObject<T>(
+    T object, T Function(String json) Function() toJson) {
   return jsonEncode(toJson());
 }
 
@@ -39,9 +41,10 @@ class PersistFunctions {
     // ignore informaton with a bad format
     try {
       String? result = prefs.getString('authenticate');
-      if (result != null)
+      if (result != null) {
         return getJsonObject<Authenticate>(
             result, (json) => Authenticate.fromJson(json));
+      }
       return null;
     } catch (_) {
       return null;
@@ -63,9 +66,10 @@ class PersistFunctions {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // ignore informaton with a bad format
     try {
-      String? result = prefs.getString('${sales.toString}${finDocType}');
-      if (result != null)
+      String? result = prefs.getString('${sales.toString}$finDocType');
+      if (result != null) {
         return getJsonObject<FinDoc>(result, (json) => FinDoc.fromJson(json));
+      }
       return null;
     } catch (_) {
       return null;
@@ -88,11 +92,13 @@ class PersistFunctions {
     // ignore informaton with a bad format
     try {
       String? result = prefs.getString(_testName);
-      if (result != null)
+      if (result != null) {
         return getJsonObject<SaveTest>(
             result, (json) => SaveTest.fromJson(json));
+      }
       return SaveTest();
-    } catch (_) {
+    } catch (err) {
+      debugPrint("=================getTest====SaveTest decode error: $err");
       return SaveTest();
     }
   }

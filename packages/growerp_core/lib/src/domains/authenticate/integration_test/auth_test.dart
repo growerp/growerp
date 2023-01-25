@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../../domains/domains.dart';
-import '../../common/integration_test/commonTest.dart';
+import '../../common/integration_test/common_test.dart';
 
 class AuthTest {
   //===============================high level tests ============================

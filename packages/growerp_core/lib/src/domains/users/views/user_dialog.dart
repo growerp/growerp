@@ -25,7 +25,7 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 import '../../domains.dart';
 import '../../../api_repository.dart';
 
-final GlobalKey<ScaffoldMessengerState> UserDialogKey =
+final GlobalKey<ScaffoldMessengerState> userDialogKey =
     GlobalKey<ScaffoldMessengerState>();
 
 /// User dialog with a required User class input containing the userGroup
@@ -41,12 +41,12 @@ class UserDialog extends StatelessWidget {
 
 class UserPage extends StatefulWidget {
   final User user;
-  UserPage(this.user);
+  const UserPage(this.user, {super.key});
   @override
-  _UserState createState() => _UserState();
+  UserDialogState createState() => UserDialogState();
 }
 
-class _UserState extends State<UserPage> {
+class UserDialogState extends State<UserPage> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -82,7 +82,6 @@ class _UserState extends State<UserPage> {
           partyId: widget.user.companyPartyId, name: widget.user.companyName);
     }
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.Undefined;
-    ;
     localUserGroups = UserGroup.companyUserGroupList();
     updatedUser = widget.user;
   }
@@ -125,7 +124,7 @@ class _UserState extends State<UserPage> {
     return BlocConsumer<UserBloc, UserState>(listener: (context, state) {
       if (state.status == UserStatus.failure) {
         loading = false;
-        UserDialogKey.currentState!
+        userDialogKey.currentState!
             .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
       }
       if (state.status == UserStatus.success) {
@@ -134,7 +133,7 @@ class _UserState extends State<UserPage> {
     }, builder: (context, state) {
       return Stack(children: [
         scaffoldWidget(user, context),
-        if (state.status == UserStatus.loading) LoadingIndicator(),
+        if (state.status == UserStatus.loading) const LoadingIndicator(),
       ]);
     });
   }
@@ -142,19 +141,19 @@ class _UserState extends State<UserPage> {
   Dialog scaffoldWidget(User user, BuildContext context) {
     return Dialog(
         key: Key('UserDialog${user.userGroup.toString()}'),
-        insetPadding: EdgeInsets.all(10),
+        insetPadding: const EdgeInsets.all(10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         child: Stack(clipBehavior: Clip.none, children: [
           SingleChildScrollView(
-              key: Key('listView'),
+              key: const Key('listView'),
               child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   width: isPhone ? 400 : 1000,
                   height: isPhone ? 1020 : 600,
                   child: ScaffoldMessenger(
-                      key: UserDialogKey,
+                      key: userDialogKey,
                       child: Scaffold(
                           backgroundColor: Colors.transparent,
                           floatingActionButton:
@@ -165,17 +164,17 @@ class _UserState extends State<UserPage> {
               width: isPhone ? 400 : 1000,
               decoration: BoxDecoration(
                   color: Theme.of(context).primaryColorDark,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   )),
-              child: Center(
+              child: const Center(
                   child: Text('User Information',
                       style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.bold)))),
-          Positioned(top: 5, right: 5, child: DialogCloseButton())
+          const Positioned(top: 5, right: 5, child: DialogCloseButton())
         ]));
   }
 
@@ -225,8 +224,9 @@ class _UserState extends State<UserPage> {
     String? companyName = authenticate.company!.name;
     User? currentUser = authenticate.user;
     if (widget.user.userGroup == UserGroup.Admin ||
-        widget.user.userGroup == UserGroup.Employee)
+        widget.user.userGroup == UserGroup.Employee) {
       _selectedCompany = authenticate.company;
+    }
 
     Future<List<Company>> getOwnedCompanies(filter) async {
       ApiResult<List<Company>> result = await repos.getCompanies(
@@ -236,23 +236,23 @@ class _UserState extends State<UserPage> {
           failure: (_) => [Company(name: 'get data error!')]);
     }
 
-    List<Widget> _widgets = [
+    List<Widget> widgets = [
       Row(children: [
         Expanded(
             child: TextFormField(
-          key: Key('firstName'),
-          decoration: InputDecoration(labelText: 'First Name'),
+          key: const Key('firstName'),
+          decoration: const InputDecoration(labelText: 'First Name'),
           controller: _firstNameController,
           validator: (value) {
             if (value!.isEmpty) return 'Please enter a first name?';
             return null;
           },
         )),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Expanded(
           child: TextFormField(
-            key: Key('lastName'),
-            decoration: InputDecoration(labelText: 'Last Name'),
+            key: const Key('lastName'),
+            decoration: const InputDecoration(labelText: 'Last Name'),
             controller: _lastNameController,
             validator: (value) {
               if (value!.isEmpty) return 'Please enter a last name?';
@@ -262,18 +262,19 @@ class _UserState extends State<UserPage> {
         )
       ]),
       TextFormField(
-        key: Key('loginName'),
-        decoration: InputDecoration(labelText: 'User Login Name '),
+        key: const Key('loginName'),
+        decoration: const InputDecoration(labelText: 'User Login Name '),
         controller: _nameController,
         validator: (value) {
-          if (widget.user.userGroup == UserGroup.Admin && value!.isEmpty)
+          if (widget.user.userGroup == UserGroup.Admin && value!.isEmpty) {
             return 'An administrator needs a username!';
+          }
           return null;
         },
       ),
       TextFormField(
-        key: Key('email'),
-        decoration: InputDecoration(labelText: 'Email address'),
+        key: const Key('email'),
+        decoration: const InputDecoration(labelText: 'Email address'),
         controller: _emailController,
         validator: (String? value) {
           if (value!.isEmpty) return 'Please enter Email address?';
@@ -286,8 +287,8 @@ class _UserState extends State<UserPage> {
         },
       ),
       TextFormField(
-        key: Key('telephoneNr'),
-        decoration: InputDecoration(labelText: 'Telephone number'),
+        key: const Key('telephoneNr'),
+        decoration: const InputDecoration(labelText: 'Telephone number'),
         controller: _telephoneController,
       ),
       Visibility(
@@ -296,7 +297,7 @@ class _UserState extends State<UserPage> {
           child: Row(children: [
             Expanded(
               child: DropdownSearch<Company>(
-                key: Key('companyName'),
+                key: const Key('companyName'),
                 selectedItem: _selectedCompany,
                 popupProps: PopupProps.menu(
                   showSearchBox: true,
@@ -314,11 +315,11 @@ class _UserState extends State<UserPage> {
                       height: 50,
                       decoration: BoxDecoration(
                           color: Theme.of(context).primaryColorDark,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20),
                           )),
-                      child: Center(
+                      child: const Center(
                           child: Text('Select company',
                               style: TextStyle(
                                 fontSize: 20,
@@ -345,15 +346,16 @@ class _UserState extends State<UserPage> {
                         : null,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
                 child: TextFormField(
-              key: Key('newCompanyName'),
-              decoration: InputDecoration(labelText: 'New Company Name'),
+              key: const Key('newCompanyName'),
+              decoration: const InputDecoration(labelText: 'New Company Name'),
               controller: _companyController,
               validator: (value) {
-                if (value!.isEmpty && _selectedCompany == null)
+                if (value!.isEmpty && _selectedCompany == null) {
                   return 'Please enter an existing or new company?';
+                }
                 return null;
               },
             )),
@@ -363,14 +365,14 @@ class _UserState extends State<UserPage> {
           visible: updatedUser.partyId != null &&
               currentUser!.userGroup == UserGroup.Admin,
           child: DropdownButtonFormField<UserGroup>(
-            decoration: InputDecoration(labelText: 'User Group'),
-            key: Key('userGroup'),
-            hint: Text('User Group'),
+            decoration: const InputDecoration(labelText: 'User Group'),
+            key: const Key('userGroup'),
+            hint: const Text('User Group'),
             value: _selectedUserGroup,
             validator: (value) => value == null ? 'field required' : null,
             items: localUserGroups.map((item) {
               return DropdownMenuItem<UserGroup>(
-                  child: Text(item.toString()), value: item);
+                  value: item, child: Text(item.toString()));
             }).toList(),
             onChanged: (UserGroup? newValue) {
               setState(() {
@@ -389,11 +391,11 @@ class _UserState extends State<UserPage> {
                         ? "${updatedUser.companyAddress!.city!} "
                             "${updatedUser.companyAddress!.country!}"
                         : "No address yet",
-                    key: Key('addressLabel'))),
+                    key: const Key('addressLabel'))),
             SizedBox(
                 width: 100,
                 child: ElevatedButton(
-                  key: Key('address'),
+                  key: const Key('address'),
                   onPressed: () async {
                     var result = await showDialog(
                         barrierDismissible: true,
@@ -402,9 +404,11 @@ class _UserState extends State<UserPage> {
                           return AddressDialog(
                               address: updatedUser.companyAddress);
                         });
-                    if (result is Address)
+                    if (!mounted) return;
+                    if (result is Address) {
                       context.read<UserBloc>().add(UserUpdate(
                           updatedUser.copyWith(companyAddress: result)));
+                    }
                   },
                   child: Text(updatedUser.companyAddress != null
                       ? 'Update\nAddress'
@@ -420,46 +424,50 @@ class _UserState extends State<UserPage> {
                     updatedUser.companyPaymentMethod != null
                         ? "${updatedUser.companyPaymentMethod?.ccDescription}"
                         : "No payment methods yet",
-                    key: Key('paymentMethodLabel'))),
+                    key: const Key('paymentMethodLabel'))),
             SizedBox(
                 width: 100,
                 child: ElevatedButton(
-                    key: Key('paymentMethod'),
-                    onPressed: () async {
-                      var result = await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return PaymentMethodDialog(
-                                paymentMethod:
-                                    updatedUser.companyPaymentMethod);
-                          });
-                      if (result is PaymentMethod)
-                        context.read<UserBloc>().add(UserUpdate(updatedUser
-                            .copyWith(companyPaymentMethod: result)));
-                    },
-                    child: Text((updatedUser.companyPaymentMethod != null
-                            ? 'Update'
-                            : 'Add') +
-                        ' Payment Method')))
+                    key: const Key('paymentMethod'),
+                    onPressed: updatedUser.companyAddress == null
+                        ? null
+                        : () async {
+                            var result = await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return PaymentMethodDialog(
+                                      paymentMethod:
+                                          updatedUser.companyPaymentMethod);
+                                });
+                            if (!mounted) return;
+                            if (result is PaymentMethod) {
+                              context.read<UserBloc>().add(UserUpdate(
+                                  updatedUser.copyWith(
+                                      companyPaymentMethod: result)));
+                            }
+                          },
+                    child: Text(
+                        '${updatedUser.companyPaymentMethod != null ? 'Update' : 'Add'} Payment Method')))
           ])),
     ];
-    Widget _update = Row(children: [
+    Widget update = Row(children: [
       ElevatedButton(
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.red)),
-          key: Key('deleteUser'),
-          child: Text('Delete User'),
+          key: const Key('deleteUser'),
+          child: const Text('Delete User'),
           onPressed: () async {
             var result =
                 await confirmDeleteUserComp(context, widget.user.userGroup!);
             if (result != null) {
+              if (!mounted) return;
               // delete company too?
               if (widget.user.partyId == authenticate.user!.partyId!) {
                 context.read<AuthBloc>().add(
                     AuthDeleteUser(widget.user.copyWith(image: null), result));
                 Navigator.of(context).pop(updatedUser);
-                context.read<AuthBloc>().add(AuthLoggedOut());
+                context.read<AuthBloc>().add(const AuthLoggedOut());
               } else {
                 context
                     .read<UserBloc>()
@@ -467,10 +475,10 @@ class _UserState extends State<UserPage> {
               }
             }
           }),
-      SizedBox(width: 10),
+      const SizedBox(width: 10),
       Expanded(
           child: ElevatedButton(
-              key: Key('updateUser'),
+              key: const Key('updateUser'),
               child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
@@ -491,10 +499,11 @@ class _UserState extends State<UserPage> {
                           : '',
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
-                  if (_imageFile?.path != null && updatedUser.image == null)
+                  if (!mounted) return;
+                  if (_imageFile?.path != null && updatedUser.image == null) {
                     HelperFunctions.showMessage(
                         context, "Image upload error!", Colors.red);
-                  else {
+                  } else {
                     context.read<UserBloc>().add(UserUpdate(updatedUser));
                     if (context
                             .read<AuthBloc>()
@@ -502,8 +511,9 @@ class _UserState extends State<UserPage> {
                             .authenticate!
                             .user!
                             .partyId ==
-                        updatedUser.partyId)
+                        updatedUser.partyId) {
                       context.read<AuthBloc>().add(AuthUserUpdate(updatedUser));
+                    }
                   }
                 }
               }))
@@ -511,49 +521,51 @@ class _UserState extends State<UserPage> {
     List<Widget> rows = [];
     if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
       // change list in two columns
-      for (var i = 0; i < _widgets.length; i++)
+      for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(
           children: [
             Expanded(
-                child:
-                    Padding(padding: EdgeInsets.all(10), child: _widgets[i++])),
+                child: Padding(
+                    padding: const EdgeInsets.all(10), child: widgets[i++])),
             Expanded(
                 child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: i < _widgets.length ? _widgets[i] : Container()))
+                    padding: const EdgeInsets.all(10),
+                    child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));
-      rows.add(_update);
+      }
+      rows.add(update);
     }
 
     List<Widget> column = [];
-    for (var i = 0; i < _widgets.length; i++)
-      column.add(Padding(padding: EdgeInsets.all(10), child: _widgets[i]));
-    column.add(_update);
+    for (var i = 0; i < widgets.length; i++) {
+      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+    }
+    column.add(update);
 
     return Form(
         key: _formKey,
         child: SingleChildScrollView(
-            key: Key('listView'),
+            key: const Key('listView'),
             child: Column(children: <Widget>[
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Center(
                   child: Text(
                 'User ${widget.user.userGroup.toString()} #${updatedUser.partyId ?? " New"}',
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 10,
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
-                key: Key('header'),
+                key: const Key('header'),
               )),
               Center(
                   child: Text(
                 'Company #${updatedUser.companyPartyId ?? ""}',
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 10,
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
-                key: Key('compHeader'),
+                key: const Key('compHeader'),
               )),
               Visibility(
                   visible: updatedUser.userGroup == UserGroup.Admin ||
@@ -569,7 +581,7 @@ class _UserState extends State<UserPage> {
                       : widget.user.image != null
                           ? Image.memory(widget.user.image!, scale: 0.3)
                           : Text(widget.user.firstName?.substring(0, 1) ?? '',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 30, color: Colors.black))),
               Column(children: (rows.isEmpty ? column : rows)),
             ])));

@@ -16,9 +16,7 @@ import 'dart:convert';
 import 'package:growerp_core/growerp_core.dart';
 
 class InventoryAPIRepository extends APIRepository {
-  String? apiKey;
-
-  InventoryAPIRepository(this.apiKey) : super();
+  InventoryAPIRepository(super.apiKey);
 
   Future<ApiResult<List<Asset>>> getAsset(
       {int? start,

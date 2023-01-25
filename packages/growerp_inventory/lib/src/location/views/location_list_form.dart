@@ -21,6 +21,8 @@ import '../location.dart';
 import '../widgets/widgets.dart';
 
 class LocationListForm extends StatelessWidget {
+  const LocationListForm({super.key});
+
   @override
   Widget build(BuildContext context) => RepositoryProvider(
       create: (context) => InventoryAPIRepository(
@@ -29,10 +31,12 @@ class LocationListForm extends StatelessWidget {
           create: (BuildContext context) => LocationBloc(InventoryAPIRepository(
               context.read<AuthBloc>().state.authenticate!.apiKey!))
             ..add(const LocationFetch()),
-          child: LocationList()));
+          child: const LocationList()));
 }
 
 class LocationList extends StatefulWidget {
+  const LocationList({super.key});
+
   @override
   LocationListState createState() => LocationListState();
 }
@@ -63,7 +67,7 @@ class LocationListState extends State<LocationList> {
           case LocationStatus.success:
             return Scaffold(
                 floatingActionButton: FloatingActionButton(
-                    key: Key("addNew"),
+                    key: const Key("addNew"),
                     onPressed: () async {
                       await showDialog(
                           barrierDismissible: true,
@@ -75,13 +79,13 @@ class LocationListState extends State<LocationList> {
                           });
                     },
                     tooltip: 'Add New',
-                    child: Icon(Icons.add)),
+                    child: const Icon(Icons.add)),
                 body: RefreshIndicator(
                     onRefresh: (() async =>
-                        _locationBloc.add(LocationFetch(refresh: true))),
+                        _locationBloc.add(const LocationFetch(refresh: true))),
                     child: ListView.builder(
-                      key: Key('listView'),
-                      physics: AlwaysScrollableScrollPhysics(),
+                      key: const Key('listView'),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: state.hasReachedMax
                           ? state.locations.length + 1
                           : state.locations.length + 2,
@@ -90,10 +94,10 @@ class LocationListState extends State<LocationList> {
                         if (index == 0) {
                           return Column(children: [
                             LocationListHeader(locationBloc: _locationBloc),
-                            Divider(color: Colors.black),
+                            const Divider(color: Colors.black),
                             Visibility(
                                 visible: state.locations.isEmpty,
-                                child: Center(
+                                child: const Center(
                                     heightFactor: 20,
                                     child: Text("No locations found",
                                         textAlign: TextAlign.center)))
@@ -101,9 +105,9 @@ class LocationListState extends State<LocationList> {
                         }
                         index--;
                         return index >= state.locations.length
-                            ? BottomLoader()
+                            ? const BottomLoader()
                             : Dismissible(
-                                key: Key('locationItem'),
+                                key: const Key('locationItem'),
                                 direction: DismissDirection.startToEnd,
                                 child: LocationListItem(
                                     location: state.locations[index],
@@ -127,7 +131,7 @@ class LocationListState extends State<LocationList> {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<LocationBloc>().add(LocationFetch());
+    if (_isBottom) context.read<LocationBloc>().add(const LocationFetch());
   }
 
   bool get _isBottom {

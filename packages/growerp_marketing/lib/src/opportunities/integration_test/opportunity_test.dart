@@ -109,10 +109,10 @@ class OpportunityTest {
           seconds: 5);
       await CommonTest.drag(tester, seconds: 5);
       await CommonTest.enterDropDown(
-          tester, 'lead', "${opportunity.leadUser!.firstName!}",
+          tester, 'lead', opportunity.leadUser!.firstName!,
           seconds: 5);
       await CommonTest.enterDropDown(
-          tester, 'employee', "${opportunity.employeeUser!.firstName!}",
+          tester, 'employee', opportunity.employeeUser!.firstName!,
           seconds: 5);
       await CommonTest.drag(tester, seconds: 5);
       await CommonTest.tapByKey(tester, 'update');
@@ -154,9 +154,9 @@ class OpportunityTest {
           equals(opportunity.estProbability.toString()));
       expect(CommonTest.getDropdown('stageId'), contains(opportunity.stageId));
       expect(CommonTest.getDropdownSearch('lead'),
-          contains("${opportunity.leadUser!.companyName!}"));
+          contains(opportunity.leadUser!.companyName!));
       expect(CommonTest.getDropdownSearch('employee'),
-          contains("${opportunity.employeeUser!.companyName!}"));
+          contains(opportunity.employeeUser!.companyName!));
       newOpportunities.add(opportunity.copyWith(opportunityId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

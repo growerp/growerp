@@ -21,21 +21,20 @@ import '../location.dart';
 
 class LocationDialog extends StatefulWidget {
   final Location location;
-  LocationDialog(this.location);
+  const LocationDialog(this.location, {super.key});
   @override
-  LocationDialogState createState() => LocationDialogState(location);
+  LocationDialogState createState() => LocationDialogState();
 }
 
 class LocationDialogState extends State<LocationDialog> {
-  final Location location;
+  late Location location;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-
-  LocationDialogState(this.location);
 
   @override
   void initState() {
     super.initState();
+    location = widget.location;
     _nameController.text = location.locationName ?? '';
   }
 
@@ -50,8 +49,8 @@ class LocationDialogState extends State<LocationDialog> {
             body: GestureDetector(
                 onTap: () {},
                 child: Dialog(
-                    key: Key('LocationDialog'),
-                    insetPadding: EdgeInsets.all(10),
+                    key: const Key('LocationDialog'),
+                    insetPadding: const EdgeInsets.all(10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -63,7 +62,9 @@ class LocationDialogState extends State<LocationDialog> {
                                   context,
                                   '${location.locationId == null ? "Add" : "Update"} successfull',
                                   Colors.green);
-                              await Future.delayed(Duration(milliseconds: 500));
+                              await Future.delayed(
+                                  const Duration(milliseconds: 500));
+                              if (!mounted) return;
                               Navigator.of(context).pop();
                               break;
                             case LocationStatus.failure:
@@ -71,64 +72,63 @@ class LocationDialogState extends State<LocationDialog> {
                                   'Error: ${state.message}', Colors.red);
                               break;
                             default:
-                              Text("????");
+                              const Text("????");
                           }
                         },
                         child: Stack(clipBehavior: Clip.none, children: [
                           Container(
-                              padding: EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(20),
                               width: 400,
                               height: 200,
                               child: Center(
                                 child: _showForm(repos, isPhone),
                               )),
-                          Positioned(
+                          const Positioned(
                               top: 10, right: 10, child: DialogCloseButton())
                         ]))))));
   }
 
   Widget _showForm(repos, isPhone) {
     return Center(
-        child: Container(
-            child: Form(
-                key: _formKey,
-                child: ListView(key: Key('listView'), children: <Widget>[
-                  Center(
-                      child: Text(
-                          location.locationId == null
-                              ? "New"
-                              : "${location.locationId}",
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold))),
-                  SizedBox(height: 30),
-                  TextFormField(
-                    key: Key('name'),
-                    decoration: InputDecoration(labelText: 'Location Name'),
-                    controller: _nameController,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a location name?';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                      key: Key('update'),
-                      child: Text(
-                          location.locationId == null ? 'Create' : 'Update'),
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          context.read<LocationBloc>().add(LocationUpdate(
-                                Location(
-                                  locationId: location.locationId,
-                                  locationName: _nameController.text,
-                                ),
-                              ));
-                        }
-                      }),
-                ]))));
+        child: Form(
+            key: _formKey,
+            child: ListView(key: const Key('listView'), children: <Widget>[
+              Center(
+                  child: Text(
+                      location.locationId == null
+                          ? "New"
+                          : "${location.locationId}",
+                      style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold))),
+              const SizedBox(height: 30),
+              TextFormField(
+                key: const Key('name'),
+                decoration: const InputDecoration(labelText: 'Location Name'),
+                controller: _nameController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a location name?';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                  key: const Key('update'),
+                  child:
+                      Text(location.locationId == null ? 'Create' : 'Update'),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      context.read<LocationBloc>().add(LocationUpdate(
+                            Location(
+                              locationId: location.locationId,
+                              locationName: _nameController.text,
+                            ),
+                          ));
+                    }
+                  }),
+            ])));
   }
 }

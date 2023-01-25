@@ -51,11 +51,12 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
         productFilesDialogKey.currentState!
             .showSnackBar(snackBar(context, Colors.green, state.message ?? ''));
         await Future.delayed(const Duration(milliseconds: 1000));
+        if (!mounted) return;
         Navigator.of(context).pop();
       }
     }, builder: (context, state) {
       return Stack(children: [
-        PopUpDialog(
+        popUpDialog(
             scaffoldkey: productFilesDialogKey,
             context: context,
             title: "Product Up/Download",
@@ -92,7 +93,8 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
               const SizedBox(height: 20),
               const Text("A data file will be send by email"),
             ]),
-        if (state.status == ProductStatus.filesLoading) LoadingIndicator(),
+        if (state.status == ProductStatus.filesLoading)
+          const LoadingIndicator(),
       ]);
     });
   }

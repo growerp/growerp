@@ -140,7 +140,7 @@ class ProductListState extends State<ProductList> {
                           }
                           index--;
                           return index >= state.products.length
-                              ? BottomLoader()
+                              ? const BottomLoader()
                               : Dismissible(
                                   key: const Key('productItem'),
                                   direction: DismissDirection.startToEnd,
@@ -148,7 +148,7 @@ class ProductListState extends State<ProductList> {
                                       product: state.products[index],
                                       index: index));
                         }))),
-            if (state.status == ProductStatus.loading) LoadingIndicator()
+            if (state.status == ProductStatus.loading) const LoadingIndicator()
           ]);
         });
   }

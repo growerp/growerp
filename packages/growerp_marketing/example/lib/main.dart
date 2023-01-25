@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -128,7 +129,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
-              "Routing not found for request: ${settings.name}"));
+              message: "Routing not found for request: ${settings.name}"));
   }
 }
 
@@ -165,7 +166,7 @@ class MainMenuForm extends StatelessWidget {
         ]);
       }
 
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

@@ -87,8 +87,8 @@ TextSpan _textLink(final String url, final String text) {
           color: Colors.blueAccent, decoration: TextDecoration.underline),
       recognizer: TapGestureRecognizer()
         ..onTap = () async {
-          if (await canLaunch(url)) {
-            await launch(url, forceSafariVC: false);
+          if (await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(Uri.parse(url));
           }
         });
 }

@@ -177,11 +177,11 @@ class ProductDialogState extends State<ProductDialogFull> {
                                 fontSize: 20,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold)))),
-                Positioned(top: 5, right: 5, child: DialogCloseButton())
+                const Positioned(top: 5, right: 5, child: DialogCloseButton())
               ])),
           if (productState.status == ProductStatus.updateLoading ||
               categoryState.status == CategoryStatus.loading)
-            LoadingIndicator()
+            const LoadingIndicator()
         ]);
       });
     });
@@ -396,6 +396,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                   if (_formKey.currentState!.validate()) {
                     Uint8List? image =
                         await HelperFunctions.getResizedImage(_imageFile?.path);
+                    if (!mounted) return;
                     if (_imageFile?.path != null && image == null) {
                       HelperFunctions.showMessage(
                           context, "Image upload error!", Colors.red);

@@ -143,7 +143,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
-              "Routing not found for request: ${settings.name}"));
+              message: "Routing not found for request: ${settings.name}"));
   }
 }
 
@@ -189,7 +189,7 @@ class MainMenuForm extends StatelessWidget {
         ]);
       }
 
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

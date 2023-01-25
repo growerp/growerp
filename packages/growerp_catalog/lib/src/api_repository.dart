@@ -16,40 +16,7 @@ import 'dart:convert';
 import 'package:growerp_core/growerp_core.dart';
 
 class CatalogAPIRepository extends APIRepository {
-  String? apiKey;
-
-  CatalogAPIRepository(this.apiKey) : super();
-
-  Future<ApiResult<List<Product>>> getProduct(
-      {int? start,
-      int? limit,
-      String? companyPartyId,
-      String? categoryId,
-      String? productId,
-      String? productTypeId,
-      String? assetClassId,
-      String? filter,
-      String? searchString}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/Products', apiKey,
-          queryParameters: <String, dynamic>{
-            'companyPartyId': companyPartyId,
-            'categoryId': categoryId,
-            'productId': productId,
-            'productTypeId': productTypeId,
-            'assetClassId': assetClassId,
-            'start': start,
-            'limit': limit,
-            'filter': filter,
-            'search': searchString
-          });
-      return getResponseList<Product>(
-          "products", response, (json) => Product.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
+  CatalogAPIRepository(super.apiKey);
 
   Future<ApiResult<Product>> createProduct(Product product) async {
     // no productId is add

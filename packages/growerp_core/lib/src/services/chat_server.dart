@@ -26,11 +26,11 @@ class ChatServer {
 
   ChatServer() {
     if (kReleaseMode) {
-      this.chatUrl = GlobalConfiguration().get("chatUrl");
+      chatUrl = GlobalConfiguration().get("chatUrl");
     } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
-      this.chatUrl = GlobalConfiguration().get("chatUrlDebug");
+      chatUrl = GlobalConfiguration().get("chatUrlDebug");
     } else if (Platform.isAndroid) {
-      this.chatUrl = 'ws://10.0.2.2:8081';
+      chatUrl = 'ws://10.0.2.2:8081';
     }
   }
 

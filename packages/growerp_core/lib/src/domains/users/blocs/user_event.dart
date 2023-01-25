@@ -25,7 +25,8 @@ class UserFetch extends UserEvent {
   final String searchString;
   final bool refresh;
 
-  UserFetch({this.userGroup, this.searchString = '', this.refresh = false});
+  const UserFetch(
+      {this.userGroup, this.searchString = '', this.refresh = false});
 
   @override
   List<Object> get props => [searchString, refresh];

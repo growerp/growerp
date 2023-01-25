@@ -24,7 +24,7 @@ List<MenuOption> acctMenuOptions = [
     title: "Accounting DashBoard",
     route: '/accounting',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    child: AcctDashBoard(),
+    child: const AcctDashBoard(),
   ),
   MenuOption(
       image: "assets/images/orderGrey.png",

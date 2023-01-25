@@ -15,7 +15,7 @@
 import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../services/jsonConverters.dart';
+import '../../../services/json_converters.dart';
 import '../../domains.dart';
 
 part 'user_model.freezed.dart';

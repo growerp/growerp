@@ -45,7 +45,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   UserBloc(this.repos, this.userGroup, this.authBloc)
       : super(const UserState()) {
     on<UserFetch>(_onUserFetch,
-        transformer: userDroppable(Duration(milliseconds: 100)));
+        transformer: userDroppable(const Duration(milliseconds: 100)));
     on<UserUpdate>(_onUserUpdate);
     on<UserDelete>(_onUserDelete);
   }
@@ -58,8 +58,9 @@ class UserBloc extends Bloc<UserEvent, UserState>
     UserFetch event,
     Emitter<UserState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty)
+    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
+    }
     try {
       // start from record zero for initial and refresh
       if (state.status == UserStatus.initial || event.refresh) {

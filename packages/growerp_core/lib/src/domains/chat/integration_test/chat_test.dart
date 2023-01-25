@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../common/functions/persist_functions.dart';
-import '../../common/integration_test/commonTest.dart';
+import '../../common/integration_test/common_test.dart';
 import '../../domains.dart';
 
 class ChatTest {
@@ -29,8 +29,8 @@ class ChatTest {
     if (test.chatRooms.isEmpty) {
       // not yet created
       test = test.copyWith(chatRooms: chatRooms);
-      expect(
-          find.byKey(Key('chatRoomItem')), findsNWidgets(0)); // initial admin
+      expect(find.byKey(const Key('chatRoomItem')),
+          findsNWidgets(0)); // initial admin
       await enterChatRoomData(tester, chatRooms);
       await PersistFunctions.persistTest(test.copyWith(chatRooms: chatRooms));
     }
@@ -43,12 +43,13 @@ class ChatTest {
   static Future<void> updateRooms(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     // check if already modified then skip
-    if (test.chatRooms[0].chatRoomName != test.chatRooms[0].chatRoomName)
+    if (test.chatRooms[0].chatRoomName != test.chatRooms[0].chatRoomName) {
       return;
+    }
     List<ChatRoom> updChatRooms = [];
     for (ChatRoom chatRoom in test.chatRooms) {
       updChatRooms.add(chatRoom.copyWith(
-        chatRoomName: chatRoom.chatRoomName! + 'u',
+        chatRoomName: '${chatRoom.chatRoomName!}u',
       ));
     }
     test = test.copyWith(chatRooms: updChatRooms);
@@ -62,11 +63,11 @@ class ChatTest {
     int count = test.chatRooms.length;
     await CommonTest.gotoMainMenu(tester);
     await selectChatRoom(tester);
-    expect(find.byKey(Key('chatRoomItem')), findsNWidgets(count));
+    expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(count));
     await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
     await CommonTest.gotoMainMenu(tester);
     await selectChatRoom(tester);
-    expect(find.byKey(Key('chatRoomItem')), findsNWidgets(count - 1));
+    expect(find.byKey(const Key('chatRoomItem')), findsNWidgets(count - 1));
     PersistFunctions.persistTest(test.copyWith(
         chatRooms: test.chatRooms.sublist(0, test.chatRooms.length - 1)));
   }
@@ -78,9 +79,9 @@ class ChatTest {
   static Future<void> enterChatRoomData(
       WidgetTester tester, List<ChatRoom> chatRooms) async {
     for (ChatRoom chatRoom in chatRooms) {
-      if (chatRoom.chatRoomId.isEmpty)
+      if (chatRoom.chatRoomId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
-      else {
+      } else {
         await CommonTest.doSearch(tester, searchString: chatRoom.chatRoomId);
         await CommonTest.tapByKey(tester, 'name0');
         expect(CommonTest.getTextField('header').split('#')[1],

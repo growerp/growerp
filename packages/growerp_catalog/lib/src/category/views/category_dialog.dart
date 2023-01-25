@@ -152,11 +152,11 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                                 fontSize: 20,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold)))),
-                Positioned(top: 5, right: 5, child: DialogCloseButton()),
+                const Positioned(top: 5, right: 5, child: DialogCloseButton()),
               ])),
           if (categoryState.status == CategoryStatus.updateLoading ||
               productState.status == ProductStatus.loading)
-            LoadingIndicator(),
+            const LoadingIndicator(),
         ]);
       });
     });
@@ -356,6 +356,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                                       image:
                                           await HelperFunctions.getResizedImage(
                                               _imageFile?.path));
+                                  if (!mounted) return;
                                   if (_imageFile?.path != null &&
                                       updatedCategory.image == null) {
                                     HelperFunctions.showMessage(context,

@@ -78,7 +78,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
         Navigator.pop(context);
       }
     }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.loading) return LoadingIndicator();
+      if (state.status == AuthStatus.loading) return const LoadingIndicator();
       return Scaffold(
           backgroundColor: Colors.transparent,
           body: Dialog(
@@ -87,12 +87,15 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Stack(clipBehavior: Clip.none, children: [
-                Container(
-                    padding: const EdgeInsets.all(20),
-                    width: 400,
+                popUp(
+                    context: context,
+                    child: _registerForm(widget.authenticate, state),
+                    title: widget.authenticate.company != null
+                        ? "Enter a new customer for company\n "
+                            "${widget.authenticate.company!.name}"
+                        : "Enter a new company with admin",
                     height: 650,
-                    child: _registerForm(widget.authenticate, state)),
-                Positioned(top: 5, right: 5, child: DialogCloseButton())
+                    width: 400)
               ])));
     }));
   }
@@ -103,17 +106,6 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
         child: SingleChildScrollView(
             key: const Key('listView'),
             child: Column(children: <Widget>[
-              const SizedBox(height: 20),
-              Center(
-                  child: Text(
-                      authenticate.company != null
-                          ? "Enter a new customer for company\n "
-                              "${authenticate.company!.name}"
-                          : "Enter a new company with admin user",
-                      style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold))),
               const SizedBox(height: 20),
               TextFormField(
                 key: const Key('firstName'),

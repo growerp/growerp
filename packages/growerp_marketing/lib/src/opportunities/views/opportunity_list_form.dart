@@ -110,7 +110,7 @@ class OpportunitiesState extends State<OpportunityList> {
                             }
                             index--;
                             return index >= state.opportunities.length
-                                ? BottomLoader()
+                                ? const BottomLoader()
                                 : Dismissible(
                                     key: const Key('opportunityItem'),
                                     direction: DismissDirection.startToEnd,

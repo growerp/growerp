@@ -17,13 +17,17 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter/material.dart';
 
 class AboutForm extends StatelessWidget {
+  const AboutForm({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return AboutFormHeader();
+    return const AboutFormHeader();
   }
 }
 
 class AboutFormHeader extends StatelessWidget {
+  const AboutFormHeader({super.key});
+
   @override
   Widget build(BuildContext context) {
     String version = GlobalConfiguration().get("version") ?? '';
@@ -38,8 +42,8 @@ class AboutFormHeader extends StatelessWidget {
         title: Text('About GrowERP and this $appName app'),
         applicationVersion: 'Version $version, build #$build',
         applicationName: packageName,
-        applicationDescription: Center(child: Text("$databaseUrl")),
-        applicationIcon: Image(
+        applicationDescription: Center(child: Text(databaseUrl)),
+        applicationIcon: const Image(
           image: AssetImage('assets/images/growerp.png'),
           height: 100,
           width: 200,
@@ -47,11 +51,11 @@ class AboutFormHeader extends StatelessWidget {
         applicationLegalese: '© GrowERP, $year',
         children: <Widget>[
           Center(
-              child: Container(
+              child: SizedBox(
                   width: 300,
                   child: Form(
                       child: Column(
-                    children: <Widget>[
+                    children: const <Widget>[
                       MarkdownPageListTile(
                         filename: 'README.md',
                         title: Text('View Readme'),

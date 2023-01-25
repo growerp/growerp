@@ -30,8 +30,9 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
       });
 
   if (items.isEmpty) {
-    return FatalErrorForm("No access to any option here, "
-        "have: ${authenticate.user?.userGroup} should have: ${menu![0].readGroups}");
+    return FatalErrorForm(
+        message: "No access to any option here, "
+            "have: ${authenticate.user?.userGroup} should have: ${menu![0].readGroups}");
   }
 
   return Row(children: <Widget>[

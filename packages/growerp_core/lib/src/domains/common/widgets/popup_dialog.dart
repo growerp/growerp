@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import '../../domains.dart';
 
-Widget PopUpDialog({
+Widget popUpDialog({
   required BuildContext context,
   required List<Widget> children,
   required Key scaffoldkey,
@@ -25,12 +25,12 @@ Widget PopUpDialog({
   Key key = const Key('popUp'),
 }) {
   return Dialog(
-      insetPadding: EdgeInsets.all(10),
+      insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(clipBehavior: Clip.none, children: [
-        Container(
+        SizedBox(
             width: width,
             height: height,
             child: Column(children: [
@@ -38,19 +38,19 @@ Widget PopUpDialog({
                   height: 50,
                   decoration: BoxDecoration(
                       color: Theme.of(context).primaryColorDark,
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       )),
                   child: Center(
                       child: Text(title,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 20,
                               color: Colors.white,
                               fontWeight: FontWeight.bold)))),
               Expanded(
                   child: Padding(
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 child: ScaffoldMessenger(
                     key: scaffoldkey,
                     child: Scaffold(
@@ -58,6 +58,6 @@ Widget PopUpDialog({
                         body: Center(child: Column(children: children)))),
               ))
             ])),
-        Positioned(top: 10, right: 10, child: DialogCloseButton())
+        const Positioned(top: 10, right: 10, child: DialogCloseButton())
       ]));
 }

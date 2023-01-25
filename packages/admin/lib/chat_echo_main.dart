@@ -1,5 +1,3 @@
-// ignore_for_file: always_put_required_named_parameters_first
-
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
@@ -16,6 +14,7 @@
 
 // start with: flutter run -t lib/chatEcho_main.dart
 
+// ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
 import 'package:flutter_phoenix/generated/i18n.dart';
 import 'package:growerp_core/growerp_core.dart';

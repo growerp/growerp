@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -35,15 +49,15 @@ class NetworkExceptions with _$NetworkExceptions {
       case 403:
         return NetworkExceptions.unauthorizedRequest(statusMessage);
       case 404:
-        return NetworkExceptions.notFound("Not found");
+        return const NetworkExceptions.notFound("Not found");
       case 409:
-        return NetworkExceptions.conflict();
+        return const NetworkExceptions.conflict();
       case 408:
-        return NetworkExceptions.requestTimeout();
+        return const NetworkExceptions.requestTimeout();
       case 500:
-        return NetworkExceptions.internalServerError();
+        return const NetworkExceptions.internalServerError();
       case 503:
-        return NetworkExceptions.serviceUnavailable();
+        return const NetworkExceptions.serviceUnavailable();
       default:
         var responseCode = statusCode;
         return NetworkExceptions.defaultError(
@@ -59,13 +73,13 @@ class NetworkExceptions with _$NetworkExceptions {
         if (error is DioError) {
           switch (error.type) {
             case DioErrorType.cancel:
-              networkExceptions = NetworkExceptions.requestCancelled();
+              networkExceptions = const NetworkExceptions.requestCancelled();
               break;
             case DioErrorType.connectTimeout:
-              networkExceptions = NetworkExceptions.requestTimeout();
+              networkExceptions = const NetworkExceptions.requestTimeout();
               break;
             case DioErrorType.receiveTimeout:
-              networkExceptions = NetworkExceptions.sendTimeout();
+              networkExceptions = const NetworkExceptions.sendTimeout();
               break;
             case DioErrorType.response:
               Map errors = json.decode(error.response!.data);
@@ -73,7 +87,7 @@ class NetworkExceptions with _$NetworkExceptions {
                   error.response!.statusCode ?? -1, errors['errors']);
               break;
             case DioErrorType.sendTimeout:
-              networkExceptions = NetworkExceptions.sendTimeout();
+              networkExceptions = const NetworkExceptions.sendTimeout();
               break;
             case DioErrorType.other:
               networkExceptions =
@@ -81,21 +95,21 @@ class NetworkExceptions with _$NetworkExceptions {
               break;
           }
         } else if (error is SocketException) {
-          networkExceptions = NetworkExceptions.noInternetConnection();
+          networkExceptions = const NetworkExceptions.noInternetConnection();
         } else {
-          networkExceptions = NetworkExceptions.unexpectedError();
+          networkExceptions = const NetworkExceptions.unexpectedError();
         }
         return networkExceptions;
       } on FormatException catch (_) {
-        return NetworkExceptions.formatException();
+        return const NetworkExceptions.formatException();
       } catch (_) {
-        return NetworkExceptions.unexpectedError();
+        return const NetworkExceptions.unexpectedError();
       }
     } else {
       if (error.toString().contains("is not a subtype of")) {
-        return NetworkExceptions.unableToProcess();
+        return const NetworkExceptions.unableToProcess();
       } else {
-        return NetworkExceptions.unexpectedError();
+        return const NetworkExceptions.unexpectedError();
       }
     }
   }

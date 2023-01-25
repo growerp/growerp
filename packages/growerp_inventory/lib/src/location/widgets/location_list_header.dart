@@ -37,7 +37,7 @@ class _LocationListHeaderState extends State<LocationListHeader> {
         child: Column(children: [
       ListTile(
           leading: GestureDetector(
-              key: Key('search'),
+              key: const Key('search'),
               onTap: (() =>
                   setState(() => search ? search = false : search = true)),
               child: Image.asset(
@@ -50,10 +50,10 @@ class _LocationListHeaderState extends State<LocationListHeader> {
                       width: ResponsiveWrapper.of(context).isSmallerThan(TABLET)
                           ? MediaQuery.of(context).size.width - 250
                           : MediaQuery.of(context).size.width - 350,
-                      key: Key('searchField'),
+                      key: const Key('searchField'),
                       child: TextField(
                         autofocus: true,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
@@ -63,19 +63,19 @@ class _LocationListHeaderState extends State<LocationListHeader> {
                             setState(() => searchString = value)),
                       )),
                   ElevatedButton(
-                      key: Key('searchButton'),
-                      child: Text('Search'),
+                      key: const Key('searchButton'),
+                      child: const Text('Search'),
                       onPressed: () {
                         locationBloc
                             .add(LocationFetch(searchString: searchString));
                       })
                 ])
-              : Row(children: <Widget>[
+              : Row(children: const <Widget>[
                   Expanded(child: Text("Loc.Name[ID]")),
                   SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
                 ]),
-          subtitle: Text('Product Name'),
-          trailing: SizedBox(width: 50)),
+          subtitle: const Text('Product Name'),
+          trailing: const SizedBox(width: 50)),
     ]));
   }
 }

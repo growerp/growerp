@@ -45,7 +45,9 @@ class UserGroup {
 
   static List<String> getIdList(List<UserGroup> userGroupList) {
     List<String> idList = [];
-    for (UserGroup item in userGroupList) idList.add(item._id);
+    for (UserGroup item in userGroupList) {
+      idList.add(item._id);
+    }
     return idList;
   }
 

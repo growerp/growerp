@@ -20,38 +20,30 @@ import '../../../templates/templates.dart';
 import 'package:global_configuration/global_configuration.dart';
 
 class HomeForm extends StatefulWidget {
-  final String? message;
   final List<MenuOption> menuOptions;
   final String title;
 
-  const HomeForm(
-      {Key? key,
-      this.message,
-      required this.menuOptions,
-      this.title = "GrowERP"})
+  const HomeForm({Key? key, required this.menuOptions, this.title = "GrowERP"})
       : super(key: key);
   @override
-  _HomeFormState createState() => _HomeFormState(message);
+  HomeFormState createState() => HomeFormState();
 }
 
-class _HomeFormState extends State<HomeForm> {
-  final String? message;
+class HomeFormState extends State<HomeForm> {
   String singleCompany = GlobalConfiguration().get("singleCompany");
-
-  _HomeFormState(this.message);
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
 
-    Widget _appInfo = Center(
+    Widget appInfo = Center(
         child: Align(
             alignment: Alignment.bottomCenter,
             child: Text(
                 "${GlobalConfiguration().get("appName")} "
                 "V${GlobalConfiguration().get("version")} "
                 "#${GlobalConfiguration().get("build")}",
-                style: TextStyle(fontSize: 10, color: Colors.black))));
+                style: const TextStyle(fontSize: 10, color: Colors.black))));
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
@@ -65,15 +57,17 @@ class _HomeFormState extends State<HomeForm> {
                     actions: <Widget>[
                   if (authenticate.apiKey != null)
                     IconButton(
-                        key: Key('logoutButton'),
-                        icon: Icon(Icons.do_not_disturb,
+                        key: const Key('logoutButton'),
+                        icon: const Icon(Icons.do_not_disturb,
                             key: Key('HomeFormAuth')),
                         tooltip: 'Logout',
                         onPressed: () => {
-                              context.read<AuthBloc>().add(AuthLoggedOut()),
+                              context
+                                  .read<AuthBloc>()
+                                  .add(const AuthLoggedOut()),
                             }),
                 ])),
-            _appInfo
+            appInfo
           ]);
         case AuthStatus.unAuthenticated:
           Authenticate authenticate = state.authenticate!;
@@ -81,24 +75,19 @@ class _HomeFormState extends State<HomeForm> {
             Expanded(
                 child: Scaffold(
                     appBar: AppBar(
-                        key: Key('HomeFormUnAuth'),
-                        title: appBarTitle(
-                            context,
-                            authenticate,
-                            'Login' +
-                                (singleCompany.isEmpty
-                                    ? ' / New company'
-                                    : ''))),
+                        key: const Key('HomeFormUnAuth'),
+                        title: appBarTitle(context, authenticate,
+                            'Login${singleCompany.isEmpty ? ' / New company' : ''}')),
                     body: Center(
                         child: Column(children: <Widget>[
-                      SizedBox(height: 80),
+                      const SizedBox(height: 80),
                       InkWell(
                           onLongPress: () async {
                             await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return ChangeIpForm();
+                                  return const ChangeIpForm();
                                 });
                           },
                           child: Text(widget.title,
@@ -106,26 +95,27 @@ class _HomeFormState extends State<HomeForm> {
                                   fontSize: isPhone ? 15 : 25,
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold))),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 40),
                       authenticate.company?.partyId != null
                           ? ElevatedButton(
-                              key: Key('loginButton'),
-                              child: Text('Login with an Existing ID'),
+                              key: const Key('loginButton'),
+                              child: const Text('Login with an Existing ID'),
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return LoginDialog();
+                                      return const LoginDialog();
                                     });
                               })
-                          : Text('No companies yet, create one!'),
-                      SizedBox(height: 100),
+                          : const Text('No companies yet, create one!'),
+                      const SizedBox(height: 100),
                       Visibility(
                           visible: singleCompany.isEmpty,
                           child: ElevatedButton(
-                              key: Key('newCompButton'),
-                              child: Text('Create a new company and admin'),
+                              key: const Key('newCompButton'),
+                              child:
+                                  const Text('Create a new company and admin'),
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,
@@ -138,10 +128,10 @@ class _HomeFormState extends State<HomeForm> {
                                     });
                               })),
                     ])))),
-            _appInfo
+            appInfo
           ]);
         default:
-          return LoadingIndicator();
+          return const LoadingIndicator();
       }
     });
   }

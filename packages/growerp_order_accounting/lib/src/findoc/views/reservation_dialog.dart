@@ -96,6 +96,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                   Colors.green);
                               await Future.delayed(
                                   const Duration(milliseconds: 500));
+                              if (!mounted) return;
                               Navigator.of(context).pop();
                               break;
                             case FinDocStatus.failure:

@@ -9,10 +9,10 @@ environment:
 dependencies:
   growerp_order_accounting:
     path: ../
-  growerp_catalog: 0.8.0-dev.1
-  #  path: ../../growerp_catalog/
-  growerp_inventory: 0.8.0-dev.1
-  #  path: ../../growerp_inventory/
+  growerp_catalog: #0.8.0-dev.1
+    path: ../../growerp_catalog/
+  growerp_inventory: #0.8.0-dev.1
+    path: ../../growerp_inventory/
   decimal: ^2.1.0
   flutter:
     sdk: flutter

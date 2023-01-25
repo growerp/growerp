@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:integration_test/integration_test.dart';
+// ignore: depend_on_referenced_packages
 import 'package:growerp_core/growerp_core.dart';
 
 void main() {

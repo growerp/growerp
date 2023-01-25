@@ -14,6 +14,7 @@
 
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
@@ -38,8 +39,9 @@ void main() {
   // take a screen shot if 'expected' is provided AND not the same as result
   Future<bool> waitFor(SerializableFinder itemToFind,
       {bool? expected, Duration timeout = const Duration(seconds: 10)}) async {
-    if (expected != null)
-      print("checking  ${itemToFind.serialize()['keyValueString']}");
+    if (expected != null) {
+      debugPrint("checking  ${itemToFind.serialize()['keyValueString']}");
+    }
     try {
       await driver.waitFor(itemToFind, timeout: timeout);
       if (expected != null && expected != true) {
@@ -64,7 +66,7 @@ void main() {
     if (isPhone) {
       // open drawer when phone
       final drawerFinder = find.byTooltip('Open navigation menu');
-      await driver.waitFor(drawerFinder, timeout: Duration(seconds: 20));
+      await driver.waitFor(drawerFinder, timeout: const Duration(seconds: 20));
       await driver.tap(drawerFinder);
       //await driver.waitFor(find.byValueKey('drawer'));
     }
@@ -141,8 +143,9 @@ void main() {
       //dashboard and check if phone
       await waitFor(find.byValueKey('/'), expected: true);
       isPhone = await waitFor(find.byTooltip('Open navigation menu'));
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('dashboard');
+      }
 
       // company logo at the top
       await driver.tap(find.byValueKey('tapCompany'));
@@ -155,32 +158,37 @@ void main() {
       //company
       await tapMenuButton('tap/company');
       await waitFor(find.byValueKey('/company'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('website');
+      }
 
       //catalog
       await tapMenuButton('tap/catalog');
       await waitFor(find.byValueKey('/catalog'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('catalog');
+      }
 
       //orders
       await tapMenuButton('tap/orders');
       await waitFor(find.byValueKey('/orders'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('orders');
+      }
 
       //warehouse
       await tapMenuButton('tap/warehouse');
       await waitFor(find.byValueKey('/warehouse'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('warehouse');
+      }
 
       //accounting
       await tapMenuButton('tap/accounting');
       await waitFor(find.byValueKey('/accounting'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('account');
+      }
 
       // accounting sales
       await tapMenuButton('tap/acctSales');
@@ -193,8 +201,9 @@ void main() {
       // ledger
       await tapMenuButton('tap/acctLedger');
       await waitFor(find.byValueKey('/acctLedger'), expected: true);
-      if (imagePrefix != 'test_driver/screenshots')
+      if (imagePrefix != 'test_driver/screenshots') {
         await takeScreenshot('ledgers');
+      }
 
       // back to main
       await tapMenuButton('tap/');
@@ -203,6 +212,6 @@ void main() {
       // logout
       await driver.tap(find.byValueKey('logoutButton'));
       await waitFor(find.byValueKey('HomeFormUnAuth'), expected: true);
-    }, timeout: Timeout(Duration(seconds: 300)));
+    }, timeout: const Timeout(Duration(seconds: 300)));
   });
 }

@@ -60,19 +60,18 @@ class LocationListItem extends StatelessWidget {
                     textAlign: TextAlign.center,
                   )),
             ]),
-            children: items(location, index),
-            trailing: Container(
+            trailing: SizedBox(
                 width: isPhone ? 100 : 195,
                 child: Row(children: [
                   IconButton(
                       key: Key('delete$index'),
-                      icon: Icon(Icons.delete_forever),
+                      icon: const Icon(Icons.delete_forever),
                       onPressed: () {
                         locationBloc.add(LocationDelete(location));
                       }),
                   IconButton(
                       key: Key('edit$index'),
-                      icon: Icon(Icons.edit),
+                      icon: const Icon(Icons.edit),
                       onPressed: () async {
                         await showDialog(
                             barrierDismissible: true,
@@ -83,14 +82,15 @@ class LocationListItem extends StatelessWidget {
                                   child: LocationDialog(location));
                             });
                       }),
-                ]))));
+                ])),
+            children: items(location, index)));
   }
 
   List<Widget> items(Location location, int index) {
     int assetCount = 1;
     return List.from(location.assets!.map(
         (e) => Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              SizedBox(width: 50),
+              const SizedBox(width: 50),
               Expanded(
                 child: ListTile(
                     leading: CircleAvatar(

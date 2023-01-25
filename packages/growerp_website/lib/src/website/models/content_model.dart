@@ -40,5 +40,5 @@ class Content extends Equatable with _$Content {
   List<Object?> get props => [path];
 
   @override
-  String toString() => '$path';
+  String toString() => path;
 }

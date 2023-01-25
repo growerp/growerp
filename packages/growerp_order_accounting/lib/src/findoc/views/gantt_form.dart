@@ -15,7 +15,7 @@
 // TODO: cannot use asset bloc here, need a lookup same as product lookup
 
 import 'package:flutter/material.dart';
-import 'package:date_utils/date_utils.dart' as Utils;
+import 'package:date_utils/date_utils.dart' as utilities;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -23,7 +23,7 @@ import 'package:growerp_core/growerp_core.dart';
 import '../../api_repository.dart';
 import '../findoc.dart';
 
-const DAY = 1, WEEK = 2, MONTH = 3; // columnPeriod values
+const day = 1, week = 2, month = 3; // columnPeriod values
 
 late int chartInDays;
 late int chartColumns; // total columns on chart
@@ -57,13 +57,13 @@ class GanttPage extends StatefulWidget {
 
 class GanttPageState extends State<GanttPage> {
   late DateTime ganttFromDate;
-  late int columnPeriod; //DAY,  WEEK, MONTH
+  late int columnPeriod; //day,  week, month
   late FinDocBloc _finDocBloc;
 
   @override
   void initState() {
     super.initState();
-    columnPeriod = DAY;
+    columnPeriod = day;
     _finDocBloc = context.read<FinDocBloc>();
   }
 
@@ -73,7 +73,7 @@ class GanttPageState extends State<GanttPage> {
     DateTime now = CustomizableDateTime.current;
     DateTime nowDate = DateTime(now.year, now.month, now.day, 14, 0, 0, 0);
     switch (columnPeriod) {
-      case MONTH:
+      case month:
         if (screenWidth < 800) {
           columnsOnScreen = 4;
         } else {
@@ -83,7 +83,7 @@ class GanttPageState extends State<GanttPage> {
         chartInDays = 365;
         ganttFromDate = DateTime(now.year, now.month, 1, 14, 0, 0, 0);
         break;
-      case WEEK:
+      case week:
         if (screenWidth < 800) {
           chartColumns = 14;
           columnsOnScreen = 4;
@@ -94,7 +94,7 @@ class GanttPageState extends State<GanttPage> {
         chartInDays = chartColumns * 7;
         ganttFromDate = nowDate.subtract(Duration(days: nowDate.weekday));
         break;
-      case DAY:
+      case day:
         if (screenWidth < 800) {
           chartColumns = 18;
           columnsOnScreen = 5;
@@ -135,17 +135,17 @@ class GanttPageState extends State<GanttPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
-                  onPressed: () => setState(() => columnPeriod = DAY),
+                  onPressed: () => setState(() => columnPeriod = day),
                   child: const Text('Day'),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () => setState(() => columnPeriod = WEEK),
+                  onPressed: () => setState(() => columnPeriod = week),
                   child: const Text('Week'),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () => setState(() => columnPeriod = MONTH),
+                  onPressed: () => setState(() => columnPeriod = month),
                   child: const Text('Month'),
                 ),
                 const SizedBox(width: 10),
@@ -299,16 +299,16 @@ class GanttChart extends StatelessWidget {
     late String headerText;
     int year = ganttFromDate.year;
     for (int i = 0; i < chartColumns; i++) {
-      if (columnPeriod == MONTH) {
+      if (columnPeriod == month) {
         headerText = '${months[(ganttFromDate.month + i - 1) % 12]} $year';
         if ((ganttFromDate.month + i) == 12) year++;
       }
       var formatter = DateFormat('yy-MM-dd');
-      if (columnPeriod == WEEK) {
+      if (columnPeriod == week) {
         headerText =
             'Week starting: ${days[(ganttFromDate.weekday) % 7]}\n${formatter.format(ganttFromDate.add(Duration(days: i * 7)))}';
       }
-      if (columnPeriod == DAY) {
+      if (columnPeriod == day) {
         headerText =
             '${days[(ganttFromDate.weekday + i) % 7]}\n${formatter.format(ganttFromDate.add(Duration(days: i)))}';
       }
@@ -322,7 +322,7 @@ class GanttChart extends StatelessWidget {
           ),
         ),
       ));
-      tempDate = Utils.DateUtils.nextMonth(tempDate!);
+      tempDate = utilities.DateUtils.nextMonth(tempDate!);
     }
 
     return Container(
@@ -372,9 +372,9 @@ class GanttChart extends StatelessWidget {
     int index = startIndex;
     // define the scale of 1 day
     late double dayScale;
-    if (columnPeriod == DAY) dayScale = screenWidth / columnsOnScreen;
-    if (columnPeriod == WEEK) dayScale = screenWidth / (columnsOnScreen * 7);
-    if (columnPeriod == MONTH) {
+    if (columnPeriod == day) dayScale = screenWidth / columnsOnScreen;
+    if (columnPeriod == week) dayScale = screenWidth / (columnsOnScreen * 7);
+    if (columnPeriod == month) {
       dayScale = screenWidth / (columnsOnScreen * 365 / 12);
     }
     double halfDay = dayScale / 2;

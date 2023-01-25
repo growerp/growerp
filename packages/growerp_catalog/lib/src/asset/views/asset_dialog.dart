@@ -117,7 +117,7 @@ class AssetDialogState extends State<AssetDialog> {
                                           fontSize: 20,
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold)))),
-                          Positioned(
+                          const Positioned(
                               top: 10, right: 10, child: DialogCloseButton())
                         ]))))));
   }

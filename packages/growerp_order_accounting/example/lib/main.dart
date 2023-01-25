@@ -171,7 +171,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
-        form: LocationListForm(),
+        form: const LocationListForm(),
         label: '\nWH Locations',
         icon: const Icon(Icons.location_pin),
       ),
@@ -309,7 +309,7 @@ class MainMenuForm extends StatelessWidget {
           ),
         ]);
       }
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

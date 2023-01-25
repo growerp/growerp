@@ -1,3 +1,17 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -48,10 +62,11 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      if (apiKey != null)
+      if (apiKey != null) {
         _dio.options.headers['api_key'] = apiKey;
-      else
+      } else {
         _dio.options.headers.remove('Api_key');
+      }
       var response = await _dio.get(
         uri,
         queryParameters: queryParameters,
@@ -63,9 +78,9 @@ class DioClient {
     } on SocketException catch (e) {
       throw SocketException(e.toString());
     } on FormatException catch (_) {
-      throw FormatException("Unable to process the data");
+      throw const FormatException("Unable to process the data");
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -80,10 +95,11 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      if (apiKey != null)
+      if (apiKey != null) {
         _dio.options.headers['api_key'] = apiKey;
-      else
+      } else {
         _dio.options.headers.remove('Api_key');
+      }
       var response = await _dio.post(
         uri,
         data: data,
@@ -95,9 +111,9 @@ class DioClient {
       );
       return response.data;
     } on FormatException catch (_) {
-      throw FormatException("Unable to process the data");
+      throw const FormatException("Unable to process the data");
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -112,10 +128,11 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      if (apiKey != null)
+      if (apiKey != null) {
         _dio.options.headers['api_key'] = apiKey;
-      else
+      } else {
         _dio.options.headers.remove('Api_key');
+      }
       var response = await _dio.patch(
         uri,
         data: data,
@@ -127,9 +144,9 @@ class DioClient {
       );
       return response.data;
     } on FormatException catch (_) {
-      throw FormatException("Unable to process the data");
+      throw const FormatException("Unable to process the data");
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -142,10 +159,11 @@ class DioClient {
     CancelToken? cancelToken,
   }) async {
     try {
-      if (apiKey != null)
+      if (apiKey != null) {
         _dio.options.headers['api_key'] = apiKey;
-      else
+      } else {
         _dio.options.headers.remove('Api_key');
+      }
       var response = await _dio.delete(
         uri,
         data: data,
@@ -155,9 +173,9 @@ class DioClient {
       );
       return response.data;
     } on FormatException catch (_) {
-      throw FormatException("Unable to process the data");
+      throw const FormatException("Unable to process the data");
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

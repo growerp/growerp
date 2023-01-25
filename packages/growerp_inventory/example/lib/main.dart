@@ -20,6 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,7 +105,7 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.call_received),
         ),
         TabItem(
-          form: LocationListForm(),
+          form: const LocationListForm(),
           label: '\nWH Locations',
           icon: const Icon(Icons.location_pin),
         ),
@@ -136,7 +137,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
-              "Routing not found for request: ${settings.name}"));
+              message: "Routing not found for request: ${settings.name}"));
   }
 }
 
@@ -171,7 +172,7 @@ class MainMenu extends StatelessWidget {
           ),
         ]);
       }
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

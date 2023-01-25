@@ -1,3 +1,3 @@
 export 'task_model.dart';
-export 'taskStatus_model.dart';
-export 'timeEntry_model.dart';
+export 'task_status_model.dart';
+export 'time_entry_model.dart';

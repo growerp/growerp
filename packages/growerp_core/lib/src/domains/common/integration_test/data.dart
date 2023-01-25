@@ -330,13 +330,13 @@ List<Task> tasks = [
 List<TimeEntry> timeEntries = [
   TimeEntry(
       hours: Decimal.parse('4'),
-      date: DateTime.now().subtract(Duration(days: 4))),
+      date: DateTime.now().subtract(const Duration(days: 4))),
   TimeEntry(
       hours: Decimal.parse('3'),
-      date: DateTime.now().subtract(Duration(days: 3))),
+      date: DateTime.now().subtract(const Duration(days: 3))),
   TimeEntry(
       hours: Decimal.parse('2'),
-      date: DateTime.now().subtract(Duration(days: 2)))
+      date: DateTime.now().subtract(const Duration(days: 2)))
 ];
 
 List<ChatRoom> chatRooms = [
@@ -709,8 +709,8 @@ List<FinDoc> rentalSalesOrders = [
           description: products[2].productName,
           price: products[2].price,
           quantity: Decimal.parse('2'), // nuber of days
-          rentalFromDate: DateTime.now().add(Duration(days: 2)),
-          rentalThruDate: DateTime.now().add(Duration(days: 4)),
+          rentalFromDate: DateTime.now().add(const Duration(days: 2)),
+          rentalThruDate: DateTime.now().add(const Duration(days: 4)),
         ),
       ]),
 ];
@@ -729,7 +729,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('100'),
     product: products[0],
     statusId: assetStatusValues[0],
-    receivedDate: DateTime.now().subtract(Duration(days: 4)),
+    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
     assetName: 'asset name 2',
@@ -737,7 +737,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('200'),
     product: products[1],
     statusId: assetStatusValues[0],
-    receivedDate: DateTime.now().subtract(Duration(days: 4)),
+    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
     assetName: 'asset name 3 for rental',
@@ -745,7 +745,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('1'),
     product: products[2], // only products 2 or rental test fails
     statusId: assetStatusValues[0],
-    receivedDate: DateTime.now().subtract(Duration(days: 4)),
+    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
     assetName: 'asset name 4 to be deleted',
@@ -753,6 +753,6 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('400'),
     product: products[0],
     statusId: assetStatusValues[0],
-    receivedDate: DateTime.now().subtract(Duration(days: 4)),
+    receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
 ];

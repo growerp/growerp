@@ -15,36 +15,37 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as IMG;
+import 'package:image/image.dart' as image;
 import 'dart:io';
 import 'package:http/http.dart' show get;
 import '../../domains.dart';
 
 class HelperFunctions {
   static showMessage(BuildContext context, String? message, dynamic colors) {
-    if (message != null && message != "null")
+    if (message != null && message != "null") {
       ScaffoldMessenger.of(context)
           .showSnackBar(snackBar(context, colors, message));
+    }
   }
 
-  static showTopMessage(dynamic _scaffoldKey, String? message,
-      [int? duration]) {
-    if (message != null)
-      scheduleMicrotask(() => _scaffoldKey.currentState.showSnackBar(SnackBar(
+  static showTopMessage(dynamic scaffoldKey, String? message, [int? duration]) {
+    if (message != null) {
+      scheduleMicrotask(() => scaffoldKey.currentState.showSnackBar(SnackBar(
             duration: Duration(seconds: duration ?? 2),
             content: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('$message'),
+                Text(message),
               ],
             ),
             backgroundColor: Colors.green,
           )));
+    }
   }
 
   static Future<Uint8List?> getResizedImage(imagePath) async {
     if (imagePath != null) {
-      LoadingIndicator();
+      const LoadingIndicator();
       Uint8List imageData;
       if (kIsWeb) {
         var response = await get(Uri.parse(imagePath));
@@ -53,12 +54,13 @@ class HelperFunctions {
         imageData = File(imagePath).readAsBytesSync();
       }
       if (imageData.length > 200000) {
-        IMG.Image img = IMG.decodeImage(imageData)!;
-        IMG.Image resized = IMG.copyResize(img, width: -1, height: 200);
-        imageData = IMG.encodeJpg(resized) as Uint8List;
+        image.Image img = image.decodeImage(imageData)!;
+        image.Image resized = image.copyResize(img, width: -1, height: 200);
+        imageData = image.encodeJpg(resized) as Uint8List;
       }
       return imageData;
-    } else
+    } else {
       return null;
+    }
   }
 }

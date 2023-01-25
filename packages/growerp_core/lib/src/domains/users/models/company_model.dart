@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../services/jsonConverters.dart';
+import '../../../services/json_converters.dart';
 import '../../domains.dart';
 
 part 'company_model.freezed.dart';
@@ -25,6 +25,7 @@ part 'company_model.g.dart';
 List<Company> companiesFromJson(String str) => List<Company>.from(
     json.decode(str)["companies"].map((x) => Company.fromJson(x)));
 String companiesToJson(List<Company> data) =>
+    // ignore: prefer_interpolation_to_compose_strings
     '{"companies":' +
     json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
     "}";
@@ -32,6 +33,7 @@ String companiesToJson(List<Company> data) =>
 Company companyFromJson(String str) =>
     Company.fromJson(json.decode(str)["company"]);
 String companyToJson(Company data) =>
+    // ignore: prefer_interpolation_to_compose_strings
     '{"company":' + json.encode(data.toJson()) + "}";
 
 @freezed

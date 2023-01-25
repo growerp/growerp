@@ -18,8 +18,7 @@
 /// financial document (FinDoc) types
 class PaymentInstrument {
   final String _name;
-  final String? number;
-  const PaymentInstrument._(this._name, {this.number});
+  const PaymentInstrument._(this._name);
 
   @override
   String toString() {

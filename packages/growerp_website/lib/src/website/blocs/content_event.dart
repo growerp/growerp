@@ -20,12 +20,10 @@ abstract class ContentEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class ContentInit extends ContentEvent {}
-
 class ContentFetch extends ContentEvent {
   final String websiteId;
   final Content content;
-  ContentFetch(this.websiteId, this.content);
+  const ContentFetch(this.websiteId, this.content);
   @override
   List<Object> get props => [websiteId, content];
 }
@@ -33,5 +31,5 @@ class ContentFetch extends ContentEvent {
 class ContentUpdate extends ContentEvent {
   final String websiteId;
   final Content content;
-  ContentUpdate(this.websiteId, this.content);
+  const ContentUpdate(this.websiteId, this.content);
 }

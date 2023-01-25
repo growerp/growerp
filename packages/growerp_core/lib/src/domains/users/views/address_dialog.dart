@@ -21,30 +21,28 @@ import '../../../api_repository.dart';
 
 class AddressDialog extends StatefulWidget {
   final Address? address;
-  final Key? key;
-  const AddressDialog({this.address, this.key}) : super(key: key);
+  const AddressDialog({super.key, this.address});
   @override
-  _AddressState createState() => _AddressState(address, key);
+  AddressDialogState createState() => AddressDialogState();
 }
 
-class _AddressState extends State<AddressDialog> {
-  final Address? address;
-  final Key? key;
-  TextEditingController _address1Controller = TextEditingController();
-  TextEditingController _address2Controller = TextEditingController();
-  TextEditingController _postalCodeController = TextEditingController();
-  TextEditingController _cityController = TextEditingController();
-  TextEditingController _provinceController = TextEditingController();
-  TextEditingController _countrySearchBoxController = TextEditingController();
+class AddressDialogState extends State<AddressDialog> {
+  late Address? address;
+  final TextEditingController _address1Controller = TextEditingController();
+  final TextEditingController _address2Controller = TextEditingController();
+  final TextEditingController _postalCodeController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _provinceController = TextEditingController();
+  final TextEditingController _countrySearchBoxController =
+      TextEditingController();
   Country? _selectedCountry;
 
   final _formKey = GlobalKey<FormState>();
 
-  _AddressState(this.address, this.key);
-
   @override
   void initState() {
     super.initState();
+    address = widget.address;
     if (address != null) {
       _address1Controller.text = address!.address1 ?? '';
       _address2Controller.text = address!.address2 ?? '';
@@ -60,167 +58,156 @@ class _AddressState extends State<AddressDialog> {
   Widget build(BuildContext context) {
     var repos = context.read<APIRepository>();
 
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: GestureDetector(
-            onTap: () {},
-            child: Dialog(
-                key: Key('AddressDialog'),
-                insetPadding: EdgeInsets.all(10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Stack(clipBehavior: Clip.none, children: [
-                  Container(
-                      height: 700,
-                      width: 400,
-                      child: _editAddress(context, repos)),
-                  Positioned(top: 5, right: 5, child: DialogCloseButton())
-                ]))));
+    return Dialog(
+      key: const Key('AddressDialog'),
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: popUp(
+          context: context,
+          title: address == null
+              ? "New Company Address"
+              : "Company Address #${address!.addressId}",
+          height: 700,
+          width: 400,
+          child: _editAddress(context, repos)),
+    );
   }
 
   Widget _editAddress(BuildContext context, repos) {
-    return Center(
-        child: Container(
-            width: 300,
-            child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                    key: Key('listView'),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 30),
-                        Center(
-                            child: Text(
-                                (address == null
-                                    ? "New Company Address"
-                                    : "Company Address #${address!.addressId}"),
+    return Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+            key: const Key('listView'),
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key('address1'),
+                  decoration:
+                      const InputDecoration(labelText: 'Address line 1'),
+                  controller: _address1Controller,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a Street name?';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key('address2'),
+                  decoration:
+                      const InputDecoration(labelText: 'Address line 2'),
+                  controller: _address2Controller,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key('postalCode'),
+                  decoration: const InputDecoration(labelText: 'PostalCode'),
+                  controller: _postalCodeController,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a Postal Code?';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key('city'),
+                  decoration: const InputDecoration(labelText: 'City'),
+                  controller: _cityController,
+                  validator: (value) {
+                    if (value!.isEmpty) return 'Please enter a City?';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  key: const Key('province'),
+                  decoration:
+                      const InputDecoration(labelText: 'Province/State'),
+                  controller: _provinceController,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a Province or State?';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                DropdownSearch<Country>(
+                  key: const Key('country'),
+                  selectedItem: _selectedCountry,
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0)),
+                      ),
+                      controller: _countrySearchBoxController,
+                    ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                    title: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColorDark,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            )),
+                        child: const Center(
+                            child: Text('Select country',
                                 style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold))),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          key: Key('address1'),
-                          decoration:
-                              InputDecoration(labelText: 'Address line 1'),
-                          controller: _address1Controller,
-                          validator: (value) {
-                            if (value!.isEmpty)
-                              return 'Please enter a Street name?';
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          key: Key('address2'),
-                          decoration:
-                              InputDecoration(labelText: 'Address line 2'),
-                          controller: _address2Controller,
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          key: Key('postalCode'),
-                          decoration: InputDecoration(labelText: 'PostalCode'),
-                          controller: _postalCodeController,
-                          validator: (value) {
-                            if (value!.isEmpty)
-                              return 'Please enter a Postal Code?';
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          key: Key('city'),
-                          decoration: InputDecoration(labelText: 'City'),
-                          controller: _cityController,
-                          validator: (value) {
-                            if (value!.isEmpty) return 'Please enter a City?';
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          key: Key('province'),
-                          decoration:
-                              InputDecoration(labelText: 'Province/State'),
-                          controller: _provinceController,
-                          validator: (value) {
-                            if (value!.isEmpty)
-                              return 'Please enter a Province or State?';
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        DropdownSearch<Country>(
-                          key: Key('country'),
-                          selectedItem: _selectedCountry,
-                          popupProps: PopupProps.menu(
-                            showSearchBox: true,
-                            searchFieldProps: TextFieldProps(
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(25.0)),
-                              ),
-                              controller: _countrySearchBoxController,
-                            ),
-                            menuProps: MenuProps(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            title: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColorDark,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      topRight: Radius.circular(20),
-                                    )),
-                                child: Center(
-                                    child: Text('Select country',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        )))),
-                          ),
-                          dropdownSearchDecoration: InputDecoration(
-                            labelText: 'Country',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
-                          itemAsString: (Country? u) => "${u!.name}",
-                          items: countries,
-                          validator: (value) {
-                            if (value == null)
-                              return 'Please Select a country?';
-                            return null;
-                          },
-                          onChanged: (Country? newValue) {
-                            _selectedCountry = newValue;
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        Row(children: [
-                          Expanded(
-                              child: ElevatedButton(
-                                  key: Key('updateAddress'),
-                                  child: Text('Update'),
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      Navigator.of(context).pop(Address(
-                                        address1: _address1Controller.text,
-                                        address2: _address2Controller.text,
-                                        postalCode: _postalCodeController.text,
-                                        city: _cityController.text,
-                                        province: _provinceController.text,
-                                        country: _selectedCountry != null
-                                            ? _selectedCountry!.name
-                                            : null,
-                                      ));
-                                    }
-                                  }))
-                        ]),
-                      ],
-                    )))));
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                )))),
+                  ),
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Country',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0)),
+                  ),
+                  itemAsString: (Country? u) => u!.name,
+                  items: countries,
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Please Select a country?';
+                    }
+                    return null;
+                  },
+                  onChanged: (Country? newValue) {
+                    _selectedCountry = newValue;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(children: [
+                  Expanded(
+                      child: ElevatedButton(
+                          key: const Key('updateAddress'),
+                          child: const Text('Update'),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              Navigator.of(context).pop(Address(
+                                address1: _address1Controller.text,
+                                address2: _address2Controller.text,
+                                postalCode: _postalCodeController.text,
+                                city: _cityController.text,
+                                province: _provinceController.text,
+                                country: _selectedCountry != null
+                                    ? _selectedCountry!.name
+                                    : null,
+                              ));
+                            }
+                          }))
+                ]),
+              ],
+            )));
   }
 }

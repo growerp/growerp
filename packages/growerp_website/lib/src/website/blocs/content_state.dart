@@ -17,6 +17,7 @@ part of 'content_bloc.dart';
 enum ContentStatus {
   initial,
   loading,
+  updating,
   success,
   failure,
 }

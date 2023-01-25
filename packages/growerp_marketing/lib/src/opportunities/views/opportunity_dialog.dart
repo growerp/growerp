@@ -104,7 +104,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                               width: columns.toDouble() * 400,
                               height: 1 / columns.toDouble() * 1000,
                               child: _opportunityForm()),
-                          Positioned(
+                          const Positioned(
                               top: 10, right: 10, child: DialogCloseButton())
                         ]))))));
   }

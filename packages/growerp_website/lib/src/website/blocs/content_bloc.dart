@@ -32,8 +32,6 @@ EventTransformer<E> websiteContentDroppable<E>(Duration duration) {
 
 class ContentBloc extends Bloc<ContentEvent, ContentState> {
   ContentBloc(this.repos) : super(const ContentState()) {
-    on<ContentInit>((event, emit) => emit(
-        state.copyWith(content: Content(), status: ContentStatus.success)));
     on<ContentFetch>(_onContentFetch,
         transformer:
             websiteContentDroppable(const Duration(milliseconds: 100)));
@@ -47,23 +45,28 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     Emitter<ContentState> emit,
   ) async {
     emit(state.copyWith(status: ContentStatus.loading));
-    ApiResult result = await repos.getWebsiteContent(event.content);
-    return emit(result.when(
-        success: (data) {
-          return state.copyWith(
-            status: ContentStatus.success,
-            content: data,
-          );
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: ContentStatus.failure, message: error.toString())));
+    if (event.content.path.isNotEmpty || event.content.title.isNotEmpty) {
+      ApiResult result = await repos.getWebsiteContent(event.content);
+      return emit(result.when(
+          success: (data) {
+            return state.copyWith(
+              status: ContentStatus.success,
+              content: data,
+            );
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: ContentStatus.failure, message: error.toString())));
+    } else {
+      return emit(state.copyWith(
+          status: ContentStatus.success, content: event.content));
+    }
   }
 
   Future<void> _onContentUpdate(
     ContentUpdate event,
     Emitter<ContentState> emit,
   ) async {
-    emit(state.copyWith(status: ContentStatus.loading));
+    emit(state.copyWith(status: ContentStatus.updating));
     ApiResult result =
         await repos.uploadWebsiteContent(event.websiteId, event.content);
     return emit(result.when(

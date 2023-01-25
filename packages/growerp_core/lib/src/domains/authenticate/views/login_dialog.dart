@@ -66,7 +66,7 @@ class _LoginHeaderState extends State<LoginDialog> {
         default:
       }
     }, builder: (context, state) {
-      if (state.status == AuthStatus.loading) return LoadingIndicator();
+      if (state.status == AuthStatus.loading) return const LoadingIndicator();
       if (state.status == AuthStatus.passwordChange) {
         username = _usernameController.text;
         oldPassword = _passwordController.text;
@@ -358,37 +358,4 @@ class _LoginHeaderState extends State<LoginDialog> {
               ]));
         });
   }
-}
-
-Widget popUp({
-  required BuildContext context,
-  required Widget child,
-  String title = '',
-  double height = 400,
-  double width = 400,
-}) {
-  return Stack(clipBehavior: Clip.none, children: [
-    SizedBox(
-        width: width,
-        height: height,
-        child: Column(children: [
-          Container(
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColorDark,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  )),
-              child: Center(
-                  child: Text(title,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold)))),
-          Expanded(
-              child: Padding(padding: const EdgeInsets.all(20), child: child)),
-        ])),
-    const Positioned(top: 10, right: 10, child: DialogCloseButton())
-  ]);
 }

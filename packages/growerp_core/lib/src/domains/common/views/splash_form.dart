@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class SplashForm extends StatelessWidget {
+  const SplashForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     SystemChannels.textInput.invokeMethod('TextInput.hide'); // dismiss keyboard
@@ -23,14 +25,14 @@ class SplashForm extends StatelessWidget {
         body: SingleChildScrollView(
       child: Center(
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          SizedBox(height: 100),
+          const SizedBox(height: 100),
           Image.asset(
             'assets/images/growerp.jpg',
             height: 595,
             width: 452,
           ),
-          SizedBox(height: 20),
-          SizedBox(
+          const SizedBox(height: 20),
+          const SizedBox(
               width: 300,
               child: LinearProgressIndicator(
                 minHeight: 20,

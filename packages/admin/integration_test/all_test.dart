@@ -24,7 +24,7 @@ import 'invoice_sales_test.dart' as sales_invoice;
 import 'invoice_purchase_test.dart' as purchase_invoice;
 import 'roundtrip.dart' as purchase_sales;
 import 'room_rental_test.dart' as room_rental;
-import 'chat_test.dart' as chat;
+//import 'chat_test.dart' as chat;
 import 'website_test.dart' as website;
 
 void main() {

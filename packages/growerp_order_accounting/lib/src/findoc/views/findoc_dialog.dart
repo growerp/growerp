@@ -89,7 +89,8 @@ class MyFinDocState extends State<FinDocPage> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
 
-    blocConsumerListener(BuildContext context, CartState state) async {
+    blocConsumerListener(BuildContext context, CartState state,
+        [bool mounted = true]) async {
       switch (state.status) {
         case CartStatus.complete:
           HelperFunctions.showMessage(
@@ -97,6 +98,7 @@ class MyFinDocState extends State<FinDocPage> {
               '${finDoc.idIsNull() ? "Add" : "Update"} successfull',
               Colors.green);
           await Future.delayed(const Duration(milliseconds: 500));
+          if (!mounted) return const Text('not mounted!');
           Navigator.of(context).pop();
           break;
         case CartStatus.failure:
@@ -144,7 +146,7 @@ class MyFinDocState extends State<FinDocPage> {
                 child: SizedBox(height: 40, child: generalButtons())),
           ]);
         default:
-          return LoadingIndicator();
+          return const LoadingIndicator();
       }
     }
 

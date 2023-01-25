@@ -1,2 +1,2 @@
-export 'opportunityList_header.dart';
-export 'opportunityList_item.dart';
+export 'opportunity_list_header.dart';
+export 'opportunity_list_item.dart';

@@ -100,7 +100,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       }
     }, builder: (context, state) {
       if (state.status == GlAccountStatus.failure) {
-        return const FatalErrorForm('Could not load Ledger tree!');
+        return const FatalErrorForm(message: 'Could not load Ledger tree!');
       }
       if (state.status == GlAccountStatus.success) {
         _nodes = convert(state.glAccounts);

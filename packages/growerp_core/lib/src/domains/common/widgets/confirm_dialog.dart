@@ -14,40 +14,55 @@
 
 import 'package:flutter/material.dart';
 
+import 'popup.dart';
+
 /// dialog returns true when continue, false when cancelled
 confirmDialog(BuildContext context, String title, String content) {
   // set up the buttons
   Widget cancelButton = ElevatedButton(
-    child: Text("Cancel", key: Key('cancel')),
+    child: const Text("Cancel", key: Key('cancel')),
     onPressed: () {
       Navigator.of(context).pop(false);
     },
   );
   Widget continueButton = ElevatedButton(
-    child: Text("Continue", key: Key('continue')),
+    child: const Text("Continue", key: Key('continue')),
     onPressed: () {
       Navigator.of(context).pop(true);
     },
   );
 
   // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(32.0))),
-    title: Text("$title"),
-    content: Text("$content"),
-    actions: [
-      cancelButton,
-      continueButton,
-    ],
-  );
+  Dialog dialog = Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: popUp(
+          height: 220,
+          width: 400,
+          context: context,
+          title: title,
+          child: Center(
+            child: Column(children: [
+              const SizedBox(height: 20),
+              Text(content,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              Row(children: [
+                cancelButton,
+                const SizedBox(width: 20),
+                Expanded(child: continueButton)
+              ]),
+            ]),
+          )));
 
   // show the dialog
   return showDialog(
     context: context,
     barrierDismissible: true,
     builder: (BuildContext context) {
-      return alert;
+      return dialog;
     },
   );
 }

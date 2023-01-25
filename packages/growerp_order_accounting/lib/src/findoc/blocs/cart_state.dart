@@ -17,7 +17,7 @@ part of 'cart_bloc.dart';
 enum CartStatus { initial, inProcess, saving, complete, failure }
 
 class CartState extends Equatable {
-  CartState({
+  const CartState({
     this.status = CartStatus.initial,
     required this.finDoc,
     this.itemTypes = const [],

@@ -54,7 +54,6 @@ class WebsiteFormState extends State<WebsitePage> {
   late WebsiteAPIRepository _websiteProvider;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
-  final List<Category> _availableCategories = [];
   final _urlController = TextEditingController();
   final _titleController = TextEditingController();
   final _obsidianController = TextEditingController();
@@ -99,7 +98,7 @@ class WebsiteFormState extends State<WebsitePage> {
         case WebsiteStatus.failure:
           return const Center(child: Text("error happened"));
         default:
-          return LoadingIndicator();
+          return const LoadingIndicator();
       }
     });
   }
@@ -121,12 +120,9 @@ class WebsiteFormState extends State<WebsitePage> {
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return BlocProvider.value(
-                      value: _websiteBloc,
-                      child: RepositoryProvider.value(
-                          value: _websiteProvider,
-                          child: WebsiteContentDialog(
-                              state.website!.id, content)));
+                  return RepositoryProvider.value(
+                      value: _websiteProvider,
+                      child: WebsiteContentDialog(state.website!.id, content));
                 });
             if (updContent != null) {
               setState(() {
@@ -139,7 +135,7 @@ class WebsiteFormState extends State<WebsitePage> {
             key: Key("deleteTextChip"),
           ),
           onDeleted: () async {
-            bool result = await confirmDialog(
+            bool? result = await confirmDialog(
                 context, "delete ${content.title}?", "cannot be undone!");
             if (result == true) {
               _websiteBloc.add(WebsiteUpdate(Website(
@@ -166,12 +162,8 @@ class WebsiteFormState extends State<WebsitePage> {
               builder: (BuildContext context) {
                 return RepositoryProvider.value(
                     value: _websiteProvider,
-                    child: RepositoryProvider.value(
-                        value: _websiteProvider,
-                        child: BlocProvider.value(
-                            value: _websiteBloc,
-                            child: WebsiteContentDialog(
-                                state.website!.id, Content(text: '# ')))));
+                    child: WebsiteContentDialog(
+                        state.website!.id, Content(text: '# ')));
               });
 
           if (updContent != null) {
@@ -197,10 +189,7 @@ class WebsiteFormState extends State<WebsitePage> {
                 builder: (BuildContext context) {
                   return RepositoryProvider.value(
                       value: _websiteProvider,
-                      child: BlocProvider.value(
-                          value: _websiteBloc,
-                          child: WebsiteContentDialog(
-                              state.website!.id, content)));
+                      child: WebsiteContentDialog(state.website!.id, content));
                 });
             if (updContent != null) {
               setState(() {
@@ -213,8 +202,8 @@ class WebsiteFormState extends State<WebsitePage> {
             key: Key("deleteImageChip"),
           ),
           onDeleted: () async {
-            bool result = await confirmDialog(
-                context, "delete ${content.title}?", "cannot be undone!");
+            bool? result = await confirmDialog(context,
+                "delete ${content.title}?", "This delete cannot be undone!");
             if (result == true) {
               setState(() {
                 _websiteBloc.add(WebsiteUpdate(Website(
@@ -260,8 +249,7 @@ class WebsiteFormState extends State<WebsitePage> {
             product.productName ?? '',
             key: Key(product.productName ?? ''),
           ),
-          deleteIcon:
-              Icon(Icons.cancel, key: Key('delete${product.productName!}')),
+          deleteIcon: const Icon(Icons.cancel, key: Key('deleteProductChip')),
           onDeleted: () async {
             var productList = List.of(
                 _websiteBloc.state.website!.websiteCategories[index].products);
@@ -284,7 +272,7 @@ class WebsiteFormState extends State<WebsitePage> {
       }
 
       productWidgets.add(IconButton(
-        key: const Key('addHomeCategoryProduct'),
+        key: Key("addProduct${category.categoryName}"),
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
         color: Colors.deepOrange,
@@ -292,12 +280,21 @@ class WebsiteFormState extends State<WebsitePage> {
         onPressed: () async {
           SelectDialog.showModal<Product>(
             context,
+            searchBoxDecoration: InputDecoration(
+                labelText: 'Search text here...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                )),
             label: "Find and (un)select products",
             alwaysShowScrollBar: true,
             multipleSelectedValues: category.products,
             onFind: (String filter) async => await getProduct(filter),
             itemBuilder: (context, item, isSelected) {
               return ListTile(
+                leading: CircleAvatar(
+                    backgroundColor: Colors.green,
+                    child: Text(
+                        item.productName != null ? item.productName![0] : '')),
                 trailing: isSelected ? const Icon(Icons.check) : null,
                 title: Text(item.productName ?? ''),
                 subtitle: Text(item.price.toString()),
@@ -310,14 +307,10 @@ class WebsiteFormState extends State<WebsitePage> {
                   websiteCategories: [category.copyWith(products: selected)])));
             },
             okButtonBuilder: (context, onPressed) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: FloatingActionButton(
+              return ElevatedButton(
+                  key: const Key('ok'),
                   onPressed: onPressed,
-                  mini: true,
-                  child: const Icon(Icons.check),
-                ),
-              );
+                  child: const Text('ok'));
             },
           );
         },
@@ -334,12 +327,12 @@ class WebsiteFormState extends State<WebsitePage> {
           category.categoryName,
           key: Key(category.categoryName),
         ),
-        deleteIcon: Icon(
+        deleteIcon: const Icon(
           Icons.cancel,
-          key: Key("delete${category.categoryName}"),
+          key: Key("deleteCategoryChip"),
         ),
         onDeleted: () async {
-          bool result = await confirmDialog(context,
+          bool? result = await confirmDialog(context,
               "Remove ${category.categoryName}?", "can be added again!");
           if (result == true) {
             setState(() {
@@ -373,12 +366,21 @@ class WebsiteFormState extends State<WebsitePage> {
       onPressed: () async {
         SelectDialog.showModal<Category>(
           context,
+          searchBoxDecoration: InputDecoration(
+              labelText: 'Search text here...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           label: "Find and (un)select categories",
           alwaysShowScrollBar: true,
           multipleSelectedValues: state.website!.productCategories,
           onFind: (String filter) async => await getCategory(filter),
           itemBuilder: (context, item, isSelected) {
             return ListTile(
+              leading: CircleAvatar(
+                  backgroundColor: Colors.green,
+                  child: Text(
+                      item.categoryName != null ? item.categoryName![0] : '')),
               trailing: isSelected ? const Icon(Icons.check) : null,
               title: Text(item.categoryName),
               subtitle: Text(item.description),
@@ -390,14 +392,10 @@ class WebsiteFormState extends State<WebsitePage> {
                 Website(id: state.website!.id, productCategories: selected)));
           },
           okButtonBuilder: (context, onPressed) {
-            return Align(
-              alignment: Alignment.centerRight,
-              child: FloatingActionButton(
+            return ElevatedButton(
+                key: const Key('ok'),
                 onPressed: onPressed,
-                mini: true,
-                child: const Icon(Icons.check),
-              ),
-            );
+                child: const Text('ok'));
           },
         );
       },
@@ -632,6 +630,7 @@ class WebsiteFormState extends State<WebsitePage> {
             child: Column(children: [
               Text(
                 cat["categoryName"],
+                key: Key(cat["categoryName"]),
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),

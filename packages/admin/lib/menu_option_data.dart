@@ -19,7 +19,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_website/growerp_website.dart';
-import 'forms/@forms.dart' as local;
+import 'forms/forms.dart' as local;
 
 List<MenuOption> menuOptions = [
   MenuOption(
@@ -29,7 +29,7 @@ List<MenuOption> menuOptions = [
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
     writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
-    child: local.AdminDbForm(),
+    child: const local.AdminDbForm(),
   ),
   MenuOption(
     image: 'assets/images/companyGrey.png',

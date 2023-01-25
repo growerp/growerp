@@ -36,7 +36,7 @@ EventTransformer<E> companyDroppable<E>(Duration duration) {
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
   CompanyBloc(this.repos) : super(const CompanyState()) {
     on<CompanyFetch>(_onCompanyFetch,
-        transformer: companyDroppable(Duration(milliseconds: 100)));
+        transformer: companyDroppable(const Duration(milliseconds: 100)));
     on<CompanyUpdate>(_onCompanyUpdate);
   }
 
@@ -45,8 +45,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
     CompanyFetch event,
     Emitter<CompanyState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty)
+    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
+    }
     try {
       // start from record zero for initial and refresh
       if (state.status == CompanyStatus.initial || event.refresh) {

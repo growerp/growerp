@@ -1,6 +1,6 @@
-export 'menuOption_model.dart';
-export 'tabItem_model.dart';
-export 'formArguments_model.dart';
+export 'menu_option_model.dart';
+export 'tab_item_model.dart';
+export 'form_arguments_model.dart';
 export 'currency_model.dart';
 export 'country_model.dart';
 export 'stats_model.dart';

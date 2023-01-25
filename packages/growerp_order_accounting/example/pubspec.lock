@@ -398,23 +398,23 @@ packages:
   growerp_catalog:
     dependency: "direct main"
     description:
-      name: growerp_catalog
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../growerp_catalog"
+      relative: true
+    source: path
     version: "0.8.0-dev.1"
   growerp_core:
     dependency: transitive
     description:
-      name: growerp_core
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../growerp_core"
+      relative: true
+    source: path
     version: "0.8.0-dev.1"
   growerp_inventory:
     dependency: "direct main"
     description:
-      name: growerp_inventory
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../../growerp_inventory"
+      relative: true
+    source: path
     version: "0.8.0-dev.1"
   growerp_order_accounting:
     dependency: "direct main"

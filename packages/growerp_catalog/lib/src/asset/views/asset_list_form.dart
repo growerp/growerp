@@ -118,7 +118,7 @@ class AssetListState extends State<AssetList> {
                         }
                         index--;
                         return index >= state.assets.length
-                            ? BottomLoader()
+                            ? const BottomLoader()
                             : Dismissible(
                                 key: const Key('assetItem'),
                                 direction: DismissDirection.startToEnd,

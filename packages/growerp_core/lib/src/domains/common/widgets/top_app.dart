@@ -108,22 +108,19 @@ class MyApp extends StatelessWidget {
             home: BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 if (state.status == AuthStatus.failure) {
-                  return const FatalErrorForm('server connection problem');
+                  return const FatalErrorForm(
+                      message: 'server connection problem');
                 }
                 if (state.status == AuthStatus.authenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
+                  return HomeForm(menuOptions: menuOptions, title: title);
                 }
                 if (state.status == AuthStatus.unAuthenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
+                  return HomeForm(menuOptions: menuOptions, title: title);
                 }
-                if (state.status == AuthStatus.changeIp) return ChangeIpForm();
-                return SplashForm();
+                if (state.status == AuthStatus.changeIp) {
+                  return const ChangeIpForm();
+                }
+                return const SplashForm();
               },
             )));
   }
