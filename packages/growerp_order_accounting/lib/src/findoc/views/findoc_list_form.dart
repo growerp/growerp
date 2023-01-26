@@ -41,17 +41,19 @@ class FinDocListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget finDocList = FinDocList(
-      key: key,
-      sales: sales,
-      docType: docType,
-      onlyRental: onlyRental,
-      status: status,
-      additionalItemButtonName: additionalItemButtonName,
-      additionalItemButtonRoute: additionalItemButtonRoute,
-    );
     FinDocAPIRepository finDocAPIRepository = FinDocAPIRepository(
         context.read<AuthBloc>().state.authenticate!.apiKey!);
+    Widget finDocList = RepositoryProvider.value(
+        value: finDocAPIRepository,
+        child: FinDocList(
+          key: key,
+          sales: sales,
+          docType: docType,
+          onlyRental: onlyRental,
+          status: status,
+          additionalItemButtonName: additionalItemButtonName,
+          additionalItemButtonRoute: additionalItemButtonRoute,
+        ));
     if (docType == FinDocType.order) {
       if (sales) {
         return BlocProvider<SalesOrderBloc>(
@@ -149,6 +151,7 @@ class FinDocListState extends State<FinDocList> {
   bool isLoading = true;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
+  late FinDocAPIRepository repos;
 
   @override
   void initState() {
@@ -158,6 +161,7 @@ class FinDocListState extends State<FinDocList> {
             ? 'Reservation'
             : widget.docType.toString();
     _scrollController.addListener(_onScroll);
+    repos = context.read<FinDocAPIRepository>();
     switch (widget.docType) {
       case FinDocType.order:
         widget.sales
@@ -307,16 +311,19 @@ class FinDocListState extends State<FinDocList> {
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _finDocBloc,
-                                  child: widget.docType == FinDocType.payment
-                                      ? PaymentDialog(FinDoc(
-                                          sales: widget.sales,
-                                          docType: widget.docType))
-                                      : FinDocDialog(
-                                          finDoc: FinDoc(
+                              return RepositoryProvider.value(
+                                  value: repos,
+                                  child: BlocProvider.value(
+                                      value: _finDocBloc,
+                                      child: widget.docType ==
+                                              FinDocType.payment
+                                          ? PaymentDialog(FinDoc(
                                               sales: widget.sales,
-                                              docType: widget.docType)));
+                                              docType: widget.docType))
+                                          : FinDocDialog(
+                                              finDoc: FinDoc(
+                                                  sales: widget.sales,
+                                                  docType: widget.docType))));
                             });
                       },
                       tooltip: 'Add New',

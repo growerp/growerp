@@ -104,24 +104,19 @@ class MyChatApp extends StatelessWidget {
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state.status == AuthStatus.failure) {
-              return const FatalErrorForm('Internet or server problem?');
+              return const FatalErrorForm(
+                  message: 'Internet or server problem?');
             }
             if (state.status == AuthStatus.authenticated) {
-              return HomeForm(
-                  message: state.message,
-                  menuOptions: menuOptions,
-                  title: title);
+              return HomeForm(menuOptions: menuOptions, title: title);
             }
             if (state.status == AuthStatus.unAuthenticated) {
-              return HomeForm(
-                  message: state.message,
-                  menuOptions: menuOptions,
-                  title: title);
+              return HomeForm(menuOptions: menuOptions, title: title);
             }
             if (state.status == AuthStatus.changeIp) {
-              return ChangeIpForm();
+              return const ChangeIpForm();
             }
-            return SplashForm();
+            return const SplashForm();
           },
         ));
   }

@@ -22,6 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 
+import '../../api_repository.dart';
 import '../blocs/blocs.dart';
 
 class FinDocDialog extends StatelessWidget {
@@ -64,7 +65,7 @@ class MyFinDocState extends State<FinDocPage> {
   final _descriptionController = TextEditingController();
   final _userSearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
-  late APIRepository repos;
+  late FinDocAPIRepository repos;
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   User? _selectedUser;
@@ -82,7 +83,7 @@ class MyFinDocState extends State<FinDocPage> {
     } else {
       _cartBloc = context.read<PurchaseCartBloc>() as CartBloc;
     }
-    repos = context.read<APIRepository>();
+    repos = context.read<FinDocAPIRepository>();
   }
 
   @override

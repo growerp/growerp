@@ -73,40 +73,35 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   @override
   Widget build(BuildContext context) {
     int columns = ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 1 : 2;
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
+    return BlocListener<OpportunityBloc, OpportunityState>(
+        listener: (context, state) async {
+          switch (state.status) {
+            case OpportunityStatus.success:
+              Navigator.of(context).pop();
+              break;
+            case OpportunityStatus.failure:
+              HelperFunctions.showMessage(
+                  context, 'Error: ${state.message}', Colors.red);
+              break;
+            default:
+              const Text("????");
+          }
+        },
         child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: const Key('OpportunityDialog'),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BlocListener<OpportunityBloc, OpportunityState>(
-                        listener: (context, state) async {
-                          switch (state.status) {
-                            case OpportunityStatus.success:
-                              Navigator.of(context).pop();
-                              break;
-                            case OpportunityStatus.failure:
-                              HelperFunctions.showMessage(context,
-                                  'Error: ${state.message}', Colors.red);
-                              break;
-                            default:
-                              const Text("????");
-                          }
-                        },
-                        child: Stack(clipBehavior: Clip.none, children: [
-                          SizedBox(
-                              width: columns.toDouble() * 400,
-                              height: 1 / columns.toDouble() * 1000,
-                              child: _opportunityForm()),
-                          const Positioned(
-                              top: 10, right: 10, child: DialogCloseButton())
-                        ]))))));
+            body: Dialog(
+                key: const Key('OpportunityDialog'),
+                insetPadding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
+                    context: context,
+                    title:
+                        "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
+                    width: columns.toDouble() * 400,
+                    height: 1 / columns.toDouble() * 1000,
+                    child: _opportunityForm()))));
   }
 
   Widget _opportunityForm() {
@@ -324,25 +319,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     return Form(
         key: _formKeyOpportunity,
         child: SingleChildScrollView(
-            key: const Key('listView'),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Center(
-                    child: Text(
-                  "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
-                  style: TextStyle(
-                      fontSize:
-                          ResponsiveWrapper.of(context).isSmallerThan(TABLET)
-                              ? 10
-                              : 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold),
-                  key: const Key('header'),
-                )),
-                const SizedBox(height: 10),
-                Column(children: (rows.isEmpty ? column : rows)),
-              ],
-            )));
+          key: const Key('listView'),
+          padding: const EdgeInsets.all(20),
+          child: Column(children: (rows.isEmpty ? column : rows)),
+        ));
   }
 }
