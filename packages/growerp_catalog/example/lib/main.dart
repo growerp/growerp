@@ -37,8 +37,8 @@ Future main() async {
 // Menu definition
 List<MenuOption> menuOptions = [
   MenuOption(
-    image: 'assets/images/dashBoardGrey.png',
-    selectedImage: 'assets/images/dashBoard.png',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -46,8 +46,8 @@ List<MenuOption> menuOptions = [
     child: const MainMenuForm(),
   ),
   MenuOption(
-    image: 'assets/images/companyGrey.png',
-    selectedImage: 'assets/images/company.png',
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -77,8 +77,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-      image: 'assets/images/productsGrey.png',
-      selectedImage: 'assets/images/products.png',
+      image: 'packages/growerp_core/images/productsGrey.png',
+      selectedImage: 'packages/growerp_core/images/products.png',
       title: 'Catalog',
       route: '/catalog',
       readGroups: [
@@ -128,8 +128,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     default:
       return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(message:
-              "Routing not found for request: ${settings.name}"));
+          builder: (context) => FatalErrorForm(
+              message: "Routing not found for request: ${settings.name}"));
   }
 }
 

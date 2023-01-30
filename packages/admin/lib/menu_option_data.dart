@@ -23,8 +23,8 @@ import 'forms/forms.dart' as local;
 
 List<MenuOption> menuOptions = [
   MenuOption(
-    image: 'assets/images/dashBoardGrey.png',
-    selectedImage: 'assets/images/dashBoard.png',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -32,8 +32,8 @@ List<MenuOption> menuOptions = [
     child: const local.AdminDbForm(),
   ),
   MenuOption(
-    image: 'assets/images/companyGrey.png',
-    selectedImage: 'assets/images/company.png',
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -68,8 +68,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-    image: 'assets/images/crmGrey.png',
-    selectedImage: 'assets/images/crm.png',
+    image: 'packages/growerp_core/images/crmGrey.png',
+    selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'CRM',
     route: '/crm',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -98,8 +98,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-      image: 'assets/images/productsGrey.png',
-      selectedImage: 'assets/images/products.png',
+      image: 'packages/growerp_core/images/productsGrey.png',
+      selectedImage: 'packages/growerp_core/images/products.png',
       title: 'Catalog',
       route: '/catalog',
       readGroups: [
@@ -128,8 +128,8 @@ List<MenuOption> menuOptions = [
         ),
       ]),
   MenuOption(
-    image: 'assets/images/orderGrey.png',
-    selectedImage: 'assets/images/order.png',
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
     title: 'Orders',
     route: '/orders',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -166,8 +166,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-    image: 'assets/images/supplierGrey.png',
-    selectedImage: 'assets/images/supplier.png',
+    image: 'packages/growerp_core/images/supplierGrey.png',
+    selectedImage: 'packages/growerp_core/images/supplier.png',
     title: 'Inventory',
     route: '/inventory',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -196,8 +196,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-      image: 'assets/images/accountingGrey.png',
-      selectedImage: 'assets/images/accounting.png',
+      image: 'packages/growerp_core/images/accountingGrey.png',
+      selectedImage: 'packages/growerp_core/images/accounting.png',
       title: 'Accounting',
       route: '/accounting',
       readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),

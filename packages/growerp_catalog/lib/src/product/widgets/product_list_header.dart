@@ -47,7 +47,8 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                   key: const Key('search'),
                   onTap: (() =>
                       setState(() => search ? search = false : search = true)),
-                  child: Image.asset('assets/images/search.png', height: 30)),
+                  child: Image.asset('packages/growerp_core/images/search.png',
+                      height: 30)),
               title: search
                   ? Row(children: <Widget>[
                       Expanded(

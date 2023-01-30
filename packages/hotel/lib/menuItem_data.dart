@@ -17,8 +17,8 @@ import 'package:core/domains/domains.dart';
 
 List<MenuOption> menuOptions = [
   MenuOption(
-    image: "assets/images/dashBoardGrey.png",
-    selectedImage: "assets/images/dashBoard.png",
+    image: "packages/growerp_core/images/dashBoardGrey.png",
+    selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main",
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee],
@@ -26,8 +26,8 @@ List<MenuOption> menuOptions = [
     child: GanttForm(),
   ),
   MenuOption(
-    image: "assets/images/companyGrey.png",
-    selectedImage: "assets/images/company.png",
+    image: "packages/growerp_core/images/companyGrey.png",
+    selectedImage: "packages/growerp_core/images/company.png",
     title: "Hotel",
     route: '/company',
     readGroups: [UserGroup.Admin, UserGroup.Employee],
@@ -65,8 +65,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-    image: "assets/images/single-bedGrey.png",
-    selectedImage: "assets/images/single-bed.png",
+    image: "packages/growerp_core/images/single-bedGrey.png",
+    selectedImage: "packages/growerp_core/images/single-bed.png",
     title: "Rooms",
     route: '/catalog',
     readGroups: [UserGroup.Admin, UserGroup.Employee],
@@ -85,8 +85,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-      image: "assets/images/reservationGrey.png",
-      selectedImage: "assets/images/reservation.png",
+      image: "packages/growerp_core/images/reservationGrey.png",
+      selectedImage: "packages/growerp_core/images/reservation.png",
       title: "Reservations",
       route: '/sales',
       readGroups: [
@@ -116,8 +116,8 @@ List<MenuOption> menuOptions = [
         ),
       ]),
   MenuOption(
-      image: "assets/images/check-in-outGrey.png",
-      selectedImage: "assets/images/check-in-out.png",
+      image: "packages/growerp_core/images/check-in-outGrey.png",
+      selectedImage: "packages/growerp_core/images/check-in-out.png",
       title: "check-In-Out",
       route: '/checkInOut',
       readGroups: [
@@ -150,8 +150,8 @@ List<MenuOption> menuOptions = [
         ),
       ]),
   MenuOption(
-      image: "assets/images/accountingGrey.png",
-      selectedImage: "assets/images/accounting.png",
+      image: "packages/growerp_core/images/accountingGrey.png",
+      selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Accounting",
       route: '/accounting',
       readGroups: [UserGroup.Admin]),

@@ -24,10 +24,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
     - assets/cfg/
-    - ./
-    - packages/growerp_core/images/info.png
-    - packages/growerp_core/images/infoGrey.png
-    - packages/growerp_core/images/chat.png
-    - packages/growerp_core/images/chatGrey.png

@@ -24,22 +24,22 @@ class SplashForm extends StatelessWidget {
     return Scaffold(
         body: SingleChildScrollView(
       child: Center(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          const SizedBox(height: 100),
-          Image.asset(
-            'assets/images/growerp.jpg',
-            height: 595,
-            width: 452,
-          ),
-          const SizedBox(height: 20),
-          const SizedBox(
-              width: 300,
-              child: LinearProgressIndicator(
-                minHeight: 20,
-                color: Color(0xFF4baa9b),
-                backgroundColor: Colors.lightGreen,
-              )),
-        ]),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: const [
+              SizedBox(height: 100),
+              Image(
+                  image:
+                      AssetImage('packages/growerp_core/images/growerp.jpg')),
+              SizedBox(height: 20),
+              SizedBox(
+                  width: 300,
+                  child: LinearProgressIndicator(
+                    minHeight: 20,
+                    color: Color(0xFF4baa9b),
+                    backgroundColor: Colors.lightGreen,
+                  )),
+            ]),
       ),
     ));
   }

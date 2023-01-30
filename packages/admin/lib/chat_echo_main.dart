@@ -124,8 +124,8 @@ class MyChatApp extends StatelessWidget {
 
 List<MenuOption> menuOptions = [
   MenuOption(
-    image: 'assets/images/dashBoardGrey.png',
-    selectedImage: 'assets/images/dashBoard.png',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -133,8 +133,8 @@ List<MenuOption> menuOptions = [
     child: const ChatRooms(),
   ),
   MenuOption(
-    image: 'assets/images/dashBoardGrey.png',
-    selectedImage: 'assets/images/dashBoard.png',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],

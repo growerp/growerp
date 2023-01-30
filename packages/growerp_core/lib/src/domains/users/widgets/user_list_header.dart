@@ -42,7 +42,7 @@ class _UserListHeaderState extends State<UserListHeader> {
                 onTap: (() =>
                     setState(() => search ? search = false : search = true)),
                 child: Image.asset(
-                  'assets/images/search.png',
+                  'packages/growerp_core/images/search.png',
                   height: 30,
                 )),
             title: search

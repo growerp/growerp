@@ -142,7 +142,8 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             search = !search;
           });
         }),
-        leading: Image.asset('assets/images/search.png', height: 30),
+        leading:
+            Image.asset('packages/growerp_core/images/search.png', height: 30),
         title: search
             ? Row(children: <Widget>[
                 SizedBox(

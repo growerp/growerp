@@ -38,8 +38,8 @@ Future main() async {
 // Menu definition
 List<MenuOption> menuOptions = [
   MenuOption(
-    image: 'assets/images/dashBoardGrey.png',
-    selectedImage: 'assets/images/dashBoard.png',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -47,8 +47,8 @@ List<MenuOption> menuOptions = [
     child: const MainMenu(),
   ),
   MenuOption(
-    image: 'assets/images/companyGrey.png',
-    selectedImage: 'assets/images/company.png',
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
     readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
@@ -78,8 +78,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-      image: 'assets/images/supplierGrey.png',
-      selectedImage: 'assets/images/supplier.png',
+      image: 'packages/growerp_core/images/supplierGrey.png',
+      selectedImage: 'packages/growerp_core/images/supplier.png',
       title: 'Inventory',
       route: '/inventory',
       readGroups: [
