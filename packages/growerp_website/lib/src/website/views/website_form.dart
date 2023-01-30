@@ -61,6 +61,7 @@ class WebsiteFormState extends State<WebsitePage> {
   final _websiteFormKey1 = GlobalKey<FormState>();
   final _websiteFormKey2 = GlobalKey<FormState>();
   final _websiteFormKey3 = GlobalKey<FormState>();
+  ScrollController myScrollController = ScrollController();
 
   @override
   void initState() {
@@ -583,24 +584,27 @@ class WebsiteFormState extends State<WebsitePage> {
               'Can change order with long press',
               style: TextStyle(fontSize: 10),
             ),
-            ReorderableWrap(
-                runSpacing: 10,
-                onReorder: (int oldIndex, int newIndex) {
-                  List<Content> content = List.of(state.website!.websiteContent
-                      .where((el) => el.text.isNotEmpty));
-                  if (newIndex == content.length) newIndex--;
-                  var save = content[oldIndex];
-                  content[oldIndex] = content[newIndex];
-                  content[newIndex] = save;
-                  int index = 1;
-                  for (int i = 0; i < content.length; i++) {
-                    content[i] = content[i].copyWith(seqId: index++);
-                  }
-                  _websiteBloc.add(WebsiteUpdate(
-                      Website(id: state.website!.id, websiteContent: content)));
-                },
-                spacing: 10,
-                children: textButtons)
+            PrimaryScrollController(
+                controller: myScrollController,
+                child: ReorderableWrap(
+                    runSpacing: 10,
+                    onReorder: (int oldIndex, int newIndex) {
+                      List<Content> content = List.of(state
+                          .website!.websiteContent
+                          .where((el) => el.text.isNotEmpty));
+                      if (newIndex == content.length) newIndex--;
+                      var save = content[oldIndex];
+                      content[oldIndex] = content[newIndex];
+                      content[newIndex] = save;
+                      int index = 1;
+                      for (int i = 0; i < content.length; i++) {
+                        content[i] = content[i].copyWith(seqId: index++);
+                      }
+                      _websiteBloc.add(WebsiteUpdate(Website(
+                          id: state.website!.id, websiteContent: content)));
+                    },
+                    spacing: 10,
+                    children: textButtons))
           ])),
       Container(
           width: 400,

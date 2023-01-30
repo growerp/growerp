@@ -23,13 +23,13 @@ class WebsiteTest {
   }
 
   static Future<void> updateWebsite(WidgetTester tester) async {
-    /*  await updateHost(tester);
+    await updateHost(tester);
     await updateTitle(tester);
     await updateTextSection(tester);
     await updateImages(tester);
     await updateHomePageCategories(tester, "Deals");
     await updateHomePageCategories(tester, "Featured");
-*/
+
     await updateShopCategories(tester);
   }
 
@@ -99,10 +99,11 @@ class WebsiteTest {
   }
 
   static Future<void> updateShopCategories(tester) async {
+    await CommonTest.drag(tester);
     while (tester.any(find.byKey(const Key("deleteCategoryChip")))) {
-      await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, "deleteCategoryChip", seconds: 5);
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
+      await CommonTest.drag(tester);
     }
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(tester, 'addShopCategory');
