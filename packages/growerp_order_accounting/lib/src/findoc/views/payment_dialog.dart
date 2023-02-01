@@ -87,20 +87,18 @@ class PaymentDialogState extends State<PaymentDialog> {
                         }
                       },
                       builder: (context, state) {
-                        return SingleChildScrollView(
-                            key: const Key('listView2'),
-                            physics: const ClampingScrollPhysics(),
-                            child: Stack(clipBehavior: Clip.none, children: [
-                              SizedBox(
-                                  width: 400,
-                                  height: 750,
-                                  child:
-                                      paymentForm(state, paymentDialogFormKey)),
-                              const Positioned(
-                                  top: 10,
-                                  right: 10,
-                                  child: DialogCloseButton())
-                            ]));
+                        return popUp(
+                            context: context,
+                            height: 750,
+                            width: 400,
+                            title:
+                                "${finDoc.sales ? 'Sales/incoming' : 'Purchase/outgoing'} "
+                                "Payment #${finDoc.paymentId ?? 'new'}",
+                            child: SingleChildScrollView(
+                                key: const Key('listView2'),
+                                physics: const ClampingScrollPhysics(),
+                                child:
+                                    paymentForm(state, paymentDialogFormKey)));
                       },
                     )))));
   }
@@ -113,7 +111,6 @@ class PaymentDialogState extends State<PaymentDialog> {
     }
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     AuthBloc authBloc = context.read<AuthBloc>();
-//    finDocBloc.add(FinDocGetItemTypes(sales: finDocUpdated.sales));
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
@@ -131,17 +128,6 @@ class PaymentDialogState extends State<PaymentDialog> {
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
-              const SizedBox(height: 20),
-              Center(
-                  child: Text(
-                      "${finDoc.sales ? 'Sales/incoming' : 'Purchase/outgoing'} "
-                      "Payment #${finDoc.paymentId ?? 'new'}",
-                      style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
-                      key: const Key('header'))),
-              const SizedBox(height: 30),
               DropdownSearch<User>(
                 selectedItem: _selectedUser,
                 popupProps: PopupProps.menu(
@@ -164,9 +150,10 @@ class PaymentDialogState extends State<PaymentDialog> {
                             topLeft: Radius.circular(20),
                             topRight: Radius.circular(20),
                           )),
-                      child: const Center(
-                          child: Text('Select customer',
-                              style: TextStyle(
+                      child: Center(
+                          child: Text(
+                              "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
