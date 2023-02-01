@@ -37,6 +37,7 @@ Widget popUp({
                   )),
               child: Center(
                   child: Text(title,
+                      key: const Key('header'),
                       style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white,
