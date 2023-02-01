@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 
+import '../../api_repository.dart';
 import '../blocs/blocs.dart';
 import '../views/views.dart';
 
@@ -30,7 +31,6 @@ class FinDocListItem extends StatelessWidget {
     required this.docType,
     required this.isPhone,
     required this.onlyRental,
-    required this.finDocBloc,
     this.additionalItemButton,
     this.paymentMethod,
   }) : super(key: key);
@@ -41,134 +41,134 @@ class FinDocListItem extends StatelessWidget {
   final FinDocType docType;
   final bool isPhone;
   final bool onlyRental;
-  final FinDocBloc finDocBloc;
   final Widget? additionalItemButton;
   final PaymentMethod? paymentMethod;
 
   @override
   Widget build(BuildContext context) {
+    FinDocBloc finDocBloc = context.read<FinDocBloc>();
+    FinDocAPIRepository repos = context.read<FinDocAPIRepository>();
     String classificationId = GlobalConfiguration().get("classificationId");
 
-    return Material(
-        child: ExpansionTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text(finDoc.otherUser?.companyName == null
-                  ? ''
-                  : finDoc.otherUser!.companyName![0]),
-            ),
-            title: Row(
-              children: <Widget>[
-                SizedBox(
-                    width: 80,
-                    child: Text("${finDoc.id()}", key: Key('id$index'))),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: Text(
-                        "${finDoc.otherUser?.firstName ?? ''} "
-                        "${finDoc.otherUser?.lastName ?? ''}\n"
-                        "${finDoc.otherUser?.companyName ?? ''}",
-                        key: Key("otherUser$index"))),
-                if (!isPhone && docType != FinDocType.payment)
-                  SizedBox(width: 80, child: Text("${finDoc.items.length}")),
-              ],
-            ),
-            subtitle: Row(children: <Widget>[
-              SizedBox(
-                  width: 80,
-                  child: Text(classificationId == 'AppHotel'
-                      ? finDoc.items[0].rentalFromDate
-                          .toString()
-                          .substring(0, 10)
-                      : "${finDoc.creationDate?.toString().substring(0, 11)}")),
-              SizedBox(
-                  width: 76,
-                  child: Text("${finDoc.grandTotal}",
-                      key: Key("grandTotal$index"))),
-              SizedBox(
-                  width: 90,
-                  child: Text("${finDoc.displayName(classificationId)}",
-                      key: Key("status$index"))),
-              if (!isPhone)
-                Expanded(
-                    child: Text(
-                  finDoc.otherUser!.email ?? '',
-                  key: Key('email$index'),
-                )),
-              if (!isPhone)
-                Expanded(
-                    child: Text(
-                  finDoc.description ?? '',
-                  key: Key('description$index'),
-                )),
-            ]),
-            trailing: SizedBox(
-              width: isPhone ? 100 : 195,
-              child: docType == FinDocType.payment &&
-                      finDoc.status == FinDocStatusVal.Approved
-                  ? TextButton(
-                      key: Key('nextStatus$index'),
-                      onPressed: () {
-                        finDocBloc.add(FinDocConfirmPayment(finDoc));
-                      },
-                      child: const Text(
-                        "Set to 'Paid'",
-                        textAlign: TextAlign.right,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  : docType == FinDocType.shipment
-                      ? (sales
-                          ? IconButton(
-                              key: Key('nextStatus$index'),
-                              icon: const Icon(Icons.send),
-                              tooltip:
-                                  FinDocStatusVal.nextStatus(finDoc.status!)
-                                      .toString(),
-                              onPressed: () {
-                                finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                                    status: FinDocStatusVal.nextStatus(
-                                        finDoc.status!))));
-                              })
-                          : IconButton(
-                              key: Key('nextStatus$index'),
-                              icon: const Icon(Icons.call_received),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return BlocProvider.value(
+    return ExpansionTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(finDoc.otherUser?.companyName == null
+              ? ''
+              : finDoc.otherUser!.companyName![0]),
+        ),
+        title: Row(
+          children: <Widget>[
+            SizedBox(
+                width: 80, child: Text("${finDoc.id()}", key: Key('id$index'))),
+            const SizedBox(width: 10),
+            Expanded(
+                child: Text(
+                    "${finDoc.otherUser?.firstName ?? ''} "
+                    "${finDoc.otherUser?.lastName ?? ''}\n"
+                    "${finDoc.otherUser?.companyName ?? ''}",
+                    key: Key("otherUser$index"))),
+            if (!isPhone && docType != FinDocType.payment)
+              SizedBox(width: 80, child: Text("${finDoc.items.length}")),
+          ],
+        ),
+        subtitle: Row(children: <Widget>[
+          SizedBox(
+              width: 80,
+              child: Text(classificationId == 'AppHotel'
+                  ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+                  : "${finDoc.creationDate?.toString().substring(0, 11)}")),
+          SizedBox(
+              width: 76,
+              child:
+                  Text("${finDoc.grandTotal}", key: Key("grandTotal$index"))),
+          SizedBox(
+              width: 90,
+              child: Text("${finDoc.displayName(classificationId)}",
+                  key: Key("status$index"))),
+          if (!isPhone)
+            Expanded(
+                child: Text(
+              finDoc.otherUser!.email ?? '',
+              key: Key('email$index'),
+            )),
+          if (!isPhone)
+            Expanded(
+                child: Text(
+              finDoc.description ?? '',
+              key: Key('description$index'),
+            )),
+        ]),
+        trailing: SizedBox(
+          width: isPhone ? 100 : 195,
+          child: docType == FinDocType.payment &&
+                  finDoc.status == FinDocStatusVal.Approved
+              ? TextButton(
+                  key: Key('nextStatus$index'),
+                  onPressed: () {
+                    finDocBloc.add(FinDocConfirmPayment(finDoc));
+                  },
+                  child: const Text(
+                    "Set to 'Paid'",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                )
+              : docType == FinDocType.shipment
+                  ? (sales
+                      ? IconButton(
+                          key: Key('nextStatus$index'),
+                          icon: const Icon(Icons.send),
+                          tooltip: FinDocStatusVal.nextStatus(finDoc.status!)
+                              .toString(),
+                          onPressed: () {
+                            finDocBloc.add(FinDocUpdate(finDoc.copyWith(
+                                status: FinDocStatusVal.nextStatus(
+                                    finDoc.status!))));
+                          })
+                      : IconButton(
+                          key: Key('nextStatus$index'),
+                          icon: const Icon(Icons.call_received),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return RepositoryProvider.value(
+                                      value: repos,
+                                      child: BlocProvider.value(
                                           value: finDocBloc,
-                                          child: ShipmentReceiveDialog(finDoc));
-                                    });
-                              }))
-                      : classificationId == 'AppHotel' &&
-                              finDoc.status == FinDocStatusVal.Approved
-                          ? IconButton(
-                              key: Key('nextStatus$index'),
-                              icon: const Icon(Icons.check_box_sharp),
-                              tooltip:
-                                  FinDocStatusVal.nextStatus(finDoc.status!)
-                                      .toString(),
-                              onPressed: () {
-                                finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                                    status: FinDocStatusVal.nextStatus(
-                                        finDoc.status!))));
-                              })
-                          : finDoc.status != null &&
-                                  FinDocStatusVal.statusFixed(finDoc.status!) ==
-                                      false
-                              ? itemButtons(context, paymentMethod)
-                              : finDoc.sales == true &&
-                                      finDoc.status == FinDocStatusVal.Approved
-                                  ? additionalItemButton
-                                  : null,
-            ),
-            children: items(finDoc)));
+                                          child:
+                                              ShipmentReceiveDialog(finDoc)));
+                                });
+                          }))
+                  : classificationId == 'AppHotel' &&
+                          finDoc.status == FinDocStatusVal.Approved
+                      ? IconButton(
+                          key: Key('nextStatus$index'),
+                          icon: const Icon(Icons.check_box_sharp),
+                          tooltip: FinDocStatusVal.nextStatus(finDoc.status!)
+                              .toString(),
+                          onPressed: () {
+                            finDocBloc.add(FinDocUpdate(finDoc.copyWith(
+                                status: FinDocStatusVal.nextStatus(
+                                    finDoc.status!))));
+                          })
+                      : finDoc.status != null &&
+                              FinDocStatusVal.statusFixed(finDoc.status!) ==
+                                  false
+                          ? itemButtons(
+                              context, paymentMethod, finDocBloc, repos)
+                          : finDoc.sales == true &&
+                                  finDoc.status == FinDocStatusVal.Approved
+                              ? additionalItemButton
+                              : null,
+        ),
+        children: items(finDoc));
   }
 
-  Widget? itemButtons(BuildContext context, PaymentMethod? paymentMethod) {
+  Widget? itemButtons(BuildContext context, PaymentMethod? paymentMethod,
+      FinDocBloc finDocBloc, FinDocAPIRepository repos) {
     if (finDoc.salesChannel != 'Web' ||
         (finDoc.salesChannel == 'Web' &&
             finDoc.status != FinDocStatusVal.InPreparation)) {
@@ -220,17 +220,19 @@ class FinDocListItem extends StatelessWidget {
                     barrierDismissible: true,
                     context: context,
                     builder: (BuildContext context) {
-                      return BlocProvider.value(
-                          value: finDocBloc,
-                          child: onlyRental == true
-                              ? ReservationDialog(
-                                  finDoc: finDoc, original: finDoc)
-                              : finDoc.docType == FinDocType.payment
-                                  ? PaymentDialog(
-                                      finDoc,
-                                      paymentMethod: paymentMethod,
-                                    )
-                                  : FinDocDialog(finDoc: finDoc));
+                      return RepositoryProvider.value(
+                          value: repos,
+                          child: BlocProvider.value(
+                              value: finDocBloc,
+                              child: onlyRental == true
+                                  ? ReservationDialog(
+                                      finDoc: finDoc, original: finDoc)
+                                  : finDoc.docType == FinDocType.payment
+                                      ? PaymentDialog(
+                                          finDoc,
+                                          paymentMethod: paymentMethod,
+                                        )
+                                      : FinDocDialog(finDoc: finDoc)));
                     });
               },
             )),

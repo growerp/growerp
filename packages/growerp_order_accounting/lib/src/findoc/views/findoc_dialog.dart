@@ -27,7 +27,7 @@ import '../blocs/blocs.dart';
 
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
-  const FinDocDialog({Key? key, required this.finDoc}) : super(key: key);
+  const FinDocDialog({required this.finDoc, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class FinDocDialog extends StatelessWidget {
               docType: finDoc.docType!,
               sales: true,
               finDocBloc: finDocBloc,
-              repos: context.read<APIRepository>())
+              repos: context.read<FinDocAPIRepository>())
             ..add(CartFetch(finDoc)),
           child: FinDocPage(finDoc));
     }
@@ -47,7 +47,7 @@ class FinDocDialog extends StatelessWidget {
             docType: finDoc.docType!,
             sales: false,
             finDocBloc: finDocBloc,
-            repos: context.read<APIRepository>())
+            repos: context.read<FinDocAPIRepository>())
           ..add(CartFetch(finDoc)),
         child: FinDocPage(finDoc));
   }

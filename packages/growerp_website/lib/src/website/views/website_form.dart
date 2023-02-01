@@ -380,8 +380,9 @@ class WebsiteFormState extends State<WebsitePage> {
             return ListTile(
               leading: CircleAvatar(
                   backgroundColor: Colors.green,
-                  child: Text(
-                      item.categoryName != null ? item.categoryName![0] : '')),
+                  child: Text(item.categoryName.isNotEmpty
+                      ? item.categoryName[0]
+                      : '')),
               trailing: isSelected ? const Icon(Icons.check) : null,
               title: Text(item.categoryName),
               subtitle: Text(item.description),

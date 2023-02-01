@@ -228,29 +228,36 @@ class FinDocListState extends State<FinDocList> {
                     : Dismissible(
                         key: const Key('finDocItem'),
                         direction: DismissDirection.startToEnd,
-                        child: FinDocListItem(
-                          finDoc: finDocs[index],
-                          docType: widget.docType,
-                          index: index,
-                          isPhone: isPhone,
-                          sales: widget.sales,
-                          onlyRental: widget.onlyRental,
-                          finDocBloc: _finDocBloc,
-                          additionalItemButton: widget
-                                          .additionalItemButtonName !=
-                                      null &&
-                                  widget.additionalItemButtonRoute != null
-                              ? TextButton(
-                                  key: Key('addButton$index'),
-                                  child: Text(widget.additionalItemButtonName!),
-                                  onPressed: () async {
-                                    await Navigator.pushNamed(context,
-                                        widget.additionalItemButtonRoute!,
-                                        arguments: finDocs[index]);
-                                  },
-                                )
-                              : null,
-                        ));
+                        child: BlocProvider.value(
+                            value: _finDocBloc,
+                            child: RepositoryProvider.value(
+                                value: repos,
+                                child: FinDocListItem(
+                                  finDoc: finDocs[index],
+                                  docType: widget.docType,
+                                  index: index,
+                                  isPhone: isPhone,
+                                  sales: widget.sales,
+                                  onlyRental: widget.onlyRental,
+                                  additionalItemButton: widget
+                                                  .additionalItemButtonName !=
+                                              null &&
+                                          widget.additionalItemButtonRoute !=
+                                              null
+                                      ? TextButton(
+                                          key: Key('addButton$index'),
+                                          child: Text(
+                                              widget.additionalItemButtonName!),
+                                          onPressed: () async {
+                                            await Navigator.pushNamed(
+                                                context,
+                                                widget
+                                                    .additionalItemButtonRoute!,
+                                                arguments: finDocs[index]);
+                                          },
+                                        )
+                                      : null,
+                                ))));
               }));
     }
 
