@@ -91,7 +91,7 @@ class AdminDbForm extends StatelessWidget {
         ]);
       }
 
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

@@ -15,13 +15,13 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
+import 'package:equatable/equatable.dart';
+import '../models/models.dart';
 import '../../authenticate/blocs/auth_bloc.dart';
 import '../../../services/api_result.dart';
 import '../../../services/network_exceptions.dart';
-import 'package:equatable/equatable.dart';
 import '../../../api_repository.dart';
-import '../models/models.dart';
-import 'package:stream_transform/stream_transform.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -31,7 +31,6 @@ const _userLimit = 20;
 mixin LeadBloc on Bloc<UserEvent, UserState> {}
 mixin CustomerBloc on Bloc<UserEvent, UserState> {}
 mixin EmployeeBloc on Bloc<UserEvent, UserState> {}
-mixin AdminBloc on Bloc<UserEvent, UserState> {}
 mixin SupplierBloc on Bloc<UserEvent, UserState> {}
 
 EventTransformer<E> userDroppable<E>(Duration duration) {
@@ -41,9 +40,8 @@ EventTransformer<E> userDroppable<E>(Duration duration) {
 }
 
 class UserBloc extends Bloc<UserEvent, UserState>
-    with LeadBloc, CustomerBloc, EmployeeBloc, AdminBloc, SupplierBloc {
-  UserBloc(this.repos, this.userGroup, this.authBloc)
-      : super(const UserState()) {
+    with LeadBloc, CustomerBloc, EmployeeBloc, SupplierBloc {
+  UserBloc(this.repos, this.role, this.authBloc) : super(const UserState()) {
     on<UserFetch>(_onUserFetch,
         transformer: userDroppable(const Duration(milliseconds: 100)));
     on<UserUpdate>(_onUserUpdate);
@@ -51,7 +49,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
   }
 
   final APIRepository repos;
-  final UserGroup userGroup;
+  final Role role;
   final AuthBloc authBloc;
 
   Future<void> _onUserFetch(
@@ -64,8 +62,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
     try {
       // start from record zero for initial and refresh
       if (state.status == UserStatus.initial || event.refresh) {
-        ApiResult<List<User>> compResult = await repos
-            .getUser(userGroups: [userGroup], searchString: event.searchString);
+        ApiResult<List<User>> compResult =
+            await repos.getUser(role: role, searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: UserStatus.success,
@@ -81,8 +79,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
-        ApiResult<List<User>> compResult = await repos
-            .getUser(userGroups: [userGroup], searchString: event.searchString);
+        ApiResult<List<User>> compResult =
+            await repos.getUser(role: role, searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: UserStatus.success,
@@ -95,8 +93,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
       }
       // get next page also for search
 
-      ApiResult<List<User>> compResult = await repos
-          .getUser(userGroups: [userGroup], searchString: event.searchString);
+      ApiResult<List<User>> compResult =
+          await repos.getUser(role: role, searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: UserStatus.success,

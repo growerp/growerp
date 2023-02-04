@@ -150,14 +150,14 @@ class UserTest {
       await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'telephoneNr', user.telephoneNr!);
       // changing to new company will clear paymentMethod and address
-      if (user.userGroup != UserGroup.Admin &&
-          user.userGroup != UserGroup.Employee) {
-        if ((user.companyPaymentMethod == null &&
-                user.companyAddress == null) ||
+      if (user.userGroup != UserGroup.admin &&
+          user.userGroup != UserGroup.employee) {
+        if ((user.company!.paymentMethod == null &&
+                user.company!.address == null) ||
             // need for new
             user.partyId == null) {
           await CommonTest.enterText(
-              tester, 'newCompanyName', user.companyName!);
+              tester, 'newCompanyName', user.company!.name!);
           await CommonTest.drag(tester);
         }
       }
@@ -168,16 +168,14 @@ class UserTest {
       await CommonTest.tapByKey(tester, 'updateUser');
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
-      if (user.companyAddress != null) {
-        await CommonTest.doSearch(tester, searchString: user.companyName!);
+      if (user.company != null) {
+        await CommonTest.doSearch(tester, searchString: user.company!.name!);
         await CommonTest.tapByKey(tester, 'name0');
-        await CommonTest.updateAddress(tester, user.companyAddress!);
-      }
-      if (user.companyPaymentMethod != null) {
-        await CommonTest.doSearch(tester, searchString: user.companyName!);
+        await CommonTest.updateAddress(tester, user.company!.address!);
+        await CommonTest.doSearch(tester, searchString: user.company!.name!);
         await CommonTest.tapByKey(tester, 'name0');
         await CommonTest.updatePaymentMethod(
-            tester, user.companyPaymentMethod!);
+            tester, user.company!.paymentMethod!);
       }
       newUsers.add(user.copyWith(email: email, loginName: email));
     }
@@ -208,21 +206,17 @@ class UserTest {
           equals(user.userGroup.toString()));
       newUsers.add(user.copyWith(partyId: id));
 
-      if (user.userGroup != UserGroup.Admin &&
-          user.userGroup != UserGroup.Employee) {
-        if (user.companyAddress == null) {
+      if (user.userGroup != UserGroup.admin &&
+          user.userGroup != UserGroup.employee) {
+        if (user.company == null) {
           expect(CommonTest.getTextField('addressLabel'),
               equals('No address yet'));
-        } else {
-          await CommonTest.checkAddress(tester, user.companyAddress!);
-        }
-
-        if (user.companyPaymentMethod == null) {
           expect(CommonTest.getTextField('paymentMethodLabel'),
               equals('No payment methods yet'));
         } else {
+          await CommonTest.checkAddress(tester, user.company!.address!);
           await CommonTest.checkPaymentMethod(
-              tester, user.companyPaymentMethod!);
+              tester, user.company!.paymentMethod!);
         }
       }
       await CommonTest.tapByKey(tester, 'cancel');

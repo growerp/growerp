@@ -100,15 +100,14 @@ class OpportunityDialogState extends State<OpportunityDialog> {
                     title:
                         "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
                     width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 1000,
+                    height: 1 / columns.toDouble() * 1200,
                     child: _opportunityForm()))));
   }
 
   Widget _opportunityForm() {
-    Future<List<User>> getData(
-        List<UserGroup> userGroups, String filter) async {
+    Future<List<User>> getData(Role role, String filter) async {
       ApiResult<List<User>> result = await repos.getUser(
-          userGroups: userGroups, filter: _leadSearchBoxController.text);
+          role: role, filter: _leadSearchBoxController.text);
       return result.when(
           success: (data) => data,
           failure: (_) => [User(lastName: 'get data error!')]);
@@ -212,9 +211,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         showClearButton: true,
         key: const Key('lead'),
         itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
-            "${u?.companyName}",
+            "${u?.company!.name}",
         asyncItems: (String? filter) =>
-            getData([UserGroup.Lead], _leadSearchBoxController.text),
+            getData(Role.lead, _leadSearchBoxController.text),
         onChanged: (User? newValue) {
           _selectedLead = newValue;
         },
@@ -259,10 +258,9 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           showClearButton: true,
           key: const Key('employee'),
           itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
-              "${u?.companyName}",
-          asyncItems: (String? filter) => getData(
-              [UserGroup.Employee, UserGroup.Admin],
-              _accountSearchBoxController.text),
+              "${u?.company!.name}",
+          asyncItems: (String? filter) =>
+              getData(Role.employee, _accountSearchBoxController.text),
           onChanged: (User? newValue) {
             _selectedAccount = newValue;
           }),

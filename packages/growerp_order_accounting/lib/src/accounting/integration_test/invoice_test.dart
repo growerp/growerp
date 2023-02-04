@@ -163,7 +163,7 @@ class InvoiceTest {
       expect(
           CommonTest.getDropdownSearch(
               invoice.sales == true ? "customer" : "supplier"),
-          contains(invoice.otherUser?.companyName));
+          contains(invoice.otherUser?.company!.name));
       expect(CommonTest.getTextFormField('description'),
           equals(invoice.description));
       int index = 0;
@@ -213,11 +213,11 @@ class InvoiceTest {
     for (FinDoc invoice in test.invoices) {
       await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
       if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.InPreparation.toString()]) {
+          finDocStatusValues[FinDocStatusVal.inPreparation.toString()]) {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       }
       if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.Created.toString()]) {
+          finDocStatusValues[FinDocStatusVal.created.toString()]) {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       }
       await CommonTest.checkText(tester, 'Approved');

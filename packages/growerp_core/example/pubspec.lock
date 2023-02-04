@@ -312,6 +312,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_staggered_grid_view:
+    dependency: transitive
+    description:
+      name: flutter_staggered_grid_view
+      sha256: "1312314293acceb65b92754298754801b0e1f26a1845833b740b30415bbbcf07"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -358,6 +366,14 @@ packages:
       relative: true
     source: path
     version: "0.8.0-dev.1"
+  growerp_select_dialog:
+    dependency: transitive
+    description:
+      name: growerp_select_dialog
+      sha256: ab2372a42eae30859573271d62143ebca6ea3d62bab59b5853fab6d24057c5ff
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   highlight:
     dependency: transitive
     description:
@@ -993,5 +1009,5 @@ packages:
     source: hosted
     version: "6.2.2"
 sdks:
-  dart: ">=2.18.6 <4.0.0"
+  dart: ">=2.18.6 <3.0.0"
   flutter: ">=3.7.0"

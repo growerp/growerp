@@ -21,8 +21,8 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main",
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee],
-    writeGroups: [UserGroup.Admin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: GanttForm(),
   ),
   MenuOption(
@@ -30,13 +30,13 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/company.png",
     title: "Hotel",
     route: '/company',
-    readGroups: [UserGroup.Admin, UserGroup.Employee],
-    writeGroups: [UserGroup.Admin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
         form: const WebsiteForm(
           key: Key('Website'),
-          userGroup: UserGroup.Employee,
+          userGroup: UserGroup.employee,
         ),
         label: 'Website',
         icon: const Icon(Icons.webhook),
@@ -44,7 +44,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: UserListForm(
           key: Key("Admin"),
-          userGroup: UserGroup.Admin,
+          userGroup: UserGroup.admin,
         ),
         label: "Admins",
         icon: Icon(Icons.business),
@@ -52,7 +52,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: UserListForm(
           key: Key("Employee"),
-          userGroup: UserGroup.Employee,
+          userGroup: UserGroup.employee,
         ),
         label: "Employees",
         icon: Icon(Icons.school),
@@ -69,7 +69,7 @@ List<MenuOption> menuOptions = [
     selectedImage: "packages/growerp_core/images/single-bed.png",
     title: "Rooms",
     route: '/catalog',
-    readGroups: [UserGroup.Admin, UserGroup.Employee],
+    readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: AssetListForm(),
@@ -90,11 +90,11 @@ List<MenuOption> menuOptions = [
       title: "Reservations",
       route: '/sales',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.Employee
+        UserGroup.admin,
+        UserGroup.employee
       ],
       writeGroups: [
-        UserGroup.Admin
+        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -109,7 +109,7 @@ List<MenuOption> menuOptions = [
         TabItem(
           form: UserListForm(
             key: Key("Customer"),
-            userGroup: UserGroup.Customer,
+            userGroup: UserGroup.customer,
           ),
           label: "Customers",
           icon: Icon(Icons.business),
@@ -121,11 +121,11 @@ List<MenuOption> menuOptions = [
       title: "check-In-Out",
       route: '/checkInOut',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.Employee
+        UserGroup.admin,
+        UserGroup.employee
       ],
       writeGroups: [
-        UserGroup.Admin
+        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -154,5 +154,5 @@ List<MenuOption> menuOptions = [
       selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Accounting",
       route: '/accounting',
-      readGroups: [UserGroup.Admin]),
+      readGroups: [UserGroup.admin]),
 ];

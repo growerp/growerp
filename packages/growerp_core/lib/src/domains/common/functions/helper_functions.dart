@@ -56,7 +56,7 @@ class HelperFunctions {
       if (imageData.length > 200000) {
         image.Image img = image.decodeImage(imageData)!;
         image.Image resized = image.copyResize(img, width: -1, height: 200);
-        imageData = image.encodeJpg(resized) as Uint8List;
+        imageData = image.encodeJpg(resized);
       }
       return imageData;
     } else {

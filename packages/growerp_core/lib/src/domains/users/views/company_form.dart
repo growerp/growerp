@@ -70,7 +70,7 @@ class CompanyPageState extends State<CompanyPage> {
     authenticate = widget.authenticate.copyWith();
     company = authenticate.company!;
     user = authenticate.user!;
-    isAdmin = authenticate.user!.userGroup == UserGroup.Admin;
+    isAdmin = authenticate.user!.userGroup == UserGroup.admin;
     _selectedCurrency = currencies.firstWhere(
         (element) => element.currencyId == company.currency?.currencyId);
     _nameController.text = company.name!;

@@ -69,7 +69,7 @@ class PaymentTest {
       await CommonTest.tapByKey(tester, 'edit${count - 1}');
       await CommonTest.tapByKey(tester, 'cancelFinDoc', seconds: 5);
       expect(CommonTest.getTextField('status${count - 1}'),
-          equals(finDocStatusValues[FinDocStatusVal.Cancelled.toString()]));
+          equals(finDocStatusValues[FinDocStatusVal.cancelled.toString()]));
       //  only within testing deleted item will not be removed after refresh
       //    await CommonTest.refresh(tester);
       expect(find.byKey(const Key('finDocItem')), findsNWidgets(count - 1));
@@ -116,6 +116,7 @@ class PaymentTest {
           break;
         default:
       }
+      await CommonTest.drag(tester);
       await CommonTest.enterDropDown(
           tester, 'itemType', payment.items[0].itemTypeName!);
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
@@ -137,9 +138,9 @@ class PaymentTest {
       await CommonTest.doSearch(tester,
           searchString: payment.paymentId!, seconds: 5);
       expect(CommonTest.getTextField('otherUser0'),
-          contains(payment.otherUser?.companyName));
+          contains(payment.otherUser?.company!.name));
       expect(CommonTest.getTextField('status0'),
-          equals(finDocStatusValues[FinDocStatusVal.Created.toString()]));
+          equals(finDocStatusValues[FinDocStatusVal.created.toString()]));
       expect(CommonTest.getTextField('grandTotal0'),
           equals(payment.grandTotal.toString()));
       await CommonTest.tapByKey(tester, 'edit0');
@@ -215,15 +216,15 @@ class PaymentTest {
     for (FinDoc payment in payments) {
       await CommonTest.doSearch(tester, searchString: payment.id()!);
       if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.InPreparation.toString()]) {
+          finDocStatusValues[FinDocStatusVal.inPreparation.toString()]) {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       }
       if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.Created.toString()]) {
+          finDocStatusValues[FinDocStatusVal.created.toString()]) {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       }
       if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.Approved.toString()]) {
+          finDocStatusValues[FinDocStatusVal.approved.toString()]) {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       }
     }

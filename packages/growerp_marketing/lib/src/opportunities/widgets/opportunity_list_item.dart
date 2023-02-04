@@ -56,7 +56,7 @@ class OpportunityListItem extends StatelessWidget {
                   (opportunity.leadUser != null
                       ? "${opportunity.leadUser!.firstName} "
                           "${opportunity.leadUser!.lastName}, "
-                          "${opportunity.leadUser!.companyName}"
+                          "${opportunity.leadUser!.company!.name}"
                       : ""),
                   key: Key('lead$index'),
                 )),

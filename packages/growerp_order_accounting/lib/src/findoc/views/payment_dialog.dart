@@ -166,10 +166,12 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ),
                 key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
-                    "${u!.companyName},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                    "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                 asyncItems: (String? filter) async {
                   ApiResult<List<User>> result = await repos.getUser(
-                      userGroups: [UserGroup.Customer, UserGroup.Supplier],
+                      role: finDocUpdated.sales == true
+                          ? Role.customer
+                          : Role.supplier,
                       filter: _userSearchBoxController.text);
                   return result.when(
                       success: (data) => data,
@@ -207,8 +209,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                   children: [
                     Visibility(
                         visible: (finDoc.sales == true &&
-                                _selectedUser
-                                        ?.companyPaymentMethod?.ccDescription !=
+                                _selectedUser?.company!.paymentMethod
+                                        ?.ccDescription !=
                                     null) ||
                             (finDoc.sales == false &&
                                 authBloc.state.authenticate?.company
@@ -232,7 +234,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }),
                           Expanded(
                               child: Text(
-                                  "Credit Card ${finDoc.sales == false ? "${authBloc.state.authenticate?.company?.paymentMethod?.ccDescription}" : "${_selectedUser?.companyPaymentMethod?.ccDescription}"}")),
+                                  "Credit Card ${finDoc.sales == false ? "${authBloc.state.authenticate?.company?.paymentMethod?.ccDescription}" : "${_selectedUser?.company!.paymentMethod?.ccDescription}"}")),
                         ])),
                     Row(children: [
                       Checkbox(
@@ -288,7 +290,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                           }),
                       Expanded(
                           child: Text(
-                        "Bank ${finDoc.otherUser?.companyPaymentMethod?.creditCardNumber ?? ''}",
+                        "Bank ${finDoc.otherUser?.company!.paymentMethod?.creditCardNumber ?? ''}",
                       )),
                     ]),
                   ],
@@ -319,7 +321,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                       child: const Text('Cancel Payment'),
                       onPressed: () {
                         finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                          status: FinDocStatusVal.Cancelled,
+                          status: FinDocStatusVal.cancelled,
                         )));
                       }),
                   const SizedBox(width: 20),

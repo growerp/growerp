@@ -281,7 +281,7 @@ class FinDocListState extends State<FinDocList> {
           hasReachedMax = state.hasReachedMax;
           // if rental (hotelroom) need to show checkin/out orders
           if (widget.onlyRental && widget.status != null) {
-            if (widget.status == FinDocStatusVal.Created.toString()) {
+            if (widget.status == FinDocStatusVal.created.toString()) {
               finDocs = finDocs
                   .where((el) =>
                       el.items[0].rentalFromDate != null &&
@@ -290,7 +290,7 @@ class FinDocListState extends State<FinDocList> {
                           .isSameDate(CustomizableDateTime.current))
                   .toList();
             }
-            if (widget.status == FinDocStatusVal.Approved.toString()) {
+            if (widget.status == FinDocStatusVal.approved.toString()) {
               finDocs = finDocs
                   .where((el) =>
                       el.items[0].rentalThruDate != null &&

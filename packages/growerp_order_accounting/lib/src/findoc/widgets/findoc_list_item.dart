@@ -53,9 +53,9 @@ class FinDocListItem extends StatelessWidget {
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
-          child: Text(finDoc.otherUser?.companyName == null
+          child: Text(finDoc.otherUser?.company?.name == null
               ? ''
-              : finDoc.otherUser!.companyName![0]),
+              : finDoc.otherUser!.company!.name![0]),
         ),
         title: Row(
           children: <Widget>[
@@ -66,7 +66,7 @@ class FinDocListItem extends StatelessWidget {
                 child: Text(
                     "${finDoc.otherUser?.firstName ?? ''} "
                     "${finDoc.otherUser?.lastName ?? ''}\n"
-                    "${finDoc.otherUser?.companyName ?? ''}",
+                    "${finDoc.otherUser?.company!.name ?? ''}",
                     key: Key("otherUser$index"))),
             if (!isPhone && docType != FinDocType.payment)
               SizedBox(width: 80, child: Text("${finDoc.items.length}")),
@@ -102,7 +102,7 @@ class FinDocListItem extends StatelessWidget {
         trailing: SizedBox(
           width: isPhone ? 100 : 195,
           child: docType == FinDocType.payment &&
-                  finDoc.status == FinDocStatusVal.Approved
+                  finDoc.status == FinDocStatusVal.approved
               ? TextButton(
                   key: Key('nextStatus$index'),
                   onPressed: () {
@@ -143,7 +143,7 @@ class FinDocListItem extends StatelessWidget {
                                 });
                           }))
                   : classificationId == 'AppHotel' &&
-                          finDoc.status == FinDocStatusVal.Approved
+                          finDoc.status == FinDocStatusVal.approved
                       ? IconButton(
                           key: Key('nextStatus$index'),
                           icon: const Icon(Icons.check_box_sharp),
@@ -160,7 +160,7 @@ class FinDocListItem extends StatelessWidget {
                           ? itemButtons(
                               context, paymentMethod, finDocBloc, repos)
                           : finDoc.sales == true &&
-                                  finDoc.status == FinDocStatusVal.Approved
+                                  finDoc.status == FinDocStatusVal.approved
                               ? additionalItemButton
                               : null,
         ),
@@ -171,7 +171,7 @@ class FinDocListItem extends StatelessWidget {
       FinDocBloc finDocBloc, FinDocAPIRepository repos) {
     if (finDoc.salesChannel != 'Web' ||
         (finDoc.salesChannel == 'Web' &&
-            finDoc.status != FinDocStatusVal.InPreparation)) {
+            finDoc.status != FinDocStatusVal.inPreparation)) {
       return Row(children: [
         Visibility(
             visible: !isPhone,
@@ -182,7 +182,7 @@ class FinDocListItem extends StatelessWidget {
                 tooltip: 'Cancel ${finDoc.docType}',
                 onPressed: () {
                   finDocBloc.add(FinDocUpdate(
-                      finDoc.copyWith(status: FinDocStatusVal.Cancelled)));
+                      finDoc.copyWith(status: FinDocStatusVal.cancelled)));
                 },
               ),
               IconButton(

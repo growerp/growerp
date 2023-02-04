@@ -32,20 +32,22 @@ if you use the versions from pub.dev, no pub build required.
 
 ### Prepare for backend
 OR:  install backend according: https://github.com/growerp/growerp-moqui.git
+     install chat according: https://github.com/growerp/growerp-chat.git
 
 OR: use our test backend:  
 change file packages/admin/assets/cfg/app_settings.json:
 ```
-- from:   "databaseUrlDebug": "http://localhost:8080",
+- from:   "databaseUrlDebug": "",
 - to:     "databaseUrlDebug": "https://test.growerp.org",  
 
-- from:   "chatUrlDebug":  "ws://localhost:8081",
+- from:   "chatUrlDebug":  "",
 - to:     "chatUrlDebug": "wss://chat.growerp.org",  
 ```  
 start emulator or use browser and start app in directory: packages/admin:
 ```
 flutter run
 ```
+### install the chatserver
 
 ### Some phone screen shots:
 <div style="text-align: center">

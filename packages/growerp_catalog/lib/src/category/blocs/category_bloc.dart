@@ -116,7 +116,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     Emitter<CategoryState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: CategoryStatus.updateLoading));
       List<Category> categories = List.from(state.categories);
       if (event.category.categoryId.isNotEmpty) {
         ApiResult compResult = await repos.updateCategory(event.category);

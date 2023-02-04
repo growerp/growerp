@@ -77,13 +77,6 @@ class AssetDialogState extends State<AssetDialog> {
                         listener: (context, state) async {
                           switch (state.status) {
                             case AssetStatus.success:
-                              HelperFunctions.showMessage(
-                                  context,
-                                  '${widget.asset.assetId.isEmpty ? "Add" : "Update"} successfull',
-                                  Colors.green);
-                              await Future.delayed(
-                                  const Duration(milliseconds: 500));
-                              // ignore: use_build_context_synchronously
                               Navigator.of(context).pop();
                               break;
                             case AssetStatus.failure:

@@ -42,8 +42,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const MainMenu(),
   ),
   MenuOption(
@@ -51,8 +51,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
         form: CompanyForm(FormArguments()),
@@ -62,7 +62,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Admin'),
-          userGroup: UserGroup.Admin,
+          userGroup: UserGroup.admin,
         ),
         label: 'Admins',
         icon: const Icon(Icons.business),
@@ -70,7 +70,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Employee'),
-          userGroup: UserGroup.Employee,
+          userGroup: UserGroup.employee,
         ),
         label: 'Employees',
         icon: const Icon(Icons.school),
@@ -83,8 +83,8 @@ List<MenuOption> menuOptions = [
       title: 'Inventory',
       route: '/inventory',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.Employee,
+        UserGroup.admin,
+        UserGroup.employee,
         UserGroup.SuperAdmin
       ],
       tabItems: [

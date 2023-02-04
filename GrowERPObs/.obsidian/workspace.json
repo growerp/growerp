@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/10. GrowERP Application and plugins.md",
+                "file": "1 Introduction/3 Getting started.md",
                 "mode": "source",
                 "source": false
               }
@@ -110,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "3 Technical documentation/10. GrowERP Application and plugins.md",
+                "file": "1 Introduction/3 Getting started.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "3 Technical documentation/10. GrowERP Application and plugins.md",
+                "file": "1 Introduction/3 Getting started.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "3 Technical documentation/10. GrowERP Application and plugins.md"
+                "file": "1 Introduction/3 Getting started.md"
               }
             }
           }
@@ -173,6 +173,7 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "3 Technical documentation/10. GrowERP Application and plugins.md",
     "3 Technical documentation/1 Technical Introduction.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/2 Flutter frontend.md",
@@ -181,7 +182,6 @@
     "1 Introduction/1 Overview.md",
     "2 End User documentation/1 Overview.md",
     "1 Introduction/4 Releases.md",
-    "3 Technical documentation/3 Packages.md",
-    "2 End User documentation/2 Getting Started.md"
+    "3 Technical documentation/3 Packages.md"
   ]
 }

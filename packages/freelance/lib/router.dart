@@ -36,7 +36,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/website':
       return MaterialPageRoute(
-          builder: (context) => WebsiteForm(userGroup: UserGroup.Admin));
+          builder: (context) => WebsiteForm(userGroup: UserGroup.admin));
     case '/catalog':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

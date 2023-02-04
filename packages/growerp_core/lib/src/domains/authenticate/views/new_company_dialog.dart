@@ -175,7 +175,8 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                                       .read<AuthBloc>()
                                       .add(AuthRegisterUserEcommerce(
                                         User(
-                                          companyName: _companyController.text,
+                                          company: Company(
+                                              name: _companyController.text),
                                           firstName: _firstNameController.text,
                                           lastName: _lastNameController.text,
                                           email: _emailController.text,
@@ -239,8 +240,8 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                                       .read<AuthBloc>()
                                       .add(AuthRegisterCompanyAndAdmin(
                                           User(
-                                            companyName:
-                                                _companyController.text,
+                                            company: Company(
+                                                name: _companyController.text),
                                             firstName:
                                                 _firstNameController.text,
                                             lastName: _lastNameController.text,

@@ -128,8 +128,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const ChatRooms(),
   ),
   MenuOption(
@@ -137,8 +137,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const ChatRooms(),
   ),
 ];

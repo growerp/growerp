@@ -154,9 +154,9 @@ class OpportunityTest {
           equals(opportunity.estProbability.toString()));
       expect(CommonTest.getDropdown('stageId'), contains(opportunity.stageId));
       expect(CommonTest.getDropdownSearch('lead'),
-          contains(opportunity.leadUser!.companyName!));
+          contains(opportunity.leadUser!.company!.name!));
       expect(CommonTest.getDropdownSearch('employee'),
-          contains(opportunity.employeeUser!.companyName!));
+          contains(opportunity.employeeUser!.company!.name!));
       newOpportunities.add(opportunity.copyWith(opportunityId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

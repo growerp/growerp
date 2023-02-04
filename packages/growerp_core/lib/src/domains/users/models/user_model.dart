@@ -44,11 +44,7 @@ class User with _$User {
     @JsonKey(name: 'userGroupId') @UserGroupConverter() UserGroup? userGroup,
     String? language,
     @Uint8ListConverter() Uint8List? image,
-    String? companyPartyId, // allocated by system cannot be changed.
-    String? companyName,
-    String? companyRole,
-    Address? companyAddress,
-    PaymentMethod? companyPaymentMethod,
+    Company? company,
   }) = _User;
   User._();
 
@@ -56,5 +52,5 @@ class User with _$User {
 
   @override
   String toString() => 'User $firstName $lastName [$partyId] sec: $userGroup '
-      'company: $companyName[$companyPartyId] size: ${image?.length}';
+      'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
 }

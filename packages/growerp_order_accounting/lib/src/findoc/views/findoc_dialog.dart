@@ -233,13 +233,13 @@ class MyFinDocState extends State<FinDocPage> {
                 ),
                 key: Key(finDocUpdated.sales == true ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
-                    "${u!.companyName},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                    "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                 asyncItems: (String? filter) async {
                   final finDocBloc = context.read<FinDocBloc>();
                   finDocBloc.add(FinDocGetUsers(
-                      userGroups: finDocUpdated.sales == true
-                          ? [UserGroup.Customer]
-                          : [UserGroup.Supplier],
+                      role: finDocUpdated.sales == true
+                          ? Role.customer
+                          : Role.supplier,
                       filter: _userSearchBoxController.text));
                   int times = 0;
                   while (finDocBloc.state.users.isEmpty && times++ < 10) {

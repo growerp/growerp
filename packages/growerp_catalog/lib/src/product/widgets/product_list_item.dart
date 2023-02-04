@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
+import '../../api_repository.dart';
 import '../product.dart';
 
 class ProductListItem extends StatelessWidget {
@@ -29,6 +30,7 @@ class ProductListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String classificationId = GlobalConfiguration().get("classificationId");
+    var repos = context.read<CatalogAPIRepository>();
     final productBloc = context.read<ProductBloc>();
     return Material(
         child: ListTile(
@@ -73,10 +75,10 @@ class ProductListItem extends StatelessWidget {
               await showDialog(
                   barrierDismissible: true,
                   context: context,
-                  builder: (BuildContext context) {
-                    return BlocProvider.value(
-                        value: productBloc, child: ProductDialog(product));
-                  });
+                  builder: (BuildContext context) => RepositoryProvider.value(
+                      value: repos,
+                      child: BlocProvider.value(
+                          value: productBloc, child: ProductDialog(product))));
             },
             trailing: IconButton(
               key: Key('delete$index'),

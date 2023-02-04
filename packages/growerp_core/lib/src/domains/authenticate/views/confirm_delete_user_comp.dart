@@ -30,7 +30,8 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
           Navigator.of(context).pop(false);
         }),
   ];
-  if (userGroup == UserGroup.Admin) {
+  if (userGroup == UserGroup.admin) {
+    actions.add(const SizedBox(height: 10));
     actions.add(ElevatedButton(
       child: const Text("User AND Company delete"),
       onPressed: () {
@@ -51,7 +52,7 @@ confirmDeleteUserComp(BuildContext context, UserGroup userGroup) {
               height: 300,
               context: context,
               title:
-                  "Delete yourself ${userGroup == UserGroup.Admin ? ' and opt. company?' : ''}",
+                  "Delete yourself ${userGroup == UserGroup.admin ? ' and opt. company?' : ''}",
               child: Column(
                 children: actions,
               )));

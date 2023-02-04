@@ -29,6 +29,9 @@ class ChatServer {
       chatUrl = GlobalConfiguration().get("chatUrl");
     } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
       chatUrl = GlobalConfiguration().get("chatUrlDebug");
+      if (chatUrl.isEmpty) {
+        chatUrl = 'ws://localhost:8081';
+      }
     } else if (Platform.isAndroid) {
       chatUrl = 'ws://10.0.2.2:8081';
     }

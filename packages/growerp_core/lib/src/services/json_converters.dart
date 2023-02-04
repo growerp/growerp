@@ -107,13 +107,13 @@ class UserGroupConverter implements JsonConverter<UserGroup?, String?> {
   @override
   UserGroup? fromJson(String? json) {
     if (json == null) return null;
-    return UserGroup.tryParse(json);
+    return UserGroup.getByValue(json);
   }
 
   @override
   String? toJson(UserGroup? object) {
     if (object == null) return null;
-    return object.id();
+    return object.value;
   }
 }
 
@@ -124,11 +124,27 @@ class FinDocStatusValConverter
   @override
   FinDocStatusVal? fromJson(String? json) {
     if (json == null) return null;
-    return FinDocStatusVal.tryParse(json);
+    return FinDocStatusVal.getByValue(json);
   }
 
   @override
   String? toJson(FinDocStatusVal? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class RoleConverter implements JsonConverter<Role?, String?> {
+  const RoleConverter();
+
+  @override
+  Role? fromJson(String? json) {
+    if (json == null) return null;
+    return Role.getByValue(json);
+  }
+
+  @override
+  String? toJson(Role? object) {
     if (object == null) return null;
     return object.toString();
   }
@@ -141,7 +157,7 @@ class CreditCardTypeConverter
   @override
   CreditCardType? fromJson(String? json) {
     if (json == null) return null;
-    return CreditCardType.tryParse(json);
+    return CreditCardType.getByValue(json);
   }
 
   @override

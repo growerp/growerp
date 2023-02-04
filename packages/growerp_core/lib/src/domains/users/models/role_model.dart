@@ -12,24 +12,20 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// a replacement for enum:
-// https://medium.com/@ra9r/overcoming-the-limitations-of-dart-enum-8866df8a1c47
-
-enum UserGroup {
-  employee('GROWERP_M_EMPLOYEE'),
-  admin('GROWERP_M_ADMIN'),
-  customer('GROWERP_M_CUSTOMER'),
-  lead('GROWERP_M_LEAD'),
-  supplier('GROWERP_M_SUPPLIER');
+enum Role {
+  employee('OrgInternal'),
+  customer('Customer'),
+  lead('Lead'),
+  supplier('Supplier');
 
   final String value;
-  const UserGroup(this.value);
+  const Role(this.value);
 
-  static final Map<String, UserGroup> byValue = {};
-  static UserGroup? getByValue(String value) {
+  static final Map<String, Role> byValue = {};
+  static Role? getByValue(String value) {
     if (byValue.isEmpty) {
-      for (UserGroup userGroup in UserGroup.values) {
-        byValue[userGroup.value] = userGroup;
+      for (Role role in Role.values) {
+        byValue[role.value] = role;
       }
     }
     return byValue[value];
@@ -37,6 +33,7 @@ enum UserGroup {
 
   @override
   String toString() {
+    if (value == 'OrgInternal') return 'Employee';
     return value;
   }
 }

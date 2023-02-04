@@ -28,7 +28,7 @@ class AuthTest {
     await enterFirstName(tester, user.firstName!);
     await enterLastname(tester, user.lastName!);
     await enterEmailAddress(tester, user.email!);
-    await enterCompanyName(tester, user.companyName!);
+    await enterCompanyName(tester, user.company!.name!);
     await enterCurrency(tester, company.currency!);
     await CommonTest.drag(tester, seconds: 10);
     await clearDemoData(tester);

@@ -22,59 +22,54 @@ import '../../domains.dart';
 import '../../../api_repository.dart';
 
 class UserListForm extends StatelessWidget {
-  final UserGroup userGroup;
+  final Role role;
   const UserListForm({
     super.key,
-    required this.userGroup,
+    required this.role,
   });
 
   @override
   Widget build(BuildContext context) {
     Widget userList = UserList(
       key: key,
-      userGroup: userGroup,
+      role: role,
     );
-    switch (userGroup) {
-      case UserGroup.Lead:
+    switch (role) {
+      case Role.lead:
         return BlocProvider<LeadBloc>(
-            create: (context) => UserBloc(context.read<APIRepository>(),
-                userGroup, context.read<AuthBloc>())
+            create: (context) => UserBloc(
+                context.read<APIRepository>(), role, context.read<AuthBloc>())
               ..add(const UserFetch()),
             child: userList);
-      case UserGroup.Customer:
+      case Role.customer:
         return BlocProvider<CustomerBloc>(
-            create: (context) => UserBloc(context.read<APIRepository>(),
-                userGroup, context.read<AuthBloc>())
+            create: (context) => UserBloc(
+                context.read<APIRepository>(), role, context.read<AuthBloc>())
               ..add(const UserFetch()),
             child: userList);
-      case UserGroup.Supplier:
+      case Role.supplier:
         return BlocProvider<SupplierBloc>(
-            create: (context) => UserBloc(context.read<APIRepository>(),
-                userGroup, context.read<AuthBloc>())
+            create: (context) => UserBloc(
+                context.read<APIRepository>(), role, context.read<AuthBloc>())
               ..add(const UserFetch()),
             child: userList);
-      case UserGroup.Employee:
+      case Role.employee:
         return BlocProvider<EmployeeBloc>(
-            create: (context) => UserBloc(context.read<APIRepository>(),
-                userGroup, context.read<AuthBloc>())
+            create: (context) => UserBloc(
+                context.read<APIRepository>(), role, context.read<AuthBloc>())
               ..add(const UserFetch()),
             child: userList);
-      case UserGroup.Admin:
-        return BlocProvider<AdminBloc>(
-            create: (context) => UserBloc(context.read<APIRepository>(),
-                userGroup, context.read<AuthBloc>())
-              ..add(const UserFetch()),
-            child: userList);
+
       default:
-        return Center(child: Text("user usergroup: '$userGroup' not allowed"));
+        return Center(child: Text("user usergroup: '$role' not allowed"));
     }
   }
 }
 
 class UserList extends StatefulWidget {
-  const UserList({super.key, required this.userGroup});
+  const UserList({super.key, required this.role});
 
-  final UserGroup userGroup;
+  final Role? role;
 
   @override
   UserListState createState() => UserListState();
@@ -95,22 +90,20 @@ class UserListState extends State<UserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    switch (widget.userGroup) {
-      case UserGroup.Admin:
-        _userBloc = context.read<AdminBloc>() as UserBloc;
-        break;
-      case UserGroup.Employee:
+    switch (widget.role) {
+      case Role.employee:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;
         break;
-      case UserGroup.Supplier:
+      case Role.supplier:
         _userBloc = context.read<SupplierBloc>() as UserBloc;
         break;
-      case UserGroup.Customer:
+      case Role.customer:
         _userBloc = context.read<CustomerBloc>() as UserBloc;
         break;
-      case UserGroup.Lead:
+      case Role.lead:
         _userBloc = context.read<LeadBloc>() as UserBloc;
         break;
+      default:
     }
   }
 
@@ -134,7 +127,7 @@ class UserListState extends State<UserList> {
                   return Column(children: [
                     UserListHeader(
                         isPhone: isPhone,
-                        userGroup: widget.userGroup,
+                        role: widget.role!,
                         userBloc: _userBloc),
                     const Divider(color: Colors.black),
                   ]);
@@ -154,7 +147,7 @@ class UserListState extends State<UserList> {
                         child: UserListItem(
                             user: users[index],
                             index: index,
-                            userGroup: widget.userGroup,
+                            role: widget.role!,
                             userBloc: _userBloc,
                             isDeskTop: !isPhone));
               },
@@ -174,7 +167,7 @@ class UserListState extends State<UserList> {
       blocBuilder(context, state) {
         if (state.status == UserStatus.failure) {
           return FatalErrorForm(
-              message: "Could not load ${widget.userGroup.toString()}s!");
+              message: "Could not load ${widget.role.toString()}s!");
         }
         if (state.status == UserStatus.success) {
           isLoading = false;
@@ -192,8 +185,9 @@ class UserListState extends State<UserList> {
                               value: _userBloc,
                               child: UserDialog(
                                   user: User(
-                                userGroup: widget.userGroup,
-                              )));
+                                      company: Company(
+                                role: widget.role,
+                              ))));
                         });
                   },
                   tooltip: 'Add New',
@@ -204,26 +198,22 @@ class UserListState extends State<UserList> {
         return const LoadingIndicator();
       }
 
-      switch (widget.userGroup) {
-        case UserGroup.Lead:
+      switch (widget.role) {
+        case Role.lead:
           return BlocConsumer<LeadBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
-        case UserGroup.Customer:
+        case Role.customer:
           return BlocConsumer<CustomerBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
-        case UserGroup.Admin:
-          return BlocConsumer<AdminBloc, UserState>(
-              listener: blocListener, builder: blocBuilder);
-        case UserGroup.Employee:
+        case Role.employee:
           return BlocConsumer<EmployeeBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
-        case UserGroup.Supplier:
+        case Role.supplier:
           return BlocConsumer<SupplierBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
         default:
           return Center(
-              child: Text(
-                  "should NOT show this for userGroup: ${widget.userGroup}"));
+              child: Text("should NOT show this for role: ${widget.role}"));
       }
     });
   }

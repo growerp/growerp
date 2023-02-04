@@ -159,7 +159,7 @@ class ProductDialogState extends State<ProductDialogFull> {
               child: Stack(clipBehavior: Clip.none, children: [
                 Container(
                     width: isPhone ? 400 : 800,
-                    height: isPhone ? 900 : 600,
+                    height: isPhone ? 900 : 650,
                     padding: const EdgeInsets.all(20),
                     child: listChild(classificationId, isPhone, categoryState)),
                 Container(

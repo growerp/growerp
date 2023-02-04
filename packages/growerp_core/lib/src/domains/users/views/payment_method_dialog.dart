@@ -36,8 +36,8 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
   @override
   void initState() {
     super.initState();
-    _cardType =
-        widget.paymentMethod?.creditCardType ?? CreditCardType.tryParse('');
+    _cardType = (widget.paymentMethod?.creditCardType ??
+        CreditCardType.getByValue(''))!;
     _creditCardNumberController.text =
         widget.paymentMethod?.creditCardNumber ?? '';
     _expireMonthController.text = widget.paymentMethod?.expireMonth ?? '';
@@ -79,22 +79,21 @@ class PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         color: Colors.black,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<CreditCardType>(
                   key: const Key('cardTypeDropDown'),
                   decoration: const InputDecoration(labelText: 'Card Type'),
                   hint: const Text('Card Type'),
-                  value: _cardType.toString(),
+                  value: _cardType,
                   validator: (value) => value == null ? 'field required' : null,
-                  items: _cardType
-                      .toList()
-                      .map((label) => DropdownMenuItem<String>(
-                            value: label,
-                            child: Text(label),
+                  items: CreditCardType.values
+                      .map((item) => DropdownMenuItem<CreditCardType>(
+                            value: item,
+                            child: Text(item.value),
                           ))
                       .toList(),
-                  onChanged: (String? newValue) {
+                  onChanged: (CreditCardType? newValue) {
                     setState(() {
-                      _cardType = CreditCardType.tryParse(newValue!);
+                      _cardType = newValue!;
                     });
                   },
                   isExpanded: true,

@@ -199,10 +199,10 @@ class ReservationDialogState extends State<ReservationDialog> {
                           ),
                           key: const Key('customer'),
                           itemAsString: (User? u) =>
-                              "${u!.firstName} ${u.lastName}, ${u.companyName}",
+                              "${u!.firstName} ${u.lastName}, ${u.company!.name}",
                           asyncItems: (String? filter) async {
                             ApiResult<List<User>> result = await repos.getUser(
-                                userGroups: [UserGroup.Customer],
+                                userGroups: [UserGroup.customer],
                                 filter: _userSearchBoxController.text);
                             return result.when(
                                 success: (data) => data,
@@ -234,7 +234,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                           child: UserDialog(
                                               user: User(
                                                   userGroup:
-                                                      UserGroup.Customer)));
+                                                      UserGroup.customer)));
                                     });
                                 setState(() {
                                   if (result is User) _selectedUser = result;

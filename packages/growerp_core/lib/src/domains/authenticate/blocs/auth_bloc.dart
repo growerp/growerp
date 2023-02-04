@@ -180,7 +180,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(state.copyWith(status: AuthStatus.loading));
     ApiResult<Authenticate> apiResult = await repos.register(
-        companyName: event.user.companyName!,
+        companyName: event.user.company!.name!,
         currencyId: event.currencyId,
         firstName: event.user.firstName!,
         lastName: event.user.lastName!,
@@ -208,7 +208,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     ApiResult<User> apiResult = await repos.registerUser(
-        event.user.copyWith(userGroup: UserGroup.Customer),
+        event.user.copyWith(userGroup: UserGroup.customer),
         state.authenticate!.company!.partyId!);
     emit(apiResult.when(
         success: (User data) {

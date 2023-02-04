@@ -72,7 +72,7 @@ class PdfFormats {
   static Widget buildCustomerAddress(User customer) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${customer.companyName}"),
+          Text("${customer.company!.name}"),
           Text("${customer.firstName ?? ''} ${customer.lastName ?? ''}",
               style: TextStyle(fontWeight: FontWeight.bold)),
           Text(customer.email ?? ''),

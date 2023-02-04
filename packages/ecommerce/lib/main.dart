@@ -55,7 +55,7 @@ class TopApp extends StatelessWidget {
               create: (context) =>
                   FinDocBloc(dbServer, true, FinDocType.order)),
           BlocProvider<CustomerBloc>(
-              create: (context) => UserBloc(dbServer, UserGroup.Customer,
+              create: (context) => UserBloc(dbServer, UserGroup.customer,
                   BlocProvider.of<AuthBloc>(context))),
           BlocProvider<SalesCartBloc>(
               create: (context) => CartBloc(

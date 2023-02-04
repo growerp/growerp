@@ -26,7 +26,7 @@ class UserForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>(
         create: (context) => UserBloc(context.read<APIRepository>(),
-            user.userGroup!, context.read<AuthBloc>()),
+            user.company!.role!, context.read<AuthBloc>()),
         child: UserPage(user));
   }
 }

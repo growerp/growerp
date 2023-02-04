@@ -27,8 +27,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const local.AdminDbForm(),
   ),
   MenuOption(
@@ -36,8 +36,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
         form: CompanyForm(FormArguments()),
@@ -46,16 +46,8 @@ List<MenuOption> menuOptions = [
       ),
       TabItem(
         form: const UserListForm(
-          key: Key('Admin'),
-          userGroup: UserGroup.Admin,
-        ),
-        label: 'Admins',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserListForm(
           key: Key('Employee'),
-          userGroup: UserGroup.Employee,
+          role: Role.employee,
         ),
         label: 'Employees',
         icon: const Icon(Icons.school),
@@ -72,7 +64,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'CRM',
     route: '/crm',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const OpportunityListForm(),
@@ -82,7 +74,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Lead'),
-          userGroup: UserGroup.Lead,
+          role: Role.lead,
         ),
         label: 'Leads',
         icon: const Icon(Icons.business),
@@ -90,7 +82,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Customer'),
-          userGroup: UserGroup.Customer,
+          role: Role.customer,
         ),
         label: 'Customers',
         icon: const Icon(Icons.school),
@@ -103,12 +95,11 @@ List<MenuOption> menuOptions = [
       title: 'Catalog',
       route: '/catalog',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.SuperAdmin,
-        UserGroup.Employee
+        UserGroup.admin,
+        UserGroup.employee
       ],
       writeGroups: [
-        UserGroup.Admin
+        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -132,8 +123,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/order.png',
     title: 'Orders',
     route: '/orders',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
         form: const FinDocListForm(
@@ -144,7 +135,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Customer'),
-          userGroup: UserGroup.Customer,
+          role: Role.customer,
         ),
         label: 'Customers',
         icon: const Icon(Icons.business),
@@ -158,7 +149,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Supplier'),
-          userGroup: UserGroup.Supplier,
+          role: Role.supplier,
         ),
         label: 'Suppliers',
         icon: const Icon(Icons.business),
@@ -170,7 +161,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/supplier.png',
     title: 'Inventory',
     route: '/inventory',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const FinDocListForm(
@@ -189,7 +180,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
-        form: LocationListForm(),
+        form: const LocationListForm(),
         label: '\nWH Locations',
         icon: const Icon(Icons.location_pin),
       ),
@@ -200,11 +191,11 @@ List<MenuOption> menuOptions = [
       selectedImage: 'packages/growerp_core/images/accounting.png',
       title: 'Accounting',
       route: '/accounting',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
+      readGroups: [UserGroup.admin]),
   MenuOption(
       image: 'packages/growerp_core/images/infoGrey.png',
       selectedImage: 'packages/growerp_core/images/info.png',
       title: 'About',
       route: '/about',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin]),
+      readGroups: [UserGroup.admin]),
 ];

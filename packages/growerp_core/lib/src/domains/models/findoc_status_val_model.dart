@@ -13,46 +13,39 @@
  */
 
 enum FinDocStatusVal {
-  InPreparation('FinDocPrep'),
-  Created('FinDocCreated'),
-  Approved('FinDocApproved'),
-  Completed('FinDocCompleted'),
-  Cancelled('FinDocCancelled'),
-  Unknown('unknown');
+  inPreparation('FinDocPrep'),
+  created('FinDocCreated'),
+  approved('FinDocApproved'),
+  completed('FinDocCompleted'),
+  cancelled('FinDocCancelled'),
+  unknown('Unknown');
 
-  final String _name;
-  const FinDocStatusVal(this._name);
+  final String value;
+  const FinDocStatusVal(this.value);
+
+  static final Map<String, FinDocStatusVal> byValue = {};
+  static FinDocStatusVal? getByValue(String value) {
+    if (byValue.isEmpty) {
+      for (FinDocStatusVal finDocStatusVal in FinDocStatusVal.values) {
+        byValue[finDocStatusVal.value] = finDocStatusVal;
+      }
+    }
+    return byValue[value];
+  }
 
   @override
   String toString() {
-    return _name;
-  }
-
-  static FinDocStatusVal? tryParse(String val) {
-    switch (val) {
-      case 'FinDocPrep':
-        return InPreparation;
-      case 'FinDocCreated':
-        return Created;
-      case 'FinDocApproved':
-        return Approved;
-      case 'FinDocCompleted':
-        return Completed;
-      case 'FinDocCancelled':
-        return Cancelled;
-      default:
-        return Unknown;
-    }
+    return value;
   }
 
   static FinDocStatusVal? nextStatus(FinDocStatusVal currentStatus) {
     switch (currentStatus) {
-      case InPreparation:
-        return Created;
-      case Created:
-        return Approved;
-      case Approved:
-        return Completed;
+      case inPreparation:
+        return created;
+      case created:
+        return approved;
+      case approved:
+        return completed;
       default:
         return currentStatus;
     }
@@ -60,15 +53,15 @@ enum FinDocStatusVal {
 
   static bool? statusFixed(FinDocStatusVal currentStatus) {
     switch (currentStatus) {
-      case InPreparation:
+      case inPreparation:
         return false;
-      case Created:
+      case created:
         return false;
-      case Approved:
+      case approved:
         return true;
-      case Completed:
+      case completed:
         return true;
-      case Cancelled:
+      case cancelled:
         return true;
       default:
         return true;

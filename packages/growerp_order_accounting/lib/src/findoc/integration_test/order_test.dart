@@ -39,7 +39,7 @@ class OrderTest {
       await CommonTest.enterText(tester, 'description', order.description!);
       // enter supplier
       await CommonTest.enterDropDownSearch(
-          tester, 'supplier', order.otherUser!.companyName!);
+          tester, 'supplier', order.otherUser!.company!.name!);
       // add product data
       await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
       await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
@@ -78,7 +78,7 @@ class OrderTest {
       await CommonTest.enterText(tester, 'description', order.description!);
       // enter supplier
       await CommonTest.enterDropDownSearch(
-          tester, 'customer', order.otherUser!.companyName!);
+          tester, 'customer', order.otherUser!.company!.name!);
       // add product data
       for (FinDocItem item in order.items) {
         await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
@@ -120,7 +120,7 @@ class OrderTest {
     for (FinDoc finDoc in finDocs) {
       await CommonTest.tapByKey(tester, 'addNew');
       await CommonTest.tapByKey(tester, 'customer');
-      await CommonTest.tapByText(tester, finDoc.otherUser!.companyName!);
+      await CommonTest.tapByText(tester, finDoc.otherUser!.company!.name!);
       await CommonTest.tapByKey(tester, 'itemRental');
       await CommonTest.tapByKey(tester, 'product', seconds: 5);
       await CommonTest.tapByText(tester, finDoc.items[0].description!);

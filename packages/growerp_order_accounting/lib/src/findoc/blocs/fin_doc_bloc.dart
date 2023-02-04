@@ -232,7 +232,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     emit(state.copyWith(status: FinDocStatus.loading));
     try {
       ApiResult<FinDoc> compResult = await repos.updateFinDoc(
-          event.payment.copyWith(status: FinDocStatusVal.Completed));
+          event.payment.copyWith(status: FinDocStatusVal.completed));
       return emit(compResult.when(
           success: (data) {
             List<FinDoc> finDocs = List.from(state.finDocs);
@@ -258,8 +258,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     emit(state.copyWith(status: FinDocStatus.loading));
     try {
-      ApiResult<List<User>> result = await repos.getUser(
-          userGroups: event.userGroups, filter: event.filter);
+      ApiResult<List<User>> result =
+          await repos.getUser(role: event.role, filter: event.filter);
       return emit(result.when(
           success: (data) => state.copyWith(
                 users: data,

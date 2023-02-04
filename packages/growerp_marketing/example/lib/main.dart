@@ -41,8 +41,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
     title: 'Main',
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     child: const MainMenuForm(),
   ),
   MenuOption(
@@ -50,8 +50,8 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
     route: '/company',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
-    writeGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
         form: CompanyForm(FormArguments()),
@@ -60,16 +60,8 @@ List<MenuOption> menuOptions = [
       ),
       TabItem(
         form: const UserListForm(
-          key: Key('Admin'),
-          userGroup: UserGroup.Admin,
-        ),
-        label: 'Admins',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserListForm(
           key: Key('Employee'),
-          userGroup: UserGroup.Employee,
+          role: Role.employee,
         ),
         label: 'Employees',
         icon: const Icon(Icons.school),
@@ -81,7 +73,7 @@ List<MenuOption> menuOptions = [
     selectedImage: 'packages/growerp_core/images/crm.png',
     title: 'Marketing\n',
     route: '/crm',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const OpportunityListForm(),
@@ -91,7 +83,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Lead'),
-          userGroup: UserGroup.Lead,
+          role: Role.lead,
         ),
         label: 'Leads',
         icon: const Icon(Icons.business),
@@ -99,7 +91,7 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const UserListForm(
           key: Key('Customer'),
-          userGroup: UserGroup.Customer,
+          role: Role.customer,
         ),
         label: 'Customers',
         icon: const Icon(Icons.school),

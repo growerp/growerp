@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -22,26 +21,12 @@ import '../../domains.dart';
 part 'company_model.freezed.dart';
 part 'company_model.g.dart';
 
-List<Company> companiesFromJson(String str) => List<Company>.from(
-    json.decode(str)["companies"].map((x) => Company.fromJson(x)));
-String companiesToJson(List<Company> data) =>
-    // ignore: prefer_interpolation_to_compose_strings
-    '{"companies":' +
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson()))) +
-    "}";
-
-Company companyFromJson(String str) =>
-    Company.fromJson(json.decode(str)["company"]);
-String companyToJson(Company data) =>
-    // ignore: prefer_interpolation_to_compose_strings
-    '{"company":' + json.encode(data.toJson()) + "}";
-
 @freezed
 class Company with _$Company {
   Company._();
   factory Company({
     String? partyId,
-    String? role,
+    @RoleConverter() Role? role,
     String? name,
     String? email,
     String? telephoneNr,
@@ -51,6 +36,7 @@ class Company with _$Company {
     PaymentMethod? paymentMethod,
     Decimal? vatPerc,
     Decimal? salesPerc,
+    @Default([]) List<User> employees,
   }) = _Company;
 
   factory Company.fromJson(Map<String, dynamic> json) =>

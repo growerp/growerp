@@ -19,7 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class UserListItem extends StatelessWidget {
   final User user;
   final int index;
-  final UserGroup userGroup;
+  final Role role;
   final UserBloc userBloc;
   final bool isDeskTop;
 
@@ -27,7 +27,7 @@ class UserListItem extends StatelessWidget {
     Key? key,
     required this.user,
     required this.index,
-    required this.userGroup,
+    required this.role,
     required this.userBloc,
     required this.isDeskTop,
   }) : super(key: key);
@@ -60,12 +60,12 @@ class UserListItem extends StatelessWidget {
                 if (isDeskTop)
                   Expanded(
                       child: Text(
-                          (!user.loginDisabled! ? "${user.loginName}" : " "),
+                          (!user.loginDisabled! ? user.loginName ?? '' : " "),
                           key: Key('username$index'))),
                 if (isDeskTop)
                   Expanded(
                       child: Text(
-                    user.email!.contains('example.com') ? " " : "${user.email}",
+                    user.email ?? '',
                     key: Key('email$index'),
                   )),
                 if (isDeskTop)
@@ -74,19 +74,15 @@ class UserListItem extends StatelessWidget {
                     user.language ?? '',
                     key: Key('language$index'),
                   )),
-                if (isDeskTop &&
-                    userGroup != UserGroup.Employee &&
-                    userGroup != UserGroup.Admin)
+                if (isDeskTop && role != Role.employee)
                   Expanded(
-                    child: Text("${user.companyName}",
+                    child: Text("${user.company!.name}",
                         key: Key('companyName$index'),
                         textAlign: TextAlign.center),
                   ),
-                if (!isDeskTop &&
-                    userGroup != UserGroup.Employee &&
-                    userGroup != UserGroup.Admin)
+                if (!isDeskTop && role != Role.employee)
                   Expanded(
-                      child: Text("${user.companyName}",
+                      child: Text("${user.company!.name}",
                           key: Key('companyName$index'),
                           textAlign: TextAlign.center))
               ],

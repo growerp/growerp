@@ -23,7 +23,7 @@ List<MenuOption> acctMenuOptions = [
     selectedImage: "packages/growerp_core/images/accounting.png",
     title: "Accounting DashBoard",
     route: '/accounting',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
     child: const AcctDashBoard(),
   ),
   MenuOption(
@@ -32,8 +32,7 @@ List<MenuOption> acctMenuOptions = [
       title: "Accounting Sales",
       route: '/acctSales',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.SuperAdmin
+        UserGroup.admin,
       ],
       tabItems: [
         TabItem(
@@ -55,7 +54,7 @@ List<MenuOption> acctMenuOptions = [
         TabItem(
           form: const UserListForm(
             key: Key('Customer'),
-            userGroup: UserGroup.Customer,
+            role: Role.customer,
           ),
           label: '\nCustomers',
           icon: const Icon(Icons.school),
@@ -67,11 +66,10 @@ List<MenuOption> acctMenuOptions = [
       title: "Accounting Purchasing",
       route: '/acctPurchase',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.SuperAdmin
+        UserGroup.admin,
       ],
       writeGroups: [
-        UserGroup.Admin
+        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -93,7 +91,7 @@ List<MenuOption> acctMenuOptions = [
         TabItem(
           form: const UserListForm(
             key: Key('Supplier'),
-            userGroup: UserGroup.Supplier,
+            role: Role.supplier,
           ),
           label: '\nSuppliers',
           icon: const Icon(Icons.business),
@@ -105,11 +103,10 @@ List<MenuOption> acctMenuOptions = [
       title: "Accounting Ledger\n",
       route: '/acctLedger',
       readGroups: [
-        UserGroup.Admin,
-        UserGroup.SuperAdmin
+        UserGroup.admin,
       ],
       writeGroups: [
-        UserGroup.Admin
+        UserGroup.admin
       ],
       tabItems: [
         TabItem(
@@ -131,14 +128,14 @@ List<MenuOption> acctMenuOptions = [
       selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Reports",
       route: '/reports',
-      readGroups: [UserGroup.Admin, UserGroup.SuperAdmin],
-      writeGroups: [UserGroup.Admin]),
+      readGroups: [UserGroup.admin],
+      writeGroups: [UserGroup.admin]),
 */
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main dashboard",
     route: '/',
-    readGroups: [UserGroup.Admin, UserGroup.Employee, UserGroup.SuperAdmin],
+    readGroups: [UserGroup.admin, UserGroup.employee],
   ),
 ];
