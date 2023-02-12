@@ -33,7 +33,7 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     // userlogin in mainadmin data.dart should be used for chatecho
     await CompanyTest.createCompany(tester);
-    await UserTest.selectAdministrators(tester);
+    await UserTest.selectEmployees(tester);
     await UserTest.addAdministrators(tester, [administrators[0]], check: false);
   }, skip: true);
 // now start chatEco_main.dart with the userlog in when the company created

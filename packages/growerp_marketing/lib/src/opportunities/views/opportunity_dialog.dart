@@ -188,21 +188,11 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             controller: _leadSearchBoxController,
           ),
           menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-          title: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColorDark,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  )),
-              child: const Center(
-                  child: Text('Select lead',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      )))),
+          title: popUp(
+            context: context,
+            title: 'Select Lead',
+            height: 50,
+          ),
         ),
         dropdownSearchDecoration: InputDecoration(
           labelText: 'Lead',
@@ -221,35 +211,22 @@ class OpportunityDialogState extends State<OpportunityDialog> {
       DropdownSearch<User>(
           selectedItem: _selectedAccount,
           popupProps: PopupProps.menu(
-              showSearchBox: true,
-              searchFieldProps: TextFieldProps(
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                ),
-                controller: _accountSearchBoxController,
+            showSearchBox: true,
+            searchFieldProps: TextFieldProps(
+              autofocus: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
               ),
-              menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-              title: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorDark,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    )),
-                child: const Center(
-                  child: Text(
-                    'Select employee',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              )),
+              controller: _accountSearchBoxController,
+            ),
+            menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
+            title: popUp(
+              context: context,
+              title: 'Select employee',
+              height: 50,
+            ),
+          ),
           dropdownSearchDecoration: InputDecoration(
             labelText: 'Account Employee',
             border:
@@ -260,7 +237,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
               "${u?.company!.name}",
           asyncItems: (String? filter) =>
-              getData(Role.employee, _accountSearchBoxController.text),
+              getData(Role.company, _accountSearchBoxController.text),
           onChanged: (User? newValue) {
             _selectedAccount = newValue;
           }),

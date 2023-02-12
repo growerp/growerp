@@ -111,21 +111,11 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                   ),
                   menuProps:
                       MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColorDark,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          )),
-                      child: const Center(
-                          child: Text('Select chat partner',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              )))),
+                  title: popUp(
+                    context: context,
+                    title: 'Select chat partner',
+                    height: 50,
+                  ),
                 ),
                 selectedItem: _selectedUser,
                 dropdownSearchDecoration: InputDecoration(

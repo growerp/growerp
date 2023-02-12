@@ -1,6 +1,6 @@
 name: growerp_catalog
 description:  A catalog component for the Growerp ERP System containing, products, categories and assets
-version: 0.8.0-dev.1
+version: 0.9.0-dev.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 

@@ -55,22 +55,14 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: CompanyForm(FormArguments()),
+        form: const CompanyForm(),
         label: 'Company Info',
         icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const UserListForm(
-          key: Key('Admin'),
-          userGroup: UserGroup.admin,
-        ),
-        label: 'Admins',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserListForm(
           key: Key('Employee'),
-          userGroup: UserGroup.employee,
+          role: Role.company,
         ),
         label: 'Employees',
         icon: const Icon(Icons.school),
@@ -85,7 +77,6 @@ List<MenuOption> menuOptions = [
       readGroups: [
         UserGroup.admin,
         UserGroup.employee,
-        UserGroup.SuperAdmin
       ],
       tabItems: [
         TabItem(

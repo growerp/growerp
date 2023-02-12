@@ -17,7 +17,7 @@ import '../../domains.dart';
 
 Widget popUp({
   required BuildContext context,
-  required Widget child,
+  Widget? child,
   String title = '',
   double height = 400,
   double width = 400,
@@ -37,7 +37,7 @@ Widget popUp({
                   )),
               child: Center(
                   child: Text(title,
-                      key: const Key('header'),
+                      key: const Key('topHeader'),
                       style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white,

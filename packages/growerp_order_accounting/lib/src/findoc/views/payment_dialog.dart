@@ -142,22 +142,12 @@ class PaymentDialogState extends State<PaymentDialog> {
                   ),
                   menuProps:
                       MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColorDark,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          )),
-                      child: Center(
-                          child: Text(
-                              "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              )))),
+                  title: popUp(
+                    context: context,
+                    title:
+                        "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
+                    height: 50,
+                  ),
                 ),
                 dropdownSearchDecoration: InputDecoration(
                   labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',

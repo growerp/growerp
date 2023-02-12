@@ -6,8 +6,8 @@ You can create your own website or start selling in minutes with a simple regist
 If you are a **developer** we offer you 2 environments:
 
 1. The API interface for your own developed frontend
-2. Our use/modify our Flutter frontend.
+2. Use/modify our Flutter frontend.
 
 Or run it all yourself; both frontend and backend are open source.
 
-More information in the [[1 Technical Introduction]] section
+More information in the [[1,Technical Introduction]] section

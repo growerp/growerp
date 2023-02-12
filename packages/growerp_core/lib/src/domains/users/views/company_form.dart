@@ -24,30 +24,14 @@ import 'package:image_picker/image_picker.dart';
 import '../../domains.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-final GlobalKey<ScaffoldMessengerState> companyDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
-class CompanyForm extends StatelessWidget {
-  final FormArguments formArguments;
-  const CompanyForm(this.formArguments, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      return CompanyPage(state.authenticate!);
-    });
-  }
-}
-
-class CompanyPage extends StatefulWidget {
-  final Authenticate authenticate;
-  const CompanyPage(this.authenticate, {super.key});
+class CompanyForm extends StatefulWidget {
+  const CompanyForm({super.key});
 
   @override
   CompanyPageState createState() => CompanyPageState();
 }
 
-class CompanyPageState extends State<CompanyPage> {
+class CompanyPageState extends State<CompanyForm> {
   final _formKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   late Company company;
@@ -67,14 +51,14 @@ class CompanyPageState extends State<CompanyPage> {
   @override
   void initState() {
     super.initState();
-    authenticate = widget.authenticate.copyWith();
+    authenticate = context.read<AuthBloc>().state.authenticate!;
     company = authenticate.company!;
     user = authenticate.user!;
     isAdmin = authenticate.user!.userGroup == UserGroup.admin;
     _selectedCurrency = currencies.firstWhere(
         (element) => element.currencyId == company.currency?.currencyId);
     _nameController.text = company.name!;
-    _emailController.text = company.email!;
+    _emailController.text = company.email ?? '';
     _vatPercController.text =
         company.vatPerc == null ? '' : company.vatPerc.toString();
     _salesPercController.text =
@@ -123,8 +107,7 @@ class CompanyPageState extends State<CompanyPage> {
               context, '${state.message}', Colors.green);
           break;
         case AuthStatus.failure:
-          companyDialogKey.currentState!
-              .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
           break;
         default:
       }
@@ -263,7 +246,7 @@ class CompanyPageState extends State<CompanyPage> {
                 company.address != null
                     ? "${company.address?.city} "
                         "${company.address?.country!}"
-                    : "No address yet",
+                    : "No postal address yet",
                 key: const Key('addressLabel'))),
         SizedBox(
             width: 100,
@@ -284,8 +267,8 @@ class CompanyPageState extends State<CompanyPage> {
                       }
                     }
                   : null,
-              child: Text(
-                  company.address != null ? 'Update\nAddress' : 'Add\nAddress'),
+              child:
+                  Text("${company.address != null ? 'Update' : 'Add'} Address"),
             ))
       ]),
       Row(children: [

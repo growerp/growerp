@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import '../../domains.dart';
-
 import '../../../api_repository.dart';
 
 class UserListForm extends StatelessWidget {
@@ -53,7 +52,7 @@ class UserListForm extends StatelessWidget {
                 context.read<APIRepository>(), role, context.read<AuthBloc>())
               ..add(const UserFetch()),
             child: userList);
-      case Role.employee:
+      case Role.company:
         return BlocProvider<EmployeeBloc>(
             create: (context) => UserBloc(
                 context.read<APIRepository>(), role, context.read<AuthBloc>())
@@ -91,7 +90,7 @@ class UserListState extends State<UserList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     switch (widget.role) {
-      case Role.employee:
+      case Role.company:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;
         break;
       case Role.supplier:
@@ -205,7 +204,7 @@ class UserListState extends State<UserList> {
         case Role.customer:
           return BlocConsumer<CustomerBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
-        case Role.employee:
+        case Role.company:
           return BlocConsumer<EmployeeBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
         case Role.supplier:

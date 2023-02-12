@@ -40,21 +40,17 @@ class UserListItem extends StatelessWidget {
               backgroundColor: Colors.green,
               child: user.image != null
                   ? Image.memory(user.image!)
-                  : Text(user.firstName![0]),
+                  : Text(user.firstName != null ? user.firstName![0] : '?'),
             ),
             subtitle: !isDeskTop
-                ? Text(
-                    user.email != null && user.email!.contains('example.com')
-                        ? " "
-                        : "${user.email}",
-                    key: Key("email$index"))
+                ? Text(user.email ?? '', key: Key("email$index"))
                 : null,
             title: Row(
               children: <Widget>[
                 Expanded(
                     child: Text(
-                  "${user.firstName} "
-                  "${user.lastName}",
+                  "${user.firstName ?? ''} "
+                  "${user.lastName ?? ''}",
                   key: Key('name$index'),
                 )),
                 if (isDeskTop)
@@ -74,13 +70,18 @@ class UserListItem extends StatelessWidget {
                     user.language ?? '',
                     key: Key('language$index'),
                   )),
-                if (isDeskTop && role != Role.employee)
+                if (role == Role.company)
+                  Expanded(
+                    child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
+                        key: Key('isAdmin$index'), textAlign: TextAlign.center),
+                  ),
+                if (isDeskTop && role != Role.company)
                   Expanded(
                     child: Text("${user.company!.name}",
                         key: Key('companyName$index'),
                         textAlign: TextAlign.center),
                   ),
-                if (!isDeskTop && role != Role.employee)
+                if (!isDeskTop && role != Role.company)
                   Expanded(
                       child: Text("${user.company!.name}",
                           key: Key('companyName$index'),

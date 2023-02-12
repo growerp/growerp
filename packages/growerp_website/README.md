@@ -17,7 +17,14 @@ It uses a local backend system.
 You can also use our test backend system   
     set in: example/assets/cfg/app_settings.json  
         databaseUrlDebug: https://test.growerp.org
-Start test with: cd example && flutter test integration_test/all_test.dart
+
+Start test with: 
+```sh
+flutter pub get
+flutter pub run build_runner build --delete-conflicting-outputs
+cd example
+flutter test integration_test/website_test.dart
+```
 
 ## use the example component
 As with the integration test you can use a local backend or our test backend.

@@ -21,9 +21,7 @@ Route<dynamic> coreRoute(RouteSettings settings) {
       ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }");
   switch (settings.name) {
     case '/company':
-      return MaterialPageRoute(
-          builder: (context) =>
-              CompanyForm(settings.arguments as FormArguments));
+      return MaterialPageRoute(builder: (context) => const CompanyForm());
     case '/about':
       return MaterialPageRoute(builder: (context) => const AboutForm());
     default:

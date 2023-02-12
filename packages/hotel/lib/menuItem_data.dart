@@ -58,7 +58,7 @@ List<MenuOption> menuOptions = [
         icon: Icon(Icons.school),
       ),
       TabItem(
-        form: CompanyForm(FormArguments()),
+        form: const CompanyForm(),
         label: "Company Info",
         icon: Icon(Icons.home),
       ),

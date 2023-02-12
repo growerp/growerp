@@ -18,7 +18,7 @@ void main() {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
-    await UserTest.selectAdministrators(tester);
+    await UserTest.selectEmployees(tester);
     await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
     await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
     await UserTest.deleteAdministrators(tester);

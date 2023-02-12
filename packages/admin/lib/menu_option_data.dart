@@ -40,14 +40,14 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: CompanyForm(FormArguments()),
+        form: const CompanyForm(),
         label: 'Company Info',
         icon: const Icon(Icons.home),
       ),
       TabItem(
         form: const UserListForm(
           key: Key('Employee'),
-          role: Role.employee,
+          role: Role.company,
         ),
         label: 'Employees',
         icon: const Icon(Icons.school),

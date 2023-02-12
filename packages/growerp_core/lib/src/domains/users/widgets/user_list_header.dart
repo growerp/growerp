@@ -39,8 +39,14 @@ class _UserListHeaderState extends State<UserListHeader> {
         child: ListTile(
             leading: GestureDetector(
                 key: const Key('search'),
-                onTap: (() =>
-                    setState(() => search ? search = false : search = true)),
+                onTap: (() => setState(() {
+                      if (search) {
+                        search = false;
+                        widget.userBloc.add(const UserFetch(refresh: true));
+                      } else {
+                        search = true;
+                      }
+                    })),
                 child: Image.asset(
                   'packages/growerp_core/images/search.png',
                   height: 30,
@@ -66,7 +72,6 @@ class _UserListHeaderState extends State<UserListHeader> {
                         onPressed: () {
                           widget.userBloc
                               .add(UserFetch(searchString: searchString));
-                          searchString = '';
                         })
                   ])
                 : Row(
@@ -77,11 +82,13 @@ class _UserListHeaderState extends State<UserListHeader> {
                       if (!widget.isPhone) const Expanded(child: Text("Email")),
                       if (!widget.isPhone)
                         const Expanded(child: Text("Language")),
-                      if (!widget.isPhone && widget.role != Role.employee)
+                      if (widget.role == Role.company)
+                        const Expanded(child: Text("    Admin")),
+                      if (!widget.isPhone && widget.role != Role.company)
                         const Expanded(
                             child:
                                 Text("Company", textAlign: TextAlign.center)),
-                      if (widget.isPhone && widget.role != Role.employee)
+                      if (widget.isPhone && widget.role != Role.company)
                         const Expanded(child: Text("Company"))
                     ],
                   ),

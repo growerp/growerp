@@ -1,5 +1,17 @@
 # Releases
 
+## Refactoring Release February 20 2022 (V0.9.0)
+1. System now split-up in packages registered in [pub.dev](https://pub.dev/publishers/growerp.com/packages)
+3. Role of company now separated from security group at userlogin.
+4. Reorganized the user detail screen.
+5. Company model added to user model
+2. Use of the new dart Enum.
+6. Added header with close button at all dialog screens
+7. Moved images into the core package
+8. Lint rules now applied to all source files
+9. Extended user/company/website integration tests
+10. Rename files and variable names according Dart standard. 
+
 ## Production release December 20 2022 (V0.6.0)
 
 1. User backend organization change from owner/user/company to owner/company/user

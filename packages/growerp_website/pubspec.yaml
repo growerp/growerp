@@ -1,6 +1,6 @@
 name: growerp_website
 description:  A website component for the GrowERP system.
-version: 0.8.0-dev.1
+version: 0.9.0-dev.1
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_website
 

@@ -13,7 +13,7 @@
  */
 
 enum Role {
-  employee('OrgInternal'),
+  company('OrgInternal'),
   customer('Customer'),
   lead('Lead'),
   supplier('Supplier');
@@ -33,7 +33,6 @@ enum Role {
 
   @override
   String toString() {
-    if (value == 'OrgInternal') return 'Employee';
     return value;
   }
 }

@@ -48,10 +48,10 @@ class UserPage extends StatefulWidget {
 }
 
 class UserDialogState extends State<UserPage> {
-  final _formKey = GlobalKey<FormState>();
+  final _userDialogFormKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _nameController = TextEditingController();
+  final _loginNameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _companyController = TextEditingController();
@@ -68,8 +68,10 @@ class UserDialogState extends State<UserPage> {
   late User updatedUser;
   late APIRepository repos;
   final ImagePicker _picker = ImagePicker();
-
+  late UserBloc _userBloc;
+  bool _isLoginDisabled = false;
   late bool isPhone;
+  bool _hasLogin = false;
 
   @override
   void initState() {
@@ -77,17 +79,20 @@ class UserDialogState extends State<UserPage> {
     if (widget.user.partyId != null) {
       _firstNameController.text = widget.user.firstName ?? '';
       _lastNameController.text = widget.user.lastName ?? '';
-      _nameController.text = widget.user.loginName ?? '';
+      _loginNameController.text = widget.user.loginName ?? '';
       _telephoneController.text = widget.user.telephoneNr ?? '';
       _emailController.text = widget.user.email ?? '';
       _selectedCompany = Company(
           partyId: widget.user.company!.partyId,
           name: widget.user.company!.name);
+      _isLoginDisabled = widget.user.loginDisabled ?? false;
+      _hasLogin = widget.user.userId != null;
     }
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     _selectedRole = widget.user.company!.role!;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
+    _userBloc = context.read<UserBloc>();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -144,14 +149,15 @@ class UserDialogState extends State<UserPage> {
 
   Dialog scaffoldWidget(User user, BuildContext context) {
     return Dialog(
-      key: Key('UserDialog${user.userGroup.toString()}'),
+      key: Key('UserDialog${user.company!.role!.name}'),
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       child: popUp(
           context: context,
-          title: 'User information',
+          title:
+              "${widget.user.company!.role! == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : widget.user.company!.role!.name} information",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 1020 : 700,
           child: ScaffoldMessenger(
@@ -208,8 +214,7 @@ class UserDialogState extends State<UserPage> {
   Widget _userDialog() {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     User? currentUser = authenticate.user;
-    if (widget.user.userGroup == UserGroup.admin ||
-        widget.user.userGroup == UserGroup.employee) {
+    if (widget.user.company!.role == Role.company) {
       _selectedCompany = authenticate.company;
     }
 
@@ -265,11 +270,14 @@ class UserDialogState extends State<UserPage> {
                         const InputDecoration(labelText: 'Email address'),
                     controller: _emailController,
                     validator: (String? value) {
-                      if (value!.isEmpty) return 'Please enter Email address?';
-                      if (!RegExp(
-                              r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-                          .hasMatch(value)) {
+                      if (value!.isNotEmpty &&
+                          !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                              .hasMatch(value)) {
                         return 'This is not a valid email';
+                      }
+                      if (value.isEmpty &&
+                          _loginNameController.text.isNotEmpty) {
+                        return 'Email for login required!';
                       }
                       return null;
                     },
@@ -290,7 +298,7 @@ class UserDialogState extends State<UserPage> {
         ),
       ),
       Visibility(
-          visible: updatedUser.company!.role != Role.employee,
+          visible: updatedUser.company!.role != Role.company,
           child: InputDecorator(
               decoration: InputDecoration(
                 labelText: 'Company information',
@@ -316,24 +324,14 @@ class UserDialogState extends State<UserPage> {
                         ),
                         menuProps: MenuProps(
                             borderRadius: BorderRadius.circular(20.0)),
-                        title: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColorDark,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(20),
-                                  topRight: Radius.circular(20),
-                                )),
-                            child: const Center(
-                                child: Text('Select company',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    )))),
+                        title: popUp(
+                          context: context,
+                          title: 'Select company',
+                          height: 50,
+                        ),
                       ),
                       dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Existing Company',
+                        labelText: 'Company name',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25.0)),
                       ),
@@ -351,124 +349,143 @@ class UserDialogState extends State<UserPage> {
                               : null,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                      child: TextFormField(
-                    key: const Key('newCompanyName'),
-                    decoration:
-                        const InputDecoration(labelText: 'New Company Name'),
-                    controller: _companyController,
-                    validator: (value) {
-                      if (value!.isEmpty && _selectedCompany == null) {
-                        return 'Please enter an existing or new company?';
-                      }
-                      return null;
-                    },
-                  )),
                 ]),
                 const SizedBox(height: 10),
-                DropdownButtonFormField<Role>(
-                  key: const Key('role'),
-                  decoration: const InputDecoration(labelText: 'Role'),
-                  hint: const Text('Role'),
-                  value: _selectedRole,
-                  validator: (value) =>
-                      value == null ? 'Role field required!' : null,
-                  items: Role.values.map((item) {
-                    return DropdownMenuItem<Role>(
-                        value: item, child: Text(item.value));
-                  }).toList(),
-                  onChanged: (Role? newValue) {
-                    setState(() {
-                      _selectedRole = newValue!;
-                    });
-                  },
-                  isExpanded: true,
-                ),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: Text(
-                          updatedUser.company!.address != null
-                              ? "${updatedUser.company!.address!.city!} "
-                                  "${updatedUser.company!.address!.country!}"
-                              : "No address yet",
-                          key: const Key('addressLabel'))),
-                  Expanded(
-                      child: ElevatedButton(
-                    key: const Key('address'),
-                    onPressed: () async {
-                      var result = await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AddressDialog(
-                                address: updatedUser.company!.address);
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<Role>(
+                        key: const Key('role'),
+                        decoration: const InputDecoration(labelText: 'Role'),
+                        hint: const Text('Role'),
+                        value: _selectedRole,
+                        validator: (value) =>
+                            value == null ? 'Role field required!' : null,
+                        items: Role.values.map((item) {
+                          return DropdownMenuItem<Role>(
+                              value: item, child: Text(item.value));
+                        }).toList(),
+                        onChanged: (Role? newValue) {
+                          setState(() {
+                            _selectedRole = newValue!;
                           });
-                      if (!mounted) return;
-                      if (result is Address) {
-                        context.read<UserBloc>().add(UserUpdate(
-                            updatedUser.copyWith(
-                                company: updatedUser.company!
-                                    .copyWith(address: result))));
-                      }
-                    },
-                    child: Text(
-                        "${updatedUser.company!.address != null ? 'Update' : 'Add'}"
-                        " postal address"),
-                  ))
-                ]),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: Text(
-                          updatedUser.company!.paymentMethod != null
-                              ? "${updatedUser.company!.paymentMethod?.ccDescription}"
-                              : "No payment methods yet",
-                          key: const Key('paymentMethodLabel'))),
-                  Expanded(
-                    child: SizedBox(
-                        width: 100,
-                        child: ElevatedButton(
-                            key: const Key('paymentMethod'),
-                            onPressed: updatedUser.company!.address == null
-                                ? null
-                                : () async {
-                                    var result = await showDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return PaymentMethodDialog(
-                                              paymentMethod: updatedUser
-                                                  .company!.paymentMethod);
-                                        });
-                                    if (!mounted) return;
-                                    if (result is PaymentMethod) {
-                                      context.read<UserBloc>().add(UserUpdate(
-                                          updatedUser.copyWith(
-                                              company: updatedUser.company!
-                                                  .copyWith(
-                                                      paymentMethod: result))));
-                                    }
-                                  },
+                        },
+                        isExpanded: true,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                        child: TextFormField(
+                      key: const Key('newCompanyName'),
+                      decoration:
+                          const InputDecoration(labelText: 'New Company Name'),
+                      controller: _companyController,
+                      validator: (value) {
+                        if (value!.isEmpty && _selectedCompany == null) {
+                          return 'Please enter an existing or new company?';
+                        }
+                        return null;
+                      },
+                    )),
+                  ],
+                ),
+                Visibility(
+                    visible: updatedUser.partyId != null,
+                    child: Column(children: [
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        Expanded(
                             child: Text(
-                                '${updatedUser.company!.paymentMethod != null ? 'Update' : 'Add'} Payment Method'))),
-                  )
-                ]),
+                                updatedUser.company!.address != null
+                                    ? "${updatedUser.company!.address!.city!} "
+                                        "${updatedUser.company!.address!.country!}"
+                                    : "No address yet",
+                                key: const Key('addressLabel'))),
+                        Expanded(
+                            child: ElevatedButton(
+                          key: const Key('address'),
+                          onPressed: () async {
+                            var result = await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AddressDialog(
+                                      address: updatedUser.company!.address);
+                                });
+                            if (result is Address) {
+                              _userBloc.add(UserUpdate(updatedUser.copyWith(
+                                  company: updatedUser.company!
+                                      .copyWith(address: result))));
+                            }
+                          },
+                          child: Text(
+                              "${updatedUser.company!.address != null ? 'Update' : 'Add'}"
+                              " postal address"),
+                        ))
+                      ]),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        Expanded(
+                            child: Text(
+                                updatedUser.company!.paymentMethod != null
+                                    ? "${updatedUser.company!.paymentMethod?.ccDescription}"
+                                    : "No payment methods yet",
+                                key: const Key('paymentMethodLabel'))),
+                        Expanded(
+                          child: SizedBox(
+                              width: 100,
+                              child: ElevatedButton(
+                                  key: const Key('paymentMethod'),
+                                  // address required for payment
+                                  onPressed: updatedUser.company!.address ==
+                                          null
+                                      ? null
+                                      : () async {
+                                          var result = await showDialog(
+                                              barrierDismissible: true,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return PaymentMethodDialog(
+                                                    paymentMethod: updatedUser
+                                                        .company!
+                                                        .paymentMethod);
+                                              });
+                                          if (result is PaymentMethod) {
+                                            _userBloc.add(UserUpdate(
+                                                updatedUser.copyWith(
+                                                    company: updatedUser
+                                                        .company!
+                                                        .copyWith(
+                                                            paymentMethod:
+                                                                result))));
+                                          }
+                                        },
+                                  child: Text(
+                                      '${updatedUser.company!.paymentMethod != null ? 'Update' : 'Add'} Payment Method'))),
+                        )
+                      ])
+                    ]))
               ]))),
       InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'User Login',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25.0),
+          decoration: InputDecoration(
+            labelText: 'User Login',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
+          child: Column(children: [
             TextFormField(
+              readOnly: !(currentUser!.userGroup == UserGroup.admin),
               key: const Key('loginName'),
               decoration: const InputDecoration(labelText: 'User Login Name '),
-              controller: _nameController,
+              controller: _loginNameController,
+              onChanged: (value) {
+                if (value.isNotEmpty != _hasLogin) {
+                  return setState(() {
+                    _hasLogin = !_hasLogin;
+                  });
+                }
+              },
               validator: (value) {
                 if (widget.user.userGroup == UserGroup.admin &&
                     value!.isEmpty) {
@@ -477,31 +494,57 @@ class UserDialogState extends State<UserPage> {
                 return null;
               },
             ),
-            const SizedBox(height: 10),
-            Visibility(
-                // use only to modify by admin user
-                visible: updatedUser.partyId != null &&
-                    currentUser!.userGroup == UserGroup.admin,
-                child: DropdownButtonFormField<UserGroup>(
-                  decoration: const InputDecoration(labelText: 'User Group'),
-                  key: const Key('userGroup'),
-                  hint: const Text('User Group'),
-                  value: _selectedUserGroup,
-                  validator: (value) => value == null ? 'field required' : null,
-                  items: localUserGroups.map((item) {
-                    return DropdownMenuItem<UserGroup>(
-                        value: item, child: Text(item.toString()));
-                  }).toList(),
-                  onChanged: (UserGroup? newValue) {
-                    setState(() {
-                      _selectedUserGroup = newValue!;
-                    });
-                  },
-                  isExpanded: true,
-                )),
-          ],
-        ),
-      ),
+            if (currentUser.userGroup == UserGroup.admin &&
+                _loginNameController.text.isNotEmpty)
+              Column(children: [
+                const SizedBox(height: 10),
+                Row(children: [
+                  Expanded(
+                      child: DropdownButtonFormField<UserGroup>(
+                    decoration:
+                        const InputDecoration(labelText: 'Security User Group'),
+                    key: const Key('userGroup'),
+                    hint: const Text('Security User Group'),
+                    value: _selectedUserGroup,
+                    validator: (value) =>
+                        value == null ? 'field required' : null,
+                    items: localUserGroups.map((item) {
+                      return DropdownMenuItem<UserGroup>(
+                          value: item, child: Text(item.name));
+                    }).toList(),
+                    onChanged: (UserGroup? newValue) {
+                      setState(() {
+                        _selectedUserGroup = newValue!;
+                      });
+                    },
+                    isExpanded: true,
+                  )),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 100,
+                    height: 60,
+                    child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Disabled',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                        ),
+                        child: Checkbox(
+                          key: const Key('loginDisabled'),
+                          checkColor: Colors.white,
+                          //     fillColor: MaterialStateProperty.resolveWith(getColor),
+                          value: _isLoginDisabled,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isLoginDisabled = value!;
+                            });
+                          },
+                        )),
+                  )
+                ])
+              ])
+          ]))
     ];
     Widget update = Row(children: [
       ElevatedButton(
@@ -533,20 +576,22 @@ class UserDialogState extends State<UserPage> {
               key: const Key('updateUser'),
               child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
+                if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(
                       firstName: _firstNameController.text,
                       lastName: _lastNameController.text,
                       email: _emailController.text,
-                      loginName: _nameController.text,
+                      loginName: _loginNameController.text,
                       telephoneNr: _telephoneController.text,
+                      loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
                       language: Localizations.localeOf(context)
                           .languageCode
                           .toString(),
-                      company: Company(
+                      company: widget.user.company!.copyWith(
+                          role: _selectedRole,
                           name: _companyController.text,
-                          // if new company name not empty partyId
+                          // if new company name: empty partyId
                           partyId: _companyController.text.isEmpty
                               ? updatedUser.company!.partyId
                               : ''),
@@ -557,7 +602,7 @@ class UserDialogState extends State<UserPage> {
                     HelperFunctions.showMessage(
                         context, "Image upload error!", Colors.red);
                   } else {
-                    context.read<UserBloc>().add(UserUpdate(updatedUser));
+                    _userBloc.add(UserUpdate(updatedUser));
                     if (context
                             .read<AuthBloc>()
                             .state
@@ -597,7 +642,7 @@ class UserDialogState extends State<UserPage> {
     }
 
     return Form(
-        key: _formKey,
+        key: _userDialogFormKey,
         child: SingleChildScrollView(
             key: const Key('listView'),
             child: Column(children: <Widget>[

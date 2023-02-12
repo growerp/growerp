@@ -209,22 +209,12 @@ class MyFinDocState extends State<FinDocPage> {
                   ),
                   menuProps:
                       MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColorDark,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          )),
-                      child: Center(
-                          child: Text(
-                              "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              )))),
+                  title: popUp(
+                    context: context,
+                    title:
+                        "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                    height: 50,
+                  ),
                 ),
                 dropdownSearchDecoration: InputDecoration(
                   labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
@@ -630,22 +620,11 @@ Future addProductItemDialog(BuildContext context, repos) async {
                                 ),
                                 menuProps: MenuProps(
                                     borderRadius: BorderRadius.circular(20)),
-                                title: Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                        color:
-                                            Theme.of(context).primaryColorDark,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(20),
-                                          topRight: Radius.circular(20),
-                                        )),
-                                    child: const Center(
-                                        child: Text('Select product',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            )))),
+                                title: popUp(
+                                  context: context,
+                                  title: 'Select product',
+                                  height: 50,
+                                ),
                               ),
                               dropdownSearchDecoration: InputDecoration(
                                 labelText: 'Product',
@@ -821,6 +800,11 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                                   ),
                                   menuProps: MenuProps(
                                       borderRadius: BorderRadius.circular(20)),
+                                  title: popUp(
+                                    context: context,
+                                    title: 'Select product',
+                                    height: 50,
+                                  ),
                                 ),
                                 itemAsString: (Product? u) =>
                                     "${u!.productName}",

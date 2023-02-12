@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -60,8 +61,11 @@ class UserBloc extends Bloc<UserEvent, UserState>
       return;
     }
     try {
+      debugPrint(
+          "=== event search: ${event.searchString} state: ${state.searchString}");
       // start from record zero for initial and refresh
       if (state.status == UserStatus.initial || event.refresh) {
+        debugPrint("UserBloc initial or refresh");
         ApiResult<List<User>> compResult =
             await repos.getUser(role: role, searchString: event.searchString);
         return emit(compResult.when(
@@ -70,15 +74,15 @@ class UserBloc extends Bloc<UserEvent, UserState>
                   users: data,
                   hasReachedMax: data.length < _userLimit ? true : false,
                   searchString: '',
-                  message: event.refresh == true ? 'List refreshed' : null,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));
       }
       // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+      else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
+        debugPrint("=== UserBloc search or changed search");
         ApiResult<List<User>> compResult =
             await repos.getUser(role: role, searchString: event.searchString);
         return emit(compResult.when(
@@ -90,19 +94,20 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));
+      } else {
+        debugPrint("===UserBloc continue fetch");
+        // get next page also for search
+        ApiResult<List<User>> compResult =
+            await repos.getUser(role: role, searchString: event.searchString);
+        return emit(compResult.when(
+            success: (data) => state.copyWith(
+                  status: UserStatus.success,
+                  users: List.of(state.users)..addAll(data),
+                  hasReachedMax: data.length < _userLimit ? true : false,
+                ),
+            failure: (NetworkExceptions error) => state.copyWith(
+                status: UserStatus.failure, message: error.toString())));
       }
-      // get next page also for search
-
-      ApiResult<List<User>> compResult =
-          await repos.getUser(role: role, searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: UserStatus.success,
-                users: List.of(state.users)..addAll(data),
-                hasReachedMax: data.length < _userLimit ? true : false,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure, message: error.toString())));
     } catch (error) {
       emit(state.copyWith(
           status: UserStatus.failure, message: error.toString()));
@@ -127,6 +132,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 users[index] = data;
               }
               return state.copyWith(
+                  searchString: '',
                   status: UserStatus.success,
                   users: users,
                   message: 'user ${data.firstName} updated...');
@@ -140,6 +146,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
             success: (data) {
               users.insert(0, data);
               return state.copyWith(
+                  searchString: '',
                   status: UserStatus.success,
                   users: users,
                   message: 'user ${data.firstName} added...');
@@ -167,6 +174,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 .indexWhere((element) => element.partyId == event.user.partyId);
             users.removeAt(index);
             return state.copyWith(
+                searchString: '',
                 status: UserStatus.success,
                 users: users,
                 message: 'User ${event.user.firstName} is deleted now..');

@@ -48,6 +48,8 @@ void main(List<String> arguments) async {
       '$home/growerpChat'
     ]);
   } else {
+    await Process.runSync('git', ['stash'],
+        workingDirectory: '$home/growerpChat');
     await Process.runSync('git', ['pull'],
         workingDirectory: '$home/growerpChat');
   }
@@ -137,6 +139,21 @@ void main(List<String> arguments) async {
   await Future.delayed(Duration(seconds: 60));
 
   print('======start test....');
+  await Process.runSync('flutter', ['pub', 'get'],
+      workingDirectory: '$home/growerp/packages/growerp_core');
+  await Process.runSync('flutter',
+      ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
+      workingDirectory: '$home/growerp/packages/growerp_core');
+  await Process.runSync('flutter', ['pub', 'get'],
+      workingDirectory: '$home/growerp/packages/growerp_marketing');
+  await Process.runSync('flutter',
+      ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
+      workingDirectory: '$home/growerp/packages/growerp_marketing');
+  await Process.runSync('flutter', ['pub', 'get'],
+      workingDirectory: '$home/growerp/packages/growerp_website');
+  await Process.runSync('flutter',
+      ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
+      workingDirectory: '$home/growerp/packages/growerp_website');
   await Process.start('flutter', ['test', 'integration_test/all_test.dart'],
       workingDirectory: '.', mode: ProcessStartMode.inheritStdio);
 }

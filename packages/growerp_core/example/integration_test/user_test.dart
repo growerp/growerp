@@ -8,8 +8,6 @@ import 'package:growerp_core/growerp_core.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-// this test requires company test to run first
-
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
@@ -32,7 +30,7 @@ void main() {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         clear: true, title: 'GrowERP user test');
     await CompanyTest.createCompany(tester);
-    await UserTest.selectAdministrators(tester);
+/*    await UserTest.selectEmployees(tester);
     await UserTest.addAdministrators(tester, administrators.sublist(0, 3));
     await UserTest.updateAdministrators(tester, administrators.sublist(3, 6));
     await UserTest.deleteAdministrators(tester);
@@ -41,6 +39,7 @@ void main() {
     await UserTest.updateEmployees(tester, employees.sublist(3, 6));
     await UserTest.deleteEmployees(tester);
     await selectLeads(tester);
+*/
     await UserTest.addLeads(tester, leads.sublist(0, 3));
     await UserTest.updateLeads(tester, leads.sublist(3, 6));
     await UserTest.deleteLeads(tester);
