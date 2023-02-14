@@ -461,35 +461,35 @@ packages:
       path: "../growerp_catalog"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   growerp_core:
     dependency: "direct main"
     description:
       path: "../growerp_core"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   growerp_inventory:
     dependency: "direct main"
     description:
       path: "../growerp_inventory"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   growerp_marketing:
     dependency: "direct main"
     description:
       path: "../growerp_marketing"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   growerp_order_accounting:
     dependency: "direct main"
     description:
       path: "../growerp_order_accounting"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   growerp_select_dialog:
     dependency: transitive
     description:
@@ -504,7 +504,7 @@ packages:
       path: "../growerp_website"
       relative: true
     source: path
-    version: "0.8.0-dev.1"
+    version: "0.9.0-dev.1"
   highlight:
     dependency: transitive
     description:

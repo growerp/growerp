@@ -105,7 +105,8 @@ class CompanyTest {
         equals(perc ? company.vatPerc.toString() : ''));
     expect(CommonTest.getTextFormField('salesPerc'),
         equals(perc ? company.salesPerc.toString() : ''));
-    expect(CommonTest.getTextField('addressLabel'), equals('No address yet'));
+    expect(CommonTest.getTextField('addressLabel'),
+        equals('No postal address yet'));
     expect(CommonTest.getTextField('paymentMethodLabel'),
         equals('No payment methods yet'));
   }

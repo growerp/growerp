@@ -30,7 +30,6 @@ class Themes {
       ),
     ),
     primaryColorDark: const Color.fromARGB(255, 11, 70, 61),
-    errorColor: Colors.red,
     cardColor: Colors.white,
     canvasColor: Colors.white, // modal popup background
     scaffoldBackgroundColor: Colors.white,
@@ -49,7 +48,6 @@ class Themes {
     hintColor: const Color(0xFF4baa9b),
     disabledColor: const Color(0x80FFFFFF),
     dividerColor: Colors.white30,
-    toggleableActiveColor: const Color(0xFFce5310),
     unselectedWidgetColor: Colors.black,
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

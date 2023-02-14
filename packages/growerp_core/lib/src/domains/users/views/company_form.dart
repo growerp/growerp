@@ -316,6 +316,7 @@ class CompanyPageState extends State<CompanyForm> {
                                 partyId: company.partyId,
                                 email: _emailController.text,
                                 name: _nameController.text,
+                                role: company.role,
                                 telephoneNr: _telephoneController.text,
                                 currency: _selectedCurrency,
                                 address: company.address,
