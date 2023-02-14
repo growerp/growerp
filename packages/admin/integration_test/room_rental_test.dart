@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
-import 'data.dart' as data;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -20,16 +19,15 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, [data.categories[0]],
-        check: false);
+    await CategoryTest.addCategories(tester, [categories[0]], check: false);
     await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, [data.products[2]], check: false);
+    await ProductTest.addProducts(tester, [products[2]], check: false);
     await AssetTest.selectAsset(tester);
-    await AssetTest.addAssets(tester, [data.assets[2]], check: false);
+    await AssetTest.addAssets(tester, [assets[2]], check: false);
     await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, [data.customers[0]], check: false);
+    await UserTest.addCustomers(tester, [customers[0]], check: false);
     await OrderTest.selectSalesOrders(tester);
-    await OrderTest.createRentalSalesOrder(tester, data.rentalSalesOrders);
+    await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
     await OrderTest.checkRentalSalesOrder(tester);
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
     await OrderTest.approveSalesOrder(tester);

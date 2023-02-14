@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
-import 'data.dart' as data;
 
 /// the full business roundtrip for physical products
 /// purchase products and receive in warehouse
@@ -26,18 +25,16 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, data.categories.sublist(0, 2),
+    await CategoryTest.addCategories(tester, categories.sublist(0, 2),
         check: false);
     await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, data.products.sublist(0, 2),
-        check: false);
+    await ProductTest.addProducts(tester, products.sublist(0, 2), check: false);
     await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, data.suppliers.sublist(0, 2),
-        check: false);
+    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
     await OrderTest.selectPurchaseOrders(tester);
-    await OrderTest.createPurchaseOrder(tester, data.purchaseOrders);
+    await OrderTest.createPurchaseOrder(tester, purchaseOrders);
     await OrderTest.checkPurchaseOrder(tester);
-    await OrderTest.sendPurchaseOrder(tester, data.purchaseOrders);
+    await OrderTest.sendPurchaseOrder(tester, purchaseOrders);
     await InventoryTest.selectIncomingShipments(tester);
     await InventoryTest.checkIncomingShipments(tester);
     await InventoryTest.acceptShipmentInInventory(tester);
@@ -71,9 +68,9 @@ void main() {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
     await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, [data.customers[0]], check: false);
+    await UserTest.addCustomers(tester, [customers[0]], check: false);
     await OrderTest.selectSalesOrders(tester);
-    await OrderTest.createSalesOrder(tester, data.salesOrders);
+    await OrderTest.createSalesOrder(tester, salesOrders);
     await OrderTest.checkSalesOrder(tester);
     await OrderTest.approveSalesOrder(tester);
     await InventoryTest.selectOutgoingShipments(tester);
