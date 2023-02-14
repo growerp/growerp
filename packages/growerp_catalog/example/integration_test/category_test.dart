@@ -19,7 +19,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:example/main.dart';
-import 'package:growerp_catalog/growerp_catalog.dart' as catalog;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +33,7 @@ void main() {
 
     await CompanyTest.createCompany(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, catalog.categories);
+    await CategoryTest.addCategories(tester, categories);
     await CategoryTest.updateCategories(tester);
     await CategoryTest.deleteLastCategory(tester);
   });

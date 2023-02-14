@@ -278,7 +278,7 @@ class CommonTest {
     if (tff.selectedItem is Country) return tff.selectedItem.name;
     if (tff.selectedItem is Category) return tff.selectedItem.categoryName;
     if (tff.selectedItem is Product) return tff.selectedItem.productName;
-    if (tff.selectedItem is User) return tff.selectedItem.companyName;
+    if (tff.selectedItem is User) return tff.selectedItem.company.name;
     return tff.selectedItem.toString();
   }
 

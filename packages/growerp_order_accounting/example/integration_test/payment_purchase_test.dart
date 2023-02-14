@@ -20,7 +20,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:example/main.dart' as router;
 import 'package:example/main.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart' as data;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -37,12 +36,10 @@ void main() {
     await CompanyTest.updateAddress(tester, check: false);
     await CompanyTest.updatePaymentMethod(tester, check: false);
     await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, data.suppliers.sublist(0, 2),
-        check: false);
+    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
     await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.addPayments(tester, data.purchasePayments.sublist(0, 4));
-    await PaymentTest.updatePayments(
-        tester, data.purchasePayments.sublist(4, 8));
+    await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
+    await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));
     await PaymentTest.deleteLastPayment(tester);
     await PaymentTest.sendReceivePayment(tester);
     await PaymentTest.checkPaymentComplete(tester);

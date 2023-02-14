@@ -3,7 +3,7 @@
 ## Refactoring Release February 20 2022 (V0.9.0)
 1. System now split-up in packages registered in [pub.dev](https://pub.dev/publishers/growerp.com/packages)
 3. Role of company now separated from security group at userlogin.
-4. Reorganized the user detail screen.
+4. Reorganized the user and website detail screen.
 5. Company model added to user model
 2. Use of the new dart Enum.
 6. Added header with close button at all dialog screens

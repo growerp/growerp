@@ -87,8 +87,8 @@ class PaymentTest {
       } else {
         await CommonTest.doSearch(tester, searchString: payment.paymentId!);
         await CommonTest.tapByKey(tester, 'edit0');
-        expect(
-            CommonTest.getTextField('header').split('#')[1], payment.paymentId,
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
+            payment.paymentId,
             reason: 'found different detail than was searched for');
       }
       await CommonTest.checkWidgetKey(

@@ -18,7 +18,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart' as data;
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:example/main.dart' as router;
 import 'package:example/main.dart';
@@ -37,19 +36,16 @@ void main() {
     await CompanyTest.createCompany(tester);
     await CommonTest.login(tester);
     await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, data.categories.sublist(0, 2),
+    await CategoryTest.addCategories(tester, categories.sublist(0, 2),
         check: false);
     await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, data.products.sublist(0, 2),
-        check: false);
+    await ProductTest.addProducts(tester, products.sublist(0, 2), check: false);
     await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, data.suppliers.sublist(0, 2),
-        check: false);
+    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
     // purchase
     await InvoiceTest.selectPurchaseInvoices(tester);
-    await InvoiceTest.addInvoices(tester, data.purchaseInvoices.sublist(0, 3));
-    await InvoiceTest.updateInvoices(
-        tester, data.purchaseInvoices.sublist(3, 5));
+    await InvoiceTest.addInvoices(tester, purchaseInvoices.sublist(0, 3));
+    await InvoiceTest.updateInvoices(tester, purchaseInvoices.sublist(3, 5));
     await InvoiceTest.deleteLastInvoice(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
     await PaymentTest.selectPurchasePayments(tester);

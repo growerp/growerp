@@ -28,7 +28,7 @@ class UserTest {
   }
 
   static Future<void> selectCustomers(WidgetTester tester) async {
-    await selectUsers(tester, 'dbCrm', 'UserListFormCustomer', '3');
+    await selectUsers(tester, 'dbOrders', 'UserListFormCustomer', '2');
   }
 
   static Future<void> selectSuppliers(WidgetTester tester) async {
