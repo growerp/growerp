@@ -489,92 +489,89 @@ Future addAnotherItemDialog(
     context: context,
     barrierDismissible: true,
     builder: (BuildContext context) {
-      var formKey = GlobalKey<FormState>();
-      return AlertDialog(
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20))),
-        title: const Text('Add another Item', textAlign: TextAlign.center),
-        content: SizedBox(
-            height: 350,
-            child: Form(
-                key: formKey,
-                child: SingleChildScrollView(
-                    key: const Key('listView2'),
-                    child: Column(children: <Widget>[
-                      DropdownButtonFormField<ItemType>(
-                        key: const Key('itemType'),
-                        decoration:
-                            const InputDecoration(labelText: 'Item Type'),
-                        hint: const Text('ItemType'),
-                        value: selectedItemType,
-                        validator: (value) =>
-                            value == null ? 'field required' : null,
-                        items: state.itemTypes.map((item) {
-                          return DropdownMenuItem<ItemType>(
-                              value: item, child: Text(item.itemTypeName));
-                        }).toList(),
-                        onChanged: (ItemType? newValue) {
-                          selectedItemType = newValue;
-                        },
-                        isExpanded: true,
-                      ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                          key: const Key('itemDescription'),
-                          decoration: const InputDecoration(
-                              labelText: 'Item Description'),
-                          controller: itemDescriptionController,
-                          validator: (value) {
-                            if (value!.isEmpty) return 'Item description?';
-                            return null;
-                          }),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        key: const Key('price'),
-                        decoration:
-                            const InputDecoration(labelText: 'Price/Amount'),
-                        controller: priceController,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value!.isEmpty) return 'Enter Price or Amount?';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        key: const Key('quantity'),
-                        decoration:
-                            const InputDecoration(labelText: 'Quantity'),
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ])))),
-        actions: <Widget>[
-          ElevatedButton(
-            key: const Key('cancel'),
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            key: const Key('ok'),
-            child: const Text('Ok'),
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(context).pop(FinDocItem(
-                  itemTypeId: selectedItemType!.itemTypeId,
-                  price: Decimal.parse(priceController.text),
-                  description: itemDescriptionController.text,
-                  quantity: quantityController.text.isEmpty
-                      ? Decimal.parse('1')
-                      : Decimal.parse(quantityController.text),
-                ));
-              }
-            },
-          ),
-        ],
-      );
+      var addOtherFormKey = GlobalKey<FormState>();
+      return Dialog(
+          key: const Key('addOtherItemDialog'),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20))),
+          child: popUp(
+            context: context,
+            height: 520,
+            title: 'Add another Item',
+            child: SizedBox(
+                child: Form(
+                    key: addOtherFormKey,
+                    child: SingleChildScrollView(
+                        key: const Key('listView2'),
+                        child: Column(children: <Widget>[
+                          DropdownButtonFormField<ItemType>(
+                            key: const Key('itemType'),
+                            decoration:
+                                const InputDecoration(labelText: 'Item Type'),
+                            hint: const Text('ItemType'),
+                            value: selectedItemType,
+                            validator: (value) =>
+                                value == null ? 'field required' : null,
+                            items: state.itemTypes.map((item) {
+                              return DropdownMenuItem<ItemType>(
+                                  value: item, child: Text(item.itemTypeName));
+                            }).toList(),
+                            onChanged: (ItemType? newValue) {
+                              selectedItemType = newValue;
+                            },
+                            isExpanded: true,
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                              key: const Key('itemDescription'),
+                              decoration: const InputDecoration(
+                                  labelText: 'Item Description'),
+                              controller: itemDescriptionController,
+                              validator: (value) {
+                                if (value!.isEmpty) return 'Item description?';
+                                return null;
+                              }),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            key: const Key('price'),
+                            decoration: const InputDecoration(
+                                labelText: 'Price/Amount'),
+                            controller: priceController,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter Price or Amount?';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            key: const Key('quantity'),
+                            decoration:
+                                const InputDecoration(labelText: 'Quantity'),
+                            controller: quantityController,
+                            keyboardType: TextInputType.number,
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            key: const Key('ok'),
+                            child: const Text('Ok'),
+                            onPressed: () {
+                              if (addOtherFormKey.currentState!.validate()) {
+                                Navigator.of(context).pop(FinDocItem(
+                                  itemTypeId: selectedItemType!.itemTypeId,
+                                  price: Decimal.parse(priceController.text),
+                                  description: itemDescriptionController.text,
+                                  quantity: quantityController.text.isEmpty
+                                      ? Decimal.parse('1')
+                                      : Decimal.parse(quantityController.text),
+                                ));
+                              }
+                            },
+                          ),
+                        ])))),
+          ));
     },
   );
 }
@@ -590,143 +587,145 @@ Future addProductItemDialog(BuildContext context, repos) async {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        var formKey = GlobalKey<FormState>();
+        var addProductFormKey = GlobalKey<FormState>();
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              key: const Key('addProductItemDialog'),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-              title: const Text('Add a Product', textAlign: TextAlign.center),
-              content: SizedBox(
-                  height: 350,
-                  child: Form(
-                      key: formKey,
-                      child: SingleChildScrollView(
-                          key: const Key('listView3'),
-                          child: Column(children: <Widget>[
-                            DropdownSearch<Product>(
-                              selectedItem: selectedProduct,
-                              popupProps: PopupProps.menu(
-                                showSearchBox: true,
-                                searchFieldProps: TextFieldProps(
-                                  autofocus: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
+            return Dialog(
+                key: const Key('addProductItemDialog'),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: popUp(
+                    context: context,
+                    height: 520,
+                    title: 'Add a Product',
+                    child: Form(
+                        key: addProductFormKey,
+                        child: SingleChildScrollView(
+                            key: const Key('listView3'),
+                            child: Column(children: <Widget>[
+                              DropdownSearch<Product>(
+                                selectedItem: selectedProduct,
+                                popupProps: PopupProps.menu(
+                                  showSearchBox: true,
+                                  searchFieldProps: TextFieldProps(
+                                    autofocus: true,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                    ),
+                                    controller: productSearchBoxController,
                                   ),
-                                  controller: productSearchBoxController,
+                                  menuProps: MenuProps(
+                                      borderRadius: BorderRadius.circular(20)),
+                                  title: popUp(
+                                    context: context,
+                                    title: 'Select product',
+                                    height: 50,
+                                  ),
                                 ),
-                                menuProps: MenuProps(
-                                    borderRadius: BorderRadius.circular(20)),
-                                title: popUp(
-                                  context: context,
-                                  title: 'Select product',
-                                  height: 50,
+                                dropdownSearchDecoration: InputDecoration(
+                                  labelText: 'Product',
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20)),
                                 ),
+                                key: const Key('product'),
+                                itemAsString: (Product? u) =>
+                                    "${u!.pseudoId}\n${u.productName}",
+                                asyncItems: (String? filter) async {
+                                  ApiResult<List<Product>> result =
+                                      await repos.getProduct(
+                                          filter:
+                                              productSearchBoxController.text,
+                                          limit: 3);
+                                  return result.when(
+                                      success: (data) => data,
+                                      failure: (_) => [
+                                            Product(
+                                                productName: 'get data error!')
+                                          ]);
+                                },
+                                onChanged: (Product? newValue) {
+                                  setState(() {
+                                    selectedProduct = newValue;
+                                  });
+                                  if (newValue != null) {
+                                    priceController.text =
+                                        newValue.price.toString();
+                                    itemDescriptionController.text =
+                                        "${newValue.productName}";
+                                  }
+                                },
+                                validator: (value) =>
+                                    value == null ? "Select a product?" : null,
                               ),
-                              dropdownSearchDecoration: InputDecoration(
-                                labelText: 'Product',
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                              ),
-                              key: const Key('product'),
-                              itemAsString: (Product? u) =>
-                                  "${u!.pseudoId}\n${u.productName}",
-                              asyncItems: (String? filter) async {
-                                ApiResult<List<Product>> result =
-                                    await repos.getProduct(
-                                        filter: productSearchBoxController.text,
-                                        limit: 3);
-                                return result.when(
-                                    success: (data) => data,
-                                    failure: (_) => [
-                                          Product(
-                                              productName: 'get data error!')
-                                        ]);
-                              },
-                              onChanged: (Product? newValue) {
-                                setState(() {
-                                  selectedProduct = newValue;
-                                });
-                                if (newValue != null) {
-                                  priceController.text =
-                                      newValue.price.toString();
-                                  itemDescriptionController.text =
-                                      "${newValue.productName}";
-                                }
-                              },
-                              validator: (value) =>
-                                  value == null ? "Select a product?" : null,
-                            ),
-                            const SizedBox(height: 20),
-                            TextFormField(
-                                key: const Key('itemDescription'),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                  key: const Key('itemDescription'),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Item Description'),
+                                  controller: itemDescriptionController,
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Item description?';
+                                    }
+                                    return null;
+                                  }),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                key: const Key('itemPrice'),
                                 decoration: const InputDecoration(
-                                    labelText: 'Item Description'),
-                                controller: itemDescriptionController,
+                                    labelText: 'Price/Amount'),
+                                controller: priceController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return 'Item description?';
+                                    return 'Enter Price or Amount?';
                                   }
                                   return null;
-                                }),
-                            const SizedBox(height: 20),
-                            TextFormField(
-                              key: const Key('itemPrice'),
-                              decoration: const InputDecoration(
-                                  labelText: 'Price/Amount'),
-                              controller: priceController,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Enter Price or Amount?';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            TextFormField(
-                              key: const Key('itemQuantity'),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(
-                                    RegExp('[0-9.,]+'))
-                              ],
-                              decoration:
-                                  const InputDecoration(labelText: 'Quantity'),
-                              controller: quantityController,
-                              validator: (value) =>
-                                  value == null ? "Enter a quantity?" : null,
-                            ),
-                          ])))),
-              actions: <Widget>[
-                ElevatedButton(
-                  key: const Key('cancelRental'),
-                  child: const Text('cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  key: const Key('ok'),
-                  child: const Text('ok'),
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.of(context).pop(FinDocItem(
-                        itemTypeId: 'ItemProduct',
-                        productId: selectedProduct!.productId,
-                        price: Decimal.parse(priceController.text),
-                        description: itemDescriptionController.text,
-                        quantity: quantityController.text.isEmpty
-                            ? Decimal.parse('1')
-                            : Decimal.parse(quantityController.text),
-                      ));
-                    }
-                  },
-                ),
-              ],
-            );
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                key: const Key('itemQuantity'),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp('[0-9.,]+'))
+                                ],
+                                decoration: const InputDecoration(
+                                    labelText: 'Quantity'),
+                                controller: quantityController,
+                                validator: (value) =>
+                                    value == null ? "Enter a quantity?" : null,
+                              ),
+                              const SizedBox(height: 20),
+                              Row(children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    key: const Key('ok'),
+                                    child: const Text('Add product'),
+                                    onPressed: () {
+                                      if (addProductFormKey.currentState!
+                                          .validate()) {
+                                        Navigator.of(context).pop(FinDocItem(
+                                          itemTypeId: 'ItemProduct',
+                                          productId: selectedProduct!.productId,
+                                          price: Decimal.parse(
+                                              priceController.text),
+                                          description:
+                                              itemDescriptionController.text,
+                                          quantity:
+                                              quantityController.text.isEmpty
+                                                  ? Decimal.parse('1')
+                                                  : Decimal.parse(
+                                                      quantityController.text),
+                                        ));
+                                      }
+                                    },
+                                  ),
+                                )
+                              ])
+                            ])))));
           },
         );
       });
@@ -754,32 +753,34 @@ Future addRentalItemDialog(BuildContext context, repos) async {
           return true;
         }
 
-        var formKey = GlobalKey<FormState>();
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20))),
-          title: const Text('Add a Reservation', textAlign: TextAlign.center),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              selectDate(BuildContext context) async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: startDate,
-                  firstDate: CustomizableDateTime.current,
-                  lastDate: DateTime(CustomizableDateTime.current.year + 1),
-                  selectableDayPredicate: whichDayOk,
-                );
-                if (picked != null && picked != startDate) {
-                  setState(() {
-                    startDate = picked;
-                  });
-                }
-              }
+        var addRentalFormKey = GlobalKey<FormState>();
+        return Dialog(
+            key: const Key('addRentalItemDialog'),
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: popUp(
+              context: context,
+              height: 520,
+              title: 'Add a Reservation',
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  selectDate(BuildContext context) async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: startDate,
+                      firstDate: CustomizableDateTime.current,
+                      lastDate: DateTime(CustomizableDateTime.current.year + 1),
+                      selectableDayPredicate: whichDayOk,
+                    );
+                    if (picked != null && picked != startDate) {
+                      setState(() {
+                        startDate = picked;
+                      });
+                    }
+                  }
 
-              return SizedBox(
-                  height: 450,
-                  child: Form(
-                      key: formKey,
+                  return Form(
+                      key: addRentalFormKey,
                       child: SingleChildScrollView(
                           key: const Key('listView4'),
                           child: Column(
@@ -805,6 +806,11 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                                     title: 'Select product',
                                     height: 50,
                                   ),
+                                ),
+                                dropdownSearchDecoration: InputDecoration(
+                                  labelText: 'Product',
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(20)),
                                 ),
                                 itemAsString: (Product? u) =>
                                     "${u!.productName}",
@@ -864,9 +870,11 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                               const SizedBox(height: 20),
                               Row(
                                 children: [
-                                  Text(
-                                    "${startDate.toLocal()}".split(' ')[0],
-                                    key: const Key('date'),
+                                  Expanded(
+                                    child: Text(
+                                      "${startDate.toLocal()}".split(' ')[0],
+                                      key: const Key('date'),
+                                    ),
                                   ),
                                   const SizedBox(width: 10),
                                   ElevatedButton(
@@ -885,40 +893,46 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                                     labelText: 'Nbr. of days'),
                                 controller: quantityController,
                               ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      key: const Key('okRental'),
+                                      child: const Text('Add reservation'),
+                                      onPressed: () {
+                                        if (addRentalFormKey.currentState!
+                                            .validate()) {
+                                          Navigator.of(context).pop(FinDocItem(
+                                            itemTypeId: 'ItemRental',
+                                            productId:
+                                                selectedProduct!.productId,
+                                            price: Decimal.parse(
+                                                priceController.text),
+                                            description:
+                                                itemDescriptionController.text,
+                                            rentalFromDate: startDate,
+                                            rentalThruDate: startDate.add(
+                                                Duration(
+                                                    days: int.parse(
+                                                        quantityController
+                                                                .text.isEmpty
+                                                            ? '1'
+                                                            : quantityController
+                                                                .text))),
+                                            quantity: Decimal.parse('1'),
+                                          ));
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ))));
-            },
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              key: const Key('cancelRental'),
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              key: const Key('okRental'),
-              child: const Text('Ok'),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(FinDocItem(
-                    itemTypeId: 'ItemRental',
-                    productId: selectedProduct!.productId,
-                    price: Decimal.parse(priceController.text),
-                    description: itemDescriptionController.text,
-                    rentalFromDate: startDate,
-                    rentalThruDate: startDate.add(Duration(
-                        days: int.parse(quantityController.text.isEmpty
-                            ? '1'
-                            : quantityController.text))),
-                    quantity: Decimal.parse('1'),
-                  ));
-                }
-              },
-            ),
-          ],
-        );
+                          )));
+                },
+              ),
+            ));
       });
 }
 
