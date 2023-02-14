@@ -92,7 +92,7 @@ class OpportunityTest {
         await CommonTest.doSearch(tester,
             searchString: opportunity.opportunityId);
         await CommonTest.tapByKey(tester, 'name0');
-        expect(CommonTest.getTextField('header').split('#')[1],
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
             opportunity.opportunityId);
       }
       await CommonTest.checkWidgetKey(tester, 'OpportunityDialog');
@@ -143,7 +143,7 @@ class OpportunityTest {
       }
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('OpportunityDialog')), findsOneWidget);
-      var id = CommonTest.getTextField('header').split('#')[1];
+      var id = CommonTest.getTextField('topHeader').split('#')[1];
       expect(CommonTest.getTextFormField('name'),
           equals(opportunity.opportunityName!));
       expect(CommonTest.getTextFormField('description'),
