@@ -18,7 +18,8 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
     await CompanyTest.createCompany(tester);
     await UserTest.selectEmployees(tester);
-    await UserTest.addEmployees(tester, employees.sublist(0, 2), check: false);
+    await UserTest.addAdministrators(tester, administrators.sublist(0, 2),
+        check: false);
     await UserTest.selectLeads(tester);
     await UserTest.addLeads(tester, leads.sublist(0, 2), check: false);
     await OpportunityTest.selectOpportunities(tester);

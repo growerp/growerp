@@ -53,7 +53,7 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.school),
       ),
       TabItem(
-        form: const WebsiteForm(key: Key('Website')),
+        form: const WebsiteForm(),
         label: 'Website',
         icon: const Icon(Icons.webhook),
       ),
