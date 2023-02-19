@@ -22,11 +22,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:example/main.dart' as router;
 import 'package:example/main.dart';
-
-/// the full business roundtrip for physical products
-/// purchase products and receive in warehouse
-/// sell the puchase products from the warehouse.
-/// full accounting
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

@@ -21,6 +21,7 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

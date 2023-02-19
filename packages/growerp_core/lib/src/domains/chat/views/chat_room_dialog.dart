@@ -126,7 +126,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                 showClearButton: false,
                 itemAsString: (User? u) => "${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
-                  ApiResult<List<User>> result = await repos.getUser(
+                  ApiResult<List<User>> result = await repos.lookUpUser(
                       filter: _chatRoomSearchBoxController.text);
                   return result.when(
                       success: (data) => data,

@@ -106,8 +106,8 @@ class OpportunityDialogState extends State<OpportunityDialog> {
 
   Widget _opportunityForm() {
     Future<List<User>> getData(Role role, String filter) async {
-      ApiResult<List<User>> result = await repos.getUser(
-          role: role, filter: _leadSearchBoxController.text);
+      ApiResult<List<User>> result = await repos.lookUpUser(
+          role: role, searchString: _leadSearchBoxController.text);
       return result.when(
           success: (data) => data,
           failure: (_) => [User(lastName: 'get data error!')]);

@@ -14,6 +14,8 @@ dependencies:
     path: ../
   growerp_catalog: #^0.8.0-dev.1
     path: ../../growerp_catalog
+  growerp_user_company: #^0.8.0-dev.1
+    path: ../../growerp_user_company
 
 dev_dependencies:
   flutter_test:

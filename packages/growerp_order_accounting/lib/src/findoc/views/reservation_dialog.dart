@@ -191,9 +191,10 @@ class ReservationDialogState extends State<ReservationDialog> {
                           itemAsString: (User? u) =>
                               "${u!.firstName} ${u.lastName}, ${u.company!.name}",
                           asyncItems: (String? filter) async {
-                            ApiResult<List<User>> result = await repos.getUser(
-                                userGroups: [UserGroup.customer],
-                                filter: _userSearchBoxController.text);
+                            ApiResult<List<User>> result = await repos
+                                .lookUpUser(
+                                    userGroups: [UserGroup.customer],
+                                    filter: _userSearchBoxController.text);
                             return result.when(
                                 success: (data) => data,
                                 failure: (_) =>
@@ -208,7 +209,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                               value == null ? 'field required' : null,
                         )),
                         const SizedBox(width: 10),
-                        SizedBox(
+/*                        SizedBox(
                             width: 100,
                             child: ElevatedButton(
                               key: const Key('newCustomer'),
@@ -231,6 +232,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                                 });
                               },
                             )),
+*/
                       ]),
                       const SizedBox(height: 20),
                       DropdownSearch<Product>(
@@ -265,7 +267,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                         itemAsString: (Product? u) => "${u!.productName}",
                         asyncItems: (String? filter) async {
                           ApiResult<List<Product>> result =
-                              await repos.getProduct(
+                              await repos.lookUpProduct(
                                   filter: _productSearchBoxController.text,
                                   assetClassId: classificationId == 'AppHotel'
                                       ? 'Hotel Room'

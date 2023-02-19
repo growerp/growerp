@@ -37,8 +37,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdateCompany>(_onAuthUpdateCompany);
     on<AuthUpdateUser>(_onAuthUpdateUser);
     on<AuthDeleteUser>(_onAuthDeleteUser);
+
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
-    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
+//    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
     on<AuthLoggedOut>(_onAuthLoggedOut);
     on<AuthLogin>(_onAuthLogin);
     on<AuthResetPassword>(_onAuthResetPassword);
@@ -70,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           state.copyWith(status: AuthStatus.failure, message: connect));
     }
     // get default company
-    ApiResult<List<Company>> defResult = await repos.getCompanies(limit: 1);
+    ApiResult<List<Company>> defResult = await repos.lookUpCompany();
     Company defaultCompany = defResult.when(
         success: (List<Company> data) => data.isNotEmpty ? data[0] : Company(),
         failure: (_) => Company());
@@ -203,7 +204,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthRegisterUserEcommerce(
+/*  Future<void> _onAuthRegisterUserEcommerce(
     AuthRegisterUserEcommerce event,
     Emitter<AuthState> emit,
   ) async {
@@ -225,7 +226,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await PersistFunctions.persistAuthenticate(state.authenticate!);
     }
   }
-
+*/
   Future<void> _onAuthLoggedOut(
     AuthLoggedOut event,
     Emitter<AuthState> emit,

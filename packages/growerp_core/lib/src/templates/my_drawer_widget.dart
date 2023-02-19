@@ -40,14 +40,8 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                 return DrawerHeader(
                     child: InkWell(
                         key: const Key('tapUser'),
-                        onTap: () async {
-                          await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (BuildContext context) {
-                                return UserForm(user: authenticate.user!);
-                              });
-                        },
+                        onTap: () => Navigator.pushNamed(context, '/user',
+                            arguments: authenticate.user),
                         child: Column(children: [
                           CircleAvatar(
                               backgroundColor: Colors.green,

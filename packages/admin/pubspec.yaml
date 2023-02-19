@@ -18,6 +18,8 @@ dependencies:
     path: ../growerp_catalog/
   growerp_order_accounting: #^0.8.0-dev.1
     path: ../growerp_order_accounting/
+  growerp_user_company: #^0.8.0-dev.1
+    path: ../growerp_user_company/
   decimal: ^2.1.0
   flutter:
     sdk: flutter

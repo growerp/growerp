@@ -48,14 +48,8 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                   leading: Center(
                       child: InkWell(
                           key: const Key('tapUser'),
-                          onTap: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return UserForm(user: authenticate.user!);
-                                });
-                          },
+                          onTap: () => Navigator.pushNamed(context, '/user',
+                              arguments: authenticate.user),
                           child: Column(children: [
                             SizedBox(
                                 height: ResponsiveWrapper.of(context).isTablet

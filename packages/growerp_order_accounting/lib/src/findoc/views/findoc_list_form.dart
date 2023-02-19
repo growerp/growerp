@@ -54,62 +54,67 @@ class FinDocListForm extends StatelessWidget {
           additionalItemButtonName: additionalItemButtonName,
           additionalItemButtonRoute: additionalItemButtonRoute,
         ));
-    if (docType == FinDocType.order) {
-      if (sales) {
-        return BlocProvider<SalesOrderBloc>(
+    switch (docType) {
+      case FinDocType.order:
+        if (sales) {
+          return BlocProvider<SalesOrderBloc>(
+              create: (context) =>
+                  FinDocBloc(finDocAPIRepository, sales, docType)
+                    ..add(const FinDocFetch()),
+              child: finDocList);
+        }
+        return BlocProvider<PurchaseOrderBloc>(
+            create: (BuildContext context) =>
+                FinDocBloc(finDocAPIRepository, sales, docType)
+                  ..add(const FinDocFetch()),
+            child: finDocList);
+      case FinDocType.invoice:
+        if (sales) {
+          return BlocProvider<SalesInvoiceBloc>(
+              create: (context) =>
+                  FinDocBloc(finDocAPIRepository, sales, docType)
+                    ..add(const FinDocFetch()),
+              child: finDocList);
+        }
+        return BlocProvider<PurchaseInvoiceBloc>(
+            create: (BuildContext context) =>
+                FinDocBloc(finDocAPIRepository, sales, docType)
+                  ..add(const FinDocFetch()),
+            child: finDocList);
+      case FinDocType.payment:
+        if (sales) {
+          return BlocProvider<SalesPaymentBloc>(
+              create: (context) =>
+                  FinDocBloc(finDocAPIRepository, sales, docType)
+                    ..add(const FinDocFetch()),
+              child: finDocList);
+        }
+        return BlocProvider<PurchasePaymentBloc>(
+            create: (BuildContext context) =>
+                FinDocBloc(finDocAPIRepository, sales, docType)
+                  ..add(const FinDocFetch()),
+            child: finDocList);
+      case FinDocType.shipment:
+        if (sales) {
+          return BlocProvider<OutgoingShipmentBloc>(
+              create: (context) =>
+                  FinDocBloc(finDocAPIRepository, sales, docType)
+                    ..add(const FinDocFetch()),
+              child: finDocList);
+        }
+        return BlocProvider<IncomingShipmentBloc>(
+            create: (BuildContext context) =>
+                FinDocBloc(finDocAPIRepository, sales, docType)
+                  ..add(const FinDocFetch()),
+            child: finDocList);
+      case FinDocType.transaction:
+        return BlocProvider<TransactionBloc>(
             create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
               ..add(const FinDocFetch()),
             child: finDocList);
-      }
-      return BlocProvider<PurchaseOrderBloc>(
-          create: (BuildContext context) =>
-              FinDocBloc(finDocAPIRepository, sales, docType)
-                ..add(const FinDocFetch()),
-          child: finDocList);
+      default:
+        return Center(child: Text("FinDoc type: ${docType.name} not allowed"));
     }
-    if (docType == FinDocType.invoice) {
-      if (sales) {
-        return BlocProvider<SalesInvoiceBloc>(
-            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
-              ..add(const FinDocFetch()),
-            child: finDocList);
-      }
-      return BlocProvider<PurchaseInvoiceBloc>(
-          create: (BuildContext context) =>
-              FinDocBloc(finDocAPIRepository, sales, docType)
-                ..add(const FinDocFetch()),
-          child: finDocList);
-    }
-    if (docType == FinDocType.payment) {
-      if (sales) {
-        return BlocProvider<SalesPaymentBloc>(
-            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
-              ..add(const FinDocFetch()),
-            child: finDocList);
-      }
-      return BlocProvider<PurchasePaymentBloc>(
-          create: (BuildContext context) =>
-              FinDocBloc(finDocAPIRepository, sales, docType)
-                ..add(const FinDocFetch()),
-          child: finDocList);
-    }
-    if (docType == FinDocType.shipment) {
-      if (sales) {
-        return BlocProvider<OutgoingShipmentBloc>(
-            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
-              ..add(const FinDocFetch()),
-            child: finDocList);
-      }
-      return BlocProvider<IncomingShipmentBloc>(
-          create: (BuildContext context) =>
-              FinDocBloc(finDocAPIRepository, sales, docType)
-                ..add(const FinDocFetch()),
-          child: finDocList);
-    }
-    return BlocProvider<TransactionBloc>(
-        create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
-          ..add(const FinDocFetch()),
-        child: finDocList);
   }
 }
 

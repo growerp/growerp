@@ -9,6 +9,8 @@ environment:
 dependencies:
   growerp_marketing:
     path: ../
+  growerp_user_company:
+    path: ../../growerp_user_company
   decimal: ^2.1.0
   flutter:
     sdk: flutter

@@ -12,12 +12,16 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart' as cat;
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'forms/accounting_form.dart';
+import 'acct_menu_option_data.dart';
 import 'menu_option_data.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -33,6 +37,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/user':
+      return MaterialPageRoute(
+          builder: (context) =>
+              UserForm(user: context.read<Authenticate>().user!));
     case '/crm':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -58,7 +66,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) =>
               PrintingForm(finDocIn: settings.arguments as FinDoc));
     case '/accounting':
-      return MaterialPageRoute(builder: (context) => const AccountingForm());
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
     case '/acctSales':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

@@ -158,11 +158,11 @@ class PaymentDialogState extends State<PaymentDialog> {
                 itemAsString: (User? u) =>
                     "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                 asyncItems: (String? filter) async {
-                  ApiResult<List<User>> result = await repos.getUser(
+                  ApiResult<List<User>> result = await repos.lookUpUser(
                       role: finDocUpdated.sales == true
                           ? Role.customer
                           : Role.supplier,
-                      filter: _userSearchBoxController.text);
+                      searchString: _userSearchBoxController.text);
                   return result.when(
                       success: (data) => data,
                       failure: (_) => [User(lastName: 'get data error!')]);

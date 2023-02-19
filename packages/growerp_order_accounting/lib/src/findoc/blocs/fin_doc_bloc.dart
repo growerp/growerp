@@ -259,7 +259,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     emit(state.copyWith(status: FinDocStatus.loading));
     try {
       ApiResult<List<User>> result =
-          await repos.getUser(role: event.role, filter: event.filter);
+          await repos.lookUpUser(role: event.role, searchString: event.filter);
       return emit(result.when(
           success: (data) => state.copyWith(
                 users: data,

@@ -19,6 +19,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:example/main.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

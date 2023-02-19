@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

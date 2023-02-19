@@ -266,7 +266,7 @@ class WebsiteFormState extends State<WebsitePage> {
 
       Future<List<Product>> getProduct(String filter) async {
         ApiResult<List<Product>> result =
-            await _websiteProvider.getProduct(searchString: filter);
+            await _websiteProvider.lookUpProduct(searchString: filter);
         return result.when(
             success: (data) => data,
             failure: (_) => [Product(productName: 'get data error!')]);

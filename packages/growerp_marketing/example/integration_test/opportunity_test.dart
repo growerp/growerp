@@ -5,6 +5,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:integration_test/integration_test.dart';
 // ignore: depend_on_referenced_packages
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

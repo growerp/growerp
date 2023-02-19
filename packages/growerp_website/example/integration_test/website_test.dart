@@ -20,6 +20,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:example/main.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

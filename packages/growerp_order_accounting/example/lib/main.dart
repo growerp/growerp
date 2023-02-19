@@ -23,6 +23,10 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_core/growerp_core.dart' as cat;
+import 'package:growerp_user_company/growerp_user_company.dart';
+
+import 'accounting_form.dart';
+import 'acct_menu_option_data.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -217,7 +221,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) =>
               PrintingForm(finDocIn: settings.arguments as FinDoc));
     case '/accounting':
-      return MaterialPageRoute(builder: (context) => const AccountingForm());
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
     case '/acctSales':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

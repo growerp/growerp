@@ -51,55 +51,16 @@ List<MenuOption> menuOptions = [
     route: '/company',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    tabItems: [
-      TabItem(
-        form: const CompanyForm(),
-        label: 'Company Info',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const UserListForm(
-          key: Key('Employee'),
-          role: Role.company,
-        ),
-        label: 'Employees',
-        icon: const Icon(Icons.school),
-      ),
-    ],
+    child: const MainMenu(),
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/companyGrey.png',
-    selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Other users',
-    route: '/otherusers',
+    image: 'packages/growerp_core/images/dashBoardGrey.png',
+    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    title: 'Main',
+    route: '/user',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    tabItems: [
-      TabItem(
-        form: const UserListForm(
-          key: Key('Lead'),
-          role: Role.lead,
-        ),
-        label: 'Leads',
-        icon: const Icon(Icons.business),
-      ),
-      TabItem(
-        form: const UserListForm(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
-        label: 'Customers',
-        icon: const Icon(Icons.school),
-      ),
-      TabItem(
-        form: const UserListForm(
-          key: Key('Supplier'),
-          role: Role.supplier,
-        ),
-        label: 'Suppliers',
-        icon: const Icon(Icons.business),
-      ),
-    ],
+    child: const MainMenu(),
   ),
 ];
 
@@ -117,14 +78,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
-    case '/otherusers':
+    case '/user':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     default:
-      return MaterialPageRoute(
-          builder: (context) => FatalErrorForm(
-              message: "Routing not found for request: ${settings.name}"));
+      return coreRoute(settings);
   }
 }
 
@@ -144,21 +103,18 @@ class MainMenu extends StatelessWidget {
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
-            "Administrators: ${authenticate.stats?.admins ?? 0}",
-            "Other Employees: ${authenticate.stats?.employees ?? 0}",
+            "",
+            "",
             "",
           ),
           makeDashboardItem(
-            'dbOtherUsers',
-            context,
-            menuOptions[2],
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Customers: ${authenticate.stats?.customers ?? 0}",
-            "Leads: ${authenticate.stats?.leads ?? 0}",
-            "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-          ),
+              'dbUser',
+              context,
+              menuOptions[2],
+              "${authenticate.user!.firstName!} ${authenticate.user!.lastName!}",
+              "",
+              "",
+              ""),
         ]);
       }
       return const LoadingIndicator();
