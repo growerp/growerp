@@ -25,6 +25,7 @@ class AccountingForm extends StatelessWidget {
   Widget build(BuildContext context) {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     return DashBoardForm(
+      key: const Key('AcctDashBoard'),
       dashboardItems: [
         makeDashboardItem(
           'accntSales',

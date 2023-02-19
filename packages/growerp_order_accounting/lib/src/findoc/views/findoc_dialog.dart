@@ -634,10 +634,9 @@ Future addProductItemDialog(BuildContext context, repos) async {
                                     "${u!.pseudoId}\n${u.productName}",
                                 asyncItems: (String? filter) async {
                                   ApiResult<List<Product>> result =
-                                      await repos.getProduct(
-                                          filter:
-                                              productSearchBoxController.text,
-                                          limit: 3);
+                                      await repos.lookUpProduct(
+                                          searchString:
+                                              productSearchBoxController.text);
                                   return result.when(
                                       success: (data) => data,
                                       failure: (_) => [
@@ -816,15 +815,14 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                                     "${u!.productName}",
                                 asyncItems: (String? filter) async {
                                   ApiResult<List<Product>> result =
-                                      await repos.getProduct(
-                                          filter:
+                                      await repos.lookUpProduct(
+                                          searchString:
                                               productSearchBoxController.text,
                                           assetClassId:
                                               classificationId == 'AppHotel'
                                                   ? 'Hotel Room'
                                                   : null,
-                                          productTypeId: 'Rental',
-                                          limit: 3);
+                                          productTypeId: 'Rental');
                                   return result.when(
                                       success: (data) => data,
                                       failure: (_) => [
