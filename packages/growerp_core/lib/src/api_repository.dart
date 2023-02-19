@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/src/domains/models/category_model.dart' as cat;
+import 'package:growerp_core/src/models/category_model.dart' as cat;
 import 'services/api_result.dart';
 import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';

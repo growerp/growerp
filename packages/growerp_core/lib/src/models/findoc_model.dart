@@ -14,8 +14,8 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../services/json_converters.dart';
-import '../domains.dart';
+import '../services/json_converters.dart';
+import '../domains/domains.dart';
 
 part 'findoc_model.freezed.dart';
 part 'findoc_model.g.dart';

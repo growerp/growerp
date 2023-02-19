@@ -16,8 +16,8 @@ import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../services/json_converters.dart';
-import '../common/models/models.dart';
+import '../services/json_converters.dart';
+import '../domains/common/models/models.dart';
 import 'models.dart';
 
 part 'company_model.freezed.dart';

@@ -14,8 +14,8 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../services/json_converters.dart';
-import '../domains.dart';
+import '../services/json_converters.dart';
+import '../domains/domains.dart';
 
 part 'payment_method_model.freezed.dart';
 part 'payment_method_model.g.dart';
