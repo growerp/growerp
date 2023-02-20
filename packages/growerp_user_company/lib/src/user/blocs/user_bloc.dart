@@ -59,13 +59,14 @@ class UserBloc extends Bloc<UserEvent, UserState>
       return;
     }
     try {
-      debugPrint(
-          "=== event search: ${event.searchString} state: ${state.searchString}");
       // start from record zero for initial and refresh
       if (state.status == UserStatus.initial || event.refresh) {
         debugPrint("UserBloc initial or refresh");
-        ApiResult<List<User>> compResult =
-            await repos.getUser(role: role, searchString: event.searchString);
+        ApiResult<List<User>> compResult = await repos.getUser(
+            start: 0,
+            limit: _userLimit,
+            role: role,
+            searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: UserStatus.success,
@@ -80,9 +81,11 @@ class UserBloc extends Bloc<UserEvent, UserState>
       else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
-        debugPrint("=== UserBloc search or changed search");
-        ApiResult<List<User>> compResult =
-            await repos.getUser(role: role, searchString: event.searchString);
+        ApiResult<List<User>> compResult = await repos.getUser(
+            start: 0,
+            limit: _userLimit,
+            role: role,
+            searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: UserStatus.success,
@@ -93,10 +96,12 @@ class UserBloc extends Bloc<UserEvent, UserState>
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));
       } else {
-        debugPrint("===UserBloc continue fetch");
         // get next page also for search
-        ApiResult<List<User>> compResult =
-            await repos.getUser(role: role, searchString: event.searchString);
+        ApiResult<List<User>> compResult = await repos.getUser(
+            start: state.users.length,
+            limit: _userLimit,
+            role: role,
+            searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: UserStatus.success,

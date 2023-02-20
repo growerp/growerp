@@ -89,7 +89,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                 status: ProductStatus.failure, message: error.toString())));
       }
       // get next page also for search
-
       ApiResult<List<Product>> compResult = await repos.getProduct(
           searchString: event.searchString,
           start: state.products.length,

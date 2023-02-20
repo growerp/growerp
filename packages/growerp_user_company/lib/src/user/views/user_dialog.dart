@@ -75,7 +75,7 @@ class UserDialogState extends State<UserPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.user.partyId != null) {
+    if (widget.user.company!.partyId != null) {
       _firstNameController.text = widget.user.firstName ?? '';
       _lastNameController.text = widget.user.lastName ?? '';
       _loginNameController.text = widget.user.loginName ?? '';
@@ -389,7 +389,7 @@ class UserDialogState extends State<UserPage> {
                   ],
                 ),
                 Visibility(
-                    visible: updatedUser.partyId != null,
+                    visible: updatedUser.company!.partyId != null,
                     child: Column(children: [
                       const SizedBox(height: 10),
                       Row(children: [
@@ -573,7 +573,8 @@ class UserDialogState extends State<UserPage> {
       Expanded(
           child: ElevatedButton(
               key: const Key('updateUser'),
-              child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
+              child: Text(
+                  updatedUser.company!.partyId == null ? 'Create' : 'Update'),
               onPressed: () async {
                 if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(

@@ -135,6 +135,7 @@ class OrderTest {
           usFormat.format(finDoc.items[0].rentalFromDate!));
       await CommonTest.enterText(
           tester, 'quantity', finDoc.items[0].quantity.toString());
+      await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'okRental');
       await CommonTest.tapByKey(tester, 'update', seconds: 10);
       // get productId
