@@ -1,6 +1,7 @@
 ## 0.9.0-dev.1
 
 * Refactoring and UI improvements.
+* move user/company in its own ppackage
 
 ## 0.8.0-dev.1
 

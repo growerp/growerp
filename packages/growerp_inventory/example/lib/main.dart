@@ -20,7 +20,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 
 Future main() async {
@@ -80,22 +79,6 @@ List<MenuOption> menuOptions = [
         UserGroup.employee,
       ],
       tabItems: [
-        TabItem(
-          form: const FinDocListForm(
-              key: Key('ShipmentsOut'),
-              sales: true,
-              docType: FinDocType.shipment),
-          label: '\nOutgoing shipments',
-          icon: const Icon(Icons.send),
-        ),
-        TabItem(
-          form: const FinDocListForm(
-              key: Key('ShipmentsIn'),
-              sales: false,
-              docType: FinDocType.shipment),
-          label: '\nIncoming shipments',
-          icon: const Icon(Icons.call_received),
-        ),
         TabItem(
           form: const LocationListForm(),
           label: '\nWH Locations',

@@ -13,4 +13,4 @@ Start test with: cd example && flutter test integration_test/opportunity_test.da
 
 ## use the example component
 As with the integration test you can use a local backend or our test backend.
-Before you can use the CRM component you have to create a company which sends an email with a password. Us this password to login and the CRM component appear in the main menu. Select CRM and the following screen will appear.
+
