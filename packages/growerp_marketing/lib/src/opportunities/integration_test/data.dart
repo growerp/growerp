@@ -12,8 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
+import 'package:growerp_core/test_data.dart';
 import '../models/opportunity_model.dart';
 
 List<Opportunity> opportunities = [

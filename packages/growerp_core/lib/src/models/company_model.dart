@@ -47,5 +47,6 @@ class Company with _$Company {
   @override
   String toString() => 'Company name: $name[$partyId] '
       'Curr: ${currency?.currencyId} '
-      'imgSize: ${image?.length}';
+      'imgSize: ${image?.length}'
+      '#Empl: ${employees.length}';
 }

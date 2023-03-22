@@ -33,8 +33,7 @@ class _CategoryListHeaderState extends State<CategoryListHeader> {
         child: ListTile(
             leading: GestureDetector(
                 key: const Key('search'),
-                onTap: (() =>
-                    setState(() => search ? search = false : search = true)),
+                onTap: (() => setState(() => search = !search)),
                 child: Image.asset(
                   'packages/growerp_core/images/search.png',
                   height: 30,

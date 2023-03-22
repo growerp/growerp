@@ -13,7 +13,6 @@
  */
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -40,16 +39,15 @@ EventTransformer<E> userDroppable<E>(Duration duration) {
 
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, SupplierBloc {
-  UserBloc(this.repos, this.role, this.authBloc) : super(const UserState()) {
+  UserBloc(this.repos, this.role) : super(const UserState()) {
     on<UserFetch>(_onUserFetch,
         transformer: userDroppable(const Duration(milliseconds: 100)));
     on<UserUpdate>(_onUserUpdate);
     on<UserDelete>(_onUserDelete);
   }
 
-  final UserCompanyAPIRepository repos;
-  final Role role;
-  final AuthBloc authBloc;
+  final CompanyUserAPIRepository repos;
+  final Role? role;
 
   Future<void> _onUserFetch(
     UserFetch event,
@@ -61,7 +59,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
     try {
       // start from record zero for initial and refresh
       if (state.status == UserStatus.initial || event.refresh) {
-        debugPrint("UserBloc initial or refresh");
+        emit(state.copyWith(status: UserStatus.loading));
         ApiResult<List<User>> compResult = await repos.getUser(
             start: 0,
             limit: _userLimit,
@@ -78,9 +76,10 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 status: UserStatus.failure, message: error.toString())));
       }
       // get first search page also for changed search
-      else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
+        emit(state.copyWith(status: UserStatus.loading));
         ApiResult<List<User>> compResult = await repos.getUser(
             start: 0,
             limit: _userLimit,
@@ -95,22 +94,22 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));
-      } else {
         // get next page also for search
-        ApiResult<List<User>> compResult = await repos.getUser(
-            start: state.users.length,
-            limit: _userLimit,
-            role: role,
-            searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: UserStatus.success,
-                  users: List.of(state.users)..addAll(data),
-                  hasReachedMax: data.length < _userLimit ? true : false,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure, message: error.toString())));
       }
+      emit(state.copyWith(status: UserStatus.loading));
+      ApiResult<List<User>> compResult = await repos.getUser(
+          start: state.users.length,
+          limit: _userLimit,
+          role: role,
+          searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: UserStatus.success,
+                users: List.of(state.users)..addAll(data),
+                hasReachedMax: data.length < _userLimit ? true : false,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: UserStatus.failure, message: error.toString())));
     } catch (error) {
       emit(state.copyWith(
           status: UserStatus.failure, message: error.toString()));
@@ -129,16 +128,18 @@ class UserBloc extends Bloc<UserEvent, UserState>
         return emit(compResult.when(
             success: (data) {
               if (users.isNotEmpty) {
-                // user display in navigation no users
                 int index = users.indexWhere(
                     (element) => element.partyId == event.user.partyId);
                 users[index] = data;
+              } else {
+                users.add(data);
               }
               return state.copyWith(
                   searchString: '',
                   status: UserStatus.success,
                   users: users,
-                  message: 'user ${data.firstName} updated...');
+                  message:
+                      'user ${data.firstName} ${data.lastName} updated...');
             },
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));
@@ -152,7 +153,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
                   searchString: '',
                   status: UserStatus.success,
                   users: users,
-                  message: 'user ${data.firstName} added...');
+                  message: 'user ${data.firstName} ${data.lastName} added...');
             },
             failure: (NetworkExceptions error) => state.copyWith(
                 status: UserStatus.failure, message: error.toString())));

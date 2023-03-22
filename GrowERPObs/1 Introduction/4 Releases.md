@@ -1,4 +1,11 @@
 # Releases
+## Release February 20 2023 (V0.9.1)
+1. company and user now separated in bloc/views
+2. all packages can be operated just with core
+3. No dependencies betrween packages except core.
+4. Alll tests within the specific packages
+5. Overall test like roundtrip only in admin application.
+6. All packages now at V0.9.0 in [pub.dev](https://pub.dev/publishers/growerp.com/packages)
 
 ## Refactoring Release February 20 2023 (V0.9.0)
 1. System now split-up in packages registered in [pub.dev](https://pub.dev/publishers/growerp.com/packages)

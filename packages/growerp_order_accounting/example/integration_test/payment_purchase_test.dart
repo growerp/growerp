@@ -20,7 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:example/main.dart' as router;
 import 'package:example/main.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_core/test_data.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -32,12 +32,15 @@ void main() {
   testWidgets('''GrowERP payment purchase test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-    await CompanyTest.createCompany(tester);
-    await CompanyTest.selectCompany(tester);
-    await CompanyTest.updateAddress(tester, check: false);
-    await CompanyTest.updatePaymentMethod(tester, check: false);
-    await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
+    await CommonTest.createCompanyAndAdmin(tester, testData: {
+      "companies": [
+        company.copyWith(partyId: '_MOD_', name: initialCompany.name)
+      ],
+      "users": suppliers.sublist(0, 2),
+    });
+    // get above updated company
+    await CommonTest.logout(tester);
+    await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);
     await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
     await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));

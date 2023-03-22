@@ -15,11 +15,12 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_core/test_data.dart';
 
 class WebsiteTest {
   // used in the admin app
   static Future<void> selectWebsite(WidgetTester tester) async {
-    await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteForm', '3');
+    await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteForm', '1');
   }
 
   static Future<void> updateWebsite(WidgetTester tester) async {
@@ -27,8 +28,8 @@ class WebsiteTest {
     await updateTitle(tester);
     await updateTextSection(tester);
     await updateImages(tester);
-    await updateHomePageCategories(tester, "Deals");
-    await updateHomePageCategories(tester, "Featured");
+    await updateHomePageCategories(tester, "Deals", products);
+    await updateHomePageCategories(tester, "Featured", products);
 
     await updateShopCategories(tester);
   }
@@ -81,7 +82,7 @@ class WebsiteTest {
         reason: 'newTestingImage found?');
   }
 
-  static Future<void> updateHomePageCategories(tester, categoryName) async {
+  static Future<void> updateHomePageCategories(tester, String categoryName, List<Product> products) async {
     // delete
     while (tester.any(find.byKey(const Key("deleteProductChip")))) {
       await CommonTest.tapByKey(tester, "deleteProductChip");

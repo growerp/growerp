@@ -22,14 +22,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../../api_repository.dart';
-import '../../../services/chat_server.dart';
-import '../../common/functions/functions.dart';
-import '../../domains.dart';
-import '../../../extensions.dart';
+import '../../../../growerp_core.dart';
+import '../../../../test_data.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
+  static int waitTime = 2;
+
+  static Future<void> selectTopCompany(WidgetTester tester) async {
+    await selectOption(tester, 'tapCompany', 'CompanyDialogOrgInternal');
+  }
 
   static Future<void> startApp(WidgetTester tester, Widget topApp,
       {bool clear = false}) async {
@@ -43,7 +45,7 @@ class CommonTest {
     }
     Bloc.observer = AppBlocObserver();
     runApp(topApp);
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pumpAndSettle(Duration(seconds: waitTime));
   }
 
   static Future<void> startTestApp(
@@ -67,7 +69,70 @@ class CommonTest {
         router: router,
         title: title,
         menuOptions: menuOptions));
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pumpAndSettle(Duration(seconds: waitTime));
+  }
+
+  static Future<void> createCompanyAndAdmin(WidgetTester tester,
+      {bool demoData = false, Map testData = const {}}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    int seq = test.sequence + 1;
+    if (test.company != null) return; // company already created
+    await CommonTest.logout(tester);
+    // tap new company button, enter data
+    /// [newCompany]
+    await CommonTest.tapByKey(tester, 'newCompButton');
+    await tester.pump(const Duration(seconds: 3));
+    await CommonTest.enterText(tester, 'firstName', admin.firstName!);
+    await CommonTest.enterText(tester, 'lastName', admin.lastName!);
+    var email = admin.email!.replaceFirst('XXX', '${seq++}');
+    await CommonTest.enterText(tester, 'email', email);
+
+    /// [newCompany]
+    String companyName = '${initialCompany.name!} ${seq++}';
+    await enterText(tester, 'companyName', companyName);
+    await enterDropDown(
+        tester, 'currency', initialCompany.currency!.description!);
+    await CommonTest.drag(tester);
+    if (demoData == false) {
+      await CommonTest.tapByKey(tester, 'demoData');
+    } // no demo data
+    await CommonTest.tapByKey(tester, 'newCompany', seconds: 3);
+    // start with clean saveTest
+    await PersistFunctions.persistTest(SaveTest(
+      sequence: seq,
+      nowDate: DateTime.now(), // used in rental
+      admin: admin.copyWith(email: email, loginName: email),
+      company: initialCompany.copyWith(email: email, name: companyName),
+    ));
+    await CommonTest.login(tester, testData: testData);
+  }
+
+  static checkCompanyAndAdmin(
+    WidgetTester tester,
+  ) async {
+    SaveTest test = await PersistFunctions.getTest();
+    // appbar
+    expect(getTextField('appBarAvatarText'), equals(test.company!.name![0]));
+    expect(getTextField('appBarCompanyName'), equals(test.company!.name));
+    // company
+    expect(getTextField('dbCompanyTitle'), equals("Company"));
+    expect(getTextField('dbCompanySubTitle'), equals(test.company!.name));
+    expect(getTextField('dbCompanySubTitle1'),
+        equals("Email: ${test.company!.email}"));
+    expect(getTextField('dbCompanySubTitle2'),
+        equals("Currency: ${test.company!.currency!.description}"));
+    expect(getTextField('dbCompanySubTitle3'),
+        equals("Employees: ${test.company!.employees.length + 1}"));
+    // User
+    expect(getTextField('dbUserTitle'), equals("Logged in User"));
+    expect(getTextField('dbUserSubTitle'),
+        equals("${test.admin!.firstName} ${test.admin!.lastName}"));
+    expect(
+        getTextField('dbUserSubTitle1'), equals("Email: ${test.admin!.email}"));
+    expect(getTextField('dbUserSubTitle2'),
+        equals("Login name: ${test.admin!.loginName}"));
+    expect(getTextField('dbUserSubTitle3'),
+        equals("Security Group: ${test.admin!.userGroup!.name}"));
   }
 
   static takeScreenshot(WidgetTester tester,
@@ -90,13 +155,16 @@ class CommonTest {
       } else {
         await tester.tap(find.byKey(Key("tap$formName")));
       }
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await tester.pumpAndSettle(Duration(seconds: waitTime));
     }
     await checkWidgetKey(tester, formName);
   }
 
   static Future<void> login(WidgetTester tester,
-      {String? username, String? password, int days = 0}) async {
+      {String? username,
+      String? password,
+      int days = 0,
+      Map testData = const {}}) async {
     CustomizableDateTime.customTime = DateTime.now().add(Duration(days: days));
     SaveTest test = await PersistFunctions.getTest();
     if ((test.company == null || test.admin == null) &&
@@ -114,6 +182,39 @@ class CommonTest {
       await pressLogin(tester);
       await checkText(tester, 'Main'); // dashboard
     }
+    String apiKey = CommonTest.getTextField('apiKey');
+    String moquiSessionToken = CommonTest.getTextField('moquiSessionToken');
+    await GlobalConfiguration()
+        .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
+    if (!test.testDataLoaded && testData.isNotEmpty) {
+      APIRepository repos = APIRepository();
+      repos.setApiKey(apiKey, moquiSessionToken);
+      // replace XXX strings
+      int seq = test.sequence;
+      Map parsed = {};
+      testData.forEach((k, v) {
+        List newList = [];
+        v.forEach((item) {
+          if (item is Company || item is User) {
+            if (item.email != null) {
+              item = item.copyWith(
+                  email: item.email!.replaceFirst('XXX', '${seq++}'));
+            }
+          }
+          if (item is User) {
+            if (item.loginName != null) {
+              item = item.copyWith(
+                  loginName: item.loginName!.replaceFirst('XXX', '${seq++}'));
+            }
+          }
+          newList.add(item);
+        });
+        parsed[k] = newList;
+      });
+      await repos.upLoadEntities(parsed);
+      await PersistFunctions.persistTest(
+          test.copyWith(sequence: seq, testDataLoaded: true));
+    }
   }
 
   static Future<void> gotoMainMenu(WidgetTester tester) async {
@@ -121,7 +222,8 @@ class CommonTest {
   }
 
   static Future<void> doSearch(WidgetTester tester,
-      {required String searchString, int seconds = 5}) async {
+      {required String searchString, int? seconds}) async {
+    seconds ??= waitTime;
     if (tester.any(find.byKey(const Key('searchButton'))) == false) {
       await tapByKey(tester, 'search');
     }
@@ -140,7 +242,7 @@ class CommonTest {
   }
 
   static Future<void> pressLogin(WidgetTester tester) async {
-    await tapByKey(tester, 'login', seconds: 5);
+    await tapByKey(tester, 'login', seconds: waitTime);
   }
 
   static Future<void> logout(WidgetTester tester) async {
@@ -149,7 +251,7 @@ class CommonTest {
     if (hasKey('HomeFormAuth')) {
       debugPrint("Dashboard logged in , needs to logout");
       await tapByKey(tester, 'logoutButton');
-      await tester.pump(const Duration(seconds: 5));
+      await tester.pump(Duration(seconds: waitTime));
       expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     }
   }
@@ -230,7 +332,8 @@ class CommonTest {
 
   /// [lowLevel]
   static Future<void> refresh(WidgetTester tester,
-      {int seconds = 5, String listViewName = 'listView'}) async {
+      {int? seconds, String listViewName = 'listView'}) async {
+    seconds ??= waitTime;
     await tester.drag(find.byKey(Key(listViewName)).last, const Offset(0, 400));
     await tester.pump(Duration(seconds: seconds));
   }
@@ -249,7 +352,7 @@ class CommonTest {
     await tapByKey(tester, key);
     await tester.enterText(find.byType(TextField).last, value);
     await tester
-        .pumpAndSettle(const Duration(seconds: 5)); // wait for search result
+        .pumpAndSettle(Duration(seconds: waitTime)); // wait for search result
     await tester
         .tap(find.textContaining(RegExp(value, caseSensitive: false)).last);
     await tester.pumpAndSettle(Duration(seconds: seconds));
@@ -260,7 +363,11 @@ class CommonTest {
       {int seconds = 1}) async {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
-    await tester.tap(find.textContaining(value).last);
+    if (value.isEmpty) {
+      await tester.tap(find.text(value).last);
+    } else {
+      await tester.tap(find.textContaining(value).last);
+    }
     await tester.pumpAndSettle(const Duration(seconds: 1));
   }
 
@@ -269,6 +376,7 @@ class CommonTest {
         as DropdownButtonFormField;
     if (tff.initialValue is Currency) return tff.initialValue.description;
     if (tff.initialValue is UserGroup) return tff.initialValue.toString();
+    if (tff.initialValue is Role) return tff.initialValue.value;
     return tff.initialValue;
   }
 
@@ -324,11 +432,16 @@ class CommonTest {
 
   static Future<void> selectMainMenu(
       WidgetTester tester, String menuOption) async {
+    if (hasKey('cancel')) {
+      // company or user detail menu open?
+      await tester.tap(find.byKey(const Key('cancel')).last);
+      await tester.pump();
+    }
     if (!hasKey('HomeFormAuth')) {
       if (isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));
         await tester.pump();
-        await tester.pumpAndSettle(const Duration(seconds: 5));
+        await tester.pumpAndSettle(Duration(seconds: waitTime));
       }
       await tapByKey(tester, menuOption);
     }
@@ -384,64 +497,6 @@ class CommonTest {
   static int getWidgetCountByKey(WidgetTester tester, String key) {
     var finder = find.byKey(Key(key));
     return tester.widgetList(finder).length;
-  }
-
-  static Future<void> updateAddress(
-      WidgetTester tester, Address address) async {
-    await drag(tester);
-    await tapByKey(tester, 'address');
-    await enterText(tester, 'address1', address.address1!);
-    await enterText(tester, 'address2', address.address2!);
-    await enterText(tester, 'postalCode', address.postalCode!);
-    await enterText(tester, 'city', address.city!);
-    await enterText(tester, 'province', address.province!);
-    await drag(tester);
-    await enterDropDownSearch(tester, 'country', address.country!);
-    await drag(tester);
-    await tapByKey(tester, 'updateAddress');
-    await CommonTest.waitForKey(tester, 'dismiss');
-    await CommonTest.waitForSnackbarToGo(tester);
-  }
-
-  static Future<void> checkAddress(WidgetTester tester, Address address) async {
-    await drag(tester);
-    await tapByKey(tester, 'address');
-    expect(getTextFormField('address1'), contains(address.address1!));
-    expect(getTextFormField('address2'), contains(address.address2!));
-    expect(getTextFormField('postalCode'), contains(address.postalCode));
-    expect(getTextFormField('city'), contains(address.city!));
-    expect(getTextFormField('province'), equals(address.province!));
-    expect(getDropdownSearch('country'), equals(address.country));
-    await tapByKey(tester, 'cancel');
-  }
-
-  static Future<void> updatePaymentMethod(
-      WidgetTester tester, PaymentMethod paymentMethod) async {
-    await drag(tester);
-    await tapByKey(tester, 'paymentMethod');
-    await enterDropDown(
-        tester, 'cardTypeDropDown', paymentMethod.creditCardType.toString());
-    await enterText(
-        tester, 'creditCardNumber', paymentMethod.creditCardNumber!);
-    await enterText(tester, 'expireMonth', paymentMethod.expireMonth!);
-    await enterText(tester, 'expireYear', paymentMethod.expireYear!);
-    await tapByKey(tester, 'updatePaymentMethod');
-    await CommonTest.waitForKey(tester, 'dismiss');
-    await CommonTest.waitForSnackbarToGo(tester);
-  }
-
-  static Future<void> checkPaymentMethod(
-      WidgetTester tester, PaymentMethod paymentMethod) async {
-    int length = paymentMethod.creditCardNumber!.length;
-    await drag(tester);
-    expect(
-        getTextField('paymentMethodLabel'),
-        contains(
-            paymentMethod.creditCardNumber!.substring(length - 4, length)));
-    expect(getTextField('paymentMethodLabel'),
-        contains('${paymentMethod.expireMonth!}/'));
-    expect(getTextField('paymentMethodLabel'),
-        contains(paymentMethod.expireYear!));
   }
 
   static void mockPackageInfo() {

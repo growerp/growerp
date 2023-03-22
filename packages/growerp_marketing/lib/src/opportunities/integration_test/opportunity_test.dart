@@ -21,13 +21,7 @@ import 'persist_marketing_test.dart';
 
 class OpportunityTest {
   static Future<void> selectOpportunities(WidgetTester tester) async {
-    if (find
-        .byKey(const Key('HomeFormAuth'))
-        .toString()
-        .startsWith('zero widgets with key')) {
-      await CommonTest.gotoMainMenu(tester);
-    }
-    await CommonTest.selectOption(tester, 'dbCrm', 'OpportunityListForm', '1');
+    await CommonTest.selectOption(tester, 'dbCrm', 'OpportunityListForm');
   }
 
   static Future<void> addOpportunities(

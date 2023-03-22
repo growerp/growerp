@@ -26,20 +26,31 @@ part 'company_state.dart';
 
 const _companyLimit = 20;
 
+mixin CompanyLeadBloc on Bloc<CompanyEvent, CompanyState> {}
+mixin CompanyCustomerBloc on Bloc<CompanyEvent, CompanyState> {}
+mixin CompanyEmployeeBloc on Bloc<CompanyEvent, CompanyState> {}
+mixin CompanySupplierBloc on Bloc<CompanyEvent, CompanyState> {}
+
 EventTransformer<E> companyDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
   };
 }
 
-class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
-  CompanyBloc(this.repos) : super(const CompanyState()) {
+class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
+    with CompanyLeadBloc, CompanyCustomerBloc, CompanySupplierBloc {
+  CompanyBloc(this.repos, this.role, this.authBloc)
+      : super(const CompanyState()) {
     on<CompanyFetch>(_onCompanyFetch,
         transformer: companyDroppable(const Duration(milliseconds: 100)));
     on<CompanyUpdate>(_onCompanyUpdate);
+    on<CompanyDelete>(_onCompanyDelete);
   }
 
-  final UserCompanyAPIRepository repos;
+  final CompanyUserAPIRepository repos;
+  final Role? role;
+  final AuthBloc authBloc;
+
   Future<void> _onCompanyFetch(
     CompanyFetch event,
     Emitter<CompanyState> emit,
@@ -50,8 +61,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
     try {
       // start from record zero for initial and refresh
       if (state.status == CompanyStatus.initial || event.refresh) {
-        ApiResult<List<Company>> compResult =
-            await repos.getCompanies(filter: event.searchString);
+//        emit(state.copyWith(status: CompanyStatus.loading));
+        ApiResult<List<Company>> compResult = await repos.getCompany(
+            role: role, companyPartyId: event.companyPartyId);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: CompanyStatus.success,
@@ -66,8 +78,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
           (state.searchString.isNotEmpty &&
               event.searchString != state.searchString)) {
-        ApiResult<List<Company>> compResult =
-            await repos.getCompanies(filter: event.searchString);
+        emit(state.copyWith(status: CompanyStatus.loading));
+        ApiResult<List<Company>> compResult = await repos.getCompany(
+            role: role, searchString: event.searchString);
         return emit(compResult.when(
             success: (data) => state.copyWith(
                   status: CompanyStatus.success,
@@ -79,14 +92,15 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
                 status: CompanyStatus.failure, message: error.toString())));
       }
       // get next page also for search
-
       ApiResult<List<Company>> compResult =
-          await repos.getCompanies(filter: event.searchString);
+          await repos.getCompany(role: role, searchString: event.searchString);
+      emit(state.copyWith(status: CompanyStatus.loading));
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: CompanyStatus.success,
                 companies: List.of(state.companies)..addAll(data),
                 hasReachedMax: data.length < _companyLimit ? true : false,
+                searchString: event.searchString,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: CompanyStatus.failure, message: error.toString())));
@@ -101,15 +115,24 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
     Emitter<CompanyState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: CompanyStatus.loading));
       List<Company> companies = List.from(state.companies);
       if (event.company.partyId != null) {
         ApiResult<Company> compResult =
             await repos.updateCompany(event.company);
         return emit(compResult.when(
             success: (data) {
-              int index = companies.indexWhere(
-                  (element) => element.partyId == event.company.partyId);
-              companies[index] = data;
+              if (companies.isNotEmpty) {
+                int index = companies.indexWhere(
+                    (element) => element.partyId == event.company.partyId);
+                companies[index] = data;
+              } else {
+                companies.add(data);
+              }
+              if (authBloc.state.authenticate!.company!.partyId ==
+                  data.partyId) {
+                authBloc.add(AuthLoad());
+              }
               return state.copyWith(
                   status: CompanyStatus.success,
                   companies: companies,
@@ -124,6 +147,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
         return emit(compResult.when(
             success: (data) {
               companies.insert(0, data);
+              authBloc.add(AuthLoad());
               return state.copyWith(
                   status: CompanyStatus.success,
                   companies: companies,
@@ -137,4 +161,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
           status: CompanyStatus.failure, message: error.toString()));
     }
   }
+
+  Future<void> _onCompanyDelete(
+    CompanyDelete event,
+    Emitter<CompanyState> emit,
+  ) async {}
 }

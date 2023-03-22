@@ -20,7 +20,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,21 +52,7 @@ List<MenuOption> menuOptions = [
     route: '/company',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    tabItems: [
-      TabItem(
-        form: const CompanyForm(),
-        label: 'Company Info',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const UserListForm(
-          key: Key('Employee'),
-          role: Role.company,
-        ),
-        label: 'Employees',
-        icon: const Icon(Icons.school),
-      ),
-    ],
+    child: const MainMenu(),
   ),
   MenuOption(
       image: 'packages/growerp_core/images/supplierGrey.png',
@@ -78,13 +63,7 @@ List<MenuOption> menuOptions = [
         UserGroup.admin,
         UserGroup.employee,
       ],
-      tabItems: [
-        TabItem(
-          form: const LocationListForm(),
-          label: '\nWH Locations',
-          icon: const Icon(Icons.location_pin),
-        ),
-      ]),
+      child: const LocationListForm()),
 ];
 
 // routing
@@ -105,10 +84,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
-    case '/catalog':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     default:
       return MaterialPageRoute(
           builder: (context) => FatalErrorForm(
@@ -132,9 +107,9 @@ class MainMenu extends StatelessWidget {
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
-            "Administrators: ${authenticate.stats?.admins ?? 0}",
-            "Other Employees: ${authenticate.stats?.employees ?? 0}",
-            "",
+            "Email: ${authenticate.company!.email}",
+            "Currency: ${authenticate.company!.currency!.description}",
+            "Employees: ${authenticate.company!.employees.length}",
           ),
           makeDashboardItem(
             'dbInventory',

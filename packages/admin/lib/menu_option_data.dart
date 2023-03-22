@@ -41,8 +41,12 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const CompanyForm(),
-        label: 'Company Info',
+        form: ShowCompanyDialog(
+          Company(role: Role.company),
+          key: const Key('CompanyForm'),
+          dialog: false,
+        ),
+        label: 'Company',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -69,7 +73,7 @@ List<MenuOption> menuOptions = [
     tabItems: [
       TabItem(
         form: const OpportunityListForm(),
-        label: 'My Opportunities',
+        label: '        My\nOpportunities',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -77,7 +81,15 @@ List<MenuOption> menuOptions = [
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: 'Leads',
+        label: '   Lead\nContacs',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('CompanyLead'),
+          role: Role.lead,
+        ),
+        label: '     Lead\nCompanies',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -85,7 +97,15 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: 'Customer\nContacts',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('CompanyCustomer'),
+          role: Role.customer,
+        ),
+        label: 'Customer\nCompanies',
         icon: const Icon(Icons.school),
       ),
     ],
@@ -122,7 +142,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/orderGrey.png',
     selectedImage: 'packages/growerp_core/images/order.png',
-    title: 'Orders',
+    title: 'Orders\n',
     route: '/orders',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
@@ -130,11 +150,11 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const FinDocListForm(
             key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
-        label: '\nSales orders',
+        label: 'Sales orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const CompanyListForm(
           key: Key('Customer'),
           role: Role.customer,
         ),
@@ -144,11 +164,11 @@ List<MenuOption> menuOptions = [
       TabItem(
         form: const FinDocListForm(
             key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
-        label: '\nPurchase orders',
+        label: 'Purchase orders',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
+        form: const CompanyListForm(
           key: Key('Supplier'),
           role: Role.supplier,
         ),

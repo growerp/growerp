@@ -1,3 +1,7 @@
+## 0.9.0
+
+* now independant of growerp_user_company, own (small) tests
+
 ## 0.9.0-dev.1
 
 * Refactoring and UI improvements.

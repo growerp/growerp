@@ -17,7 +17,7 @@ void main() {
   testWidgets('''Make screenshots''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-    await CompanyTest.createCompany(tester, demoData: true);
+    await CommonTest.createCompanyAndAdmin(tester, demoData: true);
     await CommonTest.takeScreenshot(tester, binding, 'dashBoard');
     await CompanyTest.selectCompany(tester);
     await CommonTest.takeScreenshot(tester, binding, 'CompayInfo');

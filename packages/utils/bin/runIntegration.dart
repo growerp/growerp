@@ -25,7 +25,6 @@ android studio installed with emulator 'Pixel 4' configured
 */
 
 void main(List<String> arguments) async {
-  var process;
   var emulator = 'Pixel 4';
   if (arguments.isNotEmpty) emulator = arguments[0];
 
@@ -110,16 +109,14 @@ void main(List<String> arguments) async {
     await Process.runSync('./gradlew', ['downloadElasticSearch'],
         workingDirectory: '$home/growerpMoqui');
     print("built system");
-    process = await Process.runSync('./gradlew', ['build'],
+    await Process.runSync('./gradlew', ['build'],
         workingDirectory: '$home/growerpMoqui');
-    print('moqui build: ${process.stdout}');
   } else {
     print("update existing growerpMoqui backend system");
     await Process.runSync('git', ['stash'],
         workingDirectory: '$home/growerpMoqui/runtime/component/growerp');
-    process = await Process.runSync('./gradlew', ['gitp'],
+    await Process.runSync('./gradlew', ['gitp'],
         workingDirectory: '$home/growerpMoqui');
-    print('moqui updated: ${process.stdout}');
   }
 
   await Process.runSync('./gradlew', ['cleandb'],
@@ -136,7 +133,7 @@ void main(List<String> arguments) async {
   await Process.start('flutter', ['emulators', '--launch', emulator]);
 
   print(' wait for emulator to start');
-  await Future.delayed(Duration(seconds: 60));
+  await Future<void>.delayed(Duration(seconds: 60));
 
   print('======start test....');
   await Process.runSync('flutter', ['pub', 'get'],

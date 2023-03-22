@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_core/test_data.dart';
 
 class UserTest {
   static Future<void> selectEmployees(WidgetTester tester) async {
@@ -126,6 +127,7 @@ class UserTest {
   static Future<List<User>> enterUserData(WidgetTester tester,
       List<User> oldUsers, List<User> npUsers, int seq) async {
     // copy id's to new list
+    Role currentRole = npUsers[0].company?.role ?? Role.unknown;
     if (oldUsers.isNotEmpty) {
       for (int x = 0; x < oldUsers.length; x++) {
         npUsers[x] = npUsers[x].copyWith(partyId: oldUsers[x].partyId);
@@ -144,62 +146,64 @@ class UserTest {
           findsOneWidget);
       await CommonTest.enterText(tester, 'firstName', user.firstName!);
       await CommonTest.enterText(tester, 'lastName', user.lastName!);
-      String email = '';
+
       if (user.email != null) {
-        email = user.email!.replaceFirst('XXX', '${seq++}');
+        user =
+            user.copyWith(email: user.email!.replaceFirst('XXX', '${seq++}'));
       }
-      await CommonTest.enterText(tester, 'email', email);
-      await CommonTest.enterText(tester, 'telephoneNr', user.telephoneNr!);
+      await CommonTest.enterText(tester, 'userEmail', user.email ?? '');
+      await CommonTest.enterText(
+          tester, 'userTelephoneNr', user.telephoneNr ?? '');
 
       await CommonTest.drag(tester);
       // company info
-      if (user.company!.role != Role.company) {
-        if ((user.company!.paymentMethod == null &&
-                user.company!.address == null) ||
-            // need for new
-            user.partyId == null) {
-          await CommonTest.enterText(
-              tester, 'newCompanyName', user.company!.name!);
+      if (currentRole != Role.company && user.company != null) {
+        await CommonTest.tapByKey(tester, 'newCompany');
+        await CommonTest.enterText(
+            tester, 'companyName', user.company!.name!); // required!
+        await CommonTest.enterText(
+            tester, 'telephoneNr', user.company!.telephoneNr ?? '');
+        if (user.company?.email != null) {
+          user = user.copyWith(
+              company: user.company!.copyWith(
+                  email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
         }
+
+        await CommonTest.drag(tester);
+        await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
+        await CommonTest.drag(tester);
+        await CommonTest.tapByKey(tester, 'update', seconds: 2);
       }
-      // login info
-      String loginName = '';
-      if (user.loginName == null || user.loginName!.isEmpty) {
-        await CommonTest.enterText(tester, 'loginName', '');
-      } else {
-        loginName = user.loginName!.replaceFirst('XXX', '${seq++}');
-        await CommonTest.enterText(tester, 'loginName', loginName);
-        await CommonTest.enterDropDown(
-            tester, 'userGroup', user.userGroup!.name);
-        if (user.loginDisabled != null &&
-            CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
-          await CommonTest.tapByKey(tester, 'loginDisabled');
+
+      // login info for company employees only
+      if (currentRole == Role.company) {
+        if (user.loginName != null) {
+          user = user.copyWith(
+              loginName: user.loginName!.replaceFirst('XXX', '${seq++}'));
+        }
+
+        await CommonTest.enterText(tester, 'loginName', user.loginName ?? '');
+        if (user.loginName != null) {
+          await CommonTest.enterDropDown(
+              tester, 'userGroup', user.userGroup!.name);
+          if (user.loginDisabled != null &&
+              CommonTest.getCheckbox('loginDisabled') != user.loginDisabled) {
+            await CommonTest.tapByKey(tester, 'loginDisabled');
+          }
         }
       }
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'updateUser');
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
-      // if required add address and payment
-      if (user.company!.address != null && user.company!.role != Role.company) {
-        await CommonTest.doSearch(tester, searchString: user.firstName!);
-        await CommonTest.tapByKey(tester, 'name0');
-        await CommonTest.updateAddress(tester, user.company!.address!);
-      }
-      if (user.company!.paymentMethod != null &&
-          user.company!.role != Role.company) {
-        await CommonTest.doSearch(tester, searchString: user.firstName!);
-        await CommonTest.tapByKey(tester, 'name0');
-        await CommonTest.updatePaymentMethod(
-            tester, user.company!.paymentMethod!);
-      }
-      newUsers.add(user.copyWith(email: email, loginName: loginName));
+      newUsers.add(user);
     }
     return (newUsers);
   }
 
   static Future<List<User>> checkUser(
       WidgetTester tester, List<User> users) async {
+    Role currentRole = users[0].company?.role ?? Role.unknown;
     List<User> newUsers = [];
     for (User user in users) {
       await CommonTest.doSearch(tester, searchString: user.firstName!);
@@ -213,39 +217,37 @@ class UserTest {
           findsOneWidget);
       expect(CommonTest.getTextFormField('firstName'), equals(user.firstName!));
       expect(CommonTest.getTextFormField('lastName'), equals(user.lastName!));
-      expect(CommonTest.getTextFormField('email'), equals(user.email!));
-      expect(CommonTest.getTextFormField('telephoneNr'),
-          equals(user.telephoneNr!));
+      expect(
+          CommonTest.getTextFormField('userEmail'), equals(user.email ?? ''));
+      expect(CommonTest.getTextFormField('userTelephoneNr'),
+          equals(user.telephoneNr ?? ''));
+
+      if (currentRole != Role.company && user.company != null) {
+        await CommonTest.tapByKey(tester, 'editCompany');
+        expect(CommonTest.getTextFormField('companyName'),
+            equals(user.company!.name!)); // required!
+        expect(CommonTest.getDropdown('role'),
+            equals(user.company!.role.toString()));
+        expect(CommonTest.getTextFormField('telephoneNr'),
+            equals(user.company!.telephoneNr ?? ''));
+        expect(CommonTest.getTextFormField('email'),
+            equals(user.company!.email ?? ''));
+        await CommonTest.drag(tester);
+        await CommonTest.tapByKey(tester, 'cancel');
+      }
       newUsers.add(user.copyWith(partyId: id));
       await CommonTest.drag(tester);
-      // company
-      if (user.company!.role != Role.company) {
-        if (user.company == null) {
-          expect(CommonTest.getTextField('addressLabel'),
-              equals('No address yet'));
-          expect(CommonTest.getTextField('paymentMethodLabel'),
-              equals('No payment methods yet'));
-        } else {
-          if (user.company!.address != null &&
-              user.company!.role != Role.company) {
-            await CommonTest.checkAddress(tester, user.company!.address!);
+      if (currentRole == Role.company) {
+        // login
+        expect(CommonTest.getTextFormField('loginName'),
+            equals(user.loginName ?? ''));
+        if (user.loginName != null && user.loginName!.isNotEmpty) {
+          expect(CommonTest.getDropdown('userGroup'),
+              equals(user.userGroup.toString()));
+          if (user.loginDisabled != null) {
+            expect(CommonTest.getCheckbox('loginDisabled'),
+                equals(user.loginDisabled));
           }
-          if (user.company!.paymentMethod != null &&
-              user.company!.role != Role.company) {
-            await CommonTest.checkPaymentMethod(
-                tester, user.company!.paymentMethod!);
-          }
-        }
-      }
-      // login
-      expect(CommonTest.getTextFormField('loginName'),
-          equals(user.loginName ?? ''));
-      if (user.loginName != null && user.loginName!.isNotEmpty) {
-        expect(CommonTest.getDropdown('userGroup'),
-            equals(user.userGroup.toString()));
-        if (user.loginDisabled != null) {
-          expect(CommonTest.getCheckbox('loginDisabled'),
-              equals(user.loginDisabled));
         }
       }
       await CommonTest.tapByKey(tester, 'cancel');

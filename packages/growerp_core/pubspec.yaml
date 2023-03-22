@@ -1,6 +1,6 @@
 name: growerp_core
 description: The Core of the GrowERP frontend
-version: 0.9.0-dev.1
+version: 0.9.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 
@@ -48,7 +48,7 @@ dependencies:
 
   #NETWORK
   json_annotation: ^4.7.0
-  dio: ^4.0.4
+  dio: ^5.0.1
 
   #UTILITIES
   freezed_annotation: ^2.0.3

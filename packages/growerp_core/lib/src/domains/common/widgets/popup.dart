@@ -15,13 +15,12 @@
 import 'package:flutter/material.dart';
 import '../../domains.dart';
 
-Widget popUp({
-  required BuildContext context,
-  Widget? child,
-  String title = '',
-  double height = 400,
-  double width = 400,
-}) {
+Widget popUp(
+    {Widget? child,
+    String title = '',
+    double height = 400,
+    double width = 400,
+    required BuildContext context}) {
   return Stack(clipBehavior: Clip.none, children: [
     SizedBox(
         width: width,
@@ -45,6 +44,6 @@ Widget popUp({
           Expanded(
               child: Padding(padding: const EdgeInsets.all(20), child: child)),
         ])),
-    const Positioned(top: 10, right: 10, child: DialogCloseButton())
+    const Positioned(top: 15, right: 15, child: DialogCloseButton())
   ]);
 }

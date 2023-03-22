@@ -21,6 +21,7 @@ part 'save_test_model.g.dart';
 @freezed
 class SaveTest with _$SaveTest {
   factory SaveTest({
+    @Default(false) bool testDataLoaded,
     @Default(0) int sequence,
     Company? company,
     User? admin,

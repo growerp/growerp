@@ -18,9 +18,7 @@
 enum UserGroup {
   employee('GROWERP_M_EMPLOYEE'),
   admin('GROWERP_M_ADMIN'),
-  customer('GROWERP_M_CUSTOMER'),
-  lead('GROWERP_M_LEAD'),
-  supplier('GROWERP_M_SUPPLIER');
+  other('OTHER');
 
   final String value;
   const UserGroup(this.value);

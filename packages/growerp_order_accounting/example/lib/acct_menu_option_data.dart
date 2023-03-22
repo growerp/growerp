@@ -16,7 +16,6 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
 
 import 'accounting_form.dart';
 
@@ -54,14 +53,6 @@ List<MenuOption> acctMenuOptions = [
           label: "\nIncoming Payments",
           icon: const Icon(Icons.home),
         ),
-        TabItem(
-          form: const UserListForm(
-            key: Key('Customer'),
-            role: Role.customer,
-          ),
-          label: '\nCustomers',
-          icon: const Icon(Icons.school),
-        ),
       ]),
   MenuOption(
       image: "packages/growerp_core/images/supplierGrey.png",
@@ -90,14 +81,6 @@ List<MenuOption> acctMenuOptions = [
               docType: FinDocType.payment),
           label: "\nOutgoing Payments",
           icon: const Icon(Icons.home),
-        ),
-        TabItem(
-          form: const UserListForm(
-            key: Key('Supplier'),
-            role: Role.supplier,
-          ),
-          label: '\nSuppliers',
-          icon: const Icon(Icons.business),
         ),
       ]),
   MenuOption(

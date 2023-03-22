@@ -193,7 +193,7 @@ class ReservationDialogState extends State<ReservationDialog> {
                           asyncItems: (String? filter) async {
                             ApiResult<List<User>> result = await repos
                                 .lookUpUser(
-                                    userGroups: [UserGroup.customer],
+                                    userGroups: [Role.customer],
                                     filter: _userSearchBoxController.text);
                             return result.when(
                                 success: (data) => data,

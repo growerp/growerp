@@ -211,13 +211,14 @@ class _LoginHeaderState extends State<LoginDialog> {
                   child: Text(item.name ?? 'Company??'),
                 );
               }).toList(),
-              onChanged: (Company? newValue) {
-                context.read<AuthBloc>().add(AuthUpdateCompany(newValue!));
+              onChanged: (Company? newValue) {},
+/*                context.read<AuthBloc>().add(AuthUpdateCompany(newValue!));
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/', ModalRoute.withName('/'),
                     arguments:
                         FormArguments(message: "Ecommerce company changed!"));
               },
+*/
               isExpanded: true,
             ),
           ),

@@ -13,7 +13,6 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +28,7 @@ Future main() async {
       child: TopApp(
           dbServer: APIRepository(),
           chatServer: ChatServer(),
-          title: 'GrowERP package: growerp_core.',
+          title: 'GrowERP package: growerp_user_company.',
           router: generateRoute,
           menuOptions: menuOptions)));
 }
@@ -48,34 +47,70 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/companyGrey.png',
     selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Company',
-    route: '/company',
+    title: 'Companies',
+    route: '/companies',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const CompanyForm(),
-        label: 'Company Info',
+        form: ShowCompanyDialog(
+          Company(role: Role.company),
+          key: const Key('CompanyForm'),
+          dialog: false,
+        ),
+        label: 'Company',
         icon: const Icon(Icons.home),
       ),
       TabItem(
-        form: const UserListForm(
-          key: Key('Employee'),
-          role: Role.company,
+        form: const CompanyListForm(
+          key: Key('Customer'),
+          role: Role.customer,
         ),
-        label: 'Employees',
-        icon: const Icon(Icons.school),
+        label: 'Customers',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Lead'),
+          role: Role.lead,
+        ),
+        label: 'Leads',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Supplier'),
+          role: Role.supplier,
+        ),
+        label: 'Suppliers',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('All'),
+          role: null,
+        ),
+        label: 'All',
+        icon: const Icon(Icons.home),
       ),
     ],
   ),
   MenuOption(
     image: 'packages/growerp_core/images/companyGrey.png',
     selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Other users',
-    route: '/otherusers',
+    title: 'Users',
+    route: '/users',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
     tabItems: [
+      TabItem(
+        form: const UserListForm(
+          key: Key('Employee'),
+          role: Role.company,
+        ),
+        label: 'Employees',
+        icon: const Icon(Icons.business),
+      ),
       TabItem(
         form: const UserListForm(
           key: Key('Lead'),
@@ -100,25 +135,47 @@ List<MenuOption> menuOptions = [
         label: 'Suppliers',
         icon: const Icon(Icons.business),
       ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('Unknown'),
+          role: Role.unknown,
+        ),
+        label: 'Others',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('All'),
+          role: null,
+        ),
+        label: 'All',
+        icon: const Icon(Icons.business),
+      ),
     ],
   ),
 ];
 
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
-  if (kDebugMode) {
-    print('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
-  }
+  debugPrint('>>>NavigateTo { ${settings.name} '
+      'with: ${settings.arguments} }');
+
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/company':
       return MaterialPageRoute(
+          builder: (context) =>
+              ShowCompanyDialog(settings.arguments as Company));
+    case '/user':
+      return MaterialPageRoute(
+          builder: (context) => ShowUserDialog(settings.arguments as User));
+    case '/companies':
+      return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
-    case '/otherusers':
+    case '/users':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
@@ -139,26 +196,26 @@ class MainMenu extends StatelessWidget {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
           makeDashboardItem(
-            'dbCompany',
-            context,
-            menuOptions[1],
-            authenticate.company!.name!.length > 20
-                ? "${authenticate.company!.name!.substring(0, 20)}..."
-                : "${authenticate.company!.name}",
-            "Administrators: ${authenticate.stats?.admins ?? 0}",
-            "Other Employees: ${authenticate.stats?.employees ?? 0}",
-            "",
-          ),
+              'dbCompanies',
+              context,
+              menuOptions[1],
+              authenticate.company!.name!.length > 20
+                  ? "${authenticate.company!.name!.substring(0, 20)}..."
+                  : "${authenticate.company!.name}",
+              "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
+              "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
+              "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}"),
           makeDashboardItem(
-            'dbOtherUsers',
+            'dbPersons',
             context,
             menuOptions[2],
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
-            "Customers: ${authenticate.stats?.customers ?? 0}",
-            "Leads: ${authenticate.stats?.leads ?? 0}",
-            "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
+            "Employees: ${authenticate.company?.employees.length ?? 0}",
+            "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
+            "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
+            "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
           ),
         ]);
       }

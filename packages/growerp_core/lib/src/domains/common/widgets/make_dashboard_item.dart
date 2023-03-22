@@ -17,8 +17,12 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../common.dart';
 
-Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
-    String subTitle, String subTitle1, String subTitle2, String subTitle3) {
+Card makeDashboardItem(
+    String key, BuildContext context, MenuOption menuOption, String subTitle,
+    [String? subTitle1,
+    String? subTitle2,
+    String? subTitle3,
+    String? subTitle4]) {
   bool phone = ResponsiveWrapper.of(context).isSmallerThan(DESKTOP);
   return Card(
       elevation: 1.0,
@@ -45,40 +49,51 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
                     style: TextStyle(
                         fontSize: phone ? 15 : 25,
                         color: Colors.black,
-                        fontWeight: FontWeight.bold)),
+                        fontWeight: FontWeight.bold),
+                    key: Key("${key}Title")),
               ),
               const SizedBox(height: 2.0),
               Center(
                 child: Text(subTitle,
                     style: TextStyle(
-                        fontSize: phone ? 12 : 20, color: Colors.black)),
+                        fontSize: phone ? 12 : 20, color: Colors.black),
+                    key: Key("${key}SubTitle")),
               ),
               const SizedBox(height: 2.0),
-              Center(
-                child: Text(subTitle1,
-                    style: TextStyle(
-                        fontSize: phone ? 12 : 20, color: Colors.black)),
-              ),
-              Visibility(
-                  visible: subTitle2.isNotEmpty,
-                  child: Column(children: [
-                    const SizedBox(height: 2.0),
-                    Center(
-                      child: Text(subTitle2,
-                          style: TextStyle(
-                              fontSize: phone ? 12 : 20, color: Colors.black)),
-                    )
-                  ])),
-              Visibility(
-                  visible: subTitle3.isNotEmpty,
-                  child: Column(children: [
-                    const SizedBox(height: 2.0),
-                    Center(
-                      child: Text(subTitle3,
-                          style: TextStyle(
-                              fontSize: phone ? 12 : 20, color: Colors.black)),
-                    )
-                  ]))
+              if (subTitle1 != null)
+                Center(
+                  child: Text(subTitle1,
+                      style: TextStyle(
+                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      key: Key("${key}SubTitle1")),
+                ),
+              const SizedBox(height: 2.0),
+              if (subTitle2 != null)
+                Column(children: [
+                  const SizedBox(height: 2.0),
+                  Center(
+                    child: Text(subTitle2,
+                        style: TextStyle(
+                            fontSize: phone ? 12 : 20, color: Colors.black),
+                        key: Key("${key}SubTitle2")),
+                  )
+                ]),
+              const SizedBox(height: 2.0),
+              if (subTitle3 != null)
+                Center(
+                  child: Text(subTitle3,
+                      style: TextStyle(
+                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      key: Key("${key}SubTitle3")),
+                ),
+              const SizedBox(height: 2.0),
+              if (subTitle4 != null)
+                Center(
+                  child: Text(subTitle4,
+                      style: TextStyle(
+                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      key: Key("${key}SubTitle4")),
+                )
             ],
           ),
         ),

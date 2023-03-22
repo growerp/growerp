@@ -305,6 +305,7 @@ class ProductDialogState extends State<ProductDialogFull> {
               },
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
             child: TextFormField(
               key: const Key('price'),
@@ -373,6 +374,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                           });
                         })),
               ),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextFormField(
                   key: const Key('assets'),

@@ -14,7 +14,7 @@
 
 part of 'company_bloc.dart';
 
-enum CompanyStatus { initial, success, failure }
+enum CompanyStatus { initial, loading, success, failure }
 
 class CompanyState extends Equatable {
   const CompanyState({
@@ -49,7 +49,7 @@ class CompanyState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [companies, hasReachedMax];
+  List<Object?> get props => [status, hasReachedMax];
 
   @override
   String toString() => '$status { #companies: ${companies.length}, '

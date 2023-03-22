@@ -12,10 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'company_test.dart' as company;
-import 'user_test.dart' as user;
+import 'core_test.dart' as core;
 
 void main() {
-  company.main();
-  user.main();
+  core.main();
 }

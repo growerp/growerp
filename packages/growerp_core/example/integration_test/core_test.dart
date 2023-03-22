@@ -1,10 +1,9 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:example/main.dart';
-import 'package:growerp_core/src/domains/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -13,17 +12,11 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP company test''', (tester) async {
+  testWidgets('''GrowERP Core test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
-        clear: true);
+        clear: true, title: "Core Test");
 
-    /// [createCompany]
-    await CompanyTest.createCompany(tester);
-    await CompanyTest.selectCompany(tester);
-    await CompanyTest.updateCompany(tester);
-
-    /// [createCompany]
-    await CompanyTest.updateAddress(tester);
-    await CompanyTest.updatePaymentMethod(tester);
+    await CommonTest.createCompanyAndAdmin(tester);
+    await CommonTest.checkCompanyAndAdmin(tester);
   });
 }

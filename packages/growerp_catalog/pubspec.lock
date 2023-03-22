@@ -237,10 +237,10 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
+      sha256: "2644a9e0965a7aa3deb09cb8ce4081db4450c178f472818c8cd34216a3070d7b"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.6"
+    version: "5.0.2"
   dropdown_search:
     dependency: "direct main"
     description:
@@ -451,10 +451,10 @@ packages:
     dependency: "direct main"
     description:
       name: growerp_core
-      sha256: e2f66fc6912ab0d79d47405d46cda1b2350f63334f279e820118fcc6a566ed3b
+      sha256: "90ec9289453b35b7be1852a1158a2be92902edd59621d5591b8557ce96bc354b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.0-dev.1"
+    version: "0.9.0"
   highlight:
     dependency: transitive
     description:

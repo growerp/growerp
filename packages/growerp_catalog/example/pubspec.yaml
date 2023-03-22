@@ -12,8 +12,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   growerp_catalog:
     path: ../
-  growerp_user_company: ^0.9.0-dev.1
-#    path: ../../growerp_user_company
 
 dev_dependencies:
   flutter_test:

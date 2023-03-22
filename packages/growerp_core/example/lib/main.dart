@@ -56,7 +56,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
+    title: 'Logged in User',
     route: '/user',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
@@ -103,18 +103,18 @@ class MainMenu extends StatelessWidget {
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
-            "",
-            "",
-            "",
+            "Email: ${authenticate.company!.email}",
+            "Currency: ${authenticate.company!.currency!.description}",
+            "Employees: ${authenticate.company!.employees.length}",
           ),
           makeDashboardItem(
               'dbUser',
               context,
               menuOptions[2],
               "${authenticate.user!.firstName!} ${authenticate.user!.lastName!}",
-              "",
-              "",
-              ""),
+              "Email: ${authenticate.user!.email}",
+              "Login name: ${authenticate.user!.loginName}",
+              "Security Group: ${authenticate.user!.userGroup!.name}"),
         ]);
       }
       return const LoadingIndicator();

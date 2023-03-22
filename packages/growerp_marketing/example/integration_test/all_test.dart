@@ -1,5 +1,5 @@
 /*
- * This software is in the public domain under CC0 1.0 Universal plus a
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
  * 
  * To the extent possible under law, the author(s) have dedicated all
@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-void main(List<String> arguments) {
-  print('Use "utils:screenshots"');
+import 'opportunity_test.dart' as opportunity;
+
+void main() {
+  opportunity.main();
 }

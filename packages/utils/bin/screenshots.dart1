@@ -20,29 +20,34 @@ import 'package:path/path.dart';
 /// Android: uses all emulators available showing with the 'flutter emulators' command
 /// IOS: all emulators showing with the 'flutter devices' command (need to start first)
 void main(List<String> arguments) {
-  var emulators = [[]];
+  const emulators = <String>[];
   exitCode = 0;
   print('Creating screen images from integration tests');
   const androidDir = 'android/fastlane/metadata/android/en-US/';
   const iosDir = 'ios/fastlane/unframed/en-US/';
 
   var params = 'emulators';
-  if (Platform.isMacOS) params = 'devices';
-  Process.run('flutter', [params]).then((ProcessResult rs) async {
-    if (!rs.stdout.contains('•')) {
+  if (Platform.isMacOS) {
+    params = 'devices';
+  }
+  Process.run('flutter', [params]).then((rs) async {
+    if ((rs.stdout as String).contains('•') == false) {
       print('No emulators/devices found');
       exit(rs.exitCode);
     }
-    LineSplitter.split(rs.stdout).forEach((line) {
-      if (line.contains('•')) emulators.add(line.split('•'));
+    LineSplitter.split(rs.stdout as String).forEach((line) {
+      if (line.contains('•')) {
+        emulators.addAll(line.split('•'));
+      }
     });
     // remove empty first one in declaration
-    emulators.removeAt(0);
-    // add entry to frame the images
-    emulators.add(['frameIt']);
+    emulators
+      ..removeAt(0)
+      // add entry to frame the images
+      ..add('frameIt');
 
     // run integration test by providing path to store screenshots
-    Future<void> ProcessEmulator(String imgPath, String emulatorId) async {
+    Future<void> processEmulator(String imgPath, String emulatorId) async {
       await Future.forEach([
         // start emulator
         {
@@ -65,7 +70,7 @@ void main(List<String> arguments) {
           'executable': 'adb',
           'arguments': ['emu', 'kill']
         }
-      ], (Map el) async {
+      ], (el) async {
         print("executing command ${el['executable']} ${el['arguments']}");
         var result = await Process.start(el['executable'], el['arguments'],
             environment: el['environment']);
@@ -89,12 +94,12 @@ void main(List<String> arguments) {
         });
 
     // process every emulator and then frameit
-    await Future.forEach(emulators, (List el) async {
+    await Future.forEach(emulators, (el) async {
       if (el[0] != 'frameIt') {
         print('====screenshots for emulator ${el[0].trim()}');
         // frameit in last step
         if (el[3].trim() == 'android') {
-          await ProcessEmulator(androidDir, el[0].trim());
+          await processEmulator(androidDir, el[0].trim());
         } else if (el[2].trim() == 'ios') {
           print('===executing IOS command: flutter drive -d ${el[1].trim()} ');
           var result = await Process.start('flutter', [
@@ -110,7 +115,7 @@ void main(List<String> arguments) {
         }
       } else {
         print('===frame the images');
-        late var result;
+        late Process result;
         if (Platform.isMacOS) {
           result = await Process.start(
             'flutter',

@@ -65,7 +65,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
     _lastNameController.text = kReleaseMode ? '' : 'Doe';
     _emailController.text = kReleaseMode ? '' : 'test@example.com';
     _demoData = kReleaseMode ? false : true;
-    _currencySelected = currencies[0];
+    _currencySelected = currencies[1];
   }
 
   @override

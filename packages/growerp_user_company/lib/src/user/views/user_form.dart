@@ -26,8 +26,8 @@ class UserForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(context.read<UserCompanyAPIRepository>(),
-            user.company!.role!, context.read<AuthBloc>()),
-        child: UserPage(user));
+        create: (context) => UserBloc(
+            context.read<CompanyUserAPIRepository>(), user.company!.role!),
+        child: UserDialog(user));
   }
 }

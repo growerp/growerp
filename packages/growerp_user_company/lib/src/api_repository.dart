@@ -16,8 +16,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-class UserCompanyAPIRepository extends APIRepository {
-  UserCompanyAPIRepository(super.apiKey);
+class CompanyUserAPIRepository extends APIRepository {
+  CompanyUserAPIRepository(super.apiKey);
 
   Future<ApiResult<List<User>>> getUser(
       {int? start,
@@ -75,6 +75,48 @@ class UserCompanyAPIRepository extends APIRepository {
     }
   }
 
+  Future<ApiResult<User>> updateUser(User user) async {
+    try {
+      final response = await dioClient.patch(
+          'rest/s1/growerp/100/User', apiKey!, data: <String, dynamic>{
+        'user': jsonEncode(user.toJson()),
+        'moquiSessionToken': sessionToken
+      });
+      return getResponse<User>("user", response, (json) => User.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<User>> deleteUser(
+      String partyId, bool deleteCompanyToo) async {
+    try {
+      final response = await dioClient.delete(
+          'rest/s1/growerp/100/User', apiKey!,
+          queryParameters: <String, dynamic>{
+            'partyId': partyId,
+            'deleteCompanyToo': deleteCompanyToo,
+          });
+      return getResponse<User>("user", response, (json) => User.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<Company>> updateCompany(Company company) async {
+    try {
+      final response = await dioClient.patch(
+          'rest/s1/growerp/100/Company', apiKey!, data: <String, dynamic>{
+        'company': jsonEncode(company.toJson()),
+        'moquiSessionToken': sessionToken
+      });
+      return getResponse<Company>(
+          "company", response, (json) => Company.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
   Future<ApiResult<List<Company>>> getCompanies(
       {bool mainCompanies = true, // just owner organizations or all?
       int? start,
@@ -88,6 +130,40 @@ class UserCompanyAPIRepository extends APIRepository {
             'start': start,
             'limit': limit,
             'filter': filter,
+          });
+      return getResponseList<Company>(
+          "companies", response, (json) => Company.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<Company>>> getCompany({
+    String? companyPartyId,
+    String? companyName,
+    String? userPartyId,
+    Role? role,
+    int? start,
+    int? limit,
+    String? filter,
+    String? firstName,
+    String? lastName,
+    String? searchString,
+  }) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/Company', apiKey!,
+          queryParameters: <String, dynamic>{
+            'role': role,
+            'companyPartyId': companyPartyId,
+            'companyName': companyName,
+            'userPartyId': userPartyId,
+            'firstName': firstName,
+            'lastName': lastName,
+            'start': start,
+            'limit': limit,
+            'filter': filter,
+            'searchString': searchString,
           });
       return getResponseList<Company>(
           "companies", response, (json) => Company.fromJson(json));

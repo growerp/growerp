@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_core/test_data.dart';
 
 class CategoryTest {
   static Future<void> selectCategories(WidgetTester tester) async {

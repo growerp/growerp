@@ -25,29 +25,28 @@ import '../../api_repository.dart';
 import '../blocs/blocs.dart';
 import '../../company/views/views.dart';
 
-final GlobalKey<ScaffoldMessengerState> userDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
-/// User dialog with a required User class input containing the role
-class UserDialog extends StatelessWidget {
+class ShowUserDialog extends StatelessWidget {
   final User user;
-  const UserDialog({Key? key, required this.user}) : super(key: key);
-
+  const ShowUserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    return UserPage(user);
+    CompanyUserAPIRepository repos = CompanyUserAPIRepository(
+        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    return BlocProvider<UserBloc>(
+        create: (context) => UserBloc(repos, Role.company),
+        child: RepositoryProvider.value(value: repos, child: UserDialog(user)));
   }
 }
 
-class UserPage extends StatefulWidget {
+class UserDialog extends StatefulWidget {
   final User user;
-  const UserPage(this.user, {super.key});
+  const UserDialog(this.user, {super.key});
   @override
   UserDialogState createState() => UserDialogState();
 }
 
-class UserDialogState extends State<UserPage> {
-  final _userDialogFormKey = GlobalKey<FormState>();
+class UserDialogState extends State<UserDialog> {
+  late final GlobalKey<FormState> _userDialogFormKey;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _loginNameController = TextEditingController();
@@ -65,34 +64,40 @@ class UserDialogState extends State<UserPage> {
   dynamic _pickImageError;
   String? _retrieveDataError;
   late User updatedUser;
-  late UserCompanyAPIRepository repos;
+  late CompanyUserAPIRepository repos;
   final ImagePicker _picker = ImagePicker();
   late UserBloc _userBloc;
   bool _isLoginDisabled = false;
   late bool isPhone;
   bool _hasLogin = false;
+  late final GlobalKey<ScaffoldMessengerState> _userDialogKey;
 
   @override
   void initState() {
     super.initState();
-    if (widget.user.company!.partyId != null) {
+    _userDialogFormKey = GlobalKey<FormState>();
+    _userDialogKey = GlobalKey<ScaffoldMessengerState>();
+
+    if (widget.user.partyId != null) {
       _firstNameController.text = widget.user.firstName ?? '';
       _lastNameController.text = widget.user.lastName ?? '';
       _loginNameController.text = widget.user.loginName ?? '';
       _telephoneController.text = widget.user.telephoneNr ?? '';
       _emailController.text = widget.user.email ?? '';
-      _selectedCompany = Company(
-          partyId: widget.user.company!.partyId,
-          name: widget.user.company!.name);
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
+    if (widget.user.company != null) {
+      _selectedCompany = Company(
+          partyId: widget.user.company!.partyId,
+          name: widget.user.company!.name);
+    }
+    _selectedRole = widget.user.company!.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
-    _selectedRole = widget.user.company!.role!;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
-    repos = context.read<UserCompanyAPIRepository>();
+    repos = context.read<CompanyUserAPIRepository>();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -129,26 +134,33 @@ class UserDialogState extends State<UserPage> {
   Widget build(BuildContext context) {
     isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
     User? user = widget.user;
-    return BlocConsumer<UserBloc, UserState>(listener: (context, state) {
-      if (state.status == UserStatus.failure) {
-        loading = false;
-        userDialogKey.currentState!
-            .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
-      }
-      if (state.status == UserStatus.success) {
-        Navigator.of(context).pop(updatedUser);
-      }
-    }, builder: (context, state) {
-      return Stack(children: [
-        scaffoldWidget(user, context),
-        if (state.status == UserStatus.loading) const LoadingIndicator(),
-      ]);
-    });
+    return BlocConsumer<UserBloc, UserState>(
+        listenWhen: (previous, current) =>
+            previous.status == UserStatus.loading,
+        listener: (context, state) {
+          if (state.status == UserStatus.failure) {
+            loading = false;
+            // message on this dialog
+            _userDialogKey.currentState!.showSnackBar(
+                snackBar(context, Colors.red, state.message ?? ''));
+          }
+          if (state.status == UserStatus.success) {
+            // message on parent page
+            HelperFunctions.showMessage(context, state.message, Colors.green);
+            Navigator.of(context).pop(state.users[0]);
+          }
+        },
+        builder: (context, state) {
+          return Stack(children: [
+            scaffoldWidget(user, context),
+            if (state.status == UserStatus.loading) const LoadingIndicator(),
+          ]);
+        });
   }
 
   Dialog scaffoldWidget(User user, BuildContext context) {
     return Dialog(
-      key: Key('UserDialog${user.company!.role!.name}'),
+      key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -156,11 +168,11 @@ class UserDialogState extends State<UserPage> {
       child: popUp(
           context: context,
           title:
-              "${widget.user.company!.role! == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : widget.user.company!.role!.name} information",
+              "${_selectedRole == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : _selectedRole.name} contact person information",
           width: isPhone ? 400 : 1000,
-          height: isPhone ? 1020 : 700,
+          height: isPhone ? 750 : 700,
           child: ScaffoldMessenger(
-              key: userDialogKey,
+              key: _userDialogKey,
               child: Scaffold(
                   backgroundColor: Colors.transparent,
                   floatingActionButton:
@@ -170,21 +182,19 @@ class UserDialogState extends State<UserPage> {
   }
 
   Widget listChild() {
-    return Builder(builder: (BuildContext context) {
-      return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-          ? FutureBuilder<void>(
-              future: retrieveLostData(),
-              builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-                if (snapshot.hasError) {
-                  return Text(
-                    'Pick image error: ${snapshot.error}}',
-                    textAlign: TextAlign.center,
-                  );
-                }
-                return _showForm();
-              })
-          : _showForm();
-    });
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? FutureBuilder<void>(
+            future: retrieveLostData(),
+            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+              if (snapshot.hasError) {
+                return Text(
+                  'Pick image error: ${snapshot.error}}',
+                  textAlign: TextAlign.center,
+                );
+              }
+              return _showForm();
+            })
+        : _showForm();
   }
 
   Text? _getRetrieveErrorWidget() {
@@ -213,7 +223,7 @@ class UserDialogState extends State<UserPage> {
   Widget _userDialog() {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     User? currentUser = authenticate.user;
-    if (widget.user.company!.role == Role.company) {
+    if (_selectedRole == Role.company) {
       _selectedCompany = authenticate.company;
     }
 
@@ -264,7 +274,7 @@ class UserDialogState extends State<UserPage> {
               children: [
                 Expanded(
                   child: TextFormField(
-                    key: const Key('email'),
+                    key: const Key('userEmail'),
                     decoration:
                         const InputDecoration(labelText: 'Email address'),
                     controller: _emailController,
@@ -285,7 +295,7 @@ class UserDialogState extends State<UserPage> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextFormField(
-                    key: const Key('telephoneNr'),
+                    key: const Key('userTelephoneNr'),
                     decoration:
                         const InputDecoration(labelText: 'Telephone number'),
                     controller: _telephoneController,
@@ -297,10 +307,11 @@ class UserDialogState extends State<UserPage> {
         ),
       ),
       Visibility(
-          visible: updatedUser.company!.role != Role.company,
+          visible: _selectedRole != Role.company,
           child: InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Company information',
+                labelText: "${_selectedCompany!.role?.value ?? Role.unknown}"
+                    " Company information",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
                 ),
@@ -309,8 +320,10 @@ class UserDialogState extends State<UserPage> {
                 Row(children: [
                   Expanded(
                     child: DropdownSearch<Company>(
-                      key: const Key('companyName'),
-                      selectedItem: _selectedCompany,
+                      key: const Key('userCompanyName'),
+                      selectedItem: _selectedCompany!.name == null
+                          ? Company(name: '')
+                          : _selectedCompany!,
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
@@ -327,10 +340,11 @@ class UserDialogState extends State<UserPage> {
                           context: context,
                           title: 'Select company',
                           height: 50,
+                          width: 450,
                         ),
                       ),
                       dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Company name',
+                        labelText: 'Select a Company name',
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25.0)),
                       ),
@@ -352,229 +366,159 @@ class UserDialogState extends State<UserPage> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(
-                      child: DropdownButtonFormField<Role>(
-                        key: const Key('role'),
-                        decoration: const InputDecoration(labelText: 'Role'),
-                        hint: const Text('Role'),
-                        value: _selectedRole,
-                        validator: (value) =>
-                            value == null ? 'Role field required!' : null,
-                        items: Role.values.map((item) {
-                          return DropdownMenuItem<Role>(
-                              value: item, child: Text(item.value));
-                        }).toList(),
-                        onChanged: (Role? newValue) {
-                          setState(() {
-                            _selectedRole = newValue!;
-                          });
+                    if (_selectedCompany!.name != null)
+                      Expanded(
+                          child: ElevatedButton(
+                        key: const Key('editCompany'),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ShowCompanyDialog(_selectedCompany!);
+                              });
                         },
-                        isExpanded: true,
-                      ),
-                    ),
+                        child: const Text('Update Company'),
+                      )),
                     const SizedBox(width: 10),
                     Expanded(
-                        child: TextFormField(
-                      key: const Key('newCompanyName'),
-                      decoration:
-                          const InputDecoration(labelText: 'New Company Name'),
-                      controller: _companyController,
-                      validator: (value) {
-                        if (value!.isEmpty && _selectedCompany == null) {
-                          return 'Please enter an existing or new company?';
+                        child: ElevatedButton(
+                      key: const Key('newCompany'),
+                      onPressed: () async {
+                        var result = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ShowCompanyDialog(Company(
+                                  partyId: '_NEW_', role: _selectedRole));
+                            });
+                        if (result is Company) {
+                          setState(() {
+                            _selectedCompany = result;
+                            _selectedRole = result.role!;
+                          });
                         }
-                        return null;
                       },
+                      child: const Text('New Company'),
                     )),
                   ],
                 ),
-                Visibility(
-                    visible: updatedUser.company!.partyId != null,
-                    child: Column(children: [
-                      const SizedBox(height: 10),
-                      Row(children: [
-                        Expanded(
-                            child: Text(
-                                updatedUser.company!.address != null
-                                    ? "${updatedUser.company!.address!.city!} "
-                                        "${updatedUser.company!.address!.country!}"
-                                    : "No address yet",
-                                key: const Key('addressLabel'))),
-                        Expanded(
-                            child: ElevatedButton(
-                          key: const Key('address'),
-                          onPressed: () async {
-                            var result = await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AddressDialog(
-                                      address: updatedUser.company!.address);
-                                });
-                            if (result is Address) {
-                              _userBloc.add(UserUpdate(updatedUser.copyWith(
-                                  company: updatedUser.company!
-                                      .copyWith(address: result))));
-                            }
-                          },
-                          child: Text(
-                              "${updatedUser.company!.address != null ? 'Update' : 'Add'}"
-                              " postal address"),
-                        ))
-                      ]),
-                      const SizedBox(height: 10),
-                      Row(children: [
-                        Expanded(
-                            child: Text(
-                                updatedUser.company!.paymentMethod != null
-                                    ? "${updatedUser.company!.paymentMethod?.ccDescription}"
-                                    : "No payment methods yet",
-                                key: const Key('paymentMethodLabel'))),
-                        Expanded(
-                          child: SizedBox(
-                              width: 100,
-                              child: ElevatedButton(
-                                  key: const Key('paymentMethod'),
-                                  // address required for payment
-                                  onPressed: updatedUser.company!.address ==
-                                          null
-                                      ? null
-                                      : () async {
-                                          var result = await showDialog(
-                                              barrierDismissible: true,
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return PaymentMethodDialog(
-                                                    paymentMethod: updatedUser
-                                                        .company!
-                                                        .paymentMethod);
-                                              });
-                                          if (result is PaymentMethod) {
-                                            _userBloc.add(UserUpdate(
-                                                updatedUser.copyWith(
-                                                    company: updatedUser
-                                                        .company!
-                                                        .copyWith(
-                                                            paymentMethod:
-                                                                result))));
-                                          }
-                                        },
-                                  child: Text(
-                                      '${updatedUser.company!.paymentMethod != null ? 'Update' : 'Add'} Payment Method'))),
-                        )
-                      ])
-                    ]))
               ]))),
-      InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'User Login',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
+      Visibility(
+        visible: widget.user.company!.role == Role.company,
+        child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: 'User Login',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              ),
             ),
-          ),
-          child: Column(children: [
-            TextFormField(
-              readOnly: !(currentUser!.userGroup == UserGroup.admin),
-              key: const Key('loginName'),
-              decoration: const InputDecoration(labelText: 'User Login Name '),
-              controller: _loginNameController,
-              onChanged: (value) {
-                if (value.isNotEmpty != _hasLogin) {
-                  return setState(() {
-                    _hasLogin = !_hasLogin;
-                  });
-                }
-              },
-              validator: (value) {
-                if (widget.user.userGroup == UserGroup.admin &&
-                    value!.isEmpty) {
-                  return 'An administrator needs a username!';
-                }
-                return null;
-              },
-            ),
-            if (currentUser.userGroup == UserGroup.admin &&
-                _loginNameController.text.isNotEmpty)
-              Column(children: [
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(
-                      child: DropdownButtonFormField<UserGroup>(
-                    decoration:
-                        const InputDecoration(labelText: 'Security User Group'),
-                    key: const Key('userGroup'),
-                    hint: const Text('Security User Group'),
-                    value: _selectedUserGroup,
-                    validator: (value) =>
-                        value == null ? 'field required' : null,
-                    items: localUserGroups.map((item) {
-                      return DropdownMenuItem<UserGroup>(
-                          value: item, child: Text(item.name));
-                    }).toList(),
-                    onChanged: (UserGroup? newValue) {
-                      setState(() {
-                        _selectedUserGroup = newValue!;
-                      });
-                    },
-                    isExpanded: true,
-                  )),
-                  const SizedBox(width: 10),
-                  SizedBox(
-                    width: 100,
-                    height: 60,
-                    child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Disabled',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
+            child: Column(children: [
+              TextFormField(
+                readOnly: !(currentUser!.userGroup == UserGroup.admin),
+                key: const Key('loginName'),
+                decoration:
+                    const InputDecoration(labelText: 'User Login Name '),
+                controller: _loginNameController,
+                onChanged: (value) {
+                  if (value.isNotEmpty != _hasLogin) {
+                    return setState(() {
+                      _hasLogin = !_hasLogin;
+                    });
+                  }
+                },
+                validator: (value) {
+                  if (widget.user.userGroup == UserGroup.admin &&
+                      value!.isEmpty) {
+                    return 'An administrator needs a username!';
+                  }
+                  return null;
+                },
+              ),
+              if (currentUser.userGroup == UserGroup.admin &&
+                  _loginNameController.text.isNotEmpty)
+                Column(children: [
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Expanded(
+                        child: DropdownButtonFormField<UserGroup>(
+                      decoration: const InputDecoration(
+                          labelText: 'Security User Group'),
+                      key: const Key('userGroup'),
+                      hint: const Text('Security User Group'),
+                      value: _selectedUserGroup,
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
+                      items: localUserGroups.map((item) {
+                        return DropdownMenuItem<UserGroup>(
+                            value: item, child: Text(item.name));
+                      }).toList(),
+                      onChanged: (UserGroup? newValue) {
+                        setState(() {
+                          _selectedUserGroup = newValue!;
+                        });
+                      },
+                      isExpanded: true,
+                    )),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 100,
+                      height: 60,
+                      child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Disabled',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
                           ),
-                        ),
-                        child: Checkbox(
-                          key: const Key('loginDisabled'),
-                          checkColor: Colors.white,
-                          //     fillColor: MaterialStateProperty.resolveWith(getColor),
-                          value: _isLoginDisabled,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isLoginDisabled = value!;
-                            });
-                          },
-                        )),
-                  )
+                          child: Checkbox(
+                            key: const Key('loginDisabled'),
+                            checkColor: Colors.white,
+                            //     fillColor: MaterialStateProperty.resolveWith(getColor),
+                            value: _isLoginDisabled,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _isLoginDisabled = value!;
+                              });
+                            },
+                          )),
+                    )
+                  ])
                 ])
-              ])
-          ]))
+            ])),
+      )
     ];
-    Widget update = Row(children: [
-      ElevatedButton(
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.red)),
-          key: const Key('deleteUser'),
-          child: const Text('Delete User'),
-          onPressed: () async {
-            var result =
-                await confirmDeleteUserComp(context, widget.user.userGroup!);
-            if (result != null) {
-              if (!mounted) return;
-              // delete company too?
-              if (widget.user.partyId == authenticate.user!.partyId!) {
-                context.read<AuthBloc>().add(
-                    AuthDeleteUser(widget.user.copyWith(image: null), result));
-                Navigator.of(context).pop(updatedUser);
-                context.read<AuthBloc>().add(const AuthLoggedOut());
-              } else {
-                context
-                    .read<UserBloc>()
-                    .add(UserDelete(widget.user.copyWith(image: null)));
+    Widget updateButton = Row(children: [
+      if (widget.user.partyId != null)
+        ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.red)),
+            key: const Key('deleteUser'),
+            child: const Text('Delete User'),
+            onPressed: () async {
+              var result =
+                  await confirmDeleteUserComp(context, widget.user.userGroup!);
+              if (result != null) {
+                if (!mounted) return;
+                // delete company too?
+                if (widget.user.partyId == authenticate.user!.partyId!) {
+                  context
+                      .read<UserBloc>()
+                      .add(UserDelete(widget.user.copyWith(image: null)));
+                  Navigator.of(context).pop(updatedUser);
+                  context.read<AuthBloc>().add(const AuthLoggedOut());
+                } else {
+                  context
+                      .read<UserBloc>()
+                      .add(UserDelete(widget.user.copyWith(image: null)));
+                }
               }
-            }
-          }),
+            }),
       const SizedBox(width: 10),
       Expanded(
           child: ElevatedButton(
               key: const Key('updateUser'),
-              child: Text(
-                  updatedUser.company!.partyId == null ? 'Create' : 'Update'),
+              child: Text(updatedUser.partyId == null ? 'Create' : 'Update'),
               onPressed: () async {
                 if (_userDialogFormKey.currentState!.validate()) {
                   updatedUser = updatedUser.copyWith(
@@ -588,13 +532,7 @@ class UserDialogState extends State<UserPage> {
                       language: Localizations.localeOf(context)
                           .languageCode
                           .toString(),
-                      company: widget.user.company!.copyWith(
-                          role: _selectedRole,
-                          name: _companyController.text,
-                          // if new company name: empty partyId
-                          partyId: _companyController.text.isEmpty
-                              ? updatedUser.company!.partyId
-                              : ''),
+                      company: _selectedCompany,
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
                   if (!mounted) return;
@@ -610,7 +548,7 @@ class UserDialogState extends State<UserPage> {
                             .user!
                             .partyId ==
                         updatedUser.partyId) {
-                      context.read<AuthBloc>().add(AuthUserUpdate(updatedUser));
+                      context.read<UserBloc>().add(UserUpdate(updatedUser));
                     }
                   }
                 }
@@ -621,7 +559,7 @@ class UserDialogState extends State<UserPage> {
     for (var i = 0; i < widgets.length; i++) {
       column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
     }
-    column.add(update);
+    column.add(updateButton);
 
     List<Widget> rows = [];
     if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
@@ -638,7 +576,7 @@ class UserDialogState extends State<UserPage> {
               return widgets[index];
             },
           )));
-      rows.add(update);
+      rows.add(updateButton);
     }
 
     return Form(
@@ -648,7 +586,7 @@ class UserDialogState extends State<UserPage> {
             child: Column(children: <Widget>[
               Center(
                   child: Text(
-                'User ${widget.user.company!.role.toString()}'
+                'User $_selectedRole'
                 ' #${updatedUser.partyId ?? " New"}',
                 style: const TextStyle(
                     fontSize: 10,

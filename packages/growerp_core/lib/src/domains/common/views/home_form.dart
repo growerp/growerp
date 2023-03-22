@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
+
 import '../../domains.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,6 +69,15 @@ class HomeFormState extends State<HomeForm> {
                                   .add(const AuthLoggedOut()),
                             }),
                 ])),
+            // hidden text be able to load demo data
+            if (kDebugMode)
+              Text(state.authenticate?.apiKey ?? '',
+                  key: const Key('apiKey'),
+                  style: const TextStyle(fontSize: 0)),
+            if (kDebugMode)
+              Text(state.authenticate?.moquiSessionToken ?? '',
+                  key: const Key('moquiSessionToken'),
+                  style: const TextStyle(fontSize: 0)),
             appInfo
           ]);
         case AuthStatus.unAuthenticated:

@@ -33,8 +33,10 @@ class DioClient {
     _dio = dio;
     _dio
       ..options.baseUrl = baseUrl
-      ..options.connectTimeout = _defaultConnectTimeout
-      ..options.receiveTimeout = _defaultReceiveTimeout
+      ..options.connectTimeout =
+          const Duration(milliseconds: _defaultConnectTimeout)
+      ..options.receiveTimeout =
+          const Duration(milliseconds: _defaultReceiveTimeout)
       ..options.responseType = ResponseType.plain
       ..httpClientAdapter
       ..options.headers = {'Content-Type': 'application/json; charset=UTF-8'};

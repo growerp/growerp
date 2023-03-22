@@ -75,7 +75,7 @@ void main() {
     await driver.tap(buttonKey);
   }
 
-  Future<void> createCompany() async {
+  Future<void> createCompanyAndAdmin() async {
     await driver.tap(find.byValueKey('newCompButton'));
     // firstname
     await driver.waitFor(find.byValueKey('firstName'));
@@ -131,7 +131,7 @@ void main() {
       if (!await waitFor(find.byValueKey('/'))) {
         // check if any company exist when not create
         if (!await waitFor(find.byValueKey('loginButton'))) {
-          await createCompany();
+          await createCompanyAndAdmin();
           // allow demo data to be created
           await waitFor(find.byValueKey('loginButton'));
           await login();

@@ -44,7 +44,7 @@ void main() {
     testWidgets("Prepare>>>>>>", (WidgetTester tester) async {
       await CommonTest.startApp(
           tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
-      await CompanyTest.createCompany(tester);
+      await CommonTest.createCompanyAndAdmin(tester);
       await AssetTest.addAssets(tester, assets);
       String random = CommonTest.getRandom();
       await UserTest.selectCustomers(tester);
@@ -56,7 +56,7 @@ void main() {
         (WidgetTester tester) async {
       await CommonTest.startApp(
           tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
-      await CompanyTest.createCompany(tester);
+      await CommonTest.createCompanyAndAdmin(tester);
       await tester.tap(find.byKey(Key('tap/sales')));
       await tester.pump(Duration(seconds: 1));
       expect(find.byKey(Key('FinDocsFormSalesOrder')), findsOneWidget);

@@ -22,33 +22,6 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
-class AuthUserUpdate extends AuthEvent {
-  final User user;
-  const AuthUserUpdate(this.user);
-}
-
-class AuthUpdateUser extends AuthEvent {
-  final User user;
-  const AuthUpdateUser(this.user);
-  @override
-  String toString() => 'Update User: $user';
-}
-
-class AuthDeleteUser extends AuthEvent {
-  final User user;
-  final bool deleteCompany;
-  const AuthDeleteUser(this.user, this.deleteCompany);
-  @override
-  String toString() => 'Delete User: $user Company: $deleteCompany';
-}
-
-class AuthUpdateCompany extends AuthEvent {
-  final Company? company;
-  const AuthUpdateCompany(this.company);
-  @override
-  String toString() => 'Update Company $company';
-}
-
 class AuthRegisterCompanyAndAdmin extends AuthEvent {
   final User user;
   final String currencyId;

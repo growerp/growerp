@@ -19,11 +19,11 @@ import '../blocs/blocs.dart';
 class UserListHeader extends StatefulWidget {
   const UserListHeader({
     Key? key,
-    required this.role,
+    this.role,
     required this.isPhone,
     required this.userBloc,
   }) : super(key: key);
-  final Role role;
+  final Role? role;
   final bool isPhone;
   final UserBloc userBloc;
 
@@ -80,11 +80,13 @@ class _UserListHeaderState extends State<UserListHeader> {
                       const Expanded(child: Text("Name")),
                       if (!widget.isPhone)
                         const Expanded(child: Text("login name")),
+                      if (!widget.isPhone && widget.role == null)
+                        const Expanded(child: Text("Role")),
                       if (!widget.isPhone) const Expanded(child: Text("Email")),
                       if (!widget.isPhone)
-                        const Expanded(child: Text("Language")),
+                        const Expanded(child: Text("Telephone")),
                       if (widget.role == Role.company)
-                        const Expanded(child: Text("    Admin")),
+                        const Expanded(child: Text("Admin")),
                       if (!widget.isPhone && widget.role != Role.company)
                         const Expanded(
                             child:

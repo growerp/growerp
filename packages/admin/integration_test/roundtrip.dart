@@ -1,13 +1,12 @@
 import 'package:admin/menu_option_data.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
-import 'package:growerp_user_company/growerp_user_company.dart';
 
 /// the full business roundtrip for physical products
 /// purchase products and receive in warehouse
@@ -24,14 +23,11 @@ void main() {
   testWidgets('''GrowERP roundtrip Purchase test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-    await CompanyTest.createCompany(tester);
-    await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, categories.sublist(0, 2),
-        check: false);
-    await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, products.sublist(0, 2), check: false);
-    await UserTest.selectSuppliers(tester);
-    await UserTest.addSuppliers(tester, suppliers.sublist(0, 2), check: false);
+    await CommonTest.createCompanyAndAdmin(tester, testData: {
+      "categories": categories.sublist(0, 2),
+      "products": products.sublist(0, 2),
+      "users": suppliers.sublist(0, 2) + [customers[0]],
+    });
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.createPurchaseOrder(tester, purchaseOrders);
     await OrderTest.checkPurchaseOrder(tester);
@@ -68,8 +64,6 @@ void main() {
     // no clear because dependend on purchase test
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-    await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, [customers[0]], check: false);
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createSalesOrder(tester, salesOrders);
     await OrderTest.checkSalesOrder(tester);

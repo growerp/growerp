@@ -1,0 +1,11 @@
+name: all_test
+version: 0.0.1
+description: A simple command-line application created by dcli
+environment: 
+  sdk: '>=2.16.0 <3.0.0'
+dependencies: 
+  dcli: 1.36.0
+  yaml: ^3.1.1
+  yaml_writer: ^1.0.3
+dev_dependencies: 
+  lint_hard: ^1.0.0

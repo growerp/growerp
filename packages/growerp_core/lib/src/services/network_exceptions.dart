@@ -75,13 +75,13 @@ class NetworkExceptions with _$NetworkExceptions {
             case DioErrorType.cancel:
               networkExceptions = const NetworkExceptions.requestCancelled();
               break;
-            case DioErrorType.connectTimeout:
+            case DioErrorType.connectionTimeout:
               networkExceptions = const NetworkExceptions.requestTimeout();
               break;
             case DioErrorType.receiveTimeout:
               networkExceptions = const NetworkExceptions.sendTimeout();
               break;
-            case DioErrorType.response:
+            case DioErrorType.badResponse:
               Map errors = json.decode(error.response!.data);
               networkExceptions = NetworkExceptions.handleResponse(
                   error.response!.statusCode ?? -1, errors['errors']);
@@ -89,9 +89,16 @@ class NetworkExceptions with _$NetworkExceptions {
             case DioErrorType.sendTimeout:
               networkExceptions = const NetworkExceptions.sendTimeout();
               break;
-            case DioErrorType.other:
+            case DioErrorType.unknown:
               networkExceptions =
                   NetworkExceptions.notFound(error.type.toString());
+              break;
+            case DioErrorType.badCertificate:
+              networkExceptions = const NetworkExceptions.unableToProcess();
+              break;
+            case DioErrorType.connectionError:
+              networkExceptions =
+                  const NetworkExceptions.noInternetConnection();
               break;
           }
         } else if (error is SocketException) {

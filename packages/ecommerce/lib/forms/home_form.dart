@@ -386,8 +386,8 @@ _settingsDialog(BuildContext context, Authenticate authenticate) async {
               ElevatedButton(
                 child: Text('Select an another company'),
                 onPressed: () async {
-                  BlocProvider.of<AuthBloc>(context)
-                      .add(AuthUpdateCompany(null));
+                  BlocProvider.of<CompanyBloc>(context)
+                      .add(UpdateCompany(null));
                   await Navigator.popAndPushNamed(context, '/login');
                 },
               ),

@@ -43,7 +43,7 @@ void main() {
         tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()),
         clear: true);
 
-    await CompanyTest.createCompany(tester);
+    await CommonTest.createCompanyAndAdmin(tester);
     await CategoryTest.selectCategories(tester);
     await CategoryTest.addCategories(tester, [categories[0]], check: false);
     await ProductTest.selectProducts(tester);

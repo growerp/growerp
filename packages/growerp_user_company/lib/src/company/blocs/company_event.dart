@@ -21,8 +21,10 @@ abstract class CompanyEvent extends Equatable {
 }
 
 class CompanyFetch extends CompanyEvent {
-  const CompanyFetch({this.refresh = false, this.searchString = ''});
+  const CompanyFetch(
+      {this.refresh = false, this.searchString = '', this.companyPartyId = ''});
   final bool refresh;
+  final String companyPartyId;
   final String searchString;
   @override
   List<Object> get props => [refresh, searchString];
@@ -31,6 +33,13 @@ class CompanyFetch extends CompanyEvent {
 class CompanyUpdate extends CompanyEvent {
   final Company company;
   const CompanyUpdate(this.company);
+  @override
+  String toString() => "UpdateCompany: $company";
+}
+
+class CompanyDelete extends CompanyEvent {
+  final Company company;
+  const CompanyDelete(this.company);
   @override
   String toString() => "UpdateCompany: $company";
 }

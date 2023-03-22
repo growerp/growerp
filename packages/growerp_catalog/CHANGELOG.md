@@ -1,3 +1,7 @@
+## 0.9.0
+
+* upgrade of core package
+
 ## 0.9.0-dev.1
 
 * Refactoring and UI improvements.

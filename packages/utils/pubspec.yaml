@@ -1,17 +1,11 @@
 name: utils
-description: A command-line applications to support the GrowERP system.
-# version: 0.0.1
-# homepage: https://www.example.com
-
-environment:
-  sdk: '>=2.17.0 <3.0.0'
-
+version: 0.0.1
+description: A simple command-line application created by dcli
+environment: 
+  sdk: '>=2.16.0 <3.0.0'
 dependencies: 
-  args: ^2.0.0
-  path: ^1.8.0
-
-
-dev_dependencies:
-  pedantic: ^1.9.0
-
-
+  dcli: 1.36.0
+  yaml: ^3.1.1
+  yaml_writer: ^1.0.3
+dev_dependencies: 
+  lint_hard: ^1.0.0

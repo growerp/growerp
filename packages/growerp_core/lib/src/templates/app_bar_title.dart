@@ -22,7 +22,8 @@ Widget appBarTitle(
       key: const Key('tapCompany'),
       onTap: () {
         if (authenticate.apiKey != null) {
-          Navigator.pushNamed(context, '/company', arguments: FormArguments());
+          Navigator.pushNamed(context, '/company',
+              arguments: authenticate.company);
         }
       },
       child: CircleAvatar(
@@ -35,11 +36,17 @@ Widget appBarTitle(
                           authenticate.company!.name!.isNotEmpty
                       ? authenticate.company!.name!.substring(0, 1)
                       : '?',
-                  style: const TextStyle(fontSize: 20, color: Colors.black))),
+                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                  key: const Key('appBarAvatarText'),
+                )),
     ),
     const SizedBox(width: 10),
     Column(children: [
-      Text(title, style: const TextStyle(fontSize: 20, color: Colors.black)),
+      Text(
+        title,
+        style: const TextStyle(fontSize: 20, color: Colors.black),
+        key: const Key('appBarTitle'),
+      ),
       Text(authenticate.company?.name ?? '??',
           key: const Key('appBarCompanyName'),
           style: const TextStyle(fontSize: 10, color: Colors.black)),

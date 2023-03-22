@@ -2,6 +2,7 @@ import 'package:admin/menu_option_data.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_core/test_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
 import 'package:growerp_user_company/growerp_user_company.dart';
@@ -17,7 +18,7 @@ void main() {
   testWidgets('''GrowERP chat test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         clear: true); // use data from previous run, ifnone same as true
-    await CompanyTest.createCompany(tester);
+    await CommonTest.createCompanyAndAdmin(tester);
     await UserTest.selectEmployees(tester);
     await UserTest.addAdministrators(tester, [administrators[0]], check: false);
     await ChatTest.selectChatRoom(tester);

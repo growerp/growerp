@@ -16,7 +16,6 @@ import 'payment_sales_test.dart' as sales_payment;
 import 'payment_purchase_test.dart' as purchase_payment;
 import 'invoice_sales_test.dart' as sales_invoice;
 import 'invoice_purchase_test.dart' as purchase_invoice;
-import 'roundtrip.dart' as purchase_sales;
 import 'room_rental_test.dart' as room_rental;
 
 void main() {
@@ -24,6 +23,5 @@ void main() {
   purchase_payment.main();
   sales_invoice.main();
   purchase_invoice.main();
-  purchase_sales.main();
   room_rental.main();
 }

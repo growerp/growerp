@@ -104,6 +104,26 @@ class APIRepository {
     }
   }
 
+  Future<ApiResult<bool>> upLoadEntities(
+    Map entities,
+  ) async {
+    try {
+      final response = await dioClient.post(
+        'rest/s1/growerp/100/Entities',
+        apiKey,
+        data: <String, dynamic>{
+          'entities': entities,
+          'classificationId': classificationId,
+          'moquiSessionToken': sessionToken,
+        },
+      );
+      return ApiResult.success(
+          data: jsonDecode(response.toString())['ok'] == 'ok');
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
   Future<ApiResult<bool>> checkCompany(String partyId) async {
     try {
       // no apykey required, if not valid will report no company
@@ -232,48 +252,6 @@ class APIRepository {
     try {
       final response = await dioClient.post('growerp/logout', apiKey!);
       return ApiResult.success(data: response);
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<Company>> updateCompany(Company company) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/Company', apiKey!, data: <String, dynamic>{
-        'company': jsonEncode(company.toJson()),
-        'moquiSessionToken': sessionToken
-      });
-      return getResponse<Company>(
-          "company", response, (json) => Company.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<User>> updateUser(User user) async {
-    try {
-      final response = await dioClient.patch(
-          'rest/s1/growerp/100/User', apiKey!, data: <String, dynamic>{
-        'user': jsonEncode(user.toJson()),
-        'moquiSessionToken': sessionToken
-      });
-      return getResponse<User>("user", response, (json) => User.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<User>> deleteUser(
-      String partyId, bool deleteCompanyToo) async {
-    try {
-      final response = await dioClient.delete(
-          'rest/s1/growerp/100/User', apiKey!,
-          queryParameters: <String, dynamic>{
-            'partyId': partyId,
-            'deleteCompanyToo': deleteCompanyToo,
-          });
-      return getResponse<User>("user", response, (json) => User.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

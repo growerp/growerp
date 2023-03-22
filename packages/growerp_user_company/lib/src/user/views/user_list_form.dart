@@ -23,19 +23,19 @@ import '../views/views.dart';
 import '../widgets/widgets.dart';
 
 class UserListForm extends StatelessWidget {
-  final Role role;
+  final Role? role;
   const UserListForm({
     super.key,
-    required this.role,
+    this.role,
   });
 
   @override
   Widget build(BuildContext context) {
-    UserCompanyAPIRepository userCompanyAPIRepository =
-        UserCompanyAPIRepository(
+    CompanyUserAPIRepository companyUserAPIRepository =
+        CompanyUserAPIRepository(
             context.read<AuthBloc>().state.authenticate!.apiKey!);
     Widget userList = RepositoryProvider.value(
-        value: userCompanyAPIRepository,
+        value: companyUserAPIRepository,
         child: UserList(
           key: key,
           role: role,
@@ -43,31 +43,29 @@ class UserListForm extends StatelessWidget {
     switch (role) {
       case Role.lead:
         return BlocProvider<LeadBloc>(
-            create: (context) => UserBloc(
-                userCompanyAPIRepository, role, context.read<AuthBloc>())
+            create: (context) => UserBloc(companyUserAPIRepository, role)
               ..add(const UserFetch()),
             child: userList);
       case Role.customer:
         return BlocProvider<CustomerBloc>(
-            create: (context) => UserBloc(
-                userCompanyAPIRepository, role, context.read<AuthBloc>())
+            create: (context) => UserBloc(companyUserAPIRepository, role)
               ..add(const UserFetch()),
             child: userList);
       case Role.supplier:
         return BlocProvider<SupplierBloc>(
-            create: (context) => UserBloc(
-                userCompanyAPIRepository, role, context.read<AuthBloc>())
+            create: (context) => UserBloc(companyUserAPIRepository, role)
               ..add(const UserFetch()),
             child: userList);
       case Role.company:
         return BlocProvider<EmployeeBloc>(
-            create: (context) => UserBloc(
-                userCompanyAPIRepository, role, context.read<AuthBloc>())
+            create: (context) => UserBloc(companyUserAPIRepository, role)
               ..add(const UserFetch()),
             child: userList);
-
       default:
-        return Center(child: Text("user usergroup: '$role' not allowed"));
+        return BlocProvider<UserBloc>(
+            create: (context) => UserBloc(companyUserAPIRepository, role)
+              ..add(const UserFetch()),
+            child: userList);
     }
   }
 }
@@ -85,7 +83,7 @@ class UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
-  late UserCompanyAPIRepository repos;
+  late CompanyUserAPIRepository repos;
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
@@ -97,7 +95,7 @@ class UserListState extends State<UserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    repos = context.read<UserCompanyAPIRepository>();
+    repos = context.read<CompanyUserAPIRepository>();
     switch (widget.role) {
       case Role.company:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;
@@ -112,6 +110,7 @@ class UserListState extends State<UserList> {
         _userBloc = context.read<LeadBloc>() as UserBloc;
         break;
       default:
+        _userBloc = context.read<UserBloc>();
     }
   }
 
@@ -135,7 +134,7 @@ class UserListState extends State<UserList> {
                   return Column(children: [
                     UserListHeader(
                         isPhone: isPhone,
-                        role: widget.role!,
+                        role: widget.role,
                         userBloc: _userBloc),
                     const Divider(color: Colors.black),
                   ]);
@@ -159,20 +158,21 @@ class UserListState extends State<UserList> {
                                 child: UserListItem(
                                     user: users[index],
                                     index: index,
-                                    role: widget.role!,
+                                    role: widget.role,
                                     isDeskTop: !isPhone))));
               },
             ));
       }
 
       blocListener(context, state) {
-        if (state.status == UserStatus.failure) {
+/*        if (state.status == UserStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == UserStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
         }
+*/
       }
 
       blocBuilder(context, state) {
@@ -196,9 +196,8 @@ class UserListState extends State<UserList> {
                               value: repos,
                               child: BlocProvider.value(
                                   value: _userBloc,
-                                  child: UserDialog(
-                                      user: User(
-                                          company: Company(
+                                  child: UserDialog(User(
+                                      company: Company(
                                     role: widget.role,
                                   )))));
                         });
@@ -225,8 +224,8 @@ class UserListState extends State<UserList> {
           return BlocConsumer<SupplierBloc, UserState>(
               listener: blocListener, builder: blocBuilder);
         default:
-          return Center(
-              child: Text("should NOT show this for role: ${widget.role}"));
+          return BlocConsumer<UserBloc, UserState>(
+              listener: blocListener, builder: blocBuilder);
       }
     });
   }

@@ -16,7 +16,8 @@ enum Role {
   company('OrgInternal'),
   customer('Customer'),
   lead('Lead'),
-  supplier('Supplier');
+  supplier('Supplier'),
+  unknown('');
 
   final String value;
   const Role(this.value);

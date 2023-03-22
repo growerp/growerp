@@ -22,20 +22,20 @@ import '../views/views.dart';
 class UserListItem extends StatelessWidget {
   final User user;
   final int index;
-  final Role role;
+  final Role? role;
   final bool isDeskTop;
 
   const UserListItem({
     Key? key,
     required this.user,
     required this.index,
-    required this.role,
+    this.role,
     required this.isDeskTop,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    UserCompanyAPIRepository repos = context.read<UserCompanyAPIRepository>();
+    CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
     UserBloc userBloc = context.read<UserBloc>();
     return Material(
         child: ListTile(
@@ -59,6 +59,12 @@ class UserListItem extends StatelessWidget {
                 if (isDeskTop)
                   Expanded(
                       child: Text(
+                    user.company!.role != null ? user.company!.role!.value : '',
+                    key: Key('role$index'),
+                  )),
+                if (isDeskTop)
+                  Expanded(
+                      child: Text(
                           (!user.loginDisabled! ? user.loginName ?? '' : " "),
                           key: Key('username$index'))),
                 if (isDeskTop)
@@ -70,23 +76,20 @@ class UserListItem extends StatelessWidget {
                 if (isDeskTop)
                   Expanded(
                       child: Text(
-                    user.language ?? '',
-                    key: Key('language$index'),
+                    user.telephoneNr ?? '',
+                    key: Key('telephone$index'),
                   )),
                 if (role == Role.company)
                   Expanded(
                     child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
-                        key: Key('isAdmin$index'), textAlign: TextAlign.center),
-                  ),
-                if (isDeskTop && role != Role.company)
-                  Expanded(
-                    child: Text("${user.company!.name}",
-                        key: Key('companyName$index'),
-                        textAlign: TextAlign.center),
+                        key: Key('isAdmin$index')),
                   ),
                 if (!isDeskTop && role != Role.company)
                   Expanded(
-                      child: Text("${user.company!.name}",
+                      child: Text(
+                          user.company?.name == null
+                              ? 'Unknown'
+                              : user.company!.name!,
                           key: Key('companyName$index'),
                           textAlign: TextAlign.center))
               ],
@@ -99,7 +102,7 @@ class UserListItem extends StatelessWidget {
                     return RepositoryProvider.value(
                         value: repos,
                         child: BlocProvider.value(
-                            value: userBloc, child: UserDialog(user: user)));
+                            value: userBloc, child: UserDialog(user)));
                   });
             },
             trailing: IconButton(

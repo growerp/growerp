@@ -33,11 +33,6 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.repos, this.chat) : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
-    on<AuthUserUpdate>(_onAuthUserUpdate);
-    on<AuthUpdateCompany>(_onAuthUpdateCompany);
-    on<AuthUpdateUser>(_onAuthUpdateUser);
-    on<AuthDeleteUser>(_onAuthDeleteUser);
-
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
 //    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
     on<AuthLoggedOut>(_onAuthLoggedOut);
@@ -48,14 +43,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final APIRepository repos;
   final ChatServer chat;
-
-  Future<void> _onAuthUserUpdate(
-    AuthUserUpdate event,
-    Emitter<AuthState> emit,
-  ) async {
-    return emit(state.copyWith(
-        authenticate: state.authenticate!.copyWith(user: event.user)));
-  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,
@@ -116,65 +103,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthUpdateCompany(
-    AuthUpdateCompany event,
-    Emitter<AuthState> emit,
-  ) async {
-    if (event.company?.partyId == state.authenticate?.company?.partyId) {
-      //only update owner company
-      ApiResult<Company> compResult = await repos.updateCompany(event.company!);
-      emit(state.copyWith(status: AuthStatus.loading));
-      return emit(compResult.when(
-          success: (data) {
-            return state.copyWith(
-                authenticate: state.authenticate?.copyWith(company: data),
-                status: AuthStatus.authenticated,
-                message: 'Company ${event.company?.name} updated');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: AuthStatus.failure, message: error.toString())));
-    }
-  }
-
-  Future<void> _onAuthUpdateUser(
-    AuthUpdateUser event,
-    Emitter<AuthState> emit,
-  ) async {
-    if (event.user.partyId == state.authenticate?.user!.partyId) {
-      //only update owner company
-      ApiResult<User> compResult = await repos.updateUser(event.user);
-      return emit(compResult.when(
-          success: (data) {
-            return state.copyWith(
-                authenticate: state.authenticate?.copyWith(user: data),
-                message:
-                    'User ${event.user.firstName} ${event.user.lastName} updated');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: AuthStatus.failure, message: error.toString())));
-    }
-  }
-
-  Future<void> _onAuthDeleteUser(
-    AuthDeleteUser event,
-    Emitter<AuthState> emit,
-  ) async {
-    if (event.user.partyId == state.authenticate?.user!.partyId) {
-      //only delete logged in user
-      ApiResult<User> compResult =
-          await repos.deleteUser(event.user.partyId!, event.deleteCompany);
-      return emit(compResult.when(
-          success: (data) {
-            return state.copyWith(
-                authenticate: Authenticate(),
-                message:
-                    'User ${event.user.firstName} ${event.user.lastName} deleted');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: AuthStatus.failure, message: error.toString())));
-    }
-  }
-
   Future<void> _onAuthRegisterCompanyAndAdmin(
     AuthRegisterCompanyAndAdmin event,
     Emitter<AuthState> emit,
@@ -208,7 +136,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthRegisterUserEcommerce event,
     Emitter<AuthState> emit,
   ) async {
-    ApiResult<User> apiResult = await repos.registerUser(
+    ApiResult<List<User>> apiResult = await repos.registerUser(
         event.user.copyWith(userGroup: UserGroup.customer),
         state.authenticate!.company!.partyId!);
     emit(apiResult.when(
@@ -218,7 +146,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               status: AuthStatus.unAuthenticated,
               message: '          Register successful,\n'
                   'you can now login with the password sent by email.',
-              authenticate: state.authenticate!.copyWith(user: data));
+              authenticate: state.authenticate!.copyWith(user: data[0]));
         },
         failure: (NetworkExceptions error) => state.copyWith(
             status: AuthStatus.failure, message: error.toString())));
