@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +35,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) =>
               ShowCompanyDialog(settings.arguments as Company));
+    case '/companies':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/user':
       return MaterialPageRoute(
           builder: (context) => ShowUserDialog(settings.arguments as User));

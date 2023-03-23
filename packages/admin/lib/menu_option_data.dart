@@ -36,7 +36,7 @@ List<MenuOption> menuOptions = [
     image: 'packages/growerp_core/images/companyGrey.png',
     selectedImage: 'packages/growerp_core/images/company.png',
     title: 'Company',
-    route: '/company',
+    route: '/companies',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
     tabItems: [

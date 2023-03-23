@@ -4,7 +4,7 @@
 - user_company - catalog and inventory marketing
 - website and order-accounting last because they use catalog and inventory in example
 
-when files removed, need to be delete din git cache:
+when files removed, need to be deleted in git cache:
 git rm --cached <filename>
 
 
