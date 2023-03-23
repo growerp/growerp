@@ -34,12 +34,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+          builder: (context) =>
+              ShowCompanyDialog(settings.arguments as Company));
     case '/user':
       return MaterialPageRoute(
-          builder: (context) =>
-              UserForm(user: context.read<Authenticate>().user!));
+          builder: (context) => ShowUserDialog(settings.arguments as User));
     case '/crm':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
