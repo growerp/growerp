@@ -1,0 +1,119 @@
+PODS:
+  - DKImagePickerController/Core (4.3.4):
+    - DKImagePickerController/ImageDataManager
+    - DKImagePickerController/Resource
+  - DKImagePickerController/ImageDataManager (4.3.4)
+  - DKImagePickerController/PhotoGallery (4.3.4):
+    - DKImagePickerController/Core
+    - DKPhotoGallery
+  - DKImagePickerController/Resource (4.3.4)
+  - DKPhotoGallery (0.0.17):
+    - DKPhotoGallery/Core (= 0.0.17)
+    - DKPhotoGallery/Model (= 0.0.17)
+    - DKPhotoGallery/Preview (= 0.0.17)
+    - DKPhotoGallery/Resource (= 0.0.17)
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Core (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Preview
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Model (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Preview (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Resource
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Resource (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - file_picker (0.0.1):
+    - DKImagePickerController/PhotoGallery
+    - Flutter
+  - Flutter (1.0.0)
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - integration_test (0.0.1):
+    - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - printing (1.0.0):
+    - Flutter
+  - SDWebImage (5.13.2):
+    - SDWebImage/Core (= 5.13.2)
+  - SDWebImage/Core (5.13.2)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - SwiftyGif (5.4.3)
+  - url_launcher_ios (0.0.1):
+    - Flutter
+  - video_player_avfoundation (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - Flutter (from `Flutter`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+  - printing (from `.symlinks/plugins/printing/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
+
+SPEC REPOS:
+  trunk:
+    - DKImagePickerController
+    - DKPhotoGallery
+    - SDWebImage
+    - SwiftyGif
+
+EXTERNAL SOURCES:
+  file_picker:
+    :path: ".symlinks/plugins/file_picker/ios"
+  Flutter:
+    :path: Flutter
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
+  printing:
+    :path: ".symlinks/plugins/printing/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/ios"
+
+SPEC CHECKSUMS:
+  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
+  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
+  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
+  integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
+  path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
+  printing: eafa00acb682c0ca029d4d98d0798f55a1e27102
+  SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
+  shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
+  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
+  url_launcher_ios: ae1517e5e344f5544fb090b079e11f399dfbe4d2
+  video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
+
+PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+
+COCOAPODS: 1.11.3
