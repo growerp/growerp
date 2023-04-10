@@ -151,13 +151,12 @@ class APIRepository {
     }
   }
 
-  Future<ApiResult<List<PaymentType>>> getPaymentTypes(
-      {bool sales = true}) async {
+  Future<ApiResult<List<ItemType>>> getPaymentTypes({bool sales = true}) async {
     try {
       final response =
           await dioClient.get('rest/s1/growerp/100/PaymentTypes', apiKey!);
-      return getResponseList<PaymentType>(
-          "paymentTypes", response, (json) => PaymentType.fromJson(json));
+      return getResponseList<ItemType>(
+          "itemTypes", response, (json) => ItemType.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

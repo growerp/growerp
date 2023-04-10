@@ -50,11 +50,8 @@ class PaymentDialogState extends State<PaymentDialog> {
     _selectedUser = finDocUpdated.otherUser;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
-    _selectedItemType = finDocUpdated.items.isNotEmpty &&
-            finDocUpdated.items[0].itemTypeId != null
-        ? ItemType(
-            itemTypeId: finDocUpdated.items[0].itemTypeId!, itemTypeName: '')
-        : null;
+    _selectedItemType =
+        finDocUpdated.items.isNotEmpty ? finDocUpdated.items[0].itemType : null;
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
@@ -288,9 +285,9 @@ class PaymentDialogState extends State<PaymentDialog> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<ItemType>(
-                key: const Key('itemType'),
-                decoration: const InputDecoration(labelText: 'Item Type'),
-                hint: const Text('ItemType'),
+                key: const Key('paymentType'),
+                decoration: const InputDecoration(labelText: 'Payment Type'),
+                hint: const Text('Payment Type'),
                 value: _selectedItemType,
                 validator: (value) =>
                     value == null ? 'Enter a item type for posting?' : null,
@@ -326,10 +323,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               otherUser: _selectedUser,
                               grandTotal: Decimal.parse(_amountController.text),
                               paymentInstrument: _paymentInstrument,
-                              items: [
-                                FinDocItem(
-                                    itemTypeId: _selectedItemType?.itemTypeId)
-                              ],
+                              items: [FinDocItem(itemType: _selectedItemType)],
                             )));
                           }
                         }),

@@ -461,14 +461,14 @@ packages:
       path: "../../growerp_core"
       relative: true
     source: path
-    version: "0.9.0-dev.1"
+    version: "0.9.0"
   growerp_order_accounting:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.9.0-dev.1"
+    version: "0.9.0"
   highlight:
     dependency: transitive
     description:

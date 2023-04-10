@@ -63,6 +63,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocConfirmPayment>(_onFinDocConfirmPayment);
     on<FinDocGetUsers>(_onFinDocGetUsers);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
+    on<FinDocGetPaymentTypes>(_onFinDocGetPaymentTypes);
   }
 
   final FinDocAPIRepository repos;
@@ -81,9 +82,11 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     try {
       // start from record zero for initial and refresh
       if (state.status == FinDocStatus.initial || event.refresh) {
-        if (state.status == FinDocStatus.initial &&
-            docType == FinDocType.payment) add(FinDocGetItemTypes());
-
+        if (docType == FinDocType.payment) {
+          add(FinDocGetPaymentTypes(sales));
+        } else {
+          add(FinDocGetItemTypes());
+        }
         ApiResult<List<FinDoc>> result = await repos.getFinDoc(
             sales: sales, docType: docType, searchString: event.searchString);
         return emit(result.when(
@@ -278,6 +281,18 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     ApiResult<List<ItemType>> result = await repos.getItemTypes(sales: sales);
+    return emit(result.when(
+        success: (data) => state.copyWith(itemTypes: data),
+        failure: (error) => state.copyWith(
+            status: FinDocStatus.failure, message: error.toString())));
+  }
+
+  Future<void> _onFinDocGetPaymentTypes(
+    FinDocGetPaymentTypes event,
+    Emitter<FinDocState> emit,
+  ) async {
+    ApiResult<List<ItemType>> result =
+        await repos.getPaymentTypes(sales: sales);
     return emit(result.when(
         success: (data) => state.copyWith(itemTypes: data),
         failure: (error) => state.copyWith(

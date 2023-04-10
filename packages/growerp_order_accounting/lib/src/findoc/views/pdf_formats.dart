@@ -134,7 +134,7 @@ class PdfFormats {
     final data = finDoc.items.map((item) {
       return [
         item.description,
-        item.itemTypeName,
+        item.itemType!.itemTypeName,
         item.quantity,
         item.price,
         item.price! * item.quantity!,

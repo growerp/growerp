@@ -62,20 +62,18 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                 child: Dialog(
                     key: Key(
                         "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
-                    insetPadding: const EdgeInsets.all(20),
+                    insetPadding: const EdgeInsets.all(10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Stack(clipBehavior: Clip.none, children: [
-                      SizedBox(
-                          width: isPhone ? 400 : 800,
-                          height: isPhone
-                              ? 600
-                              : 600, // not increase height otherwise tests will fail
-                          child: shipmentItemList()),
-                      const Positioned(
-                          top: 5, right: 5, child: DialogCloseButton())
-                    ])))));
+                    child: popUp(
+                        context: context,
+                        title: 'Incoming Shipment# ${widget.finDoc.shipmentId}',
+                        width: isPhone ? 400 : 800,
+                        height: isPhone
+                            ? 600
+                            : 600, // not increase height otherwise tests will fail
+                        child: shipmentItemList())))));
   }
 
   Widget shipmentItemList() {
@@ -96,14 +94,6 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                             )
                           : null,
                       title: Column(children: [
-                        const SizedBox(height: 20),
-                        Center(
-                            child: Text(
-                                'Incoming Shipment# ${widget.finDoc.shipmentId}',
-                                style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold))),
                         const SizedBox(height: 20),
                         Center(
                             child: Text(

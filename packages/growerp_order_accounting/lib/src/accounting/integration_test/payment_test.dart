@@ -118,7 +118,7 @@ class PaymentTest {
       }
       await CommonTest.drag(tester);
       await CommonTest.enterDropDown(
-          tester, 'itemType', payment.items[0].itemTypeName!);
+          tester, 'itemType', payment.items[0].itemType!.itemTypeName);
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: 5);
       await CommonTest.waitForKey(tester, 'dismiss');

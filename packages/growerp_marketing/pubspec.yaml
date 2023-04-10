@@ -19,8 +19,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^0.9.0
-#    path: ../growerp_core/
+  growerp_core: #^0.9.0
+    path: ../growerp_core/
   decimal: ^2.1.0
   reorderables: ^0.5.1
   intl: ^0.17.0

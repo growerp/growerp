@@ -435,7 +435,7 @@ class MyFinDocState extends State<FinDocPage> {
               }
               final item = items[index - 1];
               var itemType = state.itemTypes
-                  .firstWhere((e) => e.itemTypeId == item.itemTypeId);
+                  .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId);
               return ListTile(
                   key: const Key('productItem'),
                   leading: !isPhone
@@ -560,7 +560,7 @@ Future addAnotherItemDialog(
                             onPressed: () {
                               if (addOtherFormKey.currentState!.validate()) {
                                 Navigator.of(context).pop(FinDocItem(
-                                  itemTypeId: selectedItemType!.itemTypeId,
+                                  itemType: selectedItemType,
                                   price: Decimal.parse(priceController.text),
                                   description: itemDescriptionController.text,
                                   quantity: quantityController.text.isEmpty
@@ -707,7 +707,8 @@ Future addProductItemDialog(BuildContext context, repos) async {
                                       if (addProductFormKey.currentState!
                                           .validate()) {
                                         Navigator.of(context).pop(FinDocItem(
-                                          itemTypeId: 'ItemProduct',
+                                          itemType: ItemType(
+                                              itemTypeId: 'ItemProduct'),
                                           productId: selectedProduct!.productId,
                                           price: Decimal.parse(
                                               priceController.text),
@@ -902,7 +903,8 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                                         if (addRentalFormKey.currentState!
                                             .validate()) {
                                           Navigator.of(context).pop(FinDocItem(
-                                            itemTypeId: 'ItemRental',
+                                            itemType: ItemType(
+                                                itemTypeId: 'ItemRental'),
                                             productId:
                                                 selectedProduct!.productId,
                                             price: Decimal.parse(

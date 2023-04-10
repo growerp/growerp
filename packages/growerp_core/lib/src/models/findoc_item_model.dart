@@ -25,8 +25,7 @@ class FinDocItem with _$FinDocItem {
   FinDocItem._();
   factory FinDocItem({
     String? itemSeqId,
-    String? itemTypeId,
-    String? itemTypeName,
+    ItemType? itemType,
     String? productId,
     String? description,
     Decimal? quantity,

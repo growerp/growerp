@@ -35,7 +35,7 @@ class CartBloc extends Bloc<CartEvent, CartState>
       required this.finDocBloc})
       : super(CartState(
             finDoc: FinDoc(sales: sales, docType: docType, items: []),
-            itemTypes: const [])) {
+            itemTypes: const <ItemType>[])) {
     on<CartFetch>(_onCartFetch);
     on<CartCreateFinDoc>(_onCartCreateFinDoc);
     on<CartCancelFinDoc>(_onCartCancelFinDoc);

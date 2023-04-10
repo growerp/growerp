@@ -606,7 +606,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("22.22"),
-    items: [FinDocItem(itemTypeName: 'Product')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Product'))],
   ),
   FinDoc(
     sales: false,
@@ -614,7 +614,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.33"),
-    items: [FinDocItem(itemTypeName: 'Rental')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Rental'))],
   ),
   FinDoc(
     sales: false,
@@ -622,7 +622,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [FinDocItem(itemTypeName: 'VAT')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
   ),
   FinDoc(
     sales: false,
@@ -630,7 +630,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("55.55"),
-    items: [FinDocItem(itemTypeName: 'Sales Tax')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Sales Tax'))],
   ),
   FinDoc(
     sales: false,
@@ -638,7 +638,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("66.66"),
-    items: [FinDocItem(itemTypeName: 'Rental')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Rental'))],
   ),
   FinDoc(
     sales: false,
@@ -646,7 +646,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
-    items: [FinDocItem(itemTypeName: 'VAT')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
   ),
   FinDoc(
     sales: false,
@@ -654,7 +654,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("88.88"),
-    items: [FinDocItem(itemTypeName: 'Sales Tax')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Sales Tax'))],
   ),
   FinDoc(
     sales: false,
@@ -662,7 +662,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("9.99"),
-    items: [FinDocItem(itemTypeName: 'Product')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Product'))],
   ),
 ];
 List<FinDoc> salesPayments = [
@@ -672,7 +672,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.22"),
-    items: [FinDocItem(itemTypeName: 'Service Product')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Service Product'))],
   ),
   FinDoc(
     sales: true,
@@ -680,7 +680,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("44.11"),
-    items: [FinDocItem(itemTypeName: 'Tax')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Tax'))],
   ),
   FinDoc(
     sales: true,
@@ -688,7 +688,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("55.11"),
-    items: [FinDocItem(itemTypeName: 'Ship')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Ship'))],
   ),
   FinDoc(
     sales: true,
@@ -696,7 +696,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("66.11"),
-    items: [FinDocItem(itemTypeName: 'VAT')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
   ),
   FinDoc(
     sales: true,
@@ -704,7 +704,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("11.11"),
-    items: [FinDocItem(itemTypeName: 'Tax')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Tax'))],
   ),
   FinDoc(
     sales: true,
@@ -712,7 +712,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("22.22"),
-    items: [FinDocItem(itemTypeName: 'Service Product')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Service Product'))],
   ),
   FinDoc(
     sales: true,
@@ -720,7 +720,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("33.33"),
-    items: [FinDocItem(itemTypeName: 'VAT')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
   ),
   FinDoc(
     sales: true,
@@ -728,7 +728,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [FinDocItem(itemTypeName: 'Ship')],
+    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Ship'))],
   ),
 ];
 

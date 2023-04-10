@@ -61,3 +61,8 @@ class FinDocGetUsers extends FinDocEvent {
 }
 
 class FinDocGetItemTypes extends FinDocEvent {}
+
+class FinDocGetPaymentTypes extends FinDocEvent {
+  const FinDocGetPaymentTypes(this.sale);
+  final bool sale;
+}
