@@ -1,4 +1,31 @@
+# Planned for next release 
+Let us know if you have some suggestions at support@growerp.com
+1. Create account reports: balancesheet, balance posted summary.
+2. Create an accounting setup to:
+	1. Select the ledger organization or upload your own.
+		1. Default as is now
+		2. USA version
+		3. Thailand BOI version.
+	2. Be able to maintain the automatic posting configuration.
+	3. Access to the error journal of failed postings
+3. Ease the creation of other languages than just English.
+4. Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
+5. Separate the order/accounting package and move chat and tasking into their own package.
+6. Deep linking into the Android/IOS apps so they can also be used with your own backend.
+7. Use the new Material Design 3
+8. Extend the growerp.com website
+9. Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
+10. [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
+11. How about GPT4 in ERP? AI could make screen selections and entry suggestions?
+
 # Releases
+## Release April 12 2023 (V0.9.2)
+1. Now possible to have completely different ledger organizations between companies
+2. Better error messages from the backend interface.
+3. Payment and invoice now show only itemTypes which can be posted without errors
+4. Starting from this release, developments will only be visible outside of the master branch (mostly development) and only merged after all tests are succesful and packages are available at pub.dev.
+5. We now started a weekly email list to show our progress, building GrowERP both from a technical and functional point of view. [You can subscribe here](https://birdsend.page/forms/6228/3tDTt3BLhY)
+
 ## Release March 22 2023 (V0.9.1)
 1. company and user now separated in bloc/views
 2. all packages can be operated just with core

@@ -1,3 +1,7 @@
+## 0.9.2
+
+* upgrade of core package
+
 ## 0.9.0
 
 * Company and User bloc/view now separated

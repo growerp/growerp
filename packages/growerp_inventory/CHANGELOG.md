@@ -1,3 +1,7 @@
+## 0.9.2
+
+* upgrade to new core package 0.9.0
+
 ## 0.9.0
 
 * upgrade to new core package 0.9.0

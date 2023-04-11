@@ -1,3 +1,8 @@
+## 0.9.2
+* model changes: Item Type add account info
+* removed paymentType model now used itemType
+* adjust test data related to itemType
+
 ## 0.9.0
 
 * now independant of growerp_user_company, own (small) tests

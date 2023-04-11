@@ -1,3 +1,7 @@
+## 0.9.2
+
+* Upgrade to core 0.9.2
+
 ## 0.9.0
 
 * Upgrade to core 0.9.0
