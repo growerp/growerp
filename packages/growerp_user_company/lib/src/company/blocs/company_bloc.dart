@@ -72,7 +72,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure, message: error.toString())));
+                status: CompanyStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -89,7 +90,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure, message: error.toString())));
+                status: CompanyStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
       ApiResult<List<Company>> compResult =
@@ -103,7 +105,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
                 searchString: event.searchString,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: CompanyStatus.failure, message: error.toString())));
+              status: CompanyStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: CompanyStatus.failure, message: error.toString()));
@@ -139,7 +142,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
                   message: 'Company ${event.company.name} updated');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure, message: error.toString())));
+                status: CompanyStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Company> compResult =
@@ -154,7 +158,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
                   message: 'Company ${event.company.name} added');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure, message: error.toString())));
+                status: CompanyStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(

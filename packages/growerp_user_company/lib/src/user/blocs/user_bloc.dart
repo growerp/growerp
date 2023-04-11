@@ -73,7 +73,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure, message: error.toString())));
+                status: UserStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -93,7 +94,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure, message: error.toString())));
+                status: UserStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
         // get next page also for search
       }
       emit(state.copyWith(status: UserStatus.loading));
@@ -109,7 +111,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 hasReachedMax: data.length < _userLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure, message: error.toString())));
+              status: UserStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: UserStatus.failure, message: error.toString()));
@@ -142,7 +145,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                       'user ${data.firstName} ${data.lastName} updated...');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure, message: error.toString())));
+                status: UserStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<User> compResult = await repos.createUser(event.user);
@@ -156,7 +160,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                   message: 'user ${data.firstName} ${data.lastName} added...');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure, message: error.toString())));
+                status: UserStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -184,7 +189,8 @@ class UserBloc extends Bloc<UserEvent, UserState>
                 message: 'User ${event.user.firstName} is deleted now..');
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure, message: error.toString())));
+              status: UserStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: UserStatus.failure, message: error.toString()));

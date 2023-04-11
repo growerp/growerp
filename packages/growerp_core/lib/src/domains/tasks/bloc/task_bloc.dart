@@ -64,7 +64,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure, message: error.toString())));
+                status: TaskStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -80,7 +81,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure, message: error.toString())));
+                status: TaskStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -93,7 +95,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
                 hasReachedMax: data.length < _taskLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure, message: error.toString())));
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: TaskStatus.failure, message: error.toString()));
@@ -116,7 +119,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
               return state.copyWith(status: TaskStatus.success, tasks: tasks);
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure, message: error.toString())));
+                status: TaskStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Task> compResult = await repos.createTask(event.task);
@@ -126,7 +130,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
               return state.copyWith(status: TaskStatus.success, tasks: tasks);
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure, message: error.toString())));
+                status: TaskStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -161,7 +166,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
             return state.copyWith(tasks: tasks);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure, message: error.toString())));
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       return emit(state.copyWith(
           status: TaskStatus.failure, message: error.toString()));
@@ -189,7 +195,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
             );
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure, message: error.toString())));
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       return emit(state.copyWith(
           status: TaskStatus.failure, message: error.toString()));

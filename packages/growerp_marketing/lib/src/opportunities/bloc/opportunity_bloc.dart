@@ -61,7 +61,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: OpportunityStatus.failure, message: error.toString())));
+                status: OpportunityStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -77,7 +78,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: OpportunityStatus.failure, message: error.toString())));
+                status: OpportunityStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
       ApiResult<List<Opportunity>> compResult = await repos.getOpportunity(
@@ -91,7 +93,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                 hasReachedMax: data.length < _opportunityLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure, message: error.toString())));
+              status: OpportunityStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: OpportunityStatus.failure, message: error.toString()));
@@ -119,7 +122,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                       "opportunity ${event.opportunity.opportunityName} updated");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: OpportunityStatus.failure, message: error.toString())));
+                status: OpportunityStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Opportunity> compResult =
@@ -134,7 +138,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                       "opportunity ${event.opportunity.opportunityName} added");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: OpportunityStatus.failure, message: error.toString())));
+                status: OpportunityStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -162,7 +167,8 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
                     "opportunity ${event.opportunity.opportunityName} deleted");
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure, message: error.toString())));
+              status: OpportunityStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: OpportunityStatus.failure, message: error.toString()));

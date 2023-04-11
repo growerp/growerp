@@ -70,7 +70,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                   message: event.refresh == true ? 'List refreshed...' : null,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ProductStatus.failure, message: error.toString())));
+                status: ProductStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -86,7 +87,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ProductStatus.failure, message: error.toString())));
+                status: ProductStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
       ApiResult<List<Product>> compResult = await repos.getProduct(
@@ -100,7 +102,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                 hasReachedMax: data.length < _productLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ProductStatus.failure, message: error.toString())));
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ProductStatus.failure, message: error.toString()));
@@ -129,7 +132,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                   message: 'product ${event.product.productName} updated');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ProductStatus.failure, message: error.toString())));
+                status: ProductStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Product> compResult =
@@ -143,7 +147,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                   message: 'product ${event.product.productName} added');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ProductStatus.failure, message: error.toString())));
+                status: ProductStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -170,7 +175,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                 message: 'product ${event.product.productName} deleted');
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ProductStatus.failure, message: error.toString())));
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ProductStatus.failure, message: error.toString()));
@@ -217,7 +223,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                 message: data);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ProductStatus.failure, message: error.toString())));
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ProductStatus.failure, message: error.toString()));
@@ -240,7 +247,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
                     "The request is scheduled and the email will be sent shortly");
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ProductStatus.failure, message: error.toString())));
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ProductStatus.failure, message: error.toString()));

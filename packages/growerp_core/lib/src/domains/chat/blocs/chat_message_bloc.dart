@@ -75,7 +75,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatMessageStatus.failure, message: error.toString())));
+                status: ChatMessageStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -91,7 +92,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatMessageStatus.failure, message: error.toString())));
+                status: ChatMessageStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -104,7 +106,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
                 hasReachedMax: data.length < _chatMessageLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ChatMessageStatus.failure, message: error.toString())));
+              status: ChatMessageStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ChatMessageStatus.failure, message: error.toString()));

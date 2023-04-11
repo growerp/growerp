@@ -149,7 +149,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               authenticate: state.authenticate!.copyWith(user: data[0]));
         },
         failure: (NetworkExceptions error) => state.copyWith(
-            status: AuthStatus.failure, message: error.toString())));
+            status: AuthStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
     if (state.status == AuthStatus.registered) {
       await PersistFunctions.persistAuthenticate(state.authenticate!);
     }
@@ -166,7 +166,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             authenticate: state.authenticate!.copyWith(apiKey: null),
             message: "you are logged out now"),
         failure: (NetworkExceptions error) => state.copyWith(
-            status: AuthStatus.failure, message: error.toString())));
+            status: AuthStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
     if (state.status == AuthStatus.unAuthenticated) {
       await PersistFunctions.persistAuthenticate(
           state.authenticate!.copyWith(apiKey: null));
@@ -218,7 +219,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(apiResult.when(
         success: (_) => state.copyWith(message: 'Password reset'),
         failure: (NetworkExceptions error) => state.copyWith(
-            status: AuthStatus.failure, message: error.toString())));
+            status: AuthStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onAuthChangePassword(
@@ -236,7 +238,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             status: AuthStatus.authenticated,
             authenticate: auth),
         failure: (NetworkExceptions error) => state.copyWith(
-            status: AuthStatus.failure, message: error.toString())));
+            status: AuthStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
     if (state.status == AuthStatus.authenticated) {
       repos.setApiKey(
           state.authenticate!.apiKey!, state.authenticate!.moquiSessionToken!);

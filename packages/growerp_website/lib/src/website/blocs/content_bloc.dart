@@ -55,7 +55,8 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
             );
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ContentStatus.failure, message: error.toString())));
+              status: ContentStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } else {
       return emit(state.copyWith(
           status: ContentStatus.success, content: event.content));
@@ -77,6 +78,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
               message: 'Content Content updated');
         },
         failure: (NetworkExceptions error) => state.copyWith(
-            status: ContentStatus.failure, message: error.toString())));
+            status: ContentStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

@@ -72,7 +72,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
               );
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CategoryStatus.failure, message: error.toString())));
+                status: CategoryStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -89,7 +90,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CategoryStatus.failure, message: error.toString())));
+                status: CategoryStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -104,7 +106,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                 hasReachedMax: data.length < _categoryLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure, message: error.toString())));
+              status: CategoryStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: CategoryStatus.failure, message: error.toString()));
@@ -130,7 +133,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                   message: 'Category ${event.category.categoryName} updated!');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CategoryStatus.failure, message: error.toString())));
+                status: CategoryStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult compResult = await repos.createCategory(event.category);
@@ -143,7 +147,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                   message: 'Category ${event.category.categoryName} added!');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CategoryStatus.failure, message: error.toString())));
+                status: CategoryStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -170,7 +175,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                 message: 'Category ${event.category.categoryName} deleted!');
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure, message: error.toString())));
+              status: CategoryStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: CategoryStatus.failure, message: error.toString()));
@@ -203,7 +209,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                 status: CategoryStatus.success, message: data);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure, message: error.toString())));
+              status: CategoryStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: CategoryStatus.failure, message: error.toString()));
@@ -225,7 +232,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
                     "The request is scheduled and the email be be sent shortly");
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure, message: error.toString())));
+              status: CategoryStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: CategoryStatus.failure, message: error.toString()));

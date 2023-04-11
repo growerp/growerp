@@ -77,7 +77,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
               );
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatRoomStatus.failure, message: error.toString())));
+                status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -93,7 +93,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatRoomStatus.failure, message: error.toString())));
+                status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -106,7 +106,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                 hasReachedMax: data.length < _chatRoomLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ChatRoomStatus.failure, message: error.toString())));
+              status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ChatRoomStatus.failure, message: error.toString()));
@@ -132,7 +132,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                   chatRooms: chatRooms, message: "Chat room updated");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatRoomStatus.failure, message: error.toString())));
+                status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         List<ChatRoomMember> members = List.of(event.chatRoom.members);
@@ -164,7 +164,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                 },
                 failure: (NetworkExceptions error) => state.copyWith(
                     status: ChatRoomStatus.failure,
-                    message: error.toString())));
+                    message: NetworkExceptions.getErrorMessage(error))));
           } else {
             // not found so create new
             // add logged user to members
@@ -181,7 +181,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                 },
                 failure: (NetworkExceptions error) => state.copyWith(
                     status: ChatRoomStatus.failure,
-                    message: error.toString())));
+                    message: NetworkExceptions.getErrorMessage(error))));
           }
         } else {
           // add new multiperson room
@@ -199,7 +199,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                     status: ChatRoomStatus.success, chatRooms: chatRooms);
               },
               failure: (NetworkExceptions error) => state.copyWith(
-                  status: ChatRoomStatus.failure, message: error.toString())));
+                  status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
         }
       }
     } catch (error) {
@@ -232,7 +232,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             return state.copyWith(chatRooms: chatRooms);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: ChatRoomStatus.failure, message: error.toString())));
+              status: ChatRoomStatus.failure, message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: ChatRoomStatus.failure, message: error.toString()));
@@ -336,7 +336,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                   },
                   failure: (NetworkExceptions error) => state.copyWith(
                       status: ChatRoomStatus.failure,
-                      message: error.toString())));
+                      message: NetworkExceptions.getErrorMessage(error))));
             }
           }
         }

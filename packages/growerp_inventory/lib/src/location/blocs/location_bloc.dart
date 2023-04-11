@@ -60,7 +60,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure, message: error.toString())));
+                status: LocationStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -76,7 +77,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure, message: error.toString())));
+                status: LocationStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -89,7 +91,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                 hasReachedMax: data.length < _locationLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure, message: error.toString())));
+              status: LocationStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: LocationStatus.failure, message: error.toString()));
@@ -114,7 +117,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                   status: LocationStatus.success, locations: locations);
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure, message: error.toString())));
+                status: LocationStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Location> compResult =
@@ -126,7 +130,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                   status: LocationStatus.success, locations: locations);
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure, message: error.toString())));
+                status: LocationStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -151,7 +156,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
                 status: LocationStatus.success, locations: locations);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure, message: error.toString())));
+              status: LocationStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: LocationStatus.failure, message: error.toString()));

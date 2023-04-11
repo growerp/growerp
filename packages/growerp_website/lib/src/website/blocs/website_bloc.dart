@@ -58,7 +58,8 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
           );
         },
         failure: (NetworkExceptions error) => state.copyWith(
-            status: WebsiteStatus.failure, message: error.toString())));
+            status: WebsiteStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onWebsiteUpdate(
@@ -75,7 +76,8 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
               message: 'website updated...');
         },
         failure: (NetworkExceptions error) => state.copyWith(
-            status: WebsiteStatus.failure, message: error.toString())));
+            status: WebsiteStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onWebsiteObsUpload(
@@ -116,6 +118,7 @@ class WebsiteBloc extends Bloc<WebsiteEvent, WebsiteState> {
                   : 'obsidian removed');
         },
         failure: (NetworkExceptions error) => state.copyWith(
-            status: WebsiteStatus.failure, message: error.toString())));
+            status: WebsiteStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

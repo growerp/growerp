@@ -98,7 +98,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   message: event.refresh ? '${docType}s reloaded' : null,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure, message: error.toString())));
+                status: FinDocStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -114,7 +115,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure, message: error.toString())));
+                status: FinDocStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
       else {
@@ -127,7 +129,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   hasReachedMax: data.length < _finDocLimit ? true : false,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure, message: error.toString())));
+                status: FinDocStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -159,7 +162,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   message: '${event.finDoc.docType} ${finDocs[0].id()} added');
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure, message: error.toString())));
+                status: FinDocStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // update
         ApiResult<FinDoc> compResult = await repos.updateFinDoc(event.finDoc
@@ -197,7 +201,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                   message: "$docType ${event.finDoc.id()} updated");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure, message: error.toString())));
+                status: FinDocStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -221,7 +226,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 status: FinDocStatus.success, finDocs: finDocs);
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: FinDocStatus.failure, message: error.toString())));
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: FinDocStatus.failure, message: error.toString()));
@@ -248,7 +254,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 message: 'Payment processed successfully');
           },
           failure: (error) => state.copyWith(
-              status: FinDocStatus.failure, message: error.toString())));
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       return emit(state.copyWith(
           status: FinDocStatus.failure, message: error.toString()));
@@ -269,7 +276,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
                 status: FinDocStatus.success,
               ),
           failure: (error) => state.copyWith(
-              status: FinDocStatus.failure, message: error.toString())));
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       return emit(state.copyWith(
           status: FinDocStatus.failure, message: error.toString()));
@@ -284,7 +292,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     return emit(result.when(
         success: (data) => state.copyWith(itemTypes: data),
         failure: (error) => state.copyWith(
-            status: FinDocStatus.failure, message: error.toString())));
+            status: FinDocStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onFinDocGetPaymentTypes(
@@ -296,6 +305,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     return emit(result.when(
         success: (data) => state.copyWith(itemTypes: data),
         failure: (error) => state.copyWith(
-            status: FinDocStatus.failure, message: error.toString())));
+            status: FinDocStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

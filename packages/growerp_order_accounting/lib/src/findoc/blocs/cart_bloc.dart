@@ -71,7 +71,8 @@ class CartBloc extends Bloc<CartEvent, CartState>
                 itemTypes: data,
                 finDoc: resultFinDoc ?? event.finDoc),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: CartStatus.failure, message: error.toString())));
+                status: CartStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(

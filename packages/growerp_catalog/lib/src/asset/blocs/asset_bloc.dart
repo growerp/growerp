@@ -61,7 +61,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                   searchString: '',
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure, message: error.toString())));
+                status: AssetStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -77,7 +78,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                   searchString: event.searchString,
                 ),
             failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure, message: error.toString())));
+                status: AssetStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -90,7 +92,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                 hasReachedMax: data.length < _assetLimit ? true : false,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
-              status: AssetStatus.failure, message: error.toString())));
+              status: AssetStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: AssetStatus.failure, message: error.toString()));
@@ -116,7 +119,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                   message: "Asset ${event.asset.assetName} updated");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure, message: error.toString())));
+                status: AssetStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       } else {
         // add
         ApiResult<Asset> compResult = await repos.createAsset(event.asset);
@@ -129,7 +133,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                   message: "Asset ${event.asset.assetName} added");
             },
             failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure, message: error.toString())));
+                status: AssetStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
     } catch (error) {
       emit(state.copyWith(
@@ -155,7 +160,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
                 message: "Asset ${event.asset.assetName} deleted");
           },
           failure: (NetworkExceptions error) => state.copyWith(
-              status: AssetStatus.failure, message: error.toString())));
+              status: AssetStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } catch (error) {
       emit(state.copyWith(
           status: AssetStatus.failure, message: error.toString()));

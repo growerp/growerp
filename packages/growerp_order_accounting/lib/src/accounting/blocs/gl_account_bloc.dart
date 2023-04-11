@@ -60,7 +60,8 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
                   searchString: '',
                 ),
             failure: (error) => state.copyWith(
-                status: GlAccountStatus.failure, message: error.toString())));
+                status: GlAccountStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get first search page also for changed search
       if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
@@ -75,7 +76,8 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
                   searchString: event.searchString,
                 ),
             failure: (error) => state.copyWith(
-                status: GlAccountStatus.failure, message: error.toString())));
+                status: GlAccountStatus.failure,
+                message: NetworkExceptions.getErrorMessage(error))));
       }
       // get next page also for search
 
@@ -87,7 +89,8 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
                 hasReachedMax: data.length < _accntLimit,
               ),
           failure: (error) => state.copyWith(
-              status: GlAccountStatus.failure, message: error.toString())));
+              status: GlAccountStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     } on Exception catch (error) {
       emit(state.copyWith(
           status: GlAccountStatus.failure, message: error.toString()));
