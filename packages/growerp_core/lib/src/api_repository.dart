@@ -137,7 +137,7 @@ class APIRepository {
     }
   }
 
-  Future<ApiResult<List<ItemType>>> getItemTypes({required bool sales}) async {
+  Future<ApiResult<List<ItemType>>> getItemTypes({bool sales = true}) async {
     try {
       final response = await dioClient.get(
           'rest/s1/growerp/100/ItemTypes', apiKey!,
@@ -153,8 +153,11 @@ class APIRepository {
 
   Future<ApiResult<List<ItemType>>> getPaymentTypes({bool sales = true}) async {
     try {
-      final response =
-          await dioClient.get('rest/s1/growerp/100/PaymentTypes', apiKey!);
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/PaymentTypes', apiKey!,
+          queryParameters: <String, dynamic>{
+            'sales': sales,
+          });
       return getResponseList<ItemType>(
           "itemTypes", response, (json) => ItemType.fromJson(json));
     } on Exception catch (e) {

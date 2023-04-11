@@ -285,7 +285,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<ItemType>(
-                key: const Key('paymentType'),
+                key: const Key('itemType'),
                 decoration: const InputDecoration(labelText: 'Payment Type'),
                 hint: const Text('Payment Type'),
                 value: _selectedItemType,
@@ -293,7 +293,9 @@ class PaymentDialogState extends State<PaymentDialog> {
                     value == null ? 'Enter a item type for posting?' : null,
                 items: state.itemTypes.map((item) {
                   return DropdownMenuItem<ItemType>(
-                      value: item, child: Text(item.itemTypeName));
+                      value: item,
+                      child: Text('${item.itemTypeName}\n ${item.accountName}',
+                          overflow: TextOverflow.visible));
                 }).toList(),
                 onChanged: (ItemType? newValue) {
                   _selectedItemType = newValue;

@@ -17,12 +17,15 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'item_type_model.freezed.dart';
 part 'item_type_model.g.dart';
 
+/// Item type used for order/invoice and payments
 @freezed
 class ItemType with _$ItemType {
   ItemType._();
   factory ItemType({
     @Default('') String itemTypeId,
     @Default('') String itemTypeName,
+    @Default('') String accountCode,
+    @Default('') String accountName,
   }) = _ItemType;
 
   factory ItemType.fromJson(Map<String, dynamic> json) =>

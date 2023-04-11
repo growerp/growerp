@@ -116,9 +116,9 @@ class PaymentTest {
           break;
         default:
       }
-      await CommonTest.drag(tester);
-      await CommonTest.enterDropDown(
-          tester, 'itemType', payment.items[0].itemType!.itemTypeName);
+      await CommonTest.drag(tester, listViewName: 'listView2');
+      await CommonTest.enterDropDown(tester, 'itemType',
+          '${payment.items[0].itemType!.itemTypeName}\n ${payment.items[0].itemType!.accountName}');
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: 5);
       await CommonTest.waitForKey(tester, 'dismiss');

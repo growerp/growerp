@@ -606,7 +606,11 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("22.22"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Product'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense', accountName: 'Account'))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -614,7 +618,11 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.33"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Rental'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Financial Account Transaction', accountName: ''))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -622,7 +630,12 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Invoice Payment',
+              accountName: 'Accounts Payable - Oper'))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -630,7 +643,12 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("55.55"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Sales Tax'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense',
+              accountName: 'Prepaid Exp'))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -638,7 +656,11 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("66.66"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Rental'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Financial Account Transaction', accountName: ''))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -646,7 +668,12 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Invoice Payment',
+              accountName: 'Accounts Payable - Oper'))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -654,7 +681,12 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("88.88"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Sales Tax'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense',
+              accountName: 'Prepaid Exp'))
+    ],
   ),
   FinDoc(
     sales: false,
@@ -662,7 +694,11 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("9.99"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Product'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense', accountName: 'Account'))
+    ],
   ),
 ];
 List<FinDoc> salesPayments = [
@@ -672,7 +708,9 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.22"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Service Product'))],
+    items: [
+      FinDocItem(itemType: ItemType(itemTypeName: 'Refund', accountName: 'Acc'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -680,7 +718,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("44.11"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Tax'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Invoice Payment',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -688,7 +731,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("55.11"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Ship'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -696,7 +744,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("66.11"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Inventory',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -704,7 +757,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("11.11"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Tax'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Invoice Payment',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -712,7 +770,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("22.22"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Service Product'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -720,7 +783,12 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("33.33"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'VAT'))],
+    items: [
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Inventory',
+              accountName: 'Accounts Receivable - Un'))
+    ],
   ),
   FinDoc(
     sales: true,
@@ -728,7 +796,9 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [FinDocItem(itemType: ItemType(itemTypeName: 'Ship'))],
+    items: [
+      FinDocItem(itemType: ItemType(itemTypeName: 'Refund', accountName: 'Acc'))
+    ],
   ),
 ];
 
