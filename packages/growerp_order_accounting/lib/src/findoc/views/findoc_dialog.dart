@@ -22,8 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
+import '../findoc.dart';
 
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;

@@ -1,22 +1,34 @@
-# Planned for next release 
-Let us know if you have some suggestions at support@growerp.com
-1. Create account reports: balancesheet, balance posted summary.
-2. Create an accounting setup to:
-	1. Select the ledger organization or upload your own.
-		1. Default as is now
-		2. USA version
-		3. Thailand BOI version.
-	2. Be able to maintain the automatic posting configuration.
-	3. Access to the error journal of failed postings
-3. Ease the creation of other languages than just English.
-4. Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
-5. Separate the order/accounting package and move chat and tasking into their own package.
-6. Deep linking into the Android/IOS apps so they can also be used with your own backend.
-7. Use the new Material Design 3
-8. Extend the growerp.com website
-9. Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
-10. [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
-11. How about GPT4 in ERP? AI could make screen selections and entry suggestions?
+# Road Map
+
+Let us know if you have suggestions at support@growerp.com
+
+## Functional requests
+
+* Create account reports: balancesheet, balance posted summary.
+* Create an accounting setup to:
+	* Select the ledger organization or upload your own.
+		* Default as is now
+		* USA version
+		* Thailand BOI version.
+	* Be able to maintain the automatic posting configuration.
+	* Access to the error journal of failed postings
+* Ease the creation of other languages than just English.
+* Extend the growerp.com website
+* How about GPT4 in ERP? AI could make screen selections and entry suggestions?
+* Integration of the website and admin app (xxx.growerp.com and admin.growerp.com)
+* Update the hotel app
+* Update the freelancer app
+* Create a manufacturing app
+* Create a logistic app
+
+## Technical internal requests
+*  Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
+* Separate the order/accounting package
+* Move chat and tasking into their own package.
+* Deep linking into the Android/IOS apps so they can also be used with your own backend.
+* Use the new Material Design 3
+* Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
+* [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
 ## Release April 12 2023 (V0.9.2)

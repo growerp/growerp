@@ -458,10 +458,9 @@ packages:
   growerp_core:
     dependency: transitive
     description:
-      name: growerp_core
-      sha256: "2f1a12a8b114ccd950cd5b2acf40eaa1c13fc5150a43817feeed762713cf6883"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../growerp_core"
+      relative: true
+    source: path
     version: "0.9.2"
   growerp_order_accounting:
     dependency: "direct main"

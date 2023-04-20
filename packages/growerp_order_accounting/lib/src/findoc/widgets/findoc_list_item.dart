@@ -18,9 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
-import '../views/views.dart';
+import '../findoc.dart';
 
 class FinDocListItem extends StatelessWidget {
   const FinDocListItem({
@@ -258,7 +256,7 @@ class FinDocListItem extends StatelessWidget {
                           ? "ProductId: ${e.productId} Description: ${e.description} Quantity: ${e.quantity.toString()} Price: ${e.price.toString()} SubTotal: ${(e.quantity! * e.price!).toString()}${e.rentalFromDate == null ? '' : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
                               "${e.rentalThruDate.toString().substring(0, 10)}"}"
                           : finDoc.docType == FinDocType.transaction
-                              ? "Type: ${e.itemType!.itemTypeId.substring(3)}\n"
+                              ? "Type: ${e.itemType?.itemTypeId.substring(3)}\n"
                                   "GlAccount: ${e.glAccountId} "
                                   "Amount: ${e.price} "
                               : finDoc.docType == FinDocType.shipment

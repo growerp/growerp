@@ -109,13 +109,52 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
       ]),
-/*  MenuOption(
-      image: "packages/growerp_core/images/accountingGrey.png",
-      selectedImage: "packages/growerp_core/images/accounting.png",
+  MenuOption(
+      image: "packages/growerp_core/images/reportGrey.png",
+      selectedImage: "packages/growerp_core/images/report.png",
       title: "Reports",
       route: '/reports',
-      readGroups: [UserGroup.admin],
-      writeGroups: [UserGroup.admin]),
+      tabItems: [
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "\nBalance Sheet",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const BalanceSummaryListForm(),
+          label: "\nBalance Summary",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
+/*  MenuOption(
+      image: "packages/growerp_core/images/setupGrey.png",
+      selectedImage: "packages/growerp_core/images/setup.png",
+      title: "SetUp",
+      route: '/',
+      tabItems: [
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "Dummy",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "Dummy",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
 */
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",

@@ -20,7 +20,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../api_repository.dart';
 import '../findoc.dart';
 
 const day = 1, week = 2, month = 3; // columnPeriod values

@@ -12,28 +12,25 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-part 'gl_account_model.freezed.dart';
-part 'gl_account_model.g.dart';
+import 'package:growerp_core/growerp_core.dart';
+
+part 'ledger_report_model.freezed.dart';
+part 'ledger_report_model.g.dart';
 
 @freezed
-class GlAccount with _$GlAccount {
-  GlAccount._();
-  factory GlAccount({
-    String? accountCode,
-    String? accountName,
-    int? level,
-    String? classId,
-    bool? isDebit,
-    Decimal? rollUp,
-    Decimal? beginningBalance,
-    Decimal? postedDebits,
-    Decimal? postedCredits,
-    Decimal? postedBalance,
-    @Default([]) List<GlAccount> children,
-  }) = _GlAccount;
+class LedgerReport with _$LedgerReport {
+  LedgerReport._();
+  factory LedgerReport({
+    Company? company,
+    @Default('') String title,
+    @Default('') String periodName,
+    DateTime? fromDate,
+    DateTime? thruDate,
+    DateTime? printDate,
+    @Default([]) List<GlAccount> glAccounts,
+  }) = _LedgerReport;
 
-  factory GlAccount.fromJson(Map<String, dynamic> json) =>
-      _$GlAccountFromJson(json);
+  factory LedgerReport.fromJson(Map<String, dynamic> json) =>
+      _$LedgerReportFromJson(json);
 }

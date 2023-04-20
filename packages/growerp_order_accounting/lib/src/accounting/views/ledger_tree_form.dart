@@ -12,14 +12,16 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
+import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
+
+import '../accounting.dart';
 
 class LedgerTreeForm extends StatelessWidget {
   const LedgerTreeForm({Key? key}) : super(key: key);
@@ -27,9 +29,8 @@ class LedgerTreeForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => GlAccountBloc(FinDocAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const GlAccountFetch()),
+      create: (context) => LedgerBloc(AccountingAPIRepository(
+          context.read<AuthBloc>().state.authenticate!.apiKey!)),
       child: const LedgerTreeListForm(),
     );
   }
@@ -45,12 +46,17 @@ class LedgerTreeListForm extends StatefulWidget {
 class LedgerTreeFormState extends State<LedgerTreeListForm> {
   TreeController? _controller;
   Iterable<TreeNode> _nodes = [];
+  late LedgerBloc _ledgerBloc;
+  late bool expanded;
+  var formatter = NumberFormat.decimalPattern('en-US');
 
   @override
   void initState() {
     super.initState();
     _controller = TreeController(allNodesExpanded: false);
-    context.read<GlAccountBloc>().add(const GlAccountFetch());
+    _ledgerBloc = context.read<LedgerBloc>();
+    _ledgerBloc.add(const LedgerFetch(ReportType.ledger));
+    expanded = false;
   }
 
   @override
@@ -62,21 +68,24 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       TreeNode getTreeNode(GlAccount glAccount) {
         // recursive function
         final result = TreeNode(
-          key: ValueKey(glAccount.id),
+          key: ValueKey(glAccount.accountCode),
           content: Row(children: [
             SizedBox(
-                width: (isPhone ? 210 : 400) - (glAccount.l!.toDouble() * 10),
-                child: Text('${glAccount.id} ${glAccount.accountName} ')),
+                width:
+                    (isPhone ? 210 : 400) - (glAccount.level!.toDouble() * 10),
+                child:
+                    Text('${glAccount.accountCode} ${glAccount.accountName} ')),
             SizedBox(
                 width: 100,
                 child: Text(
-                    NumberFormat.simpleCurrency()
-                        .format(glAccount.postedBalance),
+                    formatter.format(DecimalIntl(
+                        Decimal.parse(glAccount.postedBalance.toString()))),
                     textAlign: TextAlign.right)),
             SizedBox(
                 width: 100,
                 child: Text(
-                    NumberFormat.simpleCurrency().format(glAccount.rollUp),
+                    formatter.format(DecimalIntl(
+                        Decimal.parse(glAccount.rollUp.toString()))),
                     textAlign: TextAlign.right))
           ]),
           children: glAccount.children.map(getTreeNode).toList(),
@@ -93,35 +102,38 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       return iterable;
     }
 
-    return BlocConsumer<GlAccountBloc, GlAccountState>(
-        listener: (context, state) {
-      if (state.status == GlAccountStatus.failure) {
+    return BlocConsumer<LedgerBloc, LedgerState>(listener: (context, state) {
+      if (state.status == LedgerStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
     }, builder: (context, state) {
-      if (state.status == GlAccountStatus.failure) {
+      if (state.status == LedgerStatus.failure) {
         return const FatalErrorForm(message: 'Could not load Ledger tree!');
       }
-      if (state.status == GlAccountStatus.success) {
-        _nodes = convert(state.glAccounts);
+      if (state.status == LedgerStatus.success) {
+        _nodes = convert(state.ledgerReport!.glAccounts);
       }
       return ListView(
         children: <Widget>[
           const SizedBox(height: 10),
           Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            ElevatedButton(
-              child: const Text('Expand All'),
-              onPressed: () => setState(() {
-                _controller!.expandAll();
-              }),
-            ),
+            if (!expanded)
+              ElevatedButton(
+                child: const Text('Expand All'),
+                onPressed: () => setState(() {
+                  _controller!.expandAll();
+                  expanded = !expanded;
+                }),
+              ),
             const SizedBox(width: 10),
-            ElevatedButton(
-              child: const Text('Collapse All'),
-              onPressed: () => setState(() {
-                _controller!.collapseAll();
-              }),
-            ),
+            if (expanded)
+              ElevatedButton(
+                child: const Text('Collapse All'),
+                onPressed: () => setState(() {
+                  _controller!.collapseAll();
+                  expanded = !expanded;
+                }),
+              ),
           ]),
           const SizedBox(height: 10),
           Row(children: [

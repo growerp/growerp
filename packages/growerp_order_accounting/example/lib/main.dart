@@ -109,6 +109,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+    case '/reports':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

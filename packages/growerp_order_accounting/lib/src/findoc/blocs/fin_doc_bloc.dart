@@ -20,7 +20,7 @@ import 'package:equatable/equatable.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../api_repository.dart';
+import '../findoc.dart';
 
 part 'fin_doc_event.dart';
 part 'fin_doc_state.dart';

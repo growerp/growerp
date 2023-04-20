@@ -17,9 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:printing/printing.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
-import 'pdf_formats.dart';
+import '../findoc.dart';
 
 class PrintingForm extends StatelessWidget {
   final FinDoc finDocIn;

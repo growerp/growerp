@@ -12,28 +12,20 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-part of 'gl_account_bloc.dart';
+part of 'ledger_bloc.dart';
 
-abstract class GlAccountEvent extends Equatable {
-  const GlAccountEvent();
+enum ReportType { ledger, sheet, summary }
+
+abstract class LedgerEvent extends Equatable {
+  const LedgerEvent();
   @override
   List<Object> get props => [];
 }
 
-class GlAccountFetch extends GlAccountEvent {
-  const GlAccountFetch({this.searchString = '', this.refresh = false});
-  final String searchString;
-  final bool refresh;
+class LedgerFetch extends LedgerEvent {
+  const LedgerFetch(this.reportType, {this.periodName = ''});
+  final ReportType reportType;
+  final String periodName;
   @override
-  List<Object> get props => [searchString, refresh];
-}
-
-class GlAccountUpdate extends GlAccountEvent {
-  const GlAccountUpdate(this.opportunity);
-  final GlAccount opportunity;
-}
-
-class GlAccountDelete extends GlAccountEvent {
-  const GlAccountDelete(this.opportunity);
-  final GlAccount opportunity;
+  List<Object> get props => [reportType, periodName];
 }
