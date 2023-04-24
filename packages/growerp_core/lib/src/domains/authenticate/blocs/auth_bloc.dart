@@ -52,7 +52,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ApiResult<dynamic> connectResult = await repos.getConnected();
     var connect = connectResult.when(
         success: (data) => data,
-        failure: (NetworkExceptions error) => error.toString());
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: AuthStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error)));
     if (connect is String) {
       return emit(// no connection
           state.copyWith(status: AuthStatus.failure, message: connect));
@@ -197,9 +199,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 message: 'You are logged in now...');
           }
         },
-        failure: (error) => state.copyWith(
+        failure: (NetworkExceptions error) => state.copyWith(
             status: AuthStatus.failure,
-            message: "failed logging in: ${error.toString()}")));
+            message: NetworkExceptions.getErrorMessage(error))));
 
     if (state.status == AuthStatus.authenticated) {
       repos.setApiKey(

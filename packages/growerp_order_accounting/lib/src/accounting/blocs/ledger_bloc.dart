@@ -25,6 +25,7 @@ part 'ledger_state.dart';
 class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
   LedgerBloc(this.repos) : super(const LedgerState()) {
     on<LedgerFetch>(_onLedgerFetch);
+    on<LedgerTimePeriods>(_onLedgerTimePeriods);
   }
 
   final AccountingAPIRepository repos;
@@ -50,6 +51,11 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
   ) async {
     // start from record zero for initial and refresh
     emit(state.copyWith(status: LedgerStatus.loading));
+
+    if (state.timePeriods.isEmpty) {
+      add(LedgerTimePeriods());
+    }
+
     final compResult =
         await callApi(event.reportType, periodName: event.periodName);
     return emit(compResult.when(
@@ -57,6 +63,18 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
               status: LedgerStatus.success,
               ledgerReport: data,
             ),
+        failure: (error) => state.copyWith(
+            status: LedgerStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
+  }
+
+  Future<void> _onLedgerTimePeriods(
+    LedgerTimePeriods event,
+    Emitter<LedgerState> emit,
+  ) async {
+    ApiResult<List<TimePeriod>> periodResult = await repos.getTimePeriods();
+    return emit(periodResult.when(
+        success: (data) => state.copyWith(timePeriods: data),
         failure: (error) => state.copyWith(
             status: LedgerStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));

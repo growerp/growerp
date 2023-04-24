@@ -79,62 +79,57 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == FinDocStatus.initial || event.refresh) {
-        if (docType == FinDocType.payment) {
-          add(FinDocGetPaymentTypes(sales));
-        } else {
-          add(FinDocGetItemTypes());
-        }
-        ApiResult<List<FinDoc>> result = await repos.getFinDoc(
-            sales: sales, docType: docType, searchString: event.searchString);
-        return emit(result.when(
-            success: (data) => state.copyWith(
-                  status: FinDocStatus.success,
-                  finDocs: data,
-                  hasReachedMax: data.length < _finDocLimit ? true : false,
-                  searchString: '',
-                  message: event.refresh ? '${docType}s reloaded' : null,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
+    // start from record zero for initial and refresh
+    if (state.status == FinDocStatus.initial || event.refresh) {
+      if (docType == FinDocType.payment) {
+        add(FinDocGetPaymentTypes(sales));
+      } else {
+        add(FinDocGetItemTypes());
       }
-      // get first search page also for changed search
-      else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
-            sales: sales, docType: docType, searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: FinDocStatus.success,
-                  finDocs: data,
-                  hasReachedMax: data.length < _finDocLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-      else {
-        ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
-            sales: sales, docType: docType, searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: FinDocStatus.success,
-                  finDocs: List.of(state.finDocs)..addAll(data),
-                  hasReachedMax: data.length < _finDocLimit ? true : false,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: error.toString()));
+      ApiResult<List<FinDoc>> result = await repos.getFinDoc(
+          sales: sales, docType: docType, searchString: event.searchString);
+      return emit(result.when(
+          success: (data) => state.copyWith(
+                status: FinDocStatus.success,
+                finDocs: data,
+                hasReachedMax: data.length < _finDocLimit ? true : false,
+                searchString: '',
+                message: event.refresh ? '${docType}s reloaded' : null,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get first search page also for changed search
+    else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
+          sales: sales, docType: docType, searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: FinDocStatus.success,
+                finDocs: data,
+                hasReachedMax: data.length < _finDocLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get next page also for search
+    else {
+      ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
+          sales: sales, docType: docType, searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: FinDocStatus.success,
+                finDocs: List.of(state.finDocs)..addAll(data),
+                hasReachedMax: data.length < _finDocLimit ? true : false,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -142,71 +137,66 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocUpdate event,
     Emitter<FinDocState> emit,
   ) async {
-    try {
-      List<FinDoc> finDocs = List.from(state.finDocs);
-      // need sort because were loaded at the top of the list:better seen by the user
-      List<FinDocItem> items = List.from(event.finDoc.items);
-      if (docType != FinDocType.shipment) {
-        items.sort((a, b) => a.itemSeqId!.compareTo(b.itemSeqId!));
-      }
-      if (event.finDoc.idIsNull()) {
-        // create
-        ApiResult<FinDoc> compResult = await repos.createFinDoc(event.finDoc
-            .copyWith(classificationId: classificationId, items: items));
-        return emit(compResult.when(
-            success: (data) {
-              finDocs.insert(0, data);
-              return state.copyWith(
-                  status: FinDocStatus.success,
-                  finDocs: finDocs,
-                  message: '${event.finDoc.docType} ${finDocs[0].id()} added');
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // update
-        ApiResult<FinDoc> compResult = await repos.updateFinDoc(event.finDoc
-            .copyWith(classificationId: classificationId, items: items));
-        return emit(compResult.when(
-            success: (data) {
-              late int index;
-              switch (docType) {
-                case FinDocType.order:
-                  index = finDocs.indexWhere(
-                      (element) => element.orderId == event.finDoc.orderId);
-                  break;
-                case FinDocType.payment:
-                  index = finDocs.indexWhere(
-                      (element) => element.paymentId == event.finDoc.paymentId);
-                  break;
-                case FinDocType.invoice:
-                  index = finDocs.indexWhere(
-                      (element) => element.invoiceId == event.finDoc.invoiceId);
-                  break;
-                case FinDocType.shipment:
-                  index = finDocs.indexWhere((element) =>
-                      element.shipmentId == event.finDoc.shipmentId);
-                  break;
-                case FinDocType.transaction:
-                  index = finDocs.indexWhere((element) =>
-                      element.transactionId == event.finDoc.transactionId);
-                  break;
-                default:
-              }
-              finDocs[index] = data;
-              return state.copyWith(
-                  status: FinDocStatus.success,
-                  finDocs: finDocs,
-                  message: "$docType ${event.finDoc.id()} updated");
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: FinDocStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: error.toString()));
+    List<FinDoc> finDocs = List.from(state.finDocs);
+    // need sort because were loaded at the top of the list:better seen by the user
+    List<FinDocItem> items = List.from(event.finDoc.items);
+    if (docType != FinDocType.shipment) {
+      items.sort((a, b) => a.itemSeqId!.compareTo(b.itemSeqId!));
+    }
+    if (event.finDoc.idIsNull()) {
+      // create
+      ApiResult<FinDoc> compResult = await repos.createFinDoc(event.finDoc
+          .copyWith(classificationId: classificationId, items: items));
+      return emit(compResult.when(
+          success: (data) {
+            finDocs.insert(0, data);
+            return state.copyWith(
+                status: FinDocStatus.success,
+                finDocs: finDocs,
+                message: '${event.finDoc.docType} ${finDocs[0].id()} added');
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // update
+      ApiResult<FinDoc> compResult = await repos.updateFinDoc(event.finDoc
+          .copyWith(classificationId: classificationId, items: items));
+      return emit(compResult.when(
+          success: (data) {
+            late int index;
+            switch (docType) {
+              case FinDocType.order:
+                index = finDocs.indexWhere(
+                    (element) => element.orderId == event.finDoc.orderId);
+                break;
+              case FinDocType.payment:
+                index = finDocs.indexWhere(
+                    (element) => element.paymentId == event.finDoc.paymentId);
+                break;
+              case FinDocType.invoice:
+                index = finDocs.indexWhere(
+                    (element) => element.invoiceId == event.finDoc.invoiceId);
+                break;
+              case FinDocType.shipment:
+                index = finDocs.indexWhere(
+                    (element) => element.shipmentId == event.finDoc.shipmentId);
+                break;
+              case FinDocType.transaction:
+                index = finDocs.indexWhere((element) =>
+                    element.transactionId == event.finDoc.transactionId);
+                break;
+              default:
+            }
+            finDocs[index] = data;
+            return state.copyWith(
+                status: FinDocStatus.success,
+                finDocs: finDocs,
+                message: "$docType ${event.finDoc.id()} updated");
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: FinDocStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -214,24 +204,18 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocShipmentReceive event,
     Emitter<FinDocState> emit,
   ) async {
-    try {
-      ApiResult<FinDoc> shipResult = await repos.receiveShipment(event.finDoc);
-      return emit(shipResult.when(
-          success: (data) {
-            List<FinDoc> finDocs = List.from(state.finDocs);
-            int index = finDocs
-                .indexWhere((element) => element.id() == event.finDoc.id());
-            finDocs[index] = data;
-            return state.copyWith(
-                status: FinDocStatus.success, finDocs: finDocs);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: FinDocStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, message: error.toString()));
-    }
+    ApiResult<FinDoc> shipResult = await repos.receiveShipment(event.finDoc);
+    return emit(shipResult.when(
+        success: (data) {
+          List<FinDoc> finDocs = List.from(state.finDocs);
+          int index = finDocs
+              .indexWhere((element) => element.id() == event.finDoc.id());
+          finDocs[index] = data;
+          return state.copyWith(status: FinDocStatus.success, finDocs: finDocs);
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: FinDocStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onFinDocConfirmPayment(
@@ -239,27 +223,22 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     emit(state.copyWith(status: FinDocStatus.loading));
-    try {
-      ApiResult<FinDoc> compResult = await repos.updateFinDoc(
-          event.payment.copyWith(status: FinDocStatusVal.completed));
-      return emit(compResult.when(
-          success: (data) {
-            List<FinDoc> finDocs = List.from(state.finDocs);
-            int index = finDocs.indexWhere(
-                (element) => element.id() == event.payment.paymentId);
-            finDocs[index] = data;
-            return state.copyWith(
-                status: FinDocStatus.success,
-                finDocs: finDocs,
-                message: 'Payment processed successfully');
-          },
-          failure: (error) => state.copyWith(
-              status: FinDocStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      return emit(state.copyWith(
-          status: FinDocStatus.failure, message: error.toString()));
-    }
+    ApiResult<FinDoc> compResult = await repos.updateFinDoc(
+        event.payment.copyWith(status: FinDocStatusVal.completed));
+    return emit(compResult.when(
+        success: (data) {
+          List<FinDoc> finDocs = List.from(state.finDocs);
+          int index = finDocs
+              .indexWhere((element) => element.id() == event.payment.paymentId);
+          finDocs[index] = data;
+          return state.copyWith(
+              status: FinDocStatus.success,
+              finDocs: finDocs,
+              message: 'Payment processed successfully');
+        },
+        failure: (error) => state.copyWith(
+            status: FinDocStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onFinDocGetUsers(
@@ -267,21 +246,16 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     Emitter<FinDocState> emit,
   ) async {
     emit(state.copyWith(status: FinDocStatus.loading));
-    try {
-      ApiResult<List<User>> result =
-          await repos.lookUpUser(role: event.role, searchString: event.filter);
-      return emit(result.when(
-          success: (data) => state.copyWith(
-                users: data,
-                status: FinDocStatus.success,
-              ),
-          failure: (error) => state.copyWith(
-              status: FinDocStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      return emit(state.copyWith(
-          status: FinDocStatus.failure, message: error.toString()));
-    }
+    ApiResult<List<User>> result =
+        await repos.lookUpUser(role: event.role, searchString: event.filter);
+    return emit(result.when(
+        success: (data) => state.copyWith(
+              users: data,
+              status: FinDocStatus.success,
+            ),
+        failure: (error) => state.copyWith(
+            status: FinDocStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onFinDocGetItemTypes(

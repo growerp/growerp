@@ -15,22 +15,20 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import 'models.dart';
-
-part 'ledger_report_model.freezed.dart';
-part 'ledger_report_model.g.dart';
+part 'time_period_model.freezed.dart';
+part 'time_period_model.g.dart';
 
 @freezed
-class LedgerReport with _$LedgerReport {
-  LedgerReport._();
-  factory LedgerReport({
-    Company? company,
-    @Default('') String title,
-    TimePeriod? period,
-    DateTime? printDate,
-    @Default([]) List<GlAccount> glAccounts,
-  }) = _LedgerReport;
+class TimePeriod with _$TimePeriod {
+  TimePeriod._();
+  factory TimePeriod({
+    @Default('') String periodId,
+    @Default('') String periodName,
+    DateTime? fromDate,
+    DateTime? thruDate,
+    bool? isClosed,
+  }) = _TimePeriod;
 
-  factory LedgerReport.fromJson(Map<String, dynamic> json) =>
-      _$LedgerReportFromJson(json);
+  factory TimePeriod.fromJson(Map<String, dynamic> json) =>
+      _$TimePeriodFromJson(json);
 }

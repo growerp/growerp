@@ -84,8 +84,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                   floatingActionButton: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (int.parse(periodName.substring(1)) <
-                            DateTime.now().year)
+                        if (state.timePeriods
+                            .any((item) => item.periodName == next))
                           FloatingActionButton.extended(
                               heroTag: 'next',
                               key: const Key("next"),
@@ -100,19 +100,21 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                               icon: const Icon(Icons.arrow_right),
                               label: Text(next)),
                         const SizedBox(height: 10),
-                        FloatingActionButton.extended(
-                            heroTag: 'previous',
-                            key: const Key("previous"),
-                            onPressed: () async {
-                              periodName = prev;
-                              _balanceSummaryBloc.add(LedgerFetch(
-                                  ReportType.summary,
-                                  periodName: periodName));
-                              periodName = prev;
-                            },
-                            tooltip: 'Previous year',
-                            icon: const Icon(Icons.arrow_left),
-                            label: Text(prev)),
+                        if (state.timePeriods
+                            .any((item) => item.periodName == prev))
+                          FloatingActionButton.extended(
+                              heroTag: 'previous',
+                              key: const Key("previous"),
+                              onPressed: () async {
+                                periodName = prev;
+                                _balanceSummaryBloc.add(LedgerFetch(
+                                    ReportType.summary,
+                                    periodName: periodName));
+                                periodName = prev;
+                              },
+                              tooltip: 'Previous year',
+                              icon: const Icon(Icons.arrow_left),
+                              label: Text(prev)),
                       ]),
                   body: RefreshIndicator(
                       onRefresh: (() async => context.read<LedgerBloc>().add(
@@ -121,7 +123,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                       child: ScrollablePositionedList.builder(
                         key: const Key('listView'),
                         physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: state.ledgerReport!.glAccounts.length,
+                        itemCount: state.ledgerReport!.glAccounts.length + 1,
                         itemScrollController: _itemScrollController,
                         itemPositionsListener: _itemPositionsListener,
                         itemBuilder: (BuildContext context, int index) {

@@ -47,95 +47,85 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == LocationStatus.initial || event.refresh) {
-        ApiResult<List<Location>> compResult =
-            await repos.getLocation(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: LocationStatus.success,
-                  locations: data,
-                  hasReachedMax: data.length < _locationLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        ApiResult<List<Location>> compResult =
-            await repos.getLocation(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: LocationStatus.success,
-                  locations: data,
-                  hasReachedMax: data.length < _locationLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-
+    // start from record zero for initial and refresh
+    if (state.status == LocationStatus.initial || event.refresh) {
       ApiResult<List<Location>> compResult =
           await repos.getLocation(searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: LocationStatus.success,
-                locations: List.of(state.locations)..addAll(data),
+                locations: data,
                 hasReachedMax: data.length < _locationLimit ? true : false,
+                searchString: '',
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: LocationStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: LocationStatus.failure, message: error.toString()));
     }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      ApiResult<List<Location>> compResult =
+          await repos.getLocation(searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: LocationStatus.success,
+                locations: data,
+                hasReachedMax: data.length < _locationLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: LocationStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get next page also for search
+
+    ApiResult<List<Location>> compResult =
+        await repos.getLocation(searchString: event.searchString);
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: LocationStatus.success,
+              locations: List.of(state.locations)..addAll(data),
+              hasReachedMax: data.length < _locationLimit ? true : false,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: LocationStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onLocationUpdate(
     LocationUpdate event,
     Emitter<LocationState> emit,
   ) async {
-    try {
-      List<Location> locations = List.from(state.locations);
-      if (event.location.locationId != null) {
-        ApiResult<Location> compResult =
-            await repos.updateLocation(event.location);
-        return emit(compResult.when(
-            success: (data) {
-              int index = locations.indexWhere(
-                  (element) => element.locationId == event.location.locationId);
-              locations[index] = data;
-              return state.copyWith(
-                  status: LocationStatus.success, locations: locations);
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // add
-        ApiResult<Location> compResult =
-            await repos.createLocation(event.location);
-        return emit(compResult.when(
-            success: (data) {
-              locations.insert(0, data);
-              return state.copyWith(
-                  status: LocationStatus.success, locations: locations);
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: LocationStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: LocationStatus.failure, message: error.toString()));
+    List<Location> locations = List.from(state.locations);
+    if (event.location.locationId != null) {
+      ApiResult<Location> compResult =
+          await repos.updateLocation(event.location);
+      return emit(compResult.when(
+          success: (data) {
+            int index = locations.indexWhere(
+                (element) => element.locationId == event.location.locationId);
+            locations[index] = data;
+            return state.copyWith(
+                status: LocationStatus.success, locations: locations);
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: LocationStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // add
+      ApiResult<Location> compResult =
+          await repos.createLocation(event.location);
+      return emit(compResult.when(
+          success: (data) {
+            locations.insert(0, data);
+            return state.copyWith(
+                status: LocationStatus.success, locations: locations);
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: LocationStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -143,24 +133,18 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     LocationDelete event,
     Emitter<LocationState> emit,
   ) async {
-    try {
-      List<Location> locations = List.from(state.locations);
-      ApiResult<Location> compResult =
-          await repos.deleteLocation(event.location);
-      return emit(compResult.when(
-          success: (data) {
-            int index = locations.indexWhere(
-                (element) => element.locationId == event.location.locationId);
-            locations.removeAt(index);
-            return state.copyWith(
-                status: LocationStatus.success, locations: locations);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: LocationStatus.failure, message: error.toString()));
-    }
+    List<Location> locations = List.from(state.locations);
+    ApiResult<Location> compResult = await repos.deleteLocation(event.location);
+    return emit(compResult.when(
+        success: (data) {
+          int index = locations.indexWhere(
+              (element) => element.locationId == event.location.locationId);
+          locations.removeAt(index);
+          return state.copyWith(
+              status: LocationStatus.success, locations: locations);
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: LocationStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

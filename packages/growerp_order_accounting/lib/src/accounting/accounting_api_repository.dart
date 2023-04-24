@@ -59,4 +59,15 @@ class AccountingAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
+
+  Future<ApiResult<List<TimePeriod>>> getTimePeriods() async {
+    try {
+      final response =
+          await dioClient.get('rest/s1/growerp/100/Timeperiod', apiKey!);
+      return getResponseList<TimePeriod>(
+          "timePeriods", response, (json) => TimePeriod.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
 }

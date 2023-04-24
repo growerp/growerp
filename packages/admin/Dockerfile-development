@@ -32,6 +32,14 @@ RUN flutter channel stable && flutter upgrade
 
 # Copy files to container and build
 RUN git clone -b development https://github.com/growerp/growerp.git /usr/local/growerp
+WORKDIR /usr/local/growerp/packages/growerp_core
+RUN /usr/local/flutter/bin/flutter pub get && /usr/local/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+WORKDIR /usr/local/growerp/packages/growerp_order_accounting
+RUN /usr/local/flutter/bin/flutter pub get && /usr/local/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+WORKDIR /usr/local/growerp/packages/growerp_marketing
+RUN /usr/local/flutter/bin/flutter pub get && /usr/local/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
+WORKDIR /usr/local/growerp/packages/growerp_website
+RUN /usr/local/flutter/bin/flutter pub get && /usr/local/flutter/bin/flutter pub run build_runner build --delete-conflicting-outputs
 WORKDIR /usr/local/growerp/packages/admin
 RUN /usr/local/flutter/bin/flutter build web --release
 

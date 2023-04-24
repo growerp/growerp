@@ -29,3 +29,5 @@ class LedgerFetch extends LedgerEvent {
   @override
   List<Object> get props => [reportType, periodName];
 }
+
+class LedgerTimePeriods extends LedgerEvent {}

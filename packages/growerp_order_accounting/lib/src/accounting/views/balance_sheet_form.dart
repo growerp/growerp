@@ -154,7 +154,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
           return Scaffold(
               floatingActionButton:
                   Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                if (int.parse(periodName.substring(1)) < DateTime.now().year)
+                if (state.timePeriods.any((item) => item.periodName == next))
                   FloatingActionButton.extended(
                       heroTag: 'next',
                       key: const Key("next"),
@@ -167,17 +167,18 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                       icon: const Icon(Icons.arrow_right),
                       label: Text(next)),
                 const SizedBox(height: 10),
-                FloatingActionButton.extended(
-                    heroTag: 'previous',
-                    key: const Key("previous"),
-                    onPressed: () async {
-                      _balanceSheetBloc
-                          .add(LedgerFetch(ReportType.sheet, periodName: prev));
-                      periodName = prev;
-                    },
-                    tooltip: 'Previous year',
-                    icon: const Icon(Icons.arrow_left),
-                    label: Text(prev)),
+                if (state.timePeriods.any((item) => item.periodName == prev))
+                  FloatingActionButton.extended(
+                      heroTag: 'previous',
+                      key: const Key("previous"),
+                      onPressed: () async {
+                        _balanceSheetBloc.add(
+                            LedgerFetch(ReportType.sheet, periodName: prev));
+                        periodName = prev;
+                      },
+                      tooltip: 'Previous year',
+                      icon: const Icon(Icons.arrow_left),
+                      label: Text(prev)),
               ]),
               body: RefreshIndicator(
                   onRefresh: (() async => context.read<LedgerBloc>().add(
@@ -185,10 +186,11 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                   child: ListView(children: <Widget>[
                     const SizedBox(height: 10),
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      Text("Time period: ${state.ledgerReport?.periodName}: "),
                       Text(
-                          "${state.ledgerReport?.fromDate.toString().substring(0, 10)} "
-                          " - ${state.ledgerReport?.thruDate.toString().substring(0, 10)}   "),
+                          "Time period: ${state.ledgerReport?.period!.periodName}: "),
+                      Text(
+                          "${state.ledgerReport?.period!.fromDate.toString().substring(0, 10)} "
+                          " - ${state.ledgerReport?.period!.thruDate.toString().substring(0, 10)}   "),
                       if (!expanded)
                         ElevatedButton(
                           child: const Text('Expand All'),

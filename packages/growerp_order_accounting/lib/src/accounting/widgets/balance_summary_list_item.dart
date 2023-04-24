@@ -19,18 +19,18 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:intl/intl.dart';
 
 class BalanceSummaryListItem extends StatelessWidget {
-  BalanceSummaryListItem(
+  const BalanceSummaryListItem(
       {Key? key, required this.glAccount, required this.index})
       : super(key: key);
 
   final GlAccount glAccount;
   final int index;
-  var formatter = NumberFormat.decimalPattern('en-US');
 
   @override
   Widget build(BuildContext context) {
     //   var repos = context.read<AccountingAPIRepository>();
     //   final balanceSummaryBloc = context.read<BalanceSummaryBloc>();
+    var formatter = NumberFormat.decimalPattern('en-US');
     return Material(
         child: ListTile(
       leading: CircleAvatar(
@@ -41,6 +41,7 @@ class BalanceSummaryListItem extends StatelessWidget {
       title: Row(
         children: <Widget>[
           Expanded(
+              flex: 2,
               child: Text("${glAccount.accountCode} ${glAccount.accountName}",
                   key: Key("code$index"))),
           Expanded(

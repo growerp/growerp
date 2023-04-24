@@ -45,7 +45,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                 )),
             title: Column(
               children: [
-                Text("Time period: ${widget.ledgerReport.periodName}: "),
+                Text("Time period: ${widget.ledgerReport.period!.periodName}"),
                 search
                     ? Row(children: <Widget>[
                         Expanded(
@@ -82,11 +82,11 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                     : Column(children: [
                         Row(children: const <Widget>[
                           Expanded(
+                              flex: 2,
                               child: Text("Code/Name",
                                   textAlign: TextAlign.center)),
                           Expanded(
-                              child: Text("Beginning Balance",
-                                  textAlign: TextAlign.right)),
+                              child: Text("Begin", textAlign: TextAlign.right)),
                           Expanded(
                               child: Text("Posted Debits",
                                   textAlign: TextAlign.right)),
@@ -94,7 +94,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                               child: Text("Posted Credits",
                                   textAlign: TextAlign.right)),
                           Expanded(
-                              child: Text("Ending Balance",
+                              child: Text("Ending Bal.",
                                   textAlign: TextAlign.right)),
                         ]),
                         const Divider(color: Colors.black),

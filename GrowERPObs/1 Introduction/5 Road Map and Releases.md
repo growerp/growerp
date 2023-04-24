@@ -13,6 +13,7 @@ Let us know if you have suggestions at support@growerp.com
 		* Thailand BOI version.
 	* Be able to maintain the automatic posting configuration.
 	* Access to the error journal of failed postings
+	* automatically add new timeperiod in new year
 * Ease the creation of other languages than just English.
 * Extend the growerp.com website
 * How about GPT4 in ERP? AI could make screen selections and entry suggestions?
