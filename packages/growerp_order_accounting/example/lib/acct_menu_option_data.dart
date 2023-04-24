@@ -113,7 +113,7 @@ List<MenuOption> acctMenuOptions = [
       image: "packages/growerp_core/images/reportGrey.png",
       selectedImage: "packages/growerp_core/images/report.png",
       title: "Reports",
-      route: '/reports',
+      route: '/acctReports',
       tabItems: [
         TabItem(
           form: const BalanceSheetForm(),

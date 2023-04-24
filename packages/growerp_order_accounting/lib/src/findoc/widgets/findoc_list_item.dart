@@ -257,7 +257,7 @@ class FinDocListItem extends StatelessWidget {
                               "${e.rentalThruDate.toString().substring(0, 10)}"}"
                           : finDoc.docType == FinDocType.transaction
                               ? "Type: ${e.itemType?.itemTypeId.substring(3)}\n"
-                                  "GlAccount: ${e.glAccountId} "
+                                  "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}\n"
                                   "Amount: ${e.price} "
                               : finDoc.docType == FinDocType.shipment
                                   ? "ProductId: ${e.productId} "

@@ -21,6 +21,7 @@ part 'gl_account_model.g.dart';
 class GlAccount with _$GlAccount {
   GlAccount._();
   factory GlAccount({
+    String? glAccountId,
     String? accountCode,
     String? accountName,
     int? level,

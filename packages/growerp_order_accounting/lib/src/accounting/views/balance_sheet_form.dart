@@ -90,8 +90,10 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
               SizedBox(
                   width: 100,
                   child: Text(
-                      formatter.format(DecimalIntl(
-                          Decimal.parse(glAccount.postedBalance.toString()))),
+                      formatter.format(DecimalIntl(Decimal.parse(
+                          glAccount.postedBalance != null
+                              ? glAccount.postedBalance.toString()
+                              : '0'))),
                       textAlign: TextAlign.right)),
             ]),
             children: glAccount.children.map(getTreeNode).toList(),
@@ -106,19 +108,19 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
       final treeNodes = <TreeNode>[];
       for (final element in glAccounts) {
         if (element.accountCode == 'EQUITY') {
-          equity = element.postedBalance!;
+          equity = element.postedBalance ?? Decimal.zero;
         }
         if (element.accountCode == 'DISTRIBUTION') {
-          distribution = element.postedBalance!;
+          distribution = element.postedBalance ?? Decimal.zero;
         }
         if (element.accountCode == 'ASSET') {
-          assets = element.postedBalance!;
+          assets = element.postedBalance ?? Decimal.zero;
         }
         if (element.accountCode == 'LIABILITY') {
-          liability = element.postedBalance!;
+          liability = element.postedBalance ?? Decimal.zero;
         }
         if (element.accountCode == 'INCOME') {
-          income = element.postedBalance!;
+          income = element.postedBalance ?? Decimal.zero;
         }
         treeNodes.add(getTreeNode(element));
       }

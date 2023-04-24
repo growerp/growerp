@@ -5,6 +5,7 @@ Let us know if you have suggestions at support@growerp.com
 ## Functional requests
 
 * Create account reports: balancesheet, balance posted summary.
+* Use the new [Material Design 3](https://m3.material.io/)
 * Create an accounting setup to:
 	* Select the ledger organization or upload your own.
 		* Default as is now
@@ -26,7 +27,6 @@ Let us know if you have suggestions at support@growerp.com
 * Separate the order/accounting package
 * Move chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
-* Use the new Material Design 3
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 

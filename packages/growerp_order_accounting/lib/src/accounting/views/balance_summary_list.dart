@@ -78,6 +78,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
         builder: (context, state) {
           switch (state.status) {
             case LedgerStatus.success:
+              var next = 'Y${int.parse(periodName.substring(1)) + 1}';
+              var prev = 'Y${int.parse(periodName.substring(1)) - 1}';
               return Scaffold(
                   floatingActionButton: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -88,29 +90,29 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                               heroTag: 'next',
                               key: const Key("next"),
                               onPressed: () async {
-                                periodName =
-                                    'Y${int.parse(periodName.substring(1)) + 1}';
+                                periodName = next;
                                 _balanceSummaryBloc.add(LedgerFetch(
                                     ReportType.summary,
                                     periodName: periodName));
+                                periodName = next;
                               },
                               tooltip: 'Next Year',
                               icon: const Icon(Icons.arrow_right),
-                              label: Text(periodName)),
+                              label: Text(next)),
                         const SizedBox(height: 10),
                         FloatingActionButton.extended(
                             heroTag: 'previous',
                             key: const Key("previous"),
                             onPressed: () async {
-                              periodName =
-                                  'Y${int.parse(periodName.substring(1)) - 1}';
+                              periodName = prev;
                               _balanceSummaryBloc.add(LedgerFetch(
                                   ReportType.summary,
                                   periodName: periodName));
+                              periodName = prev;
                             },
                             tooltip: 'Previous year',
                             icon: const Icon(Icons.arrow_left),
-                            label: Text(periodName)),
+                            label: Text(prev)),
                       ]),
                   body: RefreshIndicator(
                       onRefresh: (() async => context.read<LedgerBloc>().add(

@@ -1,3 +1,8 @@
+## 0.9.3
+* model changes:
+  * added glAccountId to GlAccount
+  * FinDocItem: replace glAccountId with GlAccount
+
 ## 0.9.2
 * model changes: Item Type add account info
 * removed paymentType model now used itemType
