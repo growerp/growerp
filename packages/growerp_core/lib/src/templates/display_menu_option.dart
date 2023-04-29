@@ -25,6 +25,7 @@ class DisplayMenuOption extends StatefulWidget {
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget>? actions; // actions at the appBar
+  final bool? isPhone;
   const DisplayMenuOption({
     Key? key,
     this.menuOption,
@@ -33,6 +34,7 @@ class DisplayMenuOption extends StatefulWidget {
     this.tabIndex,
     this.tabItem,
     this.actions,
+    this.isPhone = false,
   }) : super(key: key);
 
   @override
@@ -65,7 +67,6 @@ class MenuOptionState extends State<DisplayMenuOption>
     title = menuOption.title;
     route = menuOption.route; // used also for key
     child = menuOption.child;
-    leadAction = menuOption.leadAction;
     tabIndex = widget.tabIndex ?? 0;
     if (menuOption.floatButtonForm != null) {
       floatingActionButton = FloatingActionButton(
@@ -95,7 +96,11 @@ class MenuOptionState extends State<DisplayMenuOption>
       // text of tabs at top of screen (tablet, web)
       tabText.add(Align(
           alignment: Alignment.center,
-          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
+          child: Text(
+              widget.isPhone!
+                  ? tabItems[i].label
+                  : tabItems[i].label.replaceAll('\n', ' '),
+              key: Key('tap$displayMOFormKey'))));
       // tabs at bottom of screen : phone
       bottomItems.add(BottomNavigationBarItem(
           icon: tabItems[i].icon,
@@ -226,10 +231,11 @@ class MenuOptionState extends State<DisplayMenuOption>
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             key: Key(displayMOFormKey),
             automaticallyImplyLeading: isPhone,
             leading: leadAction,
-            title: appBarTitle(context, authenticate, title),
+            title: appBarTitle(context, authenticate, title, isPhone),
             actions: actions),
         drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
         floatingActionButton: floatingActionButton,
@@ -239,28 +245,29 @@ class MenuOptionState extends State<DisplayMenuOption>
   Widget tabPage(Authenticate authenticate, bool isPhone) {
     displayMOFormKey =
         tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+    Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
     debugPrint("=== current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             automaticallyImplyLeading: isPhone,
             bottom: isPhone
                 ? null
                 : TabBar(
                     controller: _controller,
-                    labelPadding: const EdgeInsets.all(10.0),
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.white,
+                    labelPadding: const EdgeInsets.all(5.0),
                     indicatorSize: TabBarIndicatorSize.label,
-                    indicator: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                        color: Colors.white),
+                    indicator: BoxDecoration(
+                      color: tabSelectedBackground,
+                      borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10)),
+                    ),
                     tabs: tabText,
                   ),
-            title: appBarTitle(
-                context, authenticate, '$title ${bottomItems[tabIndex].label}'),
+            title: appBarTitle(context, authenticate,
+                '$title ${bottomItems[tabIndex].label}', isPhone),
             actions: actions),
         drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
         floatingActionButton: floatingActionButtonList[tabIndex],

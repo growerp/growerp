@@ -86,9 +86,15 @@ class HomeFormState extends State<HomeForm> {
             Expanded(
                 child: Scaffold(
                     appBar: AppBar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
                         key: const Key('HomeFormUnAuth'),
-                        title: appBarTitle(context, authenticate,
-                            'Login${singleCompany.isEmpty ? ' / New company' : ''}')),
+                        title: appBarTitle(
+                          context,
+                          authenticate,
+                          'Login${singleCompany.isEmpty ? ' / New company' : ''}',
+                          isPhone,
+                        )),
                     body: Center(
                         child: Column(children: <Widget>[
                       const SizedBox(height: 80),

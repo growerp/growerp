@@ -96,7 +96,7 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
                             child:
                                 Text("Next Step", textAlign: TextAlign.center)),
                     ]),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]),
             trailing: search ? null : const SizedBox(width: 20)));
   }

@@ -132,27 +132,12 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Stack(clipBehavior: Clip.none, children: [
-                Container(
-                    width: 400,
+                popUp(
+                    context: context,
+                    child: listChild(productState),
+                    title: 'Category Information',
                     height: 650,
-                    padding: const EdgeInsets.all(20),
-                    child: listChild(productState)),
-                Container(
-                    height: 50,
-                    width: 400,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColorDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: const Center(
-                        child: Text('Category Information',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)))),
-                const Positioned(top: 5, right: 5, child: DialogCloseButton()),
+                    width: 400)
               ])),
           if (categoryState.status == CategoryStatus.updateLoading ||
               productState.status == ProductStatus.loading)
@@ -270,7 +255,6 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                         key: _categoryDialogFormKey,
                         child: ListView(key: const Key('listView'), children: <
                             Widget>[
-                          const SizedBox(height: 10),
                           Center(
                               child: Text(
                             'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',

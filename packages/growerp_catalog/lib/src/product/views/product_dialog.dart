@@ -152,32 +152,17 @@ class ProductDialogState extends State<ProductDialogFull> {
         return Stack(children: [
           Dialog(
               key: const Key('ProductDialog'),
-              insetPadding: const EdgeInsets.all(20),
+              insetPadding: const EdgeInsets.only(left: 20, right: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Stack(clipBehavior: Clip.none, children: [
-                Container(
-                    width: isPhone ? 400 : 800,
-                    height: isPhone ? 900 : 650,
-                    padding: const EdgeInsets.all(20),
-                    child: listChild(classificationId, isPhone, categoryState)),
-                Container(
-                    height: 50,
-                    width: isPhone ? 400 : 800,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColorDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: const Center(
-                        child: Text('Product Information',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)))),
-                const Positioned(top: 5, right: 5, child: DialogCloseButton())
+                popUp(
+                    context: context,
+                    child: listChild(classificationId, isPhone, categoryState),
+                    title: 'Product Information',
+                    height: 650,
+                    width: 400)
               ])),
           if (productState.status == ProductStatus.updateLoading ||
               categoryState.status == CategoryStatus.loading)
@@ -446,7 +431,8 @@ class ProductDialogState extends State<ProductDialogFull> {
     }
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+      column.add(Padding(
+          padding: const EdgeInsets.only(bottom: 10), child: widgets[i]));
     }
 
     return ScaffoldMessenger(
@@ -459,14 +445,11 @@ class ProductDialogState extends State<ProductDialogFull> {
               child: SingleChildScrollView(
                   key: const Key('listView'),
                   child: Column(children: <Widget>[
-                    const SizedBox(height: 50),
                     Center(
                         child: Text(
                       'Product #${widget.product.productId.isEmpty ? " New" : widget.product.productId}',
                       style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
+                          fontSize: 10, fontWeight: FontWeight.bold),
                       key: const Key('header'),
                     )),
                     const SizedBox(height: 10),

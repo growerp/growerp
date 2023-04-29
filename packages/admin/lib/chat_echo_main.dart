@@ -99,7 +99,8 @@ class MyChatApp extends StatelessWidget {
               const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
             ],
             background: Container(color: const Color(0xFFF5F5F5))),
-        theme: Themes.formTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+        darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
         onGenerateRoute: router.generateRoute,
         home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {

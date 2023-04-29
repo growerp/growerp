@@ -13,20 +13,28 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domains/domains.dart';
 
 Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
-    List<MenuOption>? menu) {
+    List<MenuOption> menu) {
   UserGroup? groupId = authenticate.user?.userGroup;
+  ThemeBloc themeBloc = context.read<ThemeBloc>();
   List options = [];
-  menu?.forEach((option) => {
-        if (option.readGroups.contains(groupId))
-          options.add({
-            "route": option.route,
-            "selImage": option.selectedImage,
-            "title": option.title,
-          }),
-      });
+  for (var option in menu) {
+    {
+      if (option.readGroups.contains(groupId)) {
+        options.add({
+          "route": option.route,
+          "selImage": option.selectedImage,
+          "title": option.title,
+        });
+      }
+    }
+  }
+  options.add({
+    "route": 'theme',
+  });
   bool loggedIn = authenticate.apiKey != null;
   if (loggedIn && isPhone) {
     return SizedBox(
@@ -62,6 +70,17 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                               style: const TextStyle(
                                   fontSize: 15, color: Colors.black)),
                         ])));
+              }
+              if (options[i - 1]["route"] == "theme") {
+                return InkWell(
+                    key: const Key('theme'),
+                    onTap: () => themeBloc.add(ThemeSwitch()),
+                    child: Column(children: [
+                      Icon(themeBloc.state.themeMode == ThemeMode.light
+                          ? Icons.light_mode
+                          : Icons.dark_mode),
+                      const Text("Theme"),
+                    ]));
               }
               return ListTile(
                   key: Key('tap${options[i - 1]["route"]}'),

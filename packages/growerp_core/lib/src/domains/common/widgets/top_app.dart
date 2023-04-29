@@ -21,18 +21,18 @@ import 'package:responsive_framework/utils/scroll_behavior.dart';
 
 import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
-import '../../../styles/themes.dart';
+import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
 
 class TopApp extends StatelessWidget {
-  const TopApp(
-      {Key? key,
-      required this.dbServer,
-      required this.chatServer,
-      this.title = 'GrowERP',
-      required this.router,
-      required this.menuOptions})
-      : super(key: key);
+  const TopApp({
+    Key? key,
+    required this.dbServer,
+    required this.chatServer,
+    this.title = 'GrowERP',
+    required this.router,
+    required this.menuOptions,
+  }) : super(key: key);
 
   final APIRepository dbServer;
   final ChatServer chatServer;
@@ -48,6 +48,8 @@ class TopApp extends StatelessWidget {
         ],
         child: MultiBlocProvider(
           providers: [
+            BlocProvider<ThemeBloc>(
+                create: (context) => ThemeBloc()..add(ThemeSwitch())),
             BlocProvider<AuthBloc>(
                 create: (context) =>
                     AuthBloc(dbServer, chatServer)..add(AuthLoad())),
@@ -69,59 +71,67 @@ class MyApp extends StatelessWidget {
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
+
   const MyApp(this.title, this.router, this.menuOptions, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        // close keyboard
-        onTap: () {
-          final currentFocus = FocusScope.of(context);
+    return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+      debugPrint("======theme mode: ${state.themeMode}");
+      return GestureDetector(
+          // close keyboard
+          onTap: () {
+            final currentFocus = FocusScope.of(context);
 
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
-        },
-        child: MaterialApp(
-            title: title,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            builder: (context, widget) => ResponsiveWrapper.builder(
-                BouncingScrollWrapper.builder(context, widget!),
-                maxWidth: 2460,
-                defaultScale: true,
-                breakpoints: [
-                  const ResponsiveBreakpoint.resize(450, name: MOBILE),
-                  const ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                  const ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-                  const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
-                ],
-                background: Container(color: const Color(0xFFF5F5F5))),
-            theme: Themes.formTheme,
-            onGenerateRoute: router,
-            home: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state.status == AuthStatus.failure) {
-                  return const FatalErrorForm(
-                      message: 'server connection problem');
-                }
-                if (state.status == AuthStatus.authenticated) {
-                  return HomeForm(menuOptions: menuOptions, title: title);
-                }
-                if (state.status == AuthStatus.unAuthenticated) {
-                  return HomeForm(menuOptions: menuOptions, title: title);
-                }
-                if (state.status == AuthStatus.changeIp) {
-                  return const ChangeIpForm();
-                }
-                return const SplashForm();
-              },
-            )));
+            if (!currentFocus.hasPrimaryFocus) {
+              currentFocus.unfocus();
+            }
+          },
+          child: MaterialApp(
+              title: title,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.delegate.supportedLocales,
+              builder: (context, widget) => ResponsiveWrapper.builder(
+                  BouncingScrollWrapper.builder(context, widget!),
+                  maxWidth: 2460,
+                  defaultScale: true,
+                  breakpoints: [
+                    const ResponsiveBreakpoint.resize(450, name: MOBILE),
+                    const ResponsiveBreakpoint.autoScale(800, name: TABLET),
+                    const ResponsiveBreakpoint.resize(1200, name: DESKTOP),
+                    const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
+                  ],
+                  background: Container(color: const Color(0xFFF5F5F5))),
+              themeMode: state.themeMode,
+              theme:
+                  ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+              darkTheme:
+                  ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+              onGenerateRoute: router,
+              home: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state.status == AuthStatus.failure) {
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  }
+                  if (state.status == AuthStatus.authenticated) {
+                    return HomeForm(menuOptions: menuOptions, title: title);
+                  }
+                  if (state.status == AuthStatus.unAuthenticated) {
+                    return HomeForm(menuOptions: menuOptions, title: title);
+                  }
+                  if (state.status == AuthStatus.changeIp) {
+                    return const ChangeIpForm();
+                  }
+                  return const SplashForm();
+                },
+              )));
+    });
   }
 }

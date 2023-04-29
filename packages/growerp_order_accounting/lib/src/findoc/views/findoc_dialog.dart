@@ -114,27 +114,9 @@ class MyFinDocState extends State<FinDocPage> {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
           return Column(children: [
-            Center(
-                child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColorDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: Center(
-                        child: Text(
-                            '${finDoc.docType} #${finDoc.id() ?? ' new'}',
-                            key: const Key('header'),
-                            style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold))))),
-            SizedBox(height: isPhone ? 10 : 20),
             headerEntry(repos),
             SizedBox(
-                height: isPhone ? 110 : 40, child: updateButtons(repos, state)),
+                height: isPhone ? 110 : 50, child: updateButtons(repos, state)),
             finDocItemList(state),
             const SizedBox(height: 10),
             Center(
@@ -167,11 +149,8 @@ class MyFinDocState extends State<FinDocPage> {
                     child: SingleChildScrollView(
                         key: const Key('listView1'),
                         child: Stack(clipBehavior: Clip.none, children: [
-                          SizedBox(
-                              width: isPhone ? 400 : 800,
-                              height: isPhone
-                                  ? 600
-                                  : 600, // not increase height otherwise tests will fail
+                          popUp(
+                              context: context,
                               child: Builder(builder: (BuildContext context) {
                                 if (finDoc.sales) {
                                   return BlocConsumer<SalesCartBloc, CartState>(
@@ -183,9 +162,11 @@ class MyFinDocState extends State<FinDocPage> {
                                         CartState>(
                                     listener: blocConsumerListener,
                                     builder: blocConsumerBuilder);
-                              })),
-                          const Positioned(
-                              top: 10, right: 10, child: DialogCloseButton())
+                              }),
+                              title:
+                                  "${finDoc.docType} #${finDoc.id() ?? ' new'}",
+                              height: 650,
+                              width: isPhone ? 400 : 800)
                         ]))))));
   }
 
@@ -200,10 +181,6 @@ class MyFinDocState extends State<FinDocPage> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                    ),
                     controller: _userSearchBoxController,
                   ),
                   menuProps:
@@ -217,8 +194,6 @@ class MyFinDocState extends State<FinDocPage> {
                 ),
                 dropdownSearchDecoration: InputDecoration(
                   labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0)),
                 ),
                 key: Key(finDocUpdated.sales == true ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
@@ -250,17 +225,15 @@ class MyFinDocState extends State<FinDocPage> {
               padding: const EdgeInsets.all(10),
               child: TextFormField(
                 key: const Key('description'),
-                decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 35.0, horizontal: 10.0),
-                    labelText: '${finDoc.docType} Description'),
+                decoration:
+                    InputDecoration(labelText: '${finDoc.docType} Description'),
                 controller: _descriptionController,
               ))),
     ];
 
     return Center(
       child: SizedBox(
-          height: isPhone ? 200 : 110,
+          height: isPhone ? 200 : 100,
           child: Form(
               key: _formKeyHeader,
               child: Column(

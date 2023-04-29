@@ -68,51 +68,34 @@ class AssetDialogState extends State<AssetDialog> {
             body: GestureDetector(
                 onTap: () {},
                 child: Dialog(
-                    key: const Key('AssetDialog'),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BlocListener<AssetBloc, AssetState>(
-                        listener: (context, state) async {
-                          switch (state.status) {
-                            case AssetStatus.success:
-                              Navigator.of(context).pop();
-                              break;
-                            case AssetStatus.failure:
-                              HelperFunctions.showMessage(context,
-                                  'Error: ${state.message}', Colors.red);
-                              break;
-                            default:
-                              const Text("????");
-                          }
-                        },
-                        child: Stack(clipBehavior: Clip.none, children: [
-                          Container(
-                              padding: const EdgeInsets.all(20),
-                              width: 400,
-                              height: 500,
-                              child: Center(
-                                child: _showForm(repos, isPhone),
-                              )),
-                          Container(
-                              height: 50,
-                              width: 400,
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColorDark,
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    topRight: Radius.circular(20),
-                                  )),
-                              child: const Center(
-                                  child: Text('Asset Information',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)))),
-                          const Positioned(
-                              top: 10, right: 10, child: DialogCloseButton())
-                        ]))))));
+                  key: const Key('AssetDialog'),
+                  insetPadding: const EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: BlocListener<AssetBloc, AssetState>(
+                      listener: (context, state) async {
+                        switch (state.status) {
+                          case AssetStatus.success:
+                            Navigator.of(context).pop();
+                            break;
+                          case AssetStatus.failure:
+                            HelperFunctions.showMessage(
+                                context, 'Error: ${state.message}', Colors.red);
+                            break;
+                          default:
+                            const Text("????");
+                        }
+                      },
+                      child: Stack(clipBehavior: Clip.none, children: [
+                        popUp(
+                            context: context,
+                            child: _showForm(repos, isPhone),
+                            title: 'Asset Information',
+                            height: 550,
+                            width: 400)
+                      ])),
+                ))));
   }
 
   Widget _showForm(CatalogAPIRepository repos, bool isPhone) {

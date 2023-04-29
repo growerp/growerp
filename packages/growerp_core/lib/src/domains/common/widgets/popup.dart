@@ -29,7 +29,7 @@ Widget popUp(
           Container(
               height: 50,
               decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColorDark,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -38,9 +38,7 @@ Widget popUp(
                   child: Text(title,
                       key: const Key('topHeader'),
                       style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold)))),
+                          fontSize: 20, fontWeight: FontWeight.bold)))),
           Expanded(
               child: Padding(padding: const EdgeInsets.all(20), child: child)),
         ])),

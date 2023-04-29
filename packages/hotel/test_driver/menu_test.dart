@@ -39,7 +39,7 @@ void main() {
   Future<bool> waitFor(SerializableFinder itemToFind,
       {bool? expected, Duration timeout = const Duration(seconds: 10)}) async {
     if (expected != null)
-      print("====checking  ${itemToFind.serialize()['keyValueString']}");
+      debugPrint("====checking  ${itemToFind.serialize()['keyValueString']}");
     try {
       await driver.waitFor(itemToFind, timeout: timeout);
       if (expected != null && expected != true) {

@@ -21,7 +21,6 @@ Future<void> main() async {
       final File image =
           await File('screenshots/$screenshotName.png').create(recursive: true);
       image.writeAsBytesSync(screenshotBytes);
-      print("======================screenshot==============");
       // Here is an example of using an argument that was passed in via the
       // optional 'args' Map.
       if (args != null) {

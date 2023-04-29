@@ -13,7 +13,6 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_core/growerp_core.dart';
 
 part 'time_period_model.freezed.dart';
 part 'time_period_model.g.dart';

@@ -396,11 +396,8 @@ class CompanyFormState extends State<CompanyDialog> {
         ))
       ]),
       InputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Postal Address',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
           ),
           child: Row(children: [
             Expanded(
@@ -451,11 +448,8 @@ class CompanyFormState extends State<CompanyDialog> {
                     ]))),
           ])),
       InputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Payment method',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
           ),
           child: Row(children: [
             Expanded(

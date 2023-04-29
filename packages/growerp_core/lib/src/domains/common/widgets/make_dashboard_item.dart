@@ -26,10 +26,9 @@ Card makeDashboardItem(
   bool phone = ResponsiveWrapper.of(context).isSmallerThan(DESKTOP);
   return Card(
       elevation: 1.0,
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(5.0),
       child: Container(
-        decoration:
-            const BoxDecoration(color: Color.fromRGBO(220, 220, 220, 1.0)),
+        decoration: const BoxDecoration(),
         child: InkWell(
           key: Key(key),
           onTap: () {
@@ -47,24 +46,20 @@ Card makeDashboardItem(
               Center(
                 child: Text(menuOption.title,
                     style: TextStyle(
-                        fontSize: phone ? 15 : 25,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
+                        fontSize: phone ? 15 : 25, fontWeight: FontWeight.bold),
                     key: Key("${key}Title")),
               ),
               const SizedBox(height: 2.0),
               Center(
                 child: Text(subTitle,
-                    style: TextStyle(
-                        fontSize: phone ? 12 : 20, color: Colors.black),
+                    style: TextStyle(fontSize: phone ? 12 : 20),
                     key: Key("${key}SubTitle")),
               ),
               const SizedBox(height: 2.0),
               if (subTitle1 != null)
                 Center(
                   child: Text(subTitle1,
-                      style: TextStyle(
-                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      style: TextStyle(fontSize: phone ? 12 : 20),
                       key: Key("${key}SubTitle1")),
                 ),
               const SizedBox(height: 2.0),
@@ -73,8 +68,7 @@ Card makeDashboardItem(
                   const SizedBox(height: 2.0),
                   Center(
                     child: Text(subTitle2,
-                        style: TextStyle(
-                            fontSize: phone ? 12 : 20, color: Colors.black),
+                        style: TextStyle(fontSize: phone ? 12 : 20),
                         key: Key("${key}SubTitle2")),
                   )
                 ]),
@@ -82,16 +76,14 @@ Card makeDashboardItem(
               if (subTitle3 != null)
                 Center(
                   child: Text(subTitle3,
-                      style: TextStyle(
-                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      style: TextStyle(fontSize: phone ? 12 : 20),
                       key: Key("${key}SubTitle3")),
                 ),
               const SizedBox(height: 2.0),
               if (subTitle4 != null)
                 Center(
                   child: Text(subTitle4,
-                      style: TextStyle(
-                          fontSize: phone ? 12 : 20, color: Colors.black),
+                      style: TextStyle(fontSize: phone ? 12 : 20),
                       key: Key("${key}SubTitle4")),
                 )
             ],

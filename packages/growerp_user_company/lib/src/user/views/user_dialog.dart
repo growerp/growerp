@@ -473,8 +473,6 @@ class UserDialogState extends State<UserDialog> {
                           ),
                           child: Checkbox(
                             key: const Key('loginDisabled'),
-                            checkColor: Colors.white,
-                            //     fillColor: MaterialStateProperty.resolveWith(getColor),
                             value: _isLoginDisabled,
                             onChanged: (bool? value) {
                               setState(() {
@@ -564,8 +562,7 @@ class UserDialogState extends State<UserDialog> {
     List<Widget> rows = [];
     if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
       rows.add(const SizedBox(height: 20));
-      rows.add(Container(
-          color: Colors.white,
+      rows.add(SizedBox(
           height: 350,
           child: MasonryGridView.count(
             itemCount: widgets.length,
@@ -588,19 +585,15 @@ class UserDialogState extends State<UserDialog> {
                   child: Text(
                 'User $_selectedRole'
                 ' #${updatedUser.partyId ?? " New"}',
-                style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 key: const Key('header'),
               )),
               Center(
                   child: Text(
                 'Company #${updatedUser.company!.partyId ?? ""}',
-                style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 key: const Key('compHeader'),
               )),
               const SizedBox(height: 10),
@@ -614,8 +607,7 @@ class UserDialogState extends State<UserDialog> {
                       : widget.user.image != null
                           ? Image.memory(widget.user.image!, scale: 0.3)
                           : Text(widget.user.firstName?.substring(0, 1) ?? '',
-                              style: const TextStyle(
-                                  fontSize: 30, color: Colors.black))),
+                              style: const TextStyle(fontSize: 30))),
               Column(children: rows.isNotEmpty ? rows : column),
             ])));
   }
