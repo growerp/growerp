@@ -328,7 +328,7 @@ class MyFinDocState extends State<FinDocPage> {
               visible: !finDoc.idIsNull(),
               child: ElevatedButton(
                   key: const Key('cancelFinDoc'),
-                  child: Text('Cancel ${finDocUpdated.docType}'),
+                  child: const Text('Cancel'),
                   onPressed: () {
                     _cartBloc.add(CartCancelFinDoc(finDocUpdated));
                   })),
@@ -340,25 +340,27 @@ class MyFinDocState extends State<FinDocPage> {
                   _cartBloc.add(CartClear());
                 }
               }),
-          ElevatedButton(
-              key: const Key('update'),
-              child: Text(
-                  '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
-              onPressed: () {
-                finDocUpdated = finDocUpdated.copyWith(
-                    otherUser: _selectedUser,
-                    description: _descriptionController.text);
-                if (finDocUpdated.items.isNotEmpty &&
-                    finDocUpdated.otherUser != null) {
-                  _cartBloc.add(CartCreateFinDoc(finDocUpdated));
-                } else {
-                  HelperFunctions.showMessage(
-                      context,
-                      'A ${finDocUpdated.sales ? "Customer" : "Supplier"} '
-                      'and at least one ${finDocUpdated.docType} item is required!',
-                      Colors.red);
-                }
-              }),
+          Expanded(
+            child: ElevatedButton(
+                key: const Key('update'),
+                child: Text(
+                    '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                onPressed: () {
+                  finDocUpdated = finDocUpdated.copyWith(
+                      otherUser: _selectedUser,
+                      description: _descriptionController.text);
+                  if (finDocUpdated.items.isNotEmpty &&
+                      finDocUpdated.otherUser != null) {
+                    _cartBloc.add(CartCreateFinDoc(finDocUpdated));
+                  } else {
+                    HelperFunctions.showMessage(
+                        context,
+                        'A ${finDocUpdated.sales ? "Customer" : "Supplier"} '
+                        'and at least one ${finDocUpdated.docType} item is required!',
+                        Colors.red);
+                  }
+                }),
+          ),
         ]);
   }
 

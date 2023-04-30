@@ -83,8 +83,8 @@ class InvoiceTest {
       } else {
         await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
         await CommonTest.tapByKey(tester, 'edit0');
-        expect(
-            CommonTest.getTextField('header').split('#')[1], invoice.invoiceId);
+        expect(CommonTest.getTextField('topHeader').split('#')[1],
+            invoice.invoiceId);
       }
       await CommonTest.checkWidgetKey(
           tester, "FinDocDialog${invoice.sales ? 'Sales' : 'Purchase'}Invoice");
