@@ -77,7 +77,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-      debugPrint("======theme mode: ${state.themeMode}");
       return GestureDetector(
           // close keyboard
           onTap: () {

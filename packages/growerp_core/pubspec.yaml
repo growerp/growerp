@@ -3,23 +3,20 @@ description: The Core of the GrowERP frontend
 version: 0.9.3
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_core
-
-platforms:
-  android:
-  ios:
-  linux:
-  macos:
-  web:
-  windows:
-
-environment:
+platforms: 
+  android: true
+  ios: true
+  linux: true
+  macos: true
+  web: true
+  windows: true
+environment: 
   sdk: '>=2.18.5 <3.0.0'
-  flutter: ">=1.17.0"
-
-dependencies:
-  flutter:
+  flutter: '>=1.17.0'
+dependencies: 
+  flutter: 
     sdk: flutter
-  flutter_localizations:
+  flutter_localizations: 
     sdk: flutter
   decimal: ^2.1.0
   reorderables: ^0.5.1
@@ -45,12 +42,8 @@ dependencies:
   collection: ^1.16.0
   http: ^0.13.5
   flutter_lints: ^2.0.1
-
-  #NETWORK
   json_annotation: ^4.7.0
   dio: ^5.0.1
-
-  #UTILITIES
   freezed_annotation: ^2.0.3
   credit_card_validator: ^2.0.1
   markdown_widget: ^1.2.8
@@ -62,29 +55,24 @@ dependencies:
   fast_csv: ^0.1.44
   archive: ^3.3.0
   image: ^4.0.2
-  flutter_test:
+  flutter_test: 
     sdk: flutter
-  integration_test:
+  integration_test: 
     sdk: flutter
   flutter_staggered_grid_view: ^0.6.2
   material_color_utilities: ^0.2.0
-
-dev_dependencies:
-  flutter_driver:
+dev_dependencies: 
+  flutter_driver: 
     sdk: flutter
   freezed: ^2.0.3
   mockito: ^5.0.2
   very_good_analysis: ^3.0.0
   bloc_test: ^9.0.1
-  # flutter_launcher_icons: ^0.9.0
   build_runner: ^2.1.11
   mobx_codegen: ^2.0.4
   json_serializable: ^6.2.0
   dependency_validator: ^3.2.0
-# run dependency validator: flutter pub run dependency_validator
-
-flutter:
+flutter: 
   uses-material-design: true
-
-flutter_intl:
+flutter_intl: 
   enabled: true

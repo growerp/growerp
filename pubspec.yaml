@@ -5,5 +5,9 @@ repository: https://github.com/growerp/growerp
 environment:
   sdk: '>=2.10.0 <3.0.0'
 
+dependencies: 
+
 dev_dependencies:
   flutter_lints: ^2.0.1
+  utils:
+    path: packages/utils/
