@@ -15,7 +15,7 @@ Logger logger = Logger(
 
 final home = Platform.environment['HOME'];
 
-Future<void> main(List<String> args) async {
+main(List<String> args) {
   logger.i('creating a release and development environment\n'
       'all files are in the home/growerp directory\n'
       'flutter/development & flutter/release: flutter\n'
@@ -34,8 +34,8 @@ Future<void> main(List<String> args) async {
           '$home/growerp/flutterDevelopment');
       run('git checkout development',
           workingDirectory: '$home/growerp/flutterDevelopment');
-      logger.i('\n\ncreating moqui release...');
       // moqui release
+      logger.i('creating moqui release...');
       run('git clone -b growerp https://github.com/growerp/moqui-framework.git '
           '$home/growerp/moquiRelease');
       run('git clone https://github.com/growerp/moqui-runtime '
@@ -54,27 +54,29 @@ Future<void> main(List<String> args) async {
           '$home/growerp/moquiRelease/runtime/component/moqui-fop');
       run('./gradlew downloadElasticSearch',
           workingDirectory: '$home/growerp/moquiRelease');
+      logger.i('building moqui release...');
       run('./gradlew build', workingDirectory: '$home/growerp/moquiRelease');
       run('java -jar moqui.war load types=seed,seed-initial,install',
           workingDirectory: '$home/growerp/moquiRelease');
-      logger.i('\n\ncreating moqui development...');
+      logger.i('creating moqui development...');
       // moqui development copy from release and switch branch
       run('cp -r $home/growerp/moquiRelease $home/growerp/moquiDevelopment');
       run('git checkout development',
           workingDirectory:
               '$home/growerp/moquiRelease/runtime/component/growerp');
+      logger.i('building moqui release...');
       run('./gradlew build',
           workingDirectory: '$home/growerp/moquiDevelopment');
       run('java -jar moqui.war load types=seed,seed-initial,install',
           workingDirectory: '$home/growerp/moquiDevelopment');
       // chat
-      logger.i('\n\ncreating chat server...');
+      logger.i('creating dev/rel chat server...');
       run('git clone https://github.com/growerp/growerp-chat $home/growerp/chatRelease');
       run('cp -r $home/growerp/chatRelease $home/growerp/chatDevelopment');
       run('git checkout development',
           workingDirectory: '$home/growerp/chatDevelopment');
     } else {
-      logger.i('updating local installation at $home/growerp');
+      logger.i('updating local installation from github at $home/growerp');
       logger.w('Your changes will be stashed.....get back with: git stash pop');
       run('git stash', workingDirectory: '$home/growerp/moquiDevelopment');
       run('./gradlew gitp', workingDirectory: '$home/growerp/moquiDevelopment');
@@ -99,14 +101,25 @@ Future<void> main(List<String> args) async {
         workingDirectory: '$home/growerp/flutterDevelopment/packages/utils');
     run('flutter pub get',
         workingDirectory: '$home/growerp/flutterRelease/packages/utils');
+/*  build runner missing in production TODO: remove this comment with next release  
     run('flutter pub run build_runner build --delete-conflicting-outputs',
         workingDirectory: '$home/growerp/flutterRelease/packages/utils');
-    // start servers
-    logger.i("start servers in seperate windows");
-    run('gnome-terminal -- bash -c "cd $home/growerp/moquiDevelopment && java -jar moqui.war"');
-    run('gnome-terminal -- bash -c "cd $home/growerp/chatDevelopment && ./gradlew apprun"');
-    run('flutter run',
-        workingDirectory: '$home/growerp/flutterDevelopment/packages/admin');
+*/ // start servers
+    if (Platform.isLinux) {
+      logger.i("start servers in seperate terminal...");
+      run('gnome-terminal -- bash -c "cd $home/growerp/moquiDevelopment && java -jar moqui.war"');
+      run('gnome-terminal -- bash -c "cd $home/growerp/chatDevelopment && ./gradlew apprun"');
+      run('flutter run',
+          workingDirectory: '$home/growerp/flutterDevelopment/packages/admin');
+    } else {
+      logger..i('GrowERP Installed but not started');
+      logger..i('Create 3 command line windows:');
+      logger.i(
+          "Moqui backend in directory moquiDevelopment: java -jar moqui.war");
+      logger.i("Chat backend in directory chatDevelopment: gradlew appRun");
+      logger
+          .i("Flutter front-end in directory flutterDevelopment: flutter run");
+    }
     // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     logger.e(e);
