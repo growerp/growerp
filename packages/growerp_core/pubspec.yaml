@@ -4,12 +4,12 @@ version: 0.9.3
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_core
 platforms: 
-  android: true
-  ios: true
-  linux: true
-  macos: true
-  web: true
-  windows: true
+  android: null
+  ios: null
+  linux: null
+  macos: null
+  web: null
+  windows: null
 environment: 
   sdk: '>=2.18.5 <3.0.0'
   flutter: '>=1.17.0'
