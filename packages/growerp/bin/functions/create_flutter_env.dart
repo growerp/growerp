@@ -37,7 +37,7 @@ void createFlutterEnv() {
         workingDirectory: package.fileLocation);
   });
   // growerp package rel/dev
-/*  logger.i('build package growerp both dev and release');
+  logger.i('build package growerp both dev and release');
   run('flutter pub get',
       workingDirectory: '$growerpPath/flutterDevelopment/packages/growerp');
   run('flutter pub run build_runner build --delete-conflicting-outputs',
@@ -47,7 +47,6 @@ void createFlutterEnv() {
   run('flutter pub run build_runner build --delete-conflicting-outputs',
       workingDirectory: '$growerpPath/flutterRelease/packages/growerp');
   // change config to use growerp test backend
-*/
   final configFile = File(
       '$growerpPath/flutterDevelopment/packages/admin/assets/cfg/app_settings.json');
   final config = configFile.readAsLinesSync().toList();

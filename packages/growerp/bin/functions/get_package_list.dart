@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls
+
 import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:pub_api_client/pub_api_client.dart';
@@ -20,13 +22,17 @@ List<GrowerpPackage> getPackageList() {
       final packageName = file.substring(nameStart, nameEnd);
       final pubPackage = await client.packageInfo(packageName);
       final dynamic pubSpec = loadYaml(File(file).readAsStringSync());
+      var buildRunner = true;
+      if (pubSpec['dev_dependencies']['build_runner'] == null) {
+        buildRunner = false;
+      }
 
       componentList.add(GrowerpPackage(
           name: packageName,
           fileLocation: file.substring(0, nameEnd),
           pubVersion: pubPackage.latest.version,
           pubDate: pubPackage.latest.published,
-          // ignore: avoid_dynamic_calls
+          buildRunner: buildRunner,
           version: pubSpec['version'] as String));
     }
   });

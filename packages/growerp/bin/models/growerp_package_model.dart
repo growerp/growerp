@@ -20,6 +20,9 @@ class GrowerpPackage with _$GrowerpPackage {
 
     /// version from the pubspec.yaml
     required String version,
+
+    /// flag to indicate need build_runner if installed package
+    required bool buildRunner,
   }) = _GrowerpPackage;
   GrowerpPackage._();
 
