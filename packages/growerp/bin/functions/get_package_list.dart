@@ -37,9 +37,13 @@ List<GrowerpPackage> getPackageList() {
     }
   });
   // move growerp_core to the beginning of the list
-  final coreIndex = componentList.indexWhere((e) => e.name == 'growerp_core');
-  final temp = componentList.first;
-  componentList.first = componentList[coreIndex];
-  componentList[coreIndex] = temp;
+  if (componentList.isNotEmpty) {
+    final coreIndex = componentList.indexWhere((e) => e.name == 'growerp_core');
+    final temp = componentList.first;
+    componentList.first = componentList[coreIndex];
+    componentList[coreIndex] = temp;
+  } else {
+    logger.e('no packages found?');
+  }
   return componentList;
 }

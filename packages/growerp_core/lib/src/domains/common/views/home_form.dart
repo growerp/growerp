@@ -45,7 +45,7 @@ class HomeFormState extends State<HomeForm> {
                 "${GlobalConfiguration().get("appName")} "
                 "V${GlobalConfiguration().get("version")} "
                 "#${GlobalConfiguration().get("build")}",
-                style: const TextStyle(fontSize: 10, color: Colors.black))));
+                style: const TextStyle(fontSize: 10))));
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
@@ -110,7 +110,6 @@ class HomeFormState extends State<HomeForm> {
                           child: Text(widget.title,
                               style: TextStyle(
                                   fontSize: isPhone ? 15 : 25,
-                                  color: Colors.black,
                                   fontWeight: FontWeight.bold))),
                       const SizedBox(height: 40),
                       authenticate.company?.partyId != null

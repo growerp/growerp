@@ -20,6 +20,16 @@
             }
           },
           {
+            "id": "efd96dc2a1e12e28",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.2.7"
+              }
+            }
+          },
+          {
             "id": "d7d04bb464cbedd9",
             "type": "leaf",
             "state": {
@@ -43,7 +53,8 @@
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -86,6 +97,14 @@
             "type": "leaf",
             "state": {
               "type": "starred",
+              "state": {}
+            }
+          },
+          {
+            "id": "d0cc77ac05e943c6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
               "state": {}
             }
           }
@@ -170,7 +189,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "ee481afbef6892fd",
+  "active": "efd96dc2a1e12e28",
   "lastOpenFiles": [
     "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",
