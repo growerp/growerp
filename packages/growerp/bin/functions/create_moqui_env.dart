@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dcli/dcli.dart';
 
 import '../models/globals.dart';
@@ -46,5 +48,10 @@ void createMopquiEnv() {
     run('./gradlew gitp', workingDirectory: '$growerpPath/moquiDevelopment');
     run('git stash', workingDirectory: '$growerpPath/moquiRelease');
     run('./gradlew gitp', workingDirectory: '$growerpPath/moquiRelease');
+  }
+  if (Platform.isLinux) {
+    logger.i('Starting Moqui and chat in different window....');
+    run('gnome-terminal -- bash -c "cd $growerpPath/moquiDevelopment && java -jar moqui.war"');
+    run('gnome-terminal -- bash -c "cd $growerpPath/chatDevelopment && ./gradlew apprun"');
   }
 }
