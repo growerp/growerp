@@ -26,6 +26,6 @@ class GrowerpPackage with _$GrowerpPackage {
   }) = _GrowerpPackage;
   GrowerpPackage._();
 
-  factory GrowerpPackage.fromJson(Map<String, Object?> json) =>
+  factory GrowerpPackage.fromJson(Map<String, dynamic> json) =>
       _$GrowerpPackageFromJson(json);
 }

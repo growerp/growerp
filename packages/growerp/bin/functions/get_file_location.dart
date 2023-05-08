@@ -2,9 +2,9 @@ import 'package:dcli/dcli.dart';
 
 import '../models/models.dart';
 
+/// get the full file location path from a partial name
 String getFileLocation(String fileString) {
   final checks = fileString.split('/');
-  // find filename out of provided path
   final files = find(checks[checks.length - 1],
           types: [Find.file],
           workingDirectory: '$growerpPath/flutterDevelopment')
@@ -18,11 +18,11 @@ String getFileLocation(String fileString) {
         found = false;
         break;
       }
-      // still found return
-      if (found) {
-        returnFile = file;
-        break;
-      }
+    }
+    // still found return
+    if (found) {
+      returnFile = file;
+      break;
     }
   }
   return returnFile;

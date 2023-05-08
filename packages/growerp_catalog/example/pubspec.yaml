@@ -2,24 +2,20 @@ name: example
 description: A example project.
 version: 1.0.0+1
 publish_to: none
-
-environment:
+environment: 
   sdk: '>=2.18.6 <3.0.0'
-
-dependencies:
-  flutter:
+dependencies: 
+  flutter: 
     sdk: flutter
   cupertino_icons: ^1.0.2
-  growerp_catalog:
+  growerp_catalog: 
     path: ../
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^2.0.0
-
-flutter:
+flutter: 
   uses-material-design: true
-  assets:
+  assets: 
     - assets/cfg/

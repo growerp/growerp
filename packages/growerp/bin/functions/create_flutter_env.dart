@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:dcli/dcli.dart';
 
 import '../models/globals.dart';
@@ -30,7 +28,13 @@ void createFlutterEnv() {
     run('git pull', workingDirectory: '$growerpPath/flutterRelease');
   }
   logger.i('building packages in development...');
-  getPackageList().forEach((package) {
+  final packages = getPackageList();
+  if (packages.isEmpty) {
+    logger.e(
+        'No packages could be build, pub.dev limit reached? try later again');
+    return;
+  }
+  for (final package in packages) {
     logger.i('building package: ${package.name}');
     run('flutter pub get', workingDirectory: package.fileLocation);
     if (package.buildRunner) {
@@ -38,7 +42,7 @@ void createFlutterEnv() {
       run('flutter pub run build_runner build --delete-conflicting-outputs',
           workingDirectory: package.fileLocation);
     }
-  });
+  }
   // change config to use growerp test backend
   if (!exists('$growerpPath/moquiDevelopment')) {
     updateAppSettings();
