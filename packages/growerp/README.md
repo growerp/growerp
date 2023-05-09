@@ -16,8 +16,11 @@ commands available:
         -dev    : only the development environment
         -start  : start the process in a separate window (only development)
 
-    growerp install -start
-        default: just flutter frontend rel+dev using our test backend
+    growerp install 
+        -start start in separate window
+        -noBuild: do not compile and not db initial load
+
+    default: just flutter frontend rel+dev using our test backend
 
 - growerp switchPackage
     dependent on the 'admin' package growerp_core dependency status

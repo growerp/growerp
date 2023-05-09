@@ -1,4 +1,8 @@
-## 0.1.0-dev.6
+## 0.1.0-dev.7
+
+- added noBuild option for Moqui backend to be used in docker image build
+
+# 0.1.0-dev.6
 
 - added various options to the install command.
 

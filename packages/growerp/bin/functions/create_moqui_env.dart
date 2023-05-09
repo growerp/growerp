@@ -4,23 +4,24 @@ import 'package:dcli/dcli.dart';
 
 import '../models/models.dart';
 
-void createMoquiEnv({Environment? env, bool start = false}) {
+void createMoquiEnv(
+    {Environment? env, bool start = false, bool noBuild = false}) {
   if (!exists(growerpPath)) {
     run('mkdir $growerpPath');
   }
   if (env == null || env == Environment.development) {
-    getMoquiFiles('moquiDevelopment');
+    getMoquiFiles('moquiDevelopment', noBuild);
     if (start && Platform.isLinux) {
       logger.i('Starting Moqui in different window....');
       run('gnome-terminal -- bash -c "cd $growerpPath/moquiDevelopment && java -jar moqui.war"');
     }
   }
   if (env == null || env == Environment.release) {
-    getMoquiFiles('moquiRelease');
+    getMoquiFiles('moquiRelease', noBuild);
   }
 }
 
-void getMoquiFiles(String targetDir) {
+void getMoquiFiles(String targetDir, bool noBuild) {
   if (!exists('$growerpPath/$targetDir')) {
     logger.i('creating moqui $targetDir part...');
 
@@ -73,8 +74,10 @@ void getMoquiFiles(String targetDir) {
     run('./gradlew gitp', workingDirectory: '$growerpPath/$targetDir');
     run('./gradlew cleanall', workingDirectory: '$growerpPath/$targetDir');
   }
-  logger.i('build Moqui backend');
-  run('./gradlew build', workingDirectory: '$growerpPath/$targetDir');
-  run('java -jar moqui.war load types=seed,seed-initial,install',
-      workingDirectory: '$growerpPath/$targetDir');
+  if (!noBuild) {
+    logger.i('build Moqui backend');
+    run('./gradlew build', workingDirectory: '$growerpPath/$targetDir');
+    run('java -jar moqui.war load types=seed,seed-initial,install',
+        workingDirectory: '$growerpPath/$targetDir');
+  }
 }

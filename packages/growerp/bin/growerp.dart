@@ -27,6 +27,13 @@ void main(List<String> args) {
       start = true;
     }
 
+    var noBuild = true;
+    index = newArgs.indexOf('-noloaddata');
+    if (index > 0) {
+      newArgs.removeAt(index);
+      noBuild = true;
+    }
+
     final index1 = newArgs.indexWhere((element) => element.startsWith('-'));
     if (index1 > 0) {
       print('flag ${args[index1]} not recognized');
@@ -44,7 +51,7 @@ void main(List<String> args) {
                 case 'full':
                   print('Full installation: in the $growerpPath directory');
                   createChatEnv(start: start, env: env);
-                  createMoquiEnv(start: start, env: env);
+                  createMoquiEnv(start: start, env: env, noBuild: noBuild);
                   createFlutterEnv(start: start, env: env);
                   break;
                 case 'frontend':
@@ -54,7 +61,7 @@ void main(List<String> args) {
                   break;
                 case 'backend':
                   print('Installing just the moqui backend at $growerpPath');
-                  createMoquiEnv(start: start, env: env);
+                  createMoquiEnv(start: start, env: env, noBuild: noBuild);
                   break;
                 case 'chat':
                   print('Installing just the chat server at $growerpPath');
