@@ -11,7 +11,13 @@ commands available:
     frontend: Just flutter frontend using our test backend
     backend: Just the Moqui and chat backend.
 
-    default: just flutter frontend using our test backend
+    flags: (default: both environments)
+        -rel    : only the release environment
+        -dev    : only the development environment
+        -start  : start the process in a separate window (only development)
+
+    growerp install -start
+        default: just flutter frontend rel+dev using our test backend
 
 - growerp switchPackage
     dependent on the 'admin' package growerp_core dependency status

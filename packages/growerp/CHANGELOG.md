@@ -1,3 +1,7 @@
+## 0.1.0-dev.6
+
+- added various options to the install command.
+
 ## 0.1.0-dev.5
 
 - added the 'growerp switchPackage' command
