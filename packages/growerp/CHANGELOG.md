@@ -1,3 +1,7 @@
+## 0.1.0-dev.8
+
+- now possible to install specific parts of the system, is used in docker builds
+
 ## 0.1.0-dev.7
 
 - added noBuild option for Moqui backend to be used in docker image build

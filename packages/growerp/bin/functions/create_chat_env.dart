@@ -4,11 +4,11 @@ import 'package:dcli/dcli.dart';
 
 import '../models/models.dart';
 
-void createChatEnv({Environment? env, bool start = false}) {
+void createChatEnv({required Environment env, bool start = false}) {
   if (!exists(growerpPath)) {
     run('mkdir $growerpPath');
   }
-  if (env == null || env == Environment.development) {
+  if (env == Environment.full || env == Environment.development) {
     if (!exists('$growerpPath/chatDevelopment')) {
       logger.i('creating chat development server...');
       run('git clone -b development https://github.com/growerp/growerp-chat $growerpPath/chatDevelopment');
@@ -30,7 +30,7 @@ void createChatEnv({Environment? env, bool start = false}) {
     }
   }
 
-  if (env == null || env == Environment.release) {
+  if (env == Environment.full || env == Environment.release) {
     if (!exists('$growerpPath/chatRelease')) {
       logger.i('creating chat release server...');
       run('git clone https://github.com/growerp/growerp-chat $growerpPath/chatRelease');

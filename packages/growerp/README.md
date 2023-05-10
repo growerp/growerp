@@ -1,7 +1,7 @@
 
 GrowERP utilities
 
-A command line utility to easy install and maint the system
+A command line utility to easy install and maintain the system
 
 commands available:
 

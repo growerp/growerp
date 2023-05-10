@@ -5,20 +5,17 @@ import 'dart:io';
 import 'package:pub_api_client/pub_api_client.dart';
 import 'package:yaml_modify/yaml_modify.dart';
 
+import '../models/models.dart';
 import 'functions.dart';
 
-/// will change all packages including the app 'admin'
+/// will change all packages in development including the app 'admin'
 /// from version in pub.dev to a local path and vice versa
 Future<void> switchPackage() async {
   var production = true;
   // switch admin app
-  final adminFileName = getFileLocation('packages/admin/pubspec.yaml');
-  if (adminFileName.isEmpty) {
-    print('could not find packages/admin');
-    return;
-  }
-  final adminGrowerpPackage = await getGrowerpPackageInfo(PubClient(),
-      adminFileName.substring(0, adminFileName.lastIndexOf('/pubspec.yaml')));
+  final adminFileName = '$growerpPath/flutterDevelopment/packages/admin';
+  final adminGrowerpPackage =
+      await getGrowerpPackageInfo(PubClient(), '$adminFileName/pubspec.yaml');
   final adminFile = File(adminFileName);
   final dynamic adminYaml = loadYaml(adminFile.readAsStringSync());
   if (adminYaml['dependencies']['growerp_core'] == null) {
@@ -31,10 +28,11 @@ Future<void> switchPackage() async {
     print('switch to test using path');
     production = false;
   }
-  final pkgList = getPackageList()..add(adminGrowerpPackage);
+  final pkgList = getPackageList('$growerpPath/flutterDevelopment/packages')
+    ..add(adminGrowerpPackage);
   if (pkgList.isEmpty) {
     print('No packages could be found, pub.dev limit reached? try later again');
-    return;
+    exit(1);
   }
   for (final package in pkgList) {
     final pkgFile = File('${package.fileLocation}/pubspec.yaml');
@@ -54,6 +52,5 @@ Future<void> switchPackage() async {
     }
     final pkgStrYaml = toYamlString(pkgModifiable);
     File('${package.fileLocation}/pubspec.yaml').writeAsStringSync(pkgStrYaml);
-    //print(pkgStrYaml);
   }
 }

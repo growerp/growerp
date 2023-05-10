@@ -1,7 +1,7 @@
 import 'package:dcli/dcli.dart';
 import 'package:logger/logger.dart';
 
-String growerpPath = '$HOME/growerp';
+String growerpPath = '$HOME/growerpTest';
 
 final logger = Logger(
     printer: PrettyPrinter(

@@ -5,7 +5,7 @@ import 'package:pub_api_client/pub_api_client.dart';
 import '../models/models.dart';
 import 'functions.dart';
 
-List<GrowerpPackage> getPackageList() {
+List<GrowerpPackage> getPackageList(String packageDir) {
   final componentList = <GrowerpPackage>[];
   final client = PubClient();
 

@@ -2,77 +2,70 @@ import 'functions/functions.dart';
 import 'models/models.dart';
 
 void main(List<String> args) {
-  var newArgs = List.of(args);
-  if (newArgs.isEmpty) {
+  if (args.isEmpty) {
     print('Please enter a GrowERP command? valid commands are:'
         ' install | switchPackage');
   } else {
-    // flags
-    Environment? env;
-    var index = newArgs.indexOf('-dev');
-    if (index > 0) {
-      newArgs.removeAt(index);
-      env = Environment.development;
-    }
-    index = newArgs.indexOf('-rel');
-    if (index > 0) {
-      newArgs.removeAt(index);
-      env = Environment.release;
-    }
-
+    final modifiedArgs = <String>[];
+    var env = Environment.full;
     var start = false;
-    index = newArgs.indexOf('-start');
-    if (index > 0) {
-      newArgs.removeAt(index);
-      start = true;
+    var build = true;
+    for (final arg in args) {
+      switch (arg) {
+        case '-dev':
+          env = Environment.development;
+          break;
+        case '-rel':
+          env = Environment.release;
+          break;
+        case '-start':
+          start = true;
+          break;
+        case '-noBuild':
+        case '-nobuild':
+          build = false;
+          break;
+        default:
+          if (arg.startsWith('-')) {
+            print('flag $arg not recognized');
+          } else {
+            modifiedArgs.add(arg);
+          }
+      }
     }
-
-    var noBuild = true;
-    index = newArgs.indexOf('-noloaddata');
-    if (index > 0) {
-      newArgs.removeAt(index);
-      noBuild = true;
-    }
-
-    final index1 = newArgs.indexWhere((element) => element.startsWith('-'));
-    if (index1 > 0) {
-      print('flag ${args[index1]} not recognized');
-      return;
-    }
+    print('Flags: -noBuild: ${!build} -start: $start env: $env');
 
     // commands
-    switch (args[0].toLowerCase()) {
+    switch (modifiedArgs[0].toLowerCase()) {
       case 'install':
         {
-          if (newArgs.length > 1) {
-            if (['frontend', 'full', 'backend', 'chat']
-                .contains(args[1].toLowerCase())) {
-              switch (args[1]) {
-                case 'full':
-                  print('Full installation: in the $growerpPath directory');
-                  createChatEnv(start: start, env: env);
-                  createMoquiEnv(start: start, env: env, noBuild: noBuild);
-                  createFlutterEnv(start: start, env: env);
-                  break;
-                case 'frontend':
-                  print('Installing just the flutter frontend at $growerpPath '
-                      'using GrowERP public backend');
-                  createFlutterEnv(start: start, env: env);
-                  break;
-                case 'backend':
-                  print('Installing just the moqui backend at $growerpPath');
-                  createMoquiEnv(start: start, env: env, noBuild: noBuild);
-                  break;
-                case 'chat':
-                  print('Installing just the chat server at $growerpPath');
-                  createChatEnv(start: start, env: env);
-                  break;
-              }
+          if (modifiedArgs.length > 1) {
+            switch (GrowerpPart.parse(modifiedArgs[1])) {
+              case GrowerpPart.all:
+                print('Full installation: in the $growerpPath directory');
+                createChatEnv(start: start, env: env);
+                createMoquiEnv(start: start, env: env, build: build);
+                createFlutterEnv(start: start, env: env, build: build);
+                break;
+              case GrowerpPart.frontend:
+                print('Installing just the flutter frontend at $growerpPath '
+                    'using GrowERP public backend');
+                createFlutterEnv(start: start, env: env, build: build);
+                break;
+              case GrowerpPart.backend:
+                print('Installing just the moqui backend at $growerpPath');
+                createMoquiEnv(start: start, env: env, build: build);
+                break;
+              case GrowerpPart.chat:
+                print('Installing just the chat server at $growerpPath');
+                createChatEnv(start: start, env: env);
+                break;
+              case GrowerpPart.unknown:
+                print('not recognized install parameter: ${modifiedArgs[0]}');
             }
-          } // default install, just frontend
-          else {
+          } else {
             print('Installing just the flutter frontend at $growerpPath ');
-            createFlutterEnv(start: start, env: env);
+            createFlutterEnv(start: start, env: env, build: build);
           }
           break;
         }
@@ -84,7 +77,7 @@ void main(List<String> args) {
         }
       default:
         {
-          print('${args[0]} is not a valid command, valid commands are:'
+          print('${modifiedArgs[0]} is not a valid command, valid commands are:'
               ' install | switchPackage');
         }
     }
