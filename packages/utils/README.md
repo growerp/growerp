@@ -23,9 +23,6 @@ You might want to create your own development branch from the development branch
 4. will start chat and moqui backend
 5. will start flutter using the currently available platform
 
-## switch_prod_dev.dart
-switch pubspec.yaml files between test( all packages local via path) to using the packages from pub.dev and the reverse. Used when releasing a new version.
-
 ## screenshots
 will create screenshots using the (old driver) integration tests for all the emulators which are defined.
 
