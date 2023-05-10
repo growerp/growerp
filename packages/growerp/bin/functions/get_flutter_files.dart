@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:dcli/dcli.dart';
 
 import '../models/models.dart';
-import 'functions.dart';
 
 /// get flutter files from the git repository and create a development and/or
 /// release version of the system.

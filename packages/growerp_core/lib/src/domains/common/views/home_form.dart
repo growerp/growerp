@@ -80,6 +80,7 @@ class HomeFormState extends State<HomeForm> {
                   style: const TextStyle(fontSize: 0)),
             appInfo
           ]);
+        case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           Authenticate authenticate = state.authenticate!;
           return Column(children: [

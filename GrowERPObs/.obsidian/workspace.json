@@ -20,16 +20,6 @@
             }
           },
           {
-            "id": "efd96dc2a1e12e28",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.2.7"
-              }
-            }
-          },
-          {
             "id": "d7d04bb464cbedd9",
             "type": "leaf",
             "state": {
@@ -53,8 +43,7 @@
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -189,7 +178,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "efd96dc2a1e12e28",
+  "active": "ee481afbef6892fd",
   "lastOpenFiles": [
     "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",

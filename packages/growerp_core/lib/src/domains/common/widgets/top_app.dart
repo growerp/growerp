@@ -115,20 +115,14 @@ class MyApp extends StatelessWidget {
               onGenerateRoute: router,
               home: BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
-                  if (state.status == AuthStatus.failure) {
-                    return const FatalErrorForm(
-                        message: 'server connection problem');
+                  switch (state.status) {
+                    case AuthStatus.loading:
+                      return const SplashForm();
+                    case AuthStatus.changeIp:
+                      return const ChangeIpForm();
+                    default:
+                      return HomeForm(menuOptions: menuOptions, title: title);
                   }
-                  if (state.status == AuthStatus.authenticated) {
-                    return HomeForm(menuOptions: menuOptions, title: title);
-                  }
-                  if (state.status == AuthStatus.unAuthenticated) {
-                    return HomeForm(menuOptions: menuOptions, title: title);
-                  }
-                  if (state.status == AuthStatus.changeIp) {
-                    return const ChangeIpForm();
-                  }
-                  return const SplashForm();
                 },
               )));
     });

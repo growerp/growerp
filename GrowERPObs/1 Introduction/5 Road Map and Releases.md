@@ -35,6 +35,7 @@ Let us know if you have suggestions at support@growerp.com
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.
 2. Now have a single standalone dart installation script which assumes Flutter and Java already installed.
 3. Create account reports: balancesheet, balance posted summary.
+4. Added the global command growerp to easy install and maintain the system
 
 ## Release April 12 2023 (V0.9.2)
 1. Now possible to have completely different ledger organizations between companies
