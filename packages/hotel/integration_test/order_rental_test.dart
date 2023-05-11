@@ -12,25 +12,26 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/api_repository.dart';
-import 'package:core/domains/common/widgets/observer.dart';
-import 'package:core/domains/integration_test.dart';
-import 'package:core/services/chat_server.dart';
-import 'package:hotel/main.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_core/test_data.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:hotel/menu_option_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
-import 'package:core/extensions.dart';
+import 'package:hotel/router.dart' as router;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   DateTime today = CustomizableDateTime.current;
-  DateTime plus2 = today.add(Duration(days: 2));
-  var usFormat = new DateFormat('M/d/yyyy');
-  var intlFormat = new DateFormat('yyyy-MM-dd');
+  DateTime plus2 = today.add(const Duration(days: 2));
+  var usFormat = DateFormat('M/d/yyyy');
+  var intlFormat = DateFormat('yyyy-MM-dd');
   String plus2StringUs = usFormat.format(plus2);
   String todayStringIntl = intlFormat.format(today);
   String plus2StringIntl = intlFormat.format(plus2);
@@ -42,11 +43,11 @@ void main() {
 
   group('Order Rental tests>>>>>', () {
     testWidgets("Prepare>>>>>>", (WidgetTester tester) async {
-      await CommonTest.startApp(
-          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+          clear: true);
       await CommonTest.createCompanyAndAdmin(tester);
       await AssetTest.addAssets(tester, assets);
-      String random = CommonTest.getRandom();
+      //String random = CommonTest.getRandom();
       await UserTest.selectCustomers(tester);
       await UserTest.addCustomers(tester, customers.sublist(0, 1));
       await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
@@ -54,51 +55,51 @@ void main() {
 
     testWidgets("check orders for rental data >>>>>",
         (WidgetTester tester) async {
-      await CommonTest.startApp(
-          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+          clear: true);
       await CommonTest.createCompanyAndAdmin(tester);
-      await tester.tap(find.byKey(Key('tap/sales')));
-      await tester.pump(Duration(seconds: 1));
-      expect(find.byKey(Key('FinDocsFormSalesOrder')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('tap/sales')));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const Key('FinDocsFormSalesOrder')), findsOneWidget);
       // check list
       for (int x in [0, 1]) {
         expect(CommonTest.getTextField('statusId$x'), equals('Created'));
         await tester.tap(find.byKey(Key('ID$x')));
-        await tester.pump(Duration(seconds: 10));
+        await tester.pump(const Duration(seconds: 10));
         expect(CommonTest.getTextField('itemLine$x'),
-            contains(x == 0 ? '$todayStringIntl' : '$plus2StringIntl'));
+            contains(x == 0 ? todayStringIntl : plus2StringIntl));
       }
     }, skip: false);
     testWidgets("check blocked dates for new reservation>>>>>",
         (WidgetTester tester) async {
-      await CommonTest.startApp(
-          tester, TopApp(dbServer: APIRepository(), chatServer: ChatServer()));
+      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+          clear: true);
       if (CommonTest.isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));
-        await tester.pump(Duration(seconds: 10));
+        await tester.pump(const Duration(seconds: 10));
       }
-      await tester.tap(find.byKey(Key('tap/sales')));
-      await tester.pump(Duration(seconds: 1));
-      expect(find.byKey(Key('FinDocsFormSalesOrder')), findsOneWidget);
-      await tester.tap(find.byKey(Key('addNew')));
+      await tester.tap(find.byKey(const Key('tap/sales')));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const Key('FinDocsFormSalesOrder')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('addNew')));
       await tester.pump();
-      await tester.tap(find.byKey(Key('product')));
-      await tester.pump(Duration(seconds: 5));
+      await tester.tap(find.byKey(const Key('product')));
+      await tester.pump(const Duration(seconds: 5));
       await tester.tap(find.textContaining('productName2').last);
-      await tester.pump(Duration(seconds: 1));
-      await tester.tap(find.byKey(Key('setDate')));
-      await tester.pump(Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byKey(const Key('setDate')));
+      await tester.pump(const Duration(seconds: 1));
       await tester.tap(find.byTooltip('Switch to input'));
-      await tester.pump(Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
       await tester.enterText(find.byType(TextField).last, plus2StringUs);
-      await tester.pump(Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
       await tester.tap(find.text('OK'));
-      await tester.pump(Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
       expect(find.text('Out of range.'), findsOneWidget);
       await tester.tap(find.text('CANCEL'));
-      await tester.pump(Duration(seconds: 1));
-      await tester.tap(find.byKey(Key('cancel')));
-      await tester.pump(Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byKey(const Key('cancel')));
+      await tester.pump(const Duration(seconds: 1));
     }, skip: false);
   });
 }

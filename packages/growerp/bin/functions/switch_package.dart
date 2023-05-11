@@ -14,8 +14,11 @@ Future<void> switchPackage() async {
   var production = true;
   // switch admin app
   final adminFileName = '$growerpPath/flutterDevelopment/packages/admin';
+  final hotelFileName = '$growerpPath/flutterDevelopment/packages/hotel';
   final adminGrowerpPackage =
       await getGrowerpPackageInfo(PubClient(), '$adminFileName/pubspec.yaml');
+  final hotelGrowerpPackage =
+      await getGrowerpPackageInfo(PubClient(), '$hotelFileName/pubspec.yaml');
   final adminFile = File(adminFileName);
   final dynamic adminYaml = loadYaml(adminFile.readAsStringSync());
   if (adminYaml['dependencies']['growerp_core'] == null) {
@@ -29,7 +32,8 @@ Future<void> switchPackage() async {
     production = false;
   }
   final pkgList = getPackageList('$growerpPath/flutterDevelopment/packages')
-    ..add(adminGrowerpPackage);
+    ..add(adminGrowerpPackage)
+    ..add(hotelGrowerpPackage);
   if (pkgList.isEmpty) {
     print('No packages could be found, pub.dev limit reached? try later again');
     exit(1);

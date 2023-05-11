@@ -12,15 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// TODO: cannot use asset bloc here, need a lookup same as product lookup
-
 import 'package:flutter/material.dart';
-import 'package:date_utils/date_utils.dart' as utilities;
+import 'package:date_utils/date_utils.dart' as utils;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
-
-import '../findoc.dart';
 
 const day = 1, week = 2, month = 3; // columnPeriod values
 
@@ -33,14 +31,18 @@ class GanttForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FinDocAPIRepository finDocAPIRepository = FinDocAPIRepository(
+        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    CatalogAPIRepository catalogAPIRepository = CatalogAPIRepository(
+        context.read<AuthBloc>().state.authenticate!.apiKey!);
     return MultiBlocProvider(providers: [
       BlocProvider<FinDocBloc>(
-          create: (context) => FinDocBloc(
-              context.read<FinDocAPIRepository>(), true, FinDocType.order)
-            ..add(const FinDocFetch())),
-//      BlocProvider<AssetBloc>(
-//          create: (context) =>
-//              AssetBloc(context.read<APIRepository>())..add(AssetFetch()))
+          create: (context) =>
+              FinDocBloc(finDocAPIRepository, true, FinDocType.order)
+                ..add(const FinDocFetch())),
+      BlocProvider<AssetBloc>(
+          create: (context) =>
+              AssetBloc(catalogAPIRepository)..add(const AssetFetch()))
     ], child: const GanttPage());
   }
 }
@@ -186,63 +188,62 @@ class GanttChart extends StatelessWidget {
     List<Asset> assets = [];
     List<FinDoc> finDocs = [];
     List<FinDoc> reservations = [];
-    //return
-    //BlocBuilder<AssetBloc, AssetState>(builder: (context, state) {
-    //  assets = state.assets;
-    //  if (assets.isEmpty) {
-    //    return const Center(child: Text("No Rooms found!"));
-    //  }
-    // sort by room number
-    assets.sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
-    return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-      finDocs = state.finDocs;
-      reservations = [];
-      for (var asset in assets) {
-        for (var finDoc in finDocs) {
-          if (finDoc.status != FinDocStatusVal.created ||
-              finDoc.status != FinDocStatusVal.approved) {
-            // create a findoc for every item
-            for (var item in finDoc.items) {
-              if (item.assetId == asset.assetId &&
-                  item.rentalFromDate != null &&
-                  item.rentalThruDate != null) {
-                reservations.add(finDoc.copyWith(items: [item]));
+    return BlocBuilder<AssetBloc, AssetState>(builder: (context, state) {
+      assets = state.assets;
+      if (assets.isEmpty) {
+        return const Center(child: Text("No Rooms found!"));
+      }
+      // sort by room number
+      assets.sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
+      return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+        finDocs = state.finDocs;
+        reservations = [];
+        for (var asset in assets) {
+          for (var finDoc in finDocs) {
+            if (finDoc.status != FinDocStatusVal.created ||
+                finDoc.status != FinDocStatusVal.approved) {
+              // create a findoc for every item
+              for (var item in finDoc.items) {
+                if (item.assetId == asset.assetId &&
+                    item.rentalFromDate != null &&
+                    item.rentalThruDate != null) {
+                  reservations.add(finDoc.copyWith(items: [item]));
+                }
               }
             }
           }
         }
-      }
-      if (state.status != FinDocStatus.success) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      var screenWidth = MediaQuery.of(context).size.width;
-      var chartBars =
-          buildAssetBars(context, screenWidth, reservations, finDocs);
-      return SizedBox(
-        height: chartBars.length * 29.0 + 25.0 + 4.0,
-        child: ListView(
-          physics: const ClampingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            Stack(fit: StackFit.loose, children: <Widget>[
-              buildGrid(screenWidth),
-              buildHeader(screenWidth, Colors.lightGreen),
-              Container(
-                  margin: const EdgeInsets.only(top: 25.0),
-                  child: Column(
-                    children: <Widget>[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: chartBars,
-                      ),
-                    ],
-                  )),
-            ]),
-          ],
-        ),
-      );
+        if (state.status != FinDocStatus.success) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        var screenWidth = MediaQuery.of(context).size.width;
+        var chartBars =
+            buildAssetBars(context, screenWidth, reservations, finDocs);
+        return SizedBox(
+          height: chartBars.length * 29.0 + 25.0 + 4.0,
+          child: ListView(
+            physics: const ClampingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            children: <Widget>[
+              Stack(fit: StackFit.loose, children: <Widget>[
+                buildGrid(screenWidth),
+                buildHeader(screenWidth, Colors.lightGreen),
+                Container(
+                    margin: const EdgeInsets.only(top: 25.0),
+                    child: Column(
+                      children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: chartBars,
+                        ),
+                      ],
+                    )),
+              ]),
+            ],
+          ),
+        );
+      });
     });
-    //   });
   }
 
   Widget buildGrid(double screenWidth) {
@@ -321,7 +322,7 @@ class GanttChart extends StatelessWidget {
           ),
         ),
       ));
-      tempDate = utilities.DateUtils.nextMonth(tempDate!);
+      tempDate = utils.DateUtils.nextMonth(tempDate!);
     }
 
     return Container(
@@ -364,8 +365,8 @@ class GanttChart extends StatelessWidget {
       double screenWidth, List<FinDoc> reservations, List<FinDoc> finDocs) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     if (reservations[startIndex].items[0].rentalFromDate == null) {
-      return [];
-    } // no reservations for this asset
+      return []; // no reservations for this asset
+    }
     DateTime lastDate = ganttFromDate.subtract(const Duration(days: 1));
     List<Widget> chartContent = [];
     int index = startIndex;

@@ -3,7 +3,7 @@ version: 0.1.0+1
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.18.6 <3.0.0'
 
 dependencies:
   flutter:
@@ -18,7 +18,7 @@ dependencies:
   responsive_framework: ^0.2.0
   flutter_simple_treeview: ^3.0.0-nullsafety.1
   printing: ^5.0.4
-  pdf: ^3.0.0
+  pdf: 3.9.0
   bloc_concurrency: ^0.2.0
   core:
     path: ../core

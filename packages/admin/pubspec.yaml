@@ -2,7 +2,7 @@ name: admin
 version: 0.9.3+66
 publish_to: none
 environment: 
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.18.6 <3.0.0'
 dependencies: 
   growerp_core: 
     path: ../growerp_core/
@@ -44,7 +44,6 @@ flutter:
   uses-material-design: true
   assets: 
     - assets/cfg/
-    - packages/growerp_core/images/about.png
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png
     - packages/growerp_core/images/category.png

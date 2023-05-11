@@ -13,7 +13,13 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:core/domains/domains.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+
+import 'forms/gantt_form.dart';
 
 List<MenuOption> menuOptions = [
   MenuOption(
@@ -23,7 +29,7 @@ List<MenuOption> menuOptions = [
     route: '/',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    child: GanttForm(),
+    child: const GanttForm(),
   ),
   MenuOption(
     image: "packages/growerp_core/images/companyGrey.png",
@@ -34,33 +40,26 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     tabItems: [
       TabItem(
-        form: const WebsiteForm(
-          key: Key('Website'),
-          userGroup: UserGroup.employee,
+        form: ShowCompanyDialog(
+          Company(role: Role.company),
+          key: const Key('CompanyForm'),
+          dialog: false,
         ),
+        label: 'Company',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const UserListForm(
+          key: Key('Employee'),
+          role: Role.company,
+        ),
+        label: 'Employees',
+        icon: const Icon(Icons.school),
+      ),
+      TabItem(
+        form: const WebsiteForm(),
         label: 'Website',
         icon: const Icon(Icons.webhook),
-      ),
-      TabItem(
-        form: UserListForm(
-          key: Key("Admin"),
-          userGroup: UserGroup.admin,
-        ),
-        label: "Admins",
-        icon: Icon(Icons.business),
-      ),
-      TabItem(
-        form: UserListForm(
-          key: Key("Employee"),
-          userGroup: UserGroup.employee,
-        ),
-        label: "Employees",
-        icon: Icon(Icons.school),
-      ),
-      TabItem(
-        form: const CompanyForm(),
-        label: "Company Info",
-        icon: Icon(Icons.home),
       ),
     ],
   ),
@@ -72,15 +71,15 @@ List<MenuOption> menuOptions = [
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
-        form: AssetListForm(),
+        form: const AssetListForm(),
         label: "Rooms",
-        icon: Icon(Icons.home),
+        icon: const Icon(Icons.home),
         floatButtonForm: AssetDialog(Asset()),
       ),
       TabItem(
-        form: ProductListForm(),
+        form: const ProductListForm(),
         label: "Room Types",
-        icon: Icon(Icons.home),
+        icon: const Icon(Icons.home),
       ),
     ],
   ),
@@ -98,21 +97,21 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: FinDocListForm(
+          form: const FinDocListForm(
               key: Key("SalesOrder"),
               sales: true,
               docType: FinDocType.order,
               onlyRental: true),
           label: "Reservations",
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: UserListForm(
-            key: Key("Customer"),
-            userGroup: UserGroup.customer,
+          form: const UserListForm(
+            key: Key('Customer'),
+            role: Role.customer,
           ),
-          label: "Customers",
-          icon: Icon(Icons.business),
+          label: 'Customer\nContacts',
+          icon: const Icon(Icons.school),
         ),
       ]),
   MenuOption(
@@ -129,24 +128,24 @@ List<MenuOption> menuOptions = [
       ],
       tabItems: [
         TabItem(
-          form: FinDocListForm(
+          form: const FinDocListForm(
               key: Key("Check-In"),
               sales: true,
               docType: FinDocType.order,
               onlyRental: true,
               status: 'FinDocCreated'),
           label: "CheckIn",
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
         TabItem(
-          form: FinDocListForm(
+          form: const FinDocListForm(
               key: Key("Check-Out"),
               sales: true,
               docType: FinDocType.order,
               onlyRental: true,
               status: 'FinDocApproved'),
           label: "CheckOut",
-          icon: Icon(Icons.home),
+          icon: const Icon(Icons.home),
         ),
       ]),
   MenuOption(

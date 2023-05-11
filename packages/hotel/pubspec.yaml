@@ -3,7 +3,7 @@ version: 0.2.0+10
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.18.6 <3.0.0'
 
 dependencies:
   flutter: 
@@ -11,15 +11,23 @@ dependencies:
   flutter_localizations:
         sdk: flutter
   global_configuration: ^2.0.0-nullsafety.0
-  equatable: ^2.0.3
-  dio: ^4.0.0
-  flutter_bloc: ^8.0.0
   meta: ^1.3.0
   shared_preferences: ^2.0.6
   animations: ^2.0.0
-  core:
-    path: ../core
+  growerp_website: 
+    path: ../growerp_website/
+  growerp_core:
+    path: ../growerp_core/
+  growerp_order_accounting: 
+    path: ../growerp_order_accounting/
+  growerp_user_company: 
+    path: ../growerp_user_company/
+  growerp_catalog: 
+    path: ../growerp_catalog/
   package_info_plus: ^1.4.2
+  date_utils: ^0.2.0
+  flutter_bloc: ^8.1.1
+  intl: ^0.17.0
 
 dev_dependencies:
   integration_test:
@@ -44,6 +52,12 @@ flutter:
   uses-material-design: true
 # from https://www.flaticon.com/
   assets:
+    - packages/growerp_core/images/single-bedGrey.png
+    - packages/growerp_core/images/single-bed.png
+    - packages/growerp_core/images/reservationGrey.png
+    - packages/growerp_core/images/reservation.png
+    - packages/growerp_core/images/check-in-outGrey.png
+    - packages/growerp_core/images/check-in-out.png
     - assets/images/
     - assets/cfg/
     - assets/
