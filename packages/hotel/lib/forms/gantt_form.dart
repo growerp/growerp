@@ -415,10 +415,10 @@ class GanttChart extends StatelessWidget {
                 // bar on screen
                 decoration: BoxDecoration(
                     color: reservations[index].status == FinDocStatusVal.created
-                        ? Colors.yellow
+                        ? Theme.of(context).focusColor
                         : reservations[index].status == FinDocStatusVal.approved
-                            ? Colors.green
-                            : Colors.brown.shade200,
+                            ? Theme.of(context).canvasColor
+                            : Theme.of(context).cardColor,
                     borderRadius: borderRadius),
                 height: 20.0,
                 width: from.difference(ganttFromDate).inDays < 0
