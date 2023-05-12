@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../domains/domains.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
@@ -59,10 +59,10 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                     arguments: authenticate.user),
                                 child: Column(children: [
                                   SizedBox(
-                                      height:
-                                          ResponsiveWrapper.of(context).isTablet
-                                              ? 25
-                                              : 5),
+                                      height: ResponsiveBreakpoints.of(context)
+                                              .isTablet
+                                          ? 25
+                                          : 5),
                                   CircleAvatar(
                                       radius: 15,
                                       child: authenticate.user?.image != null

@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../product.dart';
 
@@ -48,7 +48,7 @@ class ProductListItem extends StatelessWidget {
                 Expanded(
                     child:
                         Text("${product.productName}", key: Key('name$index'))),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                if (!ResponsiveBreakpoints.of(context).isMobile)
                   Expanded(
                       child: Text("${product.description}",
                           key: Key('description$index'),

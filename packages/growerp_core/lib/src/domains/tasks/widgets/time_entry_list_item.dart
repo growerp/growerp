@@ -39,11 +39,11 @@ class TimeEntryListItem extends StatelessWidget {
               child: Text("${timeEntry.date!.toLocal()}".split(' ')[0],
                   key: Key('date$index'))),
           Text("${timeEntry.hours}", key: Key('hours$index')),
-          if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+          if (!ResponsiveBreakpoints.of(context).isMobile)
             Expanded(
                 child: Text("${timeEntry.partyId}",
                     key: Key('partyId$index'), textAlign: TextAlign.center)),
-          if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+          if (!ResponsiveBreakpoints.of(context).isMobile)
             Expanded(
                 child: Text("${timeEntry.comments}",
                     key: Key('comments$index'), textAlign: TextAlign.center)),

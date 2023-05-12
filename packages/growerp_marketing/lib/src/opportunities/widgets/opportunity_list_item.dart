@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../models/opportunity_model.dart';
 import '../bloc/opportunity_bloc.dart';
 import '../views/views.dart';
@@ -41,12 +41,12 @@ class OpportunityListItem extends StatelessWidget {
                 Expanded(
                     child: Text("${opportunity.opportunityName}",
                         key: Key('name$index'))),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                if (ResponsiveBreakpoints.of(context).isDesktop)
                   Expanded(
                       child: Text(opportunity.estAmount.toString(),
                           key: Key('estAmount$index'),
                           textAlign: TextAlign.center)),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                if (ResponsiveBreakpoints.of(context).isDesktop)
                   Expanded(
                       child: Text(opportunity.estProbability.toString(),
                           key: Key('estProbability$index'),
@@ -60,7 +60,7 @@ class OpportunityListItem extends StatelessWidget {
                       : ""),
                   key: Key('lead$index'),
                 )),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                if (ResponsiveBreakpoints.of(context).isDesktop)
                   Expanded(
                       child: Text(
                     opportunity.leadUser != null
@@ -68,10 +68,10 @@ class OpportunityListItem extends StatelessWidget {
                         : "",
                     key: Key('leadEmail$index'),
                   )),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                if (!ResponsiveBreakpoints.of(context).isMobile)
                   Text("${opportunity.stageId}",
                       key: Key('stageId$index'), textAlign: TextAlign.center),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                if (ResponsiveBreakpoints.of(context).isDesktop)
                   Expanded(
                       child: Text(
                           opportunity.nextStep != null

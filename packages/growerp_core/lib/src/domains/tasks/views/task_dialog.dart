@@ -15,7 +15,7 @@
 import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
 
 class TaskDialog extends StatefulWidget {
@@ -40,7 +40,7 @@ class TaskDialogState extends State<TaskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Scaffold(

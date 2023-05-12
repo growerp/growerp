@@ -20,7 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../blocs/blocs.dart';
 import '../../company/views/views.dart';
@@ -132,7 +132,7 @@ class UserDialogState extends State<UserDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     User? user = widget.user;
     return BlocConsumer<UserBloc, UserState>(
         listenWhen: (previous, current) =>
@@ -560,7 +560,7 @@ class UserDialogState extends State<UserDialog> {
     column.add(updateButton);
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
       rows.add(SizedBox(
           height: 350,

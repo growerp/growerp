@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 
@@ -25,13 +24,12 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP.',
-          router: generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      title: 'GrowERP.',
+      router: generateRoute,
+      menuOptions: menuOptions));
 }
 
 // Menu definition
@@ -90,15 +88,10 @@ class MainMenuForm extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem(
-            'dbCrm',
-            context,
-            menuOptions[1],
+          makeDashboardItem('dbCrm', context, menuOptions[1], [
             "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
             "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
-            "",
-            "",
-          ),
+          ]),
         ]);
       }
 

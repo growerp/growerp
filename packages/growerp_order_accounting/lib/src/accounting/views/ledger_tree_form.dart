@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:intl/intl.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import '../accounting.dart';
@@ -61,7 +61,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
 
   @override
   Widget build(BuildContext context) {
-    final isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     //convert glAccount list into TreeNodes
     Iterable<TreeNode> convert(List<GlAccount> glAccounts) {
       // convert single leaf/glAccount

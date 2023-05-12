@@ -19,7 +19,7 @@ dependencies:
   flutter: 
     sdk: flutter
   decimal: ^2.1.0
-  reorderables: ^0.5.1
+  reorderables: ^0.6.0
   intl: ^0.17.0
   global_configuration: ^2.0.0-nullsafety.0
   equatable: ^2.0.5
@@ -27,13 +27,12 @@ dependencies:
   bloc_concurrency: ^0.2.0
   meta: ^1.3.0
   image_picker: ^0.8.5
-  responsive_framework: ^0.2.0
+  responsive_framework: ^1.0.0
   flutter_simple_treeview: ^3.0.2
   dropdown_search: ^4.0.1
-  printing: ^5.9.2
-  pdf: 3.9.0
+  printing: ^5.10.4
+  pdf: ^3.10.0
   about: ^2.1.1
-  flutter_phoenix: ^1.0.0
   web_socket_channel: ^2.1.0
   shared_preferences: ^2.0.15
   date_utils: ^0.2.0
@@ -45,7 +44,7 @@ dependencies:
   freezed_annotation: ^2.0.3
   freezed: ^2.0.3
   credit_card_validator: ^2.0.1
-  markdown_widget: ^1.2.8
+  markdown_widget: ^2.1.0
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.0.3
   from_css_color: ^2.0.0
@@ -58,6 +57,8 @@ dependencies:
   growerp_core: 
     path: ../growerp_core/
   scrollable_positioned_list: ^0.3.8
+dependency_overrides:
+  intl: ^0.18.0
 dev_dependencies: 
   flutter_driver: 
     sdk: flutter

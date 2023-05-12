@@ -27,48 +27,26 @@ class AccountingForm extends StatelessWidget {
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem(
-          'accntSales',
-          context,
-          acctMenuOptions[1],
+        makeDashboardItem('accntSales', context, acctMenuOptions[1], [
           "Sls open inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
-          "",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'accntPurchase',
-          context,
-          acctMenuOptions[2],
+        ]),
+        makeDashboardItem('accntPurchase', context, acctMenuOptions[2], [
           "Pur unp inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
-          "",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'accntLedger',
-          context,
-          acctMenuOptions[3],
+        ]),
+        makeDashboardItem('accntLedger', context, acctMenuOptions[3], [
           "Accounts",
           "Transactions",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'reports',
-          context,
-          acctMenuOptions[4],
+        ]),
+        makeDashboardItem('reports', context, acctMenuOptions[4], [
           "Balance Sheet",
           "Balance summary",
-          "",
-          "",
-        ),
+        ]),
 /*        makeDashboardItem(
           'setup',
           context,
@@ -79,15 +57,7 @@ class AccountingForm extends StatelessWidget {
           "error journal",
         ),
 */
-        makeDashboardItem(
-          'Main dashboard',
-          context,
-          acctMenuOptions[5],
-          "",
-          "",
-          "",
-          "",
-        ),
+        makeDashboardItem('Main dashboard', context, acctMenuOptions[5], []),
       ],
     );
   }

@@ -94,7 +94,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                         ? "Enter a new customer for company\n "
                             "${widget.authenticate.company!.name}"
                         : "Enter a new company with admin",
-                    height: 650,
+                    height: 700,
                     width: 400)
               ])));
     }));

@@ -23,7 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../../category/blocs/category_bloc.dart';
 import '../product.dart';
@@ -122,7 +122,7 @@ class ProductDialogState extends State<ProductDialogFull> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (classificationId == 'AppHotel') _selectedTypeId = 'Rental';
     return BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) async {
@@ -413,7 +413,7 @@ class ProductDialogState extends State<ProductDialogFull> {
     ];
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(

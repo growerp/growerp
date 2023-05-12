@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import '../product.dart';
@@ -86,8 +86,8 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                       Row(children: <Widget>[
                         const Expanded(
                             child: Text("Name", textAlign: TextAlign.center)),
-                        if (!ResponsiveWrapper.of(context)
-                            .isSmallerThan(TABLET))
+                        if (ResponsiveBreakpoints.of(context)
+                            .largerThan(MOBILE))
                           const Expanded(
                               child: Text("Description",
                                   textAlign: TextAlign.center)),

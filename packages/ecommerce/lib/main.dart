@@ -22,15 +22,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'router.dart' as router;
 import 'forms/@forms.dart' as local;
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset("app_settings");
 
   BlocOverrides.runZoned(
-      () => runApp(Phoenix(
-          child: TopApp(dbServer: APIRepository(), chatServer: ChatServer()))),
+      () => runApp(TopApp(dbServer: APIRepository(), chatServer: ChatServer())),
       blocObserver: AppBlocObserver());
 }
 
@@ -80,19 +78,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: title,
         debugShowCheckedModeBanner: false,
-        builder: (context, widget) => ResponsiveWrapper.builder(
-            BouncingScrollWrapper.builder(context, widget!),
-            maxWidth: 2460,
-            minWidth: 450,
-            defaultScale: true,
-            breakpoints: [
-              ResponsiveBreakpoint.resize(450, name: MOBILE),
-              ResponsiveBreakpoint.autoScale(800, name: TABLET),
-              ResponsiveBreakpoint.autoScale(1000, name: TABLET),
-              ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-              ResponsiveBreakpoint.autoScale(2460, name: "4K"),
-            ],
-            background: Container(color: Color(0xFFF5F5F5))),
+        builder: (context, child) => ResponsiveBreakpoints.builder(
+              child: child!,
+              breakpoints: [
+                const Breakpoint(start: 0, end: 450, name: MOBILE),
+                const Breakpoint(start: 451, end: 800, name: TABLET),
+                const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+              ],
+            ),
         theme: Themes.formTheme,
         onGenerateRoute: router.generateRoute,
         home: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {

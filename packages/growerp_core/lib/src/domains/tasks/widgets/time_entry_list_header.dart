@@ -14,7 +14,7 @@
 
 import '../../../domains/tasks/bloc/task_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryListHeader extends StatelessWidget {
   const TimeEntryListHeader({Key? key, required this.taskBloc})
@@ -29,10 +29,10 @@ class TimeEntryListHeader extends StatelessWidget {
         Row(children: <Widget>[
           const Expanded(child: Text("Date")),
           const Text("Hours"),
-          if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+          if (!ResponsiveBreakpoints.of(context).isMobile)
             const Expanded(
                 child: Text("From/To Party", textAlign: TextAlign.center)),
-          if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+          if (!ResponsiveBreakpoints.of(context).isMobile)
             const Expanded(
                 child: Text("Comments", textAlign: TextAlign.center)),
         ]),

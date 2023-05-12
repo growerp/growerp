@@ -16,7 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../api_repository.dart';
 import '../company.dart';
@@ -35,7 +35,7 @@ class CompanyListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
     CompanyBloc companyBloc = context.read<CompanyBloc>();
     return Material(

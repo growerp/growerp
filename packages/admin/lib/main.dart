@@ -21,7 +21,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
@@ -57,11 +56,10 @@ Future main() async {
   }
 
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP administrator.',
-          router: router.generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      title: 'GrowERP administrator.',
+      router: router.generateRoute,
+      menuOptions: menuOptions));
 }

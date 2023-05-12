@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../blocs/asset_bloc.dart';
 
 class AssetListHeader extends StatefulWidget {
@@ -68,7 +68,7 @@ class _AssetListHeaderState extends State<AssetListHeader> {
                     Row(children: <Widget>[
                       const Expanded(
                           child: Text("Name[ID]", textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                      if (!ResponsiveBreakpoints.of(context).isMobile)
                         const Expanded(
                             child: Text("Status", textAlign: TextAlign.center)),
                       const Expanded(

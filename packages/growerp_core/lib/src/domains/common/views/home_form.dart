@@ -36,7 +36,7 @@ class HomeFormState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
     Widget appInfo = Center(
         child: Align(

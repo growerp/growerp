@@ -87,7 +87,7 @@ class MyFinDocState extends State<FinDocPage> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
     blocConsumerListener(BuildContext context, CartState state,
         [bool mounted = true]) async {

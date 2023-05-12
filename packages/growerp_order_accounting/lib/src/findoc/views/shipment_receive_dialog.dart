@@ -52,7 +52,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Scaffold(

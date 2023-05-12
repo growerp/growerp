@@ -156,7 +156,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<CompanyBloc, CompanyState>(
         listenWhen: (previous, current) =>
             previous.status == CompanyStatus.loading,
@@ -555,7 +555,7 @@ class CompanyFormState extends State<CompanyDialog> {
     ]);
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(

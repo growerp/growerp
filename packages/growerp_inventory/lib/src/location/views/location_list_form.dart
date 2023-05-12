@@ -57,7 +57,7 @@ class LocationListState extends State<LocationList> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (context, state) {
         switch (state.status) {

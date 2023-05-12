@@ -55,7 +55,7 @@ class WebsiteContentState extends State<WebsiteContent> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ContentBloc, ContentState>(
         listenWhen: ((previous, current) =>
             (previous.status == ContentStatus.updating &&

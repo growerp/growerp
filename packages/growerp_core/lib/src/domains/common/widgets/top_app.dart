@@ -15,8 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_phoenix/generated/i18n.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:responsive_framework/utils/scroll_behavior.dart';
 
 import '../../../api_repository.dart';
@@ -90,23 +89,18 @@ class MyApp extends StatelessWidget {
               title: title,
               debugShowCheckedModeBanner: false,
               localizationsDelegates: const [
-                S.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
               ],
-              supportedLocales: S.delegate.supportedLocales,
-              builder: (context, widget) => ResponsiveWrapper.builder(
-                  BouncingScrollWrapper.builder(context, widget!),
-                  maxWidth: 2460,
-                  defaultScale: true,
-                  breakpoints: [
-                    const ResponsiveBreakpoint.resize(450, name: MOBILE),
-                    const ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                    const ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-                    const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
-                  ],
-                  background: Container(color: const Color(0xFFF5F5F5))),
+              builder: (context, child) =>
+                  ResponsiveBreakpoints.builder(child: child!, breakpoints: [
+                    const Breakpoint(start: 0, end: 450, name: MOBILE),
+                    const Breakpoint(start: 451, end: 800, name: TABLET),
+                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                    const Breakpoint(
+                        start: 1921, end: double.infinity, name: '4K'),
+                  ]),
               themeMode: state.themeMode,
               theme:
                   ThemeData(useMaterial3: true, colorScheme: lightColorScheme),

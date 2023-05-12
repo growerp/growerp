@@ -17,13 +17,25 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../common.dart';
 
-Card makeDashboardItem(
-    String key, BuildContext context, MenuOption menuOption, String subTitle,
-    [String? subTitle1,
-    String? subTitle2,
-    String? subTitle3,
-    String? subTitle4]) {
-  bool phone = ResponsiveWrapper.of(context).isSmallerThan(DESKTOP);
+Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
+    List<String> subTitles) {
+  bool phone = ResponsiveBreakpoints.of(context).isMobile;
+
+  List<Widget> textList = [
+    Center(child: Image.asset(menuOption.selectedImage, height: 80.0)),
+    Center(
+        child: Text(menuOption.title.replaceAll('\n', ''),
+            style: TextStyle(
+                fontSize: phone ? 15 : 25, fontWeight: FontWeight.bold),
+            key: Key("${key}Title")))
+  ];
+  for (final test in subTitles) {
+    textList.add(Center(
+      child: Text(test,
+          style: TextStyle(fontSize: phone ? 12 : 20),
+          key: Key("${key}SubTitle")),
+    ));
+  }
   return Card(
       elevation: 1.0,
       margin: const EdgeInsets.all(5.0),
@@ -39,54 +51,7 @@ Card makeDashboardItem(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             verticalDirection: VerticalDirection.down,
-            children: <Widget>[
-              const SizedBox(height: 2.0),
-              Center(
-                  child: Image.asset(menuOption.selectedImage, height: 80.0)),
-              Center(
-                child: Text(menuOption.title,
-                    style: TextStyle(
-                        fontSize: phone ? 15 : 25, fontWeight: FontWeight.bold),
-                    key: Key("${key}Title")),
-              ),
-              const SizedBox(height: 2.0),
-              Center(
-                child: Text(subTitle,
-                    style: TextStyle(fontSize: phone ? 12 : 20),
-                    key: Key("${key}SubTitle")),
-              ),
-              const SizedBox(height: 2.0),
-              if (subTitle1 != null)
-                Center(
-                  child: Text(subTitle1,
-                      style: TextStyle(fontSize: phone ? 12 : 20),
-                      key: Key("${key}SubTitle1")),
-                ),
-              const SizedBox(height: 2.0),
-              if (subTitle2 != null)
-                Column(children: [
-                  const SizedBox(height: 2.0),
-                  Center(
-                    child: Text(subTitle2,
-                        style: TextStyle(fontSize: phone ? 12 : 20),
-                        key: Key("${key}SubTitle2")),
-                  )
-                ]),
-              const SizedBox(height: 2.0),
-              if (subTitle3 != null)
-                Center(
-                  child: Text(subTitle3,
-                      style: TextStyle(fontSize: phone ? 12 : 20),
-                      key: Key("${key}SubTitle3")),
-                ),
-              const SizedBox(height: 2.0),
-              if (subTitle4 != null)
-                Center(
-                  child: Text(subTitle4,
-                      style: TextStyle(fontSize: phone ? 12 : 20),
-                      key: Key("${key}SubTitle4")),
-                )
-            ],
+            children: textList,
           ),
         ),
       ));

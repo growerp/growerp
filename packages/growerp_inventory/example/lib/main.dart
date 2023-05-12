@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 
@@ -25,13 +24,12 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
+  runApp(TopApp(
           dbServer: APIRepository(),
           chatServer: ChatServer(),
           title: 'GrowERP package: growerp_inventory.',
           router: generateRoute,
-          menuOptions: menuOptions)));
+          menuOptions: menuOptions));
 }
 
 // Menu definition

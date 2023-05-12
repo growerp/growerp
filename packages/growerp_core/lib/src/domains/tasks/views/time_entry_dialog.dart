@@ -18,7 +18,7 @@ import '../../domains.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryDialog extends StatefulWidget {
   final TimeEntry timeEntry;
@@ -43,7 +43,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Scaffold(

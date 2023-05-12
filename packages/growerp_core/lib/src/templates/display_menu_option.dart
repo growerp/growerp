@@ -154,7 +154,7 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     actions = widget.actions ?? [];
     if (isPhone && route != '/') {
       actions.add(IconButton(

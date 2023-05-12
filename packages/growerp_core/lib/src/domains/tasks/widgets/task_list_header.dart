@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../../domains/tasks/bloc/task_bloc.dart';
 
 class TaskListHeader extends StatefulWidget {
@@ -38,7 +38,7 @@ class _TaskListHeaderState extends State<TaskListHeader> {
           title: search
               ? Row(children: <Widget>[
                   SizedBox(
-                      width: ResponsiveWrapper.of(context).isSmallerThan(TABLET)
+                      width: ResponsiveBreakpoints.of(context).isMobile
                           ? MediaQuery.of(context).size.width - 250
                           : MediaQuery.of(context).size.width - 350,
                       child: TextField(
@@ -66,7 +66,7 @@ class _TaskListHeaderState extends State<TaskListHeader> {
                     const Expanded(child: Text("Name")),
                     const Expanded(child: Text("Status")),
                     const Text("Hours"),
-                    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                    if (!ResponsiveBreakpoints.of(context).isMobile)
                       const Expanded(
                           child: Text("From/To Party",
                               textAlign: TextAlign.center)),

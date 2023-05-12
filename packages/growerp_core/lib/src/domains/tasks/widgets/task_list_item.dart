@@ -39,12 +39,12 @@ class TaskListItem extends StatelessWidget {
                     child: Text("${task.status}", key: Key('status$index'))),
                 Text(task.unInvoicedHours!.toString(),
                     key: Key('unInvoicedHours$index')),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                if (!ResponsiveBreakpoints.of(context).isMobile)
                   Expanded(
                       child: Text("${task.description}",
                           key: Key('description$index'),
                           textAlign: TextAlign.center)),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                if (!ResponsiveBreakpoints.of(context).isMobile)
                   Expanded(
                       child: Text("${task.rate}",
                           key: Key('rate$index'), textAlign: TextAlign.center)),

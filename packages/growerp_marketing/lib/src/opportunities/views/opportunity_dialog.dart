@@ -72,7 +72,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
 
   @override
   Widget build(BuildContext context) {
-    int columns = ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 1 : 2;
+    int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<OpportunityBloc, OpportunityState>(
         listener: (context, state) async {
           switch (state.status) {
@@ -270,7 +270,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     ];
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(

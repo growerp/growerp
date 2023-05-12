@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../blocs/category_bloc.dart';
 
 class CategoryListHeader extends StatefulWidget {
@@ -67,7 +67,7 @@ class _CategoryListHeaderState extends State<CategoryListHeader> {
                     Row(children: <Widget>[
                       const Expanded(
                           child: Text("Name", textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                      if (!ResponsiveBreakpoints.of(context).isMobile)
                         const Expanded(
                             child: Text("Description",
                                 textAlign: TextAlign.center)),

@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityListHeader extends StatefulWidget {
@@ -42,10 +42,9 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
             title: search
                 ? Row(children: <Widget>[
                     SizedBox(
-                        width:
-                            ResponsiveWrapper.of(context).isSmallerThan(TABLET)
-                                ? MediaQuery.of(context).size.width - 250
-                                : MediaQuery.of(context).size.width - 350,
+                        width: ResponsiveBreakpoints.of(context).isMobile
+                            ? MediaQuery.of(context).size.width - 250
+                            : MediaQuery.of(context).size.width - 350,
                         child: TextField(
                           key: const Key('searchField'),
                           autofocus: true,
@@ -73,25 +72,25 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
                           child: Text(
                         "Opportunity Name",
                       )),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                      if (ResponsiveBreakpoints.of(context).isDesktop)
                         const Expanded(
                             child: Text("Est. Amount",
                                 textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                      if (ResponsiveBreakpoints.of(context).isDesktop)
                         const Expanded(
                             child: Text("Est. Probability %",
                                 textAlign: TextAlign.center)),
                       const Expanded(
                           child: Text("Lead Name & Company",
                               textAlign: TextAlign.left)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                      if (ResponsiveBreakpoints.of(context).isDesktop)
                         const Expanded(
                             child:
                                 Text("Lead Email", textAlign: TextAlign.right)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                      if (!ResponsiveBreakpoints.of(context).isMobile)
                         const Expanded(
                             child: Text("Stage", textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(DESKTOP))
+                      if (ResponsiveBreakpoints.of(context).isDesktop)
                         const Expanded(
                             child:
                                 Text("Next Step", textAlign: TextAlign.center)),
