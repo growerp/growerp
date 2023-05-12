@@ -516,7 +516,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 
@@ -545,7 +545,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 
@@ -559,7 +559,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 }

@@ -75,8 +75,8 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
                               curve: Curves.linear);
                         })
                   ])
-                : Column(children: [
-                    Row(children: const <Widget>[
+                : const Column(children: [
+                    Row(children: <Widget>[
                       Expanded(
                           child:
                               Text("Code/Name", textAlign: TextAlign.center)),
@@ -93,7 +93,7 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
                           child: Text("Ending Balance",
                               textAlign: TextAlign.center)),
                     ]),
-                    const Divider(color: Colors.black),
+                    Divider(color: Colors.black),
                   ]),
             trailing: const Text(' ')));
   }

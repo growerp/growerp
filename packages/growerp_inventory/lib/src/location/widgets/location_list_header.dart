@@ -70,7 +70,7 @@ class _LocationListHeaderState extends State<LocationListHeader> {
                             .add(LocationFetch(searchString: searchString));
                       })
                 ])
-              : Row(children: const <Widget>[
+              : const Row(children: <Widget>[
                   Expanded(child: Text("Loc.Name[ID]")),
                   SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
                 ]),

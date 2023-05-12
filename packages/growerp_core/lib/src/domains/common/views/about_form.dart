@@ -49,13 +49,13 @@ class AboutFormHeader extends StatelessWidget {
           width: 200,
         ),
         applicationLegalese: '© GrowERP, $year',
-        children: <Widget>[
+        children: const <Widget>[
           Center(
               child: SizedBox(
                   width: 300,
                   child: Form(
                       child: Column(
-                    children: const <Widget>[
+                    children: <Widget>[
 /*                      MarkdownPageListTile(
                         filename: 'README.md',
                         title: Text('View Readme'),

@@ -106,13 +106,13 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                     fontSize: isPhone ? 20 : 30,
                                     color: Colors.black))),
                         const SizedBox(height: 30),
-                        Row(children: const <Widget>[
+                        const Row(children: <Widget>[
                           Text('ProductId  '),
                           Expanded(child: Text('Description')),
                           Text('quantity'),
                         ]),
                       ]),
-                      subtitle: Row(children: const <Widget>[
+                      subtitle: const Row(children: <Widget>[
                         Expanded(
                             child: Text('existing location',
                                 textAlign: TextAlign.center)),

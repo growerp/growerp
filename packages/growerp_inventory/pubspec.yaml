@@ -53,6 +53,8 @@ dependencies:
     sdk: flutter
   growerp_core: 
     path: ../growerp_core/
+dependency_overrides:
+  intl: ^0.18.0
 dev_dependencies: 
   flutter_driver: 
     sdk: flutter

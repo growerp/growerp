@@ -21,25 +21,21 @@ class SplashForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChannels.textInput.invokeMethod('TextInput.hide'); // dismiss keyboard
-    return Scaffold(
+    return const Scaffold(
         body: SingleChildScrollView(
       child: Center(
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: const [
-              SizedBox(height: 100),
-              Image(
-                  image:
-                      AssetImage('packages/growerp_core/images/growerp.jpg')),
-              SizedBox(height: 20),
-              SizedBox(
-                  width: 300,
-                  child: LinearProgressIndicator(
-                    minHeight: 20,
-                    color: Color(0xFF4baa9b),
-                    backgroundColor: Colors.lightGreen,
-                  )),
-            ]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          SizedBox(height: 100),
+          Image(image: AssetImage('packages/growerp_core/images/growerp.jpg')),
+          SizedBox(height: 20),
+          SizedBox(
+              width: 300,
+              child: LinearProgressIndicator(
+                minHeight: 20,
+                color: Color(0xFF4baa9b),
+                backgroundColor: Colors.lightGreen,
+              )),
+        ]),
       ),
     ));
   }

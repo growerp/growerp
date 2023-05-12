@@ -79,8 +79,8 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                                   curve: Curves.linear);
                             })
                       ])
-                    : Column(children: [
-                        Row(children: const <Widget>[
+                    : const Column(children: [
+                        Row(children: <Widget>[
                           Expanded(
                               flex: 2,
                               child: Text("Code/Name",
@@ -97,7 +97,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                               child: Text("Ending Bal.",
                                   textAlign: TextAlign.right)),
                         ]),
-                        const Divider(color: Colors.black),
+                        Divider(color: Colors.black),
                       ]),
               ],
             ),
