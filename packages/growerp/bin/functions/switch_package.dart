@@ -13,14 +13,15 @@ import 'functions.dart';
 Future<void> switchPackage() async {
   var production = true;
   // switch admin app
-  final adminFileName = '$growerpPath/flutterDevelopment/packages/admin';
-  final hotelFileName = '$growerpPath/flutterDevelopment/packages/hotel';
+  final adminDirectory = '$growerpPath/flutterDevelopment/packages/admin';
+  final hotelDirectory = '$growerpPath/flutterDevelopment/packages/hotel';
   final adminGrowerpPackage =
-      await getGrowerpPackageInfo(PubClient(), '$adminFileName/pubspec.yaml');
+      await getGrowerpPackageInfo(PubClient(), adminDirectory);
   final hotelGrowerpPackage =
-      await getGrowerpPackageInfo(PubClient(), '$hotelFileName/pubspec.yaml');
-  final adminFile = File(adminFileName);
+      await getGrowerpPackageInfo(PubClient(), hotelDirectory);
+  final adminFile = File('$adminDirectory/pubspec.yaml');
   final dynamic adminYaml = loadYaml(adminFile.readAsStringSync());
+  // check to see if switch to dev or switch to release
   if (adminYaml['dependencies']['growerp_core'] == null) {
     print("Could not find dependency growerp_core in admin app'");
     return;
