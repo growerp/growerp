@@ -1,5 +1,5 @@
 name: growerp
-version: 0.1.0-dev.9
+version: 0.1.0-dev.10
 description: GrowERP installation and tools
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
@@ -10,7 +10,7 @@ platforms:
 executables: 
   growerp: null
 environment: 
-  sdk: '>=2.18.4 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   dcli: ^2.1.0
   freezed_annotation: ^2.0.3

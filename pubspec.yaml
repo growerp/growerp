@@ -3,7 +3,7 @@ description: growerp system
 repository: https://github.com/growerp/growerp
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies: 
 

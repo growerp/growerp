@@ -2,7 +2,7 @@ name: admin
 version: 0.9.3+66
 publish_to: none
 environment: 
-  sdk: '>3.0.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   growerp_core: 
     path: ../growerp_core/

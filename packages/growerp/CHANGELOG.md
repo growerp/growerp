@@ -1,3 +1,7 @@
+## 0.1.0-dev.10
+
+- upgrade internal packages.
+
 ## 0.1.0-dev.9
 
 - aded the packageswitch command to switch between local and pub.dev for all packages.
