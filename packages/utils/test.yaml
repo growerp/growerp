@@ -7,5 +7,5 @@ dependencies:
   dcli: 1.36.0
   yaml: ^3.1.1
   yaml_writer: ^1.0.3
-dev_dependencies: 
+dev_dependencies:
   lint_hard: ^1.0.0

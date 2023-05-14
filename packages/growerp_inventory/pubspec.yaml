@@ -55,10 +55,10 @@ dependencies:
     path: ../growerp_core/
 dependency_overrides:
   intl: ^0.18.0
-dev_dependencies: 
+dev_dependencies:
   flutter_driver: 
     sdk: flutter
-  integration_test: 
+  integration_test:
     sdk: flutter
   mockito: ^5.0.2
   very_good_analysis: ^3.0.0
