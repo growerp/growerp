@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import '../../../l10n/generated/growerp_core_localizations.dart';
 import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -228,7 +229,7 @@ class _LoginHeaderState extends State<LoginDialog> {
   Widget _loginToCurrentCompany() {
     return popUp(
         context: context,
-        title: "Login with Existing user name",
+        title: GrowerpCoreLocalizations.of(context)!.loginWithExistingUserName,
         child: Form(
             key: _loginFormKey,
             child: Column(children: <Widget>[

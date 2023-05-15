@@ -11,3 +11,4 @@ export 'src/models/models.dart';
 export 'src/core_router.dart';
 export 'src/styles/color_schemes.dart';
 export 'src/extensions.dart';
+export 'src/l10n/generated/growerp_core_localizations.dart';

@@ -21,6 +21,7 @@ import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
+import '../../../l10n/generated/growerp_core_localizations.dart';
 
 class TopApp extends StatelessWidget {
   const TopApp({
@@ -86,8 +87,10 @@ class MyApp extends StatelessWidget {
           },
           child: MaterialApp(
               title: title,
+              supportedLocales: const [Locale('en'), Locale('th')],
               debugShowCheckedModeBanner: false,
               localizationsDelegates: const [
+                GrowerpCoreLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
