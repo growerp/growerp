@@ -1,3 +1,5 @@
 {
-  "loginWithExistingUserName": "Login with Existing user name"
+  "loginWithExistingUserName": "Login with Existing user name",
+  "addNew": "Add new"
+
 }

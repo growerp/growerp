@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
+import '../../l10n/generated/growerp_order_accounting_localizations.dart';
 import '../findoc.dart';
 
 class FinDocListHeader extends StatefulWidget {
@@ -78,7 +79,7 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text(
-                            '${widget.sales ? "Customer" : "Supplier"} name & Company')),
+                            '${widget.sales ? "Customer" : "Supplier"} ${GrowerpOrderAccountingLocalizations.of(context)!.nameAndCompany}')),
                     if (!widget.isPhone && widget.docType != FinDocType.payment)
                       const SizedBox(
                           width: 80,

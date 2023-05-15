@@ -6,4 +6,7 @@ class GrowerpCoreLocalizationsEn extends GrowerpCoreLocalizations {
 
   @override
   String get loginWithExistingUserName => 'Login with Existing user name';
+
+  @override
+  String get addNew => 'Add new';
 }

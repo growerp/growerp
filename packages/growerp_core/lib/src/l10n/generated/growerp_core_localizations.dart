@@ -60,15 +60,18 @@ import 'growerp_core_localizations_th.dart';
 /// be consistent with the languages listed in the GrowerpCoreLocalizations.supportedLocales
 /// property.
 abstract class GrowerpCoreLocalizations {
-  GrowerpCoreLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  GrowerpCoreLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static GrowerpCoreLocalizations? of(BuildContext context) {
-    return Localizations.of<GrowerpCoreLocalizations>(context, GrowerpCoreLocalizations);
+    return Localizations.of<GrowerpCoreLocalizations>(
+        context, GrowerpCoreLocalizations);
   }
 
-  static const LocalizationsDelegate<GrowerpCoreLocalizations> delegate = _GrowerpCoreLocalizationsDelegate();
+  static const LocalizationsDelegate<GrowerpCoreLocalizations> delegate =
+      _GrowerpCoreLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -80,7 +83,8 @@ abstract class GrowerpCoreLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -98,36 +102,44 @@ abstract class GrowerpCoreLocalizations {
   /// In en, this message translates to:
   /// **'Login with Existing user name'**
   String get loginWithExistingUserName;
+
+  /// No description provided for @addNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new'**
+  String get addNew;
 }
 
-class _GrowerpCoreLocalizationsDelegate extends LocalizationsDelegate<GrowerpCoreLocalizations> {
+class _GrowerpCoreLocalizationsDelegate
+    extends LocalizationsDelegate<GrowerpCoreLocalizations> {
   const _GrowerpCoreLocalizationsDelegate();
 
   @override
   Future<GrowerpCoreLocalizations> load(Locale locale) {
-    return SynchronousFuture<GrowerpCoreLocalizations>(lookupGrowerpCoreLocalizations(locale));
+    return SynchronousFuture<GrowerpCoreLocalizations>(
+        lookupGrowerpCoreLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'th'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'th'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_GrowerpCoreLocalizationsDelegate old) => false;
 }
 
 GrowerpCoreLocalizations lookupGrowerpCoreLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return GrowerpCoreLocalizationsEn();
-    case 'th': return GrowerpCoreLocalizationsTh();
+    case 'en':
+      return GrowerpCoreLocalizationsEn();
+    case 'th':
+      return GrowerpCoreLocalizationsTh();
   }
 
   throw FlutterError(
-    'GrowerpCoreLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'GrowerpCoreLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

@@ -29,7 +29,8 @@ Future main() async {
       chatServer: ChatServer(),
       title: 'GrowERP package: growerp_inventory.',
       router: generateRoute,
-      menuOptions: menuOptions));
+      menuOptions: menuOptions,
+      extraDelegates: const [GrowerpInventoryLocalizations.delegate]));
 }
 
 // Menu definition

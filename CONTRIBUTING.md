@@ -7,3 +7,14 @@ In general you can make a pull request to the https://github.com/growerp/growerp
 3. Commit your changes: git commit -am 'Add some feature'
 4. Push to the branch: git push --set-upstream origin my-new-feature
 5. Submit a pull request.
+
+
+Start your commit message with:
+    docs:   - A documentation change.
+    feat:   - A new feature.
+    fix:    - A bug fix.
+    bug:    - A bug fix.
+    perf:   - A change that improves performance.
+    refactor: - A change that neither fixes a bug nor adds a feature.
+    revert: - A change that reverts a previous commit.
+

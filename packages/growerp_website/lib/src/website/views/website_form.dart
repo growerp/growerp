@@ -25,6 +25,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
 import 'package:growerp_select_dialog/growerp_select_dialog.dart';
 import '../../api_repository.dart';
+import '../../l10n/generated/growerp_website_localizations.dart';
 import '../website.dart';
 
 class WebsiteForm extends StatelessWidget {
@@ -650,8 +651,8 @@ class WebsiteFormState extends State<WebsitePage> {
                 color: Colors.black45, style: BorderStyle.solid, width: 0.80),
           ),
           child: Column(children: [
-            const Text(
-              'Shop dropdown Categories',
+            Text(
+              GrowerpWebsiteLocalizations.of(context)!.shopDropdownCategories,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),

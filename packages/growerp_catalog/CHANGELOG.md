@@ -1,6 +1,3 @@
-## 0.9.3
-* upgrade of core package
-
 ## 0.9.2
 * upgrade of core package
 

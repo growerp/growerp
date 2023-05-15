@@ -1,4 +1,4 @@
-name: example
+name: user_company_example
 description: A example project.
 version: 1.0.0+1
 publish_to: none
@@ -10,8 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  growerp_user_company:
-    path: ../
+  growerp_user_company: ^0.9.2
 
 dependency_overrides:
   intl: ^0.18.0

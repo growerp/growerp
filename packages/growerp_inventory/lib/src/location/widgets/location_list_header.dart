@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../l10n/generated/growerp_inventory_localizations.dart';
 import '../location.dart';
 
 class LocationListHeader extends StatefulWidget {
@@ -74,7 +75,8 @@ class _LocationListHeaderState extends State<LocationListHeader> {
                   Expanded(child: Text("Loc.Name[ID]")),
                   SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
                 ]),
-          subtitle: const Text('Product Name'),
+          subtitle:
+              Text(GrowerpInventoryLocalizations.of(context)!.productName),
           trailing: const SizedBox(width: 50)),
     ]));
   }

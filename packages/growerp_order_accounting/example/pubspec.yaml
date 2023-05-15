@@ -1,4 +1,4 @@
-name: example
+name: order_accounting_example
 version: 0.0.0+0
 publish_to: none
 
@@ -7,8 +7,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  growerp_order_accounting:
-    path: ../
+  growerp_order_accounting: ^0.9.2
   decimal: ^2.1.0
   flutter:
     sdk: flutter

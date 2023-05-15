@@ -1,0 +1,16 @@
+name: growerp
+repository: https://github.com/growerp/growerp
+
+packages:
+  - packages/admin
+  - packages/hotel
+  - packages/growerp*
+  - packages/growerp*/example
+
+ide:
+  intellij:
+    enabled: false
+    
+scripts:
+  analyze:
+    exec: dart analyze .

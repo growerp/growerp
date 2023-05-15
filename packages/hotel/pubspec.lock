@@ -565,14 +565,14 @@ packages:
       path: "../growerp_catalog"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.2"
   growerp_core:
     dependency: "direct main"
     description:
       path: "../growerp_core"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.2"
   growerp_order_accounting:
     dependency: "direct main"
     description:
@@ -581,12 +581,11 @@ packages:
     source: path
     version: "0.9.2"
   growerp_select_dialog:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: growerp_select_dialog
-      sha256: ab2372a42eae30859573271d62143ebca6ea3d62bab59b5853fab6d24057c5ff
-      url: "https://pub.dev"
-    source: hosted
+      path: "../growerp_select_dialog"
+      relative: true
+    source: path
     version: "0.6.0"
   growerp_user_company:
     dependency: "direct main"
@@ -594,7 +593,7 @@ packages:
       path: "../growerp_user_company"
       relative: true
     source: path
-    version: "0.9.3"
+    version: "0.9.2"
   growerp_website:
     dependency: "direct main"
     description:
@@ -1588,5 +1587,5 @@ packages:
     source: hosted
     version: "1.0.1"
 sdks:
-  dart: ">=3.0.0-0 <4.0.0"
+  dart: ">=3.0.0 <4.0.0"
   flutter: ">=3.9.0"

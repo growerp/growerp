@@ -1,8 +1,3 @@
-## 0.9.3
-* added accounting reports menu
-  * Balance sheet
-  * Balance posted summary
-
 ## 0.9.2
 * Merged invoice itemType and paymentItemType
 * adapted payment tests

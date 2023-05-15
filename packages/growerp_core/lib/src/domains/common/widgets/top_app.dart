@@ -24,13 +24,14 @@ import '../../domains.dart';
 import '../../../l10n/generated/growerp_core_localizations.dart';
 
 class TopApp extends StatelessWidget {
-  const TopApp({
+  TopApp({
     Key? key,
     required this.dbServer,
     required this.chatServer,
     this.title = 'GrowERP',
     required this.router,
     required this.menuOptions,
+    this.extraDelegates = const [],
   }) : super(key: key);
 
   final APIRepository dbServer;
@@ -38,89 +39,86 @@ class TopApp extends StatelessWidget {
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
+  final List<LocalizationsDelegate> extraDelegates;
 
+  final List<LocalizationsDelegate> localizationsDelegates = [
+    GrowerpCoreLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ];
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider(create: (context) => dbServer),
-          RepositoryProvider(create: (context) => chatServer),
-        ],
-        child: MultiBlocProvider(
           providers: [
-            BlocProvider<ThemeBloc>(
-                create: (context) => ThemeBloc()..add(ThemeSwitch())),
-            BlocProvider<AuthBloc>(
-                create: (context) =>
-                    AuthBloc(dbServer, chatServer)..add(AuthLoad())),
-            BlocProvider<ChatRoomBloc>(
-              create: (context) =>
-                  ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
-                    ..add(ChatRoomFetch()),
-            ),
-            BlocProvider<ChatMessageBloc>(
-                create: (context) => ChatMessageBloc(
-                    dbServer, chatServer, context.read<AuthBloc>())),
+            RepositoryProvider(create: (context) => dbServer),
+            RepositoryProvider(create: (context) => chatServer),
           ],
-          child: MyApp(title, router, menuOptions),
-        ),
-      );
-}
-
-class MyApp extends StatelessWidget {
-  final String title;
-  final Route<dynamic> Function(RouteSettings) router;
-  final List<MenuOption> menuOptions;
-
-  const MyApp(this.title, this.router, this.menuOptions, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-      return GestureDetector(
-          // close keyboard
-          onTap: () {
-            final currentFocus = FocusScope.of(context);
-
-            if (!currentFocus.hasPrimaryFocus) {
-              currentFocus.unfocus();
-            }
-          },
-          child: MaterialApp(
-              title: title,
-              supportedLocales: const [Locale('en'), Locale('th')],
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: const [
-                GrowerpCoreLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
+          child: MultiBlocProvider(
+              providers: [
+                BlocProvider<ThemeBloc>(
+                    create: (context) => ThemeBloc()..add(ThemeSwitch())),
+                BlocProvider<AuthBloc>(
+                    create: (context) =>
+                        AuthBloc(dbServer, chatServer)..add(AuthLoad())),
+                BlocProvider<ChatRoomBloc>(
+                  create: (context) => ChatRoomBloc(
+                      dbServer, chatServer, context.read<AuthBloc>())
+                    ..add(ChatRoomFetch()),
+                ),
+                BlocProvider<ChatMessageBloc>(
+                    create: (context) => ChatMessageBloc(
+                        dbServer, chatServer, context.read<AuthBloc>())),
               ],
-              builder: (context, child) =>
-                  ResponsiveBreakpoints.builder(child: child!, breakpoints: [
-                    const Breakpoint(start: 0, end: 450, name: MOBILE),
-                    const Breakpoint(start: 451, end: 800, name: TABLET),
-                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                    const Breakpoint(
-                        start: 1921, end: double.infinity, name: '4K'),
-                  ]),
-              themeMode: state.themeMode,
-              theme:
-                  ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-              darkTheme:
-                  ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-              onGenerateRoute: router,
-              home: BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  switch (state.status) {
-                    case AuthStatus.loading:
-                      return const SplashForm();
-                    case AuthStatus.changeIp:
-                      return const ChangeIpForm();
-                    default:
-                      return HomeForm(menuOptions: menuOptions, title: title);
-                  }
-                },
-              )));
-    });
-  }
+              child:
+                  BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
+                localizationsDelegates.addAll(extraDelegates);
+                return GestureDetector(
+                    // close keyboard
+                    onTap: () {
+                      final currentFocus = FocusScope.of(context);
+
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
+                    },
+                    child: MaterialApp(
+                        title: title,
+                        supportedLocales: const [Locale('en'), Locale('th')],
+                        debugShowCheckedModeBanner: false,
+                        localizationsDelegates: localizationsDelegates,
+                        builder: (context, child) =>
+                            ResponsiveBreakpoints.builder(
+                                child: child!,
+                                breakpoints: [
+                                  const Breakpoint(
+                                      start: 0, end: 450, name: MOBILE),
+                                  const Breakpoint(
+                                      start: 451, end: 800, name: TABLET),
+                                  const Breakpoint(
+                                      start: 801, end: 1920, name: DESKTOP),
+                                  const Breakpoint(
+                                      start: 1921,
+                                      end: double.infinity,
+                                      name: '4K'),
+                                ]),
+                        themeMode: state.themeMode,
+                        theme: ThemeData(
+                            useMaterial3: true, colorScheme: lightColorScheme),
+                        darkTheme: ThemeData(
+                            useMaterial3: true, colorScheme: darkColorScheme),
+                        onGenerateRoute: router,
+                        home: BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            switch (state.status) {
+                              case AuthStatus.loading:
+                                return const SplashForm();
+                              case AuthStatus.changeIp:
+                                return const ChangeIpForm();
+                              default:
+                                return HomeForm(
+                                    menuOptions: menuOptions, title: title);
+                            }
+                          },
+                        )));
+              })));
 }

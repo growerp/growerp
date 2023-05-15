@@ -25,11 +25,13 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-      dbServer: APIRepository(),
-      chatServer: ChatServer(),
-      title: 'GrowERP.',
-      router: generateRoute,
-      menuOptions: menuOptions));
+    dbServer: APIRepository(),
+    chatServer: ChatServer(),
+    title: 'GrowERP Package Inventory.',
+    router: generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: const [GrowerpCatalogLocalizations.delegate],
+  ));
 }
 
 // Menu definition

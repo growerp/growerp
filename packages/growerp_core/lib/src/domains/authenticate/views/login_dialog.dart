@@ -12,12 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../../l10n/generated/growerp_core_localizations.dart';
-import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+
 import '../../../domains/domains.dart';
+import '../../../l10n/generated/growerp_core_localizations.dart';
+import '../../common/functions/helper_functions.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
