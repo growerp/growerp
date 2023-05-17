@@ -68,10 +68,11 @@ Future main() async {
       router: router.generateRoute,
       menuOptions: menuOptions,
       extraDelegates: const [
-        GrowerpCatalogLocalizations.delegate,
-        GrowerpInventoryLocalizations.delegate,
-        GrowerpOrderAccountingLocalizations.delegate,
-        GrowerpWebsiteLocalizations.delegate,
-        GrowerpMarketingLocalizations.delegate,
+        CatalogLocalizations.delegate,
+        InventoryLocalizations.delegate,
+        OrderAccountingLocalizations.delegate,
+        WebsiteLocalizations.delegate,
+        MarketingLocalizations.delegate,
+        InventoryLocalizations.delegate,
       ]));
 }
