@@ -18,7 +18,7 @@ dependencies:
   responsive_framework: ^1.0.0
   flutter_simple_treeview: ^3.0.0-nullsafety.1
   printing: ^5.10.4
-  pdf: ^3.10.0
+  pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
   core:
     path: ../core

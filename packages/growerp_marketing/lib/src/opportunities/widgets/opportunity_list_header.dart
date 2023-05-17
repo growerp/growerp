@@ -37,10 +37,7 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
                 key: const Key('search'),
                 onTap: (() =>
                     setState(() => search ? search = false : search = true)),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
-                )),
+                child: const Icon(Icons.search_sharp, size: 40)),
             title: search
                 ? Row(children: <Widget>[
                     SizedBox(

@@ -39,10 +39,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
             leading: GestureDetector(
                 key: const Key('search'),
                 onTap: (() => setState(() => search = !search)),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
-                )),
+                child: const Icon(Icons.search_sharp, size: 40)),
             title: Column(
               children: [
                 Text("Time period: ${widget.ledgerReport.period!.periodName}"),

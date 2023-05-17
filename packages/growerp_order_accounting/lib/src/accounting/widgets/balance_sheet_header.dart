@@ -38,10 +38,7 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
             leading: GestureDetector(
                 key: const Key('search'),
                 onTap: (() => setState(() => search = !search)),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
-                )),
+                child: const Icon(Icons.search_sharp, size: 40)),
             title: search
                 ? Row(children: <Widget>[
                     Expanded(

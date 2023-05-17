@@ -14,3 +14,10 @@ ide:
 scripts:
   analyze:
     exec: dart analyze .
+  build_all:
+    run: dart pub global run melos exec --depends-on="build_runner" "flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs"
+    description: build_runner build all modules.
+  l10n:
+    run: dart pub global run melos exec --fail-fast --file-exists="l10n.yaml" flutter gen-l10n
+    description: Generates l10n for all app packages.
+  

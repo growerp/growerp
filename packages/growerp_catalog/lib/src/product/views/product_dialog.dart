@@ -161,8 +161,8 @@ class ProductDialogState extends State<ProductDialogFull> {
                     context: context,
                     child: listChild(classificationId, isPhone, categoryState),
                     title: 'Product Information',
-                    height: 650,
-                    width: 400)
+                    height: 750,
+                    width: isPhone ? 450 : 800)
               ])),
           if (productState.status == ProductStatus.updateLoading ||
               categoryState.status == CategoryStatus.loading)
@@ -334,45 +334,38 @@ class ProductDialogState extends State<ProductDialogFull> {
             },
             isExpanded: true,
           )),
-      Visibility(
-          visible:
-              classificationId != 'AppHotel' && _selectedTypeId != 'Service',
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(
-                          color: Colors.black45,
-                          style: BorderStyle.solid,
-                          width: 0.80),
-                    ),
-                    child: CheckboxListTile(
-                        key: const Key('useWarehouse'),
-                        title: const Text("Use Warehouse?",
-                            style: TextStyle(color: Color(0xFF4baa9b))),
-                        value: useWarehouse,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            useWarehouse = value!;
-                          });
-                        })),
+      if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
+        Expanded(
+          child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25.0),
+                border: Border.all(
+                    color: Colors.black45,
+                    style: BorderStyle.solid,
+                    width: 0.80),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormField(
-                  key: const Key('assets'),
-                  decoration:
-                      const InputDecoration(labelText: 'Assets in warehouse'),
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-                  ],
-                  controller: _assetsController,
-                ),
-              )
+              child: CheckboxListTile(
+                  key: const Key('useWarehouse'),
+                  title: const Text("Use Warehouse?",
+                      style: TextStyle(color: Color(0xFF4baa9b))),
+                  value: useWarehouse,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      useWarehouse = value!;
+                    });
+                  })),
+        ),
+      if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
+        Expanded(
+          child: TextFormField(
+            key: const Key('assets'),
+            decoration: const InputDecoration(labelText: 'Assets in warehouse'),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
             ],
-          )),
+            controller: _assetsController,
+          ),
+        ),
       Row(children: [
         Expanded(
             child: ElevatedButton(

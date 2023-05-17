@@ -33,8 +33,7 @@ class _TaskListHeaderState extends State<TaskListHeader> {
       child: ListTile(
           onTap: (() =>
               setState(() => search ? search = false : search = true)),
-          leading: Image.asset('packages/growerp_core/images/search.png',
-              height: 30),
+          leading: const Icon(Icons.search_sharp, size: 40),
           title: search
               ? Row(children: <Widget>[
                   SizedBox(

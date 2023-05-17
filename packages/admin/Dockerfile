@@ -31,9 +31,9 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 RUN flutter channel stable && flutter upgrade
 
 # Copy files to container and build
-RUN git clone https://github.com/growerp/growerp.git /usr/local/growerp
+RUN git clone -b development https://github.com/growerp/growerp.git /usr/local/growerp
 WORKDIR /usr/local/growerp/packages/admin
-RUN /usr/local/flutter/bin/flutter build web --release
+RUN /usr/local/flutter/bin/flutter build web 
 
 # Stage 2 - Create the run-time image
 FROM nginx
