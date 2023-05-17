@@ -24,8 +24,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
 import 'package:growerp_select_dialog/growerp_select_dialog.dart';
-import '../../api_repository.dart';
-import '../../l10n/generated/growerp_website_localizations.dart';
+import '../../../growerp_website.dart';
 import '../website.dart';
 
 class WebsiteForm extends StatelessWidget {
@@ -652,7 +651,7 @@ class WebsiteFormState extends State<WebsitePage> {
           ),
           child: Column(children: [
             Text(
-              GrowerpWebsiteLocalizations.of(context)!.shopDropdownCategories,
+              WebsiteLocalizations.of(context)!.shopDropdownCategories,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),

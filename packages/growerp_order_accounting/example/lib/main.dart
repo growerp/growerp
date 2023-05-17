@@ -31,7 +31,7 @@ Future main() async {
     title: 'GrowERP.',
     router: generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [GrowerpOrderAccountingLocalizations.delegate],
+    extraDelegates: const [OrderAccountingLocalizations.delegate],
   ));
 }
 

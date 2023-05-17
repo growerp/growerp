@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../l10n/generated/growerp_marketing_localizations.dart';
+import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityListHeader extends StatefulWidget {
@@ -72,8 +72,7 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
                     Row(children: <Widget>[
                       Expanded(
                           child: Text(
-                        GrowerpMarketingLocalizations.of(context)!
-                            .opportunityName,
+                        MarketingLocalizations.of(context)!.opportunityName,
                       )),
                       if (ResponsiveBreakpoints.of(context).isDesktop)
                         const Expanded(

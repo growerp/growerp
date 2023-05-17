@@ -90,9 +90,8 @@ class _CompanyListHeaderState extends State<CompanyListHeader> {
                         const Expanded(child: Text("VAT/salesPerc")),
                       if (!widget.isPhone)
                         Expanded(
-                            child: Text(
-                                GrowerpUserCompanyLocalizations.of(context)!
-                                    .numberOfEmployees)),
+                            child: Text(UserCompanyLocalizations.of(context)!
+                                .numberOfEmployees)),
                     ],
                   ),
             subtitle: widget.isPhone

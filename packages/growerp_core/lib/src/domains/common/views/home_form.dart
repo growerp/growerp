@@ -14,7 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../l10n/generated/growerp_core_localizations.dart';
+import '../../../l10n/generated/core_localizations.dart';
 import '../../domains.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -117,7 +117,7 @@ class HomeFormState extends State<HomeForm> {
                       authenticate.company?.partyId != null
                           ? ElevatedButton(
                               key: const Key('loginButton'),
-                              child: Text(GrowerpCoreLocalizations.of(context)!
+                              child: Text(CoreLocalizations.of(context)!
                                   .loginWithExistingUserName),
                               onPressed: () async {
                                 await showDialog(

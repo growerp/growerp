@@ -111,7 +111,7 @@ class ProductListState extends State<ProductList> {
                                   child: ProductDialog(Product()));
                             });
                       },
-                      tooltip: GrowerpCoreLocalizations.of(context)!.addNew,
+                      tooltip: CoreLocalizations.of(context)!.addNew,
                       child: const Icon(Icons.add))
                 ]),
                 body: RefreshIndicator(

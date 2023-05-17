@@ -29,7 +29,7 @@ Future main() async {
     title: 'GrowERP package: growerp_user_company.',
     router: generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [GrowerpUserCompanyLocalizations.delegate],
+    extraDelegates: const [UserCompanyLocalizations.delegate],
   ));
 }
 

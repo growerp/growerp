@@ -3,5 +3,5 @@ synthetic-package: false
 output-dir: ./lib/src/l10n/generated
 arb-dir: ./lib/src/l10n
 template-arb-file: intl_en.arb
-output-localization-file: growerp_user_company_localizations.dart
-output-class: GrowerpUserCompanyLocalizations
+output-localization-file: user_company_localizations.dart
+output-class: UserCompanyLocalizations

@@ -1,9 +1,0 @@
-import 'growerp_user_company_localizations.dart';
-
-/// The translations for English (`en`).
-class GrowerpUserCompanyLocalizationsEn extends GrowerpUserCompanyLocalizations {
-  GrowerpUserCompanyLocalizationsEn([String locale = 'en']) : super(locale);
-
-  @override
-  String get numberOfEmployees => 'Nr.Employees';
-}

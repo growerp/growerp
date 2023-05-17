@@ -21,7 +21,7 @@ import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
-import '../../../l10n/generated/growerp_core_localizations.dart';
+import '../../../l10n/generated/core_localizations.dart';
 
 class TopApp extends StatelessWidget {
   TopApp({
@@ -42,7 +42,7 @@ class TopApp extends StatelessWidget {
   final List<LocalizationsDelegate> extraDelegates;
 
   final List<LocalizationsDelegate> localizationsDelegates = [
-    GrowerpCoreLocalizations.delegate,
+    CoreLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,

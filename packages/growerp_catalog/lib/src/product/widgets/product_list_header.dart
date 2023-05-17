@@ -18,7 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../l10n/generated/growerp_catalog_localizations.dart';
+import '../../l10n/generated/catalog_localizations.dart';
 import '../product.dart';
 
 class ProductListHeader extends StatefulWidget {
@@ -93,8 +93,7 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                               child: Text("Description",
                                   textAlign: TextAlign.center)),
                         Expanded(
-                            child: Text(
-                                GrowerpCatalogLocalizations.of(context)!.price,
+                            child: Text(CatalogLocalizations.of(context)!.price,
                                 textAlign: TextAlign.center)),
                         if (classificationId != 'AppHotel')
                           const Expanded(

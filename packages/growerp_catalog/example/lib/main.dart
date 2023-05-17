@@ -30,7 +30,7 @@ Future main() async {
     title: 'GrowERP Package Inventory.',
     router: generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [GrowerpCatalogLocalizations.delegate],
+    extraDelegates: const [CatalogLocalizations.delegate],
   ));
 }
 

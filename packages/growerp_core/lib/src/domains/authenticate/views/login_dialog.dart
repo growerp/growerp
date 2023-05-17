@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../domains/domains.dart';
-import '../../../l10n/generated/growerp_core_localizations.dart';
+import '../../../l10n/generated/core_localizations.dart';
 import '../../common/functions/helper_functions.dart';
 
 class LoginDialog extends StatefulWidget {
@@ -230,7 +230,7 @@ class _LoginHeaderState extends State<LoginDialog> {
   Widget _loginToCurrentCompany() {
     return popUp(
         context: context,
-        title: GrowerpCoreLocalizations.of(context)!.loginWithExistingUserName,
+        title: CoreLocalizations.of(context)!.loginWithExistingUserName,
         child: Form(
             key: _loginFormKey,
             child: Column(children: <Widget>[
