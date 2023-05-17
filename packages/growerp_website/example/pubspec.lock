@@ -341,7 +341,7 @@ packages:
       path: "../../growerp_core"
       relative: true
     source: path
-    version: "0.9.2"
+    version: "1.0.0"
   growerp_select_dialog:
     dependency: "direct overridden"
     description:

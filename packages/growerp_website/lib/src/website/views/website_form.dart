@@ -652,7 +652,7 @@ class WebsiteFormState extends State<WebsitePage> {
           child: Column(children: [
             Text(
               WebsiteLocalizations.of(context)!.shopDropdownCategories,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Wrap(spacing: 10, children: browseCatButtons)
