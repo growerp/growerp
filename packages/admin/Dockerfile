@@ -24,16 +24,25 @@ RUN apt-get update && \
 # Clone the flutter repo
 RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
     /usr/local/flutter/bin/flutter doctor -v
-
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # set flutter channel
 RUN flutter channel stable && flutter upgrade
-
-# Copy files to container and build
-RUN git clone -b development https://github.com/growerp/growerp.git /usr/local/growerp
+RUN dart pub global activate melos
+ENV PATH="/root/.pub-cache/bin:${PATH}"
+# get growerp repos
+RUN git clone --depth 1 -b development https://github.com/growerp/growerp.git /usr/local/growerp
+WORKDIR /usr/local/growerp/
+#RUN dart pub global run melos:melos clean
+RUN melos bootstrap
+RUN melos exec --file-exists="l10n.yaml" -- "flutter gen-l10n"
+# get growerp_core first, other are dependent on it
+RUN melos exec --scope="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs" 
+# build the others, no need for examples
+RUN melos exec --ignore="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs"
+# build flutter app
 WORKDIR /usr/local/growerp/packages/admin
-RUN /usr/local/flutter/bin/flutter build web 
+RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx

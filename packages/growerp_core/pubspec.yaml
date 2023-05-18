@@ -74,6 +74,6 @@ dev_dependencies:
   dependency_validator: ^3.2.0
 flutter: 
   uses-material-design: true
-#  generate: true
+#  generate: true and run flutter gen-l10n
 flutter_intl: 
   enabled: true

@@ -12,17 +12,15 @@ Let us know if you have suggestions at support@growerp.com
 	* Be able to maintain the automatic posting configuration.
 	* Access to the error journal of failed postings
 	* automatically add new timeperiod in new year
-* Ease the creation of other languages than just English.
 * Extend the growerp.com website
 * How about GPT4 in ERP? AI could make screen selections and entry suggestions?
 * Integration of the website and admin app (xxx.growerp.com and admin.growerp.com)
-* Update the hotel app
 * Update the freelancer app
 * Create a manufacturing app
 * Create a logistic app
 
 ## Technical internal requests
-*  Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
+* Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * Separate the order/accounting package
 * replace nginx frontend webserver with: https://github.com/onepub-dev/nginx-le can do wildcards.
 * Move chat and tasking into their own package.
@@ -33,11 +31,11 @@ Let us know if you have suggestions at support@growerp.com
 # Releases
 ## Release May 31 2023 (V0.9.5)
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.
-2. Now have a single standalone dart installation script which assumes Flutter and Java already installed.
-3. Create account reports: balancesheet, balance posted summary.
-4. Added the global command growerp to easy install and maintain the system
-5. Language localizations, currently English and Thai, help us translate?
-6. Now using [Melos](https://pub.dev/packages/melos) to maintain packages in development
+2. Create account reports: balancesheet, balance posted summary.
+3. Added the global command growerp to easy install and maintain the system
+4. Language localizations, currently English and Thai, help us translate?
+5. Now using [Melos](https://pub.dev/packages/melos) to maintain packages
+6. Update the hotel app to latest packages
 
 ## Release April 12 2023 (V0.9.2)
 1. Now possible to have completely different ledger organizations between companies
