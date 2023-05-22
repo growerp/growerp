@@ -22,7 +22,6 @@ Let us know if you have suggestions at support@growerp.com
 ## Technical internal requests
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * Separate the order/accounting package
-* replace nginx frontend webserver with: https://github.com/onepub-dev/nginx-le can do wildcards.
 * Move chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)

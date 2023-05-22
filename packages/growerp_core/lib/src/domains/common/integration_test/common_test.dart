@@ -90,6 +90,7 @@ class CommonTest {
     /// [newCompany]
     String companyName = '${initialCompany.name!} ${seq++}';
     await enterText(tester, 'companyName', companyName);
+    await CommonTest.drag(tester);
     await enterDropDown(
         tester, 'currency', initialCompany.currency!.description!);
     await CommonTest.drag(tester);
@@ -116,7 +117,7 @@ class CommonTest {
     expect(getTextField('appBarCompanyName'), equals(test.company!.name));
     // company
     expect(getTextField('dbCompanyTitle'), equals("Company"));
-    expect(getTextField('dbCompanySubTitle'), equals(test.company!.name));
+    expect(getTextField('dbCompanySubTitle0'), equals(test.company!.name));
     expect(getTextField('dbCompanySubTitle1'),
         equals("Email: ${test.company!.email}"));
     expect(getTextField('dbCompanySubTitle2'),
@@ -125,13 +126,13 @@ class CommonTest {
         equals("Employees: ${test.company!.employees.length + 1}"));
     // User
     expect(getTextField('dbUserTitle'), equals("Logged in User"));
-    expect(getTextField('dbUserSubTitle'),
+    expect(getTextField('dbUserSubTitle0'),
         equals("${test.admin!.firstName} ${test.admin!.lastName}"));
     expect(
         getTextField('dbUserSubTitle1'), equals("Email: ${test.admin!.email}"));
-    expect(getTextField('dbUserSubTitle2'),
-        equals("Login name: ${test.admin!.loginName}"));
-    expect(getTextField('dbUserSubTitle3'),
+    expect(getTextField('dbUserSubTitle2'), equals("Login name:"));
+    expect(getTextField('dbUserSubTitle3'), equals(" ${test.admin!.email}"));
+    expect(getTextField('dbUserSubTitle4'),
         equals("Security Group: ${test.admin!.userGroup!.name}"));
   }
 

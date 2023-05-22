@@ -29,11 +29,12 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
                 fontSize: phone ? 15 : 25, fontWeight: FontWeight.bold),
             key: Key("${key}Title")))
   ];
+  int index = 0;
   for (final test in subTitles) {
     textList.add(Center(
       child: Text(test,
           style: TextStyle(fontSize: phone ? 12 : 20),
-          key: Key("${key}SubTitle")),
+          key: Key("${key}SubTitle${index++}")),
     ));
   }
   return Card(

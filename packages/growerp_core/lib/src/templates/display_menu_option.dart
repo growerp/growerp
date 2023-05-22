@@ -24,7 +24,7 @@ class DisplayMenuOption extends StatefulWidget {
   final int menuIndex; // navigator rail menu selected
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
-  final List<Widget>? actions; // actions at the appBar
+  final List<Widget> actions; // actions at the appBar
   final bool? isPhone;
   const DisplayMenuOption({
     Key? key,
@@ -33,7 +33,7 @@ class DisplayMenuOption extends StatefulWidget {
     required this.menuIndex,
     this.tabIndex,
     this.tabItem,
-    this.actions,
+    this.actions = const [],
     this.isPhone = false,
   }) : super(key: key);
 
@@ -66,6 +66,21 @@ class MenuOptionState extends State<DisplayMenuOption>
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     route = menuOption.route; // used also for key
+    actions = widget.actions;
+    actions.add(IconButton(
+        //  key: Key('topChatButton'), // causes a duplicate key?
+        icon: const Icon(Icons.chat),
+        tooltip: 'Chat',
+        onPressed: () async => {
+              await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return const ChatRoomListDialog();
+                },
+              )
+            }));
+
     child = menuOption.child;
     tabIndex = widget.tabIndex ?? 0;
     if (menuOption.floatButtonForm != null) {
@@ -155,7 +170,6 @@ class MenuOptionState extends State<DisplayMenuOption>
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    actions = widget.actions ?? [];
     if (isPhone && route != '/') {
       actions.add(IconButton(
           key: const Key('homeButton'),
@@ -170,20 +184,6 @@ class MenuOptionState extends State<DisplayMenuOption>
             }
           }));
     }
-
-    actions.add(IconButton(
-        //  key: Key('topChatButton'), // causes a duplicate key?
-        icon: const Icon(Icons.chat),
-        tooltip: 'Chat',
-        onPressed: () async => {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return const ChatRoomListDialog();
-                },
-              )
-            }));
 
     Authenticate authenticate = Authenticate();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
