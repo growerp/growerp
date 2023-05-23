@@ -45,12 +45,19 @@ class WebsiteContentState extends State<WebsiteContent> {
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
   final ImagePicker _picker = ImagePicker();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     newContent = widget.content;
     _nameController.text = widget.content.title;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -123,8 +130,8 @@ class WebsiteContentState extends State<WebsiteContent> {
                           padding: const EdgeInsets.all(20),
                           child: Scaffold(
                               backgroundColor: Colors.transparent,
-                              floatingActionButton:
-                                  imageButtons(context, _onImageButtonPressed),
+                              floatingActionButton: ImageButtons(
+                                  _scrollController, _onImageButtonPressed),
                               body: imageChild(isPhone))),
                       const Positioned(
                           top: 5, right: 5, child: DialogCloseButton())

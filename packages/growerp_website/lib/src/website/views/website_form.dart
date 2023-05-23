@@ -155,7 +155,6 @@ class WebsiteFormState extends State<WebsitePage> {
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
         color: Colors.deepOrange,
-        padding: const EdgeInsets.all(0.0),
         onPressed: () async {
           var updContent = await showDialog(
               barrierDismissible: true,
@@ -223,7 +222,6 @@ class WebsiteFormState extends State<WebsitePage> {
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
         color: Colors.deepOrange,
-        padding: const EdgeInsets.all(0.0),
         onPressed: () async {
           var updContent = await showDialog(
               barrierDismissible: true,
@@ -475,14 +473,12 @@ class WebsiteFormState extends State<WebsitePage> {
     }
 
     List<Widget> widgets = [
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Clickable website URL',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: InkWell(
             onTap: doLlaunchUrl,
             child: Text(
@@ -497,16 +493,12 @@ class WebsiteFormState extends State<WebsitePage> {
           )),
       Form(
           key: _websiteFormKey1,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Website domain',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
               child: Row(children: [
                 Expanded(
                   child: TextFormField(
@@ -538,23 +530,19 @@ class WebsiteFormState extends State<WebsitePage> {
               ]))),
       Form(
           key: _websiteFormKey2,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Title of the website',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
               child: Row(children: [
                 Expanded(
                   child: TextFormField(
                       key: const Key('title'),
                       controller: _titleController,
-                      decoration: const InputDecoration(
-                          labelText: 'Title of the website')),
+                      decoration:
+                          const InputDecoration(labelText: 'Title text')),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
@@ -568,19 +556,13 @@ class WebsiteFormState extends State<WebsitePage> {
                       }
                     }),
               ]))),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Text sections',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Column(children: [
-            const Text(
-              'Text sections',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
             const Text(
               'Can change order with long press',
               style: TextStyle(fontSize: 10),
@@ -607,31 +589,21 @@ class WebsiteFormState extends State<WebsitePage> {
                     spacing: 10,
                     children: textButtons))
           ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Images',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(runSpacing: 10, spacing: 10, children: imageButtons)
-          ])),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Images',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons)),
       for (Map cat in catButtons)
-        Container(
-            width: 400,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25.0),
-              border: Border.all(
-                  color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-            ),
+        InputDecorator(
+            key: Key(cat["categoryName"]),
+            decoration: InputDecoration(
+                labelText: cat["categoryName"],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                )),
             child: Column(children: [
               Text(
                 cat["categoryName"],
@@ -641,46 +613,28 @@ class WebsiteFormState extends State<WebsitePage> {
               ),
               Wrap(spacing: 10, children: cat["products"])
             ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            Text(
-              WebsiteLocalizations.of(context)!.shopDropdownCategories,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, children: browseCatButtons)
-          ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Website colors',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, children: colorCatButtons)
-          ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText:
+                  WebsiteLocalizations.of(context)!.shopDropdownCategories,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child: Wrap(spacing: 10, children: browseCatButtons)),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Website Colors',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child:
+              Column(children: [Wrap(spacing: 10, children: colorCatButtons)])),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Obsidian vault',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: TextField(
@@ -691,7 +645,7 @@ class WebsiteFormState extends State<WebsitePage> {
             const SizedBox(width: 10),
             ElevatedButton(
                 key: const Key('upload'),
-                child: const Text('Upload Obsidian Vault'),
+                child: const Text('Upload '),
                 onPressed: () async {
                   FilePickerResult? result;
                   String? path;
@@ -725,16 +679,12 @@ class WebsiteFormState extends State<WebsitePage> {
           ])),
       Form(
           key: _websiteFormKey3,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Google Websiste statistics ID',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
               child: Row(children: [
                 Expanded(
                   child: TextFormField(
@@ -783,21 +733,16 @@ class WebsiteFormState extends State<WebsitePage> {
     return Center(
         child: SingleChildScrollView(
             key: const Key('listView'),
-            padding: const EdgeInsets.all(20),
-            child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(children: [
-                  Center(
-                      child: Text(
-                    'id:#${state.website?.id}',
-                    style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
-                    key: const Key('header'),
-                  )),
-                  const SizedBox(height: 10),
-                  Column(children: (rows.isEmpty ? column : rows)),
-                ]))));
+            child: Column(children: [
+              Center(
+                  child: Text(
+                'id:#${state.website?.id}',
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                key: const Key('header'),
+              )),
+              const SizedBox(height: 10),
+              Column(children: (rows.isEmpty ? column : rows)),
+            ])));
   }
 }
