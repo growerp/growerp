@@ -53,7 +53,7 @@ class ProductDialogFull extends StatefulWidget {
 }
 
 class ProductDialogState extends State<ProductDialogFull> {
-  final _formKey = GlobalKey<FormState>();
+  late final GlobalKey<FormState> _productDialogFormKey;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -69,6 +69,7 @@ class ProductDialogState extends State<ProductDialogFull> {
   late String classificationId;
   final ImagePicker _picker = ImagePicker();
   late List<Category> _selectedCategories;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -88,6 +89,13 @@ class ProductDialogState extends State<ProductDialogFull> {
     _selectedTypeId = widget.product.productTypeId;
     classificationId = GlobalConfiguration().get("classificationId");
     useWarehouse = widget.product.useWarehouse;
+    _productDialogFormKey = GlobalKey<FormState>();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -365,7 +373,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                 child: Text(
                     widget.product.productId.isEmpty ? 'Create' : 'Update'),
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
+                  if (_productDialogFormKey.currentState!.validate()) {
                     Uint8List? image =
                         await HelperFunctions.getResizedImage(_imageFile?.path);
                     if (!mounted) return;
@@ -424,23 +432,27 @@ class ProductDialogState extends State<ProductDialogFull> {
       key: productDialogKey,
       child: Scaffold(
           backgroundColor: Colors.transparent,
-          floatingActionButton: imageButtons(context, _onImageButtonPressed),
+          floatingActionButton:
+              ImageButtons(_scrollController, _onImageButtonPressed),
           body: Form(
-              key: _formKey,
+              key: _productDialogFormKey,
               child: SingleChildScrollView(
                   key: const Key('listView'),
+                  controller: _scrollController,
                   child: Column(children: <Widget>[
                     Center(
                         child: Text(
                       'Product #${widget.product.productId.isEmpty ? " New" : widget.product.productId}',
                       style: const TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.bold),
+                          color: Colors.black,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                       key: const Key('header'),
                     )),
                     const SizedBox(height: 10),
                     CircleAvatar(
                         backgroundColor: Colors.green,
-                        radius: 80,
+                        radius: 60,
                         child: _imageFile != null
                             ? foundation.kIsWeb
                                 ? Image.network(_imageFile!.path, scale: 0.3)

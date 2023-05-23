@@ -53,7 +53,7 @@ dependencies:
   file_picker: ^5.0.1
   fast_csv: ^0.1.44
   archive: ^3.3.0
-  image: ^4.0.2
+  image: ^4.0.17
   flutter_test: 
     sdk: flutter
   integration_test: 

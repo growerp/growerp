@@ -14,35 +14,77 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 
-Widget imageButtons(BuildContext context, onImageButtonPressed) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: <Widget>[
-      const SizedBox(height: 100),
-      FloatingActionButton(
-        key: const Key('gallery'),
-        onPressed: () {
-          onImageButtonPressed(ImageSource.gallery, context: context);
-        },
-        heroTag: 'image0',
-        tooltip: 'Pick Image from gallery',
-        child: const Icon(Icons.photo_library),
+class ImageButtons extends StatefulWidget {
+  final Function onImageButtonPressed;
+  final ScrollController scrollController;
+  const ImageButtons(this.scrollController, this.onImageButtonPressed,
+      {super.key});
+
+  @override
+  State<ImageButtons> createState() => _ImageButtonsState();
+}
+
+class _ImageButtonsState extends State<ImageButtons> {
+  bool isVisible = true;
+
+  @override
+  void initState() {
+    widget.scrollController.addListener(() {
+      if (isVisible != false &&
+          widget.scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+        setState(() {
+          isVisible = false;
+        });
+      }
+      if (isVisible != true &&
+          widget.scrollController.position.userScrollDirection ==
+              ScrollDirection.forward) {
+        setState(() {
+          isVisible = true;
+        });
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Visibility(
+      visible: isVisible,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          const SizedBox(height: 100),
+          FloatingActionButton(
+            key: const Key('gallery'),
+            onPressed: () {
+              widget.onImageButtonPressed(ImageSource.gallery,
+                  context: context);
+            },
+            heroTag: 'image0',
+            tooltip: 'Pick Image from gallery',
+            child: const Icon(Icons.photo_library),
+          ),
+          const SizedBox(height: 20),
+          Visibility(
+            visible: !kIsWeb,
+            child: FloatingActionButton(
+              key: const Key('camera'),
+              onPressed: () {
+                widget.onImageButtonPressed(ImageSource.camera,
+                    context: context);
+              },
+              heroTag: 'image1',
+              tooltip: 'Take a Photo',
+              child: const Icon(Icons.camera_alt),
+            ),
+          )
+        ],
       ),
-      const SizedBox(height: 20),
-      Visibility(
-        visible: !kIsWeb,
-        child: FloatingActionButton(
-          key: const Key('camera'),
-          onPressed: () {
-            onImageButtonPressed(ImageSource.camera, context: context);
-          },
-          heroTag: 'image1',
-          tooltip: 'Take a Photo',
-          child: const Icon(Icons.camera_alt),
-        ),
-      )
-    ],
-  );
+    );
+  }
 }

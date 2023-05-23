@@ -89,6 +89,7 @@ class CompanyFormState extends State<CompanyDialog> {
   String? _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
   late bool isPhone;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -122,6 +123,12 @@ class CompanyFormState extends State<CompanyDialog> {
     if (company.telephoneNr != null) {
       _telephoneController.text = company.telephoneNr!;
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -581,10 +588,12 @@ class CompanyFormState extends State<CompanyDialog> {
         child: Scaffold(
             key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
             backgroundColor: Colors.transparent,
-            floatingActionButton: imageButtons(context, _onImageButtonPressed),
+            floatingActionButton:
+                ImageButtons(_scrollController, _onImageButtonPressed),
             body: Form(
                 key: _companyDialogFormKey,
                 child: SingleChildScrollView(
+                    controller: _scrollController,
                     key: const Key('listView'),
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
@@ -601,7 +610,7 @@ class CompanyFormState extends State<CompanyDialog> {
                           const SizedBox(height: 10),
                           CircleAvatar(
                               backgroundColor: Colors.green,
-                              radius: 80,
+                              radius: 60,
                               child: _imageFile != null
                                   ? kIsWeb
                                       ? Image.network(_imageFile!.path,

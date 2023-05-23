@@ -71,6 +71,7 @@ class UserDialogState extends State<UserDialog> {
   late bool isPhone;
   bool _hasLogin = false;
   late final GlobalKey<ScaffoldMessengerState> _userDialogKey;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -98,6 +99,12 @@ class UserDialogState extends State<UserDialog> {
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
     repos = context.read<CompanyUserAPIRepository>();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -176,7 +183,7 @@ class UserDialogState extends State<UserDialog> {
               child: Scaffold(
                   backgroundColor: Colors.transparent,
                   floatingActionButton:
-                      imageButtons(context, _onImageButtonPressed),
+                      ImageButtons(_scrollController, _onImageButtonPressed),
                   body: listChild()))),
     );
   }
@@ -579,6 +586,7 @@ class UserDialogState extends State<UserDialog> {
     return Form(
         key: _userDialogFormKey,
         child: SingleChildScrollView(
+            controller: _scrollController,
             key: const Key('listView'),
             child: Column(children: <Widget>[
               Center(
