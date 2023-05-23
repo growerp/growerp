@@ -30,6 +30,7 @@ void main() {
 
   testWidgets('''GrowERP category test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        CatalogLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester);

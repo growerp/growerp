@@ -14,6 +14,7 @@ void main() {
 
   testWidgets('''GrowERP Core test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        CoreLocalizations.localizationsDelegates,
         clear: true, title: "Core Test");
 
     await CommonTest.createCompanyAndAdmin(tester);

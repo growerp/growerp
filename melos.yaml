@@ -21,4 +21,7 @@ scripts:
   l10n:
     run: dart pub global run melos exec --fail-fast --file-exists="l10n.yaml" flutter gen-l10n
     description: Generates l10n for all app packages.
+  test_all:
+    run: dart pub global run melos exec --file-exists="integration_test/all_test.dart" flutter test integration_test/all_test.dart
+    description: run all integration tests.
   

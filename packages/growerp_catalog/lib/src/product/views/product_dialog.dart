@@ -149,25 +149,23 @@ class ProductDialogState extends State<ProductDialogFull> {
           default:
         }
       }, builder: (context, categoryState) {
-        return Stack(children: [
-          Dialog(
+        if (productState.status == ProductStatus.updateLoading ||
+            categoryState.status == CategoryStatus.loading) {
+          return const LoadingIndicator();
+        } else {
+          return Dialog(
               key: const Key('ProductDialog'),
               insetPadding: const EdgeInsets.only(left: 20, right: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Stack(clipBehavior: Clip.none, children: [
-                popUp(
-                    context: context,
-                    child: listChild(classificationId, isPhone, categoryState),
-                    title: 'Product Information',
-                    height: 750,
-                    width: isPhone ? 450 : 800)
-              ])),
-          if (productState.status == ProductStatus.updateLoading ||
-              categoryState.status == CategoryStatus.loading)
-            const LoadingIndicator()
-        ]);
+              child: popUp(
+                  context: context,
+                  child: listChild(classificationId, isPhone, categoryState),
+                  title: 'Product Information',
+                  height: 750,
+                  width: isPhone ? 450 : 800));
+        }
       });
     });
   }
@@ -335,36 +333,30 @@ class ProductDialogState extends State<ProductDialogFull> {
             isExpanded: true,
           )),
       if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
-        Expanded(
-          child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
-              child: CheckboxListTile(
-                  key: const Key('useWarehouse'),
-                  title: const Text("Use Warehouse?",
-                      style: TextStyle(color: Color(0xFF4baa9b))),
-                  value: useWarehouse,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      useWarehouse = value!;
-                    });
-                  })),
-        ),
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25.0),
+              border: Border.all(
+                  color: Colors.black45, style: BorderStyle.solid, width: 0.80),
+            ),
+            child: CheckboxListTile(
+                key: const Key('useWarehouse'),
+                title: const Text("Use Warehouse?",
+                    style: TextStyle(color: Color(0xFF4baa9b))),
+                value: useWarehouse,
+                onChanged: (bool? value) {
+                  setState(() {
+                    useWarehouse = value!;
+                  });
+                })),
       if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
-        Expanded(
-          child: TextFormField(
-            key: const Key('assets'),
-            decoration: const InputDecoration(labelText: 'Assets in warehouse'),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-            ],
-            controller: _assetsController,
-          ),
+        TextFormField(
+          key: const Key('assets'),
+          decoration: const InputDecoration(labelText: 'Assets in warehouse'),
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+          ],
+          controller: _assetsController,
         ),
       Row(children: [
         Expanded(

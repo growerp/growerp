@@ -16,6 +16,7 @@ void main() {
 
   testWidgets('''Make screenshots''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        CoreLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, demoData: true);
     await CommonTest.takeScreenshot(tester, binding, 'dashBoard');

@@ -193,16 +193,15 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                           " - ${state.ledgerReport?.period!.thruDate.toString().substring(0, 10)}   "),
                       if (!expanded)
                         ElevatedButton(
-                          child: const Text('Expand All'),
+                          child: const Text('Exp.'),
                           onPressed: () => setState(() {
                             expanded = !expanded;
                             _controller!.expandAll();
                           }),
                         ),
-                      const SizedBox(width: 10),
                       if (expanded)
                         ElevatedButton(
-                          child: const Text('Collapse All'),
+                          child: const Text('Col.'),
                           onPressed: () => setState(() {
                             expanded = !expanded;
                             _controller!.collapseAll();

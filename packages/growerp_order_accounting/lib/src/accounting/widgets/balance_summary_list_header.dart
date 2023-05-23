@@ -85,13 +85,13 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                           Expanded(
                               child: Text("Begin", textAlign: TextAlign.right)),
                           Expanded(
-                              child: Text("Posted Debits",
+                              child: Text("Post.\nDebit",
                                   textAlign: TextAlign.right)),
                           Expanded(
-                              child: Text("Posted Credits",
+                              child: Text("Post.\nCredt",
                                   textAlign: TextAlign.right)),
                           Expanded(
-                              child: Text("Ending Bal.",
+                              child: Text("End\nBal.",
                                   textAlign: TextAlign.right)),
                         ]),
                         Divider(color: Colors.black),

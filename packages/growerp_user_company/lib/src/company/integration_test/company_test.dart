@@ -164,8 +164,8 @@ class CompanyTest {
     await CommonTest.enterText(tester, 'address2', address.address2!);
     await CommonTest.enterText(tester, 'postalCode', address.postalCode!);
     await CommonTest.enterText(tester, 'city', address.city!);
-    await CommonTest.enterText(tester, 'province', address.province!);
     await CommonTest.drag(tester);
+    await CommonTest.enterText(tester, 'province', address.province!);
     await CommonTest.enterDropDownSearch(tester, 'country', address.country!);
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(tester, 'updateAddress');

@@ -76,18 +76,19 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text('${widget.sales ? "Customer" : "Supplier"} '
-                            '${OrderAccountingLocalizations.of(context)!.nameAndCompany}')),
+                            '\n${OrderAccountingLocalizations.of(context)!.nameAndCompany}')),
                     if (!widget.isPhone && widget.docType != FinDocType.payment)
                       const SizedBox(
                           width: 80,
                           child: Text("#items", textAlign: TextAlign.left)),
                   ]),
             subtitle: Row(children: <Widget>[
-              SizedBox(
-                  width: 80,
-                  child: Text(classificationId == 'AppHotel'
-                      ? 'Reserv. Date'
-                      : 'Creation Date')),
+              if (!widget.isPhone)
+                SizedBox(
+                    width: 80,
+                    child: Text(classificationId == 'AppHotel'
+                        ? 'Reserv. Date'
+                        : 'Creation Date')),
               const SizedBox(width: 76, child: Text("Total")),
               const SizedBox(width: 90, child: Text("Status")),
               if (!widget.isPhone) const Expanded(child: Text("Email Address")),

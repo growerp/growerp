@@ -188,7 +188,7 @@ class CompanyFormState extends State<CompanyDialog> {
                       context: context,
                       title: "$_selectedRole Company information",
                       width: isPhone ? 400 : 1000,
-                      height: isPhone ? 750 : 750,
+                      height: isPhone ? 600 : 750,
                       child: listChild()))
               : listChild();
         });
@@ -562,10 +562,10 @@ class CompanyFormState extends State<CompanyDialog> {
           children: [
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
+                    padding: const EdgeInsets.all(5), child: widgets[i++])),
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));
@@ -573,7 +573,7 @@ class CompanyFormState extends State<CompanyDialog> {
     }
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+      column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
     return ScaffoldMessenger(
@@ -587,7 +587,7 @@ class CompanyFormState extends State<CompanyDialog> {
                 child: SingleChildScrollView(
                     key: const Key('listView'),
                     child: Padding(
-                        padding: const EdgeInsets.all(15),
+                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
                         child: Column(children: [
                           Center(
                               child: Text(

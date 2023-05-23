@@ -36,6 +36,7 @@ void main() {
 
   testWidgets('''GrowERP company test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        UserCompanyLocalizations.localizationsDelegates,
         title: "growerp_user_company: main company test", clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await CommonTest.selectTopCompany(tester);
@@ -51,6 +52,7 @@ void main() {
 
   testWidgets('''GrowERP customer test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        UserCompanyLocalizations.localizationsDelegates,
         title: "growerp_user_company: customer company test", clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCustomers(tester); // create
@@ -65,6 +67,7 @@ void main() {
 
   testWidgets('''GrowERP lead test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        UserCompanyLocalizations.localizationsDelegates,
         title: "growerp_user_company: lead company test", clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectLeads(tester);
@@ -79,6 +82,7 @@ void main() {
 
   testWidgets('''GrowERP Supplier test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        UserCompanyLocalizations.localizationsDelegates,
         title: "growerp_user_company: Supplier company test", clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
     await selectSuppliers(tester);

@@ -81,12 +81,13 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                     formatter.format(DecimalIntl(
                         Decimal.parse(glAccount.postedBalance.toString()))),
                     textAlign: TextAlign.right)),
-            SizedBox(
-                width: 100,
-                child: Text(
-                    formatter.format(DecimalIntl(
-                        Decimal.parse(glAccount.rollUp.toString()))),
-                    textAlign: TextAlign.right))
+            if (!isPhone)
+              SizedBox(
+                  width: 100,
+                  child: Text(
+                      formatter.format(DecimalIntl(
+                          Decimal.parse(glAccount.rollUp.toString()))),
+                      textAlign: TextAlign.right))
           ]),
           children: glAccount.children.map(getTreeNode).toList(),
         );
@@ -143,8 +144,10 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 child: const Text('Gl Account ID  GL Account Name')),
             const SizedBox(
                 width: 100, child: Text('Posted', textAlign: TextAlign.right)),
-            const SizedBox(
-                width: 100, child: Text('Roll Up', textAlign: TextAlign.right))
+            if (!isPhone)
+              const SizedBox(
+                  width: 100,
+                  child: Text('Roll Up', textAlign: TextAlign.right))
           ]),
           const Divider(color: Colors.black),
           TreeView(

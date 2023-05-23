@@ -52,6 +52,7 @@ class CommonTest {
       WidgetTester tester,
       Route<dynamic> Function(RouteSettings) router,
       List<MenuOption> menuOptions,
+      List<LocalizationsDelegate> extraDelegates,
       {bool clear = false,
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
@@ -64,11 +65,13 @@ class CommonTest {
     }
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
-        dbServer: APIRepository(),
-        chatServer: ChatServer(),
-        router: router,
-        title: title,
-        menuOptions: menuOptions));
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      router: router,
+      title: title,
+      menuOptions: menuOptions,
+      extraDelegates: extraDelegates,
+    ));
     await tester.pumpAndSettle(Duration(seconds: waitTime));
   }
 

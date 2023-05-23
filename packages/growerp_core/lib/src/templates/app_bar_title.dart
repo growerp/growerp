@@ -27,7 +27,7 @@ Widget appBarTitle(BuildContext context, Authenticate authenticate,
         }
       },
       child: CircleAvatar(
-          radius: 25,
+          radius: 15,
           child: authenticate.company?.image != null
               ? Image.memory(authenticate.company!.image!)
               : Text(

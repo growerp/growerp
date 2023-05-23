@@ -58,7 +58,8 @@ class HomeFormState extends State<HomeForm> {
                     menuList: widget.menuOptions,
                     menuIndex: 0,
                     actions: <Widget>[
-                  if (authenticate.apiKey != null)
+                  if (authenticate.apiKey != null &&
+                      widget.menuOptions[0].route == '/')
                     IconButton(
                         key: const Key('logoutButton'),
                         icon: const Icon(Icons.do_not_disturb,

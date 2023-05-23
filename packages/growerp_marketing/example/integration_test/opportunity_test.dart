@@ -16,6 +16,7 @@ void main() {
 
   testWidgets('''GrowERP opportunity test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        MarketingLocalizations.localizationsDelegates,
         clear: true,
         title:
             "Opportunity test"); // use data from previous run, ifnone same as true

@@ -66,7 +66,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/supplierGrey.png",
       selectedImage: "packages/growerp_core/images/supplier.png",
-      title: "Accounting Purchasing",
+      title: "Accounting Purch.",
       route: '/acctPurchase',
       readGroups: [
         UserGroup.admin,

@@ -66,9 +66,9 @@ class MenuOptionState extends State<DisplayMenuOption>
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     route = menuOption.route; // used also for key
-    actions = widget.actions;
+    actions = List.of(widget.actions);
     actions.add(IconButton(
-        //  key: Key('topChatButton'), // causes a duplicate key?
+        key: const Key('topChatButton'), // causes a duplicate key?
         icon: const Icon(Icons.chat),
         tooltip: 'Chat',
         onPressed: () async => {
@@ -80,6 +80,21 @@ class MenuOptionState extends State<DisplayMenuOption>
                 },
               )
             }));
+
+    if (route != '/') {
+      actions.add(IconButton(
+          key: const Key('homeButton'),
+          icon: const Icon(Icons.home),
+          tooltip: 'Go Home',
+          onPressed: () {
+            if (route.startsWith('/acct')) {
+              Navigator.pushNamed(context, '/accounting',
+                  arguments: FormArguments());
+            } else {
+              Navigator.pushNamed(context, '/', arguments: FormArguments());
+            }
+          }));
+    }
 
     child = menuOption.child;
     tabIndex = widget.tabIndex ?? 0;
@@ -170,21 +185,6 @@ class MenuOptionState extends State<DisplayMenuOption>
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    if (isPhone && route != '/') {
-      actions.add(IconButton(
-          key: const Key('homeButton'),
-          icon: const Icon(Icons.home),
-          tooltip: 'Go Home',
-          onPressed: () {
-            if (route.startsWith('/acct')) {
-              Navigator.pushNamed(context, '/accounting',
-                  arguments: FormArguments());
-            } else {
-              Navigator.pushNamed(context, '/', arguments: FormArguments());
-            }
-          }));
-    }
-
     Authenticate authenticate = Authenticate();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
