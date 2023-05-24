@@ -16,12 +16,35 @@ scripts:
   analyze:
     exec: dart analyze .
   build_all:
-    run: dart pub global run melos exec -c 1 --depends-on="build_runner" "flutter pub run build_runner build --delete-conflicting-outputs"
     description: build_runner build all modules.
+    run: "flutter pub run build_runner build --delete-conflicting-outputs"
+    exec:
+      concurrency: 1
+      orderDependents: true
+    packageFilters:
+      dependsOn: build_runner     
   l10n:
-    run: dart pub global run melos exec --fail-fast --file-exists="l10n.yaml" flutter gen-l10n
     description: Generates l10n for all app packages.
-  test_all:
-    run: dart pub global run melos exec -c 1 --file-exists="integration_test/all_test.dart" flutter test integration_test/all_test.dart
+    run: "flutter gen-l10n"
+    exec:
+      failFast: true
+    packageFilters:
+      fileExists: "l10n.yaml"
+      
+  test_package:
     description: run all integration tests.
-  
+    run: "flutter test integration_test/all_test.dart"
+    exec:
+      orderDependents: true
+      concurrency: 1
+    packageFilters:
+      fileExists: "integration_test/all_test.dart"
+      scope: "*_example"
+  test_app:
+    description: run all app tests.
+    run: "flutter test integration_test/all_test.dart"
+    exec:
+      concurrency: 1
+    packageFilters:
+      fileExists: "integration_test/all_test.dart"
+      ignore: "*_example"
