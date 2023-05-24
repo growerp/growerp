@@ -29,11 +29,10 @@ In general you store your files in the src directory so they will not be visble 
 plugin_name
 	lib
 		plugin_name.dart
-		api_repository
 		src
 			models
 			views
-				widgets
+			widgets
 				
 
 

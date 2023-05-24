@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/10 GrowERP Application and plugins.md",
                 "mode": "source",
                 "source": false
               }
@@ -72,7 +72,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "level",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -97,7 +97,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -117,7 +118,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/10 GrowERP Application and plugins.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -134,7 +135,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/10 GrowERP Application and plugins.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -157,7 +158,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md"
+                "file": "3 Technical documentation/10 GrowERP Application and plugins.md"
               }
             }
           }
@@ -178,11 +179,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "ee481afbef6892fd",
+  "active": "5eaef352ace2aa85",
   "lastOpenFiles": [
+    "1 Introduction/5 Road Map and Releases.md",
     "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",
-    "1 Introduction/5 Road Map and Releases.md",
     "1 Introduction/3 Getting started.md",
     "1 Introduction/4 Releases.md",
     "2 End User documentation/3 Website.md",
