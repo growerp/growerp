@@ -479,55 +479,52 @@ class WebsiteFormState extends State<WebsitePage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
               )),
-          child: InkWell(
-            onTap: doLlaunchUrl,
-            child: Text(
-              "${state.website?.hostName}",
-              key: const Key('url'),
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
+          child: Column(children: [
+            InkWell(
+              onTap: doLlaunchUrl,
+              child: Text(
+                "${state.website?.hostName}",
+                key: const Key('url'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
-          )),
-      Form(
-          key: _websiteFormKey1,
-          child: InputDecorator(
-              decoration: InputDecoration(
-                  labelText: 'Website domain',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  )),
-              child: Row(children: [
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('urlInput'),
-                    controller: _urlController,
-                    decoration: const InputDecoration(labelText: 'url'),
-                    validator: (value) {
-                      if (value!.isEmpty) return 'A subdomainname is required';
-                      return null;
-                    },
+            Form(
+                key: _websiteFormKey1,
+                child: Row(children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('urlInput'),
+                      controller: _urlController,
+                      decoration: const InputDecoration(labelText: 'url'),
+                      validator: (value) {
+                        if (value!.isEmpty)
+                          return 'A subdomainname is required';
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-                Text(
-                    state.website!.hostName
-                        .substring(state.website!.hostName.indexOf('.')),
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                    key: const Key('updateHost'),
-                    child: const Text('update'),
-                    onPressed: () async {
-                      if (_websiteFormKey1.currentState!.validate()) {
-                        _websiteBloc.add(WebsiteUpdate(Website(
-                            id: state.website!.id,
-                            hostName: _urlController.text)));
-                      }
-                    }),
-              ]))),
+                  Text(
+                      state.website!.hostName
+                          .substring(state.website!.hostName.indexOf('.')),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                      key: const Key('updateHost'),
+                      child: const Text('update'),
+                      onPressed: () async {
+                        if (_websiteFormKey1.currentState!.validate()) {
+                          _websiteBloc.add(WebsiteUpdate(Website(
+                              id: state.website!.id,
+                              hostName: _urlController.text)));
+                        }
+                      }),
+                ]))
+          ])),
       Form(
           key: _websiteFormKey2,
           child: InputDecorator(
@@ -681,7 +678,7 @@ class WebsiteFormState extends State<WebsitePage> {
           key: _websiteFormKey3,
           child: InputDecorator(
               decoration: InputDecoration(
-                  labelText: 'Google Websiste statistics ID',
+                  labelText: 'Google Website statistics ID',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   )),
