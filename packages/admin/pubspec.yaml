@@ -80,6 +80,7 @@ flutter:
     - packages/growerp_core/images/companyGrey.png
     - packages/growerp_core/images/export.png
     - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/myInfo.png
     - packages/growerp_core/images/search.png
     - packages/growerp_core/images/chat.png

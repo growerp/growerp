@@ -14,6 +14,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class SplashForm extends StatelessWidget {
   const SplashForm({super.key});
@@ -21,14 +23,18 @@ class SplashForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChannels.textInput.invokeMethod('TextInput.hide'); // dismiss keyboard
-    return const Scaffold(
+    ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
+    return Scaffold(
         body: SingleChildScrollView(
       child: Center(
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          SizedBox(height: 100),
-          Image(image: AssetImage('packages/growerp_core/images/growerp.jpg')),
-          SizedBox(height: 20),
-          SizedBox(
+          const SizedBox(height: 100),
+          Image(
+              image: AssetImage(themeMode == ThemeMode.light
+                  ? 'packages/growerp_core/images/growerp.jpg'
+                  : 'packages/growerp_core/images/growerpDark.jpg')),
+          const SizedBox(height: 20),
+          const SizedBox(
               width: 300,
               child: LinearProgressIndicator(
                 minHeight: 20,
