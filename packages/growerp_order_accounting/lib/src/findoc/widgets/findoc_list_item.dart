@@ -57,13 +57,11 @@ class FinDocListItem extends StatelessWidget {
         ),
         title: Row(
           children: <Widget>[
-            SizedBox(
-                width: 80, child: Text("${finDoc.id()}", key: Key('id$index'))),
-            const SizedBox(width: 10),
+            Expanded(child: Text("${finDoc.id()}", key: Key('id$index'))),
             Expanded(
                 child: Text(
                     "${finDoc.otherUser?.firstName ?? ''} "
-                    "${finDoc.otherUser?.lastName ?? ''}\n"
+                    "${finDoc.otherUser?.lastName ?? ''}${isPhone ? '\n' : ' '}"
                     "${finDoc.otherUser?.company!.name ?? ''}",
                     key: Key("otherUser$index"))),
             if (!isPhone && docType != FinDocType.payment)
@@ -71,23 +69,21 @@ class FinDocListItem extends StatelessWidget {
           ],
         ),
         subtitle: Row(children: <Widget>[
-          SizedBox(
-              width: 80,
-              child: Text(classificationId == 'AppHotel'
-                  ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-                  : "${finDoc.creationDate?.toString().substring(0, 11)}")),
-          SizedBox(
-              width: 76,
+          if (!isPhone)
+            Expanded(
+                child: Text(classificationId == 'AppHotel'
+                    ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+                    : "${finDoc.creationDate?.toString().substring(0, 11)}")),
+          Expanded(
               child:
                   Text("${finDoc.grandTotal}", key: Key("grandTotal$index"))),
-          SizedBox(
-              width: 90,
+          Expanded(
               child: Text("${finDoc.displayName(classificationId)}",
                   key: Key("status$index"))),
           if (!isPhone)
             Expanded(
                 child: Text(
-              finDoc.otherUser!.email ?? '',
+              finDoc.otherUser!.email ?? '??',
               key: Key('email$index'),
             )),
           if (!isPhone)

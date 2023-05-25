@@ -37,71 +37,70 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
   });
   bool loggedIn = authenticate.apiKey != null;
   if (loggedIn && isPhone) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.40,
-        child: Drawer(
-          key: const Key('drawer'),
-          child: ListView.builder(
-            itemCount: options.length + 1,
-            itemBuilder: (context, i) {
-              if (i == 0) {
-                return DrawerHeader(
-                    child: InkWell(
-                        key: const Key('tapUser'),
-                        onTap: () => Navigator.pushNamed(context, '/user',
-                            arguments: authenticate.user),
-                        child: Column(children: [
-                          CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 40,
-                              child: authenticate.user?.image != null
-                                  ? Image.memory(authenticate.user!.image!)
-                                  : Text(
-                                      authenticate.user?.firstName
-                                              ?.substring(0, 1) ??
-                                          '',
-                                      style: const TextStyle(
-                                          fontSize: 30, color: Colors.black))),
-                          const SizedBox(height: 10),
-                          Text("${authenticate.user!.firstName} ",
-                              style: const TextStyle(
-                                  fontSize: 15, color: Colors.black)),
-                          Text("${authenticate.user!.lastName}",
-                              style: const TextStyle(
-                                  fontSize: 15, color: Colors.black)),
-                        ])));
-              }
-              if (options[i - 1]["route"] == "theme") {
-                return InkWell(
-                    key: const Key('theme'),
-                    onTap: () => themeBloc.add(ThemeSwitch()),
+    return Drawer(
+      width: 200,
+      key: const Key('drawer'),
+      child: ListView.builder(
+        itemCount: options.length + 1,
+        itemBuilder: (context, i) {
+          if (i == 0) {
+            return DrawerHeader(
+                child: InkWell(
+                    key: const Key('tapUser'),
+                    onTap: () => Navigator.pushNamed(context, '/user',
+                        arguments: authenticate.user),
                     child: Column(children: [
-                      Icon(themeBloc.state.themeMode == ThemeMode.light
-                          ? Icons.light_mode
-                          : Icons.dark_mode),
-                      const Text("Theme"),
-                    ]));
-              }
-              return ListTile(
-                  key: Key('tap${options[i - 1]["route"]}'),
-                  contentPadding: const EdgeInsets.all(5.0),
-                  title: Text(options[i - 1]["title"]),
-                  leading: Image.asset(
-                    options[i - 1]["selImage"],
-                  ),
-                  onTap: () {
-                    if (options[i - 1]["route"] == "/") {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/', (Route<dynamic> route) => false);
-                    } else {
-                      Navigator.pushNamed(context, options[i - 1]["route"],
-                          arguments:
-                              FormArguments(menuIndex: options[i - 1]["tab"]));
-                    }
-                  });
-            },
-          ),
-        ));
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 40,
+                          child: authenticate.user?.image != null
+                              ? Image.memory(authenticate.user!.image!)
+                              : Text(
+                                  authenticate.user?.firstName
+                                          ?.substring(0, 1) ??
+                                      '',
+                                  style: const TextStyle(
+                                      fontSize: 30, color: Colors.black))),
+                      const SizedBox(height: 10),
+                      Text("${authenticate.user!.firstName} ",
+                          style: const TextStyle(
+                              fontSize: 15, color: Colors.black)),
+                      Text("${authenticate.user!.lastName}",
+                          style: const TextStyle(
+                              fontSize: 15, color: Colors.black)),
+                    ])));
+          }
+          if (options[i - 1]["route"] == "theme") {
+            return InkWell(
+                key: const Key('theme'),
+                onTap: () => themeBloc.add(ThemeSwitch()),
+                child: Column(children: [
+                  Icon(themeBloc.state.themeMode == ThemeMode.light
+                      ? Icons.light_mode
+                      : Icons.dark_mode),
+                  const Text("Theme"),
+                ]));
+          }
+          return ListTile(
+              key: Key('tap${options[i - 1]["route"]}'),
+              contentPadding: const EdgeInsets.all(5.0),
+              title: Text(options[i - 1]["title"]),
+              leading: Image.asset(
+                options[i - 1]["selImage"],
+              ),
+              onTap: () {
+                if (options[i - 1]["route"] == "/") {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/', (Route<dynamic> route) => false);
+                } else {
+                  Navigator.pushNamed(context, options[i - 1]["route"],
+                      arguments:
+                          FormArguments(menuIndex: options[i - 1]["tab"]));
+                }
+              });
+        },
+      ),
+    );
   }
   return const Text('error: should not arrive here');
 }

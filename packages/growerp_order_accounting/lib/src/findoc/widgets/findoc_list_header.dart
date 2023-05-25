@@ -76,7 +76,7 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text('${widget.sales ? "Customer" : "Supplier"} '
-                            '\n${OrderAccountingLocalizations.of(context)!.nameAndCompany}')),
+                            '${widget.isPhone ? '\n' : ' '}${OrderAccountingLocalizations.of(context)!.nameAndCompany}')),
                     if (!widget.isPhone && widget.docType != FinDocType.payment)
                       const SizedBox(
                           width: 80,

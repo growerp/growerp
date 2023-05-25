@@ -93,20 +93,18 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                               backgroundColor: Colors.transparent,
                             )
                           : null,
-                      title: Column(children: [
-                        const SizedBox(height: 20),
+                      title: const Column(children: [
+                        SizedBox(height: 20),
                         Center(
                             child: Text(
-                                'For every Item either:\n'
-                                '- Select an existing location\n'
-                                '- Enter a new location\n'
-                                '- leave empty for a new location with\n'
-                                '   the name of the item and received date',
-                                style: TextStyle(
-                                    fontSize: isPhone ? 20 : 30,
-                                    color: Colors.black))),
-                        const SizedBox(height: 30),
-                        const Row(children: <Widget>[
+                          'For every Item either:\n'
+                          '- Select an existing location\n'
+                          '- Enter a new location\n'
+                          '- leave empty for a new location with\n'
+                          '   the name of the item and received date',
+                        )),
+                        SizedBox(height: 30),
+                        Row(children: <Widget>[
                           Text('ProductId  '),
                           Expanded(child: Text('Description')),
                           Text('quantity'),
@@ -121,7 +119,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                 textAlign: TextAlign.center)),
                       ]),
                     ),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && newItems.isEmpty) {

@@ -91,7 +91,7 @@ class TopApp extends StatelessWidget {
                                 child: child!,
                                 breakpoints: [
                                   const Breakpoint(
-                                      start: 0, end: 450, name: MOBILE),
+                                      start: 0, end: 500, name: MOBILE),
                                   const Breakpoint(
                                       start: 451, end: 800, name: TABLET),
                                   const Breakpoint(

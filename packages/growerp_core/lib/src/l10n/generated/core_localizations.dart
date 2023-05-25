@@ -93,17 +93,89 @@ abstract class CoreLocalizations {
     Locale('th')
   ];
 
+  /// No description provided for @addNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new'**
+  String get addNew;
+
+  /// No description provided for @andAtLeastOne.
+  ///
+  /// In en, this message translates to:
+  /// **'and at least one '**
+  String get andAtLeastOne;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @customer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customer;
+
+  /// No description provided for @invoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get invoice;
+
+  /// No description provided for @itemIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'item is required'**
+  String get itemIsRequired;
+
   /// No description provided for @loginWithExistingUserName.
   ///
   /// In en, this message translates to:
   /// **'Login with Existing user name'**
   String get loginWithExistingUserName;
 
-  /// No description provided for @addNew.
+  /// No description provided for @order.
   ///
   /// In en, this message translates to:
-  /// **'Add new'**
-  String get addNew;
+  /// **'Order'**
+  String get order;
+
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// No description provided for @shipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipment'**
+  String get shipment;
+
+  /// No description provided for @supplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier'**
+  String get supplier;
+
+  /// No description provided for @transaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transaction;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'update'**
+  String get update;
 }
 
 class _CoreLocalizationsDelegate extends LocalizationsDelegate<CoreLocalizations> {

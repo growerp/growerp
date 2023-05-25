@@ -35,6 +35,7 @@ dependencies:
   dropdown_search: ^4.0.1
   printing: ^5.10.4
   pdf: ^3.10.3
+  image: ^4.0.17
   about: ^2.1.1
   web_socket_channel: ^2.1.0
   shared_preferences: ^2.0.15

@@ -5,8 +5,44 @@ class CoreLocalizationsTh extends CoreLocalizations {
   CoreLocalizationsTh([String locale = 'th']) : super(locale);
 
   @override
-  String get loginWithExistingUserName => 'test thai';
+  String get addNew => 'Add new';
 
   @override
-  String get addNew => 'Add new thai';
+  String get andAtLeastOne => 'and at least one ';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get itemIsRequired => 'item is required';
+
+  @override
+  String get loginWithExistingUserName => 'Login with Existing user name';
+
+  @override
+  String get order => 'Order';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get shipment => 'Shipment';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get update => 'update';
 }

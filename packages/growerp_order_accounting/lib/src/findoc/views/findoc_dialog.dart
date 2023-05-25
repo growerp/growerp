@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -344,7 +345,8 @@ class MyFinDocState extends State<FinDocPage> {
             child: ElevatedButton(
                 key: const Key('update'),
                 child: Text(
-                    '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
+                    "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "
+                    "${FinDocType.translated(context, finDocUpdated.docType!)}"),
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
                       otherUser: _selectedUser,
@@ -355,8 +357,10 @@ class MyFinDocState extends State<FinDocPage> {
                   } else {
                     HelperFunctions.showMessage(
                         context,
-                        'A ${finDocUpdated.sales ? "Customer" : "Supplier"} '
-                        'and at least one ${finDocUpdated.docType} item is required!',
+                        'A ${finDocUpdated.sales ? CoreLocalizations.of(context)!.customer : CoreLocalizations.of(context)!.supplier} '
+                        '${CoreLocalizations.of(context)!.andAtLeastOne} '
+                        '${FinDocType.translated(context, finDocUpdated.docType!)} '
+                        '${CoreLocalizations.of(context)!.itemIsRequired}',
                         Colors.red);
                   }
                 }),
