@@ -341,6 +341,7 @@ class MyFinDocState extends State<FinDocPage> {
                   _cartBloc.add(CartClear());
                 }
               }),
+          const SizedBox(width: 10),
           Expanded(
             child: ElevatedButton(
                 key: const Key('update'),
@@ -350,6 +351,7 @@ class MyFinDocState extends State<FinDocPage> {
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
                       otherUser: _selectedUser,
+                      otherCompany: _selectedUser!.company,
                       description: _descriptionController.text);
                   if (finDocUpdated.items.isNotEmpty &&
                       finDocUpdated.otherUser != null) {

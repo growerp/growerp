@@ -104,8 +104,8 @@ class WebsiteTest {
   static Future<void> updateShopCategories(tester) async {
     await CommonTest.drag(tester);
     while (tester.any(find.byKey(const Key("deleteCategoryChip")))) {
-      await CommonTest.tapByKey(tester, "deleteCategoryChip", seconds: 2);
-      await CommonTest.tapByKey(tester, "continue", seconds: 1);
+      await CommonTest.tapByKey(tester, "deleteCategoryChip", seconds: 3);
+      await CommonTest.tapByKey(tester, "continue", seconds: 2);
       await CommonTest.drag(tester);
     }
     await CommonTest.drag(tester);
@@ -116,8 +116,8 @@ class WebsiteTest {
     expect(find.byKey(Key(categories[0].categoryName)), findsOneWidget,
         reason: 'category 0 should be present?');
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'deleteCategoryChip', seconds: 2);
-    await CommonTest.tapByKey(tester, "continue", seconds: 1);
+    await CommonTest.tapByKey(tester, 'deleteCategoryChip', seconds: 3);
+    await CommonTest.tapByKey(tester, "continue", seconds: 2);
     await CommonTest.drag(tester);
     expect(find.byKey(Key(categories[0].categoryName)), findsNothing,
         reason: 'category 0 should not be found?');

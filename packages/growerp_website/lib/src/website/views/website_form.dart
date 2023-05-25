@@ -501,8 +501,9 @@ class WebsiteFormState extends State<WebsitePage> {
                       controller: _urlController,
                       decoration: const InputDecoration(labelText: 'url'),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return 'A subdomainname is required';
+                        }
                         return null;
                       },
                     ),

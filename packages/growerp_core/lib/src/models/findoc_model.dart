@@ -37,12 +37,12 @@ class FinDoc with _$FinDoc {
     // ignore: invalid_annotation_target
     @JsonKey(name: 'statusId')
     @FinDocStatusValConverter()
-        FinDocStatusVal? status,
+    FinDocStatusVal? status,
     @DateTimeConverter() DateTime? creationDate,
     @DateTimeConverter() DateTime? placedDate,
     String? description,
-    User?
-        otherUser, //a single person responsible for finDoc of a single company
+    User? otherUser, //a person responsible
+    Company? otherCompany, // the other company
     Decimal? grandTotal,
     String? classificationId, // is productStore
     String? salesChannel,

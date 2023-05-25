@@ -88,7 +88,7 @@ void main() {
           MarketingLocalizations.delegate,
           InventoryLocalizations.delegate,
         ],
-        clear: true); // use data from previous run, ifnone same as true
+        clear: false); // use data from previous run, ifnone same as true
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createSalesOrder(tester, salesOrders);
     await OrderTest.checkSalesOrder(tester);
