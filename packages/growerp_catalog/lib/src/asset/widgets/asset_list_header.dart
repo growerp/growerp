@@ -71,7 +71,7 @@ class _AssetListHeaderState extends State<AssetListHeader> {
                       const Expanded(
                           child: Text("Product", textAlign: TextAlign.center)),
                     ]),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]),
             trailing: const Text(' ')));
   }

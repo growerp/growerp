@@ -90,7 +90,7 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
                           child: Text("Ending Balance",
                               textAlign: TextAlign.center)),
                     ]),
-                    Divider(color: Colors.black),
+                    Divider(),
                   ]),
             trailing: const Text(' ')));
   }

@@ -94,7 +94,7 @@ class LocationListState extends State<LocationList> {
                         if (index == 0) {
                           return Column(children: [
                             LocationListHeader(locationBloc: _locationBloc),
-                            const Divider(color: Colors.black),
+                            const Divider(),
                             Visibility(
                                 visible: state.locations.isEmpty,
                                 child: const Center(

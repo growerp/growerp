@@ -223,7 +223,7 @@ class FinDocListItem extends StatelessWidget {
                                       finDoc: finDoc, original: finDoc)
                                   : finDoc.docType == FinDocType.payment
                                       ? PaymentDialog(
-                                          finDoc,
+                                          finDoc: finDoc,
                                           paymentMethod: paymentMethod,
                                         )
                                       : FinDocDialog(finDoc: finDoc)));

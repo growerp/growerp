@@ -134,7 +134,7 @@ class CompanyListState extends State<CompanyList> {
                         isPhone: isPhone,
                         role: widget.role,
                         companyBloc: _companyBloc),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && companies.isEmpty) {

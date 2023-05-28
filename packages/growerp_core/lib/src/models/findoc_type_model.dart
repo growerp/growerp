@@ -11,7 +11,7 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
-import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'package:growerp_core/src/l10n/generated/core_localizations.dart';
 
 /// financial document (FinDoc) types

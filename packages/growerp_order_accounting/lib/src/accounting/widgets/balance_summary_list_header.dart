@@ -94,7 +94,7 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
                               child: Text("End\nBal.",
                                   textAlign: TextAlign.right)),
                         ]),
-                        Divider(color: Colors.black),
+                        Divider(),
                       ]),
               ],
             ),

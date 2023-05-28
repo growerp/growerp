@@ -69,6 +69,7 @@ class MyFinDocState extends State<FinDocPage> {
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   User? _selectedUser;
+  Company? _selectedCompany;
   late bool isPhone;
 
   @override
@@ -77,6 +78,7 @@ class MyFinDocState extends State<FinDocPage> {
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
     _selectedUser = finDocUpdated.otherUser;
+    _selectedCompany = finDocUpdated.otherCompany;
     _descriptionController.text = finDocUpdated.description ?? "";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
@@ -124,58 +126,47 @@ class MyFinDocState extends State<FinDocPage> {
                 child: Text(
                     "Items# ${finDocUpdated.items.length}   Grand total : ${finDocUpdated.grandTotal == null ? "0.00" : finDocUpdated.grandTotal.toString()}",
                     key: const Key('grandTotal'))),
-            Padding(
-                padding: const EdgeInsets.all(10),
-                child: SizedBox(height: 40, child: generalButtons())),
+            const SizedBox(height: 10),
+            SizedBox(height: 40, child: generalButtons()),
           ]);
         default:
           return const LoadingIndicator();
       }
     }
 
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: Key(
-                        "FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
-                        "${finDoc.docType}"),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: SingleChildScrollView(
-                        key: const Key('listView1'),
-                        child: Stack(clipBehavior: Clip.none, children: [
-                          popUp(
-                              context: context,
-                              child: Builder(builder: (BuildContext context) {
-                                if (finDoc.sales) {
-                                  return BlocConsumer<SalesCartBloc, CartState>(
-                                      listener: blocConsumerListener,
-                                      builder: blocConsumerBuilder);
-                                }
-                                // purchase from here
-                                return BlocConsumer<PurchaseCartBloc,
-                                        CartState>(
-                                    listener: blocConsumerListener,
-                                    builder: blocConsumerBuilder);
-                              }),
-                              title:
-                                  "${finDoc.docType} #${finDoc.id() ?? ' new'}",
-                              height: 650,
-                              width: isPhone ? 400 : 800)
-                        ]))))));
+    return Dialog(
+        key: Key("FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
+            "${finDoc.docType}"),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        insetPadding: const EdgeInsets.all(10),
+        child: SingleChildScrollView(
+            key: const Key('listView1'),
+            child: popUp(
+              title: "${finDoc.docType} #${finDoc.id() ?? ' new'}",
+              height: 650,
+              width: isPhone ? 400 : 800,
+              context: context,
+              child: Builder(builder: (BuildContext context) {
+                if (finDoc.sales) {
+                  return BlocConsumer<SalesCartBloc, CartState>(
+                      listener: blocConsumerListener,
+                      builder: blocConsumerBuilder);
+                }
+                // purchase from here
+                return BlocConsumer<PurchaseCartBloc, CartState>(
+                    listener: blocConsumerListener,
+                    builder: blocConsumerBuilder);
+              }),
+            )));
   }
 
   Widget headerEntry(repos) {
     List<Widget> widgets = [
       Expanded(
           child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: DropdownSearch<User>(
                 selectedItem: _selectedUser,
                 popupProps: PopupProps.menu(
@@ -215,6 +206,7 @@ class MyFinDocState extends State<FinDocPage> {
                 onChanged: (User? newValue) {
                   setState(() {
                     _selectedUser = newValue;
+                    _selectedCompany = newValue!.company;
                   });
                 },
                 validator: (value) => value == null
@@ -253,6 +245,7 @@ class MyFinDocState extends State<FinDocPage> {
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
                 otherUser: _selectedUser,
+                otherCompany: _selectedCompany,
                 description: _descriptionController.text)));
           }),
       ElevatedButton(
@@ -265,6 +258,7 @@ class MyFinDocState extends State<FinDocPage> {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
                       otherUser: _selectedUser,
+                      otherCompany: _selectedCompany,
                       description: _descriptionController.text),
                   newItem: finDocItem));
             }
@@ -281,6 +275,7 @@ class MyFinDocState extends State<FinDocPage> {
                   _cartBloc.add(CartAdd(
                       finDoc: finDocUpdated.copyWith(
                           otherUser: _selectedUser,
+                          otherCompany: _selectedCompany,
                           description: _descriptionController.text),
                       newItem: finDocItem));
                 }
@@ -295,6 +290,7 @@ class MyFinDocState extends State<FinDocPage> {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
                       otherUser: _selectedUser,
+                      otherCompany: _selectedCompany,
                       description: _descriptionController.text),
                   newItem: finDocItem));
             }
@@ -333,6 +329,7 @@ class MyFinDocState extends State<FinDocPage> {
                   onPressed: () {
                     _cartBloc.add(CartCancelFinDoc(finDocUpdated));
                   })),
+          const SizedBox(width: 5),
           ElevatedButton(
               key: const Key('clear'),
               child: const Text('Clear Cart'),
@@ -341,7 +338,7 @@ class MyFinDocState extends State<FinDocPage> {
                   _cartBloc.add(CartClear());
                 }
               }),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
           Expanded(
             child: ElevatedButton(
                 key: const Key('update'),
@@ -391,11 +388,13 @@ class MyFinDocState extends State<FinDocPage> {
                             child:
                                 Text("Item Type", textAlign: TextAlign.center)),
                       const Expanded(
-                          child: Text("Descr.", textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text("    Qty", textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text("Price", textAlign: TextAlign.center)),
+                          child:
+                              Text("Description", textAlign: TextAlign.center)),
+                      if (!isPhone)
+                        const Expanded(
+                            child:
+                                Text("    Qty", textAlign: TextAlign.center)),
+                      const Text("Price", textAlign: TextAlign.center),
                       if (!isPhone)
                         const Expanded(
                             child:
@@ -403,7 +402,7 @@ class MyFinDocState extends State<FinDocPage> {
                       const Expanded(
                           child: Text(" ", textAlign: TextAlign.center)),
                     ]),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]),
                 );
               }
@@ -434,13 +433,12 @@ class MyFinDocState extends State<FinDocPage> {
                         child: Text("${item.description}",
                             key: Key('itemDescription${index - 1}'),
                             textAlign: TextAlign.left)),
-                    Expanded(
-                        child: Text("${item.quantity}",
-                            textAlign: TextAlign.center,
-                            key: Key('itemQuantity${index - 1}'))),
-                    Expanded(
-                        child: Text("${item.price}",
-                            key: Key('itemPrice${index - 1}'))),
+                    if (!isPhone)
+                      Expanded(
+                          child: Text("${item.quantity}",
+                              textAlign: TextAlign.center,
+                              key: Key('itemQuantity${index - 1}'))),
+                    Text("${item.price}", key: Key('itemPrice${index - 1}')),
                     if (!isPhone)
                       Expanded(
                         key: Key('subTotal${index - 1}'),

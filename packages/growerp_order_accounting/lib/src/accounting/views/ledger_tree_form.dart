@@ -149,7 +149,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                   width: 100,
                   child: Text('Roll Up', textAlign: TextAlign.right))
           ]),
-          const Divider(color: Colors.black),
+          const Divider(),
           TreeView(
               treeController: _controller,
               nodes: _nodes as List<TreeNode>,

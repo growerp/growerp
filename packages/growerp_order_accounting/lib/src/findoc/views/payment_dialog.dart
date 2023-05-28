@@ -18,12 +18,13 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../blocs/blocs.dart';
+
+import '../findoc.dart';
 
 class PaymentDialog extends StatefulWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
-  const PaymentDialog(this.finDoc, {super.key, this.paymentMethod});
+  const PaymentDialog({required this.finDoc, this.paymentMethod, super.key});
   @override
   PaymentDialogState createState() => PaymentDialogState();
 }
@@ -31,9 +32,10 @@ class PaymentDialog extends StatefulWidget {
 class PaymentDialogState extends State<PaymentDialog> {
   final GlobalKey<FormState> paymentDialogFormKey = GlobalKey<FormState>();
   late FinDoc finDoc; // incoming finDoc
-  late APIRepository repos;
   late FinDoc finDocUpdated;
+  late FinDocBloc finDocBloc;
   User? _selectedUser;
+  Company? _selectedCompany;
   ItemType? _selectedItemType;
 
   late bool isPhone;
@@ -45,9 +47,10 @@ class PaymentDialogState extends State<PaymentDialog> {
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
-    repos = context.read<APIRepository>();
+    finDocBloc = context.read<FinDocBloc>();
     finDocUpdated = finDoc;
     _selectedUser = finDocUpdated.otherUser;
+    _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
     _selectedItemType =
@@ -60,44 +63,37 @@ class PaymentDialogState extends State<PaymentDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: Key(
-                        "PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BlocConsumer<FinDocBloc, FinDocState>(
-                      listener: (context, state) {
-                        if (state.status == FinDocStatus.success) {
-                          Navigator.of(context).pop();
-                        }
-                        if (state.status == FinDocStatus.failure) {
-                          HelperFunctions.showMessage(
-                              context, '${state.message}', Colors.red);
-                        }
-                      },
-                      builder: (context, state) {
-                        return popUp(
-                            context: context,
-                            height: 750,
-                            width: 400,
-                            title:
-                                "${finDoc.sales ? 'Sales/incoming' : 'Purchase/outgoing'} "
-                                "Payment #${finDoc.paymentId ?? 'new'}",
-                            child: SingleChildScrollView(
-                                key: const Key('listView2'),
-                                physics: const ClampingScrollPhysics(),
-                                child:
-                                    paymentForm(state, paymentDialogFormKey)));
-                      },
-                    )))));
+    return Dialog(
+        key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: BlocConsumer<FinDocBloc, FinDocState>(
+          listenWhen: (previous, current) =>
+              previous.status == FinDocStatus.loading,
+          listener: (context, state) {
+            if (state.status == FinDocStatus.success) {
+              Navigator.of(context).pop();
+            }
+            if (state.status == FinDocStatus.failure) {
+              HelperFunctions.showMessage(
+                  context, '${state.message}', Colors.red);
+            }
+          },
+          builder: (context, state) {
+            return popUp(
+                context: context,
+                height: 750,
+                width: 400,
+                title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
+                    "Payment #${finDoc.paymentId ?? 'new'}",
+                child: SingleChildScrollView(
+                    key: const Key('listView2'),
+                    physics: const ClampingScrollPhysics(),
+                    child: paymentForm(state, paymentDialogFormKey)));
+          },
+        ));
   }
 
   Widget paymentForm(
@@ -106,7 +102,6 @@ class PaymentDialogState extends State<PaymentDialog> {
       _selectedItemType = state.itemTypes
           .firstWhere((el) => _selectedItemType!.itemTypeId == el.itemTypeId);
     }
-    FinDocBloc finDocBloc = context.read<FinDocBloc>();
     AuthBloc authBloc = context.read<AuthBloc>();
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
@@ -148,25 +143,26 @@ class PaymentDialogState extends State<PaymentDialog> {
                 ),
                 dropdownSearchDecoration: InputDecoration(
                   labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0)),
                 ),
                 key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
                     "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                 asyncItems: (String? filter) async {
-                  ApiResult<List<User>> result = await repos.lookUpUser(
+                  finDocBloc.add(FinDocGetUsers(
                       role: finDocUpdated.sales == true
                           ? Role.customer
                           : Role.supplier,
-                      searchString: _userSearchBoxController.text);
-                  return result.when(
-                      success: (data) => data,
-                      failure: (_) => [User(lastName: 'get data error!')]);
+                      filter: _userSearchBoxController.text));
+                  int times = 0;
+                  while (finDocBloc.state.users.isEmpty && times++ < 10) {
+                    await Future.delayed(const Duration(milliseconds: 500));
+                  }
+                  return finDocBloc.state.users;
                 },
                 onChanged: (User? newValue) {
                   setState(() {
                     _selectedUser = newValue;
+                    _selectedCompany = newValue!.company;
                   });
                 },
                 validator: (value) => value == null
@@ -176,10 +172,7 @@ class PaymentDialogState extends State<PaymentDialog> {
               const SizedBox(height: 20),
               TextFormField(
                   key: const Key('amount'),
-                  decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 35.0, horizontal: 10.0),
-                      labelText: 'Amount'),
+                  decoration: const InputDecoration(labelText: 'Amount'),
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   validator: (value) =>
@@ -196,8 +189,8 @@ class PaymentDialogState extends State<PaymentDialog> {
                   children: [
                     Visibility(
                         visible: (finDoc.sales == true &&
-                                _selectedUser?.company!.paymentMethod
-                                        ?.ccDescription !=
+                                _selectedCompany
+                                        ?.paymentMethod?.ccDescription !=
                                     null) ||
                             (finDoc.sales == false &&
                                 authBloc.state.authenticate?.company
@@ -221,7 +214,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                               }),
                           Expanded(
                               child: Text(
-                                  "Credit Card ${finDoc.sales == false ? "${authBloc.state.authenticate?.company?.paymentMethod?.ccDescription}" : "${_selectedUser?.company!.paymentMethod?.ccDescription}"}")),
+                                  "Credit Card ${finDoc.sales == false ? authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedUser?.company!.paymentMethod?.ccDescription}")),
                         ])),
                     Row(children: [
                       Checkbox(
@@ -277,13 +270,13 @@ class PaymentDialogState extends State<PaymentDialog> {
                           }),
                       Expanded(
                           child: Text(
-                        "Bank ${finDoc.otherUser?.company!.paymentMethod?.creditCardNumber ?? ''}",
+                        "Bank ${finDoc.otherCompany?.paymentMethod?.creditCardNumber ?? ''}",
                       )),
                     ]),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               DropdownButtonFormField<ItemType>(
                 key: const Key('itemType'),
                 decoration: const InputDecoration(labelText: 'Payment Type'),
@@ -295,7 +288,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                   return DropdownMenuItem<ItemType>(
                       value: item,
                       child: Text('${item.itemTypeName}\n ${item.accountName}',
-                          overflow: TextOverflow.visible));
+                          overflow: TextOverflow.ellipsis, maxLines: 2));
                 }).toList(),
                 onChanged: (ItemType? newValue) {
                   _selectedItemType = newValue;
@@ -323,6 +316,7 @@ class PaymentDialogState extends State<PaymentDialog> {
                           if (paymentDialogFormKey.currentState!.validate()) {
                             finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
                               otherUser: _selectedUser,
+                              otherCompany: _selectedUser!.company,
                               grandTotal: Decimal.parse(_amountController.text),
                               paymentInstrument: _paymentInstrument,
                               items: [FinDocItem(itemType: _selectedItemType)],

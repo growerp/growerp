@@ -94,6 +94,7 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
               if (!widget.isPhone) const Expanded(child: Text("Email Address")),
               if (!widget.isPhone)
                 Expanded(child: Text("${widget.docType} description")),
+              const Divider(),
             ]),
             trailing: SizedBox(width: widget.isPhone ? 40 : 195)));
   }

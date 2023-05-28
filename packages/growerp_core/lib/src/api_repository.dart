@@ -137,6 +137,19 @@ class APIRepository {
     }
   }
 
+  Future<ApiResult<bool>> checkEmail(String email) async {
+    try {
+      // no apykey required, if not valid will report no email address
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/CheckEmail', null,
+          queryParameters: <String, dynamic>{'email': email});
+      return ApiResult.success(
+          data: jsonDecode(response.toString())['ok'] == 'ok');
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
   Future<ApiResult<List<ItemType>>> getItemTypes({bool sales = true}) async {
     try {
       final response = await dioClient.get(

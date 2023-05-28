@@ -105,7 +105,7 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                                     : "Number of Rooms",
                                 textAlign: TextAlign.center)),
                       ]),
-                      const Divider(color: Colors.black),
+                      const Divider(),
                     ]),
               trailing: const Text(' ')));
     });

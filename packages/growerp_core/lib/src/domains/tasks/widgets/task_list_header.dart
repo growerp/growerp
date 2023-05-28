@@ -70,7 +70,7 @@ class _TaskListHeaderState extends State<TaskListHeader> {
                           child: Text("From/To Party",
                               textAlign: TextAlign.center)),
                   ]),
-                  const Divider(color: Colors.black),
+                  const Divider(),
                 ]),
           trailing: search ? null : const SizedBox(width: 20)),
     );

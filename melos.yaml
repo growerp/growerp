@@ -33,18 +33,18 @@ scripts:
       
   test_package:
     description: run all integration tests.
-    run: "flutter test integration_test/all_test.dart"
+    run: "flutter test integration_test"
     exec:
       orderDependents: true
       concurrency: 1
     packageFilters:
-      fileExists: "integration_test/all_test.dart"
+      dirExists: "integration_test"
       scope: "*_example"
   test_app:
     description: run all app tests.
-    run: "flutter test integration_test/all_test.dart"
+    run: "flutter test integration_test"
     exec:
       concurrency: 1
     packageFilters:
-      fileExists: "integration_test/all_test.dart"
+      dirExists: "integration_test"
       ignore: "*_example"

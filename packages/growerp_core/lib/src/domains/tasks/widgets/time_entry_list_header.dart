@@ -36,7 +36,7 @@ class TimeEntryListHeader extends StatelessWidget {
             const Expanded(
                 child: Text("Comments", textAlign: TextAlign.center)),
         ]),
-        const Divider(color: Colors.black),
+        const Divider(),
       ]),
     ));
   }

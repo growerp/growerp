@@ -218,12 +218,12 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                           width: 100,
                           child: Text('Posted', textAlign: TextAlign.right)),
                     ]),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                     TreeView(
                         treeController: _controller,
                         nodes: _nodes as List<TreeNode>,
                         indent: 10),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                     Padding(
                       padding: const EdgeInsets.all(30.0),
                       child: Table(

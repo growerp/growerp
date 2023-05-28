@@ -66,7 +66,7 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: '\nCustomers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
           key: Key('Supplier'),
           role: Role.supplier,
         ),
-        label: 'Suppliers',
+        label: '\nSuppliers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -108,7 +108,7 @@ List<MenuOption> menuOptions = [
           key: Key('Employee'),
           role: Role.company,
         ),
-        label: 'Employees',
+        label: '\nEmployees',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -116,7 +116,7 @@ List<MenuOption> menuOptions = [
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: 'Leads',
+        label: '\nLeads',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -124,7 +124,7 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: '\nCustomers',
         icon: const Icon(Icons.school),
       ),
       TabItem(
@@ -132,7 +132,7 @@ List<MenuOption> menuOptions = [
           key: Key('Supplier'),
           role: Role.supplier,
         ),
-        label: 'Suppliers',
+        label: '\nSuppliers',
         icon: const Icon(Icons.business),
       ),
       TabItem(

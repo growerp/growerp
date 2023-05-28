@@ -40,7 +40,7 @@ Widget popUp(
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)))),
           Expanded(
-              child: Padding(padding: const EdgeInsets.all(20), child: child)),
+              child: Padding(padding: const EdgeInsets.all(10), child: child)),
         ])),
     const Positioned(top: 15, right: 15, child: DialogCloseButton())
   ]);

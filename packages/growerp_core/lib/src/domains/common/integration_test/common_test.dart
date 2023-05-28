@@ -81,17 +81,26 @@ class CommonTest {
     int seq = test.sequence + 1;
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
-    // tap new company button, enter data
-    /// [newCompany]
+    // check if email address already exist
+    APIRepository repos = APIRepository();
+    var exist = true;
+    var times = 0;
+    while (exist) {
+      ApiResult result =
+          await repos.checkEmail(admin.email!.replaceFirst('XXX', '${seq++}'));
+      exist = result.when(success: (data) => data, failure: (_) => false);
+      expect(times++, lessThan(20),
+          reason: "Could not find free email address");
+    }
+
     await CommonTest.tapByKey(tester, 'newCompButton');
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.enterText(tester, 'firstName', admin.firstName!);
     await CommonTest.enterText(tester, 'lastName', admin.lastName!);
-    var email = admin.email!.replaceFirst('XXX', '${seq++}');
+    var email = admin.email!.replaceFirst('XXX', '$seq');
     await CommonTest.enterText(tester, 'email', email);
 
-    /// [newCompany]
-    String companyName = '${initialCompany.name!} ${seq++}';
+    String companyName = '${initialCompany.name!} $seq';
     await enterText(tester, 'companyName', companyName);
     await CommonTest.drag(tester);
     await enterDropDown(
@@ -103,7 +112,7 @@ class CommonTest {
     await CommonTest.tapByKey(tester, 'newCompany', seconds: 3);
     // start with clean saveTest
     await PersistFunctions.persistTest(SaveTest(
-      sequence: seq,
+      sequence: ++seq,
       nowDate: DateTime.now(), // used in rental
       admin: admin.copyWith(email: email, loginName: email),
       company: initialCompany.copyWith(email: email, name: companyName),

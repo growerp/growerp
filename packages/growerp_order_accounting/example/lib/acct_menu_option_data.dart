@@ -57,7 +57,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/supplierGrey.png",
       selectedImage: "packages/growerp_core/images/supplier.png",
-      title: "Accounting Purchasing",
+      title: "Acctg. Purchasing",
       route: '/acctPurchase',
       readGroups: [
         UserGroup.admin,
@@ -86,7 +86,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Accounting Ledger\n",
+      title: "Acctg. Ledger\n",
       route: '/acctLedger',
       readGroups: [
         UserGroup.admin,
@@ -112,7 +112,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/reportGrey.png",
       selectedImage: "packages/growerp_core/images/report.png",
-      title: "Reports",
+      title: "Acctg. Reports",
       route: '/acctReports',
       tabItems: [
         TabItem(

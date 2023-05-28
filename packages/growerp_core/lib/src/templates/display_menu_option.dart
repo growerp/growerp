@@ -117,10 +117,11 @@ class MenuOptionState extends State<DisplayMenuOption>
           child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
     }
     for (var i = 0; i < tabItems.length; i++) {
+      print("====tooltip number $i");
       // form key for testing
       displayMOFormKey =
           tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      debugPrint("=== current form key: $displayMOFormKey");
+      debugPrint("==1= current form key: $displayMOFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
@@ -134,7 +135,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       // tabs at bottom of screen : phone
       bottomItems.add(BottomNavigationBarItem(
           icon: tabItems[i].icon,
-          label: tabItems[i].label,
+          label: tabItems[i].label.replaceAll('\n', ' '),
           tooltip: (i + 1).toString()));
       // floating actionbutton at each tab; not work with domain org
       if (tabItems[i].floatButtonRoute != null) {
@@ -227,7 +228,7 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   Widget simplePage(Authenticate authenticate, bool isPhone) {
     displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    debugPrint("=== current form key: $displayMOFormKey");
+    debugPrint("==2-simple= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -246,7 +247,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     displayMOFormKey =
         tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
     Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
-    debugPrint("=== current form key: $displayMOFormKey");
+    debugPrint("==3-tab= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -267,7 +268,7 @@ class MenuOptionState extends State<DisplayMenuOption>
                     tabs: tabText,
                   ),
             title: appBarTitle(context, authenticate,
-                '$title ${bottomItems[tabIndex].label}', isPhone),
+                '$title ${tabItems[tabIndex].label}', isPhone),
             actions: actions),
         drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
         floatingActionButton: floatingActionButtonList[tabIndex],

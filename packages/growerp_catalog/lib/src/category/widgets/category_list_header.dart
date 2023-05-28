@@ -73,7 +73,7 @@ class _CategoryListHeaderState extends State<CategoryListHeader> {
                           child: Text("Nbr.of Products",
                               textAlign: TextAlign.center)),
                     ]),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]),
             trailing: const Text(' ')));
   }

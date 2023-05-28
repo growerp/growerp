@@ -190,7 +190,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   const Expanded(
                       child: Text("#Members", textAlign: TextAlign.center)),
                 ]),
-                const Divider(color: Colors.black),
+                const Divider(),
               ]),
         trailing: const Text(' '));
   }

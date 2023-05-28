@@ -136,7 +136,7 @@ class UserListState extends State<UserList> {
                         isPhone: isPhone,
                         role: widget.role,
                         userBloc: _userBloc),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && users.isEmpty) {

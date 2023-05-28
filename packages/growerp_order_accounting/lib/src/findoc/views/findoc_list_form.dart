@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 
 import '../findoc.dart';
 
+/// listing financial documents and orders
 class FinDocListForm extends StatelessWidget {
   const FinDocListForm({
     super.key,
@@ -216,7 +217,7 @@ class FinDocListState extends State<FinDocList> {
                         sales: widget.sales,
                         docType: widget.docType,
                         finDocBloc: _finDocBloc),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                     Visibility(
                         visible: finDocs.isEmpty,
                         child: Center(
@@ -328,9 +329,10 @@ class FinDocListState extends State<FinDocList> {
                                       value: _finDocBloc,
                                       child: widget.docType ==
                                               FinDocType.payment
-                                          ? PaymentDialog(FinDoc(
-                                              sales: widget.sales,
-                                              docType: widget.docType))
+                                          ? PaymentDialog(
+                                              finDoc: FinDoc(
+                                                  sales: widget.sales,
+                                                  docType: widget.docType))
                                           : FinDocDialog(
                                               finDoc: FinDoc(
                                                   sales: widget.sales,

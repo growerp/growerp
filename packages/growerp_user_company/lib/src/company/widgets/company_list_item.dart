@@ -73,17 +73,21 @@ class CompanyListItem extends StatelessWidget {
                   )),
                 if (!isPhone)
                   Expanded(
-                      child: Text(
-                    company.vatPerc != Decimal.parse("0")
-                        ? company.vatPerc.toString()
-                        : company.salesPerc.toString(),
-                    key: Key('perc$index'),
+                      child: Center(
+                    child: Text(
+                      company.vatPerc != Decimal.parse("0")
+                          ? company.vatPerc.toString()
+                          : company.salesPerc.toString(),
+                      key: Key('perc$index'),
+                    ),
                   )),
                 if (!isPhone)
                   Expanded(
-                      child: Text(
-                    company.employees.length.toString(),
-                    key: Key('employees$index'),
+                      child: Center(
+                    child: Text(
+                      company.employees.length.toString(),
+                      key: Key('employees$index'),
+                    ),
                   )),
               ],
             ),
