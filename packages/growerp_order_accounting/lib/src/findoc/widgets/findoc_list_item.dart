@@ -47,7 +47,7 @@ class FinDocListItem extends StatelessWidget {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     FinDocAPIRepository repos = context.read<FinDocAPIRepository>();
     String classificationId = GlobalConfiguration().get("classificationId");
-
+    DateTime date = finDoc.placedDate ?? finDoc.creationDate ?? DateTime.now();
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
@@ -58,10 +58,10 @@ class FinDocListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(
-                child: Text(
-                    "${finDoc.id()} "
-                    "${finDoc.placedDate.toString().substring(0, 10)}",
-                    key: Key('id$index'))),
+                child: Wrap(children: [
+              Text("${finDoc.id()}", key: Key('id$index')),
+              Text(" ${date.toString().substring(0, 10)}")
+            ])),
             Expanded(
                 child: Text(
                     "${finDoc.otherUser?.firstName ?? ''} "

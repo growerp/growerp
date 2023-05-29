@@ -28,24 +28,29 @@ class ImageButtons extends StatefulWidget {
 }
 
 class _ImageButtonsState extends State<ImageButtons> {
-  bool isVisible = true;
+  late bool isVisible;
 
   @override
   void initState() {
+    isVisible = true;
     widget.scrollController.addListener(() {
       if (isVisible != false &&
           widget.scrollController.position.userScrollDirection ==
               ScrollDirection.reverse) {
-        setState(() {
-          isVisible = false;
-        });
+        if (mounted) {
+          setState(() {
+            isVisible = false;
+          });
+        }
       }
       if (isVisible != true &&
           widget.scrollController.position.userScrollDirection ==
               ScrollDirection.forward) {
-        setState(() {
-          isVisible = true;
-        });
+        if (mounted) {
+          setState(() {
+            isVisible = true;
+          });
+        }
       }
     });
     super.initState();
