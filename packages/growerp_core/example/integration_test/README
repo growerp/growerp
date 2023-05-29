@@ -1,6 +1,0 @@
-Integration tests using integration test package.(WidgetTest)
-=============================================================
-
-run tests:
-
-flutter test integration_test/all_test.dart

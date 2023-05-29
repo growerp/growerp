@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+// ignore_for_file: depend_on_referenced_packages
 import 'package:core_example/main.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
