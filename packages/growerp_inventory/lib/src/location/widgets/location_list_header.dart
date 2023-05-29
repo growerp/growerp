@@ -46,7 +46,7 @@ class _LocationListHeaderState extends State<LocationListHeader> {
               ? Row(children: <Widget>[
                   SizedBox(
                       width: ResponsiveBreakpoints.of(context).isMobile
-                          ? MediaQuery.of(context).size.width - 250
+                          ? MediaQuery.of(context).size.width - 300
                           : MediaQuery.of(context).size.width - 350,
                       key: const Key('searchField'),
                       child: TextField(

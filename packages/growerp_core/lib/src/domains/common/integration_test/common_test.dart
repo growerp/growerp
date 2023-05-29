@@ -33,21 +33,6 @@ class CommonTest {
     await selectOption(tester, 'tapCompany', 'CompanyDialogOrgInternal');
   }
 
-  static Future<void> startApp(WidgetTester tester, Widget topApp,
-      {bool clear = false}) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int seq = Random.secure().nextInt(1024) + test.sequence;
-    debugPrint("==1==startapp seq: $seq");
-    if (clear == true) {
-      await PersistFunctions.persistTest(SaveTest(sequence: seq));
-    } else {
-      await PersistFunctions.persistTest(test.copyWith(sequence: seq));
-    }
-    Bloc.observer = AppBlocObserver();
-    runApp(topApp);
-    await tester.pumpAndSettle(Duration(seconds: waitTime));
-  }
-
   static Future<void> startTestApp(
       WidgetTester tester,
       Route<dynamic> Function(RouteSettings) router,

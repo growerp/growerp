@@ -32,6 +32,7 @@ void main() {
   testWidgets('''GrowERP room rental sales order test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
+        title: "Room rental test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "assets": [assets[2]], // will create product and category too

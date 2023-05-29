@@ -127,17 +127,17 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'setDate');
       await CommonTest.tapByTooltip(tester, 'Switch to input');
       await tester.enterText(find.byType(TextField).last,
-          usFormat.format(finDoc.items[0].rentalFromDate!));
+          usFormat.format(finDoc.items[0].rentalFromDate!).trim());
       await tester.pump();
       await CommonTest.tapByText(tester, 'OK');
       DateTime textField = DateTime.parse(CommonTest.getTextField('date'));
       expect(usFormat.format(textField),
-          usFormat.format(finDoc.items[0].rentalFromDate!));
+          usFormat.format(finDoc.items[0].rentalFromDate!).trim());
       await CommonTest.enterText(
           tester, 'quantity', finDoc.items[0].quantity.toString());
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'okRental');
-      await CommonTest.tapByKey(tester, 'update', seconds: 10);
+      await CommonTest.tapByKey(tester, 'update', seconds: 5);
       // get productId
       await CommonTest.tapByKey(tester, 'id0'); // added at the top
       List<FinDocItem> newItems = List.of(finDoc.items);
@@ -221,7 +221,7 @@ class OrderTest {
     await CommonTest.tapByKey(tester, 'setDate');
     await CommonTest.tapByTooltip(tester, 'Switch to input');
     await tester.enterText(find.byType(TextField).last,
-        usFormat.format(test.orders[0].items[0].rentalFromDate!));
+        usFormat.format(test.orders[0].items[0].rentalFromDate!).trim());
     await tester.pump();
     await CommonTest.tapByText(tester, 'OK');
     expect(find.text('Out of range.'), findsOneWidget);

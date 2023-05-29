@@ -738,17 +738,27 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                 borderRadius: BorderRadius.all(Radius.circular(20))),
             child: popUp(
               context: context,
-              height: 520,
+              height: 600,
               title: 'Add a Reservation',
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
-                  selectDate(BuildContext context) async {
-                    final picked = await showDatePicker(
+                  Future<void> selectDate(BuildContext context) async {
+                    final DateTime? picked = await showDatePicker(
                       context: context,
                       initialDate: startDate,
                       firstDate: CustomizableDateTime.current,
                       lastDate: DateTime(CustomizableDateTime.current.year + 1),
                       selectableDayPredicate: whichDayOk,
+                      builder: (BuildContext context, Widget? child) {
+                        return FittedBox(
+                          child: Theme(
+                            data: ThemeData(
+                              primaryColor: Theme.of(context).primaryColor,
+                            ),
+                            child: child!,
+                          ),
+                        );
+                      },
                     );
                     if (picked != null && picked != startDate) {
                       setState(() {
@@ -762,6 +772,7 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                       child: SingleChildScrollView(
                           key: const Key('listView4'),
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               DropdownSearch<Product>(
                                 key: const Key('product'),

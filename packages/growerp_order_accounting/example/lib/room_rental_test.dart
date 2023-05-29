@@ -29,27 +29,24 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP payment purchase test''', (tester) async {
+  testWidgets('''GrowERP room rental sales order test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
-        title: 'Purchase payment Test',
+        title: "Room rental test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "companies": [
-        company.copyWith(partyId: '_MOD_', name: initialCompany.name)
-      ],
-      "users": suppliers.sublist(0, 2),
+      "assets": [assets[2]], // will create product and category too
+      "users": [customers[0]],
     });
-    // get above updated company
-    await CommonTest.logout(tester);
-    await CommonTest.login(tester);
-    await PaymentTest.selectPurchasePayments(tester);
-    await PaymentTest.addPayments(tester, purchasePayments.sublist(0, 4));
-    await PaymentTest.updatePayments(tester, purchasePayments.sublist(4, 8));
-    await PaymentTest.deleteLastPayment(tester);
-    await PaymentTest.sendReceivePayment(tester);
-    await PaymentTest.checkPaymentComplete(tester);
-    await TransactionTest.selectTransactions(tester);
-    await TransactionTest.checkTransactionComplete(tester);
+    await OrderTest.selectSalesOrders(tester);
+    await OrderTest.createRentalSalesOrder(tester, rentalSalesOrders);
+    await OrderTest.checkRentalSalesOrder(tester);
+    await OrderTest.checkRentalSalesOrderBlocDates(tester);
+    await OrderTest.approveSalesOrder(tester);
+    await InvoiceTest.selectSalesInvoices(tester);
+    await InvoiceTest.checkInvoices(tester);
+    await InvoiceTest.sendOrApproveInvoices(tester);
+    await OrderTest.selectSalesOrders(tester);
+    await OrderTest.checkOrderCompleted(tester);
   });
 }
