@@ -57,7 +57,11 @@ class FinDocListItem extends StatelessWidget {
         ),
         title: Row(
           children: <Widget>[
-            Expanded(child: Text("${finDoc.id()}", key: Key('id$index'))),
+            Expanded(
+                child: Text(
+                    "${finDoc.id()} "
+                    "${finDoc.placedDate.toString().substring(0, 10)}",
+                    key: Key('id$index'))),
             Expanded(
                 child: Text(
                     "${finDoc.otherUser?.firstName ?? ''} "

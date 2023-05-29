@@ -72,7 +72,10 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
                         })
                   ])
                 : Row(children: <Widget>[
-                    SizedBox(width: 80, child: Text(widget.docType.toString())),
+                    SizedBox(
+                        width: 80,
+                        child: Text("${widget.docType.toString()} Id"
+                            "${widget.isPhone ? '\n' : ' '}Date")),
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text('${widget.sales ? "Customer" : "Supplier"} '
