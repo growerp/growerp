@@ -31,49 +31,57 @@ class LocationListHeader extends StatefulWidget {
 class _LocationListHeaderState extends State<LocationListHeader> {
   bool search = false;
   String searchString = '';
+  late final LocationBloc locationBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    locationBloc = context.read<LocationBloc>();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final locationBloc = context.read<LocationBloc>();
-    return Material(
-        child: Column(children: [
-      ListTile(
-          leading: GestureDetector(
-              key: const Key('search'),
-              onTap: (() =>
-                  setState(() => search ? search = false : search = true)),
-              child: const Icon(Icons.search_sharp, size: 40)),
-          title: search
-              ? Row(children: <Widget>[
-                  SizedBox(
-                      width: ResponsiveBreakpoints.of(context).isMobile
-                          ? MediaQuery.of(context).size.width - 300
-                          : MediaQuery.of(context).size.width - 350,
-                      key: const Key('searchField'),
-                      child: TextField(
-                        autofocus: true,
-                        decoration: const InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          hintText: "search in name loc/asset/product Id",
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() {
+              setState(() => search ? search = false : search = true);
+              if (search == false) {
+                locationBloc.add(const LocationFetch(refresh: true));
+              }
+            }),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: search
+            ? Row(children: <Widget>[
+                SizedBox(
+                    width: ResponsiveBreakpoints.of(context).isMobile
+                        ? MediaQuery.of(context).size.width - 300
+                        : MediaQuery.of(context).size.width - 350,
+                    key: const Key('searchField'),
+                    child: TextField(
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
                         ),
-                        onChanged: ((value) =>
-                            setState(() => searchString = value)),
-                      )),
-                  ElevatedButton(
-                      key: const Key('searchButton'),
-                      child: const Text('Search'),
-                      onPressed: () {
-                        locationBloc
-                            .add(LocationFetch(searchString: searchString));
-                      })
-                ])
-              : const Row(children: <Widget>[
-                  Expanded(child: Text("Loc.Name[ID]")),
-                  SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
-                ]),
-          subtitle: Text(InventoryLocalizations.of(context)!.productName),
-          trailing: const SizedBox(width: 50)),
-    ]));
+                        hintText: "search in name loc/asset/product Id",
+                      ),
+                      onChanged: ((value) =>
+                          setState(() => searchString = value)),
+                    )),
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('Search'),
+                    onPressed: () {
+                      locationBloc
+                          .add(LocationFetch(searchString: searchString));
+                    })
+              ])
+            : const Row(children: <Widget>[
+                Expanded(child: Text("Loc.Name[ID]")),
+                SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
+              ]),
+        subtitle: Text(InventoryLocalizations.of(context)!.productName),
+        trailing: const SizedBox(width: 50));
   }
 }

@@ -27,7 +27,7 @@ Integration tests in GrowERP are organized as a normal program. Code re-use is o
 Tests can be started by using the ['Melos'](https://pub.dev/packages/melos) package or manually by going into every package and app and enter the 'flutter test integration_test' from the command line. If you have installed Melos, things get easier by using the 'melos test_package' and 'melos test_app' commands.
 
 ## All tests independent.
-All tests can be run independent, create their own test data and run in a separate company. When a test is copied from the top /integration_test directory to the lib directory it can be run inside the debugger and single stepped with breakpoints. Within a test, the test can stopped, screens can be modified with hot restart an then the test continued.
+All tests can be run independently, create their own test data and run in a separate company. When a test is copied from the top /integration_test directory to the lib directory it can be run inside the debugger and single stepped with breakpoints. Within a test, the test can stopped, screens can be modified with hot restart an then the test continued.
 
 All test data is stored in the growerp_core package test_data.dart file.
 This test data can be used to initially load, before the test starts or as data to be entered in the screens.

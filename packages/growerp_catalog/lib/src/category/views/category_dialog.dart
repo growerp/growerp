@@ -138,14 +138,12 @@ class CategoryDialogState extends State<CategoryDialogFull> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Stack(clipBehavior: Clip.none, children: [
-                popUp(
-                    context: context,
-                    child: listChild(productState),
-                    title: 'Category Information',
-                    height: 650,
-                    width: 400)
-              ])),
+              child: popUp(
+                  context: context,
+                  child: listChild(productState),
+                  title: 'Category Information',
+                  height: 650,
+                  width: 400)),
           if (categoryState.status == CategoryStatus.updateLoading ||
               productState.status == ProductStatus.loading)
             const LoadingIndicator(),

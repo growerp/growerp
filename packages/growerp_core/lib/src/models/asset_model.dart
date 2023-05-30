@@ -27,6 +27,7 @@ class Asset with _$Asset {
     String? assetClassId, // room, table etc
     String? assetName, // include room number/name
     String? statusId,
+    Decimal? acquireCost,
     Decimal? quantityOnHand,
     Decimal? availableToPromise,
     String? parentAssetId,

@@ -49,6 +49,7 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     }
     // start from record zero for initial and refresh
     if (state.status == LocationStatus.initial || event.refresh) {
+      emit(state.copyWith(status: LocationStatus.loading));
       ApiResult<List<Location>> compResult =
           await repos.getLocation(searchString: event.searchString);
       return emit(compResult.when(

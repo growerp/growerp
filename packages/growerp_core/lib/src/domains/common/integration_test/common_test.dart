@@ -72,7 +72,7 @@ class CommonTest {
     var times = 0;
     while (exist) {
       ApiResult result =
-          await repos.checkEmail(admin.email!.replaceFirst('XXX', '${seq++}'));
+          await repos.checkEmail(admin.email!.replaceFirst('XXX', '$seq'));
       exist = result.when(success: (data) => data, failure: (_) => false);
       expect(times++, lessThan(20),
           reason: "Could not find free email address");

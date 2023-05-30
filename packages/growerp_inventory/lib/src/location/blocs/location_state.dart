@@ -14,7 +14,7 @@
 
 part of 'location_bloc.dart';
 
-enum LocationStatus { initial, success, failure }
+enum LocationStatus { initial, loading, success, failure }
 
 class LocationState extends Equatable {
   const LocationState({
@@ -49,7 +49,7 @@ class LocationState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [locations, hasReachedMax];
+  List<Object?> get props => [locations, hasReachedMax, status];
 
   @override
   String toString() => '$status { #locations: ${locations.length}, '

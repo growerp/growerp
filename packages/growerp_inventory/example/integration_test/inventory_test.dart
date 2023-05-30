@@ -24,6 +24,10 @@ import 'package:growerp_core/test_data.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  Future<void> selectLocation(WidgetTester tester) async {
+    await CommonTest.selectOption(tester, 'dbInventory', 'LocationListForm');
+  }
+
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
@@ -31,11 +35,15 @@ void main() {
   testWidgets('''GrowERP inventory test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         InventoryLocalizations.localizationsDelegates,
+        title: "Inventory location test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "products": products.sublist(0, 3) // will create category too
     });
-    // TODO: to be completed
+    await selectLocation(tester);
+    await LocationTest.addLocations(tester, locations.sublist(0, 2));
+    await LocationTest.updateLocations(tester, locations.sublist(2, 4));
+    await LocationTest.deleteLocations(tester, 2);
     await CommonTest.logout(tester);
   });
 }
