@@ -31,8 +31,7 @@ class TimeEntryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
+    return ListTile(
       title: Row(
         children: <Widget>[
           Expanded(
@@ -66,6 +65,6 @@ class TimeEntryListItem extends StatelessWidget {
           context.read<TaskBloc>().add(TaskTimeEntryDelete(timeEntry));
         },
       ),
-    ));
+    );
   }
 }

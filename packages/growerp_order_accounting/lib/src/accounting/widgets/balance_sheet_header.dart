@@ -33,65 +33,62 @@ class _BalanceSheetHeaderState extends State<BalanceSheetHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() => setState(() => search = !search)),
-                child: const Icon(Icons.search_sharp, size: 40)),
-            title: search
-                ? Row(children: <Widget>[
-                    Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in account code and name...",
-                      ),
-                      onChanged: ((value) =>
-                          setState(() => searchString = value)),
-                    )),
-                    ElevatedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () async {
-                          int index = 0;
-                          for (var el in widget.accounts) {
-                            if (el.accountCode!.contains(searchString) ||
-                                el.accountCode!.contains(searchString)) {
-                              break;
-                            }
-                            index++;
-                          }
-                          widget.controller.scrollTo(
-                              index: index,
-                              duration: const Duration(seconds: 1),
-                              curve: Curves.linear);
-                        })
-                  ])
-                : const Column(children: [
-                    Row(children: <Widget>[
-                      Expanded(
-                          child:
-                              Text("Code/Name", textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Beginning Balance",
-                              textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Posted Debits",
-                              textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Posted Credits",
-                              textAlign: TextAlign.center)),
-                      Expanded(
-                          child: Text("Ending Balance",
-                              textAlign: TextAlign.center)),
-                    ]),
-                    Divider(),
-                  ]),
-            trailing: const Text(' ')));
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() => setState(() => search = !search)),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: search
+            ? Row(children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  key: const Key('searchField'),
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    hintText: "search in account code and name...",
+                  ),
+                  onChanged: ((value) => setState(() => searchString = value)),
+                )),
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('Search'),
+                    onPressed: () async {
+                      int index = 0;
+                      for (var el in widget.accounts) {
+                        if (el.accountCode!.contains(searchString) ||
+                            el.accountCode!.contains(searchString)) {
+                          break;
+                        }
+                        index++;
+                      }
+                      widget.controller.scrollTo(
+                          index: index,
+                          duration: const Duration(seconds: 1),
+                          curve: Curves.linear);
+                    })
+              ])
+            : const Column(children: [
+                Row(children: <Widget>[
+                  Expanded(
+                      child: Text("Code/Name", textAlign: TextAlign.center)),
+                  Expanded(
+                      child: Text("Beginning Balance",
+                          textAlign: TextAlign.center)),
+                  Expanded(
+                      child:
+                          Text("Posted Debits", textAlign: TextAlign.center)),
+                  Expanded(
+                      child:
+                          Text("Posted Credits", textAlign: TextAlign.center)),
+                  Expanded(
+                      child:
+                          Text("Ending Balance", textAlign: TextAlign.center)),
+                ]),
+                Divider(),
+              ]),
+        trailing: const Text(' '));
   }
 }

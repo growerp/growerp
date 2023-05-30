@@ -25,8 +25,7 @@ class BalanceSheetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
+    return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
         child: Text(
@@ -51,6 +50,6 @@ class BalanceSheetItem extends StatelessWidget {
                   key: Key("name$index"), textAlign: TextAlign.center)),
         ],
       ),
-    ));
+    );
   }
 }

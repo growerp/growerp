@@ -42,72 +42,70 @@ class _ProductListHeaderState extends State<ProductListHeader> {
       if (state.status == AuthStatus.authenticated) {
         authenticate = state.authenticate!;
       }
-      return Material(
-          child: ListTile(
-              leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() =>
-                    setState(() => search ? search = false : search = true)),
-                child: const Icon(Icons.search_sharp, size: 40),
-              ),
-              title: search
-                  ? Row(children: <Widget>[
-                      Expanded(
-                          child: TextField(
-                        key: const Key('searchField'),
-                        controller: searchController,
-                        autofocus: true,
-                        decoration: const InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          hintText: "search in ID, name and description...",
-                        ),
-                        onChanged: ((value) {
-                          searchString = value;
-                        }),
-                        onSubmitted: ((value) {
-                          productBloc.add(ProductFetch(
+      return ListTile(
+          leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() =>
+                setState(() => search ? search = false : search = true)),
+            child: const Icon(Icons.search_sharp, size: 40),
+          ),
+          title: search
+              ? Row(children: <Widget>[
+                  Expanded(
+                      child: TextField(
+                    key: const Key('searchField'),
+                    controller: searchController,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      hintText: "search in ID, name and description...",
+                    ),
+                    onChanged: ((value) {
+                      searchString = value;
+                    }),
+                    onSubmitted: ((value) {
+                      productBloc.add(ProductFetch(
+                        companyPartyId: authenticate.company!.partyId!,
+                        searchString: value,
+                      ));
+                    }),
+                  )),
+                  ElevatedButton(
+                      key: const Key('searchButton'),
+                      child: const Text('Search'),
+                      onPressed: () {
+                        productBloc.add(ProductFetch(
                             companyPartyId: authenticate.company!.partyId!,
-                            searchString: value,
-                          ));
-                        }),
-                      )),
-                      ElevatedButton(
-                          key: const Key('searchButton'),
-                          child: const Text('Search'),
-                          onPressed: () {
-                            productBloc.add(ProductFetch(
-                                companyPartyId: authenticate.company!.partyId!,
-                                searchString: searchString));
-                            searchString = '';
-                          })
-                    ])
-                  : Column(children: [
-                      Row(children: <Widget>[
-                        const Expanded(
-                            child: Text("Name", textAlign: TextAlign.center)),
-                        if (ResponsiveBreakpoints.of(context)
-                            .largerThan(MOBILE))
-                          const Expanded(
-                              child: Text("Description",
-                                  textAlign: TextAlign.center)),
-                        Expanded(
-                            child: Text(CatalogLocalizations.of(context)!.price,
-                                textAlign: TextAlign.center)),
-                        if (classificationId != 'AppHotel')
-                          const Expanded(
-                              child: Text("Catg", textAlign: TextAlign.center)),
-                        Expanded(
-                            child: Text(
-                                classificationId != 'AppHotel'
-                                    ? "Nbr Of Assets"
-                                    : "Number of Rooms",
-                                textAlign: TextAlign.center)),
-                      ]),
-                      const Divider(),
-                    ]),
-              trailing: const Text(' ')));
+                            searchString: searchString));
+                        searchString = '';
+                      })
+                ])
+              : Column(children: [
+                  Row(children: <Widget>[
+                    const Expanded(
+                        child: Text("Name", textAlign: TextAlign.center)),
+                    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                      const Expanded(
+                          child:
+                              Text("Description", textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(CatalogLocalizations.of(context)!.price,
+                            textAlign: TextAlign.center)),
+                    if (classificationId != 'AppHotel')
+                      const Expanded(
+                          child: Text("Catg", textAlign: TextAlign.center)),
+                    Expanded(
+                        child: Text(
+                            classificationId != 'AppHotel'
+                                ? "Nbr Of Assets"
+                                : "Number of Rooms",
+                            textAlign: TextAlign.center)),
+                  ]),
+                  const Divider(),
+                ]),
+          trailing: const Text(' '));
     });
   }
 }

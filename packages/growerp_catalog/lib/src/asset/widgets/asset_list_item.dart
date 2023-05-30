@@ -30,42 +30,38 @@ class AssetListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     var repos = context.read<CatalogAPIRepository>();
     final assetBloc = context.read<AssetBloc>();
-    return Material(
-        child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text(asset.assetName != null ? asset.assetName![0] : "?"),
-            ),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Text("${asset.assetName}", key: Key('name$index'))),
-                if (!ResponsiveBreakpoints.of(context).isMobile)
-                  Expanded(
-                      child: Text("${asset.statusId}",
-                          key: Key('statusId$index'),
-                          textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("${asset.product!.productName}",
-                        key: Key('product$index'),
-                        textAlign: TextAlign.center)),
-              ],
-            ),
-            onTap: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) => RepositoryProvider.value(
-                      value: repos,
-                      child: BlocProvider.value(
-                          value: assetBloc, child: AssetDialog(asset))));
-            },
-            trailing: IconButton(
-              key: Key('delete$index'),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {
-                assetBloc.add(AssetDelete(asset));
-              },
-            )));
+    return ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(asset.assetName != null ? asset.assetName![0] : "?"),
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(child: Text("${asset.assetName}", key: Key('name$index'))),
+            if (!ResponsiveBreakpoints.of(context).isMobile)
+              Expanded(
+                  child: Text("${asset.statusId}",
+                      key: Key('statusId$index'), textAlign: TextAlign.center)),
+            Expanded(
+                child: Text("${asset.product!.productName}",
+                    key: Key('product$index'), textAlign: TextAlign.center)),
+          ],
+        ),
+        onTap: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) => RepositoryProvider.value(
+                  value: repos,
+                  child: BlocProvider.value(
+                      value: assetBloc, child: AssetDialog(asset))));
+        },
+        trailing: IconButton(
+          key: Key('delete$index'),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            assetBloc.add(AssetDelete(asset));
+          },
+        ));
   }
 }

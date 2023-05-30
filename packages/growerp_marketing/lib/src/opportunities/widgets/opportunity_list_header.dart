@@ -31,71 +31,69 @@ class _OpportunityListHeaderState extends State<OpportunityListHeader> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() =>
-                    setState(() => search ? search = false : search = true)),
-                child: const Icon(Icons.search_sharp, size: 40)),
-            title: search
-                ? Row(children: <Widget>[
-                    SizedBox(
-                        width: ResponsiveBreakpoints.of(context).isMobile
-                            ? MediaQuery.of(context).size.width - 250
-                            : MediaQuery.of(context).size.width - 350,
-                        child: TextField(
-                          key: const Key('searchField'),
-                          autofocus: true,
-                          decoration: const InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            hintText: "search in ID, name and lead...",
-                          ),
-                          onChanged: ((value) => setState(() {
-                                searchString = value;
-                              })),
-                        )),
-                    ElevatedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () {
-                          context.read<OpportunityBloc>().add(
-                              OpportunityFetch(searchString: searchString));
-                        })
-                  ])
-                : Column(children: [
-                    Row(children: <Widget>[
-                      Expanded(
-                          child: Text(
-                        MarketingLocalizations.of(context)!.opportunityName,
-                      )),
-                      if (ResponsiveBreakpoints.of(context).isDesktop)
-                        const Expanded(
-                            child: Text("Est. Amount",
-                                textAlign: TextAlign.center)),
-                      if (ResponsiveBreakpoints.of(context).isDesktop)
-                        const Expanded(
-                            child: Text("Est. Probability %",
-                                textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text("Lead Name & Company",
-                              textAlign: TextAlign.left)),
-                      if (ResponsiveBreakpoints.of(context).isDesktop)
-                        const Expanded(
-                            child:
-                                Text("Lead Email", textAlign: TextAlign.right)),
-                      if (!ResponsiveBreakpoints.of(context).isMobile)
-                        const Expanded(
-                            child: Text("Stage", textAlign: TextAlign.center)),
-                      if (ResponsiveBreakpoints.of(context).isDesktop)
-                        const Expanded(
-                            child:
-                                Text("Next Step", textAlign: TextAlign.center)),
-                    ]),
-                    const Divider(),
-                  ]),
-            trailing: search ? null : const SizedBox(width: 20)));
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() =>
+                setState(() => search ? search = false : search = true)),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: search
+            ? Row(children: <Widget>[
+                SizedBox(
+                    width: ResponsiveBreakpoints.of(context).isMobile
+                        ? MediaQuery.of(context).size.width - 250
+                        : MediaQuery.of(context).size.width - 350,
+                    child: TextField(
+                      key: const Key('searchField'),
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        hintText: "search in ID, name and lead...",
+                      ),
+                      onChanged: ((value) => setState(() {
+                            searchString = value;
+                          })),
+                    )),
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('Search'),
+                    onPressed: () {
+                      context
+                          .read<OpportunityBloc>()
+                          .add(OpportunityFetch(searchString: searchString));
+                    })
+              ])
+            : Column(children: [
+                Row(children: <Widget>[
+                  Expanded(
+                      child: Text(
+                    MarketingLocalizations.of(context)!.opportunityName,
+                  )),
+                  if (ResponsiveBreakpoints.of(context).isDesktop)
+                    const Expanded(
+                        child:
+                            Text("Est. Amount", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).isDesktop)
+                    const Expanded(
+                        child: Text("Est. Probability %",
+                            textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("Lead Name & Company",
+                          textAlign: TextAlign.left)),
+                  if (ResponsiveBreakpoints.of(context).isDesktop)
+                    const Expanded(
+                        child: Text("Lead Email", textAlign: TextAlign.right)),
+                  if (!ResponsiveBreakpoints.of(context).isMobile)
+                    const Expanded(
+                        child: Text("Stage", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).isDesktop)
+                    const Expanded(
+                        child: Text("Next Step", textAlign: TextAlign.center)),
+                ]),
+                const Divider(),
+              ]),
+        trailing: search ? null : const SizedBox(width: 20));
   }
 }

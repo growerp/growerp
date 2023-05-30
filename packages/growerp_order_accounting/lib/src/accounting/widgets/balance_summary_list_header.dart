@@ -34,70 +34,68 @@ class _BalanceSummaryListHeaderState extends State<BalanceSummaryListHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() => setState(() => search = !search)),
-                child: const Icon(Icons.search_sharp, size: 40)),
-            title: Column(
-              children: [
-                Text("Time period: ${widget.ledgerReport.period!.periodName}"),
-                search
-                    ? Row(children: <Widget>[
-                        Expanded(
-                            child: TextField(
-                          key: const Key('searchField'),
-                          autofocus: true,
-                          decoration: const InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            hintText: "search in account code and name...",
-                          ),
-                          onChanged: ((value) =>
-                              setState(() => searchString = value)),
-                        )),
-                        ElevatedButton(
-                            key: const Key('searchButton'),
-                            child: const Text('Search'),
-                            onPressed: () async {
-                              int index = 0;
-                              for (var el in widget.ledgerReport.glAccounts) {
-                                if (el.accountCode!.contains(searchString) ||
-                                    el.accountName!.contains(searchString)) {
-                                  break;
-                                }
-                                index++;
-                              }
-                              widget.controller.scrollTo(
-                                  index: index,
-                                  duration: const Duration(seconds: 1),
-                                  curve: Curves.linear);
-                            })
-                      ])
-                    : const Column(children: [
-                        Row(children: <Widget>[
-                          Expanded(
-                              flex: 2,
-                              child: Text("Code/Name",
-                                  textAlign: TextAlign.center)),
-                          Expanded(
-                              child: Text("Begin", textAlign: TextAlign.right)),
-                          Expanded(
-                              child: Text("Post.\nDebit",
-                                  textAlign: TextAlign.right)),
-                          Expanded(
-                              child: Text("Post.\nCredt",
-                                  textAlign: TextAlign.right)),
-                          Expanded(
-                              child: Text("End\nBal.",
-                                  textAlign: TextAlign.right)),
-                        ]),
-                        Divider(),
-                      ]),
-              ],
-            ),
-            trailing: const Text(' ')));
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() => setState(() => search = !search)),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: Column(
+          children: [
+            Text("Time period: ${widget.ledgerReport.period!.periodName}"),
+            search
+                ? Row(children: <Widget>[
+                    Expanded(
+                        child: TextField(
+                      key: const Key('searchField'),
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.transparent),
+                        ),
+                        hintText: "search in account code and name...",
+                      ),
+                      onChanged: ((value) =>
+                          setState(() => searchString = value)),
+                    )),
+                    ElevatedButton(
+                        key: const Key('searchButton'),
+                        child: const Text('Search'),
+                        onPressed: () async {
+                          int index = 0;
+                          for (var el in widget.ledgerReport.glAccounts) {
+                            if (el.accountCode!.contains(searchString) ||
+                                el.accountName!.contains(searchString)) {
+                              break;
+                            }
+                            index++;
+                          }
+                          widget.controller.scrollTo(
+                              index: index,
+                              duration: const Duration(seconds: 1),
+                              curve: Curves.linear);
+                        })
+                  ])
+                : const Column(children: [
+                    Row(children: <Widget>[
+                      Expanded(
+                          flex: 2,
+                          child:
+                              Text("Code/Name", textAlign: TextAlign.center)),
+                      Expanded(
+                          child: Text("Begin", textAlign: TextAlign.right)),
+                      Expanded(
+                          child:
+                              Text("Post.\nDebit", textAlign: TextAlign.right)),
+                      Expanded(
+                          child:
+                              Text("Post.\nCredt", textAlign: TextAlign.right)),
+                      Expanded(
+                          child: Text("End\nBal.", textAlign: TextAlign.right)),
+                    ]),
+                    Divider(),
+                  ]),
+          ],
+        ),
+        trailing: const Text(' '));
   }
 }

@@ -23,8 +23,7 @@ class TimeEntryListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
+    return ListTile(
       title: Column(children: [
         Row(children: <Widget>[
           const Expanded(child: Text("Date")),
@@ -38,6 +37,6 @@ class TimeEntryListHeader extends StatelessWidget {
         ]),
         const Divider(),
       ]),
-    ));
+    );
   }
 }

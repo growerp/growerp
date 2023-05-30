@@ -31,8 +31,7 @@ class BalanceSummaryListItem extends StatelessWidget {
     //   var repos = context.read<AccountingAPIRepository>();
     //   final balanceSummaryBloc = context.read<BalanceSummaryBloc>();
     var formatter = NumberFormat.decimalPattern('en-US');
-    return Material(
-        child: ListTile(
+    return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
         child: Text(
@@ -68,23 +67,23 @@ class BalanceSummaryListItem extends StatelessWidget {
       ),
       onTap: () async {
         /*          await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) => RepositoryProvider.value(
-                      value: repos,
-                      child: BlocProvider.value(
-                          value: balanceSummaryBloc,
-                          child: BalanceSummaryDialog(balanceSummary))));
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) => RepositoryProvider.value(
+                  value: repos,
+                  child: BlocProvider.value(
+                      value: balanceSummaryBloc,
+                      child: BalanceSummaryDialog(balanceSummary))));
     */
       },
       /*       trailing: IconButton(
-              key: Key('delete$index'),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {
-                balanceSummaryBloc
-                    .add(BalanceSummaryDelete(balanceSummary.copyWith(image: null)));
-              },
-            )*/
-    ));
+          key: Key('delete$index'),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            balanceSummaryBloc
+                .add(BalanceSummaryDelete(balanceSummary.copyWith(image: null)));
+          },
+        )*/
+    );
   }
 }
