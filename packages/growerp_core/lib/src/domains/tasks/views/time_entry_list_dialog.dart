@@ -35,24 +35,22 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Dialog(
-            key: const Key('TimeEntryListDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Stack(clipBehavior: Clip.none, children: [
-              Container(
-                  padding: const EdgeInsets.all(20),
-                  width: 400,
-                  height: 400,
-                  child: Center(
-                    child: _showList(isPhone),
-                  )),
-              const Positioned(top: 5, right: 5, child: DialogCloseButton())
-            ])));
+    return Dialog(
+        key: const Key('TimeEntryListDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(clipBehavior: Clip.none, children: [
+          Container(
+              padding: const EdgeInsets.all(20),
+              width: 400,
+              height: 400,
+              child: Center(
+                child: _showList(isPhone),
+              )),
+          const Positioned(top: 5, right: 5, child: DialogCloseButton())
+        ]));
   }
 
   Widget _showList(isPhone) {

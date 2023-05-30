@@ -61,41 +61,34 @@ class AssetDialogState extends State<AssetDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                  key: const Key('AssetDialog'),
-                  insetPadding: const EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: BlocListener<AssetBloc, AssetState>(
-                      listener: (context, state) async {
-                        switch (state.status) {
-                          case AssetStatus.success:
-                            Navigator.of(context).pop();
-                            break;
-                          case AssetStatus.failure:
-                            HelperFunctions.showMessage(
-                                context, 'Error: ${state.message}', Colors.red);
-                            break;
-                          default:
-                            const Text("????");
-                        }
-                      },
-                      child: Stack(clipBehavior: Clip.none, children: [
-                        popUp(
-                            context: context,
-                            child: _showForm(repos, isPhone),
-                            title: 'Asset Information',
-                            height: 550,
-                            width: 400)
-                      ])),
-                ))));
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dialog(
+            key: const Key('AssetDialog'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: BlocListener<AssetBloc, AssetState>(
+                listener: (context, state) async {
+                  switch (state.status) {
+                    case AssetStatus.success:
+                      Navigator.of(context).pop();
+                      break;
+                    case AssetStatus.failure:
+                      HelperFunctions.showMessage(
+                          context, 'Error: ${state.message}', Colors.red);
+                      break;
+                    default:
+                      const Text("????");
+                  }
+                },
+                child: popUp(
+                    context: context,
+                    child: _showForm(repos, isPhone),
+                    title: 'Asset Information',
+                    height: 550,
+                    width: 400))));
   }
 
   Widget _showForm(CatalogAPIRepository repos, bool isPhone) {
