@@ -7,7 +7,8 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  growerp_marketing: ^0.9.2
+  growerp_marketing: ^1.0.0
+  #  path: ../
   decimal: ^2.1.0
   flutter:
     sdk: flutter

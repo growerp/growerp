@@ -498,16 +498,18 @@ packages:
   growerp_core:
     dependency: "direct main"
     description:
-      path: "../growerp_core"
-      relative: true
-    source: path
+      name: growerp_core
+      sha256: "9f0bcadd31482fc829dd5b1f62859a631171f9bbab429d272e3cff698c068dad"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   growerp_select_dialog:
     dependency: "direct main"
     description:
-      path: "../growerp_select_dialog"
-      relative: true
-    source: path
+      name: growerp_select_dialog
+      sha256: ab2372a42eae30859573271d62143ebca6ea3d62bab59b5853fab6d24057c5ff
+      url: "https://pub.dev"
+    source: hosted
     version: "0.6.0"
   highlight:
     dependency: transitive

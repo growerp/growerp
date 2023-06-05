@@ -432,19 +432,21 @@ packages:
     source: hosted
     version: "2.0.0-nullsafety.1"
   growerp_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../growerp_core"
-      relative: true
-    source: path
+      name: growerp_core
+      sha256: "9f0bcadd31482fc829dd5b1f62859a631171f9bbab429d272e3cff698c068dad"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   growerp_order_accounting:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.9.2"
+      name: growerp_order_accounting
+      sha256: "715cf940d010b178de1b7ff1f11b87b5d095b92812a5f84b0b0f95b54329d3b8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   highlight:
     dependency: transitive
     description:

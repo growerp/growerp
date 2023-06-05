@@ -1,15 +1,15 @@
 name: growerp_website
 description: A website component for the GrowERP system.
-version: 0.9.2
+version: 1.0.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/packages/growerp_website
 platforms: 
-  android: null
-  ios: null
-  linux: null
-  macos: null
-  web: null
-  windows: null
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 environment: 
   sdk: '>=3.0.0 <4.0.0'
   flutter: '>=1.17.0'
@@ -42,7 +42,7 @@ dependencies:
   json_annotation: ^4.7.0
   decimal: ^2.1.0
   growerp_select_dialog: ^0.6.0
-  growerp_core: ^0.9.2
+  growerp_core: ^1.0.0
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 

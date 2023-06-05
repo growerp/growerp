@@ -8,8 +8,8 @@ dependencies:
   flutter: 
     sdk: flutter
   cupertino_icons: ^1.0.2
-  growerp_catalog: ^1.9.2
-
+  growerp_catalog:
+    path: ../
 dependency_overrides:
   intl: ^0.18.0
 dev_dependencies:
