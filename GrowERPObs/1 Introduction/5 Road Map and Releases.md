@@ -20,6 +20,8 @@ Let us know if you have suggestions at support@growerp.com
 * Create a logistic app
 
 ## Technical internal requests
+* Just use official Moqui releases (just moqui.war) and patch with git patches.
+* Create a mono-repro having Flutter, Moqui, chat all in a single git repository.
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * Separate the order/accounting package
 * Move chat and tasking into their own package.

@@ -10,7 +10,7 @@ void getFlutterFiles(String targetDir) {
     // get from git
     run('git clone https://github.com/growerp/growerp.git '
         '$growerpPath/$targetDir');
-    if (targetDir == 'flutterDevelopment') {
+    if (targetDir.contains('Development')) {
       run('git checkout development',
           workingDirectory: '$growerpPath/$targetDir');
     }

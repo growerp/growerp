@@ -174,8 +174,8 @@ abstract class CoreLocalizations {
   /// No description provided for @update.
   ///
   /// In en, this message translates to:
-  /// **'update'**
-  String get update;
+  /// **'update {num}'**
+  String update(Object num);
 }
 
 class _CoreLocalizationsDelegate extends LocalizationsDelegate<CoreLocalizations> {

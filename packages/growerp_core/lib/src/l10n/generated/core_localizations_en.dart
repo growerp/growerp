@@ -44,5 +44,7 @@ class CoreLocalizationsEn extends CoreLocalizations {
   String get unknown => 'Unknown';
 
   @override
-  String get update => 'update';
+  String update(Object num) {
+    return 'update $num';
+  }
 }
