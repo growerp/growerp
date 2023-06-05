@@ -12,14 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../common/functions/helper_functions.dart';
-import '../../../services/api_result.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
-import '../../domains.dart';
 
+import '../../domains.dart';
+import '../../common/functions/helper_functions.dart';
+import '../../../services/api_result.dart';
 import '../../../api_repository.dart';
 
 class ChatRoomDialog extends StatefulWidget {
@@ -48,7 +49,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     var repos = context.read<APIRepository>();
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
         listener: (context, state) {

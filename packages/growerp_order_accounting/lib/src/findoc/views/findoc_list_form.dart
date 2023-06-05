@@ -15,12 +15,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../api_repository.dart';
 import '../findoc.dart';
 
+/// listing financial documents and orders
 class FinDocListForm extends StatelessWidget {
   const FinDocListForm({
     super.key,
@@ -199,7 +199,7 @@ class FinDocListState extends State<FinDocList> {
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 60).round();
     Widget finDocsPage() {
-      bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+      bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
       return RefreshIndicator(
           onRefresh: (() async =>
               _finDocBloc.add(const FinDocFetch(refresh: true))),
@@ -217,7 +217,7 @@ class FinDocListState extends State<FinDocList> {
                         sales: widget.sales,
                         docType: widget.docType,
                         finDocBloc: _finDocBloc),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                     Visibility(
                         visible: finDocs.isEmpty,
                         child: Center(
@@ -329,9 +329,10 @@ class FinDocListState extends State<FinDocList> {
                                       value: _finDocBloc,
                                       child: widget.docType ==
                                               FinDocType.payment
-                                          ? PaymentDialog(FinDoc(
-                                              sales: widget.sales,
-                                              docType: widget.docType))
+                                          ? PaymentDialog(
+                                              finDoc: FinDoc(
+                                                  sales: widget.sales,
+                                                  docType: widget.docType))
                                           : FinDocDialog(
                                               finDoc: FinDoc(
                                                   sales: widget.sales,

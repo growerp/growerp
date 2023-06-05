@@ -24,7 +24,7 @@ create your first company!
 
 
 # Packages
-Below a number of inclusions of techinal READme's expect for the admin package in various stages of development
+Below a number of inclusions of techincal READme's expect for the admin package in various stages of development
 
 ![](https://raw.githubusercontent.com/growerp/growerp/master/packages/admin/README.md) 
 
@@ -37,3 +37,5 @@ Below a number of inclusions of techinal READme's expect for the admin package i
 ![](https://raw.githubusercontent.com/growerp/growerp/master/packages/core/README.md)
 
 ![](https://raw.githubusercontent.com/growerp/growerp/master/packages/utils/README.md)
+
+# Integration tests

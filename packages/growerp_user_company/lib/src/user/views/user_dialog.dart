@@ -20,7 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../blocs/blocs.dart';
 import '../../company/views/views.dart';
@@ -71,6 +71,7 @@ class UserDialogState extends State<UserDialog> {
   late bool isPhone;
   bool _hasLogin = false;
   late final GlobalKey<ScaffoldMessengerState> _userDialogKey;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -98,6 +99,12 @@ class UserDialogState extends State<UserDialog> {
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
     repos = context.read<CompanyUserAPIRepository>();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -132,7 +139,7 @@ class UserDialogState extends State<UserDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     User? user = widget.user;
     return BlocConsumer<UserBloc, UserState>(
         listenWhen: (previous, current) =>
@@ -176,7 +183,7 @@ class UserDialogState extends State<UserDialog> {
               child: Scaffold(
                   backgroundColor: Colors.transparent,
                   floatingActionButton:
-                      imageButtons(context, _onImageButtonPressed),
+                      ImageButtons(_scrollController, _onImageButtonPressed),
                   body: listChild()))),
     );
   }
@@ -473,8 +480,6 @@ class UserDialogState extends State<UserDialog> {
                           ),
                           child: Checkbox(
                             key: const Key('loginDisabled'),
-                            checkColor: Colors.white,
-                            //     fillColor: MaterialStateProperty.resolveWith(getColor),
                             value: _isLoginDisabled,
                             onChanged: (bool? value) {
                               setState(() {
@@ -562,10 +567,9 @@ class UserDialogState extends State<UserDialog> {
     column.add(updateButton);
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       rows.add(const SizedBox(height: 20));
-      rows.add(Container(
-          color: Colors.white,
+      rows.add(SizedBox(
           height: 350,
           child: MasonryGridView.count(
             itemCount: widgets.length,
@@ -582,25 +586,22 @@ class UserDialogState extends State<UserDialog> {
     return Form(
         key: _userDialogFormKey,
         child: SingleChildScrollView(
+            controller: _scrollController,
             key: const Key('listView'),
             child: Column(children: <Widget>[
               Center(
                   child: Text(
                 'User $_selectedRole'
                 ' #${updatedUser.partyId ?? " New"}',
-                style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 key: const Key('header'),
               )),
               Center(
                   child: Text(
                 'Company #${updatedUser.company!.partyId ?? ""}',
-                style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 key: const Key('compHeader'),
               )),
               const SizedBox(height: 10),
@@ -614,8 +615,7 @@ class UserDialogState extends State<UserDialog> {
                       : widget.user.image != null
                           ? Image.memory(widget.user.image!, scale: 0.3)
                           : Text(widget.user.firstName?.substring(0, 1) ?? '',
-                              style: const TextStyle(
-                                  fontSize: 30, color: Colors.black))),
+                              style: const TextStyle(fontSize: 30))),
               Column(children: rows.isNotEmpty ? rows : column),
             ])));
   }

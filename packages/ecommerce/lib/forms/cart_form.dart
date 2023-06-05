@@ -111,7 +111,6 @@ class _CartTotal extends StatelessWidget {
                       onPressed: order.items.length == 0
                           ? null
                           : () async {
-                              print("=====buy pressec====state: $state====");
                               if (state.status == AuthStatus.unAuthenticated) {
                                 dynamic result = await showDialog(
                                     barrierDismissible: true,
@@ -120,10 +119,7 @@ class _CartTotal extends StatelessWidget {
                                       return LoginDialog(
                                           'Please login/register first?');
                                     });
-                                print("======cartform: login result: $result");
                                 if (result is Authenticate) {
-                                  print(
-                                      "======cartform: login result: $result");
                                   HelperFunctions.showMessage(context,
                                       'Sending order...', Colors.green);
                                   _finDocBloc.add(FinDocFetch(

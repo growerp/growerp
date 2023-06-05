@@ -14,6 +14,11 @@
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'menu_option_data.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +26,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
@@ -57,11 +61,18 @@ Future main() async {
   }
 
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP administrator.',
-          router: router.generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      title: 'GrowERP administrator.',
+      router: router.generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: const [
+        CatalogLocalizations.delegate,
+        InventoryLocalizations.delegate,
+        OrderAccountingLocalizations.delegate,
+        WebsiteLocalizations.delegate,
+        MarketingLocalizations.delegate,
+        InventoryLocalizations.delegate,
+      ]));
 }

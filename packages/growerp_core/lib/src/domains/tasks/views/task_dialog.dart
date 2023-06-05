@@ -15,7 +15,7 @@
 import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
 
 class TaskDialog extends StatefulWidget {
@@ -40,51 +40,46 @@ class TaskDialogState extends State<TaskDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: const Key('TaskDialog'),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BlocListener<TaskBloc, TaskState>(
-                        listener: (context, state) async {
-                          switch (state.status) {
-                            case TaskStatus.success:
-                              HelperFunctions.showMessage(
-                                  context,
-                                  '${widget.task.taskId == null ? "Add" : "Update"} successfull',
-                                  Colors.green);
-                              await Future.delayed(
-                                  const Duration(milliseconds: 500));
-                              if (!mounted) return;
-                              Navigator.of(context).pop();
-                              break;
-                            case TaskStatus.failure:
-                              HelperFunctions.showMessage(context,
-                                  'Error: ${state.message}', Colors.red);
-                              break;
-                            default:
-                              const Text("????");
-                          }
-                        },
-                        child: Stack(clipBehavior: Clip.none, children: [
-                          Container(
-                              padding: const EdgeInsets.all(20),
-                              width: 400,
-                              height: 400,
-                              child: Center(
-                                child: _showForm(isPhone),
-                              )),
-                          const Positioned(
-                              top: 10, right: 10, child: DialogCloseButton())
-                        ]))))));
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dialog(
+            key: const Key('TaskDialog'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: BlocListener<TaskBloc, TaskState>(
+                listener: (context, state) async {
+                  switch (state.status) {
+                    case TaskStatus.success:
+                      HelperFunctions.showMessage(
+                          context,
+                          '${widget.task.taskId == null ? "Add" : "Update"} successfull',
+                          Colors.green);
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      if (!mounted) return;
+                      Navigator.of(context).pop();
+                      break;
+                    case TaskStatus.failure:
+                      HelperFunctions.showMessage(
+                          context, 'Error: ${state.message}', Colors.red);
+                      break;
+                    default:
+                      const Text("????");
+                  }
+                },
+                child: Stack(clipBehavior: Clip.none, children: [
+                  Container(
+                      padding: const EdgeInsets.all(20),
+                      width: 400,
+                      height: 400,
+                      child: Center(
+                        child: _showForm(isPhone),
+                      )),
+                  const Positioned(
+                      top: 10, right: 10, child: DialogCloseButton())
+                ]))));
   }
 
   Widget _showForm(isPhone) {

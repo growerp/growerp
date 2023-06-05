@@ -1,5 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages
-import 'package:example/main.dart';
+import 'package:marketing_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -16,6 +16,7 @@ void main() {
 
   testWidgets('''GrowERP opportunity test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        MarketingLocalizations.localizationsDelegates,
         clear: true,
         title:
             "Opportunity test"); // use data from previous run, ifnone same as true

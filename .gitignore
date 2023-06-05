@@ -2,6 +2,9 @@
 *.g.dart
 *.freezed.dart
 
+#melos
+pubspec_overrides.yaml
+
 # Miscellaneous
 *.class
 *.log

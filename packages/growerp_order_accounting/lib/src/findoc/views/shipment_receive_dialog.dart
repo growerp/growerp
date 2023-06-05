@@ -52,28 +52,24 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: GestureDetector(
-                onTap: () {},
-                child: Dialog(
-                    key: Key(
-                        "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
-                    insetPadding: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: popUp(
-                        context: context,
-                        title: 'Incoming Shipment# ${widget.finDoc.shipmentId}',
-                        width: isPhone ? 400 : 800,
-                        height: isPhone
-                            ? 600
-                            : 600, // not increase height otherwise tests will fail
-                        child: shipmentItemList())))));
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dialog(
+            key: Key(
+                "ShipmentReceiveDialog${widget.finDoc.sales ? 'Sales' : 'Purchase'}"),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                context: context,
+                title: 'Incoming Shipment# ${widget.finDoc.shipmentId}',
+                width: isPhone ? 400 : 800,
+                height: isPhone
+                    ? 600
+                    : 600, // not increase height otherwise tests will fail
+                child: shipmentItemList())));
   }
 
   Widget shipmentItemList() {
@@ -93,26 +89,24 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                               backgroundColor: Colors.transparent,
                             )
                           : null,
-                      title: Column(children: [
-                        const SizedBox(height: 20),
+                      title: const Column(children: [
+                        SizedBox(height: 20),
                         Center(
                             child: Text(
-                                'For every Item either:\n'
-                                '- Select an existing location\n'
-                                '- Enter a new location\n'
-                                '- leave empty for a new location with\n'
-                                '   the name of the item and received date',
-                                style: TextStyle(
-                                    fontSize: isPhone ? 20 : 30,
-                                    color: Colors.black))),
-                        const SizedBox(height: 30),
-                        Row(children: const <Widget>[
+                          'For every Item either:\n'
+                          '- Select an existing location\n'
+                          '- Enter a new location\n'
+                          '- leave empty for a new location with\n'
+                          '   the name of the item and received date',
+                        )),
+                        SizedBox(height: 30),
+                        Row(children: <Widget>[
                           Text('ProductId  '),
                           Expanded(child: Text('Description')),
                           Text('quantity'),
                         ]),
                       ]),
-                      subtitle: Row(children: const <Widget>[
+                      subtitle: const Row(children: <Widget>[
                         Expanded(
                             child: Text('existing location',
                                 textAlign: TextAlign.center)),
@@ -121,7 +115,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                 textAlign: TextAlign.center)),
                       ]),
                     ),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && newItems.isEmpty) {

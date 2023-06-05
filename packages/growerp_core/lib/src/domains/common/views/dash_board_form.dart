@@ -23,7 +23,7 @@ class DashBoardForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     int widthAxisCount = isPhone ? 2 : 3;
     int heightAxisCount = isPhone ? 3 : 2;
     double width = MediaQuery.of(context).size.width - (isPhone ? 0 : 60);

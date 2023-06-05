@@ -37,80 +37,78 @@ class UserListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
     UserBloc userBloc = context.read<UserBloc>();
-    return Material(
-        child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: user.image != null
-                  ? Image.memory(user.image!)
-                  : Text(user.firstName != null ? user.firstName![0] : '?'),
-            ),
-            subtitle: !isDeskTop
-                ? Text(user.email ?? '', key: Key("email$index"))
-                : null,
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Text(
-                  "${user.firstName ?? ''} "
-                  "${user.lastName ?? ''}",
-                  key: Key('name$index'),
-                )),
-                if (isDeskTop)
-                  Expanded(
-                      child: Text(
-                    user.company!.role != null ? user.company!.role!.value : '',
-                    key: Key('role$index'),
-                  )),
-                if (isDeskTop)
-                  Expanded(
-                      child: Text(
-                          (!user.loginDisabled! ? user.loginName ?? '' : " "),
-                          key: Key('username$index'))),
-                if (isDeskTop)
-                  Expanded(
-                      child: Text(
-                    user.email ?? '',
-                    key: Key('email$index'),
-                  )),
-                if (isDeskTop)
-                  Expanded(
-                      child: Text(
-                    user.telephoneNr ?? '',
-                    key: Key('telephone$index'),
-                  )),
-                if (role == Role.company)
-                  Expanded(
-                    child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
-                        key: Key('isAdmin$index')),
-                  ),
-                if (!isDeskTop && role != Role.company)
-                  Expanded(
-                      child: Text(
-                          user.company?.name == null
-                              ? 'Unknown'
-                              : user.company!.name!,
-                          key: Key('companyName$index'),
-                          textAlign: TextAlign.center))
-              ],
-            ),
-            onTap: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RepositoryProvider.value(
-                        value: repos,
-                        child: BlocProvider.value(
-                            value: userBloc, child: UserDialog(user)));
-                  });
-            },
-            trailing: IconButton(
-              key: Key("delete$index"),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {
-                userBloc.add(UserDelete(user.copyWith(image: null)));
-              },
-            )));
+    return ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: user.image != null
+              ? Image.memory(user.image!)
+              : Text(user.firstName != null ? user.firstName![0] : '?'),
+        ),
+        subtitle:
+            !isDeskTop ? Text(user.email ?? '', key: Key("email$index")) : null,
+        title: Row(
+          children: <Widget>[
+            Expanded(
+                child: Text(
+              "${user.firstName ?? ''} "
+              "${user.lastName ?? ''}",
+              key: Key('name$index'),
+            )),
+            if (isDeskTop)
+              Expanded(
+                  child: Text(
+                user.company!.role != null ? user.company!.role!.value : '',
+                key: Key('role$index'),
+              )),
+            if (isDeskTop)
+              Expanded(
+                  child: Text(
+                      (!user.loginDisabled! ? user.loginName ?? '' : " "),
+                      key: Key('username$index'))),
+            if (isDeskTop)
+              Expanded(
+                  child: Text(
+                user.email ?? '',
+                key: Key('email$index'),
+              )),
+            if (isDeskTop)
+              Expanded(
+                  child: Text(
+                user.telephoneNr ?? '',
+                key: Key('telephone$index'),
+              )),
+            if (role == Role.company)
+              Expanded(
+                child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
+                    key: Key('isAdmin$index')),
+              ),
+            if (!isDeskTop && role != Role.company)
+              Expanded(
+                  child: Text(
+                      user.company?.name == null
+                          ? 'Unknown'
+                          : user.company!.name!,
+                      key: Key('companyName$index'),
+                      textAlign: TextAlign.center))
+          ],
+        ),
+        onTap: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) {
+                return RepositoryProvider.value(
+                    value: repos,
+                    child: BlocProvider.value(
+                        value: userBloc, child: UserDialog(user)));
+              });
+        },
+        trailing: IconButton(
+          key: Key("delete$index"),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            userBloc.add(UserDelete(user.copyWith(image: null)));
+          },
+        ));
   }
 }

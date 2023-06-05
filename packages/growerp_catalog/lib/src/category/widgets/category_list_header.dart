@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../blocs/category_bloc.dart';
 
 class CategoryListHeader extends StatefulWidget {
@@ -29,54 +29,50 @@ class _CategoryListHeaderState extends State<CategoryListHeader> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() => setState(() => search = !search)),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
+    return ListTile(
+        leading: GestureDetector(
+          key: const Key('search'),
+          onTap: (() => setState(() => search = !search)),
+          child: const Icon(Icons.search_sharp, size: 40),
+        ),
+        title: search
+            ? Row(children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  key: const Key('searchField'),
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    hintText: "search in ID, name and description...",
+                  ),
+                  onChanged: ((value) => setState(() => searchString = value)),
                 )),
-            title: search
-                ? Row(children: <Widget>[
-                    Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in ID, name and description...",
-                      ),
-                      onChanged: ((value) =>
-                          setState(() => searchString = value)),
-                    )),
-                    ElevatedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () {
-                          context
-                              .read<CategoryBloc>()
-                              .add(CategoryFetch(searchString: searchString));
-                          searchString = '';
-                        })
-                  ])
-                : Column(children: [
-                    Row(children: <Widget>[
-                      const Expanded(
-                          child: Text("Name", textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
-                        const Expanded(
-                            child: Text("Description",
-                                textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text("Nbr.of Products",
-                              textAlign: TextAlign.center)),
-                    ]),
-                    const Divider(color: Colors.black),
-                  ]),
-            trailing: const Text(' ')));
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('Search'),
+                    onPressed: () {
+                      context
+                          .read<CategoryBloc>()
+                          .add(CategoryFetch(searchString: searchString));
+                      searchString = '';
+                    })
+              ])
+            : Column(children: [
+                Row(children: <Widget>[
+                  const Expanded(
+                      child: Text("Name", textAlign: TextAlign.center)),
+                  if (!ResponsiveBreakpoints.of(context).isMobile)
+                    const Expanded(
+                        child:
+                            Text("Description", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child:
+                          Text("Nbr.of Products", textAlign: TextAlign.center)),
+                ]),
+                const Divider(),
+              ]),
+        trailing: const Text(' '));
   }
 }

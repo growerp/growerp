@@ -18,7 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:example/main.dart';
+import 'package:catalog_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 
 void main() {
@@ -30,6 +30,7 @@ void main() {
 
   testWidgets('''GrowERP asset test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
+        CatalogLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
 //      "categories": categories.sublist(0, 2),

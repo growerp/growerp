@@ -3,9 +3,7 @@
    <application
         android:label="admin"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon"
-        android:restoreAnyVersion="true"
-        android:requestLegacyExternalStorage="true">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -892,6 +892,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('100'),
     product: products[0],
     statusId: assetStatusValues[0],
+    acquireCost: Decimal.parse('11'),
     receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
@@ -900,6 +901,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('200'),
     product: products[1],
     statusId: assetStatusValues[0],
+    acquireCost: Decimal.parse('22'),
     receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
@@ -908,6 +910,7 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('1'),
     product: products[2], // only products 2 or rental test fails
     statusId: assetStatusValues[0],
+    acquireCost: Decimal.parse('33'),
     receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
   Asset(
@@ -916,6 +919,15 @@ List<Asset> assets = [
     quantityOnHand: Decimal.parse('400'),
     product: products[0],
     statusId: assetStatusValues[0],
+    acquireCost: Decimal.parse('44'),
     receivedDate: DateTime.now().subtract(const Duration(days: 4)),
   ),
+];
+
+// Inventory
+List<Location> locations = [
+  Location(locationName: "loc1", assets: [assets[0]]),
+  Location(locationName: "loc2", assets: [assets[1]]),
+  Location(locationName: "loc3", assets: [assets[2]]),
+  Location(locationName: "loc4", assets: [assets[3]]),
 ];

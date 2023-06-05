@@ -57,7 +57,7 @@ class LocationListState extends State<LocationList> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (context, state) {
         switch (state.status) {
@@ -94,7 +94,7 @@ class LocationListState extends State<LocationList> {
                         if (index == 0) {
                           return Column(children: [
                             LocationListHeader(locationBloc: _locationBloc),
-                            const Divider(color: Colors.black),
+                            const Divider(),
                             Visibility(
                                 visible: state.locations.isEmpty,
                                 child: const Center(

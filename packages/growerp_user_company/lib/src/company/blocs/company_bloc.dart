@@ -58,112 +58,99 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == CompanyStatus.initial || event.refresh) {
+    // start from record zero for initial and refresh
+    if (state.status == CompanyStatus.initial || event.refresh) {
 //        emit(state.copyWith(status: CompanyStatus.loading));
-        ApiResult<List<Company>> compResult = await repos.getCompany(
-            role: role, companyPartyId: event.companyPartyId);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: CompanyStatus.success,
-                  companies: data,
-                  hasReachedMax: data.length < _companyLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        emit(state.copyWith(status: CompanyStatus.loading));
-        ApiResult<List<Company>> compResult = await repos.getCompany(
-            role: role, searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: CompanyStatus.success,
-                  companies: data,
-                  hasReachedMax: data.length < _companyLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-      ApiResult<List<Company>> compResult =
-          await repos.getCompany(role: role, searchString: event.searchString);
-      emit(state.copyWith(status: CompanyStatus.loading));
+      ApiResult<List<Company>> compResult = await repos.getCompany(
+          role: role, companyPartyId: event.companyPartyId);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: CompanyStatus.success,
-                companies: List.of(state.companies)..addAll(data),
+                companies: data,
+                hasReachedMax: data.length < _companyLimit ? true : false,
+                searchString: '',
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: CompanyStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      emit(state.copyWith(status: CompanyStatus.loading));
+      ApiResult<List<Company>> compResult =
+          await repos.getCompany(role: role, searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: CompanyStatus.success,
+                companies: data,
                 hasReachedMax: data.length < _companyLimit ? true : false,
                 searchString: event.searchString,
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: CompanyStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: CompanyStatus.failure, message: error.toString()));
     }
+    // get next page also for search
+    ApiResult<List<Company>> compResult =
+        await repos.getCompany(role: role, searchString: event.searchString);
+    emit(state.copyWith(status: CompanyStatus.loading));
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: CompanyStatus.success,
+              companies: List.of(state.companies)..addAll(data),
+              hasReachedMax: data.length < _companyLimit ? true : false,
+              searchString: event.searchString,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: CompanyStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onCompanyUpdate(
     CompanyUpdate event,
     Emitter<CompanyState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: CompanyStatus.loading));
-      List<Company> companies = List.from(state.companies);
-      if (event.company.partyId != null) {
-        ApiResult<Company> compResult =
-            await repos.updateCompany(event.company);
-        return emit(compResult.when(
-            success: (data) {
-              if (companies.isNotEmpty) {
-                int index = companies.indexWhere(
-                    (element) => element.partyId == event.company.partyId);
-                companies[index] = data;
-              } else {
-                companies.add(data);
-              }
-              if (authBloc.state.authenticate!.company!.partyId ==
-                  data.partyId) {
-                authBloc.add(AuthLoad());
-              }
-              return state.copyWith(
-                  status: CompanyStatus.success,
-                  companies: companies,
-                  message: 'Company ${event.company.name} updated');
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // add
-        ApiResult<Company> compResult =
-            await repos.createCompany(event.company);
-        return emit(compResult.when(
-            success: (data) {
-              companies.insert(0, data);
+    emit(state.copyWith(status: CompanyStatus.loading));
+    List<Company> companies = List.from(state.companies);
+    if (event.company.partyId != null) {
+      ApiResult<Company> compResult = await repos.updateCompany(event.company);
+      return emit(compResult.when(
+          success: (data) {
+            if (companies.isNotEmpty) {
+              int index = companies.indexWhere(
+                  (element) => element.partyId == event.company.partyId);
+              companies[index] = data;
+            } else {
+              companies.add(data);
+            }
+            if (authBloc.state.authenticate!.company!.partyId == data.partyId) {
               authBloc.add(AuthLoad());
-              return state.copyWith(
-                  status: CompanyStatus.success,
-                  companies: companies,
-                  message: 'Company ${event.company.name} added');
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: CompanyStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: CompanyStatus.failure, message: error.toString()));
+            }
+            return state.copyWith(
+                status: CompanyStatus.success,
+                companies: companies,
+                message: 'Company ${event.company.name} updated');
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: CompanyStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // add
+      ApiResult<Company> compResult = await repos.createCompany(event.company);
+      return emit(compResult.when(
+          success: (data) {
+            companies.insert(0, data);
+            authBloc.add(AuthLoad());
+            return state.copyWith(
+                status: CompanyStatus.success,
+                companies: companies,
+                message: 'Company ${event.company.name} added');
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: CompanyStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 

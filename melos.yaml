@@ -1,0 +1,58 @@
+name: growerp
+repository: https://github.com/growerp/growerp
+
+packages:
+  - packages/admin
+  - packages/hotel
+  - packages/growerp*
+  - packages/growerp*/*example
+
+ide:
+  intellij:
+    enabled: false
+    
+scripts:
+  analyze:
+    exec: dart analyze .
+    description: Analyse all packages for possible problems.
+  build_all:
+    description: build_runner build all modules.
+    run: "flutter pub run build_runner build --delete-conflicting-outputs"
+    exec:
+      concurrency: 1
+      orderDependents: true
+    packageFilters:
+      dependsOn: build_runner     
+  l10n:
+    description: Generates l10n for all app packages.
+    run: "flutter gen-l10n"
+    exec:
+      failFast: true
+    packageFilters:
+      fileExists: "l10n.yaml"
+      
+  test_package:
+    description: run all integration tests.
+    run: "flutter test integration_test"
+    exec:
+      orderDependents: true
+      concurrency: 1
+    packageFilters:
+      dirExists: "integration_test"
+      scope: "*_example"
+  test_app:
+    description: run all app tests.
+    run: "flutter test integration_test"
+    exec:
+      concurrency: 1
+    packageFilters:
+      dirExists: "integration_test"
+      ignore: "*_example"
+  test_all:
+    description: run all app and package tests.
+    run: "flutter test integration_test"
+    exec:
+      orderDependents: true
+      concurrency: 1
+    packageFilters:
+      dirExists: "integration_test"

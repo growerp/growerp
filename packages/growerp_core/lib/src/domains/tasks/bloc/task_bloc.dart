@@ -51,91 +51,81 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == TaskStatus.initial || event.refresh) {
-        ApiResult<List<Task>> compResult =
-            await repos.getTask(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: TaskStatus.success,
-                  tasks: data,
-                  hasReachedMax: data.length < _taskLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        ApiResult<List<Task>> compResult =
-            await repos.getTask(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: TaskStatus.success,
-                  tasks: data,
-                  hasReachedMax: data.length < _taskLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-
+    // start from record zero for initial and refresh
+    if (state.status == TaskStatus.initial || event.refresh) {
       ApiResult<List<Task>> compResult =
           await repos.getTask(searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: TaskStatus.success,
-                tasks: List.of(state.tasks)..addAll(data),
+                tasks: data,
                 hasReachedMax: data.length < _taskLimit ? true : false,
+                searchString: '',
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: TaskStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: TaskStatus.failure, message: error.toString()));
     }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      ApiResult<List<Task>> compResult =
+          await repos.getTask(searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: TaskStatus.success,
+                tasks: data,
+                hasReachedMax: data.length < _taskLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get next page also for search
+
+    ApiResult<List<Task>> compResult =
+        await repos.getTask(searchString: event.searchString);
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: TaskStatus.success,
+              tasks: List.of(state.tasks)..addAll(data),
+              hasReachedMax: data.length < _taskLimit ? true : false,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: TaskStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onTaskUpdate(
     TaskUpdate event,
     Emitter<TaskState> emit,
   ) async {
-    try {
-      List<Task> tasks = List.from(state.tasks);
-      if (event.task.taskId != null) {
-        ApiResult<Task> compResult = await repos.updateTask(event.task);
-        return emit(compResult.when(
-            success: (data) {
-              int index = tasks
-                  .indexWhere((element) => element.taskId == event.task.taskId);
-              tasks[index] = data;
-              return state.copyWith(status: TaskStatus.success, tasks: tasks);
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // add
-        ApiResult<Task> compResult = await repos.createTask(event.task);
-        return emit(compResult.when(
-            success: (data) {
-              tasks.insert(0, data);
-              return state.copyWith(status: TaskStatus.success, tasks: tasks);
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: TaskStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: TaskStatus.failure, message: error.toString()));
+    List<Task> tasks = List.from(state.tasks);
+    if (event.task.taskId != null) {
+      ApiResult<Task> compResult = await repos.updateTask(event.task);
+      return emit(compResult.when(
+          success: (data) {
+            int index = tasks
+                .indexWhere((element) => element.taskId == event.task.taskId);
+            tasks[index] = data;
+            return state.copyWith(status: TaskStatus.success, tasks: tasks);
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // add
+      ApiResult<Task> compResult = await repos.createTask(event.task);
+      return emit(compResult.when(
+          success: (data) {
+            tasks.insert(0, data);
+            return state.copyWith(status: TaskStatus.success, tasks: tasks);
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: TaskStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -143,63 +133,53 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     TaskTimeEntryUpdate event,
     Emitter<TaskState> emit,
   ) async {
-    try {
-      ApiResult<TimeEntry> compResult;
-      if (event.timeEntry.timeEntryId != null) {
-        compResult = await repos.updateTimeEntry(event.timeEntry);
-      } else {
-        compResult = await repos.createTimeEntry(event.timeEntry);
-      }
-
-      emit(compResult.when(
-          success: (data) {
-            List<Task> tasks = List.from(state.tasks);
-            int index =
-                tasks.indexWhere((element) => element.taskId == data.taskId);
-            if (event.timeEntry.timeEntryId == null) {
-              tasks[index].timeEntries.add(data);
-            } else {
-              int indexTe = tasks[index].timeEntries.indexWhere(
-                  (element) => element.timeEntryId == data.timeEntryId);
-              tasks[index].timeEntries[indexTe] = data;
-            }
-            return state.copyWith(tasks: tasks);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      return emit(state.copyWith(
-          status: TaskStatus.failure, message: error.toString()));
+    ApiResult<TimeEntry> compResult;
+    if (event.timeEntry.timeEntryId != null) {
+      compResult = await repos.updateTimeEntry(event.timeEntry);
+    } else {
+      compResult = await repos.createTimeEntry(event.timeEntry);
     }
+
+    emit(compResult.when(
+        success: (data) {
+          List<Task> tasks = List.from(state.tasks);
+          int index =
+              tasks.indexWhere((element) => element.taskId == data.taskId);
+          if (event.timeEntry.timeEntryId == null) {
+            tasks[index].timeEntries.add(data);
+          } else {
+            int indexTe = tasks[index].timeEntries.indexWhere(
+                (element) => element.timeEntryId == data.timeEntryId);
+            tasks[index].timeEntries[indexTe] = data;
+          }
+          return state.copyWith(tasks: tasks);
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: TaskStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onTimeEntryDelete(
     TaskTimeEntryDelete event,
     Emitter<TaskState> emit,
   ) async {
-    try {
-      ApiResult<TimeEntry> teApiResult =
-          await repos.deleteTimeEntry(event.timeEntry);
+    ApiResult<TimeEntry> teApiResult =
+        await repos.deleteTimeEntry(event.timeEntry);
 
-      emit(teApiResult.when(
-          success: (data) {
-            List<Task> tasks = List.from(state.tasks);
-            int index =
-                tasks.indexWhere((element) => element.taskId == data.taskId);
-            tasks[index].timeEntries.removeWhere(
-                (element) => element.timeEntryId == data.timeEntryId);
-            return state.copyWith(
-              status: TaskStatus.success,
-              tasks: tasks,
-            );
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      return emit(state.copyWith(
-          status: TaskStatus.failure, message: error.toString()));
-    }
+    emit(teApiResult.when(
+        success: (data) {
+          List<Task> tasks = List.from(state.tasks);
+          int index =
+              tasks.indexWhere((element) => element.taskId == data.taskId);
+          tasks[index].timeEntries.removeWhere(
+              (element) => element.timeEntryId == data.timeEntryId);
+          return state.copyWith(
+            status: TaskStatus.success,
+            tasks: tasks,
+          );
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: TaskStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

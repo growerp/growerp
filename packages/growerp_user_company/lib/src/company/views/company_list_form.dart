@@ -16,7 +16,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../company.dart';
 import '../widgets/widgets.dart';
@@ -114,7 +114,7 @@ class CompanyListState extends State<CompanyList> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Builder(builder: (BuildContext context) {
       Widget showForm(state) {
         return RefreshIndicator(
@@ -134,7 +134,7 @@ class CompanyListState extends State<CompanyList> {
                         isPhone: isPhone,
                         role: widget.role,
                         companyBloc: _companyBloc),
-                    const Divider(color: Colors.black),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && companies.isEmpty) {

@@ -3,7 +3,7 @@ version: 0.1.0+1
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -15,14 +15,14 @@ dependencies:
   dio: ^4.0.0
   meta: ^1.3.0
   shared_preferences: ^2.0.6
-  responsive_framework: ^0.2.0
+  responsive_framework: ^1.0.0
   flutter_simple_treeview: ^3.0.0-nullsafety.1
-  printing: ^5.0.4
-  pdf: ^3.0.0
+  printing: ^5.10.4
+  pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
   core:
     path: ../core
-  package_info_plus: ^1.4.2
+  package_info_plus: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -97,6 +97,7 @@ flutter:
     - packages/growerp_core/images/companyGrey.png
     - packages/growerp_core/images/export.png
     - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/myInfo.png
     - packages/growerp_core/images/search.png
     - packages/growerp_core/images/chat.png

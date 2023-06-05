@@ -39,51 +39,49 @@ class LocationListItem extends StatelessWidget {
     for (Asset asset in location.assets!) {
       qohTotal += asset.quantityOnHand ?? d('0');
     }
-    return Material(
-        child: ExpansionTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Text(location.locationName != null
-                  ? location.locationName![0]
-                  : "?"),
-            ),
-            title: Row(children: <Widget>[
-              Expanded(
-                  child: Text(
-                      "${location.locationName}[${location.locationId}]",
-                      key: Key('locName$index'))),
-              SizedBox(
-                  width: 70,
-                  child: Text(
-                    qohTotal.toString(),
-                    key: Key('qoh$index'),
-                    textAlign: TextAlign.center,
-                  )),
-            ]),
-            trailing: SizedBox(
-                width: isPhone ? 100 : 195,
-                child: Row(children: [
-                  IconButton(
-                      key: Key('delete$index'),
-                      icon: const Icon(Icons.delete_forever),
-                      onPressed: () {
-                        locationBloc.add(LocationDelete(location));
-                      }),
-                  IconButton(
-                      key: Key('edit$index'),
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: locationBloc,
-                                  child: LocationDialog(location));
-                            });
-                      }),
-                ])),
-            children: items(location, index)));
+    return ExpansionTile(
+        key: Key("$index"),
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: Text(
+              location.locationName != null ? location.locationName![0] : "?"),
+        ),
+        title: Row(children: <Widget>[
+          Expanded(
+              child: Text("${location.locationName}[${location.locationId}]",
+                  key: Key('locName$index'))),
+          SizedBox(
+              width: 70,
+              child: Text(
+                qohTotal.toString(),
+                key: Key('qoh$index'),
+                textAlign: TextAlign.center,
+              )),
+        ]),
+        trailing: SizedBox(
+            width: isPhone ? 100 : 195,
+            child: Row(children: [
+              IconButton(
+                  key: Key('delete$index'),
+                  icon: const Icon(Icons.delete_forever),
+                  onPressed: () {
+                    locationBloc.add(LocationDelete(location));
+                  }),
+              IconButton(
+                  key: Key('edit$index'),
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return BlocProvider.value(
+                              value: locationBloc,
+                              child: LocationDialog(location));
+                        });
+                  }),
+            ])),
+        children: items(location, index));
   }
 
   List<Widget> items(Location location, int index) {
@@ -92,6 +90,7 @@ class LocationListItem extends StatelessWidget {
         (e) => Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               const SizedBox(width: 50),
               Expanded(
+                key: const Key('locationItem'),
                 child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.green,

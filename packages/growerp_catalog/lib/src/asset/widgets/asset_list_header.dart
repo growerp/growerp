@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../blocs/asset_bloc.dart';
 
 class AssetListHeader extends StatefulWidget {
@@ -30,52 +30,48 @@ class _AssetListHeaderState extends State<AssetListHeader> {
   @override
   Widget build(BuildContext context) {
     final assetBloc = context.read<AssetBloc>();
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() =>
-                    setState(() => search ? search = false : search = true)),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() =>
+                setState(() => search ? search = false : search = true)),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: search
+            ? Row(children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  key: const Key('searchField'),
+                  textInputAction: TextInputAction.go,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    hintText: "search in ID, name and description...",
+                  ),
+                  onChanged: ((value) => setState(() {
+                        searchString = value;
+                      })),
                 )),
-            title: search
-                ? Row(children: <Widget>[
-                    Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      textInputAction: TextInputAction.go,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        hintText: "search in ID, name and description...",
-                      ),
-                      onChanged: ((value) => setState(() {
-                            searchString = value;
-                          })),
-                    )),
-                    ElevatedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('Search'),
-                        onPressed: () {
-                          assetBloc.add(AssetFetch(searchString: searchString));
-                        })
-                  ])
-                : Column(children: [
-                    Row(children: <Widget>[
-                      const Expanded(
-                          child: Text("Name[ID]", textAlign: TextAlign.center)),
-                      if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
-                        const Expanded(
-                            child: Text("Status", textAlign: TextAlign.center)),
-                      const Expanded(
-                          child: Text("Product", textAlign: TextAlign.center)),
-                    ]),
-                    const Divider(color: Colors.black),
-                  ]),
-            trailing: const Text(' ')));
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('Search'),
+                    onPressed: () {
+                      assetBloc.add(AssetFetch(searchString: searchString));
+                    })
+              ])
+            : Column(children: [
+                Row(children: <Widget>[
+                  const Expanded(
+                      child: Text("Name[ID]", textAlign: TextAlign.center)),
+                  if (!ResponsiveBreakpoints.of(context).isMobile)
+                    const Expanded(
+                        child: Text("Status", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("Product", textAlign: TextAlign.center)),
+                ]),
+                const Divider(),
+              ]),
+        trailing: const Text(' '));
   }
 }

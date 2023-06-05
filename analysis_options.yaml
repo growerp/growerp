@@ -18,6 +18,8 @@ analyzer:
     - "packages/hotel/**"
     - "packages/freelance/**"
     - "packages/growerp_select_dialog/**"
+  errors:
+    invalid_annotation_target: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the

@@ -11,6 +11,9 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+
+import 'package:growerp_core/src/l10n/generated/core_localizations.dart';
+
 /// financial document (FinDoc) types
 enum FinDocType {
   order('Order'),
@@ -37,6 +40,23 @@ enum FinDocType {
         return transaction;
     }
     return unknown;
+  }
+
+  static String translated(context, FinDocType val) {
+    switch (val) {
+      case FinDocType.order:
+        return CoreLocalizations.of(context)!.order;
+      case FinDocType.invoice:
+        return CoreLocalizations.of(context)!.invoice;
+      case FinDocType.payment:
+        return CoreLocalizations.of(context)!.payment;
+      case FinDocType.shipment:
+        return CoreLocalizations.of(context)!.shipment;
+      case FinDocType.transaction:
+        return CoreLocalizations.of(context)!.transaction;
+      default:
+        return CoreLocalizations.of(context)!.unknown;
+    }
   }
 
   @override

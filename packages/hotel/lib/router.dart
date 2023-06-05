@@ -12,16 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/coreRouter.dart';
-import 'package:core/domains/domains.dart';
 import 'package:flutter/material.dart';
-import 'package:core/templates/templates.dart';
-import 'package:hotel/menuItem_data.dart';
+import 'package:growerp_core/growerp_core.dart';
 
-// https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
+import 'acct_menu_option_data.dart';
+import 'menu_option_data.dart';
+
 Route<dynamic> generateRoute(RouteSettings settings) {
-  print(">>>NavigateTo { ${settings.name} " +
-      "with: ${settings.arguments.toString()} }");
+  debugPrint(
+      ">>>NavigateTo { ${settings.name} with: ${settings.arguments.toString()} }");
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
@@ -52,6 +51,25 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+    case '/accounting':
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
+    case '/acctSales':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
+    case '/acctPurchase':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
+    case '/acctLedger':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+    case '/acctReports':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../product.dart';
 
@@ -32,60 +32,58 @@ class ProductListItem extends StatelessWidget {
     String classificationId = GlobalConfiguration().get("classificationId");
     var repos = context.read<CatalogAPIRepository>();
     final productBloc = context.read<ProductBloc>();
-    return Material(
-        child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: product.image != null
-                  ? Image.memory(
-                      product.image!,
-                      height: 100,
-                    )
-                  : Text(product.productName![0]),
-            ),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                    child:
-                        Text("${product.productName}", key: Key('name$index'))),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
-                  Expanded(
-                      child: Text("${product.description}",
-                          key: Key('description$index'),
-                          textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("${product.price}",
-                        key: Key('price$index'), textAlign: TextAlign.center)),
-                if (classificationId != 'AppHotel')
-                  Expanded(
-                      child: Text(
-                          "${product.categories.isEmpty ? '0' : product.categories.length > 1 ? product.categories.length : product.categories[0].categoryName}",
-                          key: Key('categoryName$index'),
-                          textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text(
-                        product.assetCount != null
-                            ? product.assetCount.toString()
-                            : '0',
-                        key: Key('assetCount$index'),
-                        textAlign: TextAlign.center)),
-              ],
-            ),
-            onTap: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) => RepositoryProvider.value(
-                      value: repos,
-                      child: BlocProvider.value(
-                          value: productBloc, child: ProductDialog(product))));
-            },
-            trailing: IconButton(
-              key: Key('delete$index'),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {
-                productBloc.add(ProductDelete(product.copyWith(image: null)));
-              },
-            )));
+    return ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: product.image != null
+              ? Image.memory(
+                  product.image!,
+                  height: 100,
+                )
+              : Text(product.productName![0]),
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(
+                child: Text("${product.productName}", key: Key('name$index'))),
+            if (!ResponsiveBreakpoints.of(context).isMobile)
+              Expanded(
+                  child: Text("${product.description}",
+                      key: Key('description$index'),
+                      textAlign: TextAlign.center)),
+            Expanded(
+                child: Text("${product.price}",
+                    key: Key('price$index'), textAlign: TextAlign.center)),
+            if (classificationId != 'AppHotel')
+              Expanded(
+                  child: Text(
+                      "${product.categories.isEmpty ? '0' : product.categories.length > 1 ? product.categories.length : product.categories[0].categoryName}",
+                      key: Key('categoryName$index'),
+                      textAlign: TextAlign.center)),
+            Expanded(
+                child: Text(
+                    product.assetCount != null
+                        ? product.assetCount.toString()
+                        : '0',
+                    key: Key('assetCount$index'),
+                    textAlign: TextAlign.center)),
+          ],
+        ),
+        onTap: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) => RepositoryProvider.value(
+                  value: repos,
+                  child: BlocProvider.value(
+                      value: productBloc, child: ProductDialog(product))));
+        },
+        trailing: IconButton(
+          key: Key('delete$index'),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            productBloc.add(ProductDelete(product.copyWith(image: null)));
+          },
+        ));
   }
 }

@@ -13,7 +13,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import '../../common/common.dart';
 
 class FatalErrorForm extends StatelessWidget {
@@ -25,27 +24,30 @@ class FatalErrorForm extends StatelessWidget {
       {super.key, required this.message, this.route, this.buttonText});
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-          Text(message),
-          Visibility(
-              visible: route != null && buttonText != null,
-              child: ElevatedButton(
-                  child: Text("$buttonText"),
-                  onPressed: () {
-                    Navigator.pushNamed(context, route!,
-                        arguments: FormArguments());
-                  })),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            key: const Key('restart'),
-            child: const Text('Restart'),
-            onPressed: () => Phoenix.rebirth(context),
-          )
-        ])));
+    return SizedBox(
+      width: 400,
+      child: Center(
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+            Text(message),
+            Visibility(
+                visible: route != null && buttonText != null,
+                child: ElevatedButton(
+                    child: Text("$buttonText"),
+                    onPressed: () {
+                      Navigator.pushNamed(context, route!,
+                          arguments: FormArguments());
+                    })),
+/*            const SizedBox(height: 20),
+            ElevatedButton(
+              key: const Key('restart'),
+              child: const Text('Restart'),
+              onPressed: () => Phoenix.rebirth(context),
+            )
+*/
+          ])),
+    );
   }
 }

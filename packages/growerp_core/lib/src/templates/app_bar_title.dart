@@ -15,8 +15,8 @@
 import 'package:flutter/material.dart';
 import '../domains/domains.dart';
 
-Widget appBarTitle(
-    BuildContext context, Authenticate authenticate, String title) {
+Widget appBarTitle(BuildContext context, Authenticate authenticate,
+    String title, bool isPhone) {
   return Row(children: [
     InkWell(
       key: const Key('tapCompany'),
@@ -27,7 +27,6 @@ Widget appBarTitle(
         }
       },
       child: CircleAvatar(
-          backgroundColor: Colors.green,
           radius: 15,
           child: authenticate.company?.image != null
               ? Image.memory(authenticate.company!.image!)
@@ -36,20 +35,19 @@ Widget appBarTitle(
                           authenticate.company!.name!.isNotEmpty
                       ? authenticate.company!.name!.substring(0, 1)
                       : '?',
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
                   key: const Key('appBarAvatarText'),
                 )),
     ),
-    const SizedBox(width: 10),
+    const SizedBox(width: 5),
     Column(children: [
       Text(
-        title,
-        style: const TextStyle(fontSize: 20, color: Colors.black),
+        isPhone ? title : title.replaceAll('\n', ' '),
+        style: const TextStyle(fontSize: 18),
         key: const Key('appBarTitle'),
       ),
       Text(authenticate.company?.name ?? '??',
           key: const Key('appBarCompanyName'),
-          style: const TextStyle(fontSize: 10, color: Colors.black)),
+          style: const TextStyle(fontSize: 10)),
     ]),
   ]);
 }

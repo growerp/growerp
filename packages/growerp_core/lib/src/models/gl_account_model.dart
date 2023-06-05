@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 part 'gl_account_model.freezed.dart';
 part 'gl_account_model.g.dart';
@@ -20,13 +21,17 @@ part 'gl_account_model.g.dart';
 class GlAccount with _$GlAccount {
   GlAccount._();
   factory GlAccount({
-    String? id,
-    int? l,
-    String? classId,
-    String? isDebit,
+    String? glAccountId,
+    String? accountCode,
     String? accountName,
-    double? postedBalance,
-    double? rollUp,
+    int? level,
+    String? classId,
+    bool? isDebit,
+    Decimal? rollUp,
+    Decimal? beginningBalance,
+    Decimal? postedDebits,
+    Decimal? postedCredits,
+    Decimal? postedBalance,
     @Default([]) List<GlAccount> children,
   }) = _GlAccount;
 

@@ -9,5 +9,6 @@ export 'src/domains/domains.dart';
 export 'src/domains/integration_test.dart';
 export 'src/models/models.dart';
 export 'src/core_router.dart';
-export 'src/styles/themes.dart';
+export 'src/styles/color_schemes.dart';
 export 'src/extensions.dart';
+export 'src/l10n/generated/core_localizations.dart';

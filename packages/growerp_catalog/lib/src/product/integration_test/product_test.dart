@@ -58,6 +58,7 @@ class ProductTest {
       await CommonTest.enterText(tester, 'price', product.price.toString());
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());
+      await CommonTest.drag(tester);
       // remove existing categories
       while (tester.any(find.byKey(const Key("deleteChip")))) {
         await CommonTest.tapByKey(tester, "deleteChip");

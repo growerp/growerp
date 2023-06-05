@@ -58,6 +58,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
   late String classificationId;
   late CategoryBloc _categoryBloc;
   final ImagePicker _picker = ImagePicker();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -67,6 +68,12 @@ class CategoryDialogState extends State<CategoryDialogFull> {
     _descrController.text = widget.category.description;
     _selectedProducts = List.of(widget.category.products);
     _categoryBloc = context.read<CategoryBloc>();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -131,29 +138,12 @@ class CategoryDialogState extends State<CategoryDialogFull> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Stack(clipBehavior: Clip.none, children: [
-                Container(
-                    width: 400,
-                    height: 650,
-                    padding: const EdgeInsets.all(20),
-                    child: listChild(productState)),
-                Container(
-                    height: 50,
-                    width: 400,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColorDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: const Center(
-                        child: Text('Category Information',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)))),
-                const Positioned(top: 5, right: 5, child: DialogCloseButton()),
-              ])),
+              child: popUp(
+                  context: context,
+                  child: listChild(productState),
+                  title: 'Category Information',
+                  height: 650,
+                  width: 400)),
           if (categoryState.status == CategoryStatus.updateLoading ||
               productState.status == ProductStatus.loading)
             const LoadingIndicator(),
@@ -258,19 +248,18 @@ class CategoryDialogState extends State<CategoryDialogFull> {
     ));
 
     return Center(
-        child: Container(
-            padding: const EdgeInsets.all(20),
-            child: ScaffoldMessenger(
-                key: categoryDialogKey,
-                child: Scaffold(
-                    backgroundColor: Colors.transparent,
-                    floatingActionButton:
-                        imageButtons(context, _onImageButtonPressed),
-                    body: Form(
-                        key: _categoryDialogFormKey,
-                        child: ListView(key: const Key('listView'), children: <
-                            Widget>[
-                          const SizedBox(height: 10),
+        child: ScaffoldMessenger(
+            key: categoryDialogKey,
+            child: Scaffold(
+                backgroundColor: Colors.transparent,
+                floatingActionButton:
+                    ImageButtons(_scrollController, _onImageButtonPressed),
+                body: Form(
+                    key: _categoryDialogFormKey,
+                    child: SingleChildScrollView(
+                        controller: _scrollController,
+                        key: const Key('listView'),
+                        child: Column(children: [
                           Center(
                               child: Text(
                             'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',
@@ -283,7 +272,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                           const SizedBox(height: 30),
                           CircleAvatar(
                               backgroundColor: Colors.green,
-                              radius: 80,
+                              radius: 70,
                               child: _imageFile != null
                                   ? foundation.kIsWeb
                                       ? Image.network(_imageFile!.path,
@@ -301,7 +290,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                                           style: const TextStyle(
                                               fontSize: 30,
                                               color: Colors.black))),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 10),
                           TextFormField(
                             key: const Key('name'),
                             decoration: const InputDecoration(

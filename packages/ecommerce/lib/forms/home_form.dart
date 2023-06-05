@@ -76,10 +76,6 @@ class _HomeState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      if (state.status == AuthStatus.unAuthenticated)
-        print("======Unauth==$state ${state.message}");
-      if (state.status == AuthStatus.authenticated)
-        print("======Auth==$state ${state.message}");
       if (state.status == AuthStatus.authenticated)
         HelperFunctions.showMessage(context, '${state.message}', Colors.green);
     }, builder: (context, authState) {

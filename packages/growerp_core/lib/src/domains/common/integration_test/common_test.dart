@@ -33,25 +33,11 @@ class CommonTest {
     await selectOption(tester, 'tapCompany', 'CompanyDialogOrgInternal');
   }
 
-  static Future<void> startApp(WidgetTester tester, Widget topApp,
-      {bool clear = false}) async {
-    SaveTest test = await PersistFunctions.getTest();
-    int seq = Random.secure().nextInt(1024) + test.sequence;
-    debugPrint("==1==startapp seq: $seq");
-    if (clear == true) {
-      await PersistFunctions.persistTest(SaveTest(sequence: seq));
-    } else {
-      await PersistFunctions.persistTest(test.copyWith(sequence: seq));
-    }
-    Bloc.observer = AppBlocObserver();
-    runApp(topApp);
-    await tester.pumpAndSettle(Duration(seconds: waitTime));
-  }
-
   static Future<void> startTestApp(
       WidgetTester tester,
       Route<dynamic> Function(RouteSettings) router,
       List<MenuOption> menuOptions,
+      List<LocalizationsDelegate> extraDelegates,
       {bool clear = false,
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
@@ -64,11 +50,13 @@ class CommonTest {
     }
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
-        dbServer: APIRepository(),
-        chatServer: ChatServer(),
-        router: router,
-        title: title,
-        menuOptions: menuOptions));
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      router: router,
+      title: title,
+      menuOptions: menuOptions,
+      extraDelegates: extraDelegates,
+    ));
     await tester.pumpAndSettle(Duration(seconds: waitTime));
   }
 
@@ -78,18 +66,28 @@ class CommonTest {
     int seq = test.sequence + 1;
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
-    // tap new company button, enter data
-    /// [newCompany]
+    // check if email address already exist
+    APIRepository repos = APIRepository();
+    var exist = true;
+    var times = 0;
+    while (exist) {
+      ApiResult result =
+          await repos.checkEmail(admin.email!.replaceFirst('XXX', '${++seq}'));
+      exist = result.when(success: (data) => data, failure: (_) => false);
+      expect(times++, lessThan(20),
+          reason: "Could not find free email address");
+    }
+
     await CommonTest.tapByKey(tester, 'newCompButton');
     await tester.pump(const Duration(seconds: 3));
     await CommonTest.enterText(tester, 'firstName', admin.firstName!);
     await CommonTest.enterText(tester, 'lastName', admin.lastName!);
-    var email = admin.email!.replaceFirst('XXX', '${seq++}');
+    var email = admin.email!.replaceFirst('XXX', '$seq');
     await CommonTest.enterText(tester, 'email', email);
 
-    /// [newCompany]
-    String companyName = '${initialCompany.name!} ${seq++}';
+    String companyName = '${initialCompany.name!} $seq';
     await enterText(tester, 'companyName', companyName);
+    await CommonTest.drag(tester);
     await enterDropDown(
         tester, 'currency', initialCompany.currency!.description!);
     await CommonTest.drag(tester);
@@ -99,7 +97,7 @@ class CommonTest {
     await CommonTest.tapByKey(tester, 'newCompany', seconds: 3);
     // start with clean saveTest
     await PersistFunctions.persistTest(SaveTest(
-      sequence: seq,
+      sequence: ++seq,
       nowDate: DateTime.now(), // used in rental
       admin: admin.copyWith(email: email, loginName: email),
       company: initialCompany.copyWith(email: email, name: companyName),
@@ -116,7 +114,7 @@ class CommonTest {
     expect(getTextField('appBarCompanyName'), equals(test.company!.name));
     // company
     expect(getTextField('dbCompanyTitle'), equals("Company"));
-    expect(getTextField('dbCompanySubTitle'), equals(test.company!.name));
+    expect(getTextField('dbCompanySubTitle0'), equals(test.company!.name));
     expect(getTextField('dbCompanySubTitle1'),
         equals("Email: ${test.company!.email}"));
     expect(getTextField('dbCompanySubTitle2'),
@@ -125,13 +123,13 @@ class CommonTest {
         equals("Employees: ${test.company!.employees.length + 1}"));
     // User
     expect(getTextField('dbUserTitle'), equals("Logged in User"));
-    expect(getTextField('dbUserSubTitle'),
+    expect(getTextField('dbUserSubTitle0'),
         equals("${test.admin!.firstName} ${test.admin!.lastName}"));
     expect(
         getTextField('dbUserSubTitle1'), equals("Email: ${test.admin!.email}"));
-    expect(getTextField('dbUserSubTitle2'),
-        equals("Login name: ${test.admin!.loginName}"));
-    expect(getTextField('dbUserSubTitle3'),
+    expect(getTextField('dbUserSubTitle2'), equals("Login name:"));
+    expect(getTextField('dbUserSubTitle3'), equals(" ${test.admin!.email}"));
+    expect(getTextField('dbUserSubTitle4'),
         equals("Security Group: ${test.admin!.userGroup!.name}"));
   }
 
@@ -516,7 +514,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 
@@ -545,7 +543,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 
@@ -559,7 +557,7 @@ class CommonTest {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handler);
   }
 }

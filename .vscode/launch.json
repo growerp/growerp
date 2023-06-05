@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "packages/growerp_user_company/example",
+            "program": "lib/main.dart",
+            "deviceId": "chrome"
+        }
+    ]
+}

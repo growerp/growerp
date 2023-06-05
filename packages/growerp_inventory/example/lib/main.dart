@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 
@@ -25,13 +24,13 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP package: growerp_inventory.',
-          router: generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+      dbServer: APIRepository(),
+      chatServer: ChatServer(),
+      title: 'GrowERP package: growerp_inventory.',
+      router: generateRoute,
+      menuOptions: menuOptions,
+      extraDelegates: const [InventoryLocalizations.delegate]));
 }
 
 // Menu definition
@@ -100,26 +99,19 @@ class MainMenu extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem(
-            'dbCompany',
-            context,
-            menuOptions[1],
+          makeDashboardItem('dbCompany', context, menuOptions[1], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
             "Email: ${authenticate.company!.email}",
             "Currency: ${authenticate.company!.currency!.description}",
             "Employees: ${authenticate.company!.employees.length}",
-          ),
-          makeDashboardItem(
-            'dbInventory',
-            context,
-            menuOptions[2],
+          ]),
+          makeDashboardItem('dbInventory', context, menuOptions[2], [
             "Incoming Shipments: ${authenticate.stats?.incomingShipments ?? 0}",
             "Outgoing Shipments: ${authenticate.stats?.outgoingShipments ?? 0}",
             "Wh Locations: ${authenticate.stats?.whLocations ?? 0}",
-            "",
-          ),
+          ]),
         ]);
       }
       return const LoadingIndicator();

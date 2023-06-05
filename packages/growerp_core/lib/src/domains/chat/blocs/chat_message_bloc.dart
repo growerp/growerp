@@ -56,83 +56,73 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      if (state.status == ChatMessageStatus.initial) {
-        final myStream = chatServer.stream();
-        // ignore: unused_local_variable
-        final subscription = myStream.listen((data) => add(
-            ChatMessageReceiveWs(WsChatMessage.fromJson(jsonDecode(data)))));
-      }
-      // start from record zero for initial and refresh
-      if (state.status == ChatMessageStatus.initial || event.refresh) {
-        ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
-            chatRoomId: event.chatRoomId, searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: ChatMessageStatus.success,
-                  chatMessages: data,
-                  hasReachedMax: data.length < _chatMessageLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatMessageStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
-            chatRoomId: event.chatRoomId, searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: ChatMessageStatus.success,
-                  chatMessages: data,
-                  hasReachedMax: data.length < _chatMessageLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: ChatMessageStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-
+    if (state.status == ChatMessageStatus.initial) {
+      final myStream = chatServer.stream();
+      // ignore: unused_local_variable
+      final subscription = myStream.listen((data) =>
+          add(ChatMessageReceiveWs(WsChatMessage.fromJson(jsonDecode(data)))));
+    }
+    // start from record zero for initial and refresh
+    if (state.status == ChatMessageStatus.initial || event.refresh) {
       ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
           chatRoomId: event.chatRoomId, searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: ChatMessageStatus.success,
-                chatMessages: List.of(state.chatMessages)..addAll(data),
+                chatMessages: data,
                 hasReachedMax: data.length < _chatMessageLimit ? true : false,
+                searchString: '',
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: ChatMessageStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: ChatMessageStatus.failure, message: error.toString()));
     }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
+          chatRoomId: event.chatRoomId, searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: ChatMessageStatus.success,
+                chatMessages: data,
+                hasReachedMax: data.length < _chatMessageLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: ChatMessageStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get next page also for search
+
+    ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
+        chatRoomId: event.chatRoomId, searchString: event.searchString);
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: ChatMessageStatus.success,
+              chatMessages: List.of(state.chatMessages)..addAll(data),
+              hasReachedMax: data.length < _chatMessageLimit ? true : false,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: ChatMessageStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onChatMessageReceiveWs(
     ChatMessageReceiveWs event,
     Emitter<ChatMessageState> emit,
   ) async {
-    try {
-      if (event.chatMessage.toUserId ==
-          authBloc.state.authenticate!.user!.userId) {
-        List<ChatMessage> chatMessages = List.from(state.chatMessages);
-        chatMessages.insert(
-            0,
-            ChatMessage(
-              fromUserId: event.chatMessage.fromUserId,
-              content: event.chatMessage.content,
-            ));
-        emit(state.copyWith(chatMessages: chatMessages));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: ChatMessageStatus.failure, message: error.toString()));
+    if (event.chatMessage.toUserId ==
+        authBloc.state.authenticate!.user!.userId) {
+      List<ChatMessage> chatMessages = List.from(state.chatMessages);
+      chatMessages.insert(
+          0,
+          ChatMessage(
+            fromUserId: event.chatMessage.fromUserId,
+            content: event.chatMessage.content,
+          ));
+      emit(state.copyWith(chatMessages: chatMessages));
     }
   }
 
@@ -140,19 +130,14 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageSendWs event,
     Emitter<ChatMessageState> emit,
   ) async {
-    try {
-      chatServer.send(event.chatMessage.toJson().toString());
-      List<ChatMessage> chatMessages = List.from(state.chatMessages);
-      chatMessages.insert(
-          0,
-          ChatMessage(
-            fromUserId: authBloc.state.authenticate!.user!.userId,
-            content: event.chatMessage.content,
-          ));
-      emit(state.copyWith(chatMessages: chatMessages));
-    } catch (error) {
-      emit(state.copyWith(
-          status: ChatMessageStatus.failure, message: error.toString()));
-    }
+    chatServer.send(event.chatMessage.toJson().toString());
+    List<ChatMessage> chatMessages = List.from(state.chatMessages);
+    chatMessages.insert(
+        0,
+        ChatMessage(
+          fromUserId: authBloc.state.authenticate!.user!.userId,
+          content: event.chatMessage.content,
+        ));
+    emit(state.copyWith(chatMessages: chatMessages));
   }
 }

@@ -16,7 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../api_repository.dart';
 import '../company.dart';
@@ -35,93 +35,96 @@ class CompanyListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
     CompanyBloc companyBloc = context.read<CompanyBloc>();
-    return Material(
-        child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.green,
-              child: company.image != null
-                  ? Image.memory(company.image!)
-                  : Text(company.name != null ? company.name![0] : '?'),
-            ),
-            title: Row(
-              children: <Widget>[
+    return ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.green,
+          child: company.image != null
+              ? Image.memory(company.image!)
+              : Text(company.name != null ? company.name![0] : '?'),
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(
+                child: Text(
+              "${company.name ?? ''} ",
+              key: Key('name$index'),
+            )),
+            if (!isPhone && role == null)
+              Expanded(
+                  child: Text(
+                company.role!.value,
+                key: Key('role$index'),
+              )),
+            if (!isPhone)
+              Expanded(
+                  child: Text(
+                company.email ?? '',
+                key: Key('email$index'),
+              )),
+            if (!isPhone)
+              Expanded(
+                  child: Text(
+                company.telephoneNr ?? '',
+                key: Key('telephone$index'),
+              )),
+            if (!isPhone)
+              Expanded(
+                  child: Center(
+                child: Text(
+                  company.vatPerc != Decimal.parse("0")
+                      ? company.vatPerc.toString()
+                      : company.salesPerc.toString(),
+                  key: Key('perc$index'),
+                ),
+              )),
+            if (!isPhone)
+              Expanded(
+                  child: Center(
+                child: Text(
+                  company.employees.length.toString(),
+                  key: Key('employees$index'),
+                ),
+              )),
+          ],
+        ),
+        subtitle: isPhone
+            ? Row(children: [
+                Expanded(
+                    child: Text(company.email ?? '',
+                        key: const Key("companyEmail"))),
                 Expanded(
                     child: Text(
-                  "${company.name ?? ''} ",
-                  key: Key('name$index'),
+                  company.employees.length.toString(),
+                  key: Key('employees$index'),
                 )),
-                if (!isPhone && role == null)
+                if (role == null)
                   Expanded(
                       child: Text(
                     company.role!.value,
                     key: Key('role$index'),
                   )),
-                if (!isPhone)
-                  Expanded(
-                      child: Text(
-                    company.email ?? '',
-                    key: Key('email$index'),
-                  )),
-                if (!isPhone)
-                  Expanded(
-                      child: Text(
-                    company.telephoneNr ?? '',
-                    key: Key('telephone$index'),
-                  )),
-                if (!isPhone)
-                  Expanded(
-                      child: Text(
-                    company.vatPerc != Decimal.parse("0")
-                        ? company.vatPerc.toString()
-                        : company.salesPerc.toString(),
-                    key: Key('perc$index'),
-                  )),
-                if (!isPhone)
-                  Expanded(
-                      child: Text(
-                    company.employees.length.toString(),
-                    key: Key('employees$index'),
-                  )),
-              ],
-            ),
-            subtitle: isPhone
-                ? Row(children: [
-                    Expanded(
-                        child: Text(company.email ?? '',
-                            key: const Key("companyEmail"))),
-                    Expanded(
-                        child: Text(
-                      company.employees.length.toString(),
-                      key: Key('employees$index'),
-                    )),
-                    if (role == null)
-                      Expanded(
-                          child: Text(
-                        company.role!.value,
-                        key: Key('role$index'),
-                      )),
-                  ])
-                : null,
-            onTap: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RepositoryProvider.value(
-                        value: repos,
-                        child: BlocProvider.value(
-                            value: companyBloc, child: CompanyDialog(company)));
-                  });
-            },
-            trailing: IconButton(
-              key: Key("delete$index"),
-              icon: const Icon(Icons.delete_forever),
-              onPressed: () {
-                companyBloc.add(CompanyDelete(company.copyWith(image: null)));
-              },
-            )));
+              ])
+            : null,
+        onTap: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) {
+                return RepositoryProvider.value(
+                    value: repos,
+                    child: BlocProvider.value(
+                        value: companyBloc, child: CompanyDialog(company)));
+              });
+        },
+        trailing: IconButton(
+          key: Key("delete$index"),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            companyBloc.add(CompanyDelete(company.copyWith(image: null)));
+          },
+        ));
   }
 }

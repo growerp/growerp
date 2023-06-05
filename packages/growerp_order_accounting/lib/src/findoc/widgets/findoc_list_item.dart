@@ -18,9 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
-import '../views/views.dart';
+import '../findoc.dart';
 
 class FinDocListItem extends StatelessWidget {
   const FinDocListItem({
@@ -49,7 +47,7 @@ class FinDocListItem extends StatelessWidget {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     FinDocAPIRepository repos = context.read<FinDocAPIRepository>();
     String classificationId = GlobalConfiguration().get("classificationId");
-
+    DateTime date = finDoc.placedDate ?? finDoc.creationDate ?? DateTime.now();
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
@@ -59,13 +57,15 @@ class FinDocListItem extends StatelessWidget {
         ),
         title: Row(
           children: <Widget>[
-            SizedBox(
-                width: 80, child: Text("${finDoc.id()}", key: Key('id$index'))),
-            const SizedBox(width: 10),
+            Expanded(
+                child: Wrap(children: [
+              Text("${finDoc.id()}", key: Key('id$index')),
+              Text(" ${date.toString().substring(0, 10)}")
+            ])),
             Expanded(
                 child: Text(
                     "${finDoc.otherUser?.firstName ?? ''} "
-                    "${finDoc.otherUser?.lastName ?? ''}\n"
+                    "${finDoc.otherUser?.lastName ?? ''}${isPhone ? '\n' : ' '}"
                     "${finDoc.otherUser?.company!.name ?? ''}",
                     key: Key("otherUser$index"))),
             if (!isPhone && docType != FinDocType.payment)
@@ -73,23 +73,21 @@ class FinDocListItem extends StatelessWidget {
           ],
         ),
         subtitle: Row(children: <Widget>[
-          SizedBox(
-              width: 80,
-              child: Text(classificationId == 'AppHotel'
-                  ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
-                  : "${finDoc.creationDate?.toString().substring(0, 11)}")),
-          SizedBox(
-              width: 76,
+          if (!isPhone)
+            Expanded(
+                child: Text(classificationId == 'AppHotel'
+                    ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+                    : "${finDoc.creationDate?.toString().substring(0, 11)}")),
+          Expanded(
               child:
                   Text("${finDoc.grandTotal}", key: Key("grandTotal$index"))),
-          SizedBox(
-              width: 90,
+          Expanded(
               child: Text("${finDoc.displayName(classificationId)}",
                   key: Key("status$index"))),
           if (!isPhone)
             Expanded(
                 child: Text(
-              finDoc.otherUser!.email ?? '',
+              finDoc.otherUser!.email ?? '??',
               key: Key('email$index'),
             )),
           if (!isPhone)
@@ -229,7 +227,7 @@ class FinDocListItem extends StatelessWidget {
                                       finDoc: finDoc, original: finDoc)
                                   : finDoc.docType == FinDocType.payment
                                       ? PaymentDialog(
-                                          finDoc,
+                                          finDoc: finDoc,
                                           paymentMethod: paymentMethod,
                                         )
                                       : FinDocDialog(finDoc: finDoc)));
@@ -258,8 +256,8 @@ class FinDocListItem extends StatelessWidget {
                           ? "ProductId: ${e.productId} Description: ${e.description} Quantity: ${e.quantity.toString()} Price: ${e.price.toString()} SubTotal: ${(e.quantity! * e.price!).toString()}${e.rentalFromDate == null ? '' : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
                               "${e.rentalThruDate.toString().substring(0, 10)}"}"
                           : finDoc.docType == FinDocType.transaction
-                              ? "Type: ${e.itemType!.itemTypeId.substring(3)}\n"
-                                  "GlAccount: ${e.glAccountId} "
+                              ? "Type: ${e.itemType?.itemTypeId.substring(3)}\n"
+                                  "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}\n"
                                   "Amount: ${e.price} "
                               : finDoc.docType == FinDocType.shipment
                                   ? "ProductId: ${e.productId} "

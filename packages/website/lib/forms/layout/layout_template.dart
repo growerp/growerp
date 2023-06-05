@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'navigation_bar.dart';
-import 'navigation_drawer.dart';
 
 class LayoutTemplate extends StatelessWidget {
   final Widget form;
@@ -11,9 +10,6 @@ class LayoutTemplate extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (context, sizingInformation) => Scaffold(
-        drawer: sizingInformation.deviceScreenType == DeviceScreenType.mobile
-            ? NavigationDrawer()
-            : null,
         backgroundColor: Colors.white,
         body: CenteredView(
           child: Column(

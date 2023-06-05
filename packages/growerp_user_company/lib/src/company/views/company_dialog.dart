@@ -89,6 +89,7 @@ class CompanyFormState extends State<CompanyDialog> {
   String? _retrieveDataError;
   final ImagePicker _picker = ImagePicker();
   late bool isPhone;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -124,6 +125,12 @@ class CompanyFormState extends State<CompanyDialog> {
     }
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _onImageButtonPressed(ImageSource source,
       {BuildContext? context}) async {
     try {
@@ -156,7 +163,7 @@ class CompanyFormState extends State<CompanyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<CompanyBloc, CompanyState>(
         listenWhen: (previous, current) =>
             previous.status == CompanyStatus.loading,
@@ -188,7 +195,7 @@ class CompanyFormState extends State<CompanyDialog> {
                       context: context,
                       title: "$_selectedRole Company information",
                       width: isPhone ? 400 : 1000,
-                      height: isPhone ? 750 : 750,
+                      height: isPhone ? 600 : 750,
                       child: listChild()))
               : listChild();
         });
@@ -396,11 +403,8 @@ class CompanyFormState extends State<CompanyDialog> {
         ))
       ]),
       InputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Postal Address',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
           ),
           child: Row(children: [
             Expanded(
@@ -451,11 +455,8 @@ class CompanyFormState extends State<CompanyDialog> {
                     ]))),
           ])),
       InputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             labelText: 'Payment method',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
           ),
           child: Row(children: [
             Expanded(
@@ -561,17 +562,17 @@ class CompanyFormState extends State<CompanyDialog> {
     ]);
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(
           children: [
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
+                    padding: const EdgeInsets.all(5), child: widgets[i++])),
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));
@@ -579,7 +580,7 @@ class CompanyFormState extends State<CompanyDialog> {
     }
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+      column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
     return ScaffoldMessenger(
@@ -587,13 +588,15 @@ class CompanyFormState extends State<CompanyDialog> {
         child: Scaffold(
             key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
             backgroundColor: Colors.transparent,
-            floatingActionButton: imageButtons(context, _onImageButtonPressed),
+            floatingActionButton:
+                ImageButtons(_scrollController, _onImageButtonPressed),
             body: Form(
                 key: _companyDialogFormKey,
                 child: SingleChildScrollView(
+                    controller: _scrollController,
                     key: const Key('listView'),
                     child: Padding(
-                        padding: const EdgeInsets.all(15),
+                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
                         child: Column(children: [
                           Center(
                               child: Text(
@@ -607,7 +610,7 @@ class CompanyFormState extends State<CompanyDialog> {
                           const SizedBox(height: 10),
                           CircleAvatar(
                               backgroundColor: Colors.green,
-                              radius: 80,
+                              radius: 60,
                               child: _imageFile != null
                                   ? kIsWeb
                                       ? Image.network(_imageFile!.path,

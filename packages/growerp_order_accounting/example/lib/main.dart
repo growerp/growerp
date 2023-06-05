@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'acct_menu_option_data.dart';
@@ -26,13 +25,14 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP.',
-          router: generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+    dbServer: APIRepository(),
+    chatServer: ChatServer(),
+    title: 'GrowERP.',
+    router: generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: const [OrderAccountingLocalizations.delegate],
+  ));
 }
 
 // Menu definition
@@ -109,6 +109,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+    case '/acctReports':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
     default:
       return coreRoute(settings);
   }
@@ -124,19 +128,13 @@ class MainMenuForm extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem(
-            'dbOrders',
-            context,
-            menuOptions[1],
+          makeDashboardItem('dbOrders', context, menuOptions[1], [
             "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
             "Customers: ${authenticate.stats?.customers ?? 0}",
             "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
             "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-          ),
-          makeDashboardItem(
-            'dbAccounting',
-            context,
-            menuOptions[2],
+          ]),
+          makeDashboardItem('dbAccounting', context, menuOptions[2], [
             "Sales open invoices: \n"
                 "${authenticate.company!.currency?.currencyId} "
                 "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
@@ -145,9 +143,7 @@ class MainMenuForm extends StatelessWidget {
                 "${authenticate.company!.currency?.currencyId} "
                 "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
                 "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-            "",
-            "",
-          ),
+          ]),
         ]);
       }
       return const LoadingIndicator();

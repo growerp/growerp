@@ -24,7 +24,8 @@ class DisplayMenuOption extends StatefulWidget {
   final int menuIndex; // navigator rail menu selected
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
-  final List<Widget>? actions; // actions at the appBar
+  final List<Widget> actions; // actions at the appBar
+  final bool? isPhone;
   const DisplayMenuOption({
     Key? key,
     this.menuOption,
@@ -32,7 +33,8 @@ class DisplayMenuOption extends StatefulWidget {
     required this.menuIndex,
     this.tabIndex,
     this.tabItem,
-    this.actions,
+    this.actions = const [],
+    this.isPhone = false,
   }) : super(key: key);
 
   @override
@@ -64,8 +66,37 @@ class MenuOptionState extends State<DisplayMenuOption>
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     route = menuOption.route; // used also for key
+    actions = List.of(widget.actions);
+    actions.add(IconButton(
+        key: const Key('topChatButton'), // causes a duplicate key?
+        icon: const Icon(Icons.chat),
+        tooltip: 'Chat',
+        onPressed: () async => {
+              await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return const ChatRoomListDialog();
+                },
+              )
+            }));
+
+    if (route != '/') {
+      actions.add(IconButton(
+          key: const Key('homeButton'),
+          icon: const Icon(Icons.home),
+          tooltip: 'Go Home',
+          onPressed: () {
+            if (route.startsWith('/acct')) {
+              Navigator.pushNamed(context, '/accounting',
+                  arguments: FormArguments());
+            } else {
+              Navigator.pushNamed(context, '/', arguments: FormArguments());
+            }
+          }));
+    }
+
     child = menuOption.child;
-    leadAction = menuOption.leadAction;
     tabIndex = widget.tabIndex ?? 0;
     if (menuOption.floatButtonForm != null) {
       floatingActionButton = FloatingActionButton(
@@ -89,17 +120,21 @@ class MenuOptionState extends State<DisplayMenuOption>
       // form key for testing
       displayMOFormKey =
           tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      debugPrint("=== current form key: $displayMOFormKey");
+      debugPrint("==1= current form key: $displayMOFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
       tabText.add(Align(
           alignment: Alignment.center,
-          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
+          child: Text(
+              widget.isPhone!
+                  ? tabItems[i].label
+                  : tabItems[i].label.replaceAll('\n', ' '),
+              key: Key('tap$displayMOFormKey'))));
       // tabs at bottom of screen : phone
       bottomItems.add(BottomNavigationBarItem(
           icon: tabItems[i].icon,
-          label: tabItems[i].label,
+          label: tabItems[i].label.replaceAll('\n', ' '),
           tooltip: (i + 1).toString()));
       // floating actionbutton at each tab; not work with domain org
       if (tabItems[i].floatButtonRoute != null) {
@@ -149,37 +184,7 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    actions = widget.actions ?? [];
-    if (isPhone && route != '/') {
-      actions.add(IconButton(
-          key: const Key('homeButton'),
-          icon: const Icon(Icons.home),
-          tooltip: 'Go Home',
-          onPressed: () {
-            if (route.startsWith('/acct')) {
-              Navigator.pushNamed(context, '/accounting',
-                  arguments: FormArguments());
-            } else {
-              Navigator.pushNamed(context, '/', arguments: FormArguments());
-            }
-          }));
-    }
-
-    actions.add(IconButton(
-        //  key: Key('topChatButton'), // causes a duplicate key?
-        icon: const Icon(Icons.chat),
-        tooltip: 'Chat',
-        onPressed: () async => {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return const ChatRoomListDialog();
-                },
-              )
-            }));
-
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     Authenticate authenticate = Authenticate();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
@@ -222,14 +227,15 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   Widget simplePage(Authenticate authenticate, bool isPhone) {
     displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    debugPrint("=== current form key: $displayMOFormKey");
+    debugPrint("==2-simple= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             key: Key(displayMOFormKey),
             automaticallyImplyLeading: isPhone,
             leading: leadAction,
-            title: appBarTitle(context, authenticate, title),
+            title: appBarTitle(context, authenticate, title, isPhone),
             actions: actions),
         drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
         floatingActionButton: floatingActionButton,
@@ -239,28 +245,29 @@ class MenuOptionState extends State<DisplayMenuOption>
   Widget tabPage(Authenticate authenticate, bool isPhone) {
     displayMOFormKey =
         tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    debugPrint("=== current form key: $displayMOFormKey");
+    Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
+    debugPrint("==3-tab= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             automaticallyImplyLeading: isPhone,
             bottom: isPhone
                 ? null
                 : TabBar(
                     controller: _controller,
-                    labelPadding: const EdgeInsets.all(10.0),
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.white,
+                    labelPadding: const EdgeInsets.all(5.0),
                     indicatorSize: TabBarIndicatorSize.label,
-                    indicator: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10)),
-                        color: Colors.white),
+                    indicator: BoxDecoration(
+                      color: tabSelectedBackground,
+                      borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10)),
+                    ),
                     tabs: tabText,
                   ),
-            title: appBarTitle(
-                context, authenticate, '$title ${bottomItems[tabIndex].label}'),
+            title: appBarTitle(context, authenticate,
+                '$title ${tabItems[tabIndex].label}', isPhone),
             actions: actions),
         drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
         floatingActionButton: floatingActionButtonList[tabIndex],

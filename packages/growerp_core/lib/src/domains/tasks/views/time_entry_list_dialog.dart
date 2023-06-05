@@ -15,7 +15,7 @@
 import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../domains.dart';
 
 class TimeEntryListDialog extends StatefulWidget {
@@ -34,25 +34,23 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
-    return GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Dialog(
-            key: const Key('TimeEntryListDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Stack(clipBehavior: Clip.none, children: [
-              Container(
-                  padding: const EdgeInsets.all(20),
-                  width: 400,
-                  height: 400,
-                  child: Center(
-                    child: _showList(isPhone),
-                  )),
-              const Positioned(top: 5, right: 5, child: DialogCloseButton())
-            ])));
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    return Dialog(
+        key: const Key('TimeEntryListDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(clipBehavior: Clip.none, children: [
+          Container(
+              padding: const EdgeInsets.all(20),
+              width: 400,
+              height: 400,
+              child: Center(
+                child: _showList(isPhone),
+              )),
+          const Positioned(top: 5, right: 5, child: DialogCloseButton())
+        ]));
   }
 
   Widget _showList(isPhone) {

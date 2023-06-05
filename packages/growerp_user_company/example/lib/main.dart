@@ -16,7 +16,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 
@@ -24,13 +23,14 @@ Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
-  runApp(Phoenix(
-      child: TopApp(
-          dbServer: APIRepository(),
-          chatServer: ChatServer(),
-          title: 'GrowERP package: growerp_user_company.',
-          router: generateRoute,
-          menuOptions: menuOptions)));
+  runApp(TopApp(
+    dbServer: APIRepository(),
+    chatServer: ChatServer(),
+    title: 'GrowERP package: growerp_user_company.',
+    router: generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: const [UserCompanyLocalizations.delegate],
+  ));
 }
 
 // Menu definition
@@ -66,7 +66,7 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: '\nCustomers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -82,7 +82,7 @@ List<MenuOption> menuOptions = [
           key: Key('Supplier'),
           role: Role.supplier,
         ),
-        label: 'Suppliers',
+        label: '\nSuppliers',
         icon: const Icon(Icons.home),
       ),
       TabItem(
@@ -108,7 +108,7 @@ List<MenuOption> menuOptions = [
           key: Key('Employee'),
           role: Role.company,
         ),
-        label: 'Employees',
+        label: '\nEmployees',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -116,7 +116,7 @@ List<MenuOption> menuOptions = [
           key: Key('Lead'),
           role: Role.lead,
         ),
-        label: 'Leads',
+        label: '\nLeads',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -124,7 +124,7 @@ List<MenuOption> menuOptions = [
           key: Key('Customer'),
           role: Role.customer,
         ),
-        label: 'Customers',
+        label: '\nCustomers',
         icon: const Icon(Icons.school),
       ),
       TabItem(
@@ -132,7 +132,7 @@ List<MenuOption> menuOptions = [
           key: Key('Supplier'),
           role: Role.supplier,
         ),
-        label: 'Suppliers',
+        label: '\nSuppliers',
         icon: const Icon(Icons.business),
       ),
       TabItem(
@@ -195,20 +195,15 @@ class MainMenu extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem(
-              'dbCompanies',
-              context,
-              menuOptions[1],
-              authenticate.company!.name!.length > 20
-                  ? "${authenticate.company!.name!.substring(0, 20)}..."
-                  : "${authenticate.company!.name}",
-              "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
-              "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
-              "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}"),
-          makeDashboardItem(
-            'dbPersons',
-            context,
-            menuOptions[2],
+          makeDashboardItem('dbCompanies', context, menuOptions[1], [
+            authenticate.company!.name!.length > 20
+                ? "${authenticate.company!.name!.substring(0, 20)}..."
+                : "${authenticate.company!.name}",
+            "Customers: ${authenticate.stats != null ? authenticate.stats!.customers : 0}",
+            "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
+            "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
+          ]),
+          makeDashboardItem('dbPersons', context, menuOptions[2], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
@@ -216,7 +211,7 @@ class MainMenu extends StatelessWidget {
             "Customers: ${authenticate.stats != null ? authenticate.stats?.customers ?? 0 : 0}",
             "Leads: ${authenticate.stats != null ? authenticate.stats?.leads ?? 0 : 0}",
             "Suppliers: ${authenticate.stats != null ? authenticate.stats?.suppliers ?? 0 : 0}",
-          ),
+          ]),
         ]);
       }
       return const LoadingIndicator();

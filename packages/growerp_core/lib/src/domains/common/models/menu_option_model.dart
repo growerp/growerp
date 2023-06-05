@@ -24,7 +24,6 @@ class MenuOption {
   final String route; // route path required to show this item
   final List<TabItem>? tabItems; // top/bottom tabs
   final Widget? child; // when no tabs this is single page
-  final Widget? leadAction; // single actionButton on the left like back button
   final List<UserGroup> readGroups; // user groups who can read
   final List<UserGroup>? writeGroups; // user groups who can add/update/delete
   final Widget? floatButtonForm; // for dialogs which use navigator internally
@@ -36,7 +35,6 @@ class MenuOption {
     required this.route,
     this.tabItems,
     this.child,
-    this.leadAction,
     required this.readGroups,
     this.writeGroups,
     this.floatButtonForm,

@@ -22,5 +22,5 @@
     "_________________comment_restRequestsLogs": "show logging of requests",
     "restRequestLogs": false,
     "_________________comment_restResponseLogs": "show logging of responses",
-    "restResponseLogs": false 
+    "restResponseLogs": false
 }

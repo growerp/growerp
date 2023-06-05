@@ -43,20 +43,20 @@ class AboutFormHeader extends StatelessWidget {
         applicationVersion: 'Version $version, build #$build',
         applicationName: packageName,
         applicationDescription: Center(child: Text(databaseUrl)),
-        applicationIcon: const Image(
-          image: AssetImage('assets/images/growerp.png'),
+        applicationIcon: Image.asset(
+          'packages/growerp_core/images/growerp.png',
           height: 100,
           width: 200,
         ),
         applicationLegalese: '© GrowERP, $year',
-        children: <Widget>[
+        children: const <Widget>[
           Center(
               child: SizedBox(
                   width: 300,
                   child: Form(
                       child: Column(
-                    children: const <Widget>[
-                      MarkdownPageListTile(
+                    children: <Widget>[
+/*                      MarkdownPageListTile(
                         filename: 'README.md',
                         title: Text('View Readme'),
                         icon: Icon(Icons.all_inclusive),
@@ -81,6 +81,7 @@ class AboutFormHeader extends StatelessWidget {
                         title: Text('Privacy, Code of conduct'),
                         icon: Icon(Icons.sentiment_satisfied),
                       ),
+*/
                       LicensesPageListTile(
                         title: Text('Open source Licenses'),
                         icon: Icon(Icons.favorite),

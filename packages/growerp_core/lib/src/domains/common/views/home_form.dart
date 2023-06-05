@@ -14,6 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../l10n/generated/core_localizations.dart';
 import '../../domains.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,7 +37,7 @@ class HomeFormState extends State<HomeForm> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
     Widget appInfo = Center(
         child: Align(
@@ -45,7 +46,7 @@ class HomeFormState extends State<HomeForm> {
                 "${GlobalConfiguration().get("appName")} "
                 "V${GlobalConfiguration().get("version")} "
                 "#${GlobalConfiguration().get("build")}",
-                style: const TextStyle(fontSize: 10, color: Colors.black))));
+                style: const TextStyle(fontSize: 10))));
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
@@ -57,7 +58,8 @@ class HomeFormState extends State<HomeForm> {
                     menuList: widget.menuOptions,
                     menuIndex: 0,
                     actions: <Widget>[
-                  if (authenticate.apiKey != null)
+                  if (authenticate.apiKey != null &&
+                      widget.menuOptions[0].route == '/')
                     IconButton(
                         key: const Key('logoutButton'),
                         icon: const Icon(Icons.do_not_disturb,
@@ -80,15 +82,22 @@ class HomeFormState extends State<HomeForm> {
                   style: const TextStyle(fontSize: 0)),
             appInfo
           ]);
+        case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           Authenticate authenticate = state.authenticate!;
           return Column(children: [
             Expanded(
                 child: Scaffold(
                     appBar: AppBar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
                         key: const Key('HomeFormUnAuth'),
-                        title: appBarTitle(context, authenticate,
-                            'Login${singleCompany.isEmpty ? ' / New company' : ''}')),
+                        title: appBarTitle(
+                          context,
+                          authenticate,
+                          'Login${singleCompany.isEmpty ? ' / New company' : ''}',
+                          isPhone,
+                        )),
                     body: Center(
                         child: Column(children: <Widget>[
                       const SizedBox(height: 80),
@@ -104,13 +113,13 @@ class HomeFormState extends State<HomeForm> {
                           child: Text(widget.title,
                               style: TextStyle(
                                   fontSize: isPhone ? 15 : 25,
-                                  color: Colors.black,
                                   fontWeight: FontWeight.bold))),
                       const SizedBox(height: 40),
                       authenticate.company?.partyId != null
                           ? ElevatedButton(
                               key: const Key('loginButton'),
-                              child: const Text('Login with an Existing ID'),
+                              child: Text(CoreLocalizations.of(context)!
+                                  .loginWithExistingUserName),
                               onPressed: () async {
                                 await showDialog(
                                     barrierDismissible: true,

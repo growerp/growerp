@@ -53,6 +53,7 @@ class CategoryTest {
       await CommonTest.tapByKey(
           tester, 'name'); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', category.categoryName);
+      await CommonTest.drag(tester);
       await CommonTest.enterText(tester, 'description', category.description);
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update');

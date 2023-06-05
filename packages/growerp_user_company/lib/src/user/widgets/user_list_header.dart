@@ -36,65 +36,59 @@ class _UserListHeaderState extends State<UserListHeader> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: GestureDetector(
-                key: const Key('search'),
-                onTap: (() => setState(() {
-                      if (search) {
-                        search = false;
-                        widget.userBloc.add(const UserFetch(refresh: true));
-                      } else {
-                        search = true;
-                      }
-                    })),
-                child: Image.asset(
-                  'packages/growerp_core/images/search.png',
-                  height: 30,
+    return ListTile(
+        leading: GestureDetector(
+            key: const Key('search'),
+            onTap: (() => setState(() {
+                  if (search) {
+                    search = false;
+                    widget.userBloc.add(const UserFetch(refresh: true));
+                  } else {
+                    search = true;
+                  }
+                })),
+            child: const Icon(Icons.search_sharp, size: 40)),
+        title: search
+            ? Row(children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  key: const Key('searchField'),
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      hintText: 'enter first or last name'),
+                  onChanged: ((value) {
+                    searchString = value;
+                  }),
                 )),
-            title: search
-                ? Row(children: <Widget>[
-                    Expanded(
-                        child: TextField(
-                      key: const Key('searchField'),
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.transparent),
-                          ),
-                          hintText: 'enter first or last name'),
-                      onChanged: ((value) {
-                        searchString = value;
-                      }),
-                    )),
-                    ElevatedButton(
-                        key: const Key('searchButton'),
-                        child: const Text('search'),
-                        onPressed: () {
-                          widget.userBloc
-                              .add(UserFetch(searchString: searchString));
-                        })
-                  ])
-                : Row(
-                    children: <Widget>[
-                      const Expanded(child: Text("Name")),
-                      if (!widget.isPhone)
-                        const Expanded(child: Text("login name")),
-                      if (!widget.isPhone && widget.role == null)
-                        const Expanded(child: Text("Role")),
-                      if (!widget.isPhone) const Expanded(child: Text("Email")),
-                      if (!widget.isPhone)
-                        const Expanded(child: Text("Telephone")),
-                      if (widget.role == Role.company)
-                        const Expanded(child: Text("Admin")),
-                      if (!widget.isPhone && widget.role != Role.company)
-                        const Expanded(
-                            child:
-                                Text("Company", textAlign: TextAlign.center)),
-                      if (widget.isPhone && widget.role != Role.company)
-                        const Expanded(child: Text("Company"))
-                    ],
-                  ),
-            trailing: const Text(' ')));
+                ElevatedButton(
+                    key: const Key('searchButton'),
+                    child: const Text('search'),
+                    onPressed: () {
+                      widget.userBloc
+                          .add(UserFetch(searchString: searchString));
+                    })
+              ])
+            : Row(
+                children: <Widget>[
+                  const Expanded(child: Text("Name")),
+                  if (!widget.isPhone)
+                    const Expanded(child: Text("login name")),
+                  if (!widget.isPhone && widget.role == null)
+                    const Expanded(child: Text("Role")),
+                  if (!widget.isPhone) const Expanded(child: Text("Email")),
+                  if (!widget.isPhone) const Expanded(child: Text("Telephone")),
+                  if (widget.role == Role.company)
+                    const Expanded(child: Text("Admin")),
+                  if (!widget.isPhone && widget.role != Role.company)
+                    const Expanded(
+                        child: Text("Company", textAlign: TextAlign.center)),
+                  if (widget.isPhone && widget.role != Role.company)
+                    const Expanded(child: Text("Company"))
+                ],
+              ),
+        trailing: const Text(' '));
   }
 }

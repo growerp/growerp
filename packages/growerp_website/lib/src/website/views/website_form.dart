@@ -19,12 +19,12 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
 import 'package:growerp_select_dialog/growerp_select_dialog.dart';
-import '../../api_repository.dart';
+import '../../../growerp_website.dart';
 import '../website.dart';
 
 class WebsiteForm extends StatelessWidget {
@@ -155,7 +155,6 @@ class WebsiteFormState extends State<WebsitePage> {
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
         color: Colors.deepOrange,
-        padding: const EdgeInsets.all(0.0),
         onPressed: () async {
           var updContent = await showDialog(
               barrierDismissible: true,
@@ -223,7 +222,6 @@ class WebsiteFormState extends State<WebsitePage> {
         iconSize: 30,
         icon: const Icon(Icons.add_circle),
         color: Colors.deepOrange,
-        padding: const EdgeInsets.all(0.0),
         onPressed: () async {
           var updContent = await showDialog(
               barrierDismissible: true,
@@ -475,86 +473,74 @@ class WebsiteFormState extends State<WebsitePage> {
     }
 
     List<Widget> widgets = [
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: InkWell(
-            onTap: doLlaunchUrl,
-            child: Text(
-              "${state.website?.hostName}",
-              key: const Key('url'),
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Clickable website URL',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child: Column(children: [
+            InkWell(
+              onTap: doLlaunchUrl,
+              child: Text(
+                "${state.website?.hostName}",
+                key: const Key('url'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
-          )),
-      Form(
-          key: _websiteFormKey1,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
-              child: Row(children: [
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('urlInput'),
-                    controller: _urlController,
-                    decoration: const InputDecoration(labelText: 'url'),
-                    validator: (value) {
-                      if (value!.isEmpty) return 'A subdomainname is required';
-                      return null;
-                    },
+            Form(
+                key: _websiteFormKey1,
+                child: Row(children: [
+                  Expanded(
+                    child: TextFormField(
+                      key: const Key('urlInput'),
+                      controller: _urlController,
+                      decoration: const InputDecoration(labelText: 'url'),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'A subdomainname is required';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-                Text(
-                    state.website!.hostName
-                        .substring(state.website!.hostName.indexOf('.')),
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                    key: const Key('updateHost'),
-                    child: const Text('update'),
-                    onPressed: () async {
-                      if (_websiteFormKey1.currentState!.validate()) {
-                        _websiteBloc.add(WebsiteUpdate(Website(
-                            id: state.website!.id,
-                            hostName: _urlController.text)));
-                      }
-                    }),
-              ]))),
+                  Text(
+                      state.website!.hostName
+                          .substring(state.website!.hostName.indexOf('.')),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                      key: const Key('updateHost'),
+                      child: const Text('update'),
+                      onPressed: () async {
+                        if (_websiteFormKey1.currentState!.validate()) {
+                          _websiteBloc.add(WebsiteUpdate(Website(
+                              id: state.website!.id,
+                              hostName: _urlController.text)));
+                        }
+                      }),
+                ]))
+          ])),
       Form(
           key: _websiteFormKey2,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Title of the website',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
               child: Row(children: [
                 Expanded(
                   child: TextFormField(
                       key: const Key('title'),
                       controller: _titleController,
-                      decoration: const InputDecoration(
-                          labelText: 'Title of the website')),
+                      decoration:
+                          const InputDecoration(labelText: 'Title text')),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
@@ -568,19 +554,13 @@ class WebsiteFormState extends State<WebsitePage> {
                       }
                     }),
               ]))),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Text sections',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Column(children: [
-            const Text(
-              'Text sections',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
             const Text(
               'Can change order with long press',
               style: TextStyle(fontSize: 10),
@@ -607,31 +587,21 @@ class WebsiteFormState extends State<WebsitePage> {
                     spacing: 10,
                     children: textButtons))
           ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Images',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(runSpacing: 10, spacing: 10, children: imageButtons)
-          ])),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Images',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons)),
       for (Map cat in catButtons)
-        Container(
-            width: 400,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25.0),
-              border: Border.all(
-                  color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-            ),
+        InputDecorator(
+            key: Key(cat["categoryName"]),
+            decoration: InputDecoration(
+                labelText: cat["categoryName"],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                )),
             child: Column(children: [
               Text(
                 cat["categoryName"],
@@ -641,46 +611,28 @@ class WebsiteFormState extends State<WebsitePage> {
               ),
               Wrap(spacing: 10, children: cat["products"])
             ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Shop dropdown Categories',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, children: browseCatButtons)
-          ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
-          child: Column(children: [
-            const Text(
-              'Website colors',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(spacing: 10, children: colorCatButtons)
-          ])),
-      Container(
-          width: 400,
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(
-                color: Colors.black45, style: BorderStyle.solid, width: 0.80),
-          ),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText:
+                  WebsiteLocalizations.of(context)!.shopDropdownCategories,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child: Wrap(spacing: 10, children: browseCatButtons)),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Website Colors',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
+          child:
+              Column(children: [Wrap(spacing: 10, children: colorCatButtons)])),
+      InputDecorator(
+          decoration: InputDecoration(
+              labelText: 'Obsidian vault',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              )),
           child: Row(children: [
             Expanded(
                 child: TextField(
@@ -691,7 +643,7 @@ class WebsiteFormState extends State<WebsitePage> {
             const SizedBox(width: 10),
             ElevatedButton(
                 key: const Key('upload'),
-                child: const Text('Upload Obsidian Vault'),
+                child: const Text('Upload '),
                 onPressed: () async {
                   FilePickerResult? result;
                   String? path;
@@ -725,16 +677,12 @@ class WebsiteFormState extends State<WebsitePage> {
           ])),
       Form(
           key: _websiteFormKey3,
-          child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                    color: Colors.black45,
-                    style: BorderStyle.solid,
-                    width: 0.80),
-              ),
+          child: InputDecorator(
+              decoration: InputDecoration(
+                  labelText: 'Google Website statistics ID',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                  )),
               child: Row(children: [
                 Expanded(
                   child: TextFormField(
@@ -758,7 +706,7 @@ class WebsiteFormState extends State<WebsitePage> {
     ];
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(
@@ -783,21 +731,16 @@ class WebsiteFormState extends State<WebsitePage> {
     return Center(
         child: SingleChildScrollView(
             key: const Key('listView'),
-            padding: const EdgeInsets.all(20),
-            child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(children: [
-                  Center(
-                      child: Text(
-                    'id:#${state.website?.id}',
-                    style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
-                    key: const Key('header'),
-                  )),
-                  const SizedBox(height: 10),
-                  Column(children: (rows.isEmpty ? column : rows)),
-                ]))));
+            child: Column(children: [
+              Center(
+                  child: Text(
+                'id:#${state.website?.id}',
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                key: const Key('header'),
+              )),
+              const SizedBox(height: 10),
+              Column(children: (rows.isEmpty ? column : rows)),
+            ])));
   }
 }

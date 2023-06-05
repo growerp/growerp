@@ -1,3 +1,13 @@
+## 1.0.0
+* model changes: 
+  * company now directly on order
+  * added acquireCost to asset
+* added localization
+* updated to dart 3
+* upgrade to material 3 light/dart scheme
+* refactor: removed not required material,GestureDetectors 
+* add accounting reports
+
 ## 0.9.2
 * model changes: Item Type add account info
 * removed paymentType model now used itemType

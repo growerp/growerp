@@ -57,7 +57,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/supplierGrey.png",
       selectedImage: "packages/growerp_core/images/supplier.png",
-      title: "Accounting Purchasing",
+      title: "Acctg. Purchasing",
       route: '/acctPurchase',
       readGroups: [
         UserGroup.admin,
@@ -86,7 +86,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Accounting Ledger\n",
+      title: "Acctg. Ledger\n",
       route: '/acctLedger',
       readGroups: [
         UserGroup.admin,
@@ -109,13 +109,52 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
       ]),
+  MenuOption(
+      image: "packages/growerp_core/images/reportGrey.png",
+      selectedImage: "packages/growerp_core/images/report.png",
+      title: "Acctg. Reports",
+      route: '/acctReports',
+      tabItems: [
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "\nBalance Sheet",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const BalanceSummaryListForm(),
+          label: "\nBalance Summary",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
 /*  MenuOption(
-      image: "packages/growerp_core/images/accountingGrey.png",
-      selectedImage: "packages/growerp_core/images/accounting.png",
-      title: "Reports",
-      route: '/reports',
-      readGroups: [UserGroup.admin],
-      writeGroups: [UserGroup.admin]),
+      image: "packages/growerp_core/images/setupGrey.png",
+      selectedImage: "packages/growerp_core/images/setup.png",
+      title: "SetUp",
+      route: '/',
+      tabItems: [
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "Dummy",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "Dummy",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
 */
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",

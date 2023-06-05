@@ -26,47 +26,43 @@ class TaskListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-        child: ListTile(
-            leading: CircleAvatar(
-                backgroundColor: Colors.green,
-                child: Text(task.taskName != null ? task.taskName![0] : '')),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                    child: Text("${task.taskName}", key: Key('name$index'))),
-                Expanded(
-                    child: Text("${task.status}", key: Key('status$index'))),
-                Text(task.unInvoicedHours!.toString(),
-                    key: Key('unInvoicedHours$index')),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
-                  Expanded(
-                      child: Text("${task.description}",
-                          key: Key('description$index'),
-                          textAlign: TextAlign.center)),
-                if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
-                  Expanded(
-                      child: Text("${task.rate}",
-                          key: Key('rate$index'), textAlign: TextAlign.center)),
-              ],
-            ),
-            onTap: () async {
-              await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return BlocProvider.value(
-                        value: context.read<TaskBloc>(),
-                        child: TaskDialog(task));
-                  });
-            },
-            trailing: IconButton(
-                key: Key('delete$index'),
-                icon: const Icon(Icons.delete_forever),
-                onPressed: () {
-                  context
-                      .read<TaskBloc>()
-                      .add(TaskUpdate(task.copyWith(status: 'Closed')));
-                })));
+    return ListTile(
+        leading: CircleAvatar(
+            backgroundColor: Colors.green,
+            child: Text(task.taskName != null ? task.taskName![0] : '')),
+        title: Row(
+          children: <Widget>[
+            Expanded(child: Text("${task.taskName}", key: Key('name$index'))),
+            Expanded(child: Text("${task.status}", key: Key('status$index'))),
+            Text(task.unInvoicedHours!.toString(),
+                key: Key('unInvoicedHours$index')),
+            if (!ResponsiveBreakpoints.of(context).isMobile)
+              Expanded(
+                  child: Text("${task.description}",
+                      key: Key('description$index'),
+                      textAlign: TextAlign.center)),
+            if (!ResponsiveBreakpoints.of(context).isMobile)
+              Expanded(
+                  child: Text("${task.rate}",
+                      key: Key('rate$index'), textAlign: TextAlign.center)),
+          ],
+        ),
+        onTap: () async {
+          await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (BuildContext context) {
+                return BlocProvider.value(
+                    value: context.read<TaskBloc>(), child: TaskDialog(task));
+              });
+        },
+        trailing: IconButton(
+            key: Key('delete$index'),
+            icon: const Icon(Icons.delete_forever),
+            onPressed: () {
+              context
+                  .read<TaskBloc>()
+                  .add(TaskUpdate(task.copyWith(status: 'Closed')));
+            }));
   }
 }

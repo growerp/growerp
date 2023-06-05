@@ -25,7 +25,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:core/styles/themes.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:core/domains/domains.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -60,8 +59,7 @@ Future main() async {
   }
 
   BlocOverrides.runZoned(
-    () => runApp(Phoenix(
-        child: TopApp(dbServer: APIRepository(), chatServer: ChatServer()))),
+    () => runApp(TopApp(dbServer: APIRepository(), chatServer: ChatServer())),
     blocObserver: AppBlocObserver(),
   );
 }
@@ -123,17 +121,15 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: S.delegate.supportedLocales,
-            builder: (context, widget) => ResponsiveWrapper.builder(
-                BouncingScrollWrapper.builder(context, widget!),
-                maxWidth: 2460,
-                defaultScale: true,
-                breakpoints: [
-                  const ResponsiveBreakpoint.resize(450, name: MOBILE),
-                  const ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                  const ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-                  const ResponsiveBreakpoint.autoScale(2460, name: '4K'),
-                ],
-                background: Container(color: const Color(0xFFF5F5F5))),
+            builder: (context, child) => ResponsiveBreakpoints.builder(
+        child: child!,
+        breakpoints: [
+          const Breakpoint(start: 0, end: 450, name: MOBILE),
+          const Breakpoint(start: 451, end: 800, name: TABLET),
+          const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+          const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+        ],
+      ),
             theme: Themes.formTheme,
             onGenerateRoute: router.generateRoute,
             home: BlocBuilder<AuthBloc, AuthState>(

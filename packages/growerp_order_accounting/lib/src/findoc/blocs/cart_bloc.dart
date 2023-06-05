@@ -54,29 +54,23 @@ class CartBloc extends Bloc<CartEvent, CartState>
     CartFetch event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      if (state.status == CartStatus.initial) {
-        FinDoc? resultFinDoc;
-        if (event.finDoc.idIsNull()) {
-          // get saved cart
-          resultFinDoc = await PersistFunctions.getFinDoc(
-              event.finDoc.sales, event.finDoc.docType!);
-        }
-        // get item types
-        ApiResult<List<ItemType>> result =
-            await repos.getItemTypes(sales: sales);
-        return emit(result.when(
-            success: (data) => state.copyWith(
-                status: CartStatus.inProcess,
-                itemTypes: data,
-                finDoc: resultFinDoc ?? event.finDoc),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: CartStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
+    if (state.status == CartStatus.initial) {
+      FinDoc? resultFinDoc;
+      if (event.finDoc.idIsNull()) {
+        // get saved cart
+        resultFinDoc = await PersistFunctions.getFinDoc(
+            event.finDoc.sales, event.finDoc.docType!);
       }
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
+      // get item types
+      ApiResult<List<ItemType>> result = await repos.getItemTypes(sales: sales);
+      return emit(result.when(
+          success: (data) => state.copyWith(
+              status: CartStatus.inProcess,
+              itemTypes: data,
+              finDoc: resultFinDoc ?? event.finDoc),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: CartStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -85,20 +79,15 @@ class CartBloc extends Bloc<CartEvent, CartState>
     CartCreateFinDoc event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: CartStatus.saving));
-      finDocBloc.add(FinDocUpdate(event.finDoc));
-      add(CartClear());
-      return emit(
-        state.copyWith(
-          status: CartStatus.complete,
-          finDoc: FinDoc(docType: docType, sales: sales, items: []),
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
-    }
+    emit(state.copyWith(status: CartStatus.saving));
+    finDocBloc.add(FinDocUpdate(event.finDoc));
+    add(CartClear());
+    return emit(
+      state.copyWith(
+        status: CartStatus.complete,
+        finDoc: FinDoc(docType: docType, sales: sales, items: []),
+      ),
+    );
   }
 
   // cancel findoc in database
@@ -106,117 +95,92 @@ class CartBloc extends Bloc<CartEvent, CartState>
     CartCancelFinDoc event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      finDocBloc.add(FinDocUpdate(
-          event.finDoc.copyWith(status: FinDocStatusVal.cancelled)));
-      add(CartClear());
-      return emit(
-        state.copyWith(
-          status: CartStatus.complete,
-          finDoc: FinDoc(docType: docType, sales: sales),
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
-    }
+    finDocBloc.add(
+        FinDocUpdate(event.finDoc.copyWith(status: FinDocStatusVal.cancelled)));
+    add(CartClear());
+    return emit(
+      state.copyWith(
+        status: CartStatus.complete,
+        finDoc: FinDoc(docType: docType, sales: sales),
+      ),
+    );
   }
 
   Future<void> _onCartHeader(
     CartHeader event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      // save cart
-      await PersistFunctions.persistFinDoc(event.finDoc);
-      return emit(
-        state.copyWith(
-          status: CartStatus.inProcess,
-          finDoc: event.finDoc,
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
-    }
+    // save cart
+    await PersistFunctions.persistFinDoc(event.finDoc);
+    return emit(
+      state.copyWith(
+        status: CartStatus.inProcess,
+        finDoc: event.finDoc,
+      ),
+    );
   }
 
   Future<void> _onCartAdd(
     CartAdd event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      List<FinDocItem> items = List.from(state.finDoc.items);
-      items.insert(
-          0, event.newItem.copyWith(itemSeqId: (items.length + 1).toString()));
-      Decimal grandTotal = Decimal.parse('0');
-      for (var x in items) {
-        grandTotal += x.quantity! * x.price!;
-      }
-      var finDoc = event.finDoc.copyWith(
-          otherUser: event.finDoc.otherUser,
-          description: event.finDoc.description,
-          items: items,
-          grandTotal: grandTotal);
-      // save cart
-      await PersistFunctions.persistFinDoc(finDoc);
-      return emit(
-        state.copyWith(
-          status: CartStatus.inProcess,
-          finDoc: finDoc,
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
+    List<FinDocItem> items = List.from(state.finDoc.items);
+    items.insert(
+        0, event.newItem.copyWith(itemSeqId: (items.length + 1).toString()));
+    Decimal grandTotal = Decimal.parse('0');
+    for (var x in items) {
+      grandTotal += x.quantity! * x.price!;
     }
+    var finDoc = event.finDoc.copyWith(
+        otherUser: event.finDoc.otherUser,
+        description: event.finDoc.description,
+        items: items,
+        grandTotal: grandTotal);
+    // save cart
+    await PersistFunctions.persistFinDoc(finDoc);
+    return emit(
+      state.copyWith(
+        status: CartStatus.inProcess,
+        finDoc: finDoc,
+      ),
+    );
   }
 
   Future<void> _onCartDeleteItem(
     CartDeleteItem event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      List<FinDocItem> items = List.from(state.finDoc.items);
-      items.removeAt(event.index);
-      Decimal grandTotal = Decimal.parse('0');
-      int i = 0;
-      for (var x in items) {
-        items[i] = items[i].copyWith(itemSeqId: (1 + i++).toString());
-        grandTotal += x.quantity! * x.price!;
-      }
-      var finDoc = state.finDoc.copyWith(grandTotal: grandTotal, items: items);
-      // save cart
-      await PersistFunctions.persistFinDoc(finDoc);
-      emit(
-        state.copyWith(
-          status: CartStatus.inProcess,
-          finDoc: finDoc,
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
+    List<FinDocItem> items = List.from(state.finDoc.items);
+    items.removeAt(event.index);
+    Decimal grandTotal = Decimal.parse('0');
+    int i = 0;
+    for (var x in items) {
+      items[i] = items[i].copyWith(itemSeqId: (1 + i++).toString());
+      grandTotal += x.quantity! * x.price!;
     }
+    var finDoc = state.finDoc.copyWith(grandTotal: grandTotal, items: items);
+    // save cart
+    await PersistFunctions.persistFinDoc(finDoc);
+    emit(
+      state.copyWith(
+        status: CartStatus.inProcess,
+        finDoc: finDoc,
+      ),
+    );
   }
 
   Future<void> _onCartClear(
     CartClear event,
     Emitter<CartState> emit,
   ) async {
-    try {
-      var finDoc = FinDoc(sales: sales, docType: docType, items: []);
-      // clear cart
-      await PersistFunctions.removeFinDoc(finDoc);
-      return emit(
-        state.copyWith(
-          status: CartStatus.inProcess,
-          finDoc: finDoc,
-        ),
-      );
-    } catch (error) {
-      emit(state.copyWith(
-          status: CartStatus.failure, message: error.toString()));
-    }
+    var finDoc = FinDoc(sales: sales, docType: docType, items: []);
+    // clear cart
+    await PersistFunctions.removeFinDoc(finDoc);
+    return emit(
+      state.copyWith(
+        status: CartStatus.inProcess,
+        finDoc: finDoc,
+      ),
+    );
   }
 }

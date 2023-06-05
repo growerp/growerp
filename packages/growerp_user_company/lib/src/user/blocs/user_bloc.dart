@@ -56,116 +56,105 @@ class UserBloc extends Bloc<UserEvent, UserState>
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == UserStatus.initial || event.refresh) {
-        emit(state.copyWith(status: UserStatus.loading));
-        ApiResult<List<User>> compResult = await repos.getUser(
-            start: 0,
-            limit: _userLimit,
-            role: role,
-            searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: UserStatus.success,
-                  users: data,
-                  hasReachedMax: data.length < _userLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        emit(state.copyWith(status: UserStatus.loading));
-        ApiResult<List<User>> compResult = await repos.getUser(
-            start: 0,
-            limit: _userLimit,
-            role: role,
-            searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: UserStatus.success,
-                  users: data,
-                  hasReachedMax: data.length < _userLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-        // get next page also for search
-      }
+    // start from record zero for initial and refresh
+    if (state.status == UserStatus.initial || event.refresh) {
       emit(state.copyWith(status: UserStatus.loading));
       ApiResult<List<User>> compResult = await repos.getUser(
-          start: state.users.length,
+          start: 0,
           limit: _userLimit,
           role: role,
           searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: UserStatus.success,
-                users: List.of(state.users)..addAll(data),
+                users: data,
                 hasReachedMax: data.length < _userLimit ? true : false,
+                searchString: '',
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: UserStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: UserStatus.failure, message: error.toString()));
     }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      emit(state.copyWith(status: UserStatus.loading));
+      ApiResult<List<User>> compResult = await repos.getUser(
+          start: 0,
+          limit: _userLimit,
+          role: role,
+          searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: UserStatus.success,
+                users: data,
+                hasReachedMax: data.length < _userLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: UserStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+      // get next page also for search
+    }
+    emit(state.copyWith(status: UserStatus.loading));
+    ApiResult<List<User>> compResult = await repos.getUser(
+        start: state.users.length,
+        limit: _userLimit,
+        role: role,
+        searchString: event.searchString);
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: UserStatus.success,
+              users: List.of(state.users)..addAll(data),
+              hasReachedMax: data.length < _userLimit ? true : false,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: UserStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onUserUpdate(
     UserUpdate event,
     Emitter<UserState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: UserStatus.loading));
-      List<User> users = List.from(state.users);
-      if (event.user.partyId != null) {
-        ApiResult<User> compResult = await repos.updateUser(event.user);
-        return emit(compResult.when(
-            success: (data) {
-              if (users.isNotEmpty) {
-                int index = users.indexWhere(
-                    (element) => element.partyId == event.user.partyId);
-                users[index] = data;
-              } else {
-                users.add(data);
-              }
-              return state.copyWith(
-                  searchString: '',
-                  status: UserStatus.success,
-                  users: users,
-                  message:
-                      'user ${data.firstName} ${data.lastName} updated...');
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // add
-        ApiResult<User> compResult = await repos.createUser(event.user);
-        return emit(compResult.when(
-            success: (data) {
-              users.insert(0, data);
-              return state.copyWith(
-                  searchString: '',
-                  status: UserStatus.success,
-                  users: users,
-                  message: 'user ${data.firstName} ${data.lastName} added...');
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: UserStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: UserStatus.failure, message: error.toString()));
+    emit(state.copyWith(status: UserStatus.loading));
+    List<User> users = List.from(state.users);
+    if (event.user.partyId != null) {
+      ApiResult<User> compResult = await repos.updateUser(event.user);
+      return emit(compResult.when(
+          success: (data) {
+            if (users.isNotEmpty) {
+              int index = users.indexWhere(
+                  (element) => element.partyId == event.user.partyId);
+              users[index] = data;
+            } else {
+              users.add(data);
+            }
+            return state.copyWith(
+                searchString: '',
+                status: UserStatus.success,
+                users: users,
+                message: 'user ${data.firstName} ${data.lastName} updated...');
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: UserStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // add
+      ApiResult<User> compResult = await repos.createUser(event.user);
+      return emit(compResult.when(
+          success: (data) {
+            users.insert(0, data);
+            return state.copyWith(
+                searchString: '',
+                status: UserStatus.success,
+                users: users,
+                message: 'user ${data.firstName} ${data.lastName} added...');
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: UserStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -173,27 +162,22 @@ class UserBloc extends Bloc<UserEvent, UserState>
     UserDelete event,
     Emitter<UserState> emit,
   ) async {
-    try {
-      List<User> users = List.from(state.users);
-      ApiResult<User> compResult =
-          await repos.deleteUser(event.user.partyId!, false);
-      return emit(compResult.when(
-          success: (data) {
-            int index = users
-                .indexWhere((element) => element.partyId == event.user.partyId);
-            users.removeAt(index);
-            return state.copyWith(
-                searchString: '',
-                status: UserStatus.success,
-                users: users,
-                message: 'User ${event.user.firstName} is deleted now..');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: UserStatus.failure, message: error.toString()));
-    }
+    List<User> users = List.from(state.users);
+    ApiResult<User> compResult =
+        await repos.deleteUser(event.user.partyId!, false);
+    return emit(compResult.when(
+        success: (data) {
+          int index = users
+              .indexWhere((element) => element.partyId == event.user.partyId);
+          users.removeAt(index);
+          return state.copyWith(
+              searchString: '',
+              status: UserStatus.success,
+              users: users,
+              message: 'User ${event.user.firstName} is deleted now..');
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: UserStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

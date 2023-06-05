@@ -48,97 +48,87 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    try {
-      // start from record zero for initial and refresh
-      if (state.status == AssetStatus.initial || event.refresh) {
-        ApiResult<List<Asset>> compResult =
-            await repos.getAsset(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: AssetStatus.success,
-                  assets: data,
-                  hasReachedMax: data.length < _assetLimit ? true : false,
-                  searchString: '',
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get first search page also for changed search
-      if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-          (state.searchString.isNotEmpty &&
-              event.searchString != state.searchString)) {
-        ApiResult<List<Asset>> compResult =
-            await repos.getAsset(searchString: event.searchString);
-        return emit(compResult.when(
-            success: (data) => state.copyWith(
-                  status: AssetStatus.success,
-                  assets: data,
-                  hasReachedMax: data.length < _assetLimit ? true : false,
-                  searchString: event.searchString,
-                ),
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-      // get next page also for search
-
+    // start from record zero for initial and refresh
+    if (state.status == AssetStatus.initial || event.refresh) {
       ApiResult<List<Asset>> compResult =
           await repos.getAsset(searchString: event.searchString);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: AssetStatus.success,
-                assets: List.of(state.assets)..addAll(data),
+                assets: data,
                 hasReachedMax: data.length < _assetLimit ? true : false,
+                searchString: '',
               ),
           failure: (NetworkExceptions error) => state.copyWith(
               status: AssetStatus.failure,
               message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: AssetStatus.failure, message: error.toString()));
     }
+    // get first search page also for changed search
+    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+        (state.searchString.isNotEmpty &&
+            event.searchString != state.searchString)) {
+      ApiResult<List<Asset>> compResult =
+          await repos.getAsset(searchString: event.searchString);
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: AssetStatus.success,
+                assets: data,
+                hasReachedMax: data.length < _assetLimit ? true : false,
+                searchString: event.searchString,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: AssetStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    // get next page also for search
+
+    ApiResult<List<Asset>> compResult =
+        await repos.getAsset(searchString: event.searchString);
+    return emit(compResult.when(
+        success: (data) => state.copyWith(
+              status: AssetStatus.success,
+              assets: List.of(state.assets)..addAll(data),
+              hasReachedMax: data.length < _assetLimit ? true : false,
+            ),
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: AssetStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onAssetUpdate(
     AssetUpdate event,
     Emitter<AssetState> emit,
   ) async {
-    try {
-      List<Asset> assets = List.from(state.assets);
-      if (event.asset.assetId.isNotEmpty) {
-        ApiResult<Asset> compResult = await repos.updateAsset(event.asset);
-        return emit(compResult.when(
-            success: (data) {
-              int index = assets.indexWhere(
-                  (element) => element.assetId == event.asset.assetId);
-              assets[index] = data;
-              return state.copyWith(
-                  status: AssetStatus.success,
-                  assets: assets,
-                  message: "Asset ${event.asset.assetName} updated");
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      } else {
-        // add
-        ApiResult<Asset> compResult = await repos.createAsset(event.asset);
-        return emit(compResult.when(
-            success: (data) {
-              assets.insert(0, data);
-              return state.copyWith(
-                  status: AssetStatus.success,
-                  assets: assets,
-                  message: "Asset ${event.asset.assetName} added");
-            },
-            failure: (NetworkExceptions error) => state.copyWith(
-                status: AssetStatus.failure,
-                message: NetworkExceptions.getErrorMessage(error))));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-          status: AssetStatus.failure, message: error.toString()));
+    List<Asset> assets = List.from(state.assets);
+    if (event.asset.assetId.isNotEmpty) {
+      ApiResult<Asset> compResult = await repos.updateAsset(event.asset);
+      return emit(compResult.when(
+          success: (data) {
+            int index = assets.indexWhere(
+                (element) => element.assetId == event.asset.assetId);
+            assets[index] = data;
+            return state.copyWith(
+                status: AssetStatus.success,
+                assets: assets,
+                message: "Asset ${event.asset.assetName} updated");
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: AssetStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    } else {
+      // add
+      ApiResult<Asset> compResult = await repos.createAsset(event.asset);
+      return emit(compResult.when(
+          success: (data) {
+            assets.insert(0, data);
+            return state.copyWith(
+                status: AssetStatus.success,
+                assets: assets,
+                message: "Asset ${event.asset.assetName} added");
+          },
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: AssetStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
     }
   }
 
@@ -146,25 +136,20 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     AssetDelete event,
     Emitter<AssetState> emit,
   ) async {
-    try {
-      List<Asset> assets = List.from(state.assets);
-      ApiResult<Asset> compResult = await repos.deleteAsset(event.asset);
-      return emit(compResult.when(
-          success: (data) {
-            int index = assets.indexWhere(
-                (element) => element.assetId == event.asset.assetId);
-            assets.removeAt(index);
-            return state.copyWith(
-                status: AssetStatus.success,
-                assets: assets,
-                message: "Asset ${event.asset.assetName} deleted");
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: AssetStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } catch (error) {
-      emit(state.copyWith(
-          status: AssetStatus.failure, message: error.toString()));
-    }
+    List<Asset> assets = List.from(state.assets);
+    ApiResult<Asset> compResult = await repos.deleteAsset(event.asset);
+    return emit(compResult.when(
+        success: (data) {
+          int index = assets
+              .indexWhere((element) => element.assetId == event.asset.assetId);
+          assets.removeAt(index);
+          return state.copyWith(
+              status: AssetStatus.success,
+              assets: assets,
+              message: "Asset ${event.asset.assetName} deleted");
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: AssetStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
   }
 }

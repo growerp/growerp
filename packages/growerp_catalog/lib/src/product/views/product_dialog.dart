@@ -23,7 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import '../../api_repository.dart';
 import '../../category/blocs/category_bloc.dart';
 import '../product.dart';
@@ -53,7 +53,7 @@ class ProductDialogFull extends StatefulWidget {
 }
 
 class ProductDialogState extends State<ProductDialogFull> {
-  final _formKey = GlobalKey<FormState>();
+  late final GlobalKey<FormState> _productDialogFormKey;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -69,6 +69,7 @@ class ProductDialogState extends State<ProductDialogFull> {
   late String classificationId;
   final ImagePicker _picker = ImagePicker();
   late List<Category> _selectedCategories;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -88,6 +89,13 @@ class ProductDialogState extends State<ProductDialogFull> {
     _selectedTypeId = widget.product.productTypeId;
     classificationId = GlobalConfiguration().get("classificationId");
     useWarehouse = widget.product.useWarehouse;
+    _productDialogFormKey = GlobalKey<FormState>();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onImageButtonPressed(ImageSource source,
@@ -122,7 +130,7 @@ class ProductDialogState extends State<ProductDialogFull> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     if (classificationId == 'AppHotel') _selectedTypeId = 'Rental';
     return BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) async {
@@ -149,40 +157,23 @@ class ProductDialogState extends State<ProductDialogFull> {
           default:
         }
       }, builder: (context, categoryState) {
-        return Stack(children: [
-          Dialog(
+        if (productState.status == ProductStatus.updateLoading ||
+            categoryState.status == CategoryStatus.loading) {
+          return const LoadingIndicator();
+        } else {
+          return Dialog(
               key: const Key('ProductDialog'),
-              insetPadding: const EdgeInsets.all(20),
+              insetPadding: const EdgeInsets.only(left: 20, right: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Stack(clipBehavior: Clip.none, children: [
-                Container(
-                    width: isPhone ? 400 : 800,
-                    height: isPhone ? 900 : 650,
-                    padding: const EdgeInsets.all(20),
-                    child: listChild(classificationId, isPhone, categoryState)),
-                Container(
-                    height: 50,
-                    width: isPhone ? 400 : 800,
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColorDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        )),
-                    child: const Center(
-                        child: Text('Product Information',
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)))),
-                const Positioned(top: 5, right: 5, child: DialogCloseButton())
-              ])),
-          if (productState.status == ProductStatus.updateLoading ||
-              categoryState.status == CategoryStatus.loading)
-            const LoadingIndicator()
-        ]);
+              child: popUp(
+                  context: context,
+                  child: listChild(classificationId, isPhone, categoryState),
+                  title: 'Product Information',
+                  height: 750,
+                  width: isPhone ? 450 : 800));
+        }
       });
     });
   }
@@ -349,45 +340,32 @@ class ProductDialogState extends State<ProductDialogFull> {
             },
             isExpanded: true,
           )),
-      Visibility(
-          visible:
-              classificationId != 'AppHotel' && _selectedTypeId != 'Service',
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25.0),
-                      border: Border.all(
-                          color: Colors.black45,
-                          style: BorderStyle.solid,
-                          width: 0.80),
-                    ),
-                    child: CheckboxListTile(
-                        key: const Key('useWarehouse'),
-                        title: const Text("Use Warehouse?",
-                            style: TextStyle(color: Color(0xFF4baa9b))),
-                        value: useWarehouse,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            useWarehouse = value!;
-                          });
-                        })),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormField(
-                  key: const Key('assets'),
-                  decoration:
-                      const InputDecoration(labelText: 'Assets in warehouse'),
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
-                  ],
-                  controller: _assetsController,
-                ),
-              )
-            ],
-          )),
+      if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25.0),
+              border: Border.all(
+                  color: Colors.black45, style: BorderStyle.solid, width: 0.80),
+            ),
+            child: CheckboxListTile(
+                key: const Key('useWarehouse'),
+                title: const Text("Use Warehouse?",
+                    style: TextStyle(color: Color(0xFF4baa9b))),
+                value: useWarehouse,
+                onChanged: (bool? value) {
+                  setState(() {
+                    useWarehouse = value!;
+                  });
+                })),
+      if (classificationId != 'AppHotel' && _selectedTypeId != 'Service')
+        TextFormField(
+          key: const Key('assets'),
+          decoration: const InputDecoration(labelText: 'Assets in warehouse'),
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp('[0-9.,]+'))
+          ],
+          controller: _assetsController,
+        ),
       Row(children: [
         Expanded(
             child: ElevatedButton(
@@ -395,7 +373,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                 child: Text(
                     widget.product.productId.isEmpty ? 'Create' : 'Update'),
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
+                  if (_productDialogFormKey.currentState!.validate()) {
                     Uint8List? image =
                         await HelperFunctions.getResizedImage(_imageFile?.path);
                     if (!mounted) return;
@@ -428,7 +406,7 @@ class ProductDialogState extends State<ProductDialogFull> {
     ];
 
     List<Widget> rows = [];
-    if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+    if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
         rows.add(Row(
@@ -446,33 +424,35 @@ class ProductDialogState extends State<ProductDialogFull> {
     }
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+      column.add(Padding(
+          padding: const EdgeInsets.only(bottom: 10), child: widgets[i]));
     }
 
     return ScaffoldMessenger(
       key: productDialogKey,
       child: Scaffold(
           backgroundColor: Colors.transparent,
-          floatingActionButton: imageButtons(context, _onImageButtonPressed),
+          floatingActionButton:
+              ImageButtons(_scrollController, _onImageButtonPressed),
           body: Form(
-              key: _formKey,
+              key: _productDialogFormKey,
               child: SingleChildScrollView(
                   key: const Key('listView'),
+                  controller: _scrollController,
                   child: Column(children: <Widget>[
-                    const SizedBox(height: 50),
                     Center(
                         child: Text(
                       'Product #${widget.product.productId.isEmpty ? " New" : widget.product.productId}',
                       style: const TextStyle(
-                          fontSize: 10,
                           color: Colors.black,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold),
                       key: const Key('header'),
                     )),
                     const SizedBox(height: 10),
                     CircleAvatar(
                         backgroundColor: Colors.green,
-                        radius: 80,
+                        radius: 60,
                         child: _imageFile != null
                             ? foundation.kIsWeb
                                 ? Image.network(_imageFile!.path, scale: 0.3)

@@ -30,7 +30,7 @@ class FinDocItem with _$FinDocItem {
     String? description,
     Decimal? quantity,
     Decimal? price,
-    String? glAccountId,
+    GlAccount? glAccount,
     String? assetId,
     String? assetName,
     Location? location,

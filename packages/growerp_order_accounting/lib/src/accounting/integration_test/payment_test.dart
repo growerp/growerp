@@ -97,10 +97,9 @@ class PaymentTest {
           tester,
           payment.sales ? 'customer' : 'supplier',
           payment.otherUser!.lastName!);
-      await CommonTest.tapByKey(
-          tester, 'amount'); // required because keyboard come up
-      await CommonTest.enterText(
-          tester, 'amount', payment.grandTotal!.toString());
+      await CommonTest.enterText(tester, 'amount',
+          payment.grandTotal!.toString()); // required because keyboard come up
+      await CommonTest.drag(tester, listViewName: 'listView2');
       switch (payment.paymentInstrument) {
         case PaymentInstrument.bank:
           await CommonTest.tapByKey(tester, 'bank');
@@ -116,7 +115,6 @@ class PaymentTest {
           break;
         default:
       }
-      await CommonTest.drag(tester, listViewName: 'listView2');
       await CommonTest.enterDropDown(tester, 'itemType',
           '${payment.items[0].itemType!.itemTypeName}\n ${payment.items[0].itemType!.accountName}');
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);

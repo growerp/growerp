@@ -66,7 +66,7 @@ List<MenuOption> acctMenuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/supplierGrey.png",
       selectedImage: "packages/growerp_core/images/supplier.png",
-      title: "Accounting Purchasing",
+      title: "Accounting Purch.",
       route: '/acctPurchase',
       readGroups: [
         UserGroup.admin,
@@ -126,14 +126,29 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
       ]),
-/*  MenuOption(
-      image: "packages/growerp_core/images/accountingGrey.png",
-      selectedImage: "packages/growerp_core/images/accounting.png",
+  MenuOption(
+      image: "packages/growerp_core/images/reportGrey.png",
+      selectedImage: "packages/growerp_core/images/report.png",
       title: "Reports",
-      route: '/reports',
-      readGroups: [UserGroup.admin],
-      writeGroups: [UserGroup.admin]),
-*/
+      route: '/acctReports',
+      tabItems: [
+        TabItem(
+          form: const BalanceSheetForm(),
+          label: "\nBalance Sheet",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const BalanceSummaryListForm(),
+          label: "\nBalance Summary",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",

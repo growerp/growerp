@@ -18,8 +18,8 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:example/main.dart' as router;
-import 'package:example/main.dart';
+import 'package:order_accounting_example/main.dart' as router;
+import 'package:order_accounting_example/main.dart';
 import 'package:growerp_core/test_data.dart';
 
 void main() {
@@ -31,6 +31,7 @@ void main() {
 
   testWidgets('''GrowERP payment sales test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+        OrderAccountingLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester,
         testData: {"users": customers.sublist(0, 2)});

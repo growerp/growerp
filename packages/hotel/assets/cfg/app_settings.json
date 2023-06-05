@@ -6,7 +6,7 @@
     "_________________comment__production url NOT _end forwardslash!": "https://rest.example.com",
     "databaseUrl": "https://backend.growerp.com",
     "chatUrl": "wss://chat.growerp.com",
-    "databaseUrlDebug": "http://localhost:8080",
+    "databaseUrlDebug": "",
         "chatUrlDebug": "",
     "____________": "show debug banner on top right ",
     "test": false,

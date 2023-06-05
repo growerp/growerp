@@ -12,11 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+
+import '../../common/functions/helper_functions.dart';
 import '../../domains.dart';
 
 class ChatRoomListDialog extends StatefulWidget {
@@ -142,14 +143,12 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
             search = !search;
           });
         }),
-        leading:
-            Image.asset('packages/growerp_core/images/search.png', height: 30),
+        leading: const Icon(Icons.search_sharp, size: 40),
         title: search
             ? Row(children: <Widget>[
                 SizedBox(
-                    width: ResponsiveWrapper.of(context).isSmallerThan(TABLET)
-                        ? 150
-                        : 250,
+                    width:
+                        ResponsiveBreakpoints.of(context).isMobile ? 150 : 250,
                     child: TextField(
                       key: const Key("searchField"),
                       textInputAction: TextInputAction.go,
@@ -183,7 +182,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   const Expanded(
                       child: Text("Chat (group) name",
                           textAlign: TextAlign.center)),
-                  if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+                  if (!ResponsiveBreakpoints.of(context).isMobile)
                     const Expanded(
                         child: Text("Status", textAlign: TextAlign.center)),
                   const Expanded(
@@ -191,7 +190,7 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
                   const Expanded(
                       child: Text("#Members", textAlign: TextAlign.center)),
                 ]),
-                const Divider(color: Colors.black),
+                const Divider(),
               ]),
         trailing: const Text(' '));
   }
@@ -237,7 +236,7 @@ class ListDetail extends StatelessWidget {
             Expanded(
                 key: Key('chatRoomName$index'),
                 child: Text(chatRooms[index].chatRoomName ?? '??')),
-            if (!ResponsiveWrapper.of(context).isSmallerThan(TABLET))
+            if (!ResponsiveBreakpoints.of(context).isMobile)
               Expanded(
                   child: Text(
                       chatRooms[index].hasRead

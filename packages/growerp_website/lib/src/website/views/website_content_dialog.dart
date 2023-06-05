@@ -45,6 +45,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
   final ImagePicker _picker = ImagePicker();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -54,8 +55,14 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
+    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<ContentBloc, ContentState>(
         listenWhen: ((previous, current) =>
             (previous.status == ContentStatus.updating &&
@@ -123,8 +130,8 @@ class WebsiteContentState extends State<WebsiteContent> {
                           padding: const EdgeInsets.all(20),
                           child: Scaffold(
                               backgroundColor: Colors.transparent,
-                              floatingActionButton:
-                                  imageButtons(context, _onImageButtonPressed),
+                              floatingActionButton: ImageButtons(
+                                  _scrollController, _onImageButtonPressed),
                               body: imageChild(isPhone))),
                       const Positioned(
                           top: 5, right: 5, child: DialogCloseButton())

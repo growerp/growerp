@@ -27,48 +27,37 @@ class AccountingForm extends StatelessWidget {
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem(
-          'accntSales',
-          context,
-          acctMenuOptions[1],
+        makeDashboardItem('accntSales', context, acctMenuOptions[1], [
           "Sls open inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
-          "",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'accntPurchase',
-          context,
-          acctMenuOptions[2],
+        ]),
+        makeDashboardItem('accntPurchase', context, acctMenuOptions[2], [
           "Pur unp inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
-          "",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'accntLedger',
-          context,
-          acctMenuOptions[3],
+        ]),
+        makeDashboardItem('accntLedger', context, acctMenuOptions[3], [
           "Accounts",
           "Transactions",
-          "",
-          "",
-        ),
-        makeDashboardItem(
-          'Main dashboard',
+        ]),
+        makeDashboardItem('reports', context, acctMenuOptions[4], [
+          "Balance Sheet",
+          "Balance summary",
+        ]),
+/*        makeDashboardItem(
+          'setup',
           context,
-          acctMenuOptions[4],
-          "",
-          "",
-          "",
-          "",
+          acctMenuOptions[5],
+          "coming soon:",
+          "upload & maintain ledger organization",
+          "automatic posting rules",
+          "error journal",
         ),
+*/
+        makeDashboardItem('Main dashboard', context, acctMenuOptions[5], []),
       ],
     );
   }
