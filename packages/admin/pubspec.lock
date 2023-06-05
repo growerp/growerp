@@ -547,10 +547,10 @@ packages:
     dependency: "direct main"
     description:
       name: growerp_order_accounting
-      sha256: "715cf940d010b178de1b7ff1f11b87b5d095b92812a5f84b0b0f95b54329d3b8"
+      sha256: "1ebdb8408f27ee658739c2c61d3d0202477859f48420a7ea56464801e9ef3c22"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   growerp_select_dialog:
     dependency: transitive
     description:

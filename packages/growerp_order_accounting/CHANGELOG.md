@@ -1,3 +1,6 @@
+# 1.0.1
+* freezed files missing
+
 # 1.0.0
 * added localization
 * updated to dart 3

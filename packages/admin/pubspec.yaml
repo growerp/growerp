@@ -11,7 +11,7 @@ dependencies:
   growerp_website: ^1.0.0
   growerp_inventory: ^1.0.0
   growerp_catalog: ^1.0.0
-  growerp_order_accounting: ^1.0.0
+  growerp_order_accounting: ^1.0.1
   growerp_user_company: ^1.0.0
   decimal: ^2.1.0
   flutter: 

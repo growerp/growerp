@@ -562,45 +562,51 @@ packages:
   growerp_catalog:
     dependency: "direct main"
     description:
-      path: "../growerp_catalog"
-      relative: true
-    source: path
-    version: "0.9.2"
+      name: growerp_catalog
+      sha256: "57b5e6bb213128908a77beda4a887515d7f77befd67c44430002419dba4fbb86"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   growerp_core:
     dependency: "direct main"
     description:
-      path: "../growerp_core"
-      relative: true
-    source: path
+      name: growerp_core
+      sha256: "9f0bcadd31482fc829dd5b1f62859a631171f9bbab429d272e3cff698c068dad"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   growerp_order_accounting:
     dependency: "direct main"
     description:
-      path: "../growerp_order_accounting"
-      relative: true
-    source: path
-    version: "0.9.2"
+      name: growerp_order_accounting
+      sha256: "1ebdb8408f27ee658739c2c61d3d0202477859f48420a7ea56464801e9ef3c22"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   growerp_select_dialog:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../growerp_select_dialog"
-      relative: true
-    source: path
+      name: growerp_select_dialog
+      sha256: ab2372a42eae30859573271d62143ebca6ea3d62bab59b5853fab6d24057c5ff
+      url: "https://pub.dev"
+    source: hosted
     version: "0.6.0"
   growerp_user_company:
     dependency: "direct main"
     description:
-      path: "../growerp_user_company"
-      relative: true
-    source: path
-    version: "0.9.2"
+      name: growerp_user_company
+      sha256: e8ac26b9b2e923def8ac0c7a0d19976ae66ac19a3379fc100f45f6cb80de695e
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   growerp_website:
     dependency: "direct main"
     description:
-      path: "../growerp_website"
-      relative: true
-    source: path
-    version: "0.9.2"
+      name: growerp_website
+      sha256: f12d99ce656e4e918849dc5cff4c0d9dea69a693cb094ce7145f77f57f512411
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   highlight:
     dependency: transitive
     description:
