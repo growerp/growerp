@@ -28,6 +28,19 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 
 # set flutter channel
 RUN flutter channel stable && flutter upgrade
+RUN dart pub global activate melos
+ENV PATH="/root/.pub-cache/bin:${PATH}"
+# get growerp repos
+RUN git clone --depth 1 -b development https://github.com/growerp/growerp.git /usr/local/growerp
+WORKDIR /usr/local/growerp/
+#RUN dart pub global run melos:melos clean
+RUN melos bootstrap
+RUN melos exec --file-exists="l10n.yaml" -- "flutter gen-l10n"
+# get growerp_core first, other are dependent on it
+RUN melos exec --scope="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs" 
+# build the others, no need for examples
+RUN melos exec --ignore="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs"
+# build flutter app
 WORKDIR /usr/local/growerp/packages/admin
 RUN flutter build web --release
 
