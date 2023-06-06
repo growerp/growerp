@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
+    <widgets>
+        <render-mode>
+            <text type="html"><![CDATA[
+                <html><body>
+                Welcome to the GrowERP ${classification} system, ${firstName!} ${lastName!}<br/><br/>
+                <#if  classification == 'Admin'>    
+                You can now start a website, sell products, manage your inventory and your accounting is done automatically.<br/>
+
+                If you sell products on your website, the payments will be forwarded to you monthly.<br/><br/>
+                </#if>
+                When you need any support, please let us know at
+                <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${classification}">support@growerp.com</a><br/><br/>
+                <b>Your password to login is ${newPassword}</b> <br/><br/>
+                We will regularly send you an email with tips about the system. 
+                But for now, look around and let us know your comments!
+                <br/><br/>
+                Regards, <br/> The Growerp-${classification} Team!
+                </body></html>
+            ]]></text></render-mode>
+    </widgets>
+</screen>

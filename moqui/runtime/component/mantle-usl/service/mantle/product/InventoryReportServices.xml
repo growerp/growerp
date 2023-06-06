@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="InventoryProjectedInfo">
+        <in-parameters>
+            <parameter name="productIdList" type="List" required="true"/>
+            <parameter name="facilityId"/>
+            <parameter name="estThruDate" type="Timestamp"><description>Limits order item by requiredByDate, run
+                consume/produce by estimatedStartDate, production estimate by readyDate. Allows requiredByDate
+                and estimatedStartDate to be null (missing).</description></parameter>
+            <parameter name="maxResults" type="Integer" default="1000"/>
+            <parameter name="indexName" default-value="mantle_inventory"/>
+            <parameter name="getAssetData" type="Boolean" default="true"/>
+            <parameter name="assetDocumentName" default-value="MantleInventoryAsset"/>
+            <parameter name="getOrderItemData" type="Boolean" default="true"/>
+            <parameter name="orderItemDocumentName" default-value="MantleInventoryOrderItem"/>
+            <parameter name="getRunConsumeData" type="Boolean" default="true"/>
+            <parameter name="runConsumeDocumentName" default-value="MantleInventoryRunConsume"/>
+            <parameter name="getRunProduceData" type="Boolean" default="true"/>
+            <parameter name="runProduceDocumentName" default-value="MantleInventoryRunProduce"/>
+            <parameter name="getProdEstimateData" type="Boolean" default="true"/>
+            <parameter name="prodEstimateDocumentName" default-value="MantleInventoryProdEstimate"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="infoByProductId" type="Map"><description>A Map where the key is a productId and the value
+                is a Map with: orderQuantitySum, quantityReservedSum, quantityNotAvailableSum, quantityNotIssuedSum,
+                orderNotReserved, prodEstQuantitySum, availableToPromiseTotalSum, quantityOnHandTotalSum,
+                estimatedConsumeQuantitySum, consumeQuantitySum, estimatedProduceQuantitySum, produceQuantitySum,
+                estRunConsumeRemaining, estRunProduceRemaining, and totalProjected.
+
+                The totalProjected value = availableToPromiseTotalSum - orderNotReserved -
+                    estRunConsumeRemaining + estRunProduceRemaining + prodEstQuantitySum
+            </description></parameter>
+        </out-parameters>
+        <!-- this could work in theory, but ElasticSearch only searches on the first document in the list, doesn't
+            seem to like the different document structures or something, so we end up doing the multiples searches below
+        <script>
+            searchSourceMap = [
+                aggs: [ products: [
+                    terms: [field: 'productId'],
+                    aggs: [
+                        orderQuantitySum: [sum: [field:'orderQuantity']],
+                        estimatedConsumeQuantitySum: [sum: [field:'estimatedConsumeQuantity']],
+                        consumeQuantitySum: [sum: [field:'consumeQuantity']],
+                        estimatedProduceQuantitySum: [sum: [field:'estimatedProduceQuantity']],
+                        produceQuantitySum: [sum: [field:'produceQuantity']],
+                        prodEstQuantitySum: [sum: [field:'prodEstQuantity']],
+                        availableToPromiseTotalSum: [sum: [field:'availableToPromiseTotal']],
+                        quantityOnHandTotalSum: [sum: [field:'quantityOnHandTotal']]
+                    ]
+                ] ]
+            ]
+            if (facilityId) searchSourceMap.query = [match: [facilityId:facilityId]]
+            // TODO: filter by productId
+        </script>
+        <service-call name="org.moqui.search.SearchServices.search#CountBySource" out-map="globalOut"
+                in-map="[indexName:indexName, sourceMap:searchSourceMap,
+                    documentTypeList:[orderItemDocumentName,prodEstimateDocumentName,assetDocumentName,runConsumeDocumentName,runProduceDocumentName]]"/>
+        <log level="warn" message="========== globalOut.responseString: ${globalOut.searchResponse.toString()}"/>
+        -->
+        <actions><script><![CDATA[
+            import org.moqui.elasticsearch.ElasticSearchUtil
+
+            String estThruDateStr = estThruDate ? (estThruDate.getTime() as String) : null
+            // consolidate the results into a single Map by productId
+            infoByProductId = [:] as Map<String, Map>
+
+            if (getOrderItemData) {
+                List andList = [[terms:[productId: productIdList]],
+                                [bool:[must_not:[terms:[partStatusId: ['OrderCompleted', 'OrderRejected', 'OrderCancelled']]]]]]
+                if (facilityId) andList.add([term: [facilityId: facilityId]])
+                if (estThruDateStr) andList.add([or: [[missing: [field: 'requiredByDate']],
+                                                      [range: [requiredByDate: [lte: estThruDateStr, format: 'epoch_millis']]]]])
+
+                ElasticSearchUtil.simpleAggSearch((String) indexName, [(String) orderItemDocumentName], maxResults,
+                        [bool:[filter:andList]], "productId",
+                        [orderQuantitySum:'orderQuantity', quantityReservedSum:'reservations.quantityReserved',
+                              quantityNotAvailableSum:'reservations.quantityNotAvailable', quantityNotIssuedSum:'reservations.quantityNotIssued'],
+                        infoByProductId, ec)
+            }
+
+            if (getProdEstimateData) {
+                List andList = [[terms:[productId:productIdList]], [range:[readyDate:[gte:'now/d', lte:estThruDateStr, format:'epoch_millis']]]]
+                if (facilityId) andList.add([term:[facilityId:facilityId]])
+
+                ElasticSearchUtil.simpleAggSearch((String) indexName, [(String) prodEstimateDocumentName], maxResults,
+                        [bool:[filter:andList]], "productId", [prodEstQuantitySum:'prodEstQuantity'],
+                        infoByProductId, ec)
+            }
+
+            if (getAssetData) {
+                List andList = [[terms:[productId:productIdList]], [term:[statusId:'AstAvailable']]]
+                if (facilityId) andList.add([term:[facilityId:facilityId]])
+
+                ElasticSearchUtil.simpleAggSearch((String) indexName, [(String) assetDocumentName], maxResults,
+                        [bool:[filter:andList]], "productId",
+                        [availableToPromiseTotalSum:'availableToPromiseTotal', quantityOnHandTotalSum:'quantityOnHandTotal'],
+                        infoByProductId, ec)
+            }
+
+            if (getRunConsumeData) {
+                List andList = [[terms:[productId:productIdList]], [bool:[must_not:[terms:[statusId:['WeComplete','WeClosed','WeCancelled']]]]]]
+                if (facilityId) andList.add([term: [facilityId:facilityId]])
+                if (estThruDateStr) andList.add([or: [[missing:[field:'estimatedStartDate']],
+                                                      [range:[estimatedStartDate:[lte:estThruDateStr, format:'epoch_millis']]]]])
+
+                ElasticSearchUtil.simpleAggSearch((String) indexName, [(String) runConsumeDocumentName], maxResults,
+                        [bool:[filter:andList]], "productId",
+                        [estimatedConsumeQuantitySum:'estimatedConsumeQuantity', consumeQuantitySum:'issuances.consumeQuantity'],
+                        infoByProductId, ec)
+            }
+
+            if (getRunProduceData) {
+                List andList = [[terms:[productId:productIdList]], [bool:[must_not:[terms:[statusId:['WeComplete','WeClosed','WeCancelled']]]]]]
+                if (facilityId) andList.add([term:[facilityId:facilityId]])
+                if (estThruDateStr) andList.add([or: [[missing:[field:'estimatedStartDate']],
+                                                      [range:[estimatedStartDate:[lte:estThruDateStr, format:'epoch_millis']]]]])
+
+                ElasticSearchUtil.simpleAggSearch((String) indexName, [(String) runProduceDocumentName], maxResults,
+                        [bool:[filter:andList]], "productId",
+                        [estimatedProduceQuantitySum:'estimatedProduceQuantity', produceQuantitySum:'receipts.produceQuantity'],
+                        infoByProductId, ec)
+            }
+
+            // set zero defaults, calculate totals
+            for (Map infoMap in infoByProductId.values()) {
+                // default all values to 0
+                if (infoMap.orderQuantitySum == null) infoMap.orderQuantitySum = 0
+                if (infoMap.quantityReservedSum == null) infoMap.quantityReservedSum = 0
+                if (infoMap.quantityNotAvailableSum == null) infoMap.quantityNotAvailableSum = 0
+                if (infoMap.quantityNotIssuedSum == null) infoMap.quantityNotIssuedSum = 0
+
+                if (infoMap.prodEstQuantitySum == null) infoMap.prodEstQuantitySum = 0
+                if (infoMap.availableToPromiseTotalSum == null) infoMap.availableToPromiseTotalSum = 0
+                if (infoMap.quantityOnHandTotalSum == null) infoMap.quantityOnHandTotalSum = 0
+
+                if (infoMap.estimatedConsumeQuantitySum == null) infoMap.estimatedConsumeQuantitySum = 0
+                if (infoMap.consumeQuantitySum == null) infoMap.consumeQuantitySum = 0
+                if (infoMap.estimatedProduceQuantitySum == null) infoMap.estimatedProduceQuantitySum = 0
+                if (infoMap.produceQuantitySum == null) infoMap.produceQuantitySum = 0
+
+                infoMap.orderNotReserved = infoMap.orderQuantitySum - infoMap.quantityReservedSum
+                infoMap.estRunConsumeRemaining = infoMap.estimatedConsumeQuantitySum - infoMap.consumeQuantitySum
+                if (infoMap.estRunConsumeRemaining < 0) infoMap.estRunConsumeRemaining = 0
+                infoMap.estRunProduceRemaining = infoMap.estimatedProduceQuantitySum - infoMap.produceQuantitySum
+                if (infoMap.estRunProduceRemaining < 0) infoMap.estRunProduceRemaining = 0
+
+                infoMap.totalProjected = infoMap.availableToPromiseTotalSum - infoMap.orderNotReserved -
+                        infoMap.estRunConsumeRemaining + infoMap.estRunProduceRemaining + infoMap.prodEstQuantitySum
+            }
+        ]]></script></actions>
+    </service>
+
+    <service verb="get" noun="PriceHistoryInfo">
+        <in-parameters>
+            <parameter name="productIdList" type="List" required="true"/>
+            <parameter name="facilityId"/>
+            <parameter name="fromDate" type="Timestamp"/>
+            <parameter name="thruDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="maxResults" type="Integer" default="1000"/>
+            <parameter name="indexName" default-value="mantle_inventory"/>
+            <parameter name="orderItemDocumentName" default-value="MantleInventoryOrderItem"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="infoByProductId" type="Map"><description>A Map where the key is a productId and the value
+                is a Map with: orderQuantitySum, unitAmountMin, unitAmountMax, weightedAmountSum, and weightedAmountAvg.</description></parameter>
+        </out-parameters>
+        <!-- NOTE: there is a good reference for Elasticsearch scripting here:
+            https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html
+            https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics.html
+        -->
+        <actions><script><![CDATA[
+            import org.elasticsearch.action.search.SearchResponse
+            import org.elasticsearch.script.Script
+            import org.elasticsearch.script.ScriptType
+            import org.elasticsearch.search.aggregations.AggregationBuilder
+            import org.elasticsearch.search.aggregations.AggregationBuilders
+            import org.moqui.elasticsearch.ElasticSearchUtil
+
+            String fromDateStr = fromDate ? (fromDate.getTime() as String) : null
+            String thruDateStr = thruDate.getTime() as String
+
+            List andList = [[terms: [productId: productIdList]], [bool: [must_not: [terms: [partStatusId: ['OrderRejected', 'OrderCancelled']]]]]]
+            if (facilityId) andList.add([term: [facilityId: facilityId]])
+            // alternative to allow placedDate to be null: if (fromDateStr) andList.add([or: [[missing:[field:'placedDate']], [range:['placedDate':[gte:fromDateStr]]]]])
+            if (fromDateStr) andList.add([range: ['placedDate': [gte: fromDateStr, format: 'epoch_millis']]])
+            andList.add([range: ['placedDate': [lte: thruDateStr, format: 'epoch_millis']]])
+
+            AggregationBuilder aggBuilder = AggregationBuilders.terms("products").field("productId").size(maxResults)
+                    .subAggregation(AggregationBuilders.sum("orderQuantitySum").field("orderQuantity"))
+                    .subAggregation(AggregationBuilders.min("unitAmountMin").field("unitAmount"))
+                    .subAggregation(AggregationBuilders.max("unitAmountMax").field("unitAmount"))
+                    .subAggregation(AggregationBuilders.sum("weightedAmountSum").field("orderItemTotal"))
+
+            SearchResponse searchResponse = ElasticSearchUtil.aggregationSearch((String) indexName, [(String) orderItemDocumentName],
+                    maxResults, [bool: [filter: andList]], aggBuilder, ec)
+
+            // consolidate the results into a single Map by productId
+            infoByProductId = [:]
+            for (def bucket in searchResponse.getAggregations().get('products').getBuckets()) {
+                String productId = bucket.getKey()
+                BigDecimal orderQuantitySum = bucket.getAggregations().get('orderQuantitySum').getValue()
+                BigDecimal weightedAmountSum = bucket.getAggregations().get('weightedAmountSum').getValue()
+                BigDecimal weightedAmountAvg = (weightedAmountSum / orderQuantitySum).setScale(2, BigDecimal.ROUND_HALF_UP)
+                addToMapInMap(productId, 'orderQuantitySum', orderQuantitySum, infoByProductId)
+                addToMapInMap(productId, 'unitAmountMin', bucket.getAggregations().get('unitAmountMin').getValue(), infoByProductId)
+                addToMapInMap(productId, 'unitAmountMax', bucket.getAggregations().get('unitAmountMax').getValue(), infoByProductId)
+                addToMapInMap(productId, 'weightedAmountSum', weightedAmountSum, infoByProductId)
+                addToMapInMap(productId, 'weightedAmountAvg', weightedAmountAvg, infoByProductId)
+            }
+        ]]></script></actions>
+    </service>
+</services>

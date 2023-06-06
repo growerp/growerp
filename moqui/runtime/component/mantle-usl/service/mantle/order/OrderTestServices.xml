@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="generate" noun="TestOrders" transaction="ignore">
+        <in-parameters>
+            <parameter name="productStoreId" default-value="POPC_DEFAULT"/>
+            <parameter name="vendorPartyId"><description>Defaults to ProductStore.organizationPartyId</description></parameter>
+            <parameter name="productCategoryId"/>
+            <parameter name="orderCount" type="Integer" default-value="100"/>
+            <parameter name="maxItems" type="Integer" default-value="4"/>
+            <parameter name="maxQuantity" type="Integer" default-value="10"/>
+            <parameter name="thruDate" type="Date" default="ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd')"/>
+            <parameter name="maxDaysPast" type="Integer" default-value="365"/>
+            <parameter name="ifSureSetToTrue" type="Boolean"/>
+        </in-parameters>
+        <actions>
+            <if condition="!ifSureSetToTrue"><return error="true" message="You didn't say you were sure you want to generate a bunch of orders"/></if>
+
+            <!-- store and vendor -->
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore"/>
+            <set field="vendorPartyId" from="vendorPartyId ?: productStore.organizationPartyId"/>
+
+            <!-- customers to randomly select from -->
+            <entity-find entity-name="mantle.party.PartyRole" list="partyRoleList">
+                <econdition field-name="roleTypeId" value="Customer"/></entity-find>
+            <set field="customerIdList" from="partyRoleList*.partyId"/>
+            <if condition="!customerIdList"><return message="No customers found"/></if>
+
+            <!-- products to randomly select from -->
+            <if condition="productCategoryId"><then>
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="pcmList">
+                    <date-filter/><econdition field-name="productCategoryId"/></entity-find>
+                <set field="productIdList" from="pcmList*.productId"/>
+            </then><else>
+                <entity-find entity-name="mantle.product.Product" list="prodList">
+                    <econdition field-name="productTypeEnumId" value="PtAsset"/>
+                    <econdition field-name="assetClassEnumId" value="AsClsInventoryFin"/>
+                </entity-find>
+                <set field="productIdList" from="prodList*.productId"/>
+            </else></if>
+            <if condition="!productIdList"><return message="No products found to order (finished good or in category ${productCategoryId})"/></if>
+
+            <log level="warn" message="customerIdList ${customerIdList}"/>
+            <log level="warn" message="productIdList ${productIdList}"/>
+
+            <!-- create and ship orders -->
+            <script><![CDATA[
+                def shipmentMethodEnumIdList = ['ShMthGround', 'ShMthThirdDay', 'ShMthSecondDay', 'ShMthNextDay']
+                int shipmentMethodSize = shipmentMethodEnumIdList.size()
+                def salesChannelEnumIdList = ['ScWeb', 'ScWebExternal', 'ScEmail', 'ScEdi', 'ScAmazon']
+                int salesChannelSize = salesChannelEnumIdList.size()
+
+                Random rand = new Random()
+                int customerCount = customerIdList.size()
+                int productCount = productIdList.size()
+
+                boolean suspendedTransaction = false
+                try {
+                    if (ec.transaction.isTransactionInPlace()) suspendedTransaction = ec.transaction.suspend()
+
+                    for (int idx = 0; idx < orderCount; idx++) {
+                        // run each in separate TX, then clear errors and other messages
+                        boolean beganTransaction = ec.transaction.begin(timeout)
+                        try {
+                            String customerPartyId = customerIdList.get(rand.nextInt(customerCount))
+                            java.sql.Date orderDate = thruDate - rand.nextInt(maxDaysPast)
+                            Timestamp orderTs = ec.l10n.parseTimestamp(orderDate.toString() + " " + (rand.nextInt(12) + 8).toString().padLeft(2, '0') + ":00:00.000", null)
+
+                            Map orderOut = ec.service.sync().name("mantle.order.OrderServices.create#Order").parameters([entryDate:orderTs,
+                                    productStoreId:productStoreId, salesChannelEnumId:salesChannelEnumIdList.get(rand.nextInt(salesChannelSize)),
+                                    vendorPartyId:vendorPartyId, customerPartyId:customerPartyId, carrierPartyId:'_NA_',
+                                    shipmentMethodEnumId:shipmentMethodEnumIdList.get(rand.nextInt(shipmentMethodSize))]).call()
+                            String orderId = orderOut.orderId
+                            String orderPartSeqId = orderOut.orderPartSeqId
+
+                            ec.logger.warn("Creating order ${orderId} date ${orderTs} customer ${customerPartyId}")
+
+                            int itemCount = rand.nextInt(maxItems) + 1
+                            for (int itemIdx = 0; itemIdx < itemCount; itemIdx++) {
+                                String productId = productIdList.get(rand.nextInt(productCount))
+                                int itemQuantity = rand.nextInt(maxQuantity)
+                                ec.service.sync().name("mantle.order.OrderServices.add#OrderProductQuantity").parameters([orderId:orderId,
+                                        orderPartSeqId:orderPartSeqId, productId:productId, quantity:itemQuantity]).call()
+                                ec.logger.warn("Add order ${orderId} item ${itemIdx} product ${productId} quantity ${itemQuantity}")
+                            }
+
+                            String paymentMethodId = null, paymentInstrumentEnumId = null, shippingPostalContactMechId = null
+                            if (customerPartyId == 'CustJqp') {
+                                paymentMethodId = 'CustJqpCc'
+                                shippingPostalContactMechId = 'CustJqpAddr'
+                            } else {
+                                // find payment method or default to check instrument
+                                def ccPaymentMethod = ec.entity.find("mantle.account.method.PaymentMethod").condition("ownerPartyId", customerPartyId)
+                                        .condition("paymentMethodTypeEnumId", "PmtCreditCard").one()
+                                if (ccPaymentMethod != null) paymentMethodId = ccPaymentMethod.paymentMethodId
+                                else paymentInstrumentEnumId = 'PiPersonalCheck'
+
+                                // find shipping/primary address or default to ???
+                                def shippingPcm = ec.entity.find("mantle.party.contact.PartyContactMech").condition("partyId", customerPartyId)
+                                        .condition("contactMechPurposeId", "PostalShippingDest").one()
+                                if (shippingPcm == null) shippingPcm = ec.entity.find("mantle.party.contact.PartyContactMech")
+                                        .condition("partyId", customerPartyId).condition("contactMechPurposeId", "PostalPrimary").one()
+                                if (shippingPcm != null) shippingPostalContactMechId = shippingPcm.contactMechId
+                            }
+
+                            ec.service.sync().name("mantle.order.OrderServices.set#OrderBillingShippingInfo").parameters([
+                                    orderId:orderId, orderPartSeqId:orderPartSeqId, paymentMethodId:paymentMethodId,
+                                    paymentInstrumentEnumId:paymentInstrumentEnumId, shippingPostalContactMechId:shippingPostalContactMechId]).call()
+
+                            ec.service.sync().name("mantle.order.OrderServices.place#Order").parameters([orderId:orderId, placedDate:orderTs]).call()
+                            ec.service.sync().name("mantle.order.OrderServices.approve#Order").parameters([orderId:orderId]).call()
+                            ec.service.sync().name("mantle.shipment.ShipmentServices.ship#OrderPart")
+                                    .parameters([orderId:orderId, orderPartSeqId:orderPartSeqId, shipDate:orderTs, tryAutoPackage:false]).call()
+                        } catch (Throwable t) {
+                            ec.transaction.rollback(beganTransaction, "Error generating order", t)
+                            ec.logger.log(200, "Generate order error", t)
+                        } finally {
+                            if (ec.transaction.isTransactionInPlace()) ec.transaction.commit(beganTransaction)
+                        }
+
+                        ec.message.clearAll()
+                    }
+                } catch (Exception e) {
+                    ec.logger.log(200, "Generate order TX error", e)
+                } finally {
+                    if (suspendedTransaction) ec.transaction.resume()
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>

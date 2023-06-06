@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="generate" noun="PositivePayFile">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="paymentInstrumentEnumId" default-value="PiCompanyCheck"/>
+            <parameter name="fromDate" type="Timestamp"><description>If null no limit on look back</description></parameter>
+            <parameter name="thruDate" type="Timestamp" default="ec.user.nowTimestamp">
+                <description>If null look through now</description></parameter>
+            <parameter name="fileDate" type="Timestamp" default="ec.user.nowTimestamp"><description>The date/time used
+                in various fields and set on PaymentMethodFile.fileDate</description></parameter>
+            <parameter name="formatServiceName"><description>Extension mechanism, generally empty and determined based
+                on BankAccount.posPayFormatEnumId</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentMethodFileId"/>
+            <parameter name="fileText"/>
+            <parameter name="paymentCount"/>
+        </out-parameters>
+        <actions>
+            <set field="paymentCount" from="0"/>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+            <entity-find-one entity-name="mantle.account.method.BankAccount" value-field="bankAccount"/>
+            <if condition="!bankAccount"><return error="true" message="Payment method ${paymentMethodId} is not a bank account"/></if>
+            <if condition="!bankAccount.posPayFormatEnumId">
+                <return error="true" message="No Pos. Pay File Format set for bank account ${paymentMethodId}"/></if>
+
+            <entity-find entity-name="mantle.account.payment.Payment" list="originalPaymentList" for-update="true">
+                <econdition field-name="fromPartyId" from="paymentMethod.ownerPartyId"/>
+                <econdition field-name="statusId" value="PmntDelivered"/>
+                <econdition field-name="paymentMethodId"/>
+
+                <econdition field-name="paymentInstrumentEnumId"/>
+                <econdition field-name="paymentMethodFileId" from="null"/>
+                <econdition field-name="effectiveDate" operator="greater-equals" from="fromDate" ignore-if-empty="true"/>
+                <econdition field-name="effectiveDate" operator="less-equals" from="thruDate"/>
+                <order-by field-name="paymentRefNum"/>
+            </entity-find>
+
+            <if condition="!formatServiceName">
+                <set field="supportedFormats" from="['PmftBankOfAmericaAr', 'PmftCityBankCnb', 'PmftSunTrustCpr',
+                        'PmftWachoviaAr', 'PmftWellsFargoArp', 'PmftZionsBankCsv']"/>
+                <if condition="bankAccount.posPayFormatEnumId in supportedFormats">
+                    <then><set field="formatServiceName" value="mantle.account.PositivePayServices.generate#${bankAccount.posPayFormatEnumId}"/></then>
+                    <else><return error="true" message="Positive Pay File Format ${bankAccount.posPayFormatEnumId} not supported and no format service specified"/></else>
+                </if>
+            </if>
+
+            <!-- calc entryCount, debitAmountTotal -->
+            <set field="debitAmountTotal" from="0"/>
+            <set field="debitAmountTotalWithCancels" from="0"/>
+            <set field="checkNumberSum" from="0"/>
+            <set field="paymentList" from="[]"/>
+            <iterate list="originalPaymentList" entry="payment">
+                <if condition="!payment.paymentRefNum">
+                    <message>Payment ${payment.paymentId} has no check number (Reference Number), skipping</message>
+                    <continue/>
+                </if>
+
+                <!-- treat voids as 0; NOTE: cancels also counted as positive number, is a check-sum -->
+                <if condition="payment.statusId != 'PmntVoid'">
+                    <set field="debitAmountTotalWithCancels" from="debitAmountTotalWithCancels + payment.amount"/>
+                    <if condition="payment.statusId != 'PmntCancelled'">
+                        <set field="debitAmountTotal" from="debitAmountTotal + payment.amount"/>
+                    </if>
+                </if>
+
+                <set field="checkNumberLong" from="payment.paymentRefNum as Long"/>
+                <set field="checkNumberSum" from="checkNumberSum + checkNumberLong"/>
+
+                <script>paymentList.add(payment)</script>
+            </iterate>
+
+            <!-- no payments? return now with a message -->
+            <if condition="!paymentList">
+                <return type="warning" message="No pending payments found for payment method ${paymentMethodId}"/></if>
+            <set field="entryCount" from="paymentList.size()"/>
+            <set field="paymentCount" from="paymentList.size()"/>
+
+            <!-- create a PaymentMethodFile record, get the paymentMethodFileId (used in the file) -->
+            <set field="fileTypeEnumId" from="bankAccount.posPayFormatEnumId"/>
+            <service-call name="create#mantle.account.method.PaymentMethodFile" in-map="context" out-map="context"/>
+
+            <!-- call the service to generate the file -->
+            <service-call name="${formatServiceName}" in-map="context" out-map="context"/>
+
+            <!-- return now if we have any errors -->
+            <check-errors/>
+
+            <!-- save file info on PaymentMethodFile, update statusId and set paymentMethodFileId on Payment records -->
+            <service-call name="mantle.account.PaymentMethodServices.update#PaymentMethodFileComplete" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="send" noun="PositivePayJob" authenticate="anonymous-all">
+        <description>For a ServiceJob to automatically send positive pay files, based on PaymentMethodFileType SystemMessage config</description>
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="paymentInstrumentEnumId" default-value="PiCompanyCheck"/>
+            <parameter name="lookBackDays" type="Integer"/>
+            <parameter name="formatServiceName"><description>Extension mechanism, generally empty and determined based
+                on BankAccount.posPayFormatEnumId</description></parameter>
+            <parameter name="systemMessageTypeId"><description>If not specified looked up in PaymentMethodFileType</description></parameter>
+            <parameter name="systemMessageRemoteId"><description>If not specified looked up in PaymentMethodFileType</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentMethodFileId"/>
+            <parameter name="systemMessageId"/>
+            <parameter name="paymentCount"/>
+        </out-parameters>
+        <actions>
+            <if condition="lookBackDays">
+                <script>
+                    Calendar lookBackCal = ec.user.nowCalendar
+                    lookBackCal.add(Calendar.DAY_OF_MONTH, -lookBackDays)
+                    fromDate = new java.sql.Timestamp(lookBackCal.getTimeInMillis())
+                </script>
+            </if>
+            <log message="Generating PositivePay file for payment method ${paymentMethodId} instrument ${paymentInstrumentEnumId} look back days ${lookBackDays} fromDate ${fromDate}"/>
+
+            <!-- returns paymentMethodFileId or null if no applicable Payment records -->
+            <!-- NOTE: run in new TX so that is committed (record exists) before async create of SystemMessage done by produce service below -->
+            <service-call name="mantle.account.PositivePayServices.generate#PositivePayFile"
+                    in-map="context" out-map="context" transaction="force-new"/>
+            <if condition="!paymentMethodFileId">
+                <log message="In send#PositivePayJob no file generated, not sending"/>
+                <return/>
+            </if>
+
+            <service-call name="mantle.account.PaymentMethodServices.produce#PaymentMethodFileSystemMessage" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="PositivePayInterface" type="interface">
+        <in-parameters>
+            <parameter name="paymentMethodFileId" required="true"/>
+            <parameter name="bankAccount" type="Map" required="true"/>
+            <parameter name="paymentList" type="List" required="true"/>
+            <parameter name="thruDate" type="Timestamp" required="true"/>
+            <parameter name="fileDate" type="Timestamp" required="true"/>
+            <parameter name="entryCount" type="Long" required="true"/>
+            <parameter name="debitAmountTotal" type="BigDecimal" required="true"/>
+            <parameter name="debitAmountTotalWithCancels" type="BigDecimal" required="true"/>
+            <parameter name="checkNumberSum" type="Long" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fileText"/>
+        </out-parameters>
+    </service>
+    <service verb="generate" noun="PmftBankOfAmericaAr">
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions>
+            <if condition="!bankAccount.posPayBankNumber || bankAccount.posPayBankNumber.length() != 3">
+                <return error="true" message="Pos. Pay Bank Number must be set and 3 characters long (for bank account [${bankAccount.paymentMethodId}])"/></if>
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+
+                String accountNumber =  bankAccount.accountNumber
+                if (accountNumber.length() > 12) accountNumber = accountNumber.substring(accountNumber.length() - 12, accountNumber.length())
+
+                List<StringBuilder> lines = []
+
+                // Header
+                StringBuilder fileHeader = new StringBuilder(80)
+                // 01-03: Record Type Code = 'DRS'
+                fileHeader.append('DRS')
+                // 04-06: Bank Number, assigned by bank
+                fileHeader.append(bankAccount.posPayBankNumber)
+                // 07-18: Account Number (12 digits, left 0 padded)
+                fileHeader.append(accountNumber.padLeft(12, '0'))
+                // 19-26: Processing date (yyyyMMdd)
+                fileHeader.append(ec.l10n.format(fileDate, 'yyyyMMdd'))
+                // 27-27: Blank (1 space)
+                fileHeader.append(' ')
+                // 28-35: Certification cutoff date (yyyyMMdd)
+                fileHeader.append(ec.l10n.format(thruDate, 'yyyyMMdd'))
+                // 36-36: Final Input Indicator (Y for last data through cutoff date, N otherwise; always use N)
+                fileHeader.append('N')
+                // 37-80: Filler, 44 spaces
+                fileHeader.append(" ".padRight(44, ' '))
+                lines.add(fileHeader)
+
+                // Account number in detail lines is only 10 chars
+                if (accountNumber.length() > 10) accountNumber = accountNumber.substring(accountNumber.length() - 10, accountNumber.length())
+
+                for (Map payment in paymentList) {
+                    // Get amount String (10 chars, last 2 are cents)
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValue() as String
+
+                    boolean isVoid = payment.statusId == 'PmntVoid'
+                    boolean isCancel = payment.statusId == 'PmntCancelled'
+
+                    String payeeName = ""
+                    EntityValue otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                    if (otherParty) {
+                        payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                        if (payeeName.length() > 43) payeeName = payeeName.substring(0, 43)
+                    }
+
+                    // Detail Line
+                    StringBuilder detailLine = new StringBuilder(80)
+                    // 01-10: Check number (10 digits, left 0 padded)
+                    detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                    // 11-20: Check amount (10 digits, last 2 are cents, left 0 padded); for voids enter all 0s
+                    detailLine.append((isVoid ? '0' : amountStr).padLeft(10, '0'))
+                    // 21-30: Account number (same as header, but 10 digits)
+                    detailLine.append(accountNumber.padLeft(10, '0'))
+                    // 31-36: Actual date of issue (MMddyy)
+                    detailLine.append(ec.l10n.format(payment.effectiveDate, 'MMddyy'))
+                    // 37-37: Blank for issue record, '-' for cancel
+                    detailLine.append((isCancel ? '-' : ' '))
+                    // 38-80: Payee information (43 chars; pad right with spaces)
+                    detailLine.append(payeeName.padRight(43, ' '))
+
+                    lines.add(detailLine)
+                }
+
+                // Get amount String (10 chars, last 2 are cents)
+                String debitAmountTotalWithCancelsStr = debitAmountTotalWithCancels.movePointRight(2).longValue() as String
+
+                // Trailer
+                StringBuilder fileTrailer = new StringBuilder(80)
+                // 01-04: Trailer Constant = '1EOF'
+                fileTrailer.append('1EOF')
+                // 05-05: Blank
+                fileTrailer.append(' ')
+                // 06-10: Number of detail records (5 numbers, left 0 pad)
+                fileTrailer.append((entryCount as String).padLeft(5, '0'))
+                // 11-30: Blanks (20)
+                fileTrailer.append(' '.padRight(20, ' '))
+                // 31-40: "Hash total" (simple sum) of all check numbers (10 numbers, left 0 pad)
+                fileTrailer.append((checkNumberSum as String).padLeft(10, '0'))
+                // 41-50: Sum of check amounts (issues and cancels; 10 numbers, last 2 are cents, left 0 padded)
+                fileTrailer.append(debitAmountTotalWithCancelsStr.padLeft(10, '0'))
+                // 51-80: Blanks (30)
+                fileTrailer.append(" ".padRight(30, ' '))
+
+                lines.add(fileTrailer)
+
+                // combine the lines
+                StringBuilder ftSb = new StringBuilder(81 * lines.size())
+                for (StringBuilder line in lines) {
+                    if (line.length() != 80) ec.message.addError(ec.resource.expand('Generated line does not have exactly 80 chars: ${line}',''))
+                    ftSb.append(line).append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="generate" noun="PmftCityBankCnb">
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions>
+            <if condition="!bankAccount.posPayBankNumber || bankAccount.posPayBankNumber.length() != 3">
+                <return error="true" message="Pos. Pay Bank Number must be set and be 3 digits (for bank account [${bankAccount.paymentMethodId}])"/></if>
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+1234567
+
+                String accountNumber =  bankAccount.accountNumber
+                if (accountNumber.length() > 9) accountNumber = accountNumber.substring(accountNumber.length() - 9, accountNumber.length())
+
+                List<StringBuilder> lines = []
+
+                // NOTE: No Header for City Bank CNB file
+
+                for (Map payment in paymentList) {
+                    // Get amount String (10 chars, last 2 are cents)
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValue() as String
+
+                    // NOTE: for City Bank treat void and cancel as "Void"
+                    boolean isVoid = payment.statusId == 'PmntVoid'
+                    boolean isCancel = payment.statusId == 'PmntCancelled'
+
+                    String payeeName = ""
+                    EntityValue otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                    if (otherParty) {
+                        payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                        if (payeeName.length() > 50) payeeName = payeeName.substring(0, 50)
+                    }
+
+                    // Detail Line
+                    StringBuilder detailLine = new StringBuilder(87)
+                    // 01-03: Bank ID, assigned by bank (3 digits)
+                    detailLine.append(bankAccount.posPayBankNumber)
+                    // 04-12: Account Number (9 digits, left 0 padded)
+                    detailLine.append(accountNumber.padLeft(9, '0'))
+                    // 13-20: Check number (8 digits, left 0 padded)
+                    detailLine.append(payment.paymentRefNum.padLeft(8, '0'))
+                    // 21-30: Check amount (10 digits, last 2 are cents, left 0 padded); for voids enter all 0s
+                    detailLine.append((isVoid ? '0' : amountStr).padLeft(10, '0'))
+                    // 31-36: Date of issue (MMddyy)
+                    detailLine.append(ec.l10n.format(payment.effectiveDate, 'MMddyy'))
+                    // 37-86: Additional data; Payee information (50 chars; pad right with spaces)
+                    detailLine.append(payeeName.padRight(50, ' '))
+                    // 87-87: Void indicator Blank for issue record, 'V' for void/cancel, 'I' for issue
+                    detailLine.append((isVoid || isCancel ? 'V' : 'I'))
+
+                    lines.add(detailLine)
+                }
+
+                // NOTE: No Trailer for City Bank CNB file
+
+                // combine the lines
+                StringBuilder ftSb = new StringBuilder(81 * lines.size())
+                for (StringBuilder line in lines) {
+                    if (line.length() != 87) ec.message.addError(ec.resource.expand('Generated line does not have exactly 87 chars: ${line}',''))
+                    ftSb.append(line).append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="generate" noun="PmftSunTrustCpr">
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions>
+            <if condition="!bankAccount.posPayBankNumber || bankAccount.posPayBankNumber.length() != 3">
+                <return error="true" message="Pos. Pay Bank Number must be set and 3 characters long (for bank account [${bankAccount.paymentMethodId}])"/></if>
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80        90        100       110       120
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+
+                String accountNumber =  bankAccount.accountNumber
+                if (accountNumber.length() > 10) accountNumber = accountNumber.substring(accountNumber.length() - 10, accountNumber.length())
+
+                List<StringBuilder> lines = []
+
+                // Account Batch Header Record
+                StringBuilder fileHeader = new StringBuilder(240)
+                // 01-03: Record Type Code = '*00'
+                fileHeader.append('*00')
+                // 04-13: Account Number (10 digits, left 0 padded)
+                fileHeader.append(accountNumber.padLeft(10, '0'))
+                // 14-23: Serial Number (could use file ID, but seems to want all 0s; 10 digits, left 0 pad)
+                fileHeader.append('0'.padLeft(10, '0'))
+                // 24-26: Bank Number, assigned by bank (3 digits)
+                fileHeader.append(bankAccount.posPayBankNumber)
+                // 27-32: Issue (file) date (MMddyy)
+                fileHeader.append(ec.l10n.format(fileDate, 'MMddyy'))
+                // 33-240: Filler, 208 spaces
+                fileHeader.append(" ".padRight(208, ' '))
+                lines.add(fileHeader)
+
+                for (Map payment in paymentList) {
+                    // Get amount String (11 chars, last 2 are cents)
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValue() as String
+
+                    boolean isVoid = payment.statusId == 'PmntVoid'
+                    boolean isCancel = payment.statusId == 'PmntCancelled'
+
+                    String payeeName = ""
+                    EntityValue otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                    if (otherParty) {
+                        payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                        if (payeeName.length() > 40) payeeName = payeeName.substring(0, 40)
+                    }
+
+                    // FUTURE: Stop Item (*22)
+                    if (isVoid || isCancel) {
+                        // Detail Line - Cancel/Void Item
+                        StringBuilder detailLine = new StringBuilder(240)
+                        // 01-03: Transaction code (for Cancel/Void Item *26)
+                        detailLine.append('*26')
+                        // 04-13: Account number (same as header, 10 digits)
+                        detailLine.append(accountNumber.padLeft(10, '0'))
+                        // 14-23: Check number (10 digits, left 0 padded)
+                        detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                        // 24-29: Transaction Date (MMddyy)
+                        detailLine.append(ec.l10n.format(payment.effectiveDate, 'MMddyy'))
+                        // 30-240: Filler (211 spaces)
+                        detailLine.append("".padRight(211, ' '))
+
+                        lines.add(detailLine)
+                    } else {
+                        // Detail Line - Issue Item
+                        StringBuilder detailLine = new StringBuilder(240)
+                        // 01-03: Transaction code (for Issue Item *10)
+                        detailLine.append('*10')
+                        // 04-13: Account number (same as header, 10 digits)
+                        detailLine.append(accountNumber.padLeft(10, '0'))
+                        // 14-23: Check number (10 digits, left 0 padded)
+                        detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                        // 24-34: Check amount (11 digits, last 2 are cents, left 0 padded)
+                        detailLine.append(amountStr.padLeft(11, '0'))
+                        // 35-49: Additional information (15 chars; all spaces)
+                        detailLine.append("".padRight(15, ' '))
+                        // 50-58: Funding source (no separate funding source, so use 9 1s)
+                        detailLine.append("1".padRight(9, '1'))
+                        // 59-80: Filler (22 spaces)
+                        detailLine.append("".padRight(22, ' '))
+
+                        // Chars 81-160 on the detail record for the Payee Name (first)
+                        // 81-83: Transaction code (for Payee Name *61)
+                        detailLine.append('*61')
+                        // 84-93: Account number (same as header, 10 digits)
+                        detailLine.append(accountNumber.padLeft(10, '0'))
+                        // 94-103: Check number (10 digits, left 0 padded)
+                        detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                        // 104-114: Check amount (11 digits, last 2 are cents, left 0 padded); for voids enter all 0s
+                        detailLine.append(amountStr.padLeft(11, '0'))
+                        // 115-154: Payee information (40 chars; pad right with spaces)
+                        detailLine.append(payeeName.padRight(40, ' '))
+                        // 155-160: Filler (6 spaces)
+                        detailLine.append("".padRight(6, ' '))
+
+                        // Chars 161-240 all blanks as there is no second Payee Name (80 spaces)
+                        detailLine.append("".padRight(80, ' '))
+
+                        lines.add(detailLine)
+                    }
+                }
+
+                // Get amount String (11 chars, last 2 are cents)
+                String debitAmountTotalStr = debitAmountTotal.movePointRight(2).longValue() as String
+
+                // Account Batch Trailer
+                StringBuilder batchTrailer = new StringBuilder(240)
+                // 01-03: Transaction Code = '*98'
+                batchTrailer.append('*98')
+                // 04-13: Account Number (10 digits, left 0 padded)
+                batchTrailer.append(accountNumber.padLeft(10, '0'))
+                // 14-23: Serial Number (seems want constant '9999999998'; 10 digits, left 0 pad)
+                batchTrailer.append('9999999998')
+                // 24-25: Number Batches (always 01)
+                batchTrailer.append('01')
+                // 26-34: Number of Items, including lines, batch header/trailer (9 numbers, left 0 pad)
+                batchTrailer.append(((entryCount + 2) as String).padLeft(9, '0'))
+                // 35-45: Sum of check amounts (issues only, NOT including cancels; 11 numbers, last 2 are cents, left 0 padded)
+                batchTrailer.append(debitAmountTotalStr.padLeft(11, '0'))
+                // 46-240: Blanks (195)
+                batchTrailer.append(" ".padRight(195, ' '))
+                lines.add(batchTrailer)
+
+                // File Trailer
+                StringBuilder fileTrailer = new StringBuilder(240)
+                // 01-03: Transaction Code = '*99'
+                fileTrailer.append('*99')
+                // 04-13: Account Number (10 digits, left 0 padded)
+                fileTrailer.append(accountNumber.padLeft(10, '0'))
+                // 14-23: Serial Number (seems to want constant '9999999999'; 10 digits, left 0 pad)
+                fileTrailer.append('9999999999')
+                // 24-25: Number Batches (always 01)
+                fileTrailer.append('01')
+                // 26-34: Number of Items, including lines, batch header/trailer, and file trailer (9 numbers, left 0 pad)
+                fileTrailer.append(((entryCount + 3) as String).padLeft(9, '0'))
+                // 35-45: Sum of check amounts (issues only, NOT including cancels; 11 numbers, last 2 are cents, left 0 padded)
+                fileTrailer.append(debitAmountTotalStr.padLeft(11, '0'))
+                // 46-240: Blanks (195)
+                fileTrailer.append(" ".padRight(195, ' '))
+                lines.add(fileTrailer)
+
+                // NOTE: this is a really weird block size, but part of the spec
+                // if not a multiple of 113 lines add lines of all spaces until it is
+                while (lines.size() % 113 != 0) {
+                    StringBuilder sb = new StringBuilder(240)
+                    for (int i = 0; i < 240; i++) sb.append(' ')
+                    lines.add(sb)
+                }
+
+                // combine the lines
+                StringBuilder ftSb = new StringBuilder(241 * lines.size())
+                for (StringBuilder line in lines) {
+                    if (line.length() != 240) ec.message.addError(ec.resource.expand('Generated line (${line.length()} chars) does not have exactly 240 chars: ${line}',''))
+                    // NOTE: not clear in spec but may not use line endings
+                    ftSb.append(line).append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="generate" noun="PmftWachoviaAr">
+        <description>Generate Wachovia Account Reconcilement File; note that uses spaces/blanks for filler</description>
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions>
+            <if condition="!bankAccount.posPayBankNumber || bankAccount.posPayBankNumber.length() > 4">
+                <return error="true" message="Pos. Pay Bank Number must be set and 4 digits or less (for bank account [${bankAccount.paymentMethodId}])"/></if>
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+
+                String accountNumber =  bankAccount.accountNumber
+                if (accountNumber.length() > 13) accountNumber = accountNumber.substring(accountNumber.length() - 13, accountNumber.length())
+                // Get amount String (12 chars, last 2 are cents)
+                String debitAmountTotalWithCancelsStr = debitAmountTotalWithCancels.movePointRight(2).longValue() as String
+
+                List<StringBuilder> lines = []
+
+                // Header
+                StringBuilder fileHeader = new StringBuilder(80)
+                // 01-20: Constant = 'RECONCILIATIONHEADER'
+                fileHeader.append('RECONCILIATIONHEADER')
+                // 21-24: Bank ID, assigned by bank (4 digits, left 0 pad)
+                fileHeader.append(bankAccount.posPayBankNumber.padLeft(4, '0'))
+                // 25-37: Account Number (13 digits, left 0 padded)
+                fileHeader.append(accountNumber.padLeft(13, '0'))
+                // 38-49: Sum of check amounts (issues and cancels; 12 digits, last 2 are cents, left 0 padded)
+                fileHeader.append(debitAmountTotalWithCancelsStr.padLeft(12, '0'))
+                // 50-54: Number of detail records (5 digits, left 0 pad)
+                fileHeader.append((entryCount as String).padLeft(5, '0'))
+                // 55-80: Filler (26 spaces)
+                fileHeader.append("".padRight(26, ' '))
+
+                lines.add(fileHeader)
+
+                // Account number in detail lines is only 10 chars
+                if (accountNumber.length() > 10) accountNumber = accountNumber.substring(accountNumber.length() - 10, accountNumber.length())
+
+                for (Map payment in paymentList) {
+                    // Get amount String (10 chars, last 2 are cents)
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValue() as String
+
+                    // NOTE: for Wachovia treat void and cancel as "Void"
+                    boolean isVoid = payment.statusId == 'PmntVoid'
+                    boolean isCancel = payment.statusId == 'PmntCancelled'
+
+                    String payeeName = ""
+                    EntityValue otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                    if (otherParty) {
+                        payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                        if (payeeName.length() > 30) payeeName = payeeName.substring(0, 30)
+                    }
+
+                    // Detail Line
+                    StringBuilder detailLine = new StringBuilder(80)
+                    // 01-13: Account Number (13 digits, left 0 padded)
+                    detailLine.append(accountNumber.padLeft(13, '0'))
+                    // 14-23: Check number (10 digits, left 0 padded)
+                    detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                    // 24-33: Check amount (10 digits, last 2 are cents, left 0 padded); for voids enter all 0s
+                    detailLine.append((isVoid ? '0' : amountStr).padLeft(10, '0'))
+                    // 34-41: Date of issue (yyyyMMdd)
+                    detailLine.append(ec.l10n.format(payment.effectiveDate, 'yyyyMMdd'))
+                    // 42-42: Void indicator Blank for issue record, '-' for cancel
+                    detailLine.append((isVoid || isCancel ? 'V' : ' '))
+                    // 43-72: Additional data; Payee information (30 chars; pad right with spaces)
+                    detailLine.append(payeeName.padRight(30, ' '))
+                    // 55-80: Filler (8 spaces)
+                    detailLine.append("".padRight(8, ' '))
+
+                    lines.add(detailLine)
+                }
+
+                // NOTE: No Trailer for Wachovia AR file
+
+                // combine the lines
+                StringBuilder ftSb = new StringBuilder(81 * lines.size())
+                for (StringBuilder line in lines) {
+                    if (line.length() != 80) ec.message.addError(ec.resource.expand('Generated line does not have exactly 80 chars: ${line}',''))
+                    ftSb.append(line).append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="generate" noun="PmftWellsFargoArp">
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions>
+            <if condition="!bankAccount.posPayBankNumber || bankAccount.posPayBankNumber.length() > 5">
+                <return error="true" message="Pos. Pay Bank Number must be set and 5 digits or less (for bank account [${bankAccount.paymentMethodId}])"/></if>
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+
+
+                String accountNumber =  bankAccount.accountNumber
+                if (accountNumber.length() > 15) accountNumber = accountNumber.substring(accountNumber.length() - 15, accountNumber.length())
+
+                List<StringBuilder> lines = []
+
+                // Header
+                StringBuilder fileHeader = new StringBuilder(80)
+                // 01-03: Constant = '*03'
+                fileHeader.append('*03')
+                // 04-08: Bank ID, assigned by bank (5 digits, left 0 pad)
+                fileHeader.append(bankAccount.posPayBankNumber.padLeft(5, '0'))
+                // 09-23: Account Number (15 digits, left 0 padded)
+                fileHeader.append(accountNumber.padLeft(15, '0'))
+                // 24-24: File status (always 0)
+                fileHeader.append('0')
+
+                lines.add(fileHeader)
+
+                // Account number in detail lines is only 10 chars
+                if (accountNumber.length() > 10) accountNumber = accountNumber.substring(accountNumber.length() - 10, accountNumber.length())
+
+                for (Map payment in paymentList) {
+                    // Get amount String (10 chars, last 2 are cents)
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValue() as String
+
+                    boolean isVoid = payment.statusId == 'PmntVoid'
+                    boolean isCancel = payment.statusId == 'PmntCancelled'
+
+                    String payeeName = ""
+                    EntityValue otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                    if (otherParty) {
+                        payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                        if (payeeName.length() > 40) payeeName = payeeName.substring(0, 40)
+                    }
+
+                    // Detail Line
+                    StringBuilder detailLine = new StringBuilder(80)
+                    // 01-10: Check number (10 digits, left 0 padded)
+                    detailLine.append(payment.paymentRefNum.padLeft(10, '0'))
+                    // 11-16: Date of issue (MMddyy)
+                    detailLine.append(ec.l10n.format(payment.effectiveDate, 'MMddyy'))
+                    // 17-26: Account number (same as header, but 10 digits)
+                    detailLine.append(accountNumber.padLeft(10, '0'))
+                    /* 27-29: Transaction code:
+                        Supported:
+                        320 check register
+                        370 cancelled register with dollar amount.
+                        430 void register with zero amount
+                        Note for Future:
+                        525 delete issue notices not received (INNRs)
+                        620 Stop Payment Request
+                        630 Release Stop Payment (Cancellation)
+                        640 Stop Payment Renewal Cancellation
+                     */
+                    detailLine.append(isVoid ? '430' : (isCancel ? '370' : '320'))
+                    // 30-39: Check amount (10 numbers, last 2 are cents, left 0 padded); for voids enter all 0s
+                    detailLine.append((isVoid ? '0' : amountStr).padLeft(10, '0'))
+                    // 40-79: Additional data; Payee information (40 chars; pad right with spaces)
+                    detailLine.append(payeeName.padRight(40, ' '))
+
+                    lines.add(detailLine)
+                }
+
+                // Get amount String (10 chars, last 2 are cents)
+                String debitAmountTotalWithCancelsStr = debitAmountTotalWithCancels.movePointRight(2).longValue() as String
+
+                // Trailer
+                StringBuilder fileTrailer = new StringBuilder(80)
+                // 01-01: Trailer Constant = '&'
+                fileTrailer.append('&')
+                // 02-15: Spaces (15)
+                fileTrailer.append(' '.padRight(15, ' '))
+                // 16-20: Number of detail records (5 digits, left 0 pad)
+                fileTrailer.append((entryCount as String).padLeft(5, '0'))
+                // 21-23: Blanks (3)
+                fileTrailer.append(' '.padRight(3, ' '))
+                // 24-33: Sum of check amounts (issues and cancels; 10 numbers, last 2 are cents, left 0 padded)
+                fileTrailer.append(debitAmountTotalWithCancelsStr.padLeft(10, '0'))
+                // 34-80: Blanks (47)
+                fileTrailer.append(" ".padRight(47, ' '))
+
+                lines.add(fileTrailer)
+
+                // combine the lines
+                StringBuilder ftSb = new StringBuilder(81 * lines.size())
+                for (StringBuilder line in lines) {
+                    // NOTE: lines don't have to be exactly 80 chars in this case
+                    ftSb.append(line).append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="PmftZionsBankCsv">
+        <implements service="mantle.account.PositivePayServices.generate#PositivePayInterface"/>
+        <actions><script><![CDATA[
+            import org.apache.commons.csv.CSVPrinter
+            import org.apache.commons.csv.CSVFormat
+            import org.apache.commons.csv.CSVRecord
+
+            StringBuilder outSb = new StringBuilder()
+            CSVPrinter printer = CSVFormat.DEFAULT.withHeader("Check Number", "Amount", "Date", "Payee", "Account", "Void").print(outSb)
+
+            String accountNumber =  bankAccount.accountNumber
+
+            for (Map payment in paymentList) {
+                // Get amount String (10 chars, last 2 are cents)
+                String amountStr = ec.l10n.format(payment.amount, '0.00')
+                String dateStr = ec.l10n.format(payment.effectiveDate, 'MM/dd/yyyy')
+
+                boolean isVoid = payment.statusId == 'PmntVoid'
+                boolean isCancel = payment.statusId == 'PmntCancelled'
+                String voidStr = isVoid || isCancel ? 'V' : 'N'
+
+                String payeeName = ""
+                Map otherParty = payment.toPartyId ? ec.entity.find("mantle.party.PartyDetail").condition("partyId", payment.toPartyId).one() : null
+                if (otherParty) {
+                    payeeName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                    if (payeeName.length() > 40) payeeName = payeeName.substring(0, 40)
+                }
+
+                printer.printRecord(payment.paymentRefNum, amountStr, dateStr, payeeName, accountNumber, voidStr)
+            }
+
+            fileText = outSb.toString()
+        ]]></script></actions>
+    </service>
+</services>

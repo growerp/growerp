@@ -1,0 +1,1086 @@
+/*
+ * This software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ *
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ *
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies { classpath 'org.ajoberstar:grgit:2.2.1' }
+}
+// Not needed for explicit use, causes problems when not from git repo: plugins { id 'org.ajoberstar.grgit' version 'x.y.z' }
+
+// Run headless so GradleWorkerMain does not steal focus (mostly a macOS annoyance)
+allprojects { tasks.withType(JavaForkOptions) { jvmArgs '-Djava.awt.headless=true' } }
+
+import org.ajoberstar.grgit.*
+
+defaultTasks 'build'
+
+def openSearchVersion = '1.3.1'
+def elasticSearchVersion = '7.10.2'
+
+def tomcatHome = '../apache-tomcat'
+// no longer include version in war file name: def getWarName() { 'moqui-' + childProjects.framework.version + '.war' }
+def getWarName() { 'moqui.war' }
+def plusRuntimeName = 'moqui-plus-runtime.war'
+def execTempDir = 'execwartmp'
+def moquiRuntime = 'runtime'
+
+def moquiConfDev = 'conf/MoquiDevConf.xml'
+def moquiConfProduction = 'conf/MoquiProductionConf.xml'
+
+def allCleanTasks = getTasksByName('clean', true)
+def allBuildTasks = getTasksByName('build', true)
+def allTestTasks = getTasksByName('test', true)
+allTestTasks.each { it.systemProperties << System.properties.subMap(getDefaultPropertyKeys()) }
+// kill the build -> check -> test dependency, only run tests explicitly and not always on build
+getTasksByName('check', true).each { it.dependsOn.clear() }
+
+Set<Task> getComponentTestTasks() {
+    Set<Task> testTasks = new LinkedHashSet()
+    for (Project subProject in getSubprojects())
+        if (subProject.getPath().startsWith(':runtime:component:')) testTasks.addAll(subProject.getTasksByName('test', false))
+    return testTasks
+}
+def getDefaultPropertyKeys() {
+    def defaultProperties = []
+    Node confXml = new XmlParser().parse(file('framework/src/main/resources/MoquiDefaultConf.xml'))
+    for (Node defaultProperty in confXml.'default-property') { defaultProperties << defaultProperty.'@name' }
+    defaultProperties
+}
+
+// ========== clean tasks ==========
+
+task clean(type: Delete) { delete file(warName); delete file(execTempDir); delete file('wartemp'); cleanVersionDetailFiles() }
+task cleanTempDir(type: Delete) { delete file(execTempDir) }
+task cleanDb { doLast {
+    if (!file(moquiRuntime).exists()) return
+    delete files(file(moquiRuntime+'/db/derby').listFiles()) - files(moquiRuntime+'/db/derby/derby.properties')
+    delete file(moquiRuntime+'/db/h2')
+    delete file(moquiRuntime+'/db/orientdb/databases')
+    delete fileTree(dir: moquiRuntime+'/txlog', include: '*')
+    cleanElasticSearch(moquiRuntime)
+} }
+task cleanLog(type: Delete) { delete fileTree(dir: moquiRuntime+'/log', include: '*') }
+task cleanSessions(type: Delete) { delete fileTree(dir: moquiRuntime+'/sessions', include: '*') }
+task cleanLoadSave(type: Delete) { delete file('SaveH2.zip'); delete file('SaveDEFAULT.zip');
+    delete file('SaveTransactional.zip'); delete file('SaveAnalytical.zip'); delete file('SaveOrientDb.zip'); delete file('SaveElasticSearch.zip') }
+task cleanPlusRuntime(type: Delete) { delete file(plusRuntimeName) }
+task cleanOther(type: Delete) { delete fileTree(dir: '.', includes: ['**/.nbattrs', '**/*~', '**/.#*', '**/.DS_Store', '**/*.rej', '**/*.orig']) }
+
+task cleanAll { dependsOn clean, allCleanTasks, cleanDb, cleanLog, cleanSessions, cleanLoadSave, cleanPlusRuntime }
+
+// ========== ElasticSearch tasks (for install in runtime/elasticsearch) ==========
+
+def cleanElasticSearch(String moquiRuntime) {
+    File osDir = file(moquiRuntime + '/opensearch')
+    String workDir = moquiRuntime + (osDir.exists() ? '/opensearch' : '/elasticsearch')
+    if (file(workDir+'/bin').exists()) {
+        def pidFile = file(workDir+'/pid')
+        if (pidFile.exists()) {
+            String pid = pidFile.getText()
+            logger.lifecycle("${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} running with pid ${pid}, stopping before deleting data then restarting")
+            exec { workingDir workDir; commandLine 'kill', pid }
+            exec { workingDir workDir; commandLine 'tail', "--pid=${pid}", '-f', '/dev/null' }
+
+            delete file(workDir+'/data')
+            if (file(workDir+'/logs').exists()) delete files(file(workDir+'/logs').listFiles())
+            if (pidFile.exists()) delete pidFile
+
+            startSearch()
+        } else {
+            logger.lifecycle("Found ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} in ${workDir}/bin directory but no pid, deleting data without stop/start; WARNING if ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} is running this will cause problems!")
+            delete file(workDir+'/data')
+            if (file(workDir+'/logs').exists()) delete files(file(workDir+'/logs').listFiles())
+        }
+    } else {
+        delete file(workDir+'/data')
+        if (file(workDir+'/logs').exists()) delete files(file(workDir+'/logs').listFiles())
+    }
+}
+task downloadOpenSearch { doLast {
+    // NOTE: works with Linux and macOS
+    // TODO: Windows support...
+    String distType = "tar.gz"
+    // https://artifacts.opensearch.org/releases/core/opensearch/1.3.1/opensearch-min-1.3.1-linux-x64.tar.gz
+    String esUrl = "https://artifacts.opensearch.org/releases/core/opensearch/${openSearchVersion}/opensearch-min-${openSearchVersion}-linux-x64.${distType}"
+    String targetDirPath = moquiRuntime + '/opensearch'
+    String esExtraDirPath = targetDirPath + '/opensearch-' + openSearchVersion
+    File targetDir = file(targetDirPath)
+    if (targetDir.exists()) { logger.lifecycle("Found directory at ${targetDirPath}, deleting"); delete targetDir }
+    File zipFile = file("${moquiRuntime}/opensearch-min-${openSearchVersion}-linux-x64.${distType}")
+    if (!zipFile.exists()) {
+        logger.lifecycle("Downloading OpenSearch from ${esUrl}")
+        ant.get(src: esUrl, dest: zipFile)
+    } else {
+        logger.lifecycle("Found OpenSearch archive at ${zipFile.getPath()}, using that instead of downloading")
+    }
+    // the eachFile closure removes the first path from each file, moving everything up a directory, which also requires delete of the extra dirs
+    copy { from distType == "zip" ? zipTree(zipFile) : tarTree(zipFile); into targetDir; eachFile {
+        def pathList = it.getRelativePath().getSegments() as List
+        if (pathList[0] == ".") pathList = pathList.tail()
+        it.setPath(pathList.tail().join("/"))
+        return it
+    } }
+
+    // make sure there is a logs directory, OpenSearch (just like ES) has start error without it
+    File esLogsDir = file(targetDirPath + '/logs')
+    if (!esLogsDir.exists()) esLogsDir.mkdir()
+
+    File extraDir = file(esExtraDirPath)
+    if (extraDir.exists()) delete extraDir
+
+    delete zipFile
+}}
+task downloadElasticSearch { doLast {
+    String suffix
+    String distType
+    String osName = System.getProperty("os.name").toLowerCase()
+    if (osName.startsWith("windows")) {
+        suffix = "windows-x86_64.zip"
+        distType = "zip"
+    } else if (osName.startsWith("mac")) {
+        suffix = "darwin-x86_64.tar.gz"
+        distType = "tar.gz"
+    } else {
+        suffix = "linux-x86_64.tar.gz"
+        distType = "tar.gz"
+    }
+    String esUrl = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-${elasticSearchVersion}-no-jdk-${suffix}"
+    String targetDirPath = moquiRuntime + '/elasticsearch'
+    String esExtraDirPath = targetDirPath + '/elasticsearch-' + elasticSearchVersion
+    File targetDir = file(targetDirPath)
+    if (targetDir.exists()) { logger.lifecycle("Found directory at ${targetDirPath}, deleting"); delete targetDir }
+    File zipFile = file("${targetDirPath}-${elasticSearchVersion}.${distType}")
+    if (!zipFile.exists()) {
+        logger.lifecycle("Downloading ElasticSearch from ${esUrl}")
+        ant.get(src: esUrl, dest: zipFile)
+    } else {
+        logger.lifecycle("Found ElasticSearch archive at ${zipFile.getPath()}, using that instead of downloading")
+    }
+    // the eachFile closure removes the first path from each file, moving everything up a directory, which also requires delete of the extra dirs
+    copy { from distType == "zip"? zipTree(zipFile) : tarTree(zipFile); into targetDir; eachFile {
+        def pathList = it.getRelativePath().getSegments() as List
+        if (pathList[0] == ".") pathList = pathList.tail()
+        it.setPath(pathList.tail().join("/"))
+        return it
+    } }
+
+    // make sure there is a logs directory, ES start error without it
+    File esLogsDir = file(targetDirPath + '/logs')
+    if (!esLogsDir.exists()) esLogsDir.mkdir()
+
+    File extraDir = file(esExtraDirPath)
+    if (extraDir.exists()) delete extraDir
+
+    delete zipFile
+}}
+/* startElasticSearch old approach, with ES 7.10.2 and OpenSearch never exits, gradle just sits there doing nothing (though same command in terminal does exit)
+task startElasticSearch(type:Exec) {
+    File osDir = file(moquiRuntime + '/opensearch')
+    workingDir moquiRuntime + (osDir.exists() ? '/opensearch' : '/elasticsearch')
+    commandLine (osDir.exists() ? ['./bin/opensearch', '-d', '-p', 'pid'] : ['./bin/elasticsearch', '-d', '-p', 'pid'])
+    ignoreExitValue true
+    onlyIf { (file(moquiRuntime + '/elasticsearch/bin').exists() || file(moquiRuntime + '/opensearch/bin').exists())
+            && !file(moquiRuntime + '/elasticsearch/pid').exists() && !file(moquiRuntime + '/opensearch/pid').exists() }
+    doFirst {
+        logger.lifecycle("Starting ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} installed in runtime/${osDir.exists() ? 'opensearch' : 'elasticsearch'}")
+    }
+}
+*/
+void startSearch(String moquiRuntime) {
+    File osDir = file(moquiRuntime + '/opensearch')
+    String workDir = moquiRuntime + (osDir.exists() ? '/opensearch' : '/elasticsearch')
+    def pidFile = file(workDir + '/pid')
+    def binFile = file(workDir + '/bin')
+    if (binFile.exists() && !pidFile.exists()) {
+        logger.lifecycle("Starting ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} installed in ${workDir}")
+        ProcessBuilder pb = new ProcessBuilder((osDir.exists() ? './bin/opensearch' : './bin/elasticsearch'), '-d', '-p', 'pid')
+        pb.directory(file(workDir))
+        pb.redirectOutput()
+        pb.redirectError()
+        pb.inheritIO()
+        logger.lifecycle("Starting process with command ${pb.command()} in ${pb.directory().path}")
+        try {
+            Process proc = pb.start()
+            // logger.lifecycle("ran start waiting...")
+            int result = proc.waitFor()
+            logger.lifecycle("Process finished with ${result}")
+        } catch (Exception e) {
+            logger.lifecycle("Error starting ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'}", e)
+        }
+    } else {
+        if (pidFile.exists()) logger.lifecycle("Not Starting ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} installed in ${workDir}, pid file already exists")
+        if (!binFile.exists()) logger.lifecycle("Not Starting ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'}, no ${workDir}/bin directory found")
+    }
+}
+task startElasticSearch { doLast {
+    startSearch(moquiRuntime)
+} }
+void stopSearch(String moquiRuntime) {
+    File osDir = file(moquiRuntime + '/opensearch')
+    String workDir = moquiRuntime + (osDir.exists() ? '/opensearch' : '/elasticsearch')
+    def pidFile = file(workDir + '/pid')
+    def binFile = file(workDir + '/bin')
+    if (pidFile.exists() && binFile.exists()) {
+        String pid = pidFile.getText()
+        logger.lifecycle("Stopping ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} installed in ${workDir} with pid ${pid}")
+        exec { workingDir workDir; commandLine 'kill', pid }
+        // don't bother waiting in this case: exec { workingDir esDir; commandLine 'tail', "--pid=${pid}", '-f', '/dev/null' }
+        if (pidFile.exists()) delete pidFile
+    } else {
+        if (!pidFile.exists()) logger.lifecycle("Not Stopping ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} installed in ${workDir}, no pid file found")
+        if (!binFile.exists()) logger.lifecycle("Not Stopping ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'}, no ${workDir}/bin directory found")
+    }
+}
+task stopElasticSearch { doLast {
+    stopSearch(moquiRuntime)
+} }
+
+// ========== development tasks ==========
+task setupIntellij {
+    description "Adds all XML catalog items to intellij to enable autocomplete"
+    doLast {
+        def ideaDir = "${rootDir}/.idea"
+        def parser = new XmlSlurper()
+        parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+        parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+        def catalogEntries = parser.parse(file("${rootDir}/framework/xsd/framework-catalog.xml"))
+                .system
+                .list()
+                .stream()
+                .map { [url: it.@systemId, location: "\$PROJECT_DIR\$/framework/xsd/${it.@uri}"] }
+                .collect(java.util.stream.Collectors.toList())
+        mkdir ideaDir
+        def rawXml
+        def miscFile = file("${ideaDir}/misc.xml")
+        if (!miscFile.exists()) {
+            def builder = new groovy.xml.StreamingMarkupBuilder()
+            builder.encoding = 'UTF-8'
+            rawXml = builder.bind {
+                project(version: '4') {
+                    component(name: 'ExternalStorageConfigurationManager', enabled: true)
+                    component(name: 'ProjectResources') {
+                        catalogEntries.each { resource(url: it.url, location: it.location) }
+                    }
+                }
+            }
+        } else {
+            def projectNode = parser.parse(miscFile)
+            def resourcesNode = projectNode.children().find { it.@name == 'ProjectResources' }
+            if (resourcesNode.size() == 0) {
+                projectNode.appendNode {
+                    component(name: 'ProjectResources') {
+                        catalogEntries.each { resource(url: it.url, location: it.location) }
+                    }
+                }
+            } else {
+                catalogEntries.each { cat ->
+                    def existingEntry = resourcesNode.children().find { it.@url == cat.url }
+                    if (existingEntry.size() > 0) {
+                        existingEntry.replaceNode { resource(url: cat.url, location: cat.location) }
+                    } else {
+                        resourcesNode.appendNode { resource(url: cat.url, location: cat.location) }
+                    }
+                }
+            }
+            rawXml = projectNode
+        }
+        def misc = groovy.xml.XmlUtil.serialize(rawXml)
+        miscFile.write(misc)
+    }
+}
+
+// ========== test task ==========
+// NOTE1: to run startElasticSearch before the first test task add it as a dependency to all test tasks
+// NOTE2: to run stopElasticSearch after the last test task make all test tasks finalizedBy stopElasticSearch
+getTasksByName('test', true).each {
+    if (it.path != ':test') {
+        // logger.lifecycle("Adding dependencies for test task ${it.getPath()}")
+        it.dependsOn(startElasticSearch)
+        it.finalizedBy(stopElasticSearch)
+    }
+}
+
+// ========== check/update tasks ==========
+
+task getRuntime {
+    description "If the runtime directory does not exist get it using settings in myaddons.xml or addons.xml; also check default components in myaddons.xml (addons.@default) and download any missing"
+    doLast { checkRuntimeDirAndDefaults(project.hasProperty('locationType') ? locationType : null) }
+}
+task checkRuntime { doLast {
+    if (!file('runtime').exists()) throw new GradleException("Required 'runtime' directory not found. Use 'gradle getRuntime' or 'gradle getComponent' or manually clone the moqui-runtime repository. This must be done in a separate Gradle run before a build so Gradle can find and run build tasks.")
+} }
+task gitPullAll {
+    description "Do a git pull to update moqui, runtime, and each installed component (for each where a .git directory is found)"
+    doLast {
+        // framework and runtime
+        if (file(".git").exists()) { doGitPullWithStatus(file('.').path) }
+        if (file("runtime/.git").exists()) { doGitPullWithStatus(file('runtime').path) }
+        // all directories under runtime/component
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } }) {
+            doGitPullWithStatus(compDir.path)
+        }
+    }
+}
+def doGitPullWithStatus(def gitDir) {
+    try {
+        def curGrgit = Grgit.open(dir: gitDir)
+        logger.lifecycle("\nPulling ${gitDir} (branch:${curGrgit.branch.current()?.name}, tracking:${curGrgit.branch.current()?.trackingBranch?.name})")
+
+        def beforeHead = curGrgit.head()
+        curGrgit.pull()
+        def afterHead = curGrgit.head()
+        if (beforeHead == afterHead) {
+            logger.lifecycle("Already up-to-date.")
+        } else {
+            List<Commit> commits = curGrgit.log { range(beforeHead, afterHead) }
+            for (Commit commit in commits) logger.lifecycle("- ${commit.getAbbreviatedId(7)} by ${commit.committer?.name}: ${commit.shortMessage}")
+        }
+    } catch (Throwable t) {
+        logger.error(t.message)
+    }
+}
+task gitCheckoutAll {
+    description "Do a git checkout on moqui, runtime, and each installed component (for each where a .git directory is found); use -Pbranch= (required) to specify a branch, use -Pcreate=true to create branches with the given name"
+    doLast {
+        if (!project.hasProperty('branch')) throw new InvalidUserDataException("No branch property specified (use -Pbranch=...)")
+        String curBranch = branch
+        String curTag = (project.hasProperty('tag') ? tag : null) ?: curBranch
+        boolean createBranch = false
+        if (project.hasProperty('create') && create == 'true') createBranch = true
+
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+
+        for (String gitDir in gitDirectories) {
+            def curGrgit = Grgit.open(dir: gitDir)
+            def branchList = curGrgit.branch.list(mode: org.ajoberstar.grgit.operation.BranchListOp.Mode.ALL)
+            def tagList = curGrgit.tag.list()
+            def targetBranch = branchList.find({ it.name == curBranch })
+            def targetTag = tagList.find({ it.name == curTag })
+            if (targetBranch == null && targetTag == null) {
+                def originBranch = branchList.find({ it.name == 'origin/' + curBranch })
+                if (originBranch != null) {
+                    logger.lifecycle("In ${gitDir} branch ${curBranch} not found but found ${originBranch.name}, creating local branch tracking that branch")
+                    targetBranch = curGrgit.branch.add(name: curBranch, startPoint: originBranch, mode: org.ajoberstar.grgit.operation.BranchAddOp.Mode.TRACK)
+                }
+            }
+            if (createBranch || targetBranch != null || targetTag != null) {
+                if (targetTag != null) {
+                    if (createBranch && curBranch != curTag) {
+                        logger.lifecycle("== Git checkout ${gitDir} tag ${curTag} and create branch ${curBranch}")
+                        try { curGrgit.checkout(branch: curBranch, createBranch: true, startPoint: targetTag) }
+                        catch (Exception e) { logger.lifecycle("Checkout error", e) }
+                    } else {
+                        logger.lifecycle("== Git checkout ${gitDir} tag ${curTag}")
+                        try { curGrgit.checkout(branch: curTag, createBranch: false) }
+                        catch (Exception e) { logger.lifecycle("Checkout error", e) }
+                    }
+                } else {
+                    logger.lifecycle("== Git checkout ${gitDir} branch ${curBranch} create ${createBranch}")
+                    try { curGrgit.checkout(branch: curBranch, createBranch: createBranch) }
+                    catch (Exception e) { logger.lifecycle("Checkout error", e) }
+                }
+            } else {
+                logger.lifecycle("* No branch or tag '${curBranch}' in ${gitDir}\nBranches: ${branchList.collect({it.name})}\nTags: ${tagList.collect({it.name})}")
+            }
+            logger.lifecycle("")
+        }
+    }
+}
+task gitStatusAll {
+    description "Do a git status to check moqui, runtime, and each installed component (for each where a .git directory is found)"
+    doLast {
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+        for (String gitDir in gitDirectories) {
+            def curGrgit = Grgit.open(dir: gitDir)
+            logger.lifecycle("\nGit status for ${gitDir} (branch:${curGrgit.branch.current()?.name}, tracking:${curGrgit.branch.current()?.trackingBranch?.name})")
+
+            if (curGrgit.remote.list().find({ it.name == 'upstream'})) {
+                def upstreamAhead = curGrgit.log { range curGrgit.resolve.toCommit('refs/remotes/upstream/master'), curGrgit.resolve.toCommit('refs/remotes/origin/master') }
+                if (upstreamAhead) logger.lifecycle("- origin/master ${upstreamAhead.size()} commits ahead of upstream/master")
+            }
+            def unpushed = curGrgit.log { range curGrgit.resolve.toCommit('refs/remotes/origin/master'), curGrgit.resolve.toCommit('HEAD') }
+            if (unpushed) logger.lifecycle("--- ${unpushed.size()} commits unpushed (ahead of origin/master)")
+            for (Commit commit in unpushed) logger.lifecycle(" - ${commit.getAbbreviatedId(8)} - ${commit.shortMessage}")
+            def curStatus = curGrgit.status()
+            if (curStatus.isClean()) logger.lifecycle("* nothing to commit, working directory clean")
+            if (curStatus.staged.added || curStatus.staged.modified || curStatus.staged.removed) logger.lifecycle("--- Changes to be committed::")
+            for (String fn in curStatus.staged.added)    logger.lifecycle("       added: ${fn}")
+            for (String fn in curStatus.staged.modified) logger.lifecycle("    modified: ${fn}")
+            for (String fn in curStatus.staged.removed)  logger.lifecycle("     removed: ${fn}")
+            if (curStatus.unstaged.added || curStatus.unstaged.modified || curStatus.unstaged.removed) logger.lifecycle("--- Changes not staged for commit:")
+            for (String fn in curStatus.unstaged.added)    logger.lifecycle("       added: ${fn}")
+            for (String fn in curStatus.unstaged.modified) logger.lifecycle("    modified: ${fn}")
+            for (String fn in curStatus.unstaged.removed)  logger.lifecycle("     removed: ${fn}")
+        }
+    }
+}
+task gitUpstreamAll {
+    description "Do a git pull upstream:master for moqui, runtime, and each installed component (for each where a .git directory is found and has a remote called upstream)"
+    doLast {
+        String remoteName = project.hasProperty('remote') ? remote : 'upstream'
+
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+        for (String gitDir in gitDirectories) {
+            def curGrgit = Grgit.open(dir: gitDir)
+            if (curGrgit.remote.list().find({ it.name == remoteName})) {
+                logger.lifecycle("\nGit merge ${remoteName} for ${gitDir}")
+                curGrgit.pull(remote: remoteName, branch: 'master')
+            } else {
+                logger.lifecycle("\nNo ${remoteName} remote for ${gitDir}")
+            }
+
+        }
+    }
+}
+
+task gitTagAll {
+    description "Do a git add or remove tag on the currently checked out commit in moqui, runtime, and each installed component"
+    doLast {
+        def tagName = (project.hasProperty('tag')) ? tag : null;
+        def tagMessage = (project.hasProperty('message')) ? message : null;
+
+        boolean removeTags = (project.hasProperty('remove') && remove == 'true')
+        boolean pushTags = (project.hasProperty('push') && push == 'true')
+
+        // Users can simply push tags to the remote
+        if (tagName == null && pushTags == false)
+            throw new InvalidUserDataException("No tag property specified (use -Ptag=...) and No push tag specified (use -Ppush=true)")
+
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+
+        def frameworkDir = gitDirectories.first()
+        for (String gitDir in gitDirectories) {
+            def relativePath = "."+gitDir.minus(frameworkDir)
+            def curGrgit = Grgit.open(dir: gitDir)
+            def branchName = curGrgit.branch.current().name
+            def commit = curGrgit.log(maxCommits: 1).find()
+
+            if (tagName != null) {
+                def tagList = curGrgit.tag.list()
+                def targetTag = tagList.find({ it.name == tagName })
+
+                if (targetTag == null) {
+                    if (removeTags) {
+                        logger.lifecycle("== Git tag '${tagName}' not found in ${branchName} of ${relativePath} ... skipping")
+                    } else {
+                        curGrgit.tag.add(name: tagName, message: tagMessage ?: "Tagging version ${tagName}")
+                        logger.lifecycle("== Git tagging commit ${commit.abbreviatedId} - '${commit.shortMessage}' by '${commit.author.name}' in ${branchName} of ${relativePath}")
+                    }
+                } else {
+                    if (removeTags) {
+                        curGrgit.tag.remove(names: [tagName])
+                        logger.lifecycle("== Git removing tag '${tagName}' in ${branchName} of ${relativePath}")
+                    } else {
+                        logger.lifecycle("== Git tag '${tagName}' already exists in ${branchName} of ${relativePath}, skipping...")
+                    }
+                }
+            }
+            if (pushTags) {
+                if (removeTags) {
+                    curGrgit.push(refsOrSpecs: [':refs/tags/'+tagName])
+                } else {
+                    curGrgit.push(tags: true)
+                }
+                logger.lifecycle("== Git pushing tag changes to remote of ${relativePath}")
+            }
+        }
+    }
+}
+task gitDiffTagsAll {
+    description "Do a git diff between two tags in the currently checked out branch in moqui, runtime, and each installed component"
+    doLast {
+        if (!project.hasProperty('taga') || taga == null)
+            throw new InvalidUserDataException("No taga property specified (use -Ptaga=...)")
+
+        // If tagb is not passed, we assume HEAD
+        def tagb = (project.hasProperty('tagb') && tagb != null) ? tagb : "HEAD";
+
+        logger.lifecycle("== Git diffing tags ${taga} and ${tagb}")
+
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+
+        def frameworkDir = gitDirectories.first()
+        for (String gitDir in gitDirectories) {
+            def relativePath = "."+gitDir.minus(frameworkDir)
+            def grgit = Grgit.open(dir: gitDir)
+
+            def tagList = grgit.tag.list()
+            def tagaCommit = tagList.find({ it.name == taga })
+            def tagbCommit = tagList.find({ it.name == tagb })
+
+            logger.lifecycle("${relativePath}")
+
+            if ((taga == "HEAD" || tagaCommit != null) && (tagb == "HEAD" || tagbCommit != null)) {
+                grgit.log {
+                    range taga, tagb
+                }.each {
+                    logger.lifecycle("    ${it.abbreviatedId} - ${it.shortMessage}")
+                }
+            }
+        }
+    }
+}
+
+task gitMergeAll {
+    description "Do a git diff between two tags in the currently checked out branch in moqui, runtime, and each installed component"
+    doLast {
+        def branchName = (project.hasProperty('branch')) ? branch : null;
+        def tagName = (project.hasProperty('tag')) ? tag : null;
+        def mergeMode = (project.hasProperty('mode')) ? mode : null;
+        def mergeMessage = (project.hasProperty('message')) ? message : null;
+        def pushMerge = (project.hasProperty('push')) ? push : null;
+
+
+        List<String> gitDirectories = []
+        if (file(".git").exists()) gitDirectories.add(file('.').path)
+        if (file("runtime/.git").exists()) gitDirectories.add(file('runtime').path)
+        for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } })
+            gitDirectories.add(compDir.path)
+
+        def frameworkDir = gitDirectories.first()
+        for (String gitDir in gitDirectories) {
+            def relativePath = "."+gitDir.minus(frameworkDir)
+            logger.lifecycle("${relativePath}")
+            def grgit = Grgit.open(dir: gitDir)
+            def currentBranch = grgit.branch.current()?.name;
+            if (branchName == currentBranch)
+                continue
+
+            def doMerge = false;
+
+            if (branchName && grgit.branch.list().find({ it.name == branchName }) != null) {
+                doMerge = true;
+            }
+
+            if (tagName && grgit.tag.list().find({ it.name == tagName }) != null) {
+                doMerge = true;
+            }
+
+            if (doMerge) {
+                grgit.merge(head: branchName ?: tagName, mode: mergeMode, message: mergeMessage)
+                logger.lifecycle("    Merging ${branchName ?: tagName} into ${currentBranch}")
+            }
+
+            if (pushMerge) {
+                grgit.push();
+                logger.lifecycle("    Pushing merge")
+            }
+        }
+    }
+}
+
+// ========== run tasks ==========
+
+task run(type: JavaExec) {
+    dependsOn checkRuntime, allBuildTasks, cleanTempDir
+    workingDir = '.'; jvmArgs = ['-server', '-XX:-OmitStackTraceInFastThrow']
+    systemProperties = ['moqui.conf':moquiConfDev, 'moqui.runtime':moquiRuntime]
+    // NOTE: this is a hack, using -jar instead of a class name, and then the first argument is the name of the jar file
+    main = '-jar'; args = [warName]
+}
+task runProduction(type: JavaExec) {
+    dependsOn checkRuntime, allBuildTasks, cleanTempDir
+    workingDir = '.'; jvmArgs = ['-server', '-Xms1024M']
+    systemProperties = ['moqui.conf':moquiConfProduction, 'moqui.runtime':moquiRuntime]
+    main = '-jar'; args = [warName]
+}
+
+task load(type: JavaExec) {
+    description "Run Moqui to load data; to specify data types use something like: gradle load -Ptypes=seed,seed-initial,install"
+    dependsOn checkRuntime, allBuildTasks
+    systemProperties = ['moqui.conf':moquiConfDev, 'moqui.runtime':moquiRuntime]
+    workingDir = '.'; jvmArgs = ['-server']; main = '-jar'
+    args = [warName, 'load', (project.properties.containsKey('types') ? "types=${types}" : "types=all")]
+}
+task loadSeed(type: JavaExec) {
+    dependsOn checkRuntime, allBuildTasks
+    systemProperties = ['moqui.conf':moquiConfProduction, 'moqui.runtime':moquiRuntime]
+    workingDir = '.'; jvmArgs = ['-server']; main = '-jar'
+    args = [warName, 'load', (project.properties.containsKey('types') ? "types=${types}" : "types=seed")]
+}
+task loadSeedInitial(type: JavaExec) {
+    dependsOn checkRuntime, allBuildTasks
+    systemProperties = ['moqui.conf':moquiConfProduction, 'moqui.runtime':moquiRuntime]
+    workingDir = '.'; jvmArgs = ['-server']; main = '-jar'
+    args = [warName, 'load', (project.properties.containsKey('types') ? "types=${types}" : "types=seed,seed-initial")]
+}
+task loadProduction(type: JavaExec) {
+    dependsOn checkRuntime, allBuildTasks
+    systemProperties = ['moqui.conf':moquiConfProduction, 'moqui.runtime':moquiRuntime]
+    workingDir = '.'; jvmArgs = ['-server']; main = '-jar'
+    args = [warName, 'load', (project.properties.containsKey('types') ? "types=${types}" : "types=seed,seed-initial,install")]
+}
+
+task saveDb { doLast {
+    if (file(moquiRuntime+'/db/derby/moqui').exists())
+        ant.zip(destfile: 'SaveDerby.zip') { fileset(dir: moquiRuntime+'/db/derby/moqui') { include(name: '**/*') } }
+    if (file(moquiRuntime+'/db/h2').exists())
+        ant.zip(destfile: 'SaveH2.zip') { fileset(dir: moquiRuntime+'/db/h2') { include(name: '**/*') } }
+    if (file(moquiRuntime+'/db/orientdb/databases').exists())
+        ant.zip(destfile: 'SaveOrientDb.zip') { fileset(dir: moquiRuntime+'/db/orientdb/databases') { include(name: '**/*') } }
+
+    File osDir = file(moquiRuntime + '/opensearch')
+    String workDir = moquiRuntime + (osDir.exists() ? '/opensearch' : '/elasticsearch')
+    if (file(workDir+'/data').exists()) {
+        if (file(workDir+'/bin').exists()) {
+            def pidFile = file(workDir+'/pid')
+            if (pidFile.exists()) {
+                String pid = pidFile.getText()
+                logger.lifecycle("ElasticSearch running with pid ${pid}, stopping before saving data then restarting")
+                exec { workingDir workDir; commandLine 'kill', pid }
+                exec { workingDir workDir; commandLine 'tail', "--pid=${pid}", '-f', '/dev/null' }
+                if (pidFile.exists()) delete pidFile
+
+                ant.zip(destfile: (osDir.exists() ? 'SaveOpenSearch.zip' : 'SaveElasticSearch.zip')) { fileset(dir: workDir+'/data') { include(name: '**/*') } }
+
+                startSearch(moquiRuntime)
+            } else {
+                logger.lifecycle("Found ${osDir.exists() ? 'OpenSearch' : 'ElasticSearch'} ${workDir}/bin directory but no pid, saving data without stop/start; WARNING if ElasticSearch is running this will cause problems!")
+
+                ant.zip(destfile: (osDir.exists() ? 'SaveOpenSearch.zip' : 'SaveElasticSearch.zip')) { fileset(dir: workDir+'/data') { include(name: '**/*') } }
+            }
+        } else {
+            ant.zip(destfile: (osDir.exists() ? 'SaveOpenSearch.zip' : 'SaveElasticSearch.zip')) { fileset(dir: workDir+'/data') { include(name: '**/*') } }
+        }
+    }
+} }
+task loadSave {
+    description "Clean all, build and load, then save database (H2, Derby), OrientDB, and OpenSearch/ElasticSearch files; to be used before reloadSave"
+    dependsOn cleanAll, load, saveDb
+}
+
+task reloadSave {
+    description "After a loadSave clean database (H2, Derby), OrientDB, and ElasticSearch files and reload from saved copy"
+    dependsOn cleanTempDir, cleanDb, cleanLog, cleanSessions
+    dependsOn allBuildTasks
+    doLast {
+        if (file('SaveDerby.zip').exists()) copy { from zipTree('SaveDerby.zip'); into file(moquiRuntime+'/db/derby/moqui') }
+        if (file('SaveH2.zip').exists()) copy { from zipTree('SaveH2.zip'); into file(moquiRuntime+'/db/h2') }
+        if (file('SaveOrientDb.zip').exists()) copy { from zipTree('SaveOrientDb.zip'); into file(moquiRuntime+'/db/orientdb/databases') }
+
+        if (file('SaveElasticSearch.zip').exists()) {
+            String esDir = moquiRuntime+'/elasticsearch'
+            if (file(esDir+'/bin').exists()) {
+                def pidFile = file(esDir+'/pid')
+                if (pidFile.exists()) {
+                    String pid = pidFile.getText()
+                    logger.lifecycle("ElasticSearch running with pid ${pid}, stopping before restoring data then restarting")
+                    exec { workingDir esDir; commandLine 'kill', pid }
+                    exec { workingDir esDir; commandLine 'tail', "--pid=${pid}", '-f', '/dev/null' }
+                    copy { from zipTree('SaveElasticSearch.zip'); into file(moquiRuntime+'/elasticsearch/data') }
+                    if (pidFile.exists()) delete pidFile
+                    exec { workingDir esDir; commandLine './bin/elasticsearch', '-d', '-p', 'pid' }
+                } else {
+                    logger.lifecycle("Found ElasticSearch ${esDir}/bin directory but no pid, saving data without stop/start; WARNING if ElasticSearch is running this will cause problems!")
+                    copy { from zipTree('SaveElasticSearch.zip'); into file(moquiRuntime+'/elasticsearch/data') }
+                }
+            } else {
+                copy { from zipTree('SaveElasticSearch.zip'); into file(moquiRuntime+'/elasticsearch/data') }
+            }
+        }
+        if (file('SaveOpenSearch.zip').exists()) {
+            String esDir = moquiRuntime+'/opensearch'
+            if (file(esDir+'/bin').exists()) {
+                def pidFile = file(esDir+'/pid')
+                if (pidFile.exists()) {
+                    String pid = pidFile.getText()
+                    logger.lifecycle("OpenSearch running with pid ${pid}, stopping before restoring data then restarting")
+                    exec { workingDir esDir; commandLine 'kill', pid }
+                    exec { workingDir esDir; commandLine 'tail', "--pid=${pid}", '-f', '/dev/null' }
+                    copy { from zipTree('SaveOpenSearch.zip'); into file(moquiRuntime+'/opensearch/data') }
+                    if (pidFile.exists()) delete pidFile
+                    exec { workingDir esDir; commandLine './bin/opensearch', '-d', '-p', 'pid' }
+                } else {
+                    logger.lifecycle("Found OpenSearch ${esDir}/bin directory but no pid, saving data without stop/start; WARNING if OpenSearch is running this will cause problems!")
+                    copy { from zipTree('SaveOpenSearch.zip'); into file(moquiRuntime+'/opensearch/data') }
+                }
+            } else {
+                copy { from zipTree('SaveOpenSearch.zip'); into file(moquiRuntime+'/opensearch/data') }
+            }
+        }
+    }
+}
+
+// ========== deploy tasks ==========
+
+task deployTomcat { doLast {
+    // remove runtime directory, may have been added for logs/etc
+    delete file(tomcatHome + '/runtime')
+    // remove ROOT directory and war to avoid conflicts
+    delete file(tomcatHome + '/webapps/ROOT')
+    delete file(tomcatHome + '/webapps/ROOT.war')
+    // copy the war file to ROOT.war
+    copy { from file(warName); into file(tomcatHome + '/webapps'); rename(warName, 'ROOT.war') }
+} }
+
+task plusRuntimeWarTemp {
+    dependsOn checkRuntime, allBuildTasks
+
+    doLast {
+        File wartempFile = file('wartemp')
+        if (wartempFile.exists()) delete wartempFile
+
+        // make version detail files
+        makeVersionDetailFiles()
+        // unzip the "moqui-${version}.war" file to the wartemp directory
+        copy { from zipTree(warName); into wartempFile }
+        // copy runtime directory (with a few exceptions) into a runtime directory in the war
+        copy {
+            from fileTree(dir: '.', include: moquiRuntime+'/**',
+                    excludes: ['**/*.jar', '**/build', moquiRuntime+'/classes/**', moquiRuntime+'/lib/**', moquiRuntime+'/log/**', moquiRuntime+'/sessions/**'])
+            into wartempFile
+        }
+        // copy the jar files from runtime/lib
+        copy { from fileTree(dir: moquiRuntime+'/lib', include: '**/*.jar').files into 'wartemp/WEB-INF/lib' }
+        // copy the classpath resource files from runtime/classes
+        copy { from fileTree(dir: moquiRuntime+'/classes', include: '**/*') into 'wartemp/WEB-INF/classes' }
+        // copy the jar files from components
+        copy { from fileTree(dir: moquiRuntime+'/base-component', include: '**/*.jar').files into 'wartemp/WEB-INF/lib' }
+        copy {
+            from fileTree(dir: moquiRuntime+'/component', include: '**/*.jar', exclude: '**/librepo/*.jar').files
+            into 'wartemp/WEB-INF/lib'
+            duplicatesStrategy DuplicatesStrategy.WARN
+        }
+        copy {
+            from fileTree(dir: moquiRuntime+'/ecomponent', include: '**/*.jar', exclude: '**/librepo/*.jar').files
+            into 'wartemp/WEB-INF/lib'
+            duplicatesStrategy DuplicatesStrategy.WARN
+        }
+        // add MoquiInit.properties fresh copy, just in case it was changed
+        copy { from file('MoquiInit.properties') into 'wartemp/WEB-INF/classes' }
+        // add Procfile to root
+        copy { from file('Procfile') into 'wartemp' }
+        // special case: copy elasticsearch plugin/module jars (needed for ES installed in runtime/elasticsearch
+        if (file(moquiRuntime+'/elasticsearch').exists())
+            copy { from fileTree(dir: '.', include: moquiRuntime+'/elasticsearch/**/*.jar') into wartempFile }
+        // special case: copy opensearch plugin/module jars (needed for ES installed in runtime/opensearch
+        if (file(moquiRuntime+'/opensearch').exists())
+            copy { from fileTree(dir: '.', include: moquiRuntime+'/opensearch/**/*.jar') into wartempFile }
+        // special case: copy jackrabbit standalone jar (if exists)
+        copy { from fileTree(dir: moquiRuntime + '/jackrabbit', include: 'jackrabbit-standalone-*.jar').files; into 'wartemp/' + moquiRuntime + '/jackrabbit' }
+
+        // clean up version detail files
+        cleanVersionDetailFiles()
+    }
+}
+task addRuntime(type: Zip) {
+    description "Create moqui-plus-runtime.war file from the moqui.war file and the runtime directory embedded in it"
+    dependsOn checkRuntime, allBuildTasks, plusRuntimeWarTemp
+
+    archiveFileName = plusRuntimeName
+    destinationDirectory = file('.')
+    from file('wartemp')
+
+    doFirst { if (file(plusRuntimeName).exists()) delete file(plusRuntimeName) }
+    doLast { delete file('wartemp') }
+}
+
+// don't use this task directly, use addRuntimeTomcat which calls this
+task deployTomcatRuntime { doLast {
+    delete file(tomcatHome + '/runtime'); delete file(tomcatHome + '/webapps/ROOT'); delete file(tomcatHome + '/webapps/ROOT.war')
+    copy { from file(plusRuntimeName); into file(tomcatHome + '/webapps'); rename(plusRuntimeName, 'ROOT.war') }
+} }
+task addRuntimeTomcat {
+    dependsOn addRuntime
+    dependsOn deployTomcatRuntime
+}
+
+// ========== component tasks ==========
+
+task getDefaults {
+    description "Get a component using specified location type, also check/get all components it depends on; requires component property; locationType property optional (defaults to git if there is a .git directory, otherwise to current)"
+    doLast {
+        String curLocationType = file('.git').exists() ? 'git' : 'current'
+        if (project.hasProperty('locationType')) curLocationType = locationType
+        getComponentTop(curLocationType)
+    }
+}
+task getComponent {
+    description "Get a component using specified location type, also check/get all components it depends on; requires component property; locationType property optional (defaults to git if there is a .git directory, otherwise to current)"
+    doLast {
+        String curLocationType = file('.git').exists() ? 'git' : 'current'
+        if (project.hasProperty('locationType')) curLocationType = locationType
+        getComponentTop(curLocationType)
+    }
+}
+task getCurrent {
+    description "Get the current archive for a component, also check each component it depends on and if not present get its current archive; requires component property"
+    doLast { getComponentTop('current') }
+}
+task getRelease {
+    description "Get the release archive for a component, also check each component it depends on and if not present get its configured release archive; requires component property"
+    doLast { getComponentTop('release') }
+}
+task getBinary {
+    description "Get the binary release archive for a component, also check each component it depends on and if not present get its configured release archive; requires component property"
+    doLast { getComponentTop('binary') }
+}
+task getGit {
+    description "Clone the git repository for a component, also check each component it depends on and if not present clone its git repository; requires component property"
+    doLast { getComponentTop('git') }
+}
+task getDepends {
+    description "Check/Get all dependencies for all components in runtime/component; locationType property optional (defaults to git if there is a .git directory, otherwise to current)"
+    doLast {
+        String curLocationType = file('.git').exists() ? 'git' : 'current'
+        if (project.hasProperty('locationType')) curLocationType = locationType
+        checkAllComponentDependencies(curLocationType)
+    }
+}
+
+task getComponentSet {
+    description "Gets all components in the specied componentSet using specified location type, also check/get all components it depends on; requires -Pcomponent property; -PlocationType property optional (defaults to git if there is a .git directory, otherwise to current)"
+    doLast {
+        String curLocationType = file('.git').exists() ? 'git' : 'current'
+        if (project.hasProperty('locationType')) curLocationType = locationType
+        if (!project.hasProperty('componentSet')) throw new InvalidUserDataException("No componentSet property specified")
+        checkRuntimeDirAndDefaults(curLocationType)
+        Set compsChecked = new TreeSet()
+        loadComponentSet((String) componentSet, curLocationType, parseAddons(), parseMyaddons(), compsChecked)
+        logger.lifecycle("Got component-set ${componentSet}, got or checked components: ${compsChecked}")
+    }
+}
+
+task zipComponents {
+    description "Create a .zip archive file for each component in runtime/component"
+    dependsOn allBuildTasks
+    doLast { for (File compDir in findComponentDirs()) createComponentZip(compDir) }
+}
+task zipComponent {
+    description "Create a .zip archive file a single component in runtime/component; requires component property"
+    dependsOn allBuildTasks
+    doLast {
+        if (!project.hasProperty('component')) throw new InvalidUserDataException("No component property specified")
+        createComponentZip(file('runtime/component/' + component))
+    }
+}
+
+// ========== utility methods ==========
+
+def createComponentZip(File compDir) {
+    File compXmlFile = file("${compDir.path}/component.xml")
+    if (!compXmlFile.exists()) {
+        logger.lifecycle("No component.xml file found at ${compXmlFile.path}, not creating component zip")
+        return
+    }
+    Node compXml = new XmlParser().parse(compXmlFile)
+    File zipFile = file("${compDir.parentFile.path}/${compXml.'@name'}${compXml.'@version' ? '-' + compXml.'@version' : ''}.zip")
+    if (zipFile.exists()) { logger.lifecycle("Deleting existing component zip file: ${zipFile.name}"); zipFile.delete() }
+    // exclude build, src, librepo, build.gradle, defaultexcludes (which includes .git)
+    ant.zip(destfile: zipFile.path) { fileset(dir: compDir.parentFile.path, includes: "${compDir.name}/**", defaultexcludes: 'yes',
+            excludes: "${compDir.name}/build/**,${compDir.name}/src/**,${compDir.name}/librepo/**,${compDir.name}/build.gradle") }
+    logger.lifecycle("Created component zip file: ${zipFile.name}")
+}
+
+def checkRuntimeDirAndDefaults(String locType) {
+    Node addons = parseAddons()
+    Node myaddons = parseMyaddons()
+    if (!locType) locType = file('.git').exists() ? 'git' : 'current'
+
+    File runtimeDir = file('runtime')
+    if (!runtimeDir.exists()) {
+        Node runtimeNode = myaddons != null && myaddons.runtime ? (Node) myaddons.runtime[0] : null
+        if (runtimeNode == null) runtimeNode = addons != null && addons.runtime ? (Node) addons.runtime[0] : null
+        if (runtimeNode == null) throw new InvalidUserDataException("The runtime directory does not exist and no runtime element found in myaddons.xml or addons.xml")
+        downloadComponent("runtime", locType, runtimeNode, addons, myaddons)
+    }
+
+    // look for @default in myaddons.xml only
+    if (myaddons?.'@default') {
+        String defaultComps = myaddons.'@default'
+        Set compsChecked = new TreeSet()
+        Set defaultCompsDownloaded = new TreeSet()
+        for (String compName in defaultComps.split(',')) {
+            compName = compName.trim()
+            if (!compName) continue
+            File componentDir = file("runtime/component/${compName}")
+            if (componentDir.exists()) continue
+            getComponent(compName, locType, addons, myaddons, compsChecked)
+            defaultCompsDownloaded.add(compName)
+        }
+        if (defaultCompsDownloaded)
+            logger.lifecycle("Got default components ${defaultCompsDownloaded}, dependent components checked: ${compsChecked}")
+    }
+}
+
+def loadComponentSet(String setName, String curLocationType, Node addons, Node myaddons, Set compsChecked) {
+    Node setNode = null
+    if (myaddons) setNode = myaddons.'component-set'.find({ it."@name" == setName })
+    if (setNode == null) setNode = addons.'component-set'.find({ it."@name" == setName })
+    if (setNode == null) throw new InvalidUserDataException("Could not find component-set with name ${setName}")
+    String components = setNode.'@components'
+    if (components) for (String compName in components.split(","))
+        getComponent(compName, curLocationType, addons, myaddons, compsChecked)
+    String sets = setNode.'@sets'
+    if (sets) for (String subsetName in sets.split(","))
+        loadComponentSet(subsetName, curLocationType, addons, myaddons, compsChecked)
+}
+
+Collection<File> findComponentDirs() {
+    file('runtime/component').listFiles().findAll({ it.isDirectory() && it.listFiles().find({ it.name == 'component.xml' }) })
+}
+Node parseAddons() { new XmlParser().parse(file('addons.xml')) }
+Node parseMyaddons() { if (file('myaddons.xml').exists()) { new XmlParser().parse(file('myaddons.xml')) } else { null } }
+Node parseComponent(project) { new XmlParser().parse(project.file('component.xml')) }
+
+def getComponentTop(String locationType) {
+    if (project.hasProperty('component')) {
+        checkRuntimeDirAndDefaults(locationType)
+        Set compsChecked = new TreeSet()
+        File componentDir = getComponent(component, locationType, parseAddons(), parseMyaddons(), compsChecked)
+        if (componentDir?.exists()) logger.lifecycle("Got component ${component}, dependent components checked: ${compsChecked}")
+    } else {
+        throw new InvalidUserDataException("No component property specified")
+    }
+}
+File getComponent(String compName, String type, Node addons, Node myaddons, Set compsChecked) {
+    // get the component
+    Node component = myaddons != null ? (Node) myaddons.component.find({ it."@name" == compName }) : null
+    if (component == null) component = (Node) addons.component.find({ it."@name" == compName })
+    if (component == null) throw new InvalidUserDataException("Component ${compName} not found in myaddons.xml or addons.xml")
+    if (component.'@skip-get' == 'true') { logger.lifecycle("Skipping get component ${compName} (skip-get=true)"); return null }
+    File componentDir = downloadComponent("runtime/component/${compName}", type, component, addons, myaddons)
+
+    checkComponentDependencies(compName, type, addons, myaddons, compsChecked)
+    return componentDir
+}
+File downloadComponent(String targetDirPath, String type, Node component, Node addons, Node myaddons) {
+    String compName = component.'@name'
+
+    String repositoryName = (component.'@repository' ?: myaddons?.'@default-repository' ?: addons.'@default-repository' ?: 'github')
+    Node repository = myaddons != null ? (Node) myaddons.repository.find({ it."@name" == repositoryName }) : null
+    if (repository == null) repository = (Node) addons.repository.find({ it."@name" == repositoryName })
+    if (repository == null) throw new InvalidUserDataException("Repository ${repositoryName} not found in myaddons.xml or addons.xml")
+    Node location = (Node) repository.location.find({ it."@type" == type })
+    if (location == null) throw new InvalidUserDataException("Location for type ${type} now found in repository ${repositoryName}")
+
+    String url = Eval.me('component', component, '"""' + location.'@url' + '"""')
+    logger.lifecycle("Getting ${compName} (type ${type}) from ${url} to ${targetDirPath}")
+
+    File targetDir = file(targetDirPath)
+    if (targetDir.exists()) { logger.lifecycle("Component ${compName} already exists at ${targetDir}"); return targetDir }
+    if (type in ['current', 'release', 'binary']) {
+        File zipFile = file("${targetDirPath}.zip")
+        ant.get(src: url, dest: zipFile)
+        // the eachFile closure removes the first path from each file, moving everything up a directory
+        copy { from zipTree(zipFile); into targetDir; eachFile { it.setPath((it.getRelativePath().getSegments() as List).tail().join("/")); return it } }
+        delete zipFile
+        // delete the empty directories left over from zip expansion with first path removed
+        String archiveDirName = compName + '-'
+        if (type == 'current') { archiveDirName += component.'@branch' } else { archiveDirName += component.'@version' }
+        // logger.lifecycle("Deleting dir ${targetDirPath}/${archiveDirName}")
+        delete file("${targetDirPath}/${archiveDirName}")
+    } else if (type == 'git') {
+        Grgit.clone(dir: targetDir, uri: url)
+    }
+    logger.lifecycle("Downloaded ${compName} to ${targetDirPath}")
+    return targetDir
+}
+def checkComponentDependencies(String compName, String type, Node addons, Node myaddons, Set compsChecked) {
+    File componentDir = file("runtime/component/${compName}")
+    if (!componentDir.exists()) return
+    compsChecked.add(compName)
+    File compXmlFile = file("${componentDir.path}/component.xml")
+    if (!compXmlFile.exists()) return
+    Node compXml = new XmlParser().parse(compXmlFile)
+    for (Node dependsOn in compXml.'depends-on') {
+        String depCompName = dependsOn.'@name'
+        if (file("runtime/component/${depCompName}").exists()) {
+            if (!compsChecked.contains(depCompName)) checkComponentDependencies(depCompName, type, addons, myaddons, compsChecked)
+        } else {
+            getComponent(depCompName, type, addons, myaddons, compsChecked)
+        }
+    }
+}
+def checkAllComponentDependencies(String type) {
+    Node addons = parseAddons()
+    Node myaddons = parseMyaddons()
+    Set compsChecked = new TreeSet()
+    for (File compDir in findComponentDirs()) {
+        checkComponentDependencies(compDir.name, type, addons, myaddons, compsChecked)
+    }
+    logger.lifecycle("Dependent components checked: ${compsChecked}")
+}
+
+def makeVersionDetailFiles() {
+    if (file(".git").exists()) {
+        def topVersionMap = [framework:getVersionDetailMap(file('.'))]
+        if (file("runtime/.git").exists()) topVersionMap.runtime = getVersionDetailMap(file('runtime'))
+        file('runtime/version.json').write(groovy.json.JsonOutput.toJson(topVersionMap), "UTF-8")
+    }
+    for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() && it.listFiles().find { it.name == '.git' } }) {
+        def versionMap = getVersionDetailMap(compDir)
+        if (versionMap == null) continue
+        file(compDir.path + '/version.json').write(groovy.json.JsonOutput.toJson(versionMap), "UTF-8")
+    }
+}
+Map getVersionDetailMap(File gitDir) {
+    def curGrgit = Grgit.open(dir: gitDir)
+    if (curGrgit == null) return null
+    String trackingName = curGrgit.branch.current()?.trackingBranch?.name
+    String trackingUrl = ""
+    int trackingNameSlash = trackingName ? trackingName.indexOf('/') : -1
+    if (trackingNameSlash > 0) {
+        String remoteName = trackingName.substring(0, trackingNameSlash)
+        def trackingRemote = curGrgit.remote.list().find({ it.name == remoteName })
+        if (trackingRemote != null) trackingUrl = trackingRemote.url
+    }
+    try {
+        String headId = curGrgit.head()?.id
+        // tags come in order of oldest first so want to find last in case multiple tags refer to HEAD commit
+        def headTag = curGrgit.tag.list().reverse().find({ it.commit.id == headId })
+        return [branch:curGrgit.branch.current()?.name, tracking:trackingName, url:trackingUrl, head:headId?.take(10), tag:headTag?.name]
+    } catch (Throwable t) {
+        logger.lifecycle("Error getting git info for directory ${gitDir?.path}", t)
+        return null
+    }
+}
+def cleanVersionDetailFiles() {
+    def runtimeVersionFile = file("runtime/version.json")
+    if (runtimeVersionFile.exists()) runtimeVersionFile.delete()
+    for (File compDir in file('runtime/component').listFiles().findAll { it.isDirectory() }) {
+        File versionDetailFile = file(compDir.path + '/version.json')
+        if (versionDetailFile.exists()) versionDetailFile.delete()
+    }
+}
+
+// ========== combined tasks ==========
+
+task cleanPullLoad { dependsOn cleanAll, gitPullAll, load }
+task cleanPullTest { dependsOn cleanAll, gitPullAll, load, allTestTasks }
+task cleanPullCompTest { dependsOn cleanAll, gitPullAll, load, getComponentTestTasks() }
+task compTest { dependsOn getComponentTestTasks() }

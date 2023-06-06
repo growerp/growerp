@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+    <!-- update Invoice totals (invoiceTotal, appliedPaymentsTotal, unpaidTotal) on changes to InvoiceItem and PaymentApplication -->
+    <eeca id="InvoiceItemUpdateInvoiceTotals" entity="mantle.account.invoice.InvoiceItem"
+            on-create="true" on-update="true" on-delete="true" run-on-error="false">
+        <actions><service-call name="mantle.account.InvoiceServices.update#InvoiceTotals" in-map="[invoiceId:invoiceId]"/></actions>
+    </eeca>
+    <eeca id="PaymentApplicationUpdateInvoiceTotals" entity="mantle.account.payment.PaymentApplication"
+            on-create="true" on-update="true" on-delete="true" run-on-error="false" get-entire-entity="true">
+        <condition><expression>invoiceId || toInvoiceId</expression></condition>
+        <actions>
+            <service-call name="mantle.account.InvoiceServices.update#InvoiceTotals" in-map="[invoiceId:invoiceId]"/>
+            <if condition="toInvoiceId"><service-call name="mantle.account.InvoiceServices.update#InvoiceTotals" in-map="[invoiceId:toInvoiceId]"/></if>
+        </actions>
+    </eeca>
+    <!-- set Invoice.dueDate based on invoiceDate and SettlementTerm -->
+    <eeca id="InvoiceSetDueDate" entity="mantle.account.invoice.Invoice" on-create="true" on-update="true" run-on-error="false">
+        <actions><service-call name="mantle.account.InvoiceServices.checkSet#InvoiceDueDate" in-map="[invoiceId:invoiceId]"/></actions>
+    </eeca>
+
+    <!-- update Payment totals (appliedTotal, unappliedTotal) on changes to Payment and PaymentApplication -->
+    <eeca id="PaymentUpdateTotals" entity="mantle.account.payment.Payment"
+            on-create="true" on-update="true" run-on-error="false" get-entire-entity="true" run-before="true">
+        <actions>
+            <set field="entityValue.amount" from="entityValue.amount ?: 0.0"/>
+            <set field="entityValue.appliedTotal" from="entityValue.appliedTotal ?: 0.0"/>
+            <set field="entityValue.unappliedTotal" from="entityValue.amount - entityValue.appliedTotal"/>
+        </actions>
+    </eeca>
+    <eeca id="PaymentApplicationUpdatePaymentTotals" entity="mantle.account.payment.PaymentApplication"
+            on-create="true" on-update="true" on-delete="true" run-on-error="false" get-entire-entity="true">
+        <condition><expression>paymentId || toPaymentId</expression></condition>
+        <actions>
+            <service-call name="mantle.account.PaymentServices.update#PaymentTotals" in-map="[paymentId:paymentId]"/>
+            <if condition="toPaymentId"><service-call name="mantle.account.PaymentServices.update#PaymentTotals" in-map="[paymentId:toPaymentId]"/></if>
+        </actions>
+    </eeca>
+
+    <!-- maintain isDebit and isTemporary flags on GlAccount -->
+    <eeca id="GlAccountSetFlags" entity="mantle.ledger.account.GlAccount"
+            on-create="true" on-update="true" run-on-error="false" run-before="true" get-entire-entity="true">
+        <actions><service-call name="mantle.ledger.LedgerServices.set#GlAccountFlags" in-map="[entityValue:entityValue]"/></actions>
+    </eeca>
+</eecas>

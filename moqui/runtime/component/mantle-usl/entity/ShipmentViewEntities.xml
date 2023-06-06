@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.shipment -->
+    <!--  - mantle.shipment.carrier -->
+    <!--  - mantle.shipment.picklist -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.shipment -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="ShipmentAndRouteSegment" package="mantle.shipment">
+        <description>Shipment and ShipmentRouteSegment entities only</description>
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment"/>
+        <member-entity entity-alias="SHRS" entity-name="mantle.shipment.ShipmentRouteSegment" join-from-alias="SHMT">
+            <key-map field-name="shipmentId"/></member-entity>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SHRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentFindView" package="mantle.shipment">
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment"/>
+        <member-relationship entity-alias="SHRS" join-from-alias="SHMT" relationship="routeSegments"/>
+        <member-relationship entity-alias="STSI" join-from-alias="SHMT" relationship="status"/>
+        <member-relationship entity-alias="SMEN" join-from-alias="SHRS" relationship="shipmentMethod" join-optional="true"/>
+        <member-relationship entity-alias="OFAC" join-from-alias="SHRS" relationship="originFacility" join-optional="true"/>
+        <member-relationship entity-alias="DFAC" join-from-alias="SHRS" relationship="destFacility" join-optional="true"/>
+        <member-entity entity-alias="FPTRL" entity-name="mantle.party.PartyRole" join-from-alias="SHMT" join-optional="true">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="TPCLS" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="SHMT" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <member-relationship entity-alias="SHITM" join-from-alias="SHMT" relationship="items" join-optional="true"/>
+        <member-relationship entity-alias="SHIS" join-from-alias="SHMT" relationship="itemSources" join-optional="true"/>
+        <member-relationship entity-alias="OHDR" join-from-alias="SHIS" relationship="orderHeader" join-optional="true"/>
+        <member-relationship entity-alias="SPRS" join-from-alias="SHMT" relationship="packageRouteSegments" join-optional="true"/>
+        <member-entity entity-alias="OPPTY" entity-name="mantle.order.OrderPartParty" join-from-alias="OHDR" join-optional="true">
+            <key-map field-name="orderId"/></member-entity>
+
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SHRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias name="shipmentMethodSequenceNum" entity-alias="SMEN" field="sequenceNum"/>
+        <alias name="segmentStatusId" entity-alias="SHRS" field="statusId"/>
+        <alias name="segmentEstimatedArrivalDate" entity-alias="SHRS" field="estimatedArrivalDate"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+
+        <alias name="destinationFacilityName" entity-alias="DFAC" field="facilityName"/>
+        <alias name="destinationFacilityPseudoId" entity-alias="DFAC" field="pseudoId"/>
+        <alias name="destinationFacilityOwnerPartyId" entity-alias="DFAC" field="ownerPartyId"/>
+        <alias name="fromRoleTypeId" entity-alias="FPTRL" field="roleTypeId"/>
+        <alias name="customerClassificationId" entity-alias="TPCLS" field="partyClassificationId"/>
+        <alias name="customerClassFromDate" entity-alias="TPCLS" field="fromDate"/>
+        <alias name="customerClassThruDate" entity-alias="TPCLS" field="thruDate"/>
+        <alias name="originFacilityName" entity-alias="OFAC" field="facilityName"/>
+        <alias name="originFacilityPseudoId" entity-alias="OFAC" field="pseudoId"/>
+        <alias name="originFacilityOwnerPartyId" entity-alias="OFAC" field="ownerPartyId"/>
+
+        <alias name="productId" entity-alias="SHITM"/>
+        <alias name="orderId" entity-alias="SHIS"/>
+        <alias name="salesChannelEnumId" entity-alias="OHDR"/>
+        <alias name="trackingCode" entity-alias="SPRS"/>
+        <alias name="returnTrackingCode" entity-alias="SPRS"/>
+        <alias name="orderPartyId" entity-alias="OPPTY" field="partyId"/>
+        <alias name="orderRoleTypeId" entity-alias="OPPTY" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentReceiveFindView" package="mantle.shipment">
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment"/>
+        <member-entity entity-alias="SHRS" entity-name="mantle.shipment.ShipmentRouteSegment" join-from-alias="SHMT">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="STSI" entity-name="moqui.basic.StatusItem" join-from-alias="SHMT">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="DFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="destinationFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="FPTRL" entity-name="mantle.party.PartyRole" join-from-alias="SHMT" join-optional="true">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SHRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias name="segmentStatusId" entity-alias="SHRS" field="statusId"/>
+        <alias name="segmentEstimatedArrivalDate" entity-alias="SHRS" field="estimatedArrivalDate"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+        <alias name="destinationFacilityName" entity-alias="DFAC" field="facilityName"/>
+        <alias name="destinationFacilityPseudoId" entity-alias="DFAC" field="pseudoId"/>
+        <alias name="fromRoleTypeId" entity-alias="FPTRL" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentShipFindView" package="mantle.shipment">
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment"/>
+        <member-entity entity-alias="SHRS" entity-name="mantle.shipment.ShipmentRouteSegment" join-from-alias="SHMT">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="STSI" entity-name="moqui.basic.StatusItem" join-from-alias="SHMT">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="OFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SHRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias name="segmentStatusId" entity-alias="SHRS" field="statusId"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+        <alias name="originFacilityName" entity-alias="OFAC" field="facilityName"/>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentSegmentFacilityStatus" package="mantle.shipment">
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment"/>
+        <member-entity entity-alias="SHRS" entity-name="mantle.shipment.ShipmentRouteSegment" join-from-alias="SHMT">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="STSI" entity-name="moqui.basic.StatusItem" join-from-alias="SHMT">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="OFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="DFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="destinationFacilityId" related="facilityId"/></member-entity>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SHRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias name="segmentStatusId" entity-alias="SHRS" field="statusId"/>
+        <alias name="segmentEstimatedArrivalDate" entity-alias="SHRS" field="estimatedArrivalDate"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+        <alias name="originFacilityName" entity-alias="OFAC" field="facilityName"/>
+        <alias name="originOwnerPartyId" entity-alias="OFAC" field="ownerPartyId"/>
+        <alias name="destinationFacilityName" entity-alias="DFAC" field="facilityName"/>
+        <alias name="destinationOwnerPartyId" entity-alias="DFAC" field="ownerPartyId"/>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentItemDetail" package="mantle.shipment">
+        <member-entity entity-alias="SHITM" entity-name="mantle.shipment.ShipmentItem"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="SHITM">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ASRC" entity-name="mantle.product.receipt.AssetReceipt" join-from-alias="SHITM" join-optional="true">
+            <key-map field-name="productId"/><key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="ASIS" entity-name="mantle.product.issuance.AssetIssuance" join-from-alias="SHITM" join-optional="true">
+            <key-map field-name="productId"/><key-map field-name="shipmentId"/></member-entity>
+        <alias-all entity-alias="SHITM"/>
+        <alias-all entity-alias="PROD"/>
+        <alias name="quantityAcceptedTotal" entity-alias="ASRC" field="quantityAccepted" function="sum"/>
+        <alias name="quantityRejectedTotal" entity-alias="ASRC" field="quantityRejected" function="sum"/>
+        <alias name="quantityTotal" entity-alias="ASIS" field="quantity" function="sum"/>
+        <alias name="quantityCancelledTotal" entity-alias="ASIS" field="quantityCancelled" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentAndItemSource" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment" join-from-alias="SIS">
+            <key-map field-name="shipmentId"/></member-entity>
+        <alias-all entity-alias="SIS"/>
+        <alias-all entity-alias="SHMT"><exclude field="statusId"/><exclude field="binLocationNumber"/></alias-all>
+        <alias name="shipmentStatusId" entity-alias="SHMT" field="statusId"/>
+        <alias name="shipmentBinLocationNumber" entity-alias="SHMT" field="binLocationNumber"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentItemSourceSummary" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <alias-all entity-alias="SIS"><exclude field="quantity"/><exclude field="quantityNotHandled"/></alias-all>
+        <alias name="quantity" entity-alias="SIS" function="sum"/>
+        <alias name="quantityNotHandled" entity-alias="SIS" function="sum"/>
+        <alias name="quantityShipped" function="sum"><complex-alias operator="-">
+            <complex-alias-field entity-alias="SIS" field="quantity"/>
+            <complex-alias-field entity-alias="SIS" field="quantityNotHandled"/>
+        </complex-alias></alias>
+    </view-entity>
+    <view-entity entity-name="ShipmentItemSourceOrderItem" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment" join-from-alias="SIS">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem" join-from-alias="SIS">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <alias-all entity-alias="SIS"><exclude field="quantity"/><exclude field="quantityNotHandled"/></alias-all>
+        <alias name="shipmentStatusId" entity-alias="SHMT" field="statusId"/>
+        <alias name="quantity" entity-alias="SIS" function="sum"/>
+        <alias name="quantityNotHandled" entity-alias="SIS" function="sum"/>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+        <alias name="unitAmount" entity-alias="OITM" function="avg"/>
+        <alias name="handledTotalAmount" function="sum"><complex-alias operator="*">
+            <complex-alias operator="-">
+                <complex-alias-field entity-alias="SIS" field="quantity"/>
+                <complex-alias-field entity-alias="SIS" field="quantityNotHandled"/>
+            </complex-alias>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentItemAssocView" package="mantle.shipment">
+        <member-entity entity-alias="SITM" entity-name="mantle.shipment.ShipmentItem"/>
+        <member-entity entity-alias="IPROD" entity-name="mantle.product.Product" join-from-alias="SITM">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PASC" entity-name="mantle.product.ProductAssoc" join-from-alias="SITM">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="SITM"/>
+        <alias-all entity-alias="IPROD" prefix="item"/>
+        <alias-all entity-alias="PASC"><exclude field="quantity"/></alias-all>
+        <alias name="componentQuantity" entity-alias="PASC" field="quantity"/>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentRouteSegmentDetail" package="mantle.shipment">
+        <member-entity entity-alias="SHRS" entity-name="mantle.shipment.ShipmentRouteSegment"/>
+        <member-entity entity-alias="STSI" entity-name="moqui.basic.StatusItem" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="OFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="DFAC" entity-name="mantle.facility.Facility" join-from-alias="SHRS" join-optional="true">
+            <key-map field-name="destinationFacilityId" related="facilityId"/></member-entity>
+        <alias-all entity-alias="SHRS"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+        <alias name="originFacilityName" entity-alias="OFAC" field="facilityName"/>
+        <alias name="originFacilityPseudoId" entity-alias="OFAC" field="pseudoId"/>
+        <alias name="originFacilityOwnerPartyId" entity-alias="OFAC" field="ownerPartyId"/>
+        <alias name="destinationFacilityName" entity-alias="DFAC" field="facilityName"/>
+        <alias name="destinationFacilityPseudoId" entity-alias="DFAC" field="pseudoId"/>
+        <alias name="destinationFacilityOwnerPartyId" entity-alias="DFAC" field="ownerPartyId"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentBoxTypeDetail" package="mantle.shipment">
+        <member-entity entity-alias="SHBX" entity-name="mantle.shipment.ShipmentBoxType"/>
+        <member-entity entity-alias="DUOM" entity-name="moqui.basic.Uom" join-from-alias="SHBX" join-optional="true">
+            <key-map field-name="dimensionUomId"/></member-entity>
+        <member-entity entity-alias="WUOM" entity-name="moqui.basic.Uom" join-from-alias="SHBX" join-optional="true">
+            <key-map field-name="weightUomId"/></member-entity>
+        <member-entity entity-alias="BUOM" entity-name="moqui.basic.Uom" join-from-alias="SHBX" join-optional="true">
+            <key-map field-name="capacityUomId"/></member-entity>
+        <alias-all entity-alias="SHBX"/>
+        <alias-all entity-alias="DUOM" prefix="dimension"><exclude field="uomId"/></alias-all>
+        <alias-all entity-alias="WUOM" prefix="weight"><exclude field="uomId"/></alias-all>
+        <alias-all entity-alias="BUOM" prefix="capacity"><exclude field="uomId"/></alias-all>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentInvoicePayment" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication" join-from-alias="SIS">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment" join-from-alias="PAPP">
+            <key-map field-name="paymentId"/></member-entity>
+        <alias-all entity-alias="PMT"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+        <alias name="invoiceId" entity-alias="SIS"/>
+        <alias name="paymentId" entity-alias="PAPP"/>
+        <alias name="amountApplied" entity-alias="PAPP"/>
+        <alias name="appliedDate" entity-alias="PAPP"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentOrderPayment" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment" join-from-alias="SIS">
+            <key-map field-name="orderId"/></member-entity>
+        <alias-all entity-alias="PMT"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+        <alias name="orderId" entity-alias="SIS"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentEmailMessageDetail" package="mantle.shipment">
+        <member-entity entity-alias="SEM" entity-name="mantle.shipment.ShipmentEmailMessage"/>
+        <member-entity entity-alias="EMSG" entity-name="moqui.basic.email.EmailMessage" join-from-alias="SEM">
+            <key-map field-name="emailMessageId"/></member-entity>
+        <alias-all entity-alias="SEM"/><alias-all entity-alias="EMSG"/>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentPackageFindView" package="mantle.shipment">
+        <member-entity entity-alias="SPRS" entity-name="mantle.shipment.ShipmentPackageRouteSeg"/>
+        <member-relationship entity-alias="SHMT" join-from-alias="SPRS" relationship="shipment"/>
+        <member-relationship entity-alias="SRS" join-from-alias="SPRS" relationship="routeSegment"/>
+        <member-entity entity-alias="TPCLS" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="SHMT" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="SPRS"/>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias name="customerClassificationId" entity-alias="TPCLS" field="partyClassificationId"/>
+        <alias name="customerClassFromDate" entity-alias="TPCLS" field="fromDate"/>
+        <alias name="customerClassThruDate" entity-alias="TPCLS" field="thruDate"/>
+    </view-entity>
+    <!-- aborted effort, for future reference (report on insured packages where associated order was refunded as a list of potential insurance claims)
+    <view-entity entity-name="ShipmentInsuredRefunded" package="mantle.shipment">
+        <member-entity entity-alias="SPRS" entity-name="mantle.shipment.ShipmentPackageRouteSeg"/>
+        <member-relationship entity-alias="SRS" join-from-alias="SPRS" relationship="routeSegment"/>
+        <member-relationship entity-alias="SPCNT" join-from-alias="SPRS" relationship="contents"/>
+        <member-relationship entity-alias="SIS" join-from-alias="SPCNT" relationship="itemSources"/>
+        <member-relationship entity-alias="OITM" join-from-alias="SIS" relationship="orderItem"/>
+        <member-entity entity-alias="PMNT" entity-name="mantle.payment.Payment" join-from-alias="OITM">
+            <key-map field-name="orderId"/>
+            <entity-condition><econdition entity-alias="PMNT" field-name="paymentTypeEnumId" value="PtRefund"/></entity-condition>
+        </member-entity>
+        <alias-all entity-alias="SPRS"/>
+        <alias-all entity-alias="SRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+    </view-entity>
+    -->
+
+    <view-entity entity-name="ShipmentPackageSummary" package="mantle.shipment">
+        <member-entity entity-alias="SRS" entity-name="mantle.shipment.ShipmentRouteSegment"/>
+        <member-relationship entity-alias="SHMT" join-from-alias="SRS" relationship="shipment"/>
+        <member-relationship entity-alias="SPRS" join-from-alias="SRS" relationship="packageRouteSegments" join-optional="true"/>
+        <member-relationship entity-alias="SPKG" join-from-alias="SPRS" relationship="package" join-optional="true"/>
+        <member-relationship entity-alias="SBT" join-from-alias="SPKG" relationship="boxType" join-optional="true"/>
+        <member-entity entity-alias="SPCT" entity-name="mantle.shipment.ShipmentPackageContentSummary" join-from-alias="SPRS" join-optional="true" sub-select="true">
+            <key-map field-name="shipmentId"/><key-map field-name="shipmentPackageSeqId"/></member-entity>
+        <member-entity entity-alias="SMR" entity-name="mantle.shipment.ShipmentMinReturn" join-from-alias="SRS" join-optional="true" sub-select="true">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="SMO" entity-name="mantle.shipment.ShipmentMinOrder" join-from-alias="SRS" join-optional="true" sub-select="true">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="SOPQ" entity-name="mantle.shipment.ShipmentOrderProductQuantity" join-from-alias="SMO" join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="SOSC" entity-name="mantle.shipment.ShipmentOrderShippingCharge" join-from-alias="SMO" join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="SOSD" entity-name="mantle.shipment.ShipmentOrderShippingDiscount" join-from-alias="SMO" join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <alias-all entity-alias="SHMT"/>
+        <alias-all entity-alias="SRS"><exclude field="statusId"/><exclude field="costUomId"/><exclude field="estimatedArrivalDate"/></alias-all>
+        <alias-all entity-alias="SPRS"/>
+        <alias-all entity-alias="SPKG"/>
+        <alias-all entity-alias="SMO"><exclude field="shipmentId"/></alias-all>
+        <alias-all entity-alias="SMR"><exclude field="shipmentId"/></alias-all>
+        <alias-all entity-alias="SBT"><exclude field="pseudoId"/><exclude field="description"/><exclude field="weightUomId"/></alias-all>
+        <alias name="boxPseudoId" entity-alias="SBT" field="pseudoId"/>
+        <alias name="boxDescription" entity-alias="SBT" field="description"/>
+        <alias name="boxWeightUomId" entity-alias="SBT" field="weightUomId"/>
+        <alias name="estimatedAmountTotal" entity-alias="SPRS" field="estimatedAmount" function="sum"/>
+        <alias name="baseAmountTotal" entity-alias="SPRS" field="baseAmount" function="sum"/>
+        <alias name="actualAmountTotal" entity-alias="SPRS" field="actualAmount" function="sum"/>
+        <alias name="weightTotal" entity-alias="SPKG" field="weight" function="sum"/>
+        <alias name="productId" entity-alias="SPCT"/>
+        <alias name="quantityTotal" entity-alias="SPCT" field="quantity" function="sum"/>
+        <alias name="packageCount" entity-alias="SPKG" field="shipmentPackageSeqId" function="count"/>
+        <alias name="orderProductQuantity" entity-alias="SOPQ" function="sum"/>
+        <alias name="shippingChargeTotal" entity-alias="SOSC" function="sum"/><!-- prorate by quantityTotal / orderProductQuantity -->
+        <alias name="shippingDiscountTotal" entity-alias="SOSD" function="sum"/><!-- prorate by quantityTotal / orderProductQuantity -->
+    </view-entity>
+    <view-entity entity-name="ShipmentPackageContentSummary" package="mantle.shipment">
+        <member-entity entity-alias="SPC" entity-name="mantle.shipment.ShipmentPackageContent"/>
+        <alias name="shipmentId" entity-alias="SPC"/>
+        <alias name="shipmentPackageSeqId" entity-alias="SPC"/>
+        <alias name="productId" entity-alias="SPC"/>
+        <alias name="quantity" entity-alias="SPC" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentMinOrder" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-relationship entity-alias="OHDR" join-from-alias="SIS" relationship="orderHeader" join-optional="true"/>
+        <member-relationship entity-alias="OITM" join-from-alias="SIS" relationship="orderItem" join-optional="true"/>
+        <member-relationship entity-alias="OPRT" join-from-alias="OITM" relationship="part" join-optional="true"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+        <alias name="orderId" entity-alias="OHDR" function="min"/>
+        <alias name="orderDisplayId" entity-alias="OHDR" function="min" field="displayId"/>
+        <alias name="orderExternalId" entity-alias="OHDR" function="min" field="externalId"/>
+        <alias name="orderOriginId" entity-alias="OHDR" function="min" field="originId"/>
+        <alias name="orderEntryDate" entity-alias="OHDR" function="min" field="entryDate"/>
+        <alias name="orderPlacedDate" entity-alias="OHDR" function="min" field="placedDate"/>
+        <alias name="orderPartSeqId" entity-alias="OPRT" function="min"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentOrderProductQuantity" package="mantle.shipment">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <alias name="orderId" entity-alias="OITM"/>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+        <alias name="orderProductQuantity" entity-alias="OITM" function="sum" field="quantity"/>
+        <entity-condition><econdition entity-alias="OITM" field-name="itemTypeEnumId" value="ItemProduct"/></entity-condition>
+    </view-entity>
+    <view-entity entity-name="ShipmentOrderShippingCharge" package="mantle.shipment">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <alias name="orderId" entity-alias="OITM"/>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+        <alias name="shippingChargeTotal" function="sum" type="number-decimal"><complex-alias operator="*">
+            <complex-alias-field entity-alias="OITM" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <entity-condition><econdition entity-alias="OITM" field-name="itemTypeEnumId" value="ItemShipping"/></entity-condition>
+    </view-entity>
+    <view-entity entity-name="ShipmentOrderShippingDiscount" package="mantle.shipment">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="PITM" entity-name="mantle.order.OrderItem" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="parentItemSeqId" related="orderItemSeqId"/></member-entity>
+        <alias name="orderId" entity-alias="OITM"/>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+        <alias name="shippingDiscountTotal" function="sum" type="number-decimal"><complex-alias operator="*">
+            <complex-alias-field entity-alias="OITM" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <entity-condition>
+            <econdition entity-alias="OITM" field-name="itemTypeEnumId" operator="in" value="ItemDiscount,ItemDiscountAppease"/>
+            <econdition entity-alias="PITM" field-name="itemTypeEnumId" value="ItemShipping"/>
+        </entity-condition>
+    </view-entity>
+    <view-entity entity-name="ShipmentMinReturn" package="mantle.shipment">
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-relationship entity-alias="RHDR" join-from-alias="SIS" relationship="returnHeader" join-optional="true"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+        <alias name="returnId" entity-alias="RHDR" function="min"/>
+        <alias name="returnDisplayId" entity-alias="RHDR" function="min" field="displayId"/>
+        <alias name="returnExternalId" entity-alias="RHDR" function="min" field="externalId"/>
+        <alias name="returnOriginId" entity-alias="RHDR" function="min" field="originId"/>
+        <alias name="returnEntryDate" entity-alias="RHDR" function="min" field="entryDate"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.shipment.carrier -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="CarrierShipmentMethodDetail" package="mantle.shipment.carrier">
+        <member-entity entity-alias="CSM" entity-name="mantle.shipment.carrier.CarrierShipmentMethod"/>
+        <member-relationship entity-alias="CPTY" join-from-alias="CSM" relationship="carrierParty"/>
+        <member-relationship entity-alias="SME" join-from-alias="CSM" relationship="shipmentMethodEnum"/>
+        <alias-all entity-alias="CSM"/>
+        <alias name="carrierPseudoId" entity-alias="CPTY" field="pseudoId"/>
+        <alias name="shipmentMethodDescription" entity-alias="SME" field="description"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.shipment.picklist -->
+    <!-- ========================================================= -->
+
+</entities>

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="ProductStoreIdFromHostName">
+        <in-parameters>
+            <parameter name="requestHostName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productStoreId"/>
+            <parameter name="defaultCurrencyUomId"/>
+        </out-parameters>
+        <actions>
+            <set field="productStoreId" from="null"/>
+            <if condition="!requestHostName"><return/></if>
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostSettingList">
+                <econdition field-name="settingTypeEnumId" value="PsstHostname"/>
+                <date-filter/><order-by field-name="-fromDate"/>
+            </entity-find>
+            <if condition="requestHostName.contains('localhost')">
+                <set field="requestHostName" value="$requestHostName:8080"/>
+            </if>
+            <iterate list="hostSettingList" entry="hostSetting">
+                <set field="hostPattern" from="hostSetting.settingValue"/>
+                <if condition="hostPattern != null &amp;&amp; ((String) requestHostName).matches((String) hostPattern)">
+                    <set field="productStoreId" from="hostSetting.productStoreId"/></if>
+            </iterate>
+
+            <if condition="!productStoreId">
+                <log level="warn" message="No store found for hostname ${requestHostName}"/>
+                <else>
+                    <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore"/>
+                    <set field="defaultCurrencyUomId" from="productStore.defaultCurrencyUomId"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="StoreInfo">
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="locale" default="ec.user.locale?.toString()"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productStore" type="Map"/>
+
+            <parameter name="categoryList" type="List"><parameter name="categoryInfo" type="Map"/></parameter>
+            <parameter name="categoryByType" type="Map"><parameter name="categoryInfo" type="Map"/></parameter>
+
+            <parameter name="settings" type="Map"/>
+
+            <parameter name="menu" type="List"/>
+            <parameter name="menu1" type="List"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
+            <if condition="productStore == null"><return error="true" message="Store not found with ID ${productStoreId}"/></if>
+            <if condition="!locale"><set field="locale" from="productStore.defaultLocale"/></if>
+
+            <set field="categoryList" from="[]"/>
+            <set field="categoryByType" from="[:]"/>
+            <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="storeCategoryList" cache="true">
+                <date-filter/><econdition field-name="productStoreId"/><order-by field-name="sequenceNum,-fromDate"/></entity-find>
+            <iterate list="storeCategoryList" entry="storeCategory">
+                <entity-find-one entity-name="mantle.product.category.ProductCategory" value-field="productCategory" cache="true">
+                    <field-map field-name="productCategoryId" from="storeCategory.productCategoryId"/></entity-find-one>
+                <set field="categoryInfo" from="storeCategory.getMap()"/>
+                <entity-find-count entity-name="mantle.product.category.ProductCategoryMember" count-field="nbrOfProducts">
+                    <econdition field-name="productCategoryId" from="productCategory.productCategoryId"/>
+                    <date-filter/>
+                </entity-find-count>
+                <script>
+                    categoryInfo.putAll(productCategory)
+                    categoryInfo["nbrOfProducts"] = nbrOfProducts
+                    categoryList.add(categoryInfo)
+                    if (categoryByType.get(categoryInfo.storeCategoryTypeEnumId) == null)
+                        categoryByType.put(categoryInfo.storeCategoryTypeEnumId, categoryInfo)
+                </script>
+            </iterate>
+
+            <!-- get settings from ProductStoreSetting -->
+            <set field="settings" from="[:]"/>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="storeSettingList" cache="true">
+                <date-filter/><econdition field-name="productStoreId"/><order-by field-name="-fromDate"/></entity-find>
+            <iterate list="storeSettingList" entry="storeSetting">
+                <if condition="!storeSetting.settingValue"><continue/></if>
+                <set field="typeEnum" from="storeSetting.type"/>
+                <script>
+                    if (typeEnum?.enumCode &amp;&amp; settings.get(typeEnum.enumCode) == null) settings.put(typeEnum.enumCode, storeSetting.settingValue)
+                    if (settings.get(storeSetting.settingTypeEnumId) == null) settings.put(storeSetting.settingTypeEnumId, storeSetting.settingValue)
+                </script>
+            </iterate>
+
+            <!-- ProductStoreWikiContent settings -->
+            <set field="templateServerWikiSpaceId" from="null"/>
+            <set field="contentBasePath" from="settings.contentLocation" default-value="/content/"/>
+            <entity-find entity-name="mantle.product.store.ProductStoreWikiContent" list="storeWikiContentList" cache="true">
+                <date-filter/><econdition field-name="productStoreId"/></entity-find>
+            <iterate list="storeWikiContentList" entry="storeWikiContent">
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="contentTypeEnum" cache="true">
+                    <field-map field-name="enumId" from="storeWikiContent.contentTypeEnumId"/></entity-find-one>
+                <if condition="storeWikiContent.spaceTypeEnumId == 'PstTmpSrv'"><then>
+                    <!-- special case for PstTmpSrv (server rendered templates), use internal resource location -->
+                    <if condition="!templateServerWikiSpaceId">
+                        <service-call name="popstore.StoreServices.get#WikiSpaceByType" out-map="spaceOut" out-map-add-to-existing="false"
+                                in-map="[productStoreId:productStoreId, spaceTypeEnumId:storeWikiContent.spaceTypeEnumId, locale:locale]"/>
+                        <set field="templateServerWikiSpaceId" from="spaceOut.wikiSpaceId"/>
+                    </if>
+                    <if condition="!templateServerWikiSpaceId">
+                        <log level="warn" message="No WikiSpace found for space type ${storeWikiContent.spaceTypeEnumId} for store ${productStoreId} locale ${locale}, skipping storeWikiContentId ${storeWikiContent.storeWikiContentId}"/>
+                        <continue/>
+                    </if>
+                    <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageTextOut" out-map-add-to-existing="false"
+                            in-map="[wikiSpaceId:templateServerWikiSpaceId, pagePath:storeWikiContent.pagePath, getPageText:false]"/>
+                    <set field="contentPath" from="pageTextOut.pageLocation"/>
+                </then><else>
+                    <!-- add space type and page path to base path for wiki content by space -->
+                    <!-- FUTURE: consider adding optional locale to path to avoid issues with browser cache and locale changes during use, see also content/sst transition -->
+                    <set field="contentPath" from="contentBasePath + 'sst/' + storeWikiContent.spaceTypeEnumId + '/' + storeWikiContent.pagePath"/>
+                </else></if>
+                <!-- add a setting by enumCode if contentTypeEnum.enumCode and by contentTypeEnumId -->
+                <script>
+                    if (contentTypeEnum?.enumCode &amp;&amp; settings.get(contentTypeEnum.enumCode) == null) settings.put(contentTypeEnum.enumCode, contentPath)
+                    if (settings.get(storeWikiContent.contentTypeEnumId) == null) settings.put(storeWikiContent.contentTypeEnumId, contentPath)
+                </script>
+            </iterate>
+
+            <!-- create menu from content items-->
+            <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="menuPages">
+                <econdition field-name="productStoreId" from="productStoreId"/>
+                <econdition field-name="pagePath" operator="is-not-null"/>
+                <econdition field-name="pagePath" operator="not-like" value="obsidian/%"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+            <set field="menu" from="[]"/>
+            <set field="menu1" from="[]"/><!-- needed for actual content in content.xml -->
+            <iterate list="menuPages" entry="page">
+                <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
+                <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                <if condition="docRr == null"><continue/></if>
+                <set field="lines" from="docRr.getText()"/>
+                <if condition="lines">
+                    <script>
+                        Map menuItem = [items: [], path: page.pagePath];
+                        lines.eachLine {
+                            if (it.startsWith('# ') || it.startsWith('## ')) {
+                                if (!menuItem.containsKey("title"))
+                                    menuItem['title'] = it.substring(it.indexOf(' ') + 1);
+                            }
+                        }
+                        menu.add(menuItem);
+                    </script>
+                </if>
+            </iterate>
+            <!-- check if obsidian uploaded -->
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" list="checkObsidian" limit="1">
+                <econdition field-name="pagePath" operator="like" value="obsidian/%"/>
+                <order-by field-name="-pagePath"/>
+            </entity-find>
+            <if condition="checkObsidian">
+                <script>
+                Map menuItem = [items: [], path: checkObsidian[0].pagePath, title: productStore.profileUrlPath];
+                menu.add(menuItem);
+                </script>
+            </if>
+            <!-- statistics -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="measurementIds">
+                <econdition field-name="productStoreId" from="productStoreId"/>
+                <econdition field-name="settingTypeEnumId" value="PsstMeasurementId"/>
+            </entity-find>
+                <set field="settings.measurementId" from="measurementIds[0]?.settingValue"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WikiSpaceByType">
+        <description>Called by content/sst transition</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="spaceTypeEnumId" required="true"/>
+            <parameter name="locale" default="ec.user.locale?.toString()"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="wikiSpaceId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
+            <if condition="productStore == null"><return error="true" message="Store not found with ID ${productStoreId}"/></if>
+            <if condition="!locale"><set field="locale" from="productStore.defaultLocale"/></if>
+
+            <!-- find WikiSpace for store by locale specified, default store locale, or no locale -->
+            <entity-find entity-name="mantle.product.store.ProductStoreWikiSpace" list="storeWikiSpaceList" cache="true">
+                <date-filter/><econdition field-name="productStoreId"/>
+                <econdition field-name="spaceTypeEnumId"/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="curWikiSpaceList" from="null"/>
+            <if condition="locale">
+                <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList"><field-map field-name="locale"/></filter-map-list>
+
+                <if condition="!curWikiSpaceList &amp;&amp; locale.contains('_')">
+                    <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                        <field-map field-name="locale" from="locale.substring(0, locale.indexOf('_'))"/></filter-map-list>
+                </if>
+                <if condition="!curWikiSpaceList &amp;&amp; productStore.defaultLocale &amp;&amp; locale != productStore.defaultLocale">
+                    <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                        <field-map field-name="locale" from="productStore.defaultLocale"/></filter-map-list>
+                </if>
+            </if>
+            <if condition="!curWikiSpaceList">
+                <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                    <field-map field-name="locale" from="null"/></filter-map-list>
+            </if>
+            <set field="wikiSpaceId" from="curWikiSpaceList ? curWikiSpaceList[0].wikiSpaceId : null"/>
+        </actions>
+    </service>
+    <service verb="get" noun="WikiSpacesByTypes">
+        <in-parameters>
+            <parameter name="productStoreId"/>
+            <parameter name="locale" default="ec.user.locale?.toString()"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="wikiSpaceIdByTypeEnumId" type="Map"/>
+        </out-parameters>
+        <actions>
+            <!-- get WikiSpaces by type -->
+            <set field="wikiSpaceIdByTypeEnumId" from="[:]"/>
+            <!-- find WikiSpace for store by locale specified, default store locale, or no locale -->
+            <entity-find entity-name="mantle.product.store.ProductStoreWikiSpace" list="storeWikiSpaceList" cache="true">
+                <date-filter/><econdition field-name="productStoreId"/><order-by field-name="-fromDate"/></entity-find>
+            <set field="spaceTypeEnumIdSet" from="new HashSet(storeWikiSpaceList*.spaceTypeEnumId)"/>
+            <iterate list="spaceTypeEnumIdSet" entry="spaceTypeEnumId">
+                <set field="curWikiSpaceList" from="null"/>
+                <if condition="locale">
+                    <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                        <field-map field-name="spaceTypeEnumId"/><field-map field-name="locale"/></filter-map-list>
+
+                    <if condition="!curWikiSpaceList &amp;&amp; locale.contains('_')">
+                        <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                            <field-map field-name="spaceTypeEnumId"/>
+                            <field-map field-name="locale" from="locale.substring(0, locale.indexOf('_'))"/>
+                        </filter-map-list>
+                    </if>
+                    <if condition="!curWikiSpaceList &amp;&amp; productStore.defaultLocale &amp;&amp; locale != productStore.defaultLocale">
+                        <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                            <field-map field-name="spaceTypeEnumId"/>
+                            <field-map field-name="locale" from="productStore.defaultLocale"/>
+                        </filter-map-list>
+                    </if>
+                </if>
+                <if condition="!curWikiSpaceList">
+                    <filter-map-list list="storeWikiSpaceList" to-list="curWikiSpaceList">
+                        <field-map field-name="spaceTypeEnumId"/><field-map field-name="locale" from="null"/></filter-map-list>
+                </if>
+                <!-- after all that we should have a curWikiSpaceList, but if not skip this space type -->
+                <if condition="!curWikiSpaceList"><continue/></if>
+                <!-- add what we have to the wikiSpaceIdByTypeEnumId Map -->
+                <script>wikiSpaceIdByTypeEnumId.put(spaceTypeEnumId, curWikiSpaceList[0].wikiSpaceId)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="Geos">
+        <out-parameters>
+            <parameter name="geoList"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.Geo" list="geoList">
+                <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY"/>
+                <order-by field-name="geoName"/>
+            </entity-find>
+        </actions>
+    </service>
+    <service verb="get" noun="Locales">
+        <out-parameters>
+            <parameter name="localeStringList"/>
+        </out-parameters>
+        <actions>
+            <set field="localeStringList" from="[]"/>
+            <iterate list="Locale.getAvailableLocales()" entry="lcl">
+                <script>
+                    localeStringList.add([locale:lcl.toString(), name:lcl.getDisplayName(ec.user.locale)])
+                </script>
+            </iterate>
+            <order-map-list list="localeStringList"><order-by field-name="name"/></order-map-list>
+        </actions>
+    </service>
+    <service verb="get" noun="TimeZones">
+        <out-parameters>
+            <parameter name="timeZoneList"/>
+        </out-parameters>
+        <actions>
+            <set field="timeZoneList" from="new TreeSet(TimeZone.getAvailableIDs().collect())"/>
+        </actions>
+    </service>
+</services>

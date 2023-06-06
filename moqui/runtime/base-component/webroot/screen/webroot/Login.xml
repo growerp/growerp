@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-include="false" require-authentication="false" history="false">
+
+    <parameter name="initialTab"/>
+    <parameter name="returnTo"/>
+
+    <!-- partial list of scenarios:
+      x basic login
+        - login username + password success
+        - next screen 2nd factor
+      x login with password change required
+        - login username + password but require password change
+        - next screen change password
+          - go to directly with anchor in URL or something
+          - if password was correct and authc code required for user allow instead of pw on change password
+          - login after change password, don't require login again
+      x cold change password
+        - start on change password tab, enter username, password, new password + confirm
+        - if 2nd factor required go to SecondFactor screen - instead go back to Login#change and get code + new password/verify
+      - reset password
+        - given username send email to UserAccount.emailAddress with separate reset password
+        - in email link to change password tab on login screen with username and reset password filled in
+        - if 2nd factor required for user also require
+      - change user after pre-auth
+    -->
+
+    <transition name="login" require-session-token="false">
+        <actions>
+            <if condition="ec.web?.sessionAttributes?.moquiPreAuthcUsername"><then>
+                <!-- already pre-auth'ed, verify code below -->
+                <set field="username" from="ec.web?.sessionAttributes?.moquiPreAuthcUsername"/>
+            </then><else>
+                <!-- no pre-auth, try logging in (pre-auth if 2nd factor required) -->
+                <set field="loggedIn" from="ec.user.loginUser(username, password)"/>
+            </else></if>
+
+            <if condition="ec.web.sessionAttributes.moquiAuthcFactorRequired">
+                <if condition="code"><then>
+                    <service-call name="org.moqui.impl.UserServices.validate#ExternalUserAuthcCode"
+                            in-map="[code:code]" out-map="validateOut"/>
+                    <if condition="validateOut.verified"><then>
+                        <script>ec.user.internalLoginUser(validateOut.username)</script>
+                        <return/>
+                    </then><else>
+                        <message error="true" public="true">Authentication code is not valid</message>
+                    </else></if>
+                </then><else>
+                    <message error="true" public="true">Authentication code required for user ${username}</message>
+                </else></if>
+            </if>
+        </actions>
+        <!-- no longer using SecondFactor screen, now built into Login screen to better support more scenarios:
+        <conditional-response url="../SecondFactor"><condition>
+            <expression>ec.web.sessionAttributes.moquiAuthcFactorRequired</expression></condition></conditional-response>
+        -->
+        <default-response type="screen-last"/>
+        <error-response url="."/>
+    </transition>
+    <transition name="logout">
+        <actions><script>ec.user.logoutUser()</script></actions>
+        <default-response url="/"/>
+        <error-response url="."/>
+    </transition>
+    <transition name="removePreAuth">
+        <actions><script>
+            ec.web.sessionAttributes.remove("moquiPreAuthcUsername")
+            ec.web.sessionAttributes.remove("moquiAuthcFactorRequired")
+            ec.web.sessionAttributes.remove("moquiPasswordChangeRequired")
+            ec.web.sessionAttributes.remove("moquiExpiredCredentials")
+        </script></actions>
+        <default-response url="."/>
+    </transition>
+    <transition name="resetPassword">
+        <parameter name="username" from="ec.web?.sessionAttributes?.moquiPreAuthcUsername ?: username"/>
+        <service-call name="org.moqui.impl.UserServices.reset#Password" in-map="[username:username]"/>
+        <default-response url="."/>
+    </transition>
+    <transition name="changePassword">
+        <parameter name="username" from="ec.web?.sessionAttributes?.moquiPreAuthcUsername ?: username"/>
+        <service-call name="org.moqui.impl.UserServices.update#Password"/>
+        <actions>
+            <!-- password change success, login the user -->
+            <if condition="updateSuccessful">
+                <set field="loginSuccess" from="ec.user.internalLoginUser(username)"/></if>
+        </actions>
+        <conditional-response type="screen-last"><condition><expression>updateSuccessful</expression></condition></conditional-response>
+        <default-response url="." parameter-map="[initialTab:'#change']"/>
+    </transition>
+    <transition name="createInitialAdminAccount">
+        <service-call name="org.moqui.impl.UserServices.create#InitialAdminAccount"/>
+        <default-response url="../Login"/>
+        <error-response url="."/>
+    </transition>
+    <transition name="sendOtp">
+        <service-call name="org.moqui.impl.UserServices.send#ExternalAuthcCode" in-map="[factorId:factorId]"/>
+        <default-response url="."/>
+    </transition>
+
+    <pre-actions><script>
+        // if user already logged in redirect to root
+        if (ec.user.userId) sri.sendRedirectAndStopRender('/')
+
+        // jQuery/UI
+        html_scripts.add('/libs/jquery/jquery.min.js')
+        // Bootstrap
+        html_scripts.add('/libs/twitter-bootstrap/js/bootstrap.min.js')
+        // Moqui webroot layout
+        html_stylesheets.add('/css/webroot-layout.css')
+    </script></pre-actions>
+    <actions>
+        <!-- handle returnTo parameter, and general handling for when the Login screen is reached directly
+            (as opposed to redirect following attempted request to screen that requires authz) -->
+        <if condition="returnTo"><then>
+            <log message="setting last path to ${returnTo}"/>
+            <script>ec.web.session.setAttribute('moqui.screen.last.path', returnTo)</script>
+        </then><else>
+            <if condition="!ec.web.session.getAttribute('moqui.screen.last.path')">
+                <set field="referrer" from="ec.web.request.getHeader('Referer')"/>
+                <if condition="referrer"><script>ec.web.session.setAttribute('moqui.screen.last.path', referrer)</script></if>
+            </if>
+        </else></if>
+
+        <set field="passwordChangeRequired" from="ec.web.sessionAttributes.moquiPasswordChangeRequired ?: 'false'" type="Boolean"/>
+        <set field="expiredCredentials" from="ec.web.sessionAttributes.moquiExpiredCredentials ?: 'false'" type="Boolean"/>
+        <if condition="passwordChangeRequired || expiredCredentials">
+            <set field="initialTab" value="#change"/></if>
+        <if condition="initialTab &amp;&amp; !initialTab.startsWith('#')"><set field="initialTab" from="'#' + initialTab"/></if>
+
+        <set field="secondFactorRequired" from="false"/>
+        <if condition="ec.web.sessionAttributes.moquiPreAuthcUsername"><then>
+            <set field="username" from="ec.web.sessionAttributes.moquiPreAuthcUsername"/>
+            <service-call name="org.moqui.impl.UserServices.get#ExternalUserAuthcFactorInfo" out-map="context"/>
+        </then><else>
+            <set field="username" from="ec.web.errorParameters?.username ?: ''"/>
+        </else></if>
+
+        <set field="passwordNode" from="ec.ecfi.confXmlRoot.first('user-facade').first('password')"/>
+        <set field="minLength" from="passwordNode.attribute('min-length')" default-value="8" type="Integer"/>
+        <set field="minDigits" from="passwordNode.attribute('min-digits')" default-value="1" type="Integer"/>
+        <set field="minOthers" from="passwordNode.attribute('min-others')" default-value="1" type="Integer"/>
+    </actions>
+    <widgets>
+        <!-- NOTE: this screen is not under the apps screen, but uses similar header/footer/etc -->
+        <container id="content" style="Login"><container style="inner"><container style="container-fluid">
+            <section-iterate name="headerSavedMessages" list="ec.web?.savedMessages" entry="message"><widgets>
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-success fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${message}" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+            <section-iterate name="headerSavedErrors" list="ec.web?.savedErrors" entry="errorMessage"><widgets>
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-danger fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${errorMessage}" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+            <section-iterate name="headerSavedValidationErrors" list="ec.web?.savedValidationErrors" entry="validationError"><widgets>
+                <!-- TODO: put these by fields instead of in header -->
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-danger fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${validationError.message} (for field ${validationError.field})" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+
+            <section name="NeedsSetupSection" condition="ec.entity.find('moqui.security.UserAccount').disableAuthz().count() > 1"><widgets>
+                <!-- primary scenario, main login screen -->
+                <render-mode><text type="html" template="true" location="component://webroot/screen/webroot/Login.ftl"/></render-mode>
+            </widgets><fail-widgets>
+                <!-- if there are no user accounts, other than the _NA_ UserAccount which is in seed data, show form to create admin account -->
+                <render-mode><text type="html"><![CDATA[
+    <div class="text-center">
+        <h3>Welcome to your new system</h3>
+        <form method="post" action="${sri.buildUrl("createInitialAdminAccount").url}" class="form-signin" id="InitialAdminForm">
+            <p class="text-muted text-center">There are no user accounts, get started by creating an initial administrator account</p>
+            <input type="hidden" name="moquiSessionToken" value="${ec.web.sessionToken}">
+            <input type="text" name="username" value="${(ec.getWeb().getErrorParameters().get("username"))!""}" placeholder="Username" required="required" class="form-control top">
+            <input type="password" name="newPassword" placeholder="New Password" required="required" class="form-control middle">
+            <input type="password" name="newPasswordVerify" placeholder="New Password Verify" required="required" class="form-control middle">
+            <input type="text" name="userFullName" value="${(ec.getWeb().getErrorParameters().get("userFullName"))!""}" placeholder="User Full Name" required="required" class="form-control middle">
+            <input type="text" name="emailAddress" value="${(ec.getWeb().getErrorParameters().get("emailAddress"))!""}" placeholder="Email Address" required="required" class="form-control bottom">
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Create Initial Admin Account</button>
+        </form>
+    </div>
+                ]]></text></render-mode>
+            </fail-widgets></section>
+
+            <!-- TODO: very convenient for dev/testing and generally safe but adds some overhead in production, consider removing for large instances -->
+            <section name="TestLoginSection">
+                <condition><expression>ec.entity.find('moqui.security.UserAccount').condition('userId', 'EX_JOHN_DOE')
+                    .condition('currentPassword', '16ac58bbfa332c1c55bd98b53e60720bfa90d394').disableAuthz().count()</expression></condition>
+                <widgets><render-mode><text type="html"><![CDATA[
+                <form method="post" action="${sri.buildUrl("login").url}" id="TestLoginLink">
+                    <input type="hidden" name="username" value="john.doe">
+                    <input type="hidden" name="password" value="moqui">
+                    <button class="btn btn-sm btn-primary" type="submit" id="TestLoginLink_button">Test Login (John Doe)</button>
+                </form>
+                <script>$("#TestLoginLink_button").focus();</script>
+                ]]></text></render-mode></widgets>
+            </section>
+        </container></container></container>
+    </widgets>
+</screen>

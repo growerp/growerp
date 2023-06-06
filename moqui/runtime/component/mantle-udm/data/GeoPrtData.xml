@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- see https://www.iso.org/obp/ui/#iso:code:3166:PT -->
+    <Geo geoId="PRT_01" geoCodeNumeric="01" geoName="Aveiro" geoNameLocal="Aveiro" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_02" geoCodeNumeric="02" geoName="Beja" geoNameLocal="Beja" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_03" geoCodeNumeric="03" geoName="Braga" geoNameLocal="Braga" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_04" geoCodeNumeric="04" geoName="Braganca" geoNameLocal="Bragança" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_05" geoCodeNumeric="05" geoName="Castelo Branco" geoNameLocal="Castelo Branco" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_06" geoCodeNumeric="06" geoName="Coimbra" geoNameLocal="Coimbra" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_07" geoCodeNumeric="07" geoName="Evora" geoNameLocal="Évora" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_08" geoCodeNumeric="08" geoName="Faro" geoNameLocal="Faro" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_09" geoCodeNumeric="09" geoName="Guarda" geoNameLocal="Guarda" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_10" geoCodeNumeric="10" geoName="Leiria" geoNameLocal="Leiria" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_11" geoCodeNumeric="11" geoName="Lisboa" geoNameLocal="Lisboa" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_12" geoCodeNumeric="12" geoName="Portalegre" geoNameLocal="Portalegre" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_13" geoCodeNumeric="13" geoName="Porto" geoNameLocal="Porto" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_14" geoCodeNumeric="14" geoName="Santarem" geoNameLocal="Santarém" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_15" geoCodeNumeric="15" geoName="Setubal" geoNameLocal="Setúbal" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_16" geoCodeNumeric="16" geoName="Viana do Castelo" geoNameLocal="Viana do Castelo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_17" geoCodeNumeric="17" geoName="Vila Real" geoNameLocal="Vila Real" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_18" geoCodeNumeric="18" geoName="Viseu" geoNameLocal="Viseu" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_20" geoCodeNumeric="20" geoName="Acores" geoNameLocal="Região Autónoma dos Açores" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="PRT_30" geoCodeNumeric="30" geoName="Madeira" geoNameLocal="Região Autónoma da Madeira" geoTypeEnumId="GEOT_PROVINCE"/>
+
+    <GeoAssoc geoId="PRT" toGeoId="PRT_01" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_02" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_03" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_04" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_05" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_06" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_07" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_08" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_09" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_10" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_11" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_12" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_13" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_14" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_15" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_16" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_17" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_18" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_20" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="PRT" toGeoId="PRT_30" geoAssocTypeEnumId="GAT_REGIONS"/>
+</entity-facade-xml>

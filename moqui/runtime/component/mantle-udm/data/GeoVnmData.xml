@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- See https://www.iso.org/obp/ui/#iso:code:3166:VN -->
+    <Geo geoCodeNumeric="01" geoId="VN-01" geoNameLocal="Lai Châu" geoTypeEnumId="GEOT_PROVINCE" geoName="Lai Chau"/>
+    <Geo geoCodeNumeric="02" geoId="VN-02" geoNameLocal="Lào Cai" geoTypeEnumId="GEOT_PROVINCE" geoName="Lao Cai"/>
+    <Geo geoCodeNumeric="03" geoId="VN-03" geoNameLocal="Hà Giang" geoTypeEnumId="GEOT_PROVINCE" geoName="Ha Giang"/>
+    <Geo geoCodeNumeric="04" geoId="VN-04" geoNameLocal="Cao Bằng" geoTypeEnumId="GEOT_PROVINCE" geoName="Cao Bang"/>
+    <Geo geoCodeNumeric="05" geoId="VN-05" geoNameLocal="Sơn La" geoTypeEnumId="GEOT_PROVINCE" geoName="Son La"/>
+    <Geo geoCodeNumeric="06" geoId="VN-06" geoNameLocal="Yên Bái" geoTypeEnumId="GEOT_PROVINCE" geoName="Yen Bai"/>
+    <Geo geoCodeNumeric="07" geoId="VN-07" geoNameLocal="Tuyên Quang" geoTypeEnumId="GEOT_PROVINCE" geoName="Tuyen Quang"/>
+    <Geo geoCodeNumeric="08" geoId="VN-09" geoNameLocal="Lạng Sơn" geoTypeEnumId="GEOT_PROVINCE" geoName="Lang Son"/>
+    <Geo geoCodeNumeric="13" geoId="VN-13" geoNameLocal="Quảng Ninh" geoTypeEnumId="GEOT_PROVINCE" geoName="Quang Ninh"/>
+    <Geo geoCodeNumeric="14" geoId="VN-14" geoNameLocal="Hòa Bình" geoTypeEnumId="GEOT_PROVINCE" geoName="Hoa Binh"/>
+    <Geo geoCodeNumeric="15" geoId="VN-18" geoNameLocal="Ninh Bình" geoTypeEnumId="GEOT_PROVINCE" geoName="Ninh Binh"/>
+    <Geo geoCodeNumeric="20" geoId="VN-20" geoNameLocal="Thái Bình" geoTypeEnumId="GEOT_PROVINCE" geoName="Thai Binh"/>
+    <Geo geoCodeNumeric="21" geoId="VN-21" geoNameLocal="Thanh Hóa" geoTypeEnumId="GEOT_PROVINCE" geoName="Thanh Hoa"/>
+    <Geo geoCodeNumeric="22" geoId="VN-22" geoNameLocal="Nghệ An" geoTypeEnumId="GEOT_PROVINCE" geoName="Nghe An"/>
+    <Geo geoCodeNumeric="23" geoId="VN-23" geoNameLocal="Hà Tĩnh" geoTypeEnumId="GEOT_PROVINCE" geoName="Ha Tinh"/>
+    <Geo geoCodeNumeric="24" geoId="VN-24" geoNameLocal="Quảng Bình" geoTypeEnumId="GEOT_PROVINCE" geoName="Quang Binh"/>
+    <Geo geoCodeNumeric="25" geoId="VN-25" geoNameLocal="Quảng Trị" geoTypeEnumId="GEOT_PROVINCE" geoName="Quang Tri"/>
+    <Geo geoCodeNumeric="26" geoId="VN-26" geoNameLocal="Thừa Thiên Huế" geoTypeEnumId="GEOT_PROVINCE" geoName="Thua Thien Hue"/>
+    <Geo geoCodeNumeric="27" geoId="VN-27" geoNameLocal="Quảng Nam" geoTypeEnumId="GEOT_PROVINCE" geoName="Quang Nam"/>
+    <Geo geoCodeNumeric="28" geoId="VN-28" geoNameLocal="Kon Tum" geoTypeEnumId="GEOT_PROVINCE" geoName="Kon Tum"/>
+    <Geo geoCodeNumeric="29" geoId="VN-29" geoNameLocal="Quảng Ngãi" geoTypeEnumId="GEOT_PROVINCE" geoName="Quang Ngai"/>
+    <Geo geoCodeNumeric="30" geoId="VN-30" geoNameLocal="Gia Lai" geoTypeEnumId="GEOT_PROVINCE" geoName="Gia Lai"/>
+    <Geo geoCodeNumeric="31" geoId="VN-31" geoNameLocal="Bình Định" geoTypeEnumId="GEOT_PROVINCE" geoName="Binh Dinh"/>
+    <Geo geoCodeNumeric="32" geoId="VN-32" geoNameLocal="Phú Yên" geoTypeEnumId="GEOT_PROVINCE" geoName="Phu Yen"/>
+    <Geo geoCodeNumeric="33" geoId="VN-33" geoNameLocal="Đắc Lắk" geoTypeEnumId="GEOT_PROVINCE" geoName="Dac Lak"/>
+    <Geo geoCodeNumeric="34" geoId="VN-34" geoNameLocal="Khánh Hòa" geoTypeEnumId="GEOT_PROVINCE" geoName="Khanh Hoa"/>
+    <Geo geoCodeNumeric="35" geoId="VN-35" geoNameLocal="Lâm Đồng" geoTypeEnumId="GEOT_PROVINCE" geoName="Lam Dong"/>
+    <Geo geoCodeNumeric="36" geoId="VN-36" geoNameLocal="Ninh Thuận" geoTypeEnumId="GEOT_PROVINCE" geoName="Ninh Thuan"/>
+    <Geo geoCodeNumeric="37" geoId="VN-37" geoNameLocal="Tây Ninh" geoTypeEnumId="GEOT_PROVINCE" geoName="Tay Ninh"/>
+    <Geo geoCodeNumeric="39" geoId="VN-39" geoNameLocal="Đồng Nai" geoTypeEnumId="GEOT_PROVINCE" geoName="Dong Nai"/>
+    <Geo geoCodeNumeric="40" geoId="VN-40" geoNameLocal="Bình Thuận" geoTypeEnumId="GEOT_PROVINCE" geoName="Binh Thuan"/>
+    <Geo geoCodeNumeric="41" geoId="VN-41" geoNameLocal="Long An" geoTypeEnumId="GEOT_PROVINCE" geoName="Long An"/>
+    <Geo geoCodeNumeric="43" geoId="VN-43" geoNameLocal="Bà Rịa - Vũng Tàu" geoTypeEnumId="GEOT_PROVINCE" geoName="Ba Ria - Vung Tau"/>
+    <Geo geoCodeNumeric="44" geoId="VN-44" geoNameLocal="An Giang" geoTypeEnumId="GEOT_PROVINCE" geoName="An Giang"/>
+    <Geo geoCodeNumeric="45" geoId="VN-45" geoNameLocal="Đồng Tháp" geoTypeEnumId="GEOT_PROVINCE" geoName="Dong Thap"/>
+    <Geo geoCodeNumeric="47" geoId="VN-47" geoNameLocal="Kiên Giang" geoTypeEnumId="GEOT_PROVINCE" geoName="Kien Giang"/>
+    <Geo geoCodeNumeric="49" geoId="VN-49" geoNameLocal="Vĩnh Long" geoTypeEnumId="GEOT_PROVINCE" geoName="Vinh Long"/>
+    <Geo geoCodeNumeric="50" geoId="VN-50" geoNameLocal="Bến Tre" geoTypeEnumId="GEOT_PROVINCE" geoName="Ben Tre"/>
+    <Geo geoCodeNumeric="51" geoId="VN-51" geoNameLocal="Trà Vinh" geoTypeEnumId="GEOT_PROVINCE" geoName="Tra Vinh"/>
+    <Geo geoCodeNumeric="52" geoId="VN-52" geoNameLocal="Sóc Trăng" geoTypeEnumId="GEOT_PROVINCE" geoName="Soc Trang"/>
+    <Geo geoCodeNumeric="53" geoId="VN-53" geoNameLocal="Bắc Kạn" geoTypeEnumId="GEOT_PROVINCE" geoName="Bac Kan"/>
+    <Geo geoCodeNumeric="54" geoId="VN-54" geoNameLocal="Bắc Giang" geoTypeEnumId="GEOT_PROVINCE" geoName="Bac Giang"/>
+    <Geo geoCodeNumeric="55" geoId="VN-55" geoNameLocal="Bạc Liêu" geoTypeEnumId="GEOT_PROVINCE" geoName="Bac Lieu"/>
+    <Geo geoCodeNumeric="56" geoId="VN-56" geoNameLocal="Bắc Ninh" geoTypeEnumId="GEOT_PROVINCE" geoName="Bac Ninh"/>
+    <Geo geoCodeNumeric="57" geoId="VN-57" geoNameLocal="Bình Dương" geoTypeEnumId="GEOT_PROVINCE" geoName="Binh Duong"/>
+    <Geo geoCodeNumeric="57" geoId="VN-58" geoNameLocal="Bình Phước" geoTypeEnumId="GEOT_PROVINCE" geoName="Binh Phuoc"/>
+    <Geo geoCodeNumeric="58" geoId="VN-59" geoNameLocal="Cà Mau" geoTypeEnumId="GEOT_PROVINCE" geoName="Ca Mau"/>
+    <Geo geoCodeNumeric="61" geoId="VN-61" geoNameLocal="Hải Dương" geoTypeEnumId="GEOT_PROVINCE" geoName="Hai Duong"/>
+    <Geo geoCodeNumeric="63" geoId="VN-63" geoNameLocal="Hà Nam" geoTypeEnumId="GEOT_PROVINCE" geoName="Ha Nam"/>
+    <Geo geoCodeNumeric="66" geoId="VN-66" geoNameLocal="Hưng Yên" geoTypeEnumId="GEOT_PROVINCE" geoName="Hung Yen"/>
+    <Geo geoCodeNumeric="67" geoId="VN-67" geoNameLocal="Nam Định" geoTypeEnumId="GEOT_PROVINCE" geoName="Nam Dinh"/>
+    <Geo geoCodeNumeric="68" geoId="VN-68" geoNameLocal="Phú Thọ" geoTypeEnumId="GEOT_PROVINCE" geoName="Phu Tho"/>
+    <Geo geoCodeNumeric="69" geoId="VN-69" geoNameLocal="Thái Nguyên" geoTypeEnumId="GEOT_PROVINCE" geoName="Thai Nguyen"/>
+    <Geo geoCodeNumeric="70" geoId="VN-70" geoNameLocal="Vĩnh Phúc" geoTypeEnumId="GEOT_PROVINCE" geoName="Vinh Phuc"/>
+    <Geo geoCodeNumeric="71" geoId="VN-71" geoNameLocal="Điện Biên" geoTypeEnumId="GEOT_PROVINCE" geoName="Dien Bien"/>
+    <Geo geoCodeNumeric="72" geoId="VN-72" geoNameLocal="Đắk Nông" geoTypeEnumId="GEOT_PROVINCE" geoName="Dak Nong"/>
+    <Geo geoCodeNumeric="73" geoId="VN-73" geoNameLocal="Hậu Giang" geoTypeEnumId="GEOT_PROVINCE" geoName="Bac Giang"/>
+    <Geo geoCodeNumeric="74" geoId="VN-CT" geoNameLocal="Cần Thơ" geoTypeEnumId="GEOT_PROVINCE" geoName="Can Tho"/>
+    <Geo geoCodeNumeric="75" geoId="VN-DN" geoNameLocal="Đà Nẵng" geoTypeEnumId="GEOT_PROVINCE" geoName="Da Nang"/>
+    <Geo geoCodeNumeric="76" geoId="VN-HN" geoNameLocal="Hà Nội" geoTypeEnumId="GEOT_PROVINCE" geoName="Ha Noi"/>
+    <Geo geoCodeNumeric="77" geoId="VN-HP" geoNameLocal="Hải Phòng" geoTypeEnumId="GEOT_PROVINCE" geoName="Hai Phong"/>
+    <Geo geoCodeNumeric="78" geoId="VN-SG" geoNameLocal="Hồ Chí Minh" geoTypeEnumId="GEOT_PROVINCE" geoName="Ho Chi Minh"/>
+
+    <GeoAssoc geoId="VNM" toGeoId="VN-01" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-02" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-03" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-04" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-05" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-06" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-07" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-09" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-13" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-14" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-18" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-20" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-21" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-22" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-23" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-24" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-25" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-26" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-27" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-28" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-29" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-30" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-31" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-32" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-33" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-34" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-35" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-36" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-37" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-39" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-40" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-41" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-43" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-44" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-45" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-47" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-49" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-50" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-51" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-52" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-53" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-54" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-55" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-56" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-57" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-58" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-59" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-61" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-63" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-66" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-67" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-68" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-69" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-70" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-71" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-72" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-73" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-CT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-DN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-HN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-HP" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="VNM" toGeoId="VN-SG" geoAssocTypeEnumId="GAT_REGIONS"/>
+</entity-facade-xml>

@@ -1,0 +1,54 @@
+From 7ce84bbb043d22d0d2174058e2c4b5b9fad3dfd7 Mon Sep 17 00:00:00 2001
+From: Hans Bakker <h.bakker@antwebsystems.com>
+Date: Tue, 8 Jun 2021 05:28:42 +0700
+Subject: [PATCH] disable itemType, gl accounts and payroll: simplified version
+ provided in growerp-moqui component
+
+---
+ data/ItemTypeData.xml             | 2 +-
+ data/ZaaGlAccountsInstallData.xml | 2 +-
+ data/ZapPayrollTaxInstallData.xml | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/data/ItemTypeData.xml b/data/ItemTypeData.xml
+index 83289e9..35634ee 100644
+--- a/data/ItemTypeData.xml
++++ b/data/ItemTypeData.xml
+@@ -12,7 +12,7 @@ You should have received a copy of the CC0 Public Domain Dedication
+ along with this software (see the LICENSE.md file). If not, see
+ <http://creativecommons.org/publicdomain/zero/1.0/>.
+ -->
+-<entity-facade-xml type="seed">
++<entity-facade-xml type="seedMoqui">
+ 
+     <!-- General Item Types (Order, Return, Invoice) -->
+     <moqui.basic.EnumerationType description="Item Type (Order, Return, Invoice)" enumTypeId="ItemType"/>
+diff --git a/data/ZaaGlAccountsInstallData.xml b/data/ZaaGlAccountsInstallData.xml
+index bca1f54..4ed054a 100644
+--- a/data/ZaaGlAccountsInstallData.xml
++++ b/data/ZaaGlAccountsInstallData.xml
+@@ -12,7 +12,7 @@ You should have received a copy of the CC0 Public Domain Dedication
+ along with this software (see the LICENSE.md file). If not, see
+ <http://creativecommons.org/publicdomain/zero/1.0/>.
+ -->
+-<entity-facade-xml type="install">
++<entity-facade-xml type="installMoqui">
+     <!-- Uses syntax in https://docs.oracle.com/javase/8/docs/api/javax/swing/text/MaskFormatter.html -->
+     <!-- Only used if PartyAcctgPreference.glAccountCodeMask is empty or the context only supports this global or user setting -->
+     <moqui.security.UserGroupPreference userGroupId="ALL_USERS" preferenceKey="GlAccountCodeMask" preferenceValue="###-###-###"/>
+diff --git a/data/ZapPayrollTaxInstallData.xml b/data/ZapPayrollTaxInstallData.xml
+index 49cba9a..677a948 100644
+--- a/data/ZapPayrollTaxInstallData.xml
++++ b/data/ZapPayrollTaxInstallData.xml
+@@ -12,7 +12,7 @@ You should have received a copy of the CC0 Public Domain Dedication
+ along with this software (see the LICENSE.md file). If not, see
+ <http://creativecommons.org/publicdomain/zero/1.0/>.
+ -->
+-<entity-facade-xml type="install">
++<entity-facade-xml type="installMoqui">
+ 
+     <!-- =============================================================================================================
+          NOTE: While based on real data this data is for demo/testing purposes only. AS STATED IN THE LICENSE THERE IS
+-- 
+2.34.1
+

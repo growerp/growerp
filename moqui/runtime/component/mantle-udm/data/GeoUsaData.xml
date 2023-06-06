@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <Geo geoCodeAlpha2="AA" geoId="USA_AA" geoName="Armed Forces Americas" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AE" geoId="USA_AE" geoName="Armed Forces Europe" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AP" geoId="USA_AP" geoName="Armed Forces Pacific" geoTypeEnumId="GEOT_STATE"/>
+
+    <Geo geoCodeAlpha2="AK" geoId="USA_AK" geoName="Alaska" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AL" geoId="USA_AL" geoName="Alabama" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AR" geoId="USA_AR" geoName="Arkansas" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AS" geoId="USA_AS" geoName="American Samoa" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="AZ" geoId="USA_AZ" geoName="Arizona" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="CA" geoId="USA_CA" geoName="California" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="CO" geoId="USA_CO" geoName="Colorado" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="CT" geoId="USA_CT" geoName="Connecticut" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="DC" geoId="USA_DC" geoName="District of Columbia" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="DE" geoId="USA_DE" geoName="Delaware" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="FL" geoId="USA_FL" geoName="Florida" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="FM" geoId="USA_FM" geoName="Federated States of Micronesia" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="GA" geoId="USA_GA" geoName="Georgia" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="GU" geoId="USA_GU" geoName="Guam" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="HI" geoId="USA_HI" geoName="Hawaii" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="IA" geoId="USA_IA" geoName="Iowa" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="ID" geoId="USA_ID" geoName="Idaho" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="IL" geoId="USA_IL" geoName="Illinois" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="IN" geoId="USA_IN" geoName="Indiana" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="KS" geoId="USA_KS" geoName="Kansas" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="KY" geoId="USA_KY" geoName="Kentucky" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="LA" geoId="USA_LA" geoName="Louisiana" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MA" geoId="USA_MA" geoName="Massachusetts" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MD" geoId="USA_MD" geoName="Maryland" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="ME" geoId="USA_ME" geoName="Maine" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MH" geoId="USA_MH" geoName="Marshall Islands" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MI" geoId="USA_MI" geoName="Michigan" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MN" geoId="USA_MN" geoName="Minnesota" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MP" geoId="USA_MP" geoName="Northern Mariana Islands" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MO" geoId="USA_MO" geoName="Missouri" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MS" geoId="USA_MS" geoName="Mississippi" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="MT" geoId="USA_MT" geoName="Montana" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NC" geoId="USA_NC" geoName="North Carolina" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="ND" geoId="USA_ND" geoName="North Dakota" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NE" geoId="USA_NE" geoName="Nebraska" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NH" geoId="USA_NH" geoName="New Hampshire" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NJ" geoId="USA_NJ" geoName="New Jersey" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NM" geoId="USA_NM" geoName="New Mexico" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NV" geoId="USA_NV" geoName="Nevada" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="NY" geoId="USA_NY" geoName="New York" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="OH" geoId="USA_OH" geoName="Ohio" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="OK" geoId="USA_OK" geoName="Oklahoma" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="OR" geoId="USA_OR" geoName="Oregon" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="PA" geoId="USA_PA" geoName="Pennsylvania" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="PW" geoId="USA_PW" geoName="Palau" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="PR" geoId="USA_PR" geoName="Puerto Rico" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="RI" geoId="USA_RI" geoName="Rhode Island" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="SC" geoId="USA_SC" geoName="South Carolina" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="SD" geoId="USA_SD" geoName="South Dakota" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="TN" geoId="USA_TN" geoName="Tennessee" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="TX" geoId="USA_TX" geoName="Texas" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="UM" geoId="USA_UM" geoName="U.S. Minor Outlying Islands" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="UT" geoId="USA_UT" geoName="Utah" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="VA" geoId="USA_VA" geoName="Virginia" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="VT" geoId="USA_VT" geoName="Vermont" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="WA" geoId="USA_WA" geoName="Washington" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="WI" geoId="USA_WI" geoName="Wisconsin" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="WV" geoId="USA_WV" geoName="West Virginia" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="WY" geoId="USA_WY" geoName="Wyoming" geoTypeEnumId="GEOT_STATE"/>
+    <Geo geoCodeAlpha2="VI" geoId="USA_VI" geoName="Virgin Islands" geoTypeEnumId="GEOT_STATE"/>
+
+    <GeoAssoc geoId="USA" toGeoId="USA_AA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AP" geoAssocTypeEnumId="GAT_REGIONS"/>
+
+    <GeoAssoc geoId="USA" toGeoId="USA_AK" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_AZ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_CA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_CO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_CT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_DC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_DE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_FL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_FM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_GA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_GU" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_HI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_IA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_ID" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_IL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_IN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_KS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_KY" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_LA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MD" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_ME" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MH" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MP" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_MT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_ND" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NH" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NJ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_NY" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_OH" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_OK" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_OR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_PA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_PR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_PW" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_RI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_SC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_SD" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_TN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_TX" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_UM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_UT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_VA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_VT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_WA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_WI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_WV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_WY" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="USA" toGeoId="USA_VI" geoAssocTypeEnumId="GAT_REGIONS"/>
+
+    <Geo geoId="USAF" geoName="US Armed Forces" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="USAF" toGeoId="USA_AA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USAF" toGeoId="USA_AE" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USAF" toGeoId="USA_AP" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+
+    <Geo geoId="USTR" geoName="US Territories" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_AS" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_FM" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_GU" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_MH" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_MP" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_PR" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_PW" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_UM" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USTR" toGeoId="USA_VI" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+
+    <Geo geoId="USAH" geoName="Alaska/Hawaii" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="USAH" toGeoId="USA_AK" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USAH" toGeoId="USA_HI" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+
+    <Geo geoId="USCN" geoName="US Continental" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_AL" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_AR" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_AZ" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_CA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_CO" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_CT" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_DC" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_DE" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_FL" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_GA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_IA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_ID" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_IL" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_IN" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_KS" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_KY" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_LA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MD" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_ME" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MI" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MN" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MO" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MS" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_MT" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NC" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_ND" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NE" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NH" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NJ" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NM" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NV" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_NY" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_OH" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_OK" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_OR" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_PA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_RI" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_SC" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_SD" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_TN" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_TX" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_UT" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_VA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_VT" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_WA" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_WI" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_WV" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USCN" toGeoId="USA_WY" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+
+    <Geo geoId="USALL" geoName="US All" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="USALL" toGeoId="USAF" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USALL" toGeoId="USTR" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USALL" toGeoId="USAH" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="USALL" toGeoId="USCN" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+
+    <Geo geoId="US50" geoName="US 50" geoTypeEnumId="GEOT_GROUP"/>
+    <GeoAssoc geoId="US50" toGeoId="USCN" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+    <GeoAssoc geoId="US50" toGeoId="USAH" geoAssocTypeEnumId="GAT_GROUP_MEMBER"/>
+</entity-facade-xml>

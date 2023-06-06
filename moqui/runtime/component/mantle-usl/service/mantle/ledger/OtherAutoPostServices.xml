@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="post" noun="WorkEffortCost">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <!-- TODO: other parameter needed? cost component concept has changed -->
+        </in-parameters>
+        <out-parameters><parameter name="acctgTransId"/></out-parameters>
+        <actions>
+            <!-- TODO: implement this... -->
+        </actions>
+    </service>
+
+    <service verb="post" noun="FinancialAccountTrans">
+        <in-parameters>
+            <parameter name="finAccountTransId" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="acctgTransId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.financial.FinancialAccountTrans" value-field="financialAccountTrans" for-update="true"/>
+            <entity-find-related-one value-field="financialAccountTrans"
+                    relationship-name="mantle.account.financial.FinancialAccount" to-value-field="financialAccount"/>
+            <if condition="!financialAccount"><return error="true" message="Not posting, could not find Financial Account with ID [${financialAccountTrans.finAccountId}] for financial account transaction with ID [${finAccountTransId}]"/></if>
+
+            <!-- get partyAcctgPreference -->
+            <if condition="!financialAccount.organizationPartyId">
+                <log level="trace" message="Not posting, Financial Account ${ec.resource.expand('FinancialAccountNameTemplate','',financialAccount)} has no organization Party; for financial account transaction with ID [${finAccountTransId}]"/>
+                <set field="financialAccountTrans.acctgTransResultEnumId" value="AtrNoAcctgPreference"/>
+                <entity-update value-field="financialAccountTrans"/>
+                <return/>
+            </if>
+            <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                    in-map="[organizationPartyId:financialAccount.organizationPartyId]"/>
+
+            <!-- if no reason set to default based on trans type -->
+            <if condition="!financialAccountTrans.reasonEnumId">
+                <set field="defaultReasonByType" from="['FattDeposit':'FatrReplenish', 'FattWithdraw':'FatrDisbursement', 'FattAdjustment':'FatrErrorAdjust']"/>
+                <set field="financialAccountTrans.reasonEnumId" from="defaultReasonByType.get(financialAccountTrans.finAccountTransTypeEnumId)"/>
+                <!-- if there is still no reason carry on, will end up in error journal
+                <log level="warn" message="Not posting FinancialAccountTrans [${finAccountTransId}], has no reasonEnumId"/>
+                <set field="financialAccountTrans.acctgTransResultEnumId" value="AtrNoTransReason"/>
+                <entity-update value-field="financialAccountTrans"/>
+                <return/>
+                -->
+            </if>
+
+            <!-- determine acctgTransTypeEnumId based on finAccountTransTypeEnumId -->
+            <set field="transTypeMap" from="[FattDeposit:'AttFinancialDeposit', FattWithdraw:'AttFinancialWithdrawal',
+                    FattAdjustment:'AttFinancialAdjustment']"/>
+            <set field="acctgTransTypeEnumId" from="transTypeMap.get(financialAccountTrans.finAccountTransTypeEnumId)"/>
+
+            <!-- keep track of if we should put in the error journal or post -->
+            <set field="useErrorJournal" from="false"/>
+
+            <!-- get the GL account for the financial account based on finAccountTypeId -->
+            <service-call name="mantle.ledger.OtherAutoPostServices.get#FinancialAccountGlAccount" out-map="accountOut"
+                    in-map="[acctgTransTypeEnumId:acctgTransTypeEnumId, organizationPartyId:financialAccount.organizationPartyId,
+                        finAccountTypeId:financialAccount.finAccountTypeId]"/>
+            <if condition="!accountOut.glAccountId"><set field="useErrorJournal" from="true"/></if>
+            <!-- get the GL account for the financial account transaction based on reasonEnumId or finAccountTransTypeEnumId -->
+            <service-call name="mantle.ledger.OtherAutoPostServices.get#FinancialAccountTransGlAccount" out-map="transOut"
+                    in-map="[acctgTransTypeEnumId:acctgTransTypeEnumId, organizationPartyId:financialAccount.organizationPartyId,
+                        reasonEnumId:financialAccountTrans.reasonEnumId, finAccountTransTypeEnumId:financialAccountTrans.finAccountTransTypeEnumId]"/>
+            <if condition="!transOut.glAccountId"><set field="useErrorJournal" from="true"/></if>
+
+            <!-- create the transaction (AcctgTrans) -->
+            <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans" out-map="context"
+                    in-map="[acctgTransTypeEnumId:acctgTransTypeEnumId, organizationPartyId:financialAccount.organizationPartyId,
+                        otherPartyId:financialAccount.ownerPartyId, amountUomId:financialAccount.currencyUomId,
+                        transactionDate:financialAccountTrans.transactionDate]"/>
+            <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans" value-field="acctgTrans"/>
+
+            <!-- create the transaction entries (AcctgTransEntry) -->
+
+            <!-- if the amount is negative it is a withdrawal (regardless of trans type, designed to be added to get total -->
+            <set field="isWithdraw" from="financialAccountTrans.amount &lt; 0"/>
+            <set field="amount" from="isWithdraw ? -financialAccountTrans.amount : financialAccountTrans.amount"/>
+
+            <set field="transMap" from="[acctgTransId:acctgTrans.acctgTransId, acctgTrans:acctgTrans,
+                    glAccountTypeEnumId:transOut.glAccountTypeEnumId, glAccountId:transOut.glAccountId,
+                    amount:amount]"/>
+            <set field="accountMap" from="[acctgTransId:acctgTrans.acctgTransId, acctgTrans:acctgTrans,
+                    glAccountTypeEnumId:accountOut.glAccountTypeEnumId, glAccountId:accountOut.glAccountId,
+                    amount:amount]"/>
+
+            <if condition="isWithdraw"><then>
+                <!-- withdrawal or negative adjustment -->
+
+                <!-- create the credit entry for the financial transaction side, for deposits an expense (decrease
+                    balance) or in transit liability (increase balance) account for incoming funds -->
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                        in-map="transMap + [debitCreditFlag:'C']"/>
+
+                <!-- create the debit entry for the financial account side, for deposits (decrease balance)
+                    of the GL account representing financial account liability -->
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                        in-map="accountMap + [debitCreditFlag:'D']"/>
+            </then><else>
+                <!-- otherwise deposit or positive adjustment -->
+
+                <!-- create the debit entry for the financial transaction side, for deposits an expense (increase
+                    balance) or in transit liability (decrease balance) account for incoming funds -->
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                        in-map="transMap + [debitCreditFlag:'D']"/>
+
+                <!-- create the credit entry for the financial account side, for deposits (increasing balance)
+                    of the GL account representing financial account liability -->
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                        in-map="accountMap + [debitCreditFlag:'C']"/>
+            </else></if>
+
+            <!-- ==== post the tx ==== -->
+            <if condition="useErrorJournal"><then>
+                <!-- put in the error journal for the org -->
+                <if condition="partyAcctgPreference?.errorGlJournalId">
+                    <service-call name="update#mantle.ledger.transaction.AcctgTrans"
+                            in-map="[acctgTransId:acctgTrans.acctgTransId, glJournalId:partyAcctgPreference.errorGlJournalId]"/>
+                </if>
+            </then><else>
+                <!-- call the post service -->
+                <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans" in-map="[acctgTransId:acctgTrans.acctgTransId]"/>
+            </else></if>
+
+            <!-- set acctg trans result to Success -->
+            <set field="financialAccountTrans.acctgTransResultEnumId" value="AtrSuccess"/>
+            <entity-update value-field="financialAccountTrans"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="FinancialAccountGlAccount">
+        <in-parameters>
+            <parameter name="acctgTransTypeEnumId" required="true"/>
+            <parameter name="organizationPartyId" required="true"/>
+            <parameter name="otherPartyId"/>
+            <parameter name="finAccountTypeId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccountId"/>
+            <parameter name="glAccountTypeEnumId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.ledger.LedgerServices.expand#ParentOrganizationList" out-map="context"
+                    in-map="[organizationPartyId:organizationPartyId]"/>
+
+            <!-- look by finAccountTypeId -->
+            <entity-find entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount" list="accountTypeGlAccountList" cache="true">
+                <econdition field-name="organizationPartyId" operator="in" from="orgPartyIdList"/>
+                <econdition field-name="finAccountTypeId"/>
+            </entity-find>
+            <set field="glAccountId" from="accountTypeGlAccountList?.first?.glAccountId"/>
+
+            <if condition="glAccountId">
+                <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount" cache="true">
+                    <field-map field-name="glAccountId"/></entity-find-one>
+                <set field="glAccountTypeEnumId" from="glAccount?.glAccountTypeEnumId"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="FinancialAccountTransGlAccount">
+        <in-parameters>
+            <parameter name="acctgTransTypeEnumId" required="true"/>
+            <parameter name="organizationPartyId" required="true"/>
+            <parameter name="otherPartyId"/>
+            <parameter name="reasonEnumId" required="true"/>
+            <parameter name="finAccountTransTypeEnumId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccountId"/>
+            <parameter name="glAccountTypeEnumId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.ledger.LedgerServices.expand#ParentOrganizationList" out-map="context"
+                    in-map="[organizationPartyId:organizationPartyId]"/>
+
+            <!-- look by reasonEnumId -->
+            <entity-find entity-name="mantle.ledger.config.FinancialAccountReasonGlAccount" list="accountReasonGlAccountList" cache="true">
+                <econdition field-name="organizationPartyId" operator="in" from="orgPartyIdList"/>
+                <econdition field-name="reasonEnumId"/>
+            </entity-find>
+            <set field="glAccountId" from="accountReasonGlAccountList?.first?.glAccountId"/>
+
+            <if condition="glAccountId">
+                <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount" cache="true">
+                    <field-map field-name="glAccountId"/></entity-find-one>
+                <set field="glAccountTypeEnumId" from="glAccount?.glAccountTypeEnumId"/>
+            </if>
+        </actions>
+    </service>
+</services>

@@ -1,0 +1,1640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========== Payroll Tax Reporting Services ========== -->
+
+    <service verb="get" noun="EmploymentInfo">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"><description>Should be a period for a Tax Year/Quarter/etc</description></parameter>
+            <parameter name="partyRelationshipId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timePeriod" type="Map"/>
+            <parameter name="employment" type="Map"/>
+
+            <parameter name="employeeFirstName"/>
+            <parameter name="employeeMiddleName"/>
+            <parameter name="employeeLastName"/>
+            <parameter name="employeeSuffix"/>
+            <parameter name="employeeSsn"/>
+            <parameter name="employeeHomeContactInfo" type="Map"/>
+            <parameter name="employeeHomeStreetString"/>
+            <parameter name="employeeHomeCszString"/>
+            <parameter name="employeeHomeString"/>
+
+            <parameter name="employerName"/>
+            <parameter name="employerEin"/>
+            <parameter name="employerContactInfo" type="Map"/>
+            <parameter name="employerAddressString"/>
+            <parameter name="employerPhoneString"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"/>
+            <entity-find-one entity-name="mantle.humanres.employment.EmploymentAndRelationship" value-field="employment"/>
+            <entity-find-one entity-name="mantle.humanres.employment.Employee" value-field="employee">
+                <field-map field-name="partyId" from="employment.fromPartyId"/></entity-find-one>
+
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="employeeDetail">
+                <field-map field-name="partyId" from="employment?.fromPartyId"/></entity-find-one>
+            <set field="employeeFirstName" from="employee?.taxName ?: employeeDetail?.firstName"/>
+            <!-- Use the tax middle name if either taxName or taxMiddleName is specified to allow middle name to be blank
+                 if is specified on their employee detail record, but is not on their SS Card/ID Card. -->
+            <set field="employeeMiddleName" from="employee?.taxName || employee?.taxMiddleName ?: employeeDetail?.middleName"/>
+            <set field="employeeLastName" from="employee?.taxLastName ?: employeeDetail?.lastName"/>
+            <set field="employeeSuffix" from="employee?.taxNameSuffix ?: employeeDetail?.suffix"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="employeeSsnPi">
+                <field-map field-name="partyId" from="employment.fromPartyId"/>
+                <field-map field-name="partyIdTypeEnumId" value="PtidSsn"/>
+            </entity-find-one>
+            <set field="employeeSsn" from="employeeSsnPi?.idValue"/>
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="employeeHomeContactInfo"
+                          in-map="[partyId:employee.partyId, postalContactMechId:employee.taxHomeContactMechId,
+                                postalContactMechPurposeId:'PostalHome']"/>
+            <!-- TODO: Shouldn't the unit number go along with address line 2? -->
+            <script>employeeHomeStreetString = """${employeeHomeContactInfo?.postalAddress?.address1 ? employeeHomeContactInfo.postalAddress.address1 + (employeeHomeContactInfo.postalAddress.unitNumber ? ' #' + employeeHomeContactInfo.postalAddress.unitNumber : '') : ''}${employeeHomeContactInfo?.postalAddress?.address2 ? '\n' + employeeHomeContactInfo.postalAddress.address2 : ''}"""</script>
+            <script>employeeHomeCszString = """${employeeHomeContactInfo?.postalAddress ? (employeeHomeContactInfo.postalAddress.city ?: '') + (employeeHomeContactInfo.postalAddressStateGeo?.geoCodeAlpha2 ? ', ' + employeeHomeContactInfo.postalAddressStateGeo.geoCodeAlpha2 : '') + ' ' + (employeeHomeContactInfo.postalAddress.postalCode ?: '') + (employeeHomeContactInfo.postalAddress.postalCodeExt ? '-' + employeeHomeContactInfo.postalAddress.postalCodeExt : '') + (employeeHomeContactInfo.postalAddressCountryGeo?.geoCodeAlpha3 ? ' ' + employeeHomeContactInfo.postalAddressCountryGeo.geoCodeAlpha3 : '') : ''}"""</script>
+            <script>employeeHomeString = """${employeeHomeStreetString}\n${employeeHomeCszString}"""</script>
+
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="employerDetail">
+                <field-map field-name="partyId" from="employment.toPartyId"/></entity-find-one>
+            <set field="employerName" value="${employerDetail.organizationName?:''}${employerDetail.firstName?:''}${employerDetail.lastName ? ' ' + employerDetail.lastName : ''}"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="employerEinPi">
+                <field-map field-name="partyId" from="employment.toPartyId"/>
+                <field-map field-name="partyIdTypeEnumId" value="PtidFein"/>
+            </entity-find-one>
+            <set field="employerEin" from="employerEinPi?.idValue"/>
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="employerContactInfo"
+                          in-map="[partyId:employment.toPartyId, postalContactMechPurposeId:'PostalTax',
+                                telecomContactMechPurposeId:'PhoneTax']"/>
+            <script>employerAddressString = """${employerContactInfo?.postalAddress?.address1 ? employerContactInfo.postalAddress.address1 + (employerContactInfo.postalAddress.unitNumber ? ' #' + employerContactInfo.postalAddress.unitNumber : '') + '\n' : ''}${employerContactInfo?.postalAddress?.address2 ? employerContactInfo.postalAddress.address2 + '\n' : ''}${employerContactInfo?.postalAddress ? (employerContactInfo.postalAddress.city ?: '') + (employerContactInfo.postalAddressStateGeo?.geoCodeAlpha2 ? ', ' + employerContactInfo.postalAddressStateGeo.geoCodeAlpha2 : '') + ' ' + (employerContactInfo.postalAddress.postalCode ?: '') + (employerContactInfo.postalAddress.postalCodeExt ? '-' + employerContactInfo.postalAddress.postalCodeExt : '') + (employerContactInfo.postalAddressCountryGeo?.geoCodeAlpha3 ? ' ' + employerContactInfo.postalAddressCountryGeo.geoCodeAlpha3 : '') : ''}"""</script>
+            <script>employerPhoneString = """${employerContactInfo?.telecomNumber ? (employerContactInfo.telecomNumber.countryCode ? employerContactInfo.telecomNumber.countryCode + '-' : '') + (employerContactInfo.telecomNumber.areaCode ? employerContactInfo.telecomNumber.areaCode + '-' : '') + (employerContactInfo.telecomNumber.contactNumber ?: '') : ''}"""</script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="EmploymentWageAndTaxInfo">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"><description>Should be a period for a Tax Year/Quarter/etc</description></parameter>
+            <parameter name="partyRelationshipId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timePeriod" type="Map"/>
+            <parameter name="employment" type="Map"/>
+
+            <parameter name="employeeFirstName"/>
+            <parameter name="employeeMiddleName"/>
+            <parameter name="employeeLastName"/>
+            <parameter name="employeeSuffix"/>
+            <parameter name="employeeSsn"/>
+            <parameter name="employeeHomeContactInfo" type="Map"/>
+            <parameter name="employeeHomeStreetString"/>
+            <parameter name="employeeHomeCszString"/>
+            <parameter name="employeeHomeString"/>
+
+            <parameter name="employerName"/>
+            <parameter name="employerEin"/>
+            <parameter name="employerContactInfo" type="Map"/>
+            <parameter name="employerAddressString"/>
+            <parameter name="employerPhoneString"/>
+
+            <!-- TODO: These are only the federal taxable/social/medical amounts.  They probably should not be separate, but
+                   should be in the wageAndTaxInfoByTaxAuthorityId Map, as these amounts differ for states and possibly localities.
+                   e.g. PA taxes pension plans such as 401k
+                   e.g. NC only taxes income that was made in their state; if you work out of state, it is not taxed. -->
+            <parameter name="taxablePayAmount" type="BigDecimal"/>
+            <parameter name="socialTaxablePayAmount" type="BigDecimal"/>
+            <parameter name="medicalTaxablePayAmount" type="BigDecimal"/>
+            <parameter name="currencyUomId"/>
+            <parameter name="hasAnyPay" type="Boolean"/>
+
+            <parameter name="wageAndTaxInfoByTaxAuthorityId" type="Map"> <description>contains Map with: taxAuthority,
+                taxAuthorityGeo, incomeTaxWithheldAmount, socialTaxWithheldAmount, medicalTaxWithheldAmount</description></parameter>
+
+            <parameter name="federalTaxAuthorityIdList" type="List"/>
+            <parameter name="stateTaxAuthorityIdList" type="List"/>
+            <parameter name="localTaxAuthorityIdList" type="List"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.humanres.PayrollDocumentServices.get#EmploymentInfo"
+                          in-map="[timePeriodId:timePeriodId, partyRelationshipId:partyRelationshipId]" out-map="context"/>
+
+            <entity-find entity-name="mantle.humanres.employment.EmploymentPayHistory" list="payHistoryList">
+                <econdition field-name="partyRelationshipId"/>
+                <econdition field-name="payDate" operator="greater-equals" from="timePeriod.fromDate"/>
+                <econdition field-name="payDate" operator="less-equals" from="timePeriod.thruDate"/>
+                <econdition field-name="internalPayroll" value="Y"/>
+            </entity-find>
+            <set field="taxablePayAmount" from="0.0"/>
+            <set field="socialTaxablePayAmount" from="0.0"/>
+            <set field="medicalTaxablePayAmount" from="0.0"/>
+            <iterate list="payHistoryList" entry="payHistory">
+                <set field="taxablePayAmount" from="taxablePayAmount + payHistory.taxablePayAmount"/>
+                <set field="socialTaxablePayAmount" from="socialTaxablePayAmount + payHistory.socialTaxablePayAmount"/>
+                <set field="medicalTaxablePayAmount" from="medicalTaxablePayAmount + payHistory.medicalTaxablePayAmount"/>
+                <set field="currencyUomId" from="payHistory.currencyUomId"/><!-- NOTE: assumes all have same currency -->
+            </iterate>
+
+            <set field="hasAnyPay" from="taxablePayAmount &gt; 0 || socialTaxablePayAmount &gt; 0 || medicalTaxablePayAmount &gt; 0"/>
+
+            <entity-find entity-name="mantle.humanres.employment.EmploymentPayDetail" list="payDetailList">
+                <econdition field-name="partyRelationshipId"/>
+                <econdition field-name="payDate" operator="greater-equals" from="timePeriod.fromDate"/>
+                <econdition field-name="payDate" operator="less-equals" from="timePeriod.thruDate"/>
+                <econdition field-name="isEmployerPaid" operator="not-equals" value="Y" or-null="true"/>
+            </entity-find>
+            <set field="wageAndTaxInfoByTaxAuthorityId" from="[:]"/>
+            <iterate list="payDetailList" entry="payDetail">
+                <if condition="!payDetail.taxAuthorityId"><continue/></if>
+                <set field="taxAuthorityId" from="payDetail.taxAuthorityId"/>
+                <entity-find-one entity-name="mantle.humanres.employment.PayrollAdjustment" value-field="payrollAdjustment">
+                    <field-map field-name="payrollAdjustmentId" from="payDetail.payrollAdjustmentId"/></entity-find-one>
+
+                <set field="wageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(taxAuthorityId)"/>
+                <if condition="!wageAndTaxInfo">
+                    <entity-find-one entity-name="mantle.other.tax.TaxAuthority" value-field="taxAuthority"/>
+                    <entity-find-one entity-name="moqui.basic.Geo" value-field="taxAuthorityGeo">
+                        <field-map field-name="geoId" from="taxAuthority.taxAuthGeoId"/></entity-find-one>
+                    <set field="wageAndTaxInfo" from="[taxAuthority:taxAuthority, taxAuthorityGeo:taxAuthorityGeo]"/>
+                    <script>wageAndTaxInfoByTaxAuthorityId.put(taxAuthorityId, wageAndTaxInfo)</script>
+                </if>
+                <script>
+                    if (payrollAdjustment.isTax == 'Y') {
+                        addToBigDecimalInMap('incomeTaxWithheldAmount', -payDetail.amount, wageAndTaxInfo)
+                    } else if (payrollAdjustment.isSocialTax == 'Y') {
+                        addToBigDecimalInMap('socialTaxWithheldAmount', -payDetail.amount, wageAndTaxInfo)
+                    } else if (payrollAdjustment.isMedicalTax == 'Y') {
+                        addToBigDecimalInMap('medicalTaxWithheldAmount', -payDetail.amount, wageAndTaxInfo)
+                    }
+                </script>
+            </iterate>
+
+            <set field="federalTaxAuthorityIdList" from="[]"/>
+            <set field="stateTaxAuthorityIdList" from="[]"/>
+            <set field="localTaxAuthorityIdList" from="[]"/>
+            <iterate list="wageAndTaxInfoByTaxAuthorityId" entry="wageAndTaxInfo" key="taxAuthorityId">
+                <if condition="wageAndTaxInfo.taxAuthority.taxAuthorityTypeEnumId == 'TatFederal'"><then>
+                    <script>federalTaxAuthorityIdList.add(taxAuthorityId)</script>
+                </then><else-if condition="wageAndTaxInfo.taxAuthority.taxAuthorityTypeEnumId == 'TatState'">
+                    <script>stateTaxAuthorityIdList.add(taxAuthorityId)</script>
+                </else-if><else-if condition="wageAndTaxInfo.taxAuthority.taxAuthorityTypeEnumId in ['TatCounty', 'TatCity']">
+                    <script>localTaxAuthorityIdList.add(taxAuthorityId)</script>
+                </else-if></if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="PeriodWageAndTaxRecords">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"><description>Should be a period for a Tax Year/Quarter/etc</description></parameter>
+            <parameter name="defaultTaxFormId" default-value="UsaIrsW2"/>
+        </in-parameters>
+        <actions>
+            <!-- lock the TimePeriod, will close later -->
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod" for-update="true"/>
+
+            <if condition="timePeriod.isClosed == 'Y'">
+                <message error="true">Not creating wage and text records for period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, already closed.</message></if>
+            <!-- TODO: uncomment this, commented for testing only
+            <if condition="ec.user.nowTimestamp.before(timePeriod.thruDate)">
+                <message error="true">Not creating wage and text records or closing period ${ec.resource.expand('TimePeriodNameTemplate','',timePeriod)}, period has not ended (ends on ${timePeriod.thruDate}).</message></if>
+            -->
+
+            <service-call name="mantle.humanres.PayrollServices.get#TimePeriodEmployments"
+                    in-map="[timePeriodId:timePeriodId, ignoreType:true]" out-map="context"/>
+
+            <iterate list="employmentList" entry="employment">
+                <entity-find-one entity-name="mantle.humanres.employment.Employee" value-field="employee">
+                    <field-map field-name="partyId" from="employment.fromPartyId"/></entity-find-one>
+                <entity-find-one entity-name="mantle.humanres.position.EmplPosition" value-field="emplPosition">
+                    <field-map field-name="emplPositionId" from="employment.emplPositionId"/></entity-find-one>
+
+                <set field="curTaxFormId" from="employment.taxFormId ?: employee.taxFormId ?: emplPosition.taxFormId ?: defaultTaxFormId"/>
+                <if condition="curTaxFormId == 'UsaIrsW2'">
+                    <!-- see if there is no SSN for employee and if so use UsaIrs1099Misc -->
+                    <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="employeeSsnPi">
+                        <field-map field-name="partyId" from="employment.fromPartyId"/>
+                        <field-map field-name="partyIdTypeEnumId" value="PtidSsn"/>
+                    </entity-find-one>
+                    <if condition="!employeeSsnPi?.idValue"><set field="curTaxFormId" value="UsaIrs1099Misc"/></if>
+                </if>
+                <if condition="curTaxFormId == 'UsaIrs1099Misc'"><then>
+                    <service-call name="mantle.humanres.PayrollDocumentServices.get#UsaIrs1099MiscFormData"
+                            out-map="formOut" out-map-add-to-existing="false"
+                            in-map="[timePeriodId:timePeriodId, partyRelationshipId:employment.partyRelationshipId]"/>
+                </then><else-if condition="curTaxFormId == 'UsaIrsW2'">
+                    <service-call name="mantle.humanres.PayrollDocumentServices.get#UsaIrsW2FormData"
+                            out-map="formOut" out-map-add-to-existing="false"
+                            in-map="[timePeriodId:timePeriodId, partyRelationshipId:employment.partyRelationshipId]"/>
+                </else-if><else>
+                    <message>Not creating wage and tax statement for employee ${employment.fromPartyId} employment ${employment.partyRelationshipId}, no tax form set</message>
+                    <continue/>
+                </else></if>
+
+                <if condition="!formOut.hasAnyPay">
+                    <message>Not creating wage and tax statement for employee ${employment.fromPartyId} employment ${employment.partyRelationshipId}, has no pay</message>
+                    <continue/>
+                </if>
+
+                <!-- save FormResponse -->
+                <service-call name="org.moqui.impl.ScreenServices.create#FormResponse" out-map="responseOut"
+                        out-map-add-to-existing="false" in-map="[formId:formOut.formId, responseMap:formOut.formMap]"/>
+
+                <!-- create TaxStatement record -->
+                <service-call name="create#mantle.other.tax.TaxStatement"
+                        in-map="[timePeriodId:timePeriodId, partyId:employment.fromPartyId,
+                            partyRelationshipId:employment.partyRelationshipId, taxAuthorityId:formOut.federalTaxAuthorityId,
+                            formId:formOut.formId, formResponseId:responseOut.formResponseId]"/>
+            </iterate>
+
+            <!-- close the TimePeriod -->
+            <set field="timePeriod.isClosed" value="Y"/>
+            <entity-update value-field="timePeriod"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="UsaIrsW2FormData">
+        <!-- NOTE: currently supports only one federal, state, and local tax authority; to support multiple states with
+            different wage/etc amounts other payroll services/etc would also need to be changed -->
+        <!-- NOTE: currently uses FEIN for Employer's state ID -->
+        <!-- TODO: support multiple tax authorities at each level by making sure the state is related to
+            federalTaxAuthorityId, and match local with state -->
+        <implements service="mantle.humanres.PayrollDocumentServices.get#EmploymentWageAndTaxInfo"/>
+        <in-parameters>
+            <parameter name="federalTaxAuthorityId" default-value="UsaIrs"/>
+            <parameter name="formId" default-value="UsaIrsW2"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="federalTaxAuthorityId"/>
+            <parameter name="formId"/>
+            <parameter name="formMap" type="Map">
+                <parameter name="w2_a"/><parameter name="w2_b"/><parameter name="w2_c"/>
+                <parameter name="w2_e1"/><parameter name="w2_e2"/><parameter name="w2_e3"/><parameter name="w2_f"/>
+                <parameter name="w2_01"/><parameter name="w2_02"/><parameter name="w2_03"/><parameter name="w2_04"/>
+                <parameter name="w2_05"/><parameter name="w2_06"/>
+                <parameter name="w2_15as"/><parameter name="w2_15ae"/><parameter name="w2_16a"/><parameter name="w2_17a"/>
+                <parameter name="w2_18a"/><parameter name="w2_19a"/><parameter name="w2_20a"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.humanres.PayrollDocumentServices.get#EmploymentWageAndTaxInfo" in-map="context" out-map="context"/>
+            <set field="formMap" from="[:]"/>
+
+            <set field="formMap.w2_a" from="employeeSsn"/>
+            <set field="formMap.w2_b" from="employerEin"/>
+            <set field="formMap.w2_c" value="${employerName}\n${employerAddressString}"/>
+            <set field="formMap.w2_e1" from="employeeFirstName + (employeeMiddleName ? ' ' + employeeMiddleName : '')"/>
+            <set field="formMap.w2_e2" from="employeeLastName"/>
+            <set field="formMap.w2_e3" from="employeeSuffix"/>
+            <set field="formMap.w2_f" from="employeeHomeString"/>
+
+            <set field="formMap.w2_01" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+            <if condition="socialTaxablePayAmount"><set field="formMap.w2_03" from="ec.l10n.format(socialTaxablePayAmount, '#,##0.00')"/></if>
+            <if condition="medicalTaxablePayAmount"><set field="formMap.w2_05" from="ec.l10n.format(medicalTaxablePayAmount, '#,##0.00')"/></if>
+
+            <set field="federalWageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(federalTaxAuthorityId)"/>
+            <set field="formMap.w2_02" from="ec.l10n.format(federalWageAndTaxInfo?.incomeTaxWithheldAmount, '#,##0.00')"/>
+            <set field="formMap.w2_04" from="ec.l10n.format(federalWageAndTaxInfo?.socialTaxWithheldAmount, '#,##0.00')"/>
+            <set field="formMap.w2_06" from="ec.l10n.format(federalWageAndTaxInfo?.medicalTaxWithheldAmount, '#,##0.00')"/>
+
+            <!-- TODO: Box 12. If there are more than 4 codes, an additional W2 Copy A is required -->
+
+            <!-- TODO: There are possibly many State records -->
+            <!-- TODO: Additionally, different states may have different reporting requirements; e.g. CA and NY may require 100% of
+                       your federal wages to be reported, while other states may only require wages for work performed in
+                       the state -->
+            <!-- TODO: State reporting is fairly tricky and differs considerably.  Hare are some good references:
+                       https://payroll.intuit.com/support/kb/2000417.html
+                       https://www.learnvest.com/knowledge-center/how-to-do-taxes-if-you-live-and-work-in-2-different-states/
+                       http://www.pewtrusts.org/en/research-and-analysis/blogs/stateline/2013/12/12/road-warrior-state-income-tax-laws-vary-widely -->
+            <set field="stateTaxAuthorityId" from="stateTaxAuthorityIdList ? stateTaxAuthorityIdList[0] : 0"/>
+            <set field="stateWageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(stateTaxAuthorityId)"/>
+            <!-- TODO: There are lines for two states on the W2, presumably if there are additional, another W2 form is required -->
+            <if condition="stateWageAndTaxInfo">
+                <set field="formMap.w2_15as" from="stateWageAndTaxInfo.taxAuthorityGeo?.geoCodeAlpha2"/>
+                <!-- TODO: this should not be the EIN, this is the state employer account/ID number -->
+                <set field="formMap.w2_15ae" from="employerEin"/>
+                <!-- TODO: State Taxable Pay Amount is not necessarily the Federal Taxable Pay amount -->
+                <!-- e.g. in PA, contributions toward an employer sponsored pension plan are taxed, but they are not federally -->
+                <!-- e.g. in NC, only wages earned in NC are reported -->
+                <set field="formMap.w2_16a" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+                <set field="formMap.w2_17a" from="ec.l10n.format(stateWageAndTaxInfo.incomeTaxWithheldAmount, '#,##0.00')"/>
+            </if>
+
+            <!-- TODO: There are possibly many Local Records.  There are lines for two localities on the W2, presumably another W2
+                       form is required if there are more than two -->
+            <set field="localTaxAuthorityId" from="localTaxAuthorityIdList ? localTaxAuthorityIdList[0] : 0"/>
+            <set field="localWageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(localTaxAuthorityId)"/>
+            <if condition="localWageAndTaxInfo">
+                <!-- TODO: Local Taxable Pay Amount is not necessarily the Federal Taxable Pay amount -->
+                <!-- e.g. in PA, contributions toward an employer sponsored pension plan are taxed, but they are not federally -->
+                <!-- e.g. in NC, only wages earned in NC are reported -->
+                <set field="formMap.w2_18a" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+                <set field="formMap.w2_19a" from="ec.l10n.format(localWageAndTaxInfo.incomeTaxWithheldAmount, '#,##0.00')"/>
+                <!-- TODO: this may need to be shortened to fit in printed form field -->
+                <set field="formMap.w2_20a" from="localWageAndTaxInfo.taxAuthorityGeo.geoName"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="Efw2File">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"/>
+            <parameter name="submitterPartyId" required="true"/>
+            <parameter name="companyPartyId"/> <!-- Defaults to time period party -->
+            <parameter name="agentPartyId"/> <!-- Defaults to no agent -->
+            <parameter name="resubWfid" default=""/> <!-- If resubmission, the WFID issued by SSA -->
+            <parameter name="preparerCode" default="L"/>
+            <parameter name="terminatingBusiness" default="N"/>
+            <parameter name="includeStateRecords" default="N"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fileText"/>
+        </out-parameters>
+        <actions>
+            <!--
+                What character sets may I use?
+                    * American Standard Code for Information Interchange-1 (ASCII-1) for BSO submitters.
+                    * Extended Binary Coded Decimal Interchange Code (EBCDIC) or ASCII for EDT submitters.
+                    * See Appendix D for character sets.
+                Are there any restrictions concerning the number of records for an EFW2 file?
+                    * If your organization files on behalf of multiple employers, include no more than 1 million RW Records
+                        or 50,000 RE Records per submission.
+                    * Following these guidelines will help to ensure that your wage data is processed in a timely manner.
+                What is the length of each record?
+                    * 512 bytes.
+                What case letters must I use?
+                    * Use alphabetic upper-case letters for all fields other than the “Contact E-Mail/Internet” field in the
+                        RA Record and the “Employer Contact E-Mail/Internet” field in the RE Record (positions 446-485).
+                    * For the "Contact E-Mail/Internet" field in the RA Record (positions 446 - 485) and in the
+                        “Employer Contact E-Mail/Internet” RE Record (positions 279-318), use upper and/or lower case letters
+                        as needed to show the exact electronic mail address.
+                What rules do you have for alpha/numeric fields?
+                    * Left justify and fill with blanks.
+                    * Where the "field" shows "Blank," all positions must be blank, not zeros.
+                What rules do you have for money fields?
+                    * Must contain only numbers.
+                    * No punctuation.
+                    * No signed amounts (high order signed or low order signed).
+                    * Include both dollars and cents with the decimal point assumed (example: $59.60 = 00000005960).
+                    * Do not round to the nearest dollar (example: $5,500.99 = 00000550099).
+                    * Right justify and zero fill to the left.
+                    * Any money field that has no amount to be reported must be filled with zeros, not blanks.
+                What rules do you have for reporting Wages, Tips, and Other Compensation and Income Tax Withheld?
+                    * The tax jurisdiction code reported in position 220 of the RE Record tells SSA how to process the report.
+                    * Note section 4.2.1 where US Territories and Protectorates have special places for Income:
+                        - Puerto Rico (P)
+                        - Virgin Islands (V)
+                        - Guam (G)
+                        - American Samoa (S)
+                        - Northern Mariana Islands (N)
+                What rules do you have for the format of the employee name?
+                    * Enter the name exactly as shown on the individual's Social Security card.
+                    * Must be submitted in the individual name fields:
+                        - Employee First Name
+                        - Employee Middle Name or Initial (if shown on Social Security card)
+                        - Employee Last Name
+                        - Suffix (if shown on Social Security card)
+                    * Do not include any titles.
+                What rules do you have for the Social Security Number (SSN)?
+                    * Use the number shown on the original/replacement SSN card.
+                    * Only numeric characters.
+                    * Omit hyphens.
+                    * May not begin with a 666 or 9.
+                    * If there is no SSN available for the employee, enter zeros (0) in positions 3 - 11 of the RW Record, and
+                        have your employee call 1-800-772-1213 or visit their local Social Security office to obtain an SSN.
+            -->
+
+            <!-- Create RA Submitter Record (Required) -->
+            <!-- Loop Across Employers (Time Periods are per employer; there will only be one employer) -->
+            <!-- Create RE Employer Record (Required) -->
+            <!-- Loop Across Employees -->
+            <!-- Create RW Employee Wage Record (Required) -->
+            <!-- Create RO Employee Wage Record (Optional) -->
+            <!-- Create RS State Wage Record (Optional) -->
+            <!-- Create RT Total Record (Required) -->
+            <!-- Create RU Total Record (Optional) -->
+            <!-- Create RV State Total Record (Optional) -->
+            <!-- Create RF Final Record (Required) -->
+
+            <service-call name="mantle.other.TaxServices.get#PayerTaxInfo" in-map="[partyId:submitterPartyId]" out-map="submitter"/>
+            <if condition="submitter == null"><return error="true" message="Submitter is required."/></if>
+
+            <!-- Agents are optional, and are defined per employer, but this only uses one -->
+            <service-call name="mantle.other.TaxServices.get#PayerTaxInfo" in-map="[partyId:agentPartyId]" out-map="agent"/>
+
+            <!-- get employmentList and timePeriod -->
+            <service-call name="mantle.humanres.PayrollServices.get#TimePeriodEmployments"
+                          in-map="[timePeriodId:timePeriodId, ignoreType:true]" out-map="context"/>
+            <if condition="!timePeriod"><return error="true" message="Time period is invalid"/></if>
+            <if condition="!employmentList"><return error="true" message="No employements found for time period"/></if>
+
+            <!-- EFW2 supports multiple employers even though time periods only encompass one -->
+            <!-- If a company is passed in, use it; otherwise use the party from the time period -->
+            <service-call name="mantle.other.TaxServices.get#PayerTaxInfo" in-map="[partyId:companyPartyId?:timePeriod?.partyId]" out-map="company"/>
+            <set field="employerList" from="[company]"/>
+
+
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+
+                ExecutionContext ec = context.ec
+
+                List<StringBuilder> lines = []
+                List<StringBuilder> rwRecordsAll = [] // totaled in RF record
+                List<StringBuilder> rwRecords = [] // reset for each employer record; totaled in RT record
+                List<StringBuilder> roRecords = [] // reset for each employer record; totaled in RU record
+                List<StringBuilder> rsRecords = [] // reset for each employer record; implementation appears to vary by state
+
+                ////////////////////////////////////////////////////////////////////////////////
+                // RA Submitter Record (Required)
+                ////////////////////////////////////////////////////////////////////////////////
+                StringBuilder raHeader = new StringBuilder(512)
+                // Record Identifier (1-2, 2)
+                raHeader.append("RA")
+
+                // Submitter's Employer Identification Number (EIN) (3-11, 9)
+                raHeader.append(submitter?.ein?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9)) // Remove all punctuation
+
+                // User Identification (User ID) (12-10, 8)
+                raHeader.append(submitter?.uid?.toUpperCase()?.padRight(8, ' ')?.take(8))
+
+                // Software Vendor Code (20-13, 4)
+                String softwareVendorCode = ec.user.getPreference('org.nactp.software.vendor.id') ?: ""
+                raHeader.append(softwareVendorCode.padRight(4, ' ')?.take(4))
+
+                // Blank (24-28, 5)
+                raHeader.append("".padRight(5, ' '))
+
+                // Resub Indicator (29-29, 1) // 1 if being resubmitted, otherwise 0
+                raHeader.append(resubWfid.trim().empty() ? "0" : "1")
+
+                // Resub Wage File Identifier (WFID) (30-35, 6)
+                raHeader.append(resubWfid?.toUpperCase()?.padRight(6, ' ')?.take(6))
+
+                // Software Code (36-37, 2)
+                raHeader.append(softwareVendorCode.empty() ? "98" : "99")
+
+                //******************************************************************************
+                // Company
+                //******************************************************************************
+                // Company Name (38-94, 57)
+                raHeader.append(company?.name?.toUpperCase()?.padRight(57, ' ')?.take(57))
+
+                // Location Address (95-116, 22) (Attention, Suite, Room Number, etc.)
+                String cmpAddress2 = company?.contactInfo?.postalAddress?.address2 ?: ''
+                String cmpUnit = company?.contactInfo?.postalAddress?.unit ? '#' + company?.contactInfo?.postalAddress?.address2 : ''
+                String cmpLocAddress = cmpAddress2 ? (cmpUnit ? (cmpAddress2 + ' ' + cmpUnit) : cmpAddress2) : cmpUnit
+                raHeader.append(cmpLocAddress.padRight(22, ' ')?.take(22))
+
+                // Delivery Address (117-138, 22) (Street Number and Name or PO Box)
+                raHeader.append(company?.contactInfo?.postalAddress?.address1?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                // City (139-160, 22)
+                raHeader.append(company?.contactInfo?.postalAddress?.city?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                // State Abbreviation (161-162, 2) Foreign Addresses fill with blanks
+                Boolean cmpHasUsAddress = company?.contactInfo?.postalAddressCountryGeo?.geoId == 'USA'
+                raHeader.append((cmpHasUsAddress ? company?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                // Zip Code (163-167, 5) For a foreign address, fill with blanks
+                raHeader.append((cmpHasUsAddress ? company?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                // Zip Code Extension (168-171, 4) If not applicable, fill with blanks
+                raHeader.append((cmpHasUsAddress ? company?.contactInfo?.postalCodeExt : '')?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                // Blank (172-176, 5)
+                raHeader.append("".padRight(5, ' '))
+
+                // Foreign State/Province (177-199, 23) If applicable, otherwise blank
+                raHeader.append((!cmpHasUsAddress ? company?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(23, ' ')?.take(23))
+
+                // Foreign Postal Code (200-214, 15)
+                raHeader.append((!cmpHasUsAddress ? company?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                // Country Code (215-216, 2) If one of the following, fill with blanks:
+                // * One of the 50 States of the U.S.A.
+                // * District of Columbia
+                // * Military Post Office (MPO)
+                // * American Samoa
+                // * Guam
+                // * Northern Mariana Islands
+                // * Puerto Rico
+                // * Virgin Islands
+                // * Otherwise, enter the applicable Country Code (see Appendix G).
+                raHeader.append((!cmpHasUsAddress ? company?.contactInfo?.postalAddressCountryGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                //******************************************************************************
+                // Submitter
+                //******************************************************************************
+                // Submitter Name (217-273, 57)
+                raHeader.append(submitter?.name?.toUpperCase()?.padRight(57, ' ')?.take(2))
+
+                // Location Address (274-295, 22) (Attention, Suite, Room Number, etc.)
+                String subAddress2 = submitter?.contactInfo?.postalAddress?.address2 ?: ''
+                String subUnit = submitter?.contactInfo?.postalAddress?.unit ? '#' + submitter?.contactInfo?.postalAddress?.address2 : ''
+                String subLocAddress = subAddress2 ? (subUnit ? (subAddress2 + ' ' + subUnit) : subAddress2) : subUnit
+                raHeader.append(subLocAddress?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                // Delivery Address (296-317, 22) (Street Number and Name or PO Box)
+                raHeader.append(submitter?.contactInfo?.postalAddress?.address1?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                // City (318-339, 22)
+                raHeader.append(submitter?.contactInfo?.postalAddress?.city?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                // State Abbreviation (340-341, 2) Foreign Addresses fill with blanks
+                Boolean subHasUsAddress = submitter?.contactInfo?.postalAddressCountryGeo?.geoId == 'USA'
+                raHeader.append((subHasUsAddress ? submitter?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                // Zip Code (342-346, 5) For a foreign address, fill with blanks
+                raHeader.append((subHasUsAddress ? submitter?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                // Zip Code Extension (347-350, 4) If not applicable, fill with blanks
+                raHeader.append((subHasUsAddress ? submitter?.contactInfo?.postalCodeExt : '')?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                // Blank (351-355, 5)
+                raHeader.append("".padRight(5, ' '))
+                // Foreign State/Province (356-378, 23) If applicable, otherwise blank
+                raHeader.append((!subHasUsAddress ? submitter?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(23, ' ')?.take(23))
+
+                // Foreign Postal Code (379-393, 15)
+                raHeader.append((!subHasUsAddress ? submitter?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                // Country Code (394-395, 2) If one of the following, fill with blanks:
+                // * One of the 50 States of the U.S.A.
+                // * District of Columbia
+                // * Military Post Office (MPO)
+                // * American Samoa
+                // * Guam
+                // * Northern Mariana Islands
+                // * Puerto Rico
+                // * Virgin Islands
+                // * Otherwise, enter the applicable Country Code (see Appendix G).
+                raHeader.append((!subHasUsAddress ? submitter?.contactInfo?.postalAddressCountryGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                // Contact Name (396-422, 27) Submitter Contact Name
+                raHeader.append(submitter?.contactInfo?.toName?.toUpperCase()?.padRight(27, ' ')?.take(2))
+
+                // Contact Phone Number (423-437, 15) contact phone with numeric values only (including area code) left justify and blank fill
+                raHeader.append(submitter?.phoneString?.replaceAll("\\p{P}", "")?.padRight(15, ' ')?.take(15))
+
+                // Contact Phone Extension (438-442, 5), left justify and blank fill
+                raHeader.append(submitter?.contactInfo?.telecomExtension?.replaceAll("\\p{P}", "")?.padRight(5, ' ')?.take(5))
+
+                // Blank (443-445, 3)
+                raHeader.append("".padRight(3, ' '))
+
+                // Contact E-Mail Internet (446-485, 40) Cannot be blank, can be mixed case
+                raHeader.append(submitter?.contactInfo?.postalAddressStateGeo?.emailAddress?.padRight(40, ' ')?.take(40))
+
+                // Blank (486-488, 3)
+                raHeader.append("".padRight(3, ' '))
+
+                // Contact Fax (489-498, 10) for US Only, includes area code
+                raHeader.append(submitter?.faxString.replaceAll("\\p{P}", "")?.padRight(10, ' ')?.take(10))
+
+                // Blank (499-499, 1)
+                raHeader.append("".padRight(1, ' '))
+
+                // Preparer Code (500-500, 1)
+                // Enter one of the following codes to indicate who prepared this file:
+                //     * A (Accounting Firm)
+                //     * L (Self-Prepared)
+                //     * S (Service Bureau)
+                //     * P (Parent Company)
+                //     * O (Other)
+                // Note: If more than one code applies, use the code that best describes who prepared this file.
+                raHeader.append(preparerCode?.toUpperCase()?.padRight(1, ' ')?.take(1))
+
+                // Blank (501-512, 12)
+                raHeader.append("".padRight(12, ' '))
+
+                lines.add(raHeader)
+
+                // employerList is allowed to contain more than one employer, but will only contain the one for the time period
+                for (Map employer in employerList) {
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // RE Employer Record (Required)
+                    ////////////////////////////////////////////////////////////////////////////////
+                    StringBuilder reRecord = new StringBuilder(512)
+                    // Record Identifier (1-2, 2)
+                    reRecord.append("RE")
+                    // Tax Year (3-6, 4)
+                    reRecord.append(timePeriod?.periodNum?.replaceAll("\\p{P}", "")?.padLeft(4, '0')?.take(4))
+
+                    // Agent Identifier Code (7-1, 1)
+                    // NOTE: Review Section 2.1 - Agent Determination before entering a “1,” “2” or “3” in this field.
+                    // If applicable, enter one of the following codes:
+                    //    * "1" 2678 Agent (Approved by IRS)
+                    //    * "2" Common Paymaster (A corporation that pays an employee who works for two or more related corporations at the same time.)
+                    //    * "3" 3504 Agent
+                    // Otherwise, fill with a blank.
+                    // TODO: This is a per employer field, but uses a common agent since this only handles a single employer
+                    reRecord.append((agent?.federalAgentIndicatorCode ?: '')?.toUpperCase()?.padRight(1, ' ')?.take(1))
+
+                    // Employer/Agent Identification Number (EIN) (8-16, 9)
+                    //    * Enter only numeric characters.
+                    //    * Omit hyphens.
+                    //    * Do not begin with 00, 07, 08, 09, 17, 18, 19, 28, 29, 49, 69, 70, 78, 79 or 89.
+                    //    * Enter the EIN under which tax payments were submitted to the IRS under Form 941, 943, 944, CT-1 or Schedule H.
+                    //        - If employer tax payments were deposited under the EIN of the Agent, enter the EIN of the Agent.
+                    //        - If employer tax payments were deposited under the EIN of the employer, enter the EIN of the employer.
+                    //    * If you entered a “1”, “2” or “3” in the Agent Indicator Code field (position 7); enter the EIN of the Agent.
+                    //    * See “Other EIN” (positions 31- 39) if taxes were deposited under more than one EIN during the year.
+                    reRecord.append((agent ?: employer)?.ein?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9))
+                    // Removes all punctuation
+
+                    // Agent for EIN (17-25, 9)
+                    //    If you entered a "1" in the Agent Indicator Code field (position 7), enter the Employer’s EIN for which you
+                    //    are an Agent.  Otherwise, fill with blanks
+                    reRecord.append((agent ? employer?.ein : '')?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9))
+                    // Removes all punctuation
+
+                    // Terminating Business Indicator(26-26, 1)
+                    //     If this is the last tax year that W-2s will be filed under this EIN, enter "1."  Otherwise, enter "0" (zero).
+                    reRecord.append(terminatingBusiness != 'Y' ? '0' : '1')
+
+                    // Establishment Number (27-30, 4)
+                    //     For multiple RE Records with the same EIN, you may use this field to assign a unique identifier for
+                    //     each RE Record (i.e., store for factory locations or types of payroll). Enter any combination of
+                    //     blanks, numbers, letters or keyboard characters.  Otherwise, fill with blanks.
+                    reRecord.append(""?.toUpperCase()?.padRight(4, ' ')?.take(4))
+                    // This would require a repeating RE section because of the same EIN if used
+
+                    // Other EIN (31-39, 9)
+                    //     For this tax year, if you submitted tax payments to the IRS under Form 941, 943, 944, CT-1 or Schedule H
+                    //     or W-2 data to SSA, and you used an EIN different from the EIN in positions 8 - 16, enter the other EIN.
+                    reRecord.append(""?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9))
+                    // Hard coded to no other EIN used during the year; There is no EIN history?
+
+                    //******************************************************************************
+                    // Employer
+                    //******************************************************************************
+                    // Employer Name (40-96, 57)
+                    reRecord.append(employer?.name?.toUpperCase()?.padRight(57, ' ')?.take(57))
+
+                    // Location Address (97-118, 22) (Attention, Suite, Room Number, etc.)
+                    String emprAddress2 = company?.contactInfo?.postalAddress?.address2 ?: ''
+                    String emprUnit = company?.contactInfo?.postalAddress?.unit ? '#' + employer?.contactInfo?.postalAddress?.address2 : ''
+                    String emprLocAddress = emprAddress2 ? (emprUnit ? (emprAddress2 + ' ' + emprUnit) : emprAddress2) : emprUnit
+                    reRecord.append(emprLocAddress?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                    // Delivery Address (119-140, 22) (Street Number and Name or PO Box)
+                    reRecord.append(employer?.contactInfo?.postalAddress?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                    // City (141-162, 22)
+                    reRecord.append(employer?.contactInfo?.postalAddress?.city?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                    // State Abbreviation (163-164, 2) Foreign Addresses fill with blanks
+                    Boolean emprHasUsAddress = employer?.contactInfo?.postalAddressCountryGeo?.geoId == 'USA'
+                    reRecord.append((emprHasUsAddress ? employer?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                    // Zip Code (165-169, 5) For a foreign address, fill with blanks
+                    reRecord.append((emprHasUsAddress ? employer?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                    // Zip Code Extension (170-173, 4) If not applicable, fill with blanks
+                    reRecord.append((emprHasUsAddress ? employer?.contactInfo?.postalCodeExt : '')?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                    // Kind of Employer (174-174, 1)
+                    //    Enter the appropriate kind of employer:
+                    //        F = Federal govt.
+                    //            (Federal government entity or instrumentality)
+                    //        S = State/local non-501c.
+                    //            (State or local government or instrumentality (this includes cities, townships, counties,
+                    //             special-purpose districts or other publicly-owned entities with governmental authority))
+                    //        T = 501c non-govt.
+                    //            (Non-governmental tax-exempt section 501(c) organization (types of 501(c) non-governmental
+                    //             organizations include private foundations, public charities, social and recreation clubs and
+                    //             veterans organizations))
+                    //        Y = State/local 501c.
+                    //             (State or local government or instrumentality where the employer received a determination
+                    //              letter from the IRS indication that they are also a tax-exempt organization under section 501(c)(3))
+                    //        N = None Apply
+                    // Note: Leave blank if the Tax Jurisdiction Code in position 220 of the RE Record is P (Puerto Rico).
+                    // TODO: Hard coded to non federal/state/local govt.
+                    // TODO: Does not consider Puerto Rico
+                    reRecord.append("N"?.toUpperCase()?.padRight(1, ' ')?.take(1)) // Hard Coded to None Apply
+
+                    // Foreign State/Province (179-201, 23) If applicable, otherwise blank
+                    reRecord.append((!emprHasUsAddress ? employer?.contactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(23, ' ')?.take(23))
+
+                    // Foreign Postal Code (202-216, 15)
+                    reRecord.append((!emprHasUsAddress ? employer?.contactInfo?.postalCode : '')?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                    // Country Code (217-218, 2) If one of the following, fill with blanks:
+                    //    * One of the 50 States of the U.S.A.
+                    //    * District of Columbia
+                    //    * Military Post Office (MPO)
+                    //    * American Samoa
+                    //    * Guam
+                    //    * Northern Mariana Islands
+                    //    * Puerto Rico
+                    //    * Virgin Islands
+                    //    * Otherwise, enter the applicable Country Code (see Appendix G).
+                    reRecord.append((!emprHasUsAddress ? employer?.contactInfo?.postalAddressCountryGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                    // Employment Code (219-219, 1)
+                    //    Enter the appropriate employment code:
+                    //        A = Agriculture                              Form 943
+                    //        H = Household                                Schedule H
+                    //        M = Military                                 Form 941
+                    //        Q = Medicare Qualified Government Employment Form 941
+                    //        X = Railroad                                 CT-1
+                    //        F = Regular                                  Form 944
+                    //        R = Regular (all others)                     Form 941
+                    //    If the Tax Jurisdiction Code in position 220 of the RE Record is blank (domestic), reporting Employment
+                    //        Code ‘Q’ (MQGE) is valid for tax year 1983 through the current tax year.
+                    //    If the Tax Jurisdiction Code in position 220 of the RE Record is P, V, G, S, or N (not domestic),
+                    //        reporting Employment Code ‘Q’ (MQGE) is valid for tax years 1986 through the current tax year.
+                    //    Note: Railroad reporting is not applicable for Puerto Rico and territorial employers.
+                    reRecord.append(employer?.partyAcctgPreference?.employerClassification?.enumCode?.toUpperCase()?.padRight(1, ' ')?.take(1))
+
+                    // Tax Jurisdiction Code (220-220, 1)
+                    //    Enter the code that identifies the type of income tax withheld from the employee’s earnings.
+                    //    Blank =                      W-2
+                    //    V = Virgin Islands           W-2VI
+                    //    G = Guam                     W-2GU
+                    //    S = American Samoa           W-2AS
+                    //    N = Northern Mariana Islands W-2CM
+                    //    P = Puerto Rico              W-2PR/499R-2
+                    // TODO: Does not consider/check for non W-2 alternatives
+                    // TODO: If other W-2 alternatives are used, these likely need to be in their own RE record as would the employees
+                    reRecord.append(""?.toUpperCase()?.padRight(1, ' ')?.take(1))
+
+                    // Third Party Sick Pay Indicator (221-221, 1)
+                    //    Enter “1” for a sick pay indicator.  Otherwise, enter "0" (zero).
+                    // TODO: Third Party Sick Pay is ignored
+                    reRecord.append("0"?.toUpperCase()?.padRight(1, ' ')?.take(1))
+
+                    // Employer Contact Name (222-248, 27)
+                    reRecord.append(employer?.contactInfo?.toName?.toUpperCase()?.padRight(27, ' ')?.take(2))
+
+                    // EmployerContact Phone Number (249-263, 15) contact phone with numeric values only (including area code), left justify and blank fill
+                    reRecord.append(employer?.phoneString?.replaceAll("\\p{P}", "")?.padRight(15, ' ')?.take(15))
+
+                    // EmployerContact Phone Extension (264-268, 5), left justify and blank fill
+                    reRecord.append(employer?.contactInfo?.telecomExtension?.replaceAll("\\p{P}", "")?.padRight(5, ' ')?.take(5))
+
+                    // Employer Contact Fax (489-498, 10) for US Only, includes area code
+                    reRecord.append(employer?.faxString?.replaceAll("\\p{P}", "")?.padRight(10, ' ')?.take(10))
+
+                    // EmployerContact E-Mail Internet (446-485, 40) Cannot be blank, can be mixed case
+                    reRecord.append(employer?.contactInfo?.postalAddressStateGeo?.emailAddress?.padRight(40, ' ')?.take(40))
+
+                    // Blank (319-512, 194)
+                    reRecord.append("".padRight(194, ' '))
+
+                    lines.add(reRecord)
+
+                    // Reset the records list for each employer for totals by employer
+                    rwRecords = []
+                    roRecords = []
+                    rsRecords = []
+
+                    // For each employee
+                    for (Map employment in employmentList) {
+                        Map empeTaxInfo = ec.service.sync().name("mantle.humanres.PayrollDocumentServices.get#EmploymentWageAndTaxInfo")
+                                .parameters([timePeriodId: timePeriodId, partyRelationshipId: employment.partyRelationshipId]).call()
+                        Map empeFederalWageAndTaxInfo = empeTaxInfo?.wageAndTaxInfoByTaxAuthorityId.get('UsaIrs')
+
+                        ////////////////////////////////////////////////////////////////////////////////
+                        // RW Employee Record (Required)
+                        ////////////////////////////////////////////////////////////////////////////////
+                        StringBuilder rwRecord = new StringBuilder(512)
+                        // Record Identifier (1-2, 2)
+                        rwRecord.append("RW")
+
+                        // Social Security Number (SSN) (3-11, 9)
+                        rwRecord.append(empeTaxInfo?.employeeSsn?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9))
+
+                        // Employee First Name (12-26, 15)
+                        //    Enter the employee's first name as shown on the Social Security card.
+                        rwRecord.append(empeTaxInfo?.employeeFirstName?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                        // Employee Middle Name (27-41, 15)
+                        //    Enter the employee's middle name or initial as shown on the Social Security card.
+                        rwRecord.append(empeTaxInfo?.employeeMiddleName?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                        // Employee Last Name (42-61, 20)
+                        //    Enter the employee's last name as shown on the Social Security card.
+                        rwRecord.append(empeTaxInfo?.employeeLastName?.toUpperCase()?.padRight(20, ' ')?.take(20))
+
+                        // Employee Name Suffix (62-65, 4)
+                        //    If applicable, enter the employee’s alphabetic suffix. For example: SR, JR
+                        rwRecord.append(empeTaxInfo?.employeeSuffix?.replaceAll("\\p{P}", "")?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                        // Location Address (66-87, 22) (Attention, Suite, Room Number, etc.)
+                        String empeAddress2 = empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.address2 ?: ''
+                        String empeUnit = empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.unit ? '#' + empeTaxInfo?.contactInfo?.postalAddress?.address2 : ''
+                        String empeLocAddress = empeAddress2 ? (empeUnit ? (empeAddress2 + ' ' + empeUnit) : empeAddress2) : empeUnit
+                        rwRecord.append(empeLocAddress.padRight(22, ' ')?.take(22))
+
+                        // Delivery Address (88-109, 22) (Street Number and Name or PO Box)
+                        rwRecord.append(empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                        // City (110-131, 22)
+                        rwRecord.append(empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.city?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                        // State Abbreviation (132-133, 2) Foreign Addresses fill with blanks
+                        Boolean empeHasUsAddress = empeTaxInfo?.employeeHomeContactInfo?.postalAddressCountryGeo?.geoId == 'USA'
+                        rwRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                        // Zip Code (134-138, 5) For a foreign address, fill with blanks
+                        rwRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCode : '')?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                        // Zip Code Extension (139-142, 4) If not applicable, fill with blanks
+                        rwRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCodeExt : '')?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                        // Blank (143-147, 5)
+                        rwRecord.append("".padRight(5, ' '))
+
+                        // Foreign State/Province (148-170, 23) If applicable, otherwise blank
+                        rwRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(23, ' ')?.take(23))
+
+                        // Foreign Postal Code (171-185, 15)
+                        rwRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCode : '')?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                        // Country Code (187-198, 2) If one of the following, fill with blanks:
+                        //    * One of the 50 States of the U.S.A.
+                        //    * District of Columbia
+                        //    * Military Post Office (MPO)
+                        //    * American Samoa
+                        //    * Guam
+                        //    * Northern Mariana Islands
+                        //    * Puerto Rico
+                        //    * Virgin Islands
+                        //    * Otherwise, enter the applicable Country Code (see Appendix G).
+                        rwRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressCountryGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                        // Wages, Tips, and Other Compensation (188-198, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    Implied decimal
+                        //    Does not apply to Puerto Rico, Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees.
+                        // TODO: This is hard coded to W-2; it does not consider US territories, nor omit them
+                        // TODO: If/when this is implemented, it is likely that that the non-W2 handling may require separate employer RE records for each
+                        rwRecord.append(ec.l10n.format(empeTaxInfo?.taxablePayAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Federal Income Tax Withheld (199-209, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    Implied decimal
+                        //    Does not apply to Puerto Rico, Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees.
+                        // TODO: This is hard coded to W-2; it does not consider US territories, nor omit them
+                        // TODO: If/when this is implemented, it is likely that that the non-W2 handling may require separate employer RE records for each
+                        rwRecord.append(ec.l10n.format(federalWageAndempeTaxInfo?.incomeTaxWithheldAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Social Security Wages (210-220, 11)
+                        //    Zero fill if the Employment Code reported in position 219 of the preceding RE Employer Record is
+                        //        Q (MGQE) or X (Railroad).
+                        //    If Employment Code is H (Household) and the tax year is 1994 or later, the sum of this field and the
+                        //        Social Security Tips field must be equal to or greater than the annual Household minimum for the
+                        //        tax year being reported. Otherwise, report zeros. See Appendix H.
+                        //    The sum of this field and the Social Security Tips field should not exceed the annual maximum Social
+                        //        Security wage base for the tax year ($118,500 for tax year 2016). See Appendix H.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: No consideration is made for Q (MGQE) or X (Railroad) employees
+                        // TODO: No consideration is made for H (Household) employees
+                        // TODO: There is no check against the PayrollAdjustmentDetail for the sociable tax Ytd Max, but perhaps there is no need
+                        rwRecord.append(ec.l10n.format(empeTaxInfo?.socialTaxablePayAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Social Security Tax Withheld (221-231, 11)
+                        //    Zero fill if the Employment Code reported in position 219 of the preceding RE Employer Record is
+                        //        Q (MGQE) or X (Railroad).
+                        //    If the Employment Code is not Q (MQGE) or X (Railroad) and the amount in this field is greater than
+                        //        zero, then the Social Security Wages field and/or the Social Security Tips field must be greater than zero.
+                        //    This amount should not exceed $7,347.00 for tax year 2016.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: No consideration is made for Q (MGQE) or X (Railroad) employees
+                        // TODO: No consideration is made for H (Household) employees
+                        // TODO: There is no check against the PayrollAdjustmentDetail for the sociable tax Ytd Max, but perhaps there is no need
+                        rwRecord.append(ec.l10n.format(empeFederalWageAndTaxInfo?.socialTaxWithheldAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Medicare Wages and Tips (232-242, 11)
+                        //    For years prior to tax year 1983, zero fill for all Employment Codes.
+                        //    Zero fill if the Employment Code reported in position 219 of the preceding RE Employer Record is X (Railroad).
+                        //    If the Employment Code is H (Household) and the tax year is 1994 or later, this field must be equal
+                        //        to or greater than the annual Household minimum for the tax year being reported. Otherwise, fill with zeros.
+                        //    For all other Employment Codes:
+                        //        * For tax years 1983 – 1993, do not exceed the annual maximum Medicare wage base for the tax year.
+                        //        * For tax years 1983 – 1990, if Social Security Wages and/or Social Security Tips are greater than
+                        //          zero, this amount must be equal to the sum of the Social Security Wages and Social Security Tips.
+                        //        * For tax year 1991 and later, this amount must equal or exceed the sum of the Social Security
+                        //          Wages and Social Security Tips.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: No consideration is given to tax years prior to 2016
+                        // TODO: No consideration is made for railroad employees
+                        rwRecord.append(ec.l10n.format(empeTaxInfo?.medicalTaxablePayAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Medicare Tax Withheld (243-253, 11)
+                        //    For tax years prior to 1983, zero fill for all Employment Codes.
+                        //    For tax year 1983 and later, zero fill if the Employment Code reported in position 219 of the
+                        //        preceding RE Employer Record is X (Railroad).
+                        //    Effective January 1, 2013, an employer is required to withhold a 0.9% additional Medicare Tax on any
+                        //        Medicare Wages and Tips or Railroad Retirement Act (RRTA) compensation it pays to an employee in
+                        //        excess of $200,000 in a calendar year.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: No consideration is given to tax years prior to 2016
+                        // TODO: No consideration is given to railroad employees
+                        // TODO: check is done against the additional medicare withholding
+                        rwRecord.append(ec.l10n.format(empeFederalWageAndTaxInfo?.medicalTaxWithheldAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Social Security Tips (254-264, 11)
+                        //    Zero fill if the Employment Code reported in position 219 of the preceding RE Employer Record is
+                        //        Q (MQGE) or X (Railroad).
+                        //    The sum of this field and Social Security Wages should not exceed the annual maximum Social Security
+                        //        wage base for the tax year ($118,500 for tax year 2016.)
+                        //    If Employment Code is H (Household) and the tax year is 1994 or later, the sum of this field and the
+                        //        Social Security Wages field must be equal to or greater than the annual Household minimum for the
+                        //        tax year being reported. Otherwise, report zeros. See Appendix H.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: Social Security Tips are not populated
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (265-275, 11)
+                        rwRecord.append("".padRight(11, ' '))
+
+                        // Dependent Care Benefits (276-286, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1990 through the current tax year.
+                        //    Does not apply to Puerto Rico, Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees.
+                        // TODO: Dependent Care Benefits are not populated
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferred Compensation Contributions to Section 401(k) (Code D) (287-297, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1987 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: 401(k) contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferred Compensation Contributions to Section 403(b) (Code E) (298-308, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1987 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: 403(b) contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferred Compensation Contributions to Section 408(k) (Code F) (309-319, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1987 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: 408(k) contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferred Compensation Contributions to Section 457(b) (Code G) (320-330, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1987 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: 457(b) contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferred Compensation Contributions to Section 501(c)(18)(D) (Code H) (331-341, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1987 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Section 501(c)(18)(D) contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (342-352, 11)
+                        rwRecord.append("".padRight(11, ' '))
+
+                        // Non-qualified Plan Section 457 Distributions or Contributions (353-363, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1990 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Non-qualified Plan Section 457 Distributions or Contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Employer Contributions to a Health Savings Account (Code W) (364-374, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2004 through the current tax year.
+                        //    Does not apply to Puerto Rico employees or Northern Mariana Islands employees..
+                        // TODO: Employer Contributions to a Health Savings Account
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Non-qualified Plan Not Section 457 Distributions or Contributions (375-385, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1990 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Non-qualified Plan Not Section 457 Distributions or Contributions
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Nontaxable Combat Pay (Code Q) (386-396, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2005 through the current tax year.
+                        //    Does not apply to Puerto Rico employees or Northern Mariana Islands employees.
+                        // TODO: Nontaxable Combat Pay
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (397-407, 11)
+                        rwRecord.append("".padRight(11, ' '))
+
+                        // Employer Cost of Premiums for Group Term Life Insurance over $50,000 (Code C)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Employer Cost of Premiums for Group Term Life Insurance over $50,000
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Income from the Excercise of Nonstatutory Stock Options (Code V) (419-429, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2001 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Employer Cost of Premiums for Group Term Life Insurance over $50,000
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Deferrals Under a Section 409A Non-qualified Deferred Compensation Plan (Code Y) (430-440, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2005 through the current tax year.
+                        //    Does not apply to Puerto Rico employees or Northern Mariana Islands employees.
+                        // TODO: Deferrals Under a Section 409A Non-qualified Deferred Compensation Plan
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Designated Roth Contributions to a Section 401(k) Plan (Code AA) (441-451, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2006 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Designated Roth Contributions to a Section 401(k) Plan
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Designated Roth Contributions Under a Section 403(b) Salary Reduction Agreement (Code BB) (452-462, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2006 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Designated Roth Contributions Under a Section 403(b) Salary Reduction Agreement
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Cost of Employer-Sponsored Health Coverage (Code DD) (463-473, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2005 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Cost of Employer-Sponsored Health Coverage
+                        rwRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (474-485, 12)
+                        rwRecord.append("".padRight(12, ' '))
+
+                        // Statutory Employee Indicator (486-486, 1)
+                        // Enter "1" for a statutory employee.  Otherwise, enter "0" (zero).
+                        //       A statutory employee is an independent contractor under IRS common law that is treated as an
+                        //       employee, by statute, for tax withholdings. For a standard independent contractor, an employer
+                        //       cannot withhold taxes, as this would change the independent contractor relationship into an
+                        //       employer-employee relationship.
+                        // TODO: Determine if this is a statuatory employee.
+                        rwRecord.append("0")
+
+                        // Blank (487-487, 1)
+                        rwRecord.append("".padRight(1, ' '))
+
+                        // Retirement Plan Indicator (488-488, 1)
+                        // Enter a "1" for a retirement plan.  Otherwise, enter "0" (zero).
+                        // TODO: Determine if there is a retirement plan
+                        rwRecord.append("0")
+
+                        // Third-Party Sick Pay Indicator (489-489, 1)
+                        // Enter a "1" for a retirement plan.  Otherwise, enter "0" (zero).
+                        // TODO: Determine Third-Party Sick Pay Indicator
+                        rwRecord.append("0")
+
+                        // Blank (490-512, 23)
+                        rwRecord.append("".padRight(23, ' '))
+
+                        lines.add(rwRecord)
+                        rwRecords.add(rwRecord)
+                        rwRecordsAll.add(rwRecord)
+
+                        ////////////////////////////////////////////////////////////////////////////////
+                        // RO Employee Record
+                        ////////////////////////////////////////////////////////////////////////////////
+                        StringBuilder roRecord = new StringBuilder(512)
+                        // Record Identifier (1-2, 2)
+                        roRecord.append("RO")
+
+                        // Blank (3-11, 9)
+                        roRecord.append("".padRight(9, ' '))
+
+                        // Allocated Tips (12-22, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1983 through the current tax year.
+                        //    Does not apply to Puerto Rico, Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees.
+                        // TODO: Allocated Tips
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Uncollected Employee Tax on Tips (Codes A and B) (23-33, 11)
+                        //    Combine the uncollected Social Security tax and the uncollected Medicare tax in this field.
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        // TODO: Uncollected Employee Tax on Tips
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Medical Savings Account (Code R) (34-44, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1997 through the current tax year.
+                        //    Does not apply to Puerto Rico or Northern Mariana Islands employees.
+                        // TODO: Medical Savings Account
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Simple Retirement Account (Code S) (45-55, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1997 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Simple Retirement Account
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Qualified Adoption Expenses (Code T) (56-66, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1997 through the current tax year.
+                        //    Does not apply to Puerto Rico or Northern Mariana Islands employees.
+                        // TODO: Qualified Adoption Expenses
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Uncollected Social Security or RRTA Tax on Cost of Group Term Life Insurance over $50,000 (Code M), (67-77, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2001 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Uncollected Social Security or RRTA Tax on Cost of Group Term Life Insurance over $50,000
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Uncollected Medicare Tax on Cost of Group Term Life Insurance Over $50,000 (Code N) (78-88, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2001 through the current tax year.
+                        //    Does not apply to Puerto Rico employees.
+                        // TODO: Uncollected Medicare Tax on Cost of Group Term Life Insurance Over $50,000
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Income Under a Nonqualified Deferred Compensation Plan That Fails to Satisfy Section 409A (Code Z) (89-99, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2005 through the current tax year.
+                        //    Does not apply to Puerto Rico or Northern Mariana Islands employees.
+                        // TODO: Income Under a Nonqualified Deferred Compensation Plan That Fails to Satisfy Section 409A
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (100-110, 11)
+                        roRecord.append("".padRight(11, ' '))
+
+                        // Designated Roth Contributions Under a Governmental Section 457(b) Plan (Code EE) (111-121, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 2011 through the current tax year.
+                        //    Does not apply to Puerto Rico or Northern Mariana Islands employees.
+                        // TODO: Designated Roth Contributions Under a Governmental Section 457(b) Plan
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (122-274, 153)
+                        roRecord.append("".padRight(153, ' '))
+
+                        // Wages Subject to Puerto Rico Tax (275-285, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Wages Subject to Puerto Rico Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Commissions Subject to Puerto Rico Tax (286-296, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Commissions Subject to Puerto Rico Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Allowances Subject to Puerto Rico Tax (297-307, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1998 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Allowances Subject to Puerto Rico Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Tips Subject to Puerto Rico Tax (308-318, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1998 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Tips Subject to Puerto Rico Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Total Wages, Commissions, Tips and Allowances Subject to Puerto Rico Tax (319-329)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Total Wages, Commissions, Tips and Allowances Subject to Puerto Rico Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Puerto Rico Tax Withheld (330-340, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Puerto Rico Tax Withheld
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Retirement Fund Annual Contributions (341-351, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Puerto Rico employees only.
+                        // TODO: Retirement Fund Annual Contributions
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (352-362, 11)
+                        roRecord.append("".padRight(11, ' '))
+
+                        // Total Wages, Tips and Other Compensation Subject to Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax (363-373, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees only.
+                        // TODO: Total Wages, Tips and Other Compensation Subject to Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax Withheld (374-384, 11)
+                        //    No negative amounts.
+                        //    Right justify and zero fill.
+                        //    This field is valid from 1978 through the current tax year.
+                        //    For Virgin Islands, American Samoa, Guam or Northern Mariana Islands employees only.
+                        // TODO: Virgin Islands, Guam, American Samoa or Northern Mariana Islands Income Tax Withheld
+                        roRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                        // Regex removes punctuation
+
+                        // Blank (385-512, 128)
+                        roRecord.append("".padRight(128, ' '))
+
+                        lines.add(roRecord)
+                        roRecords.add(roRecord)
+
+                        ////////////////////////////////////////////////////////////////////////////////
+                        // RS State Wage Record (Per State)
+                        ////////////////////////////////////////////////////////////////////////////////
+                        // Appendix F postal Numeric Codes (TODO: Do these belong on a GEO code of some sort, maybe a geoCodeNumeric2?)
+                        Map rsNumericStateCodes = [
+                                'AL':'01','AK':'02',          'AZ':'04','AR':'05',
+                                'CA':'06',          'CO':'08','CT':'09','DE':'10',
+                                'DC':'11','FL':'12','GA':'13',          'HI':'15',
+                                'ID':'16','IL':'17','IN':'18','IA':'19','KS':'20',
+                                'KY':'21','LA':'22','ME':'23','MD':'24','MA':'25',
+                                'MI':'26','MN':'27','MS':'28','MO':'29','MT':'30',
+                                'NE':'31','NV':'32','NH':'33','NJ':'34','NM':'35',
+                                'NY':'36','NC':'37','ND':'38','OH':'39','OK':'40',
+                                'OR':'41','PA':'42',          'RI':'44','SC':'45',
+                                'SD':'46','TN':'47','TX':'48','UT':'49','VT':'50',
+                                'VA':'51',          'WA':'53','WV':'54','WI':'55',
+                                'WY':'56'
+                        ]
+
+                        // State Wage and Records vary considerably by state
+                        if (includeStateRecords == 'Y') {
+                            for (stateTaxaurhtorityId in empeTaxInfo?.stateTaxAuthorityIdList) {
+                                Map empeStateWageAndTaxInfo = empeTaxInfo?.wageAndTaxInfoByTaxAuthorityId.get(stateTaxaurhtorityId)
+
+                                StringBuilder rsRecord = new StringBuilder(512)
+                                // Record Identifier (1-2, 2)
+                                rsRecord.append("RS")
+
+                                // State Code (3-4, 2)
+                                // Enter the appropriate postal NUMERIC Code (See Appendix F).  THIS IS NOT THE 2 CHARACTER STATE ABBREVIATION
+                                rsRecord.append(rsNumericStateCodes.get(empeStateWageAndTaxInfo?.taxAuthorityGeo?.geoCodeAlpha2)?.padLeft(2, '0')?.take(2))
+
+                                // Taxing Entity Code (5-9, 5)
+                                // Defined by State/local agency.
+                                // TODO: Taxing Entity Code
+                                rsRecord.append(""?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                                // Social Security Number (SSN) (10-18, 9)
+                                // Enter the employee's SSN as shown on the original/replacement SSN card issued by SSA.
+                                // If no SSN is available, enter zeros.
+                                rsRecord.append(empeTaxInfo?.employeeSsn?.replaceAll("\\p{P}", "")?.padLeft(9, '0')?.take(9))
+
+                                // Employee First Name (19-33, 15)
+                                //    Enter the employee's first name as shown on the Social Security card.
+                                rsRecord.append(empeTaxInfo?.employeeFirstName?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                                // Employee Middle Name (34-48, 15)
+                                //    Enter the employee's middle name or initial as shown on the Social Security card.
+                                rsRecord.append(empeTaxInfo?.employeeMiddleName?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                                // Employee Last Name (49-68, 20)
+                                //    Enter the employee's last name as shown on the Social Security card.
+                                rsRecord.append(empeTaxInfo?.employeeLastName?.toUpperCase()?.padRight(20, ' ')?.take(20))
+
+                                // Employee Name Suffix (69-72, 4)
+                                //    If applicable, enter the employee’s alphabetic suffix. For example: SR, JR
+                                rsRecord.append(empeTaxInfo?.employeeSuffix?.replaceAll("\\p{P}", "")?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                                // Location Address (73-94, 22) (Attention, Suite, Room Number, etc.)
+                                rsRecord.append(empeLocAddress.padRight(22, ' ')?.take(22))
+
+                                // Delivery Address (95-116, 22) (Street Number and Name or PO Box)
+                                rsRecord.append(empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                                // City (117-138, 22)
+                                rsRecord.append(empeTaxInfo?.employeeHomeContactInfo?.postalAddress?.city?.toUpperCase()?.padRight(22, ' ')?.take(22))
+
+                                // State Abbreviation (139-140, 2) Foreign Addresses fill with blanks
+                                rsRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                                // Zip Code (141-145, 5) For a foreign address, fill with blanks
+                                rsRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCode : '')?.toUpperCase()?.padRight(5, ' ')?.take(5))
+
+                                // Zip Code Extension (146-149, 4) If not applicable, fill with blanks
+                                rsRecord.append((empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCodeExt : '')?.toUpperCase()?.padRight(4, ' ')?.take(4))
+
+                                // Blank (150-154, 5)
+                                rsRecord.append("".padRight(5, ' '))
+
+                                // Foreign State/Province (155-177, 23) If applicable, otherwise blank
+                                rsRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressStateGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(23, ' ')?.take(23))
+
+                                // Foreign Postal Code (178-192, 15)
+                                rsRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalCode : '')?.toUpperCase()?.padRight(15, ' ')?.take(15))
+
+                                // Country Code (193-194, 2) If one of the following, fill with blanks:
+                                //    * One of the 50 States of the U.S.A.
+                                //    * District of Columbia
+                                //    * Military Post Office (MPO)
+                                //    * American Samoa
+                                //    * Guam
+                                //    * Northern Mariana Islands
+                                //    * Puerto Rico
+                                //    * Virgin Islands
+                                //    * Otherwise, enter the applicable Country Code (see Appendix G).
+                                rsRecord.append((!empeHasUsAddress ? empeTaxInfo?.employeeHomeContactInfo?.postalAddressCountryGeo?.geoCodeAlpha2 : '')?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                                // Optional Code (195-196, 2)
+                                // Defined by State/local agency.
+                                // Applies to unemployment reporting.
+                                // TODO: Optional Code
+                                rsRecord.append(""?.toUpperCase()?.padRight(2, ' ')?.take(2))
+
+                                // Reporting Period (197-202, 6)
+                                // Enter the last month and four-digit year for the calendar quarter for which this report applies; 
+                                // e.g., “032016” for January through March of 2016.
+                                // Applies to unemployment reporting.
+                                // TODO: Reporting Period
+                                rsRecord.append(""?.padLeft(6, '0')?.take(6))
+
+                                // State Quarterly Unemployment Insurance Total Wages (203-213, 11)
+                                // Right justify and zero fill.
+                                // Applies to unemployment reporting.
+                                // TODO: State Quarterly Unemployment Insurance Total Wages
+                                rsRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // State Quarterly Unemployment Insurance Total Taxable Wages (214-224, 11)
+                                // Right justify and zero fill.
+                                // Applies to unemployment reporting.
+                                // TODO: State Quarterly Unemployment Insurance Total Taxable Wages
+                                rsRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // Number of Weeks Worked (225-226)
+                                // Defined by State/local agency.
+                                // Applies to unemployment reporting.
+                                // TODO: Number of Weeks Worked
+                                rsRecord.append(""?.padLeft(2, '0')?.take(2))
+
+                                // Date First Employed (227-234, 8)
+                                // Enter the month, day and four-digit year; e.g., "01312016."
+                                // Applies to unemployment reporting.
+                                // TODO: Date First Employed
+                                rsRecord.append(""?.padLeft(8, '0')?.take(8))
+
+                                // Date of Separation (235-242, 8)
+                                // Enter the month, day and four-digit year; e.g., “01312016.”
+                                // Applies to unemployment reporting.
+                                // TODO: Date of Separation
+                                rsRecord.append(""?.padLeft(8, '0')?.take(8))
+
+                                // Blank (243-247, 5)
+                                rsRecord.append("".padRight(5, ' '))
+
+                                // State Employer Account Number (248-267, 20)
+                                // An identification number assigned by a State to an employer for the purpose of filing wage and
+                                //    tax reports to State or local government taxing agencies.
+                                // Applies to unemployment reporting.
+                                // TODO: State Employer Account Number
+                                rsRecord.append(""?.toUpperCase()?.padRight(20, ' ')?.take(20))
+
+                                // Blank (268-273, 6)
+                                rsRecord.append("".padRight(6, ' '))
+
+                                // State Code (274-275, 2)
+                                // Enter the appropriate postal NUMERIC Code (see Appendix F). THIS IS NOT THE 2 CHARACTER STATE ABBREVIATION
+                                // Applies to income tax reporting.
+                                rsRecord.append(rsNumericStateCodes.get(empeStateWageAndTaxInfo?.taxAuthorityGeo?.geoCodeAlpha2)?.padLeft(2, '0')?.take(2))
+
+                                // State Taxable Wages (276-286, 11)
+                                // Right justify and zero fill.
+                                // Applies to income tax reporting.
+                                // TODO: This number doesn't exist yet.  It is not necessarily the Federal number.
+                                rsRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // State Income Tax Withheld (287-297, 11)
+                                // Right justify and zero fill.
+                                // Applies to income tax reporting.
+                                rsRecord.append(ec.l10n.format(empeStateWageAndTaxInfo?.incomeTaxWithheldAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // Other State Data (298-307, 10)
+                                // Defined by State/local agency.
+                                // Applies to income tax reporting.
+                                // TODO: Other State Data
+                                rsRecord.append("".padRight(10, ' '))
+
+                                // Tax Type Code (308-308, 1)
+                                //    Enter the appropriate code for entries in fields 309 – 330:
+                                //        * C = City Income Tax
+                                //        * D = County Income Tax
+                                //        * E = School District Income Tax
+                                //        * F = Other Income Tax
+                                //    Applies to income tax reporting.
+                                // TODO: Tax Type Code
+                                rsRecord.append("".padRight(1, ' '))
+
+                                // Local Taxable Wages (276-286, 11)
+                                // Right justify and zero fill.
+                                // Applies to income tax reporting.
+                                // TODO: This number doesn't exist yet.  It is not necessarily the Federal number.
+                                rsRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // Local Income Tax Withheld (287-297, 11)
+                                // Right justify and zero fill.
+                                // Applies to income tax reporting.
+                                // TODO: We define an employee local wage and tax info, but it isn't in this loop, perhaps these
+                                //       could go on their own RS records in another loop (i.e. do they have to go on the shared
+                                //       state record, and if so, how many of them could there be?
+                                // rsRecord.append(ec.l10n.format(empeLocalWageAndTaxInfo?.incomeTaxWithheldAmount, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+                                rsRecord.append(ec.l10n.format(0, "0.00")?.replaceAll("\\p{P}", "")?.padLeft(11, '0')?.take(11))
+
+                                // State Control Number (331-337, 7)
+                                // Optional.
+                                // Applies to income tax reporting.
+                                rsRecord.append("".padRight(7, ' '))
+
+                                // Supplemental Data 1 (338-412, 75)
+                                // To be defined by user.
+                                rsRecord.append("".padRight(75, ' '))
+
+                                // Supplemental Data 2 (413-487, 75)
+                                // To be defined by user.
+                                rsRecord.append("".padRight(75, ' '))
+
+                                // Blank (488-512, 25)
+                                rsRecord.append("".padRight(25, ' '))
+
+                                lines.add(rsRecord)
+                                rsRecords.add(rsRecord)
+                            }
+                        }
+                    }
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // RT Total Record
+                    ////////////////////////////////////////////////////////////////////////////////
+
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // RO Total Record (only if there are any RO records)
+                    ////////////////////////////////////////////////////////////////////////////////
+
+                    ////////////////////////////////////////////////////////////////////////////////
+                    // RV Record (only if there are any RS records)
+                    ////////////////////////////////////////////////////////////////////////////////
+                }
+                ////////////////////////////////////////////////////////////////////////////////
+                // RF Final Record
+                ////////////////////////////////////////////////////////////////////////////////
+                ]]></script>
+        </actions>
+    </service>
+    <service verb="get" noun="UsaIrs1099MiscFormData">
+        <!-- NOTE: currently supports only one federal and state; to support multiple states with
+            different wage/etc amounts other payroll services/etc would also need to be changed -->
+        <!-- NOTE: currently uses FEIN for Employer's state ID -->
+        <!-- TODO: support multiple state tax authorities by making sure the state is related to federalTaxAuthorityId -->
+        <implements service="mantle.humanres.PayrollDocumentServices.get#EmploymentWageAndTaxInfo"/>
+        <in-parameters>
+            <parameter name="federalTaxAuthorityId" default-value="UsaIrs"/>
+            <parameter name="formId" default-value="UsaIrs1099Misc"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="federalTaxAuthorityId"/>
+            <parameter name="formId"/>
+            <parameter name="formMap" type="Map">
+                <parameter name="1099m_a"/><parameter name="1099m_b"/><parameter name="1099m_c"/>
+                <parameter name="1099m_d1"/><parameter name="1099m_d2"/><parameter name="1099m_d3"/>
+                <parameter name="1099m_03"/><parameter name="1099m_04"/><parameter name="1099m_07"/>
+                <parameter name="1099m_16a"/><parameter name="1099m_17a"/><parameter name="1099m_18a"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.humanres.PayrollDocumentServices.get#EmploymentWageAndTaxInfo" in-map="context" out-map="context"/>
+            <set field="formMap" from="[:]"/>
+
+            <set field="formMap.'1099m_a'" value="${employerName}\n${employerAddressString}\n${employerPhoneString}"/>
+            <set field="formMap.'1099m_b'" from="employerEin"/>
+            <set field="formMap.'1099m_c'" from="employeeSsn"/>
+
+            <set field="formMap.'1099m_d1'" value="${employeeFirstName?:''} ${employeeMiddleName? employeeMiddleName + ' ':''}${employeeLastName?:''} ${employeeSuffix?:''}"/>
+            <set field="formMap.'1099m_d2'" from="employeeHomeStreetString"/>
+            <set field="formMap.'1099m_d3'" from="employeeHomeCszString"/>
+
+            <set field="federalWageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(federalTaxAuthorityId)"/>
+            <if condition="federalWageAndTaxInfo?.incomeTaxWithheldAmount">
+                <then>
+                    <set field="formMap.'1099m_03'" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+                    <set field="formMap.'1099m_04'" from="ec.l10n.format(federalWageAndTaxInfo?.incomeTaxWithheldAmount, '#,##0.00')"/>
+                </then>
+                <else>
+                    <set field="formMap.'1099m_07'" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+                </else>
+            </if>
+
+            <set field="stateTaxAuthorityId" from="stateTaxAuthorityIdList ? stateTaxAuthorityIdList[0] : 0"/>
+            <set field="stateWageAndTaxInfo" from="wageAndTaxInfoByTaxAuthorityId.get(stateTaxAuthorityId)"/>
+            <if condition="stateWageAndTaxInfo">
+                <set field="formMap.'1099m_16a'" from="ec.l10n.format(stateWageAndTaxInfo.incomeTaxWithheldAmount, '#,##0.00')"/>
+                <set field="formMap.'1099m_17a'" value="${stateWageAndTaxInfo.taxAuthorityGeo?.geoCodeAlpha2} ${employerEin}"/>
+                <set field="formMap.'1099m_18a'" from="ec.l10n.format(taxablePayAmount, '#,##0.00')"/>
+            </if>
+        </actions>
+    </service>
+</services>

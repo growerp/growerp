@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- see https://en.wikipedia.org/wiki/ISO_3166-2:CN -->
+    <!-- see http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201504/t20150415_712722.html -->
+    <!-- 省级数据-->
+    <Geo geoCodeNumeric="110000" geoId="CHN_11" geoNameLocal="北京市" geoTypeEnumId="GEOT_PROVINCE" geoName="Beijing"/>
+    <Geo geoCodeNumeric="120000" geoId="CHN_12" geoNameLocal="天津市" geoTypeEnumId="GEOT_PROVINCE" geoName="Tianjin"/>
+    <Geo geoCodeNumeric="130000" geoId="CHN_13" geoNameLocal="河北省" geoTypeEnumId="GEOT_PROVINCE" geoName="Hebei"/>
+    <Geo geoCodeNumeric="140000" geoId="CHN_14" geoNameLocal="山西省" geoTypeEnumId="GEOT_PROVINCE" geoName="Shanxi"/>
+    <Geo geoCodeNumeric="150000" geoId="CHN_15" geoNameLocal="内蒙古自治区" geoTypeEnumId="GEOT_PROVINCE" geoName="Inner Mongolia"/>
+    <Geo geoCodeNumeric="210000" geoId="CHN_21" geoNameLocal="辽宁省" geoTypeEnumId="GEOT_PROVINCE" geoName="Liaoning"/>
+    <Geo geoCodeNumeric="220000" geoId="CHN_22" geoNameLocal="吉林省" geoTypeEnumId="GEOT_PROVINCE" geoName="Jilin"/>
+    <Geo geoCodeNumeric="230000" geoId="CHN_23" geoNameLocal="黑龙江省" geoTypeEnumId="GEOT_PROVINCE" geoName="Heilongjiang"/>
+    <Geo geoCodeNumeric="310000" geoId="CHN_31" geoNameLocal="上海市" geoTypeEnumId="GEOT_PROVINCE" geoName="Shanghai"/>
+    <Geo geoCodeNumeric="320000" geoId="CHN_32" geoNameLocal="江苏省" geoTypeEnumId="GEOT_PROVINCE" geoName="Jiangsu"/>
+    <Geo geoCodeNumeric="330000" geoId="CHN_33" geoNameLocal="浙江省" geoTypeEnumId="GEOT_PROVINCE" geoName="Zhejiang"/>
+    <Geo geoCodeNumeric="340000" geoId="CHN_34" geoNameLocal="安徽省" geoTypeEnumId="GEOT_PROVINCE" geoName="Anhui"/>
+    <Geo geoCodeNumeric="350000" geoId="CHN_35" geoNameLocal="福建省" geoTypeEnumId="GEOT_PROVINCE" geoName="Fujian"/>
+    <Geo geoCodeNumeric="360000" geoId="CHN_36" geoNameLocal="江西省" geoTypeEnumId="GEOT_PROVINCE" geoName="Jiangxi"/>
+    <Geo geoCodeNumeric="370000" geoId="CHN_37" geoNameLocal="山东省" geoTypeEnumId="GEOT_PROVINCE" geoName="Shandong"/>
+    <Geo geoCodeNumeric="410000" geoId="CHN_41" geoNameLocal="河南省" geoTypeEnumId="GEOT_PROVINCE" geoName="Henan"/>
+    <Geo geoCodeNumeric="420000" geoId="CHN_42" geoNameLocal="湖北省" geoTypeEnumId="GEOT_PROVINCE" geoName="Hubei"/>
+    <Geo geoCodeNumeric="430000" geoId="CHN_43" geoNameLocal="湖南省" geoTypeEnumId="GEOT_PROVINCE" geoName="Hunan"/>
+    <Geo geoCodeNumeric="440000" geoId="CHN_44" geoNameLocal="广东省" geoTypeEnumId="GEOT_PROVINCE" geoName="Guangdong"/>
+    <Geo geoCodeNumeric="450000" geoId="CHN_45" geoNameLocal="广西壮族自治区" geoTypeEnumId="GEOT_PROVINCE" geoName="Guangxi"/>
+    <Geo geoCodeNumeric="460000" geoId="CHN_46" geoNameLocal="海南省" geoTypeEnumId="GEOT_PROVINCE" geoName="Hainan"/>
+    <Geo geoCodeNumeric="500000" geoId="CHN_50" geoNameLocal="重庆市" geoTypeEnumId="GEOT_PROVINCE" geoName="Chongqing"/>
+    <Geo geoCodeNumeric="510000" geoId="CHN_51" geoNameLocal="四川省" geoTypeEnumId="GEOT_PROVINCE" geoName="Sichuan"/>
+    <Geo geoCodeNumeric="520000" geoId="CHN_52" geoNameLocal="贵州省" geoTypeEnumId="GEOT_PROVINCE" geoName="Guizhou"/>
+    <Geo geoCodeNumeric="530000" geoId="CHN_53" geoNameLocal="云南省" geoTypeEnumId="GEOT_PROVINCE" geoName="Yunnan"/>
+    <Geo geoCodeNumeric="540000" geoId="CHN_54" geoNameLocal="西藏自治区" geoTypeEnumId="GEOT_PROVINCE" geoName="Xizang"/>
+    <Geo geoCodeNumeric="610000" geoId="CHN_61" geoNameLocal="陕西省" geoTypeEnumId="GEOT_PROVINCE" geoName="Shaanxi"/>
+    <Geo geoCodeNumeric="620000" geoId="CHN_62" geoNameLocal="甘肃省" geoTypeEnumId="GEOT_PROVINCE" geoName="Gansu"/>
+    <Geo geoCodeNumeric="630000" geoId="CHN_63" geoNameLocal="青海省" geoTypeEnumId="GEOT_PROVINCE" geoName="Qinghai"/>
+    <Geo geoCodeNumeric="640000" geoId="CHN_64" geoNameLocal="宁夏回族自治区" geoTypeEnumId="GEOT_PROVINCE" geoName="Ningxia"/>
+    <Geo geoCodeNumeric="650000" geoId="CHN_65" geoNameLocal="新疆维吾尔自治区" geoTypeEnumId="GEOT_PROVINCE" geoName="Xinjiang"/>
+    <Geo geoCodeNumeric="710000" geoId="CHN_71" geoNameLocal="台湾省" geoTypeEnumId="GEOT_PROVINCE" geoName="Taiwan"/>
+    <Geo geoCodeNumeric="810000" geoId="CHN_91" geoNameLocal="香港特别行政区" geoTypeEnumId="GEOT_PROVINCE" geoName="HongKong"/>
+    <Geo geoCodeNumeric="820000" geoId="CHN_92" geoNameLocal="澳门特别行政区" geoTypeEnumId="GEOT_PROVINCE" geoName="Macao"/>
+
+    <GeoAssoc geoId="CHN" toGeoId="CHN_11" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 北京市  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_12" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 天津市  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_13" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 河北省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_14" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 山西省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_15" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 内蒙古自治区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_21" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 辽宁省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_22" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 吉林省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_23" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 黑龙江省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_31" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 上海市  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_32" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 江苏省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_33" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 浙江省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_34" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 安徽省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_35" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 福建省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_36" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 江西省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_37" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 山东省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_41" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 河南省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_42" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 湖北省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_43" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 湖南省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_44" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 广东省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_45" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 广西壮族自治区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_46" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 海南省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_50" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 重庆市  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_51" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 四川省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_52" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 贵州省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_53" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 云南省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_54" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 西藏自治区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_61" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 陕西省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_62" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 甘肃省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_63" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 青海省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_64" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 宁夏回族自治区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_65" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 新疆维吾尔自治区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_71" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 台湾省  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_91" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 香港特别行政区  -->
+    <GeoAssoc geoId="CHN" toGeoId="CHN_92" geoAssocTypeEnumId="GAT_REGIONS"/><!-- China ==- 澳门特别行政区  -->
+</entity-facade-xml>

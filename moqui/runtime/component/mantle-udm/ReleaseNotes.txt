@@ -1,0 +1,175 @@
+
+Mantle Business Artifacts - Universal Data Model Release Notes
+
+===========================================================================
+Release 2.2.0 - 31 May 2022
+===========================================================================
+
+Mantle Universal Data Model 2.2.0 is a minor new feature and bug fix
+release. This release is based on Moqui Framework 3.0.0.
+
+This release includes a number of new entities, additional fields for
+service and screen level options, and seed data improvements.
+
+- new entities using UomDimensionType in moqui-framework:
+  ProductUomDimension, PartyDimension, MarketSegmentDimension
+- new ProductParameter and related entities to configure parameters
+  applicable to products with optional options, generally additional
+  information to collect from the customer when the product is purchase,
+  including: ProductParameterOption, ProductParameterProduct,
+  ProductParameterSet, and ProductParameterValue; parameter values on
+  orders with OrderItem.productParameterSetId, uses single ID to represent
+  value set for easier future association with shipment items, assets, etc
+- new ProductWorkEffort entity for tasks related to product purchase, and
+  OrderItemWorkEffort.forStatusId to track when should be considered done
+- new ShipmentParty and OrderItemParty entities
+- new OrderServiceJobRun entity to track job runs for orders
+- new ProductDbForm and OrderItemFormResponse entities to have forms
+  associated with products that are filled out by customer on purchase
+- new PartySystemMessage entity, like other *SystemMessage join entities
+
+DEPRECATION NOTES: ProductDimension (use ProductUomDimension instead)
+and ProductDimensionType (use UomDimensionType instead); these will be
+removed in a future release, recommend updating code and migrating data
+before the next major release (non backward compatible).
+
+For a complete list of changes see:
+
+https://github.com/moqui/mantle-udm/compare/v2.1.2...v2.2.0
+
+===========================================================================
+Release 2.1.2 - 07 Dec 2019
+===========================================================================
+
+Mantle Universal Data Model 2.1.2 is a patch level new feature and bug fix
+release. This release is based on Moqui Framework 2.1.3.
+
+This release has mostly new seed data, a few additional fields, and minimal
+new entities (AssetPool, FacilityLocationType).
+
+For a complete list of changes see:
+
+https://github.com/moqui/mantle-udm/compare/v2.1.1...v2.1.2
+
+===========================================================================
+Release 2.1.1 - 23 July 2019
+===========================================================================
+
+Mantle Universal Data Model 2.1.1 is a patch level new feature and bug fix
+release. This release is based on Moqui Framework 2.1.2.
+
+This release includes various new fields, a few new entities, and new and
+updated seed data for various entities. There are some changes to
+ProductStore related entities for store configuration. The Invoice status
+flows have been expanded with new status flows specifically for payable
+and receivable invoices as well as transitions between them for when
+invoice from and to parties are both internal organizations.
+
+For a complete list of changes see:
+
+https://github.com/moqui/mantle-udm/compare/v2.1.0...v2.1.1
+
+===========================================================================
+Release 2.1.0 - 29 Nov 2018
+===========================================================================
+
+Mantle Universal Data Model 2.1.0 is a minor new feature and bug fix
+release. This release is based on Moqui Framework 2.1.1.
+
+This release includes some refinement and reorganization of seed,
+seed-initial, install, and demo data. There are a small number of new
+entities for most data model changes are adding fields to existing.
+
+There are no non-backward compatible changes in the entity definitions
+since the last release or changes that require manual or system down
+database meta data updates if using startup-add-missing.
+
+===========================================================================
+Release 2.0.0 - 22 Oct 2017
+===========================================================================
+
+Mantle Universal Data Model 2.0.0 is a minor feature and bug fix
+release. This release is based on Moqui Framework 2.1.0.
+
+New Features
+
+- Significant improvements to default chart of accounts and GL account
+  classes for summary reports and a wider variety of operations
+- Lots of tuning and small additions to support new and improved
+  functionality in mantle-usl and SimpleScreens, mostly related to procure
+  to pay and order to cash processes plus significantly improved accounting
+- Much better audit log settings based on real world needs
+- Employee entity with various fields moved from Employment or represented
+  in both for a default and override pattern
+
+===========================================================================
+Release 1.1.0 - 24 Nov 2016
+===========================================================================
+
+Mantle Universal Data Model 1.1.0 is a minor new feature release. This
+release is based on Moqui Framework 2.0.0.
+
+The changes in this release are generally minor refinements and cleanups
+plus improvements for agreements, work types, employment, and budgets and
+expense management.
+
+Non Backward Compatible Changes
+
+- Agreement fromPartyId, fromRoleTypeId, toPartyId, toRoleTypeId fields
+  replaced with organization and other (instead of from/to); the Agreement
+  entities are not generally used, but any existing data/code would
+  need to be moved/updated
+- Changed FacilityContent, RequestContent, ProductCategoryContent,
+  and ProductConfigItemContent to use a single PK field like other content
+  entities; these entities are not currently used in services, etc but if
+  used in custom code the code and existing data will need to be updated
+- EmplPosition.exemptFlag replaced by taxExemptEnumId and taxFormId
+
+New Features
+
+- Set many entities to cache=never to avoid overhead of caching where
+  read/write ratio doesn't justify it or where cache could cause issues
+- Agreement and Term improvements
+  - Refined TermType enums
+  - Parties on Agreement are now organization and other instead of from/to
+  - Added AgreementTerm termText and termNumber fields
+  - New Settlement types for day of current or next month
+- Added Enumeration type WorkType and workTypeEnumId to RateAmount,
+  TimeEntry, WorkEffortParty, and replaced emplPositionClassId on
+  WorkEffort work workTypeEnumId; this is useful for defining work types
+  separate from position classes for a generally cleaner model and to
+  better represent how position classes can have many work types
+- Employment Tax Settings
+  - Added Employment.taxFormId to override EmplPosition.taxFormId
+  - Added PayrollAdjustmentExempt entity to configure exemptions based on
+    EmplPosition.taxExemptEnumId
+- Added InvoiceItemDetail to allocate expenses to Assets, Facilities, etc
+- Expanded Budget and related entities to handle common budgeting scenarios
+  such as a budget that parallels GL expense accounts and budgets for
+  Assets and Facilities, and for budgets with a longer time period such as
+  a year with sub-periods such as months within the year
+
+===========================================================================
+Release 1.0.1 - 26 Mar 2016
+===========================================================================
+
+Mantle Universal Data Model 1.0.1 is a minor new feature release.
+
+This release is based on Moqui Framework 1.6.2.
+
+There are only minor changes in this release, including: changes for
+updates in moqui-framework, seed and demo data improvements for project
+management (used in HiveMind, etc), using new install data file type
+(something between seed and demo), some new fields, etc.
+
+===========================================================================
+Release 1.0.0 - 24 Jan 2016
+===========================================================================
+
+Mantle Universal Data Model 1.0.0 is the first release as a component
+repository separate from the other components in Mantle Business Artifacts.
+
+This release is based on Moqui Framework 1.6.1.
+
+The initial code is from Mantle 1.2.0 and has only minor changes but has
+updates for the new Moqui Framework component management features.

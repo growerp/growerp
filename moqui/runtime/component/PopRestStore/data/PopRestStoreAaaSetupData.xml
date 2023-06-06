@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!-- ecommerce authz/permission for ALL users -->
+    <moqui.security.ArtifactGroup artifactGroupId="POPRS_API" description="POP REST Store (via root screen)"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_API" artifactTypeEnumId="AT_REST_PATH"
+            inheritAuthz="Y" artifactName="/pop"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="POPRS_API_ALL" userGroupId="ALL_USERS" artifactGroupId="POPRS_API"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+    <moqui.basic.Enumeration enumCode="homePath" description="Base path for store application" enumId="PsstHomePath" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="store_path" description="Base path for store's product list" enumId="PsstStorePath" enumTypeId="ProductStoreSettingType"/>
+
+    <!-- client template setting types -->
+    <moqui.basic.Enumeration enumCode="template_client_account" description="Template Client Account Page" enumId="PsstTemplateClientAccount" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_addAddress" description="Template Client Add Address" enumId="PsstTemplateClientAddAddress" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_checkoutHeader" description="Template Client Checkout Header" enumId="PsstTemplateClientCheckoutHeader" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_checkout" description="Template Client Checkout" enumId="PsstTemplateClientCheckout" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_contactInfo" description="Template Client Contact Info" enumId="PsstTemplateClientContactInfo" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_checkoutSuccess" description="Template Client Checkout Success" enumId="PsstTemplateClientCheckoutSuccess" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_accountCreate" description="Template Client Account Create" enumId="PsstTemplateClientAccountCreate" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_login" description="Template Client Login Page" enumId="PsstTemplateClientLogin" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_menu" description="Template Client Menu Page" enumId="PsstTemplateClientMenu" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_orderDetail" description="Template Client Order Detail" enumId="PsstTemplateClientOrderDetail" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_orderHistory" description="Template Client Order History" enumId="PsstTemplateClientOrderHistory" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_productImage" description="Template Client Product Image" enumId="PsstTemplateClientProductImage" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_resetPassword" description="Template Client Reset Password" enumId="PsstTemplateClientResetPassword" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_checkoutMessages" description="Template Client Checkout Messages" enumId="PsstTemplateClientCheckoutMessages" enumTypeId="ProductStoreSettingType"/>
+
+    <moqui.basic.Enumeration enumCode="template_client_style" description="Template Client Website styles in Json format" enumId="PsstTemplateClientStyle" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_client_content" description="Template Client Contentlocation" enumId="PsstContentLocation" enumTypeId="ProductStoreSettingType"/>
+`
+     <!-- server template setting types these should be moved ot mantle-udm ...-->
+    <moqui.basic.Enumeration enumCode="template_server_root" description="Template Server Root" enumId="PsstTemplateServerRoot" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_content" description="Template Server Content" enumId="PsstTemplateServerContent" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_error" description="Template Server Error" enumId="PsstTemplateServerError" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_footer" description="Template Server Footer" enumId="PsstTemplateServerFooter" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_home" description="Template Server Home" enumId="PsstTemplateServerHome" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_header" description="Template Server Header" enumId="PsstTemplateServerHeader" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_product" description="Template Server Product" enumId="PsstTemplateServerProduct" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_search" description="Template Server Search" enumId="PsstTemplateServerSearch" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="template_server_category" description="Template Server Category" enumId="PsstTemplateServerCategory" enumTypeId="ProductStoreSettingType"/>
+
+    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname" description="Product Store ID From Hostname" enumId="PsstHostname" enumTypeId="ProductStoreSettingType"/>
+</entity-facade-xml>

@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="clone" noun="WorkEffort">
+        <in-parameters>
+            <parameter name="workEffortId"><description>The new workEffortId unless no baseWorkEffortId is specified then this is
+                the base and a sequenced ID will be generated for the new ID</description></parameter>
+            <parameter name="baseWorkEffortId" required="true" default="workEffortId"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="deepClone" type="Boolean" default="false"><description>If true recursively clone all children.</description></parameter>
+            <parameter name="deepIdIsPrefix" type="Boolean" default="false">
+                <description>If true starting workEffortId is used as a prefix for all child IDs, for project/etc cloning.</description></parameter>
+            <parameter name="idPrefix"/>
+            <parameter name="baseIdPrefix"/>
+            <parameter name="clearDates" type="Boolean" default="false"/>
+            <parameter name="copyAssetAssign" type="Boolean" default="false"/>
+            <parameter name="copyAssetNeeded" type="Boolean" default="true"/>
+            <parameter name="copyAssoc" type="Boolean" default="false"/>
+            <parameter name="copyCommEvent" type="Boolean" default="false"/>
+            <parameter name="copyContactMech" type="Boolean" default="true"/>
+            <parameter name="copyContent" type="Boolean" default="true"/>
+            <parameter name="copyNote" type="Boolean" default="true"/>
+            <parameter name="copyParty" type="Boolean" default="false"/>
+            <parameter name="copyProduct" type="Boolean" default="true"/>
+            <parameter name="copySkillStandard" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
+                <field-map field-name="workEffortId" from="baseWorkEffortId"/></entity-find-one>
+
+            <entity-set value-field="workEffort" include="nonpk" set-if-empty="false"/>
+            <if condition="clearDates">
+                <!-- set the fields even if null, don't do this for other fields -->
+                <set field="workEffort.estimatedStartDate" from="estimatedStartDate"/>
+                <set field="workEffort.estimatedCompletionDate" from="estimatedCompletionDate"/>
+                <set field="workEffort.actualStartDate" from="actualStartDate"/>
+                <set field="workEffort.actualCompletionDate" from="actualCompletionDate"/>
+            </if>
+            <if condition="workEffortId &amp;&amp; workEffortId != baseWorkEffortId"><then>
+                <set field="workEffort.workEffortId" from="workEffortId"/>
+            </then><else>
+                <if condition="idPrefix"><then>
+                    <if condition="baseIdPrefix &amp;&amp; baseWorkEffortId.startsWith(baseIdPrefix)"><then>
+                        <set field="idRest" from="baseWorkEffortId.substring(baseIdPrefix.length()+1)"/>
+                        <if condition="idRest &amp;&amp; idRest.charAt(0) == '-'"><set field="idRest" from="idRest.substring(1)"/></if>
+                        <set field="workEffort.workEffortId" value="${idPrefix}-${idRest}"/>
+                    </then><else>
+                        <set field="seqName" value="Project_${idPrefix}"/>
+                        <set field="workEffort.workEffortId" value="${idPrefix}-${ec.entity.sequencedIdPrimary(seqName, null, null)}"/>
+                    </else></if>
+                </then><else>
+                    <set field="workEffort.workEffortId" from="null"/>
+                    <entity-sequenced-id-primary value-field="workEffort"/>
+                </else></if>
+            </else></if>
+            <!-- <log level="warn" message="Cloning ${baseWorkEffortId} to ${workEffort.workEffortId}"/> -->
+            <entity-create value-field="workEffort"/>
+            <set field="workEffortId" from="workEffort.workEffortId"/>
+
+            <if condition="copyAssetAssign">
+                <entity-find entity-name="mantle.work.effort.WorkEffortAssetAssign" list="valueList">
+                    <date-filter/><econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyAssetNeeded">
+                <entity-find entity-name="mantle.work.effort.WorkEffortAssetNeeded" list="valueList">
+                    <econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyAssoc">
+                <entity-find entity-name="mantle.work.effort.WorkEffortAssoc" list="valueList">
+                    <date-filter/><econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyCommEvent">
+                <entity-find entity-name="mantle.work.effort.WorkEffortCommEvent" list="valueList">
+                    <econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyContactMech">
+                <entity-find entity-name="mantle.work.effort.WorkEffortContactMech" list="valueList">
+                    <date-filter/><econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyContent">
+                <entity-find entity-name="mantle.work.effort.WorkEffortContent" list="valueList">
+                    <econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value">
+                    <set field="value.workEffortContentId" from="null"/>
+                    <entity-sequenced-id-primary value-field="value"/>
+                    <set field="value.workEffortId" from="workEffortId"/>
+                    <entity-create value-field="value"/>
+                </iterate>
+            </if>
+            <if condition="copyNote">
+                <entity-find entity-name="mantle.work.effort.WorkEffortNote" list="valueList">
+                    <econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyParty">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="valueList">
+                    <date-filter/><econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copyProduct">
+                <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="valueList">
+                    <date-filter/><econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+            <if condition="copySkillStandard">
+                <entity-find entity-name="mantle.work.effort.WorkEffortSkillStandard" list="valueList">
+                    <econdition field-name="workEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="valueList" entry="value"><set field="value.workEffortId" from="workEffortId"/><entity-create value-field="value"/></iterate>
+            </if>
+
+            <if condition="deepClone">
+                <set field="passThroughParms" from="['clearDates', 'copyAssetAssign', 'copyAssetNeeded', 'copyAssoc', 'copyCommEvent',
+                    'copyContactMech', 'copyContent', 'copyNote', 'copyParty', 'copyProduct', 'copySkillStandard', 'idPrefix', 'baseIdPrefix']"/>
+                <set field="subMap" from="[deepClone:true, deepIdIsPrefix:false]"/>
+                <iterate list="passThroughParms" entry="parmName"><script>subMap.put(parmName, context.get(parmName))</script></iterate>
+
+                <!-- for cloning from a root set the rootWorkEffortId for all descendants -->
+                <set field="subMap.rootWorkEffortId" from="rootWorkEffortId"/>
+                <if condition="!rootWorkEffortId &amp;&amp; !workEffort.rootWorkEffortId">
+                    <set field="subMap.rootWorkEffortId" from="workEffortId"/></if>
+                <if condition="deepIdIsPrefix">
+                    <set field="subMap.baseIdPrefix" from="baseWorkEffortId"/>
+                    <set field="subMap.idPrefix" from="workEffortId"/>
+                </if>
+
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="childList">
+                    <econdition field-name="parentWorkEffortId" from="baseWorkEffortId"/></entity-find>
+                <iterate list="childList" entry="child">
+                    <service-call name="mantle.work.WorkEffortServices.clone#WorkEffort"
+                            in-map="subMap + [baseWorkEffortId:child.workEffortId, parentWorkEffortId:workEffortId]"/>
+                </iterate>
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="childList">
+                    <econdition field-name="rootWorkEffortId" from="baseWorkEffortId"/>
+                    <econdition field-name="parentWorkEffortId" operator="is-null"/>
+                </entity-find>
+                <iterate list="childList" entry="child">
+                    <service-call name="mantle.work.WorkEffortServices.clone#WorkEffort"
+                            in-map="subMap + [baseWorkEffortId:child.workEffortId, parentWorkEffortId:null]"/>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WorkEffort">
+        <description>Delete a work effort if it has nothing related to it.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="parentWorkEffortId"/>
+            <parameter name="deleteChildWorkEfforts" type="Boolean" default-value="false"/>
+            <parameter name="deleteTimeEntries" type="Boolean" default-value="false"/>
+            <parameter name="deleteWorkEffortParties" type="Boolean" default-value="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
+                <field-map field-name="workEffortId"/></entity-find-one>
+            <if condition="!workEffort"><return/></if>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="childWorkEfforts">
+                <econditions combine="or">
+                    <econdition field-name="rootWorkEffortId" from="workEffortId"/>
+                    <econdition field-name="parentWorkEffortId" from="workEffortId"/>
+                </econditions>
+            </entity-find>
+            <if condition="childWorkEfforts &amp;&amp; !deleteChildWorkEfforts">
+                <message error="true">Cannot delete work effort ${workEffortId}. Found child Work Efforts.</message></if>
+            <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntries">
+                <econdition field-name="workEffortId"/></entity-find>
+            <if condition="timeEntries &amp;&amp; !deleteTimeEntries">
+                <message error="true">Cannot delete work effort ${workEffortId}. Found Time Entries.</message></if>
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="workEffortParties">
+                <econdition field-name="workEffortId"/></entity-find>
+            <if condition="workEffortParties &amp;&amp; !deleteWorkEffortParties">
+                <message error="true">Cannot delete work effort ${workEffortId}. Found Work Efforty Parties.</message></if>
+
+            <set field="relatedValues" from="workEffort.findRelatedFk(new HashSet(
+                ['mantle.work.effort.WorkEffort', 'mantle.work.time.TimeEntry', 'mantle.work.effort.WorkEffortParty']))"/>
+            <iterate list="relatedValues" entry="relatedValue">
+                <message error="true">Cannot delete work effort ${workEffortId}. Found ${relatedValue.getEntityNamePretty()}.</message></iterate>
+            <check-errors/>
+
+            <iterate list="childWorkEfforts" entry="childWorkEffort">
+                <service-call name="mantle.work.WorkEffortServices.delete#WorkEffort" ignore-error="true"
+                              in-map="context +
+                                          [workEffortId:childWorkEffort.workEffortId, parentWorkEffortId:workEffortId]"/></iterate>
+
+            <iterate list="timeEntries" entry="timeEntry">
+                <service-call name="mantle.work.TimeServices.delete#TimeEntry" ignore-error="true"
+                              in-map="[timeEntryId:timeEntry.timeEntryId,deleteChildTimeEntries:true]"/></iterate>
+
+            <iterate list="workEffortParties" entry="workEffortParty">
+                <service-call name="delete#mantle.work.effort.WorkEffortParty" ignore-error="true"
+                              in-map="[workEffortId:workEffortId,partyId:workEffortParty.partyId,
+                                           roleTypeId:workEffortParty.roleTypeId,fromDate:workEffortParty.fromDate]"/></iterate>
+
+            <service-call name="delete#mantle.work.effort.WorkEffort" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="add" noun="WorkEffortParty">
+        <description>Adds Party to WorkEffort if no WorkEffortParty already exists for the workEffortId, partyId, and roleTypeId and filtered by fromDate/thruDate</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="roleTypeId" required="true"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffortParty" include="nonpk">
+                <exclude field-name="fromDate"/><exclude field-name="thruDate"/></auto-parameters>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fromDate" type="Timestamp"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="wepList" limit="1">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="partyId"/>
+                <econdition field-name="roleTypeId"/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <if condition="wepList"><then>
+                <set field="fromDate" from="wepList[0].fromDate"/>
+            </then><else>
+                <set field="fromDate" from="ec.user.nowTimestamp"/>
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="context"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="remove" noun="WorkEffortParty">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="roleTypeId"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="wepList">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="partyId"/>
+                <econdition field-name="roleTypeId" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="wepList" entry="wepValue">
+                <set field="wepValue.thruDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="wepValue"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="replace" noun="WorkEffortParty">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="roleTypeId" required="true"/>
+            <parameter name="newPartyId" required="true"/>
+            <parameter name="statusId"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="wepList">
+                <date-filter/><econdition field-name="workEffortId"/><econdition field-name="roleTypeId"/>
+            </entity-find>
+            <set field="foundExisting" from="false"/>
+            <iterate list="wepList" entry="wepValue">
+                <if condition="wepValue.partyId != newPartyId">
+                    <set field="wepValue.thruDate" from="ec.user.nowTimestamp"/>
+                    <entity-update value-field="wepValue"/>
+
+                    <else><set field="foundExisting" from="true"/></else>
+                </if>
+            </iterate>
+            <if condition="!foundExisting">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId,
+                    partyId:newPartyId, roleTypeId:roleTypeId, fromDate:ec.user.nowTimestamp, statusId:statusId]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="add" noun="WorkEffortProduct">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffortProduct" include="nonpk"/>
+            <parameter name="typeEnumId" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="fromDate" type="Timestamp"/></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="existingWepList">
+                <date-filter/><econdition field-name="workEffortId"/><econdition field-name="productId"/>
+                <econdition field-name="typeEnumId"/></entity-find>
+            <if condition="existingWepList">
+                <set field="existingWep" from="existingWepList[0]"/>
+                <set field="estimatedQuantity" from="(estimatedQuantity ?: 0) + (existingWep.estimatedQuantity ?: 0)"/>
+                <entity-set value-field="existingWep" include="nonpk"/>
+                <entity-update value-field="existingWep"/>
+
+                <else><service-call name="create#mantle.work.effort.WorkEffortProduct" in-map="context" out-map="context"/></else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WorkEffortStartEnd">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="workEffort" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="startDate" type="Timestamp"/>
+            <parameter name="endDate" type="Timestamp"/>
+            <parameter name="duration" type="BigDecimal"/>
+            <parameter name="allDay" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <if condition="workEffort == null"><entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/></if>
+
+            <set field="allDay" from="false"/>
+            <set field="startDate" from="workEffort.actualStartDate ?: workEffort.estimatedStartDate"/>
+            <if condition="startDate == null &amp;&amp; workEffort.allDayStart != null">
+                <set field="startDate" from="ec.l10n.parseTimestamp(workEffort.allDayStart.toString() + ' 00:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+                <set field="allDay" from="true"/>
+            </if>
+
+            <set field="endDate" from="workEffort.actualCompletionDate ?: workEffort.estimatedCompletionDate"/>
+            <if condition="endDate == null">
+                <if condition="workEffort.allDayEnd != null"><then>
+                    <set field="endDate" from="ec.l10n.parseTimestamp(workEffort.allDayEnd.toString() + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+                    <set field="allDay" from="true"/>
+                </then><else-if condition="allDay">
+                    <set field="endDate" from="ec.l10n.parseTimestamp(workEffort.allDayStart.toString() + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+                </else-if></if>
+            </if>
+            <if condition="endDate == null">
+                <set field="duration" from="(workEffort.actualWorkDuration ?: workEffort.estimatedWorkDuration) ?: workEffort.estimatedWorkTime"/>
+                <if condition="duration">
+                    <!-- convert to minutes because Java Calendar class take an integer and we may have something like 2.5 hours -->
+                    <service-call name="org.moqui.impl.BasicServices.convert#Uom" out-map="convertDurOut"
+                            in-map="[uomId:(workEffort.timeUomId ?: 'TF_hr'), toUomId:'TF_min', amount:duration]"/>
+                    <set field="durationMinutes" from="(convertDurOut.convertedAmount ?: 60) as int"/>
+                    <script>
+                        Calendar endCal = ec.user.getCalendarSafe()
+                        endCal.setTimeInMillis(startDate.time)
+                        endCal.add(Calendar.MINUTE, durationMinutes)
+                        endDate = new Timestamp(endCal.getTimeInMillis())
+                    </script>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ================================================ -->
+    <!-- ========== WorkEffortContent Services ========== -->
+    <!-- ================================================ -->
+
+    <service verb="get" noun="WorkEffortContentLocation">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="contentTypeEnumIdList" type="List" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentLocation"/>
+            <parameter name="workEffortContent"/>
+        </out-parameters>
+        <actions>
+            <iterate list="contentTypeEnumIdList" entry="contentTypeEnumId">
+                <entity-find entity-name="mantle.work.effort.WorkEffortContent" list="workEffortContentList">
+                    <econdition field-name="workEffortId"/><econdition field-name="contentTypeEnumId"/>
+                    <order-by field-name="-contentDate"/></entity-find>
+                <if condition="workEffortContentList">
+                    <set field="workEffortContent" from="workEffortContentList[0]"/>
+                    <break/>
+                </if>
+            </iterate>
+            <set field="contentLocation" from="workEffortContent ? workEffortContent.contentLocation : null"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="WorkEffortContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffortContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.work.effort.WorkEffortContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.work.WorkEffortServices.save#WorkEffortContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="WorkEffortContent">
+        <in-parameters>
+            <parameter name="workEffortContentId" required="true"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffortContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffortContent" value-field="workEffortContent"/>
+                <service-call name="mantle.work.WorkEffortServices.save#WorkEffortContentFile" out-map="context"
+                        in-map="context + [workEffortId:workEffortContent.workEffortId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.work.effort.WorkEffortContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="WorkEffortContentFile">
+        <in-parameters>
+            <parameter name="workEffortContentId" required="true"/>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/work/${workEffortId}/content_${workEffortContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.work.effort.WorkEffortContent"
+                    in-map="[workEffortContentId:workEffortContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+</services>

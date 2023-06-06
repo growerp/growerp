@@ -1,0 +1,2427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ==================================================== -->
+    <!-- ========== Shipment View/Display Services ========== -->
+    <!-- ==================================================== -->
+
+    <service-include verb="get" noun="ShipmentDisplayInfo" location="component://mantle-usl/service/mantle/shipment/ShipmentInfoServices.xml"/>
+    <service-include verb="get" noun="ShipmentContactInfo" location="component://mantle-usl/service/mantle/shipment/ShipmentInfoServices.xml"/>
+    <service-include verb="get" noun="ShipmentShippingOptions" location="component://mantle-usl/service/mantle/shipment/ShipmentInfoServices.xml"/>
+
+    <!-- ========================================================= -->
+    <!-- ========== Shipment Create and Modify Services ========== -->
+    <!-- ========================================================= -->
+
+    <service verb="create" noun="Shipment">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.shipment.Shipment"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentRouteSegment"/>
+            <parameter name="statusId" default-value="ShipInput"/>
+            <parameter name="entryDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipmentId"/>
+            <parameter name="shipmentRouteSegmentSeqId"/>
+        </out-parameters>
+        <actions>
+            <if condition="!fromPartyId &amp;&amp; originFacilityId">
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="originFacility">
+                    <field-map field-name="facilityId" from="originFacilityId"/></entity-find-one>
+                <set field="fromPartyId" from="originFacility.ownerPartyId"/>
+            </if>
+            <if condition="!toPartyId &amp;&amp; destinationFacilityId">
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="destinationFacility">
+                    <field-map field-name="facilityId" from="destinationFacilityId"/></entity-find-one>
+                <set field="toPartyId" from="destinationFacility.ownerPartyId"/>
+            </if>
+            <if condition="!destPostalContactMechId &amp;&amp; destinationFacilityId">
+                <!-- NOTE: used to always use address for destination facility, now allow override (generally from a toPartyId address) -->
+                <service-call name="mantle.facility.ContactServices.get#FacilityDefaultShipDest"
+                        in-map="[facilityId:destinationFacilityId]" out-map="facDestOut"/>
+                <set field="destPostalContactMechId" from="facDestOut.postalContactMechId"/>
+            </if>
+            <service-call name="create#mantle.shipment.Shipment" in-map="context" out-map="context"/>
+            <service-call name="create#mantle.shipment.ShipmentRouteSegment" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="ShipmentAndRouteSegment">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentRouteSegmentSeqId"/>
+            <auto-parameters entity-name="mantle.shipment.Shipment" include="nonpk"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentRouteSegment" include="nonpk"/>
+            <parameter name="carrierAndShipmentMethod"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found for ID ${shipmentId}"/></if>
+
+            <if condition="!shipment.fromPartyId &amp;&amp; !fromPartyId &amp;&amp; originFacilityId">
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="originFacility">
+                    <field-map field-name="facilityId" from="originFacilityId"/></entity-find-one>
+                <set field="fromPartyId" from="originFacility.ownerPartyId"/>
+            </if>
+            <if condition="!shipment.toPartyId &amp;&amp; !toPartyId &amp;&amp; destinationFacilityId">
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="destinationFacility">
+                    <field-map field-name="facilityId" from="destinationFacilityId"/></entity-find-one>
+                <set field="toPartyId" from="destinationFacility.ownerPartyId"/>
+            </if>
+            <service-call name="update#mantle.shipment.Shipment" in-map="context" out-map="context"/>
+
+            <if condition="!shipmentRouteSegmentSeqId">
+                <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="srsList">
+                    <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+                <set field="shipmentRouteSegmentSeqId" from="srsList ? srsList[0].shipmentRouteSegmentSeqId : null"/>
+            </if>
+            <if condition="shipmentRouteSegmentSeqId">
+                <if condition="!destPostalContactMechId &amp;&amp; destinationFacilityId">
+                    <!-- NOTE: used to always use address for destination facility, now allow override (generally from a toPartyId address) -->
+                    <service-call name="mantle.facility.ContactServices.get#FacilityDefaultShipDest"
+                            in-map="[facilityId:destinationFacilityId]" out-map="facDestOut"/>
+                    <set field="destPostalContactMechId" from="facDestOut.postalContactMechId"/>
+                </if>
+                <if condition="carrierAndShipmentMethod">
+                    <set field="carrierPartyId" from="carrierAndShipmentMethod.split(':')[0]"/>
+                    <set field="shipmentMethodEnumId" from="carrierAndShipmentMethod.split(':')[1]"/>
+                </if>
+                <service-call name="update#mantle.shipment.ShipmentRouteSegment" in-map="context" out-map="context"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="create" noun="ShipmentItem">
+        <description>Create a ShipmentItem (or add quantity if exists for productId) and create a single ShipmentItemSource with quantityNotHandled defaulting to the full quantity.</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentItem" include="nonpk"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentItemSource" include="nonpk"/>
+            <parameter name="statusId" default="SisPending"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="shipmentItemSourceId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem">
+                <field-map field-name="shipmentId"/><field-map field-name="productId"/></entity-find-one>
+            <if condition="shipmentItem != null"><then>
+                <set field="shipmentItem.quantity" from="shipmentItem.quantity + quantity"/>
+                <entity-update value-field="shipmentItem"/>
+            </then><else>
+                <service-call name="create#mantle.shipment.ShipmentItem"
+                        in-map="[shipmentId:shipmentId, productId:productId, quantity:quantity]"/>
+            </else></if>
+
+            <set field="quantityNotHandled" from="quantityNotHandled != null ? quantityNotHandled : quantity"/>
+            <service-call name="create#mantle.shipment.ShipmentItemSource" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="ShipmentItem">
+        <description>Update a ShipmentItem and if applicable a related ShipmentItemSource.</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentItem" include="nonpk"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentItemSource"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="shipmentItemSourceId"/></out-parameters>
+        <actions>
+            <if condition="quantity &lt; 0.0"><return error="true" message="Quantity cannot be less than zero for shipment ${shipmentId} product ${productId} (${quantity})"/></if>
+
+            <!-- don't allow quantity to go below issued or received qty -->
+            <entity-find entity-name="mantle.product.issuance.AssetIssuanceSummary" list="issuanceSummaryList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="productId"/>
+                <select-field field-name="quantity"/>
+            </entity-find>
+            <if condition="issuanceSummaryList &amp;&amp; (issuanceSummaryList[0].quantity ?: 0.0) &gt; quantity">
+                <return error="true" message="Quantity cannot be reduced below packed/issued quantity ${issuanceSummaryList[0].quantity}"/></if>
+            <entity-find entity-name="mantle.product.receipt.AssetReceiptSummary" list="receiptSummaryList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="productId"/>
+                <select-field field-name="quantityAccepted,quantityRejected"/>
+            </entity-find>
+            <if condition="receiptSummaryList">
+                <set field="receiptTotal" from="(receiptSummaryList[0].quantityAccepted ?: 0.0) + (receiptSummaryList[0].quantityRejected ?: 0.0)"/>
+                <if condition="receiptTotal &gt; quantity">
+                    <return error="true" message="Quantity cannot be reduced below received quantity ${receiptTotal}"/></if>
+            </if>
+
+            <!-- get the shipment type and if outgoing don't allow quantity increase over what is on related order items -->
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="shipmentTypeOut"
+                    in-map="[parentEnumId:'ShpTpOutgoing']"/>
+            <set field="isOutgoing" from="shipment.shipmentTypeEnumId in shipmentTypeOut.enumIdSet"/>
+
+            <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem"/>
+            <set field="quantityChange" from="quantity - (shipmentItem.quantity ?: 0.0)"/>
+            <entity-set value-field="shipmentItem"/>
+            <entity-update value-field="shipmentItem"/>
+
+            <if condition="shipmentItemSourceId"><then>
+                <!-- if shipmentItemSourceId passed in, update that one -->
+                <entity-find-one entity-name="mantle.shipment.ShipmentItemSource" value-field="sis"/>
+                <entity-set value-field="sis"/>
+                <set field="sis.quantity" from="(sis.quantity ?: 0.0) + quantityChange"/>
+                <set field="sis.quantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) + quantityChange"/>
+                <entity-update value-field="sis"/>
+            </then><else>
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisList">
+                    <econdition field-name="shipmentId"/><econdition field-name="productId"/></entity-find>
+                <set field="sisQuantity" from="0.0"/>
+
+                <filter-map-list list="sisList" to-list="noOrderSisList"><field-map field-name="orderId" from="null"/></filter-map-list>
+                <set field="orderSisList" from="[]"/>
+                <iterate list="sisList" entry="sis"><script>if (sis.orderId) orderSisList.add(sis)</script></iterate>
+
+                <!-- use a different quantityChange for SIS based on current ShipmentItem.quantity so they match -->
+                <iterate list="sisList" entry="sis"><set field="sisQuantity" from="sisQuantity + (sis.quantity ?: 0.0)"/></iterate>
+                <set field="quantityChange" from="quantity - sisQuantity"/>
+
+                <if condition="quantityChange &gt; 0.0">
+                    <!-- quantity increase, first find SIS records for OrderItems with quantity not already on a
+                            shipment, then find SIS with no orderId and update that one, if none create on -->
+                    <set field="increaseRemaining" from="quantityChange"/>
+
+                    <iterate list="orderSisList" entry="sis">
+                        <!-- get quantity for all ShipmentItemSource records for the order item -->
+                        <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="itemSisList">
+                            <econdition field-name="orderId" from="sis.orderId"/>
+                            <econdition field-name="orderItemSeqId" from="sis.orderItemSeqId"/>
+                            <select-field field-name="quantity"/>
+                        </entity-find>
+                        <set field="itemShipmentQuantity" from="0.0"/>
+                        <iterate list="itemSisList" entry="itemSis"><set field="itemShipmentQuantity"
+                                from="itemShipmentQuantity + itemSis.quantity"/></iterate>
+
+                        <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                            <field-map field-name="orderId" from="sis.orderId"/>
+                            <field-map field-name="orderItemSeqId" from="sis.orderItemSeqId"/>
+                        </entity-find-one>
+
+                        <set field="itemQuantityRemaining" from="orderItem.quantity - itemShipmentQuantity"/>
+
+                        <set field="currentChange" from="increaseRemaining &gt; itemQuantityRemaining ?
+                                itemQuantityRemaining : increaseRemaining"/>
+                        <if condition="currentChange">
+                            <set field="sis.quantity" from="(sis.quantity ?: 0.0) + currentChange"/>
+                            <set field="sis.quantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) + currentChange"/>
+                            <entity-update value-field="sis"/>
+                            <set field="increaseRemaining" from="increaseRemaining - currentChange"/>
+                            <if condition="increaseRemaining == 0.0"><break/></if>
+                        </if>
+                    </iterate>
+
+                    <if condition="orderSisList &amp;&amp; increaseRemaining &amp;&amp; isOutgoing">
+                        <return error="true" message="For outgoing shipments cannot increase quantity above what is on related order items (${increaseRemaining} too many)"/></if>
+
+                    <if condition="increaseRemaining &amp;&amp; noOrderSisList"><then>
+                        <set field="sis" from="noOrderSisList[0]"/>
+                        <set field="sis.quantity" from="(sis.quantity ?: 0.0) + increaseRemaining"/>
+                        <set field="sis.quantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) + increaseRemaining"/>
+                        <entity-update value-field="sis"/>
+                    </then><else-if condition="increaseRemaining">
+                        <service-call name="create#mantle.shipment.ShipmentItemSource"
+                                in-map="context + [quantity:increaseRemaining, quantityNotHandled:increaseRemaining, statusId:'SisPending']"/>
+                    </else-if></if>
+                </if>
+                <if condition="quantityChange &lt; 0.0">
+                    <!-- quantity reduce, find SIS records with no orderId and update those first, if any left pull from those from orders -->
+                    <set field="reduceRemaining" from="-quantityChange"/>
+                    <iterate list="noOrderSisList" entry="sis">
+                        <set field="currentChange" from="reduceRemaining &gt; (sis.quantityNotHandled ?: 0.0) ?
+                                (sis.quantityNotHandled ?: 0.0) : reduceRemaining"/>
+                        <if condition="currentChange">
+                            <set field="sis.quantity" from="(sis.quantity ?: 0.0) - currentChange"/>
+                            <set field="sis.quantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) - currentChange"/>
+                            <if condition="sis.quantity &gt; 0.0 &amp;&amp; sis.quantityNotHandled == 0.0">
+                                <set field="sis.statusId" from="isOutgoing ? 'SisPacked' : 'SisReceived'"/></if>
+                            <entity-update value-field="sis"/>
+                            <set field="reduceRemaining" from="reduceRemaining - currentChange"/>
+                            <if condition="reduceRemaining == 0.0"><break/></if>
+                        </if>
+                    </iterate>
+                    <iterate list="orderSisList" entry="sis">
+                        <set field="currentChange" from="reduceRemaining &gt; (sis.quantityNotHandled ?: 0.0) ?
+                                (sis.quantityNotHandled ?: 0.0) : reduceRemaining"/>
+                        <if condition="currentChange">
+                            <set field="sis.quantity" from="(sis.quantity ?: 0.0) - currentChange"/>
+                            <set field="sis.quantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) - currentChange"/>
+                            <if condition="sis.quantity &gt; 0.0 &amp;&amp; sis.quantityNotHandled == 0.0">
+                                <set field="sis.statusId" from="isOutgoing ? 'SisPacked' : 'SisReceived'"/></if>
+                            <entity-update value-field="sis"/>
+                            <set field="reduceRemaining" from="reduceRemaining - currentChange"/>
+                            <if condition="reduceRemaining == 0.0"><break/></if>
+                        </if>
+                    </iterate>
+                </if>
+            </else></if>
+
+            <!-- if product is a PtPickAssembly update produce qty for itself and consume quantities for its components on Assembly Task -->
+            <if condition="shipment.assemblyWorkEffortId">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true"/>
+                <if condition="product.productTypeEnumId == 'PtPickAssembly'">
+                    <service-call name="mantle.work.ManufacturingServices.set#ProducedProductQuantity"
+                            in-map="[workEffortId:shipment.assemblyWorkEffortId, productId:productId, estimatedQuantity:quantity]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="ensure" noun="ShipmentItemQuantityRemaining">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/><parameter name="productId" required="true"/>
+            <parameter name="newQuantityRemaining" type="BigDecimal" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem"/>
+            <if condition="shipmentItem"><then>
+                <entity-find-one entity-name="mantle.shipment.ShipmentItemDetail" value-field="shipmentItemDetail">
+                    <field-map field-name="shipmentId"/><field-map field-name="productId"/>
+                </entity-find-one>
+                <set field="quantityRemaining" from="shipmentItem.quantity - (shipmentItemDetail.quantityAcceptedTotal ?: 0) - (shipmentItemDetail.quantityRejectedTotal ?: 0)"/>
+                <if condition="quantityRemaining &lt; newQuantityRemaining">
+                    <set field="incrementQuantity" from="newQuantityRemaining - quantityRemaining"/>
+                    <service-call name="mantle.shipment.ShipmentServices.update#ShipmentItem"
+                            in-map="[shipmentId:shipmentId, productId:productId,
+                                quantity:(shipmentItem.quantity + incrementQuantity)]"/>
+                </if>
+            </then><else>
+                <!-- no ShipmentItem at all, create one -->
+                <service-call name="mantle.shipment.ShipmentServices.create#ShipmentItem"
+                        in-map="[shipmentId:shipmentId, productId:productId, quantity:newQuantityRemaining]"/>
+            </else></if>
+        </actions>
+    </service>
+
+    <!-- ======================================================= -->
+    <!-- ========== Package and RouteSegment Services ========== -->
+    <!-- ======================================================= -->
+
+    <service verb="create" noun="ShipmentPackage">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentPackage" include="nonpk"/>
+        </in-parameters>
+        <out-parameters><parameter name="shipmentPackageSeqId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.shipment.ShipmentPackage" in-map="context" out-map="context"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="srsList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <iterate list="srsList" entry="srs">
+                <service-call name="create#mantle.shipment.ShipmentPackageRouteSeg"
+                        in-map="[shipmentId:shipmentId, shipmentPackageSeqId:shipmentPackageSeqId,
+                                shipmentRouteSegmentSeqId:srs.shipmentRouteSegmentSeqId]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="update" noun="ShipmentPackageAndRouteSeg">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentPackageSeqId" required="true"/>
+            <parameter name="shipmentRouteSegmentSeqId"><description>Defaults for first route segment</description></parameter>
+            <auto-parameters entity-name="mantle.shipment.ShipmentPackage" include="nonpk"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentPackageRouteSeg" include="nonpk"/>
+        </in-parameters>
+        <actions>
+            <if condition="!shipmentRouteSegmentSeqId">
+                <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="routeSegList">
+                    <econdition field-name="shipmentId"/><select-field field-name="shipmentRouteSegmentSeqId"/></entity-find>
+                <set field="shipmentRouteSegmentSeqId" from="routeSegList ? routeSegList[0].shipmentRouteSegmentSeqId : null"/>
+            </if>
+            <if condition="!shipmentRouteSegmentSeqId"><return error="true" message="No route segment found on Shipment ${shipmentId}"/></if>
+
+            <service-call name="update#mantle.shipment.ShipmentPackage" in-map="context" out-map="context"/>
+            <service-call name="update#mantle.shipment.ShipmentPackageRouteSeg" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="ShipmentPackage">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentPackageSeqId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentPackageSeqId"/></entity-find>
+            <if condition="packageContentList"><return error="true" message="Cannot delete package ${shipmentPackageSeqId}, has items in it"/></if>
+
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentPackageRouteSeg">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentPackageSeqId"/></entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentPackage">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentPackageSeqId"/></entity-delete-by-condition>
+        </actions>
+    </service>
+    <service verb="add" noun="ItemToPackage">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="shipmentPackageSeqId"><description>If not specified will be put in a new package</description></parameter>
+            <parameter name="quantity" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem">
+                <field-map field-name="shipmentId"/><field-map field-name="productId"/></entity-find-one>
+            <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
+                <econdition field-name="shipmentId"/><econdition field-name="productId"/></entity-find>
+            <set field="packageContentTotal" from="(packageContentList*.quantity).sum() ?: 0.0"/>
+            <set field="quantityNotInPackage" from="((BigDecimal) shipmentItem.quantity ?: 0.0) - packageContentTotal"/>
+            <if condition="!quantity || quantity &gt; quantityNotInPackage"><set field="quantity" from="quantityNotInPackage"/></if>
+            <if condition="!quantity"><return message="No quantity to add to package, not adding"/></if><!-- nothing to add -->
+
+            <set field="existingPackage" from="shipmentPackageSeqId != null &amp;&amp; !shipmentPackageSeqId.isEmpty()"/>
+            <if condition="!existingPackage"><service-call name="mantle.shipment.ShipmentServices.create#ShipmentPackage"
+                    in-map="[shipmentId:shipmentId]" out-map="context"/></if>
+
+            <entity-find-one entity-name="mantle.shipment.ShipmentPackageContent" value-field="packageContent">
+                <field-map field-name="shipmentId"/><field-map field-name="productId"/><field-map field-name="shipmentPackageSeqId"/></entity-find-one>
+            <if condition="packageContent != null"><then>
+                <service-call name="update#mantle.shipment.ShipmentPackageContent" in-map="[shipmentId:shipmentId,
+                        shipmentPackageSeqId:shipmentPackageSeqId, productId:productId, quantity:(packageContent.quantity + quantity)]"/>
+            </then><else>
+                <service-call name="create#mantle.shipment.ShipmentPackageContent" in-map="context"/>
+            </else></if>
+
+            <!-- if package contents updated clear package weight -->
+            <if condition="existingPackage">
+                <entity-find-one entity-name="mantle.shipment.ShipmentPackage" value-field="shipmentPackage"/>
+                <if condition="shipmentPackage.weight">
+                    <set field="shipmentPackage.weight" from="null"/>
+                    <entity-update value-field="shipmentPackage"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="update" noun="ShipmentPackageContent">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="shipmentPackageSeqId" required="true"/>
+            <parameter name="quantity" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <set field="quantityUpdated" from="false"/>
+            <if condition="!quantity"><then>
+                <service-call name="delete#mantle.shipment.ShipmentPackageContent" in-map="context"/>
+                <set field="quantityUpdated" from="true"/>
+            </then><else>
+                <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem">
+                    <field-map field-name="shipmentId"/><field-map field-name="productId"/></entity-find-one>
+                <!-- get total for this product in all other packages -->
+                <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
+                    <econdition field-name="shipmentId"/><econdition field-name="productId"/>
+                    <econdition field-name="shipmentPackageSeqId" operator="not-equals"/>
+                </entity-find>
+                <set field="packageContentTotal" from="(packageContentList*.quantity).sum() ?: 0.0"/>
+                <set field="quantityNotInPackage" from="((BigDecimal) shipmentItem.quantity ?: 0.0) - packageContentTotal"/>
+                <if condition="quantity &gt; quantityNotInPackage"><set field="quantity" from="quantityNotInPackage"/></if>
+
+                <entity-find-one entity-name="mantle.shipment.ShipmentPackageContent" value-field="shipmentPackageContent"/>
+                <if condition="shipmentPackageContent.quantity != quantity">
+                    <service-call name="update#mantle.shipment.ShipmentPackageContent" in-map="context"/>
+                    <set field="quantityUpdated" from="true"/>
+                </if>
+            </else></if>
+
+            <!-- if package contents updated clear package weight -->
+            <if condition="quantityUpdated">
+                <entity-find-one entity-name="mantle.shipment.ShipmentPackage" value-field="shipmentPackage"/>
+                <if condition="shipmentPackage.weight">
+                    <set field="shipmentPackage.weight" from="null"/>
+                    <entity-update value-field="shipmentPackage"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="reset" noun="ShipmentPackage">
+        <description>Reset package by clearing box type, weight, and contents</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentPackageSeqId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.shipment.ShipmentPackage" in-map="[shipmentId:shipmentId,
+                    shipmentPackageSeqId:shipmentPackageSeqId, shipmentBoxTypeId:null, weight:null]"/>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentPackageContent">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentPackageSeqId"/>
+            </entity-delete-by-condition>
+        </actions>
+    </service>
+
+    <!-- ============================================= -->
+    <!-- ========== Order Shipment Services ========== -->
+    <!-- ============================================= -->
+
+    <service verb="ship" noun="OrderPart">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId" required="true"/>
+            <parameter name="tryAutoPackage" type="Boolean" default="true"/>
+            <parameter name="shipDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipmentId"/>
+        </out-parameters>
+        <actions>
+            <!-- create#OrderPartShipment has transaction=cache so make it not init the tx cache with transaction=use-or-begin -->
+            <service-call name="mantle.shipment.ShipmentServices.create#OrderPartShipment" out-map="context"
+                    in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, entryDate:shipDate, tryAutoPackage:tryAutoPackage]"/>
+
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <!-- pack all items (creating ShipmentPackageContent and AssetIssuance records) -->
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId"/>
+                <econdition field-name="itemTypeEnumId" operator="in" from="productItemTypes"/>
+                <!-- order by productId for consistent order to avoid circular locks and lock wait timeout errors when concurrently
+                    processing orders with the same products in a different order -->
+                <order-by field-name="productId"/>
+            </entity-find>
+            <iterate list="orderItemList" entry="orderItem">
+                <if condition="orderItem.productId &amp;&amp; productItemTypes.contains(orderItem.itemTypeEnumId)">
+                    <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentProduct"
+                            in-map="[productId:orderItem.productId, quantity:orderItem.quantity, shipmentId:shipmentId,
+                                shipmentPackageSeqId:shipmentPackageSeqId]"/>
+                </if>
+            </iterate>
+
+            <!-- set Shipment Packed -->
+            <service-call name="mantle.shipment.ShipmentServices.pack#Shipment" in-map="[shipmentId:shipmentId, packedDate:shipDate]"/>
+
+            <!-- NOTE: check order completed is done as items are packed, so by this point will be completed -->
+
+            <!-- set Shipment Shipped -->
+            <service-call name="mantle.shipment.ShipmentServices.ship#Shipment" in-map="[shipmentId:shipmentId]"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="OrderPartShipment" transaction="cache">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId" required="true"/>
+            <parameter name="createPackage" type="Boolean" default="false"/>
+            <parameter name="createRouteSegment" type="Boolean" default="true"/>
+            <parameter name="originFacilityId"/>
+            <parameter name="destinationFacilityId"/>
+            <parameter name="tryAutoPackage" type="Boolean" default="true"/>
+            <parameter name="shippingGatewayConfigId"/>
+            <parameter name="entryDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipmentId"/>
+            <parameter name="shipmentPackageSeqId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+            <if condition="!(orderPart.statusId in ['OrderApproved', 'OrderSent'] || orderHeader.statusId in ['OrderApproved', 'OrderSent'])">
+                <return type="danger" message="Cannot create Shipment for Order Part in status ${orderPart.statusId}"/></if>
+
+            <!-- does the OrderPart have shippable items? -->
+            <entity-find-related value-field="orderPart" relationship-name="mantle.order.OrderItem" list="orderItemList"
+                    order-by-list="['orderItemSeqId']"/>
+            <if condition="!orderItemList.find({ it.product?.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] })">
+                <return type="warning" message="Order ${orderId} part ${orderPartSeqId} has no shippable product items (type asset or asset use)"/></if>
+
+            <!-- and not already on a Shipment? -->
+            <set field="totalQtyToShip" from="0.0"/>
+            <set field="activeShipmentIds" from="new TreeSet()"/>
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <iterate list="orderItemList" entry="orderItem">
+                <!-- if no productId or not a product item type skip it -->
+                <if condition="!orderItem.productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+
+                <!-- see if Product is a physical item -->
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="orderItem.productId"/></entity-find-one>
+                <if condition="!(product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'])"><continue/></if>
+
+                <!-- determine quantityNotShipped -->
+                <set field="quantityNotShipped" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)"/>
+                <entity-find entity-name="mantle.shipment.ShipmentAndItemSource" list="existingSisList">
+                    <econdition field-name="orderId"/><econdition field-name="orderItemSeqId" from="orderItem.orderItemSeqId"/>
+                    <econdition field-name="shipmentStatusId" operator="not-in" value="ShipRejected,ShipCancelled"/>
+                    <econdition field-name="statusId" operator="not-equals" value="SisCancelled"/>
+                </entity-find>
+                <iterate list="existingSisList" entry="existingSis">
+                    <set field="quantityNotShipped" from="quantityNotShipped - existingSis.quantity"/>
+                    <if condition="existingSis.quantity"><script>activeShipmentIds.add(existingSis.shipmentId)</script></if>
+                </iterate>
+
+                <!-- if no quantity not shipped skip the item -->
+                <if condition="quantityNotShipped &lt;= 0"><continue/></if>
+                <set field="totalQtyToShip" from="totalQtyToShip + quantityNotShipped"/>
+            </iterate>
+            <if condition="totalQtyToShip == 0.0">
+                <return type="warning" message="Order ${orderId} part ${orderPartSeqId} is already on shipments ${activeShipmentIds}"/></if>
+
+            <!-- is this an outgoing Shipment (use ShpTpSales) or incoming (use ShpTpPurchase) order based on internal org? -->
+            <!-- TODO: what to do if both are internal orgs? need a flag or something for which side we're dealing with... -->
+            <entity-find-one entity-name="mantle.party.PartyRole" value-field="customerOrgInternal">
+                <field-map field-name="partyId" from="orderPart.customerPartyId"/>
+                <field-map field-name="roleTypeId" value="OrgInternal"/></entity-find-one>
+            <set field="shipmentTypeEnumId" from="customerOrgInternal ? 'ShpTpPurchase' : 'ShpTpSales'"/>
+
+            <if condition="orderPart.facilityId">
+                <if condition="customerOrgInternal"><then>
+                    <set field="destinationFacilityId" from="destinationFacilityId ?: orderPart.facilityId"/>
+                </then><else>
+                    <set field="originFacilityId" from="originFacilityId ?: orderPart.facilityId"/>
+                </else></if>
+            </if>
+
+            <!-- get shippingGatewayConfigId from store, then vendor setting, then global -->
+            <if condition="!shippingGatewayConfigId &amp;&amp; orderHeader.productStoreId &amp;&amp; orderPart.carrierPartyId">
+                <entity-find-one entity-name="mantle.product.store.ProductStoreShippingGateway" value-field="psShipGateway">
+                    <field-map field-name="productStoreId" from="orderHeader.productStoreId"/>
+                    <field-map field-name="carrierPartyId" from="orderPart.carrierPartyId"/>
+                </entity-find-one>
+                <if condition="psShipGateway?.shippingGatewayConfigId">
+                    <set field="shippingGatewayConfigId" from="psShipGateway?.shippingGatewayConfigId"/></if>
+            </if>
+            <if condition="!shippingGatewayConfigId &amp;&amp; orderPart.vendorPartyId">
+                <!-- if Shipment.fromPartyId lookup setting there -->
+                <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
+                        in-map="[partyId:orderPart.vendorPartyId, partySettingTypeId:'DefaultShipmentGatewayConfigId']"/>
+                <set field="shippingGatewayConfigId" from="ptySettingOut?.settingValue"/>
+            </if>
+            <if condition="!shippingGatewayConfigId">
+                <set field="shippingGatewayConfigId" from="ec.user.getPreference('DefaultShipmentGatewayConfigId')"/></if>
+
+            <!-- get signatureRequiredEnumId from OrderPart, if not set look at Product and ProductStoreProduct -->
+            <set field="signatureRequiredEnumId" from="orderPart.signatureRequiredEnumId"/>
+            <if condition="!signatureRequiredEnumId">
+                <iterate list="orderItemList" entry="orderItem">
+                    <set field="oiProduct" from="orderItem.product"/>
+                    <if condition="oiProduct == null"><continue/></if>
+                    <if condition="oiProduct.signatureRequiredEnumId &amp;&amp; oiProduct.signatureRequiredEnumId != 'PsrNone'">
+                        <set field="signatureRequiredEnumId" from="oiProduct.signatureRequiredEnumId"/>
+                        <break/>
+                    </if>
+                </iterate>
+            </if>
+            <if condition="!signatureRequiredEnumId &amp;&amp; orderHeader.productStoreId">
+                <iterate list="orderItemList" entry="orderItem">
+                    <entity-find-one entity-name="mantle.product.store.ProductStoreProduct" value-field="productStoreProduct">
+                        <field-map field-name="productStoreId" from="orderHeader.productStoreId"/>
+                        <field-map field-name="productId" from="orderItem.productId"/>
+                    </entity-find-one>
+                    <if condition="productStoreProduct == null"><continue/></if>
+                    <if condition="productStoreProduct.signatureRequiredEnumId &amp;&amp; productStoreProduct.signatureRequiredEnumId != 'PsrNone'">
+                        <set field="signatureRequiredEnumId" from="productStoreProduct.signatureRequiredEnumId"/>
+                        <break/>
+                    </if>
+                </iterate>
+            </if>
+
+            <!-- create Shipment record, get shipmentId -->
+            <service-call name="create#mantle.shipment.Shipment" out-map="context"
+                    in-map="[shipmentTypeEnumId:shipmentTypeEnumId, statusId:'ShipInput', entryDate:entryDate, priority:orderPart.priority,
+                        fromPartyId:orderPart.vendorPartyId, toPartyId:orderPart.customerPartyId,
+                        productStoreId:orderHeader.productStoreId, costUomId:orderHeader.currencyUomId,
+                        systemMessageRemoteId:orderHeader.systemMessageRemoteId, handlingInstructions:orderPart.shippingInstructions,
+                        signatureRequiredEnumId:signatureRequiredEnumId, otherPartyOrderId:orderPart.otherPartyOrderId,
+                        shipAfterDate:orderPart.shipAfterDate, shipBeforeDate:orderPart.shipBeforeDate,
+                        estimatedShipDate:orderPart.estimatedShipDate, estimatedArrivalDate:orderPart.estimatedDeliveryDate]"/>
+
+            <if condition="createRouteSegment">
+                <service-call name="create#mantle.shipment.ShipmentRouteSegment" out-map="context"
+                        in-map="[shipmentId:shipmentId, carrierPartyId:orderPart.carrierPartyId,
+                            shipmentMethodEnumId:orderPart.shipmentMethodEnumId, shippingGatewayConfigId:shippingGatewayConfigId,
+                            destPostalContactMechId:orderPart.postalContactMechId, destTelecomContactMechId:orderPart.telecomContactMechId,
+                            originFacilityId:originFacilityId, destinationFacilityId:destinationFacilityId]"/>
+            </if>
+
+            <if condition="createPackage">
+                <service-call name="create#mantle.shipment.ShipmentPackage" in-map="context" out-map="context"/></if>
+            <if condition="shipmentPackageSeqId &amp;&amp; shipmentRouteSegmentSeqId">
+                <service-call name="create#mantle.shipment.ShipmentPackageRouteSeg"
+                        in-map="[shipmentId:shipmentId, shipmentPackageSeqId:shipmentPackageSeqId,
+                                shipmentRouteSegmentSeqId:shipmentRouteSegmentSeqId]"/>
+            </if>
+
+            <service-call name="mantle.shipment.ShipmentServices.add#OrderPartToShipment"
+                    in-map="[shipmentId:shipmentId, orderId:orderId, orderPartSeqId:orderPartSeqId]"/>
+
+            <if condition="shippingGatewayConfigId &amp;&amp; tryAutoPackage &amp;&amp; !customerOrgInternal">
+                <service-call name="mantle.shipment.ShipmentServices.create#ShipmentAutoPackages"
+                    in-map="[shipmentId:shipmentId, shipmentRouteSegmentSeqId:shipmentRouteSegmentSeqId]"/></if>
+        </actions>
+    </service>
+
+    <service verb="add" noun="OrderPartToShipment" transaction="cache">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId" required="true"/>
+            <parameter name="shipmentId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="!(shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked'])">
+                <return error="true" message="Cannot add Order Part to Shipment in status ${shipment.statusId}"/></if>
+
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+            <if condition="!(orderPart.statusId in ['OrderApproved', 'OrderSent'])">
+                <return error="true" message="Cannot add Order Part in status ${orderPart.statusId} to Shipment"/></if>
+
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <!-- for each OrderItem in the part create ShipmentItem and ShipmentItemSource records -->
+            <entity-find-related value-field="orderPart" relationship-name="mantle.order.OrderItem" list="orderItemList"
+                    order-by-list="['orderItemSeqId']"/>
+            <iterate list="orderItemList" entry="orderItem">
+                <!-- if no productId or not a product item type skip it -->
+                <if condition="!orderItem.productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+
+                <!-- see if Product is a physical item -->
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="orderItem.productId"/></entity-find-one>
+                <if condition="!(product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'])"><continue/></if>
+
+                <!-- determine quantityNotShipped -->
+                <set field="quantityNotShipped" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)"/>
+                <entity-find entity-name="mantle.shipment.ShipmentAndItemSource" list="existingSisList">
+                    <econdition field-name="orderId"/><econdition field-name="orderItemSeqId" from="orderItem.orderItemSeqId"/>
+                    <econdition field-name="shipmentStatusId" operator="not-in" value="ShipRejected,ShipCancelled"/>
+                    <econdition field-name="statusId" operator="not-equals" value="SisCancelled"/>
+                </entity-find>
+                <iterate list="existingSisList" entry="existingSis">
+                    <set field="quantityNotShipped" from="quantityNotShipped - existingSis.quantity"/></iterate>
+
+                <!-- if no quantity not shipped skip the item -->
+                <if condition="quantityNotShipped &lt;= 0"><continue/></if>
+
+                <!-- add or update the ShipmentItem record for the productId -->
+                <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem">
+                    <field-map field-name="shipmentId"/><field-map field-name="productId" from="orderItem.productId"/></entity-find-one>
+                <if condition="shipmentItem"><then>
+                    <set field="shipmentItem.quantity" from="shipmentItem.quantity + quantityNotShipped"/>
+                    <entity-update value-field="shipmentItem"/>
+                </then><else>
+                    <service-call name="create#mantle.shipment.ShipmentItem"
+                            in-map="[shipmentId:shipmentId, productId:orderItem.productId, quantity:quantityNotShipped]"/>
+                </else></if>
+
+                <entity-find entity-name="mantle.order.OrderItemBilling" list="orderItemBillingList">
+                    <econdition field-name="orderId"/><econdition field-name="orderItemSeqId" from="orderItem.orderItemSeqId"/>
+                </entity-find>
+                <!-- set shipmentId on existing OrderItemBilling records with no shipmentId (for billed before shipped, ie Invoice before Shipment) -->
+                <set field="quantityNotBilled" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)"/>
+                <iterate list="orderItemBillingList" entry="orderItemBilling">
+                    <if condition="!orderItemBilling.shipmentId &amp;&amp; quantityNotBilled >= orderItemBilling.quantity">
+                        <set field="orderItemBilling.shipmentId" from="shipmentId"/>
+                        <entity-update value-field="orderItemBilling"/>
+                    </if>
+                    <set field="quantityNotBilled" from="quantityNotBilled - orderItemBilling.quantity"/>
+                    <!-- NOTE if orderItemBilling.shipmentId set split OrderItemBilling by Shipment quantities? -->
+                </iterate>
+
+                <!-- if quantityNotBilled > 0 do anything here? it should be handled when shipped (see InvoiceServices.create#SalesShipmentInvoices -->
+                <!-- set invoiceId, invoiceItemSeqId from existing OrderItemBilling records -->
+                <!-- simple case: full item already billed, just set the invoiceId so it is skipped when Shipment is Packed -->
+                <set field="singleFullOib" from="null"/>
+                <if condition="orderItemBillingList.size() == 1 &amp;&amp; quantityNotBilled == 0.0">
+                    <set field="singleFullOib" from="orderItemBillingList[0]"/></if>
+                <!-- NOTE: handle case where order item was invoiced, then quantity increased? just handle on Shipment Packed (in InvoiceServices.create#SalesShipmentInvoices) -->
+
+                <!-- create the ShipmentItemSource to associate the OrderItem with the Shipment -->
+                <service-call name="create#mantle.shipment.ShipmentItemSource"
+                        in-map="[shipmentId:shipmentId, productId:orderItem.productId, statusId:'SisPending',
+                            quantity:quantityNotShipped, quantityNotHandled:quantityNotShipped,
+                            orderId:orderItem.orderId, orderItemSeqId:orderItem.orderItemSeqId,
+                            invoiceId:singleFullOib?.invoiceId, invoiceItemSeqId:singleFullOib?.invoiceItemSeqId]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- =================================================== -->
+    <!-- ========== Pick, Pack, and Ship Services ========== -->
+    <!-- =================================================== -->
+
+    <service-include verb="get" noun="ShipmentLoadPickInfo" location="component://mantle-usl/service/mantle/shipment/ShipmentInfoServices.xml"/>
+    <service-include verb="get" noun="ShipmentPickPackInfo" location="component://mantle-usl/service/mantle/shipment/ShipmentInfoServices.xml"/>
+
+    <service verb="pickMove" noun="ProductToContainer">
+        <in-parameters>
+            <parameter name="scanProduct" required="true"><description>May be Product.productId, Product.pseudoId, Asset.assetId, ProductIdentification.idValue (for Product on Shipment)</description></parameter>
+            <parameter name="toContainerId" required="true"><description>May be actual containerId or serialNumber</description></parameter>
+            <parameter name="shipmentId"/>
+
+            <parameter name="locationSeqId"><description>Specify either location or container, if neither specified will look for assets with no location</description></parameter>
+            <parameter name="containerId"><description>May be actual containerId or serialNumber</description></parameter>
+            <parameter name="scanLocation"><description>May be locationSeqId within facility, containerId, or container serialNumber</description></parameter>
+
+            <parameter name="quantity" type="BigDecimal" default="1.0"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.asset.Container" value-field="toContainer">
+                <field-map field-name="containerId" from="toContainerId"/></entity-find-one>
+            <if condition="toContainer == null">
+                <entity-find-one entity-name="mantle.product.asset.Container" value-field="toContainer">
+                    <field-map field-name="serialNumber" from="toContainerId"/></entity-find-one>
+                <if condition="toContainer != null"><then>
+                    <set field="toContainerId" from="toContainer.containerId"/>
+                </then><else>
+                    <return error="true" message="Container not found with ID or Serial Number ${toContainerId}"/>
+                </else></if>
+            </if>
+
+            <if condition="shipmentId"><then>
+                <service-call name="mantle.shipment.ShipmentServices.pickMove#ShipmentProduct" in-map="context" out-map="context"/>
+            </then><else>
+                <entity-find entity-name="mantle.shipment.Shipment" list="containerShipmentList">
+                    <econdition field-name="pickContainerId" from="toContainerId"/>
+                    <econdition field-name="statusId" operator="in" value="ShipInput,ShipScheduled"/>
+                    <select-field field-name="shipmentId"/>
+                </entity-find>
+                <if condition="containerShipmentList.size() == 0"><then>
+                    <return error="true" message="No unpicked Shipment (Input or Scheduled) found assigned to Container ${toContainerId}"/>
+                </then><else-if condition="containerShipmentList.size() == 1">
+                    <set field="shipmentId" from="containerShipmentList[0].shipmentId"/>
+                    <service-call name="mantle.shipment.ShipmentServices.pickMove#ShipmentProduct" in-map="context" out-map="context"/>
+                </else-if><else>
+                    <!-- loop through Shipments in Container and pick/move for each Shipment until quantity parameter fully picked (and warn if any remaining) -->
+                    <set field="quantityToPick" from="quantity"/>
+                    <iterate list="containerShipmentList" entry="containerShipment">
+                        <!-- <log level="warn" message="pickmove shipment ${containerShipment.shipmentId} quantityToPick ${quantityToPick}"/> -->
+                        <if condition="quantityToPick == 0.0"><break/></if>
+                        <service-call name="mantle.shipment.ShipmentServices.pickMove#ShipmentProduct"
+                                in-map="context + [shipmentId:containerShipment.shipmentId, quantity:quantityToPick, insufficientQtyWarn:false]"
+                                out-map="pickMoveOut" out-map-add-to-existing="false"/>
+                        <set field="quantityToPick" from="quantityToPick - (pickMoveOut.quantityPicked ?: 0.0)"/>
+                    </iterate>
+
+                    <if condition="quantityToPick &gt; 0.0">
+                        <message type="danger">Only ${(quantity - quantityToPick).toPlainString()} found to pick out of the ${quantity.toPlainString()} requested, ${quantityToPick.toPlainString()} should be returned to the shelf</message>
+                    </if>
+                </else></if>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="pickMove" noun="ShipmentProduct">
+        <in-parameters>
+            <parameter name="scanProduct" required="true"><description>May be Product.productId, Product.pseudoId, Asset.assetId, ProductIdentification.idValue (for Product on Shipment)</description></parameter>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="toContainerId"><description>May be actual containerId or serialNumber, if not specified uses Shipment.pickContainerId, and if no value there will pick only and not move to Container</description></parameter>
+
+            <parameter name="locationSeqId"><description>Specify either location or container, if neither specified will look for assets with no location</description></parameter>
+            <parameter name="containerId"><description>May be actual containerId or serialNumber</description></parameter>
+            <parameter name="scanLocation"><description>May be locationSeqId within facility, containerId, or container serialNumber</description></parameter>
+
+            <parameter name="quantity" type="BigDecimal" default="1.0"/>
+            <parameter name="insufficientQtyWarn" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="quantityPicked" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <set field="quantityPicked" from="0.0"/>
+            <if condition="!shipmentId"><return error="true" message="No Shipment ID specified"/></if>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found with ID ${shipmentId}"/></if>
+
+            <if condition="!toContainerId &amp;&amp; shipment != null">
+                <set field="toContainerId" from="shipment.pickContainerId"/></if>
+
+            <if condition="toContainerId">
+                <entity-find-one entity-name="mantle.product.asset.Container" value-field="toContainer">
+                    <field-map field-name="containerId" from="toContainerId"/></entity-find-one>
+                <if condition="toContainer == null">
+                    <entity-find-one entity-name="mantle.product.asset.Container" value-field="toContainer">
+                        <field-map field-name="serialNumber" from="toContainerId"/></entity-find-one>
+                    <if condition="toContainer != null"><then>
+                        <set field="toContainerId" from="toContainer.containerId"/>
+                    </then><else>
+                        <return error="true" message="Container not found with ID or Serial Number ${toContainerId}"/>
+                    </else></if>
+                </if>
+            </if>
+
+            <!-- get productId from scanProduct -->
+            <service-call name="mantle.shipment.ShipmentServices.get#ShipmentProductByScan" out-map="context"
+                    in-map="[shipmentId:shipmentId, scanInput:scanProduct]"/>
+            <if condition="!productId"><return error="true" message="Could not find Product with ID ${scanProduct}"/></if>
+
+            <!-- get facilityId from first ShipmentRouteSegment.originFacilityId -->
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="firstSrsList" limit="1">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+            <set field="facilityId" from="firstSrsList ? firstSrsList[0].originFacilityId : null"/>
+            <if condition="!facilityId &amp;&amp; toContainer != null">
+                <set field="facilityId" from="toContainer.facilityId"/></if>
+            <if condition="!facilityId"><return error="true" message="No Origin Facility found on Shipment ${shipmentId}${toContainer != null ? ' or To Container ' + toContainer.containerId : ''}"/></if>
+
+            <!-- checks and normalizes facilityId, locationSeqId, containerId, scanLocation -->
+            <!-- <log level="warn" message="before scanLocation ${scanLocation} locationSeqId ${locationSeqId} containerId ${containerId}"/> -->
+            <service-call name="mantle.product.AssetServices.check#ScanLocation" in-map="context" out-map="context"/>
+            <!-- <log level="warn" message="after scanLocation ${scanLocation} locationSeqId ${locationSeqId} containerId ${containerId}"/> -->
+
+            <!-- handle by ShipmentItemSource records -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="productId"/>
+                <order-by field-name="productId,orderId"/>
+            </entity-find>
+            <iterate list="sisList" entry="sis">
+                <set field="quantityRemaining" from="quantity - quantityPicked"/>
+                <if condition="quantityRemaining &lt;= 0.0"><break/></if>
+
+                <set field="sisQtyNotPicked" from="(sis.quantity ?: 0.0) - (sis.quantityPicked ?: 0.0)"/>
+                <set field="sisQuantityRemaining" from="sisQtyNotPicked &gt; quantityRemaining ? quantityRemaining : sisQtyNotPicked"/>
+                <if condition="sisQuantityRemaining &lt;= 0.0"><continue/></if>
+
+                <!-- use AssetServices.move#Asset using reserved Asset(s), or AssetServices.move#Product if no reservation
+                    - actually, only support reservations, simplifies Asset handling a lot to require reservation -->
+                <entity-find entity-name="mantle.product.issuance.AssetReservation" list="assetReservationList">
+                    <econdition field-name="orderId" from="sis.orderId"/>
+                    <econdition field-name="orderItemSeqId" from="sis.orderItemSeqId"/>
+                    <econdition field-name="productId" from="sis.productId"/>
+                    <econdition field-name="quantityNotIssued" operator="not-equals" from="0.0"/>
+                    <order-by field-name="assetId"/>
+                </entity-find>
+                <if condition="assetReservationList">
+                    <!-- lock each Asset record before proceeding to make sure we can continue -->
+                    <set field="resAssetMap" from="[:]"/>
+                    <iterate list="assetReservationList" entry="assetReservation">
+                        <set field="curAssetId" from="assetReservation.assetId"/>
+                        <if condition="!resAssetMap.containsKey(curAssetId)">
+                            <entity-find-one entity-name="mantle.product.asset.Asset" value-field="curAsset" for-update="true">
+                                <field-map field-name="assetId" from="curAssetId"/></entity-find-one>
+                            <!-- exclude Assets that are not in the specified from container or from location -->
+                            <if condition="(containerId &amp;&amp; containerId != curAsset.containerId) || (locationSeqId &amp;&amp; locationSeqId != curAsset.locationSeqId)">
+                                <!-- <log level="warn" message="pickmove skip Asset ${curAssetId} shipment ${shipmentId} product ${productId} containerId ${containerId} curAsset.containerId ${curAsset.containerId} locationSeqId ${locationSeqId} curAsset.locationSeqId ${curAsset.locationSeqId}"/> -->
+                                <continue/>
+                            </if>
+                            <!-- exclude Assets already in the to Container -->
+                            <if condition="toContainer != null &amp;&amp; toContainer.containerId == curAsset.containerId">
+                                <!-- <log level="warn" message="pickmove skip Asset ${curAssetId} shipment ${shipmentId} product ${productId} toContainer.containerId ${toContainer.containerId} curAsset.containerId ${curAsset.containerId}"/> -->
+                                <continue/>
+                            </if>
+                            <script>resAssetMap.put(curAssetId, curAsset)</script>
+                        </if>
+                    </iterate>
+
+                    <iterate list="assetReservationList" entry="assetReservation">
+                        <set field="curAsset" from="resAssetMap.get(assetReservation.assetId)"/>
+                        <!-- if no Asset in resAssetMap is one we should skip, wrong location, etc -->
+                        <if condition="curAsset == null"><continue/></if>
+
+                        <set field="resAvailable" from="(assetReservation.quantityNotIssued ?: 0.0) - (assetReservation.quantityNotAvailable ?: 0.0)"/>
+                        <set field="quantityToPick" from="resAvailable &gt; sisQuantityRemaining ? sisQuantityRemaining : resAvailable"/>
+                        <if condition="quantityToPick &lt;= 0.0"><continue/></if>
+
+                        <set field="sisQuantityRemaining" from="sisQuantityRemaining - quantityToPick"/>
+                        <set field="quantityPicked" from="quantityPicked + quantityToPick"/>
+
+                        <!-- update ShipmentItemSource.quantityPicked -->
+                        <set field="sis.quantityPicked" from="(sis.quantityPicked ?: 0.0) + quantityToPick"/>
+
+                        <!-- move Asset to pick container (and reservation with it) -->
+                        <if condition="toContainer != null">
+                            <service-call name="mantle.product.AssetServices.move#Asset"
+                                    in-map="[assetId:curAsset.assetId, quantity:quantityToPick, facilityId:toContainer.facilityId,
+                                        locationSeqId:toContainer.locationSeqId, containerId:toContainer.containerId,
+                                        moveAssetReservationId:assetReservation.assetReservationId]"/>
+                        </if>
+                    </iterate>
+
+                    <!-- update sis record for updated quantityPicked -->
+                    <entity-update value-field="sis"/>
+                </if>
+            </iterate>
+
+            <if condition="insufficientQtyWarn &amp;&amp; quantityPicked &lt; quantity">
+                <message type="danger">Only ${quantityPicked?.toPlainString()} found to pick out of the ${quantity?.toPlainString()} requested, ${(quantity - quantityPicked)?.toPlainString()} should be returned to the shelf</message>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ShipmentProductByScan">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="scanInput" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId"/>
+            <parameter name="shipmentItemList" type="List"><parameter name="shipmentItem" type="Map"/></parameter>
+        </out-parameters>
+        <actions>
+            <!-- try scanInput by productId, then assetId, then ProductIdentification -->
+            <entity-find entity-name="mantle.shipment.ShipmentItem" list="shipmentItemList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <set field="productIdList" from="shipmentItemList*.productId"/>
+            <if condition="!productIdList"><return message="Shipment ${shipmentId} has no items"/></if>
+
+            <!-- Product.productId -->
+            <if condition="scanInput in productIdList"><set field="productId" from="scanInput"/></if>
+            <!-- Product.pseudoId -->
+            <if condition="!productId">
+                <entity-find entity-name="mantle.product.Product" list="pseudoProductList">
+                    <econdition field-name="productId" operator="in" from="productIdList"/>
+                    <econdition field-name="pseudoId" from="scanInput"/>
+                </entity-find>
+                <if condition="pseudoProductList"><set field="productId" from="pseudoProductList[0].productId"/></if>
+            </if>
+            <!-- Asset.assetId -->
+            <if condition="!productId">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="assetId" from="scanInput"/></entity-find-one>
+                <if condition="asset != null &amp;&amp; asset.productId in productIdList">
+                    <set field="productId" from="asset.productId"/></if>
+            </if>
+            <!-- ProductIdentification.idValue -->
+            <if condition="!productId">
+                <entity-find entity-name="mantle.product.ProductIdentification" list="prodIdentList">
+                    <econdition field-name="idValue" from="scanInput"/>
+                    <econdition field-name="productId" operator="in" from="productIdList"/>
+                </entity-find>
+                <if condition="prodIdentList">
+                    <if condition="prodIdentList.size() &gt; 1">
+                        <return type="warning" message="Found more than one product on shipment ${shipmentId} with other ID ${scanInput}, scan internal product or asset ID or manually select the product to pack"/></if>
+                    <set field="productId" from="prodIdentList[0].productId"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="pack" noun="ShipmentProductScan">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="scanInput" required="true"/>
+            <parameter name="shipmentPackageSeqId"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="packDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <service-call name="mantle.shipment.ShipmentServices.get#ShipmentProductByScan" in-map="context" out-map="context"/>
+
+            <if condition="productId">
+                <!-- pack it -->
+                <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentProduct" in-map="context" out-map="packOut"/>
+                <!-- if a Shipment has an item product that is also a component of another item PA product
+                    then see if direct shipment item product has been fully packed and instead pack#ShipmentAssemblyComponent -->
+                <if condition="packOut.quantityRemaining"><then>
+                    <set field="productId" from="null"/>
+                    <set field="originalQuantity" from="quantity"/>
+                    <set field="quantity" from="packOut.quantityRemaining"/>
+                </then><else>
+                    <return/>
+                </else></if>
+            </if>
+
+            <!-- see if scanInput matches a Product that is a component of a Pick Assembly on a ShipmentItem (productTypeEnumId=PtPickAssembly)
+                - if matches call pack#ShipmentAssemblyComponent instead of pack#ShipmentProduct -->
+            <if condition="!productId">
+                <!-- to avoid additional query first use cached data to make sure there is a PtPickAssembly product on the shipment -->
+                <set field="pickAssemblyIdList" from="[]"/>
+                <iterate list="productIdList" entry="paProductId">
+                    <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                        <field-map field-name="productId" from="paProductId"/></entity-find-one>
+                    <if condition="product.productTypeEnumId == 'PtPickAssembly'">
+                        <script>pickAssemblyIdList.add(paProductId)</script></if>
+                </iterate>
+
+                <if condition="pickAssemblyIdList">
+                    <entity-find entity-name="mantle.product.ProductAssoc" list="bomAssocList">
+                        <date-filter/>
+                        <econdition field-name="productId" operator="in" from="pickAssemblyIdList"/>
+                        <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+                    </entity-find>
+                    <set field="componentProductIds" from="new HashSet(bomAssocList*.toProductId)"/>
+                    <!-- <log level="warn" message="productId ${productId} scanInput ${scanInput} componentProductIds ${componentProductIds}"/> -->
+
+                    <!-- Product.productId -->
+                    <if condition="componentProductIds.contains(scanInput)"><set field="productId" from="scanInput"/></if>
+                    <!-- Product.pseudoId -->
+                    <if condition="!productId">
+                        <entity-find entity-name="mantle.product.Product" list="pseudoProductList">
+                            <econdition field-name="productId" operator="in" from="componentProductIds"/>
+                            <econdition field-name="pseudoId" from="scanInput"/>
+                        </entity-find>
+                        <if condition="pseudoProductList"><set field="productId" from="pseudoProductList[0].productId"/></if>
+                    </if>
+                    <!-- Asset.assetId -->
+                    <if condition="!productId">
+                        <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                            <field-map field-name="assetId" from="scanInput"/></entity-find-one>
+                        <if condition="asset != null &amp;&amp; asset.productId in componentProductIds">
+                            <set field="productId" from="asset.productId"/></if>
+                    </if>
+                    <!-- ProductIdentification.idValue -->
+                    <if condition="!productId">
+                        <entity-find entity-name="mantle.product.ProductIdentification" list="prodIdentList">
+                            <econdition field-name="idValue" from="scanInput"/>
+                            <econdition field-name="productId" operator="in" from="componentProductIds"/>
+                        </entity-find>
+                        <if condition="prodIdentList">
+                            <if condition="prodIdentList.size() &gt; 1">
+                                <return type="warning" message="Found more than one product on shipment ${shipmentId} with other ID ${scanInput}, scan internal product or asset ID or manually select the product to pack"/></if>
+                            <set field="productId" from="prodIdentList[0].productId"/>
+                        </if>
+                    </if>
+
+                    <if condition="productId">
+                        <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentAssemblyComponent" in-map="context"/>
+                        <return/>
+                    </if>
+                </if>
+            </if>
+
+            <!-- if we got here and originalQuantity != null then we found a direct product on the shipment but there was quantity remaining so this warning does not apply -->
+            <if condition="originalQuantity == null">
+                <return type="warning" message="Could not find product on shipment ${shipmentId} with scanned ID ${scanInput}"/></if>
+        </actions>
+    </service>
+    <service verb="pack" noun="ShipmentProduct">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentPackageSeqId"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="packDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="assetId"><description>Specify to pack a certain asset, may or may not be reserved.</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="quantityRemaining" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true"/>
+            <if condition="!(product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'])">
+                <return message="Not packing Product ${productId}, type ${product.type?.description ?: product.productTypeEnumId} is not a physical product type"/></if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList" cache="false">
+                <econdition field-name="shipmentId"/><econdition field-name="productId"/>
+                <econdition field-name="quantityNotHandled" operator="not-equals" from="0.0"/>
+            </entity-find>
+            <set field="quantityRemaining" from="quantity"/>
+            <iterate list="shipmentItemSourceList" entry="shipmentItemSource">
+                <set field="quantityToPack" from="shipmentItemSource.quantityNotHandled &gt; quantityRemaining ?
+                        quantityRemaining : shipmentItemSource.quantityNotHandled"/>
+                <set field="quantityRemaining" from="quantityRemaining &gt; shipmentItemSource.quantityNotHandled ?
+                        quantityRemaining - shipmentItemSource.quantityNotHandled : 0"/>
+                <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"
+                        in-map="[shipmentItemSourceId:shipmentItemSource.shipmentItemSourceId, assetId:assetId,
+                            shipmentPackageSeqId:shipmentPackageSeqId, packDate:packDate, quantity:quantityToPack]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="pack" noun="ShipmentItemSource">
+        <description>This is the lowest-level packing service and operates on a single ShipmentItemSource record.</description>
+        <in-parameters>
+            <parameter name="shipmentItemSourceId" required="true"/>
+            <parameter name="shipmentPackageSeqId"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="packDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="assetReservationId"><description>Specify to pack for a single reservation. If specified assetId is ignored.</description></parameter>
+            <parameter name="assetId"><description>Specify to pack a certain asset, may or may not be reserved. Packing
+                a specific quantity of an asset assumes physical presence of the asset so other reservations are moved
+                as needed.</description></parameter>
+            <parameter name="forceIssueOther" type="Boolean" default="false"/>
+            <parameter name="forceAddToPackage" type="Boolean" default="true"><description>Add to new package if no shipmentPackageSeqId specified</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.ShipmentItemSource" value-field="shipmentItemSource"/>
+            <if condition="shipmentItemSource == null"><return error="true" message="Could not find ShipmentItemSource with ID ${shipmentItemSourceId}"/></if>
+
+            <set field="shipmentId" from="shipmentItemSource.shipmentId"/>
+            <set field="shipment" from="shipmentItemSource.shipment"/>
+            <!-- don't allow packing in various statuses -->
+            <if condition="shipment.statusId in ['ShipPacked', 'ShipShipped', 'ShipDelivered', 'ShipRejected', 'ShipCancelled']">
+                <return error="true" message="Cannot pack Shipment ${shipmentId} in status ${shipment.status?.description ?: shipment.statusId}"/>
+            </if>
+            <!-- set Shipment to Picked if in Input or Scheduled status -->
+            <if condition="shipment.statusId in ['ShipInput', 'ShipScheduled']">
+                <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, statusId:'ShipPicked']"/>
+            </if>
+
+            <!-- if an assetReservationId is passed make sure it is for the same order item, etc -->
+            <if condition="assetReservationId">
+                <entity-find-one entity-name="mantle.product.issuance.AssetReservation" value-field="assetReservation"/>
+                <if condition="assetReservation == null"><return error="true" message="Reservation [${assetReservationId}] not found, not packing"/></if>
+                <if condition="shipmentItemSource.orderId != assetReservation.orderId || shipmentItemSource.orderItemSeqId != assetReservation.orderItemSeqId">
+                    <return error="true" message="Reservation order item [${assetReservation.orderId}:${assetReservation.orderItemSeqId}] does not match shipment item source order item [${shipmentItemSource.orderId}:${shipmentItemSource.orderItemSeqId}], not packing"/></if>
+                <if condition="quantity &gt; assetReservation.quantityNotIssued">
+                    <return error="true" message="Quantity specified (${quantity}) is greater than quantity not issued (${assetReservation.quantityNotIssued}) on reservation [${assetReservationId}], not packing"/></if>
+
+                <!-- clear out assetId to make sure it is ignored -->
+                <set field="assetId" from="null"/>
+            </if>
+
+            <!-- if an assetId is passed make sure it is for the same product, etc -->
+            <if condition="assetId">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset" for-update="true"/>
+                <if condition="asset == null"><return error="true" message="Asset ${assetId} not found, not packing"/></if>
+                <if condition="shipmentItemSource.productId != asset.productId">
+                    <return error="true" message="Asset product ${asset.productId} is not the same as shipment item product ${shipmentItemSource.productId}, not packing"/></if>
+                <if condition="quantity &gt; asset.quantityOnHandTotal">
+                    <return error="true" message="Quantity specified (${quantity}) is greater than asset [${assetId}] quantity on hand (${asset.quantityOnHandTotal}), not packing"/></if>
+
+                <!-- handle reservations, moving other reservations as needed to handle current quantity assumed to be physically present -->
+                <service-call name="mantle.product.AssetServices.displace#AssetReservations"
+                        in-map="[assetId:assetId, orderId:shipmentItemSource.orderId,
+                                orderItemSeqId:shipmentItemSource.orderItemSeqId, quantity:quantity]"/>
+            </if>
+
+            <!-- start with quantityRemaining = quantity -->
+            <set field="quantityRemaining" from="quantity"/>
+
+            <!-- first issue based on AssetReservation records if available -->
+            <if condition="assetReservation != null"><then>
+                <set field="assetReservationList" from="[assetReservation]"/>
+            </then><else-if condition="!assetReservationList">
+                <!-- get these by order of assetId so that different threads behave consistently for locking (avoid deadlocks!) -->
+                <entity-find entity-name="mantle.product.issuance.AssetReservation" list="assetReservationList">
+                    <econdition field-name="orderId" from="shipmentItemSource.orderId"/>
+                    <econdition field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                    <econdition field-name="productId" from="shipmentItemSource.productId"/>
+                    <econdition field-name="quantityNotIssued" operator="not-equals" from="0.0"/>
+                    <econdition field-name="assetId" ignore-if-empty="true"/>
+                    <order-by field-name="assetId"/>
+                </entity-find>
+            </else-if></if>
+            <if condition="assetReservationList">
+                <!-- lock each Asset record before proceeding to make sure we can continue -->
+                <set field="resAssetMap" from="[:]"/>
+                <iterate list="assetReservationList" entry="assetReservation">
+                    <set field="curAssetId" from="assetReservation.assetId"/>
+                    <if condition="!resAssetMap.containsKey(curAssetId)">
+                        <entity-find-one entity-name="mantle.product.asset.Asset" value-field="curAsset" for-update="true">
+                            <field-map field-name="assetId" from="curAssetId"/></entity-find-one>
+                        <script>resAssetMap.put(curAssetId, curAsset)</script>
+                    </if>
+                </iterate>
+
+                <!-- issue based on reservations -->
+                <iterate list="assetReservationList" entry="assetReservation">
+                    <set field="curAsset" from="resAssetMap.get(assetReservation.assetId)"/>
+                    <entity-find-one entity-name="mantle.facility.Facility" value-field="facility" cache="true">
+                        <field-map field-name="facilityId" from="curAsset?.facilityId"/></entity-find-one>
+                    <if condition="facility?.assetAllowIssueOverQoh != 'Y'">
+                        <if condition="assetReservation.quantity &gt; curAsset.quantityOnHandTotal">
+                            <message type="warning">For reservation ${assetReservation.assetReservationId} tried to issue quantity ${assetReservation.quantity} which is greater than quantity on hand ${curAsset.quantityOnHandTotal} for asset ${curAsset.assetId}, skipping</message>
+                            <continue/>
+                        </if>
+                    </if>
+
+                    <if condition="assetReservation.quantityNotIssued &lt; 0.0">
+                        <return error="true" message="In pack ShipmentItemSource found AssetReservation ${assetReservation.assetReservationId} with invalid (negative) quantityNotIssued ${assetReservation.quantityNotIssued}"/></if>
+                    <set field="quantityToIssue" from="assetReservation.quantityNotIssued > quantityRemaining ?
+                        quantityRemaining : assetReservation.quantityNotIssued"/>
+                    <if condition="quantityToIssue &lt;= 0.0"><continue/></if>
+                    <set field="quantityRemaining" from="quantityRemaining > assetReservation.quantityNotIssued ?
+                        (quantityRemaining - assetReservation.quantityNotIssued) : 0.0"/>
+
+                    <service-call name="mantle.product.AssetServices.issue#AssetReservation"
+                            in-map="[assetReservation:assetReservation, shipmentId:shipmentItemSource.shipmentId,
+                                shipmentItemSourceId:shipmentItemSourceId, issuedDate:packDate, quantity:quantityToIssue]"/>
+
+                    <!-- if the asset has a shipmentBoxTypeId it is already packaged, so create a package just for it -->
+                    <!-- TODO: do something similar if Product is set as already packaged -->
+                    <!-- TODO: calculate weight of asset package, or even set on asset record? -->
+                    <if condition="curAsset.shipmentBoxTypeId">
+                        <service-call name="create#mantle.shipment.ShipmentPackage" out-map="context"
+                                in-map="[shipmentId:shipmentItemSource.shipmentId, shipmentBoxTypeId:asset.shipmentBoxTypeId]"/>
+                    </if>
+                </iterate>
+            </if>
+
+            <!-- no reservation? issue from specified asset (if there is one) -->
+            <if condition="quantityRemaining &amp;&amp; asset">
+                <set field="quantityToIssue" from="asset.quantityOnHandTotal &gt; quantityRemaining ?
+                        quantityRemaining : asset.quantityOnHandTotal"/>
+                <set field="quantityRemaining" from="quantityRemaining &gt; quantityToIssue ? (quantityRemaining - quantityToIssue) : 0.0"/>
+
+                <!-- do a non-reservation asset issuance -->
+                <service-call name="mantle.product.AssetServices.issue#Asset"
+                        in-map="[shipmentId:shipmentItemSource.shipmentId, shipmentItemSourceId:shipmentItemSourceId,
+                            quantity:quantityToIssue, issuedDate:packDate, assetId:assetId,
+                            orderId:shipmentItemSource.orderId, orderItemSeqId:shipmentItemSource.orderItemSeqId,
+                            invoiceId:shipmentItemSource.invoiceId, invoiceItemSeqId:shipmentItemSource.invoiceItemSeqId]"/>
+            </if>
+
+            <!-- if quantityRemaining (no reservations or specified assetId) use logic similar to reserve to find Assets to pack/issue -->
+            <if condition="quantityRemaining">
+                <service-call name="mantle.product.AssetServices.issue#AnyAssetForShipmentItemSource" out-map="issueAnyOut"
+                        in-map="[shipmentItemSourceId:shipmentItemSourceId, quantity:quantityRemaining, issuedDate:packDate, forceIssueOther:forceIssueOther]"/>
+                <set field="quantityRemaining" from="issueAnyOut.quantityRemaining"/>
+            </if>
+
+            <!-- quantityRemaining? something didn't work, wasn't able to get all so return an error and roll back -->
+            <if condition="quantityRemaining">
+                <return error="true" message="Unable to issue ${ec.l10n.format(quantityRemaining, '0.00')} out of quantity specified (${ec.l10n.format(quantity, '0.00')}) for Shipment Item Source ${shipmentItemSourceId}, not packing"/>
+            </if>
+
+            <!-- add to specified package, or in new package if none specified -->
+            <if condition="forceAddToPackage || shipmentPackageSeqId">
+                <service-call name="mantle.shipment.ShipmentServices.add#ItemToPackage"
+                        in-map="[shipmentId:shipmentItemSource.shipmentId, productId:shipmentItemSource.productId,
+                            shipmentPackageSeqId:shipmentPackageSeqId, quantity:quantity]"/>
+            </if>
+
+            <!-- update quantityNotHandled to get ready for the next pack call -->
+            <set field="shipmentItemSource.quantityNotHandled" from="shipmentItemSource.quantityNotHandled - quantity"/>
+            <if condition="shipmentItemSource.quantityNotHandled &lt;= 0">
+                <set field="shipmentItemSource.statusId" value="SisPacked"/></if>
+            <entity-update value-field="shipmentItemSource"/>
+
+            <!-- NOTE don't mark order complete here, wait until Shipment goes to Packed status to avoid issues with unpack and order remaining completed:
+            <!- - on Shipment Item Packed mark Order as Completed (IF all order part items are completed) - ->
+            <if condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+                <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                    <field-map field-name="orderId" from="shipmentItemSource.orderId"/>
+                    <field-map field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                </entity-find-one>
+                <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
+                        in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+            </if>
+            -->
+        </actions>
+    </service>
+
+    <service verb="pack" noun="ShipmentAssemblyComponent">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="productId" required="true"><description>ID of the assembly component Product</description></parameter>
+            <parameter name="assemblyProductId"><description>If not specified will iterate through the ShipmentItem Pick Assembly Products found with the component product in its Mfg BOM</description></parameter>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="shipmentPackageSeqId"/>
+            <parameter name="packDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="assetId"><description>Specify to pack a certain asset, may or may not be reserved.</description></parameter>
+
+            <parameter name="forceIssueOther" type="Boolean" default="false"/>
+            <parameter name="forceAddToPackage" type="Boolean" default="true"><description>Add to new package if no shipmentPackageSeqId specified</description></parameter>
+        </in-parameters>
+        <actions>
+            <!-- if Product is a Pick Assembly (productTypeEnumId=PtPickAssembly)
+                - is the assetReservation for a component Product of a PA Product on the Shipment?
+                - if no Pick Assembly purpose WorkEffort (WepPickAssembly) for ShipmentItem create one
+                - issue to Pick Assembly purpose WorkEffort
+                - if PA WorkEffort has all inventory:
+                  - complete it
+                  - produce Asset for Pick Assembly Product (and reserve to order item)
+                  - issue Pick Assembly product to Shipment
+            -->
+
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment" for-update="true"/>
+
+            <!-- don't allow packing in various statuses -->
+            <if condition="shipment.statusId in ['ShipPacked', 'ShipShipped', 'ShipDelivered', 'ShipRejected', 'ShipCancelled']">
+                <return error="true" message="Cannot pack Shipment ${shipmentId} in status ${shipment.status?.description ?: shipment.statusId}"/>
+            </if>
+            <!-- set Shipment to Picked if in Input or Scheduled status -->
+            <if condition="shipment.statusId in ['ShipInput', 'ShipScheduled']">
+                <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, statusId:'ShipPicked']"/>
+            </if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItemAssocView" list="componentItemList">
+                <!-- NOTE: this may need more constraint or further preprocessing to ensure there are not multiple records for the same assembly AND component (in this case one record per assembly) -->
+                <date-filter/>
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="toProductId" from="productId"/>
+                <econdition field-name="itemProductTypeEnumId" value="PtPickAssembly"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+                <order-by field-name="productId"/>
+            </entity-find>
+
+            <entity-find-one entity-name="mantle.product.Product" value-field="componentProduct" cache="true">
+                <field-map field-name="productId"/></entity-find-one>
+
+            <if condition="!assemblyProductId"><then>
+                <!-- if no assemblyProductId find one (for validation, for issue to work effort doesn't matter which at this point) -->
+                <if condition="componentItemList"><then>
+                    <set field="allAssemblyProductIds" from="new TreeSet(componentItemList*.productId)"/>
+                </then><else>
+                    <return error="true" message="No assembly product found for component ${ec.resource.expand('ProductNameTemplate', null, componentProduct)} on Shipment ${shipmentId}"/>
+                </else></if>
+            </then><else>
+                <entity-find-one entity-name="mantle.product.Product" value-field="assemblyProduct" cache="true">
+                    <field-map field-name="productId" from="assemblyProductId"/></entity-find-one>
+                <!-- make sure assemblyProductId is on Shipment -->
+                <entity-find-one entity-name="mantle.shipment.ShipmentItem" value-field="shipmentItem">
+                    <field-map field-name="shipmentId"/>
+                    <field-map field-name="productId" from="assemblyProductId"/>
+                </entity-find-one>
+                <if condition="shipmentItem == null"><return error="true"
+                        message="Assembly product ${ec.resource.expand('ProductNameTemplate', null, assemblyProduct)} not found on Shipment ${shipmentId}"/></if>
+                <!-- make sure productId is a component of the assemblyProductId and assemblyProductId is on the Shipment -->
+                <filter-map-list list="componentItemList" to-list="verifyItemList">
+                    <field-map field-name="productId" from="assemblyProductId"/></filter-map-list>
+                <if condition="!verifyItemList"><return error="true"
+                        message="Product ${ec.resource.expand('ProductNameTemplate', null, componentProduct)} is not a component of assembly product ${ec.resource.expand('ProductNameTemplate', null, assemblyProduct)}"/></if>
+
+                <set field="allAssemblyProductIds" from="[assemblyProductId]"/>
+            </else></if>
+
+
+            <!-- if an assetId is passed make sure it is for the same product, etc -->
+            <if condition="assetId">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset" for-update="true"/>
+                <if condition="asset == null"><return error="true" message="Asset ${assetId} not found, not packing"/></if>
+                <if condition="productId != asset.productId">
+                    <return error="true" message="Asset product ${asset.productId} is not the same as shipment assembly component ${ec.resource.expand('ProductNameTemplate', null, componentProduct)}, not packing"/></if>
+                <if condition="quantity &gt; asset.quantityOnHandTotal">
+                    <return error="true" message="Quantity specified ${ec.l10n.format(quantity, null)} is greater than asset ${assetId} quantity on hand ${ec.l10n.format(asset.quantityOnHandTotal, null)}, not packing"/></if>
+            </if>
+
+            <!-- validations done, get to work -->
+
+            <!-- if no Shipment.assemblyWorkEffortId create one and set on Shipment -->
+            <set field="assemblyWorkEffortId" from="shipment.assemblyWorkEffortId"/>
+            <if condition="!assemblyWorkEffortId">
+                <service-call name="mantle.work.ManufacturingServices.create#ShipmentAssemblyWorkEffort"
+                        in-map="[shipmentId:shipmentId]" out-map="createWeOut"/>
+                <set field="assemblyWorkEffortId" from="createWeOut.assemblyWorkEffortId"/>
+            </if>
+
+            <!-- check quantity needed for Shipment by all ShipmentItems by BOM vs quantity already issued to assemblyWorkEffortId -->
+            <set field="shipmentTotalQuantity" from="componentItemList.collect({ (it.quantity ?: 0.0) * (it.componentQuantity ?: 1.0) }).sum()"/>
+            <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="assemblyIssuanceList">
+                <econdition field-name="workEffortId" from="assemblyWorkEffortId"/>
+                <econdition field-name="productId"/>
+            </entity-find>
+            <set field="assemblyQuantity" from="assemblyIssuanceList*.quantity.sum()"/>
+            <if condition="assemblyQuantity &gt;= shipmentTotalQuantity">
+                <return error="true" message="Already packed, assembly has ${ec.l10n.format(assemblyQuantity, null)} out of ${ec.l10n.format(shipmentTotalQuantity, null)} of component ${ec.resource.expand('ProductNameTemplate', null, componentProduct)}"/></if>
+
+            <!-- issue to assemblyWorkEffortId, using reservation(s) if applicable -->
+            <set field="quantityRemaining" from="quantity"/>
+
+            <!-- look up ShipmentItemSource records for assemblyProductId(s) on Shipment -->
+            <iterate list="allAssemblyProductIds" entry="assemblyProductId">
+                <if condition="quantityRemaining == 0.0"><break/></if>
+
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisList">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="productId" from="assemblyProductId"/>
+                    <order-by field-name="orderId,orderItemSeqId"/>
+                </entity-find>
+                <iterate list="sisList" entry="shipmentItemSource">
+                    <if condition="quantityRemaining == 0.0"><break/></if>
+
+                    <filter-map-list list="componentItemList" to-list="curComponentAssocList">
+                        <field-map field-name="productId" from="assemblyProductId"/></filter-map-list>
+                    <if condition="curComponentAssocList"><then>
+                        <set field="sisMaxQty" from="shipmentItemSource.quantity * (curComponentAssocList[0].componentQuantity ?: 1.0)"/>
+                        <set field="curSisQtyRemaining" from="quantityRemaining &gt; sisMaxQty ? sisMaxQty : quantityRemaining"/>
+                    </then><else>
+                        <set field="curSisQtyRemaining" from="quantityRemaining &gt; shipmentItemSource.quantity ? shipmentItemSource.quantity : quantityRemaining"/>
+                    </else></if>
+
+                    <!-- NOTE: don't displace#AssetReservations here even if assetId specified, was doing this and was incorrect because in this block we are only using reservations -->
+
+                    <!-- look up AssetReservation for ShipmentItem and component productId -->
+                    <entity-find entity-name="mantle.product.issuance.AssetReservation" list="assetReservationList">
+                        <econdition field-name="orderId" from="shipmentItemSource.orderId"/>
+                        <econdition field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                        <econdition field-name="quantityNotIssued" operator="not-equals" from="0.0"/>
+                        <econdition field-name="productId"/><!-- component productId -->
+                        <econdition field-name="assetId" ignore-if-empty="true"/><!-- optional assetId in-parameter -->
+                        <!-- get these in order of assetId so that different threads behave consistently for locking (avoid deadlocks!) -->
+                        <order-by field-name="assetId"/>
+                    </entity-find>
+                    <iterate list="assetReservationList" entry="assetReservation">
+                        <set field="quantityToIssue" from="assetReservation.quantityNotIssued &gt; curSisQtyRemaining ?
+                                curSisQtyRemaining : assetReservation.quantityNotIssued"/>
+                        <!-- <log level="warn" message="component ${productId} quantityToIssue ${quantityToIssue} curSisQtyRemaining ${curSisQtyRemaining} assetReservation.quantityNotIssued ${assetReservation.quantityNotIssued}"/> -->
+                        <if condition="quantityToIssue &lt;= 0.0"><continue/></if>
+
+                        <set field="curSisQtyRemaining" from="curSisQtyRemaining &gt; quantityToIssue ? (curSisQtyRemaining - quantityToIssue) : 0.0"/>
+                        <set field="quantityRemaining" from="quantityRemaining &gt; quantityToIssue ? (quantityRemaining - quantityToIssue) : 0.0"/>
+
+                        <!-- NOTE: do not specify shipmentId; this issuance does not directly associate with it and shouldn't be included in qty totals, etc -->
+                        <service-call name="mantle.product.AssetServices.issue#AssetReservation"
+                                in-map="[assetReservation:assetReservation, workEffortId:assemblyWorkEffortId,
+                                    issuedDate:packDate, quantity:quantityToIssue]"/>
+                    </iterate>
+                </iterate>
+
+                <!-- no reservation? issue from specified asset (if there is one) -->
+                <if condition="quantityRemaining &amp;&amp; asset != null">
+                    <set field="assetQuantityRemaining" from="asset.quantityOnHandTotal &gt; quantityRemaining ?
+                        quantityRemaining : asset.quantityOnHandTotal"/>
+
+                    <!-- do a non-reservation asset issuance -->
+                    <iterate list="sisList" entry="shipmentItemSource">
+                        <set field="quantityToIssue" from="shipmentItemSource.quantity &gt; assetQuantityRemaining ?
+                            assetQuantityRemaining : shipmentItemSource.quantity"/>
+                        <set field="assetQuantityRemaining" from="assetQuantityRemaining &gt; quantityToIssue ? (assetQuantityRemaining - quantityToIssue) : 0.0"/>
+                        <set field="quantityRemaining" from="quantityRemaining &gt; quantityToIssue ? (quantityRemaining - quantityToIssue) : 0.0"/>
+
+                        <!-- handle reservations, moving other reservations as needed to handle current quantity assumed to be physically present -->
+                        <service-call name="mantle.product.AssetServices.displace#AssetReservations"
+                                in-map="[assetId:assetId, orderId:shipmentItemSource.orderId,
+                                orderItemSeqId:shipmentItemSource.orderItemSeqId, quantity:quantityToIssue]"/>
+
+                        <!-- NOTE: do not specify shipmentIds, orderIds, or invoiceIds; this issuance does not directly associate with any of them and shouldn't be included in qty totals, etc -->
+                        <service-call name="mantle.product.AssetServices.issue#AssetToWorkEffort"
+                                in-map="[assetId:asset.assetId, asset:asset, workEffortId:assemblyWorkEffortId, quantity:quantityToIssue,
+                                issuedDate:packDate, noOriginFacility:'ignore']"/>
+
+                        <!-- before continuing refresh asset value to get latest numbers -->
+                        <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset" for-update="true"/>
+                    </iterate>
+                </if>
+
+                <if condition="quantityRemaining">
+                    <!-- if there is quantityRemaining after reservations issue any asset available to the Order it came from -->
+                    <iterate list="sisList" entry="shipmentItemSource">
+                        <if condition="quantityRemaining == 0.0"><break/></if>
+
+                        <service-call name="mantle.product.AssetServices.issue#AnyAssetForShipmentItemSource" out-map="issueAnyOut"
+                                in-map="[shipmentItemSourceId:shipmentItemSource.shipmentItemSourceId, quantity:quantityRemaining,
+                                    issuedDate:packDate, workEffortId:assemblyWorkEffortId, workEffortOnly:true, forceIssueOther:forceIssueOther]"/>
+                        <set field="quantityRemaining" from="issueAnyOut.quantityRemaining"/>
+                    </iterate>
+                </if>
+            </iterate>
+
+            <if condition="quantityRemaining">
+                <return error="true" message="Could not pack and issue ${quantityRemaining} of ${quantity}, inventory not available, not packing (component ${productId} assemblies ${allAssemblyProductIds})"/>
+            </if>
+
+            <!-- if PA WorkEffort has enough inventory to produce any quantity of any Product to Produce that has not already been produced, produce some or update prior produce -->
+            <service-call name="mantle.work.ManufacturingServices.produce#AvailableAssemblies"
+                    in-map="[workEffortId:assemblyWorkEffortId, shipmentId:shipmentId, receivedDate:packDate]"/>
+
+            <!-- if PA WorkEffort has all inventory complete it, set actualCompletionDate -->
+            <service-call name="mantle.work.ManufacturingServices.get#ProducedProductComplete"
+                    in-map="[workEffortId:assemblyWorkEffortId]" out-map="producedCompleteOut"/>
+            <if condition="producedCompleteOut.allEstimatedProduced">
+                <service-call name="update#mantle.work.effort.WorkEffort"
+                        in-map="[workEffortId:assemblyWorkEffortId, statusId:'WeComplete', actualCompletionDate:ec.user.nowTimestamp]"/>
+            </if>
+        </actions>
+    </service>
+
+
+    <service verb="unpack" noun="ShipmentItemIssuance">
+        <in-parameters>
+            <parameter name="assetIssuanceId" required="true"/>
+            <parameter name="unpackDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="unpackAssemblyComponents" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="assetReservationId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.issuance.AssetIssuance" value-field="assetIssuance"/>
+            <set field="shipmentId" from="assetIssuance.shipmentId"/>
+            <if condition="!shipmentId"><return error="true" message="Cannot unpack issuance ${assetIssuanceId}, not on a shipment"/></if>
+            <set field="originalQuantity" from="assetIssuance.quantity"/>
+            <if condition="!originalQuantity">
+                <return message="No quantity to unpack for issuance ${assetIssuanceId} of asset ${assetIssuance.assetId} in shipment ${shipmentId}"/></if>
+            <if condition="!assetIssuance.shipmentItemSourceId">
+                <return error="true" message="Cannot unpack issuance ${assetIssuanceId}, has no shipment item source"/></if>
+
+            <entity-find-one entity-name="mantle.shipment.ShipmentItemSource" value-field="shipmentItemSource" for-update="true">
+                <field-map field-name="shipmentItemSourceId" from="assetIssuance.shipmentItemSourceId"/></entity-find-one>
+            <if condition="shipmentItemSource.invoiceId">
+                <return error="true" message="Cannot unpack issuance ${assetIssuanceId}, item source ${assetIssuance.shipmentItemSourceId} already on invoice ${shipmentItemSource.invoiceId}"/></if>
+
+            <set field="shipmentItemSource.quantityNotHandled" from="shipmentItemSource.quantityNotHandled + originalQuantity"/>
+            <if condition="shipmentItemSource.statusId == 'SisPacked'">
+                <set field="shipmentItemSource.statusId" value="SisPending"/></if>
+            <entity-update value-field="shipmentItemSource"/>
+
+            <service-call name="mantle.product.AssetServices.cancel#AssetIssuance" out-map="context"
+                    in-map="[assetIssuanceId:assetIssuanceId, cancelDate:unpackDate]"/>
+
+            <!-- if product unpacked is a PtPickAssembly and was produced by the Shipment's Assembly Task then
+                also un-produce so component quantities are not used, and if unpackAssemblyComponents unpack/unissue the components as well -->
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                <field-map field-name="productId" from="assetIssuance.productId"/></entity-find-one>
+            <if condition="product.productTypeEnumId == 'PtPickAssembly'">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="assetId" from="assetIssuance.assetId"/></entity-find-one>
+                <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment">
+                    <field-map field-name="shipmentId"/></entity-find-one>
+                <!-- make sure asset came from Shipment's assemblyWorkEffortId before making changes to the WorkEffort -->
+                <if condition="shipment.assemblyWorkEffortId == asset.acquireWorkEffortId">
+                    <service-call name="mantle.work.ManufacturingServices.breakDown#Assembly"
+                            in-map="[assetId:asset.assetId, asset:asset, workEffortId:shipment.assemblyWorkEffortId,
+                                quantityToBreakDown:originalQuantity, unissueAssemblyComponents:unpackAssemblyComponents,
+                                breakDownDate:unpackDate]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ShipmentAutoPackages">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentRouteSegmentSeqId"><description>Defaults to the first route segment</description></parameter>
+            <parameter name="resetExisting" type="Boolean" default="false"><description>If false (default) does nothing if there are
+                existing packages with content</description></parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="mantle.shipment.CarrierServices.get#ShipmentGatewayDetails" in-map="context" out-map="context"/>
+            <set field="getAutoPackageInfoName" from="shippingGatewayConfig?.getAutoPackageInfoName"/>
+            <if condition="!getAutoPackageInfoName"><return/></if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItem" list="itemInfoList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <service-call name="${getAutoPackageInfoName}" out-map="context" in-map="context"/>
+            <if condition="!packageInfoList"><return/></if>
+
+            <!-- unless resetExisting see if there are ShipmentPackageContent records -->
+            <if condition="!resetExisting">
+                <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
+                    <econdition field-name="shipmentId"/></entity-find>
+                <if condition="packageContentList">
+                    <return message="Packages already have content (product quantities) assigned, not creating auto packages"/></if>
+            </if>
+
+            <!-- make sure no packages have labels, etc -->
+            <entity-find entity-name="mantle.shipment.ShipmentPackageRouteSeg" list="packageRouteSegList">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentRouteSegmentSeqId"/></entity-find>
+            <iterate list="packageRouteSegList" entry="packageRouteSeg">
+                <if condition="packageRouteSeg.trackingCode || packageRouteSeg.labelDate || packageRouteSeg.labelUrl">
+                    <return message="Package ${packageRouteSeg.shipmentPackageSeqId} already has a tracking code or label, not creating auto packages"/></if>
+            </iterate>
+            <!-- NOTE: no data changes before this point, after this point errors/etc need to be errors and cause rollback -->
+            <!-- clear out any existing packages -->
+            <iterate list="packageRouteSegList" entry="packageRouteSeg"><entity-delete value-field="packageRouteSeg"/></iterate>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentPackageContent"><econdition field-name="shipmentId"/></entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.shipment.ShipmentPackage"><econdition field-name="shipmentId"/></entity-delete-by-condition>
+
+            <!-- create new packages -->
+            <iterate list="packageInfoList" entry="packageInfo">
+                <service-call name="create#mantle.shipment.ShipmentPackage" out-map="packageOut"
+                        in-map="[shipmentId:shipmentId, shipmentBoxTypeId:packageInfo.shipmentBoxTypeId,
+                            weight:packageInfo.weight, weightUomId:packageInfo.weightUomId]"/>
+                <service-call name="create#mantle.shipment.ShipmentPackageRouteSeg"
+                        in-map="[shipmentId:shipmentId, shipmentPackageSeqId:packageOut.shipmentPackageSeqId,
+                                shipmentRouteSegmentSeqId:shipmentRouteSegmentSeqId]"/>
+                <iterate list="packageInfo.quantityByProductId" entry="quantity" key="productId">
+                    <service-call name="create#mantle.shipment.ShipmentPackageContent"
+                            in-map="[shipmentId:shipmentId, shipmentPackageSeqId:packageOut.shipmentPackageSeqId,
+                                productId:productId, quantity:quantity]"/>
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ======================================== -->
+    <!-- ========== Receiving Services ========== -->
+    <!-- ======================================== -->
+
+    <service verb="receive" noun="EntireShipment" transaction="cache">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="facilityId"><description>If not specified uses ShipmentRouteSegment.destinationFacilityId.</description></parameter>
+            <parameter name="statusId"><description>Use this status on assets created</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.shipment.ShipmentItemDetail" list="shipmentItemDetailList">
+                <econdition field-name="shipmentId"/><order-by field-name="productId"/></entity-find>
+            <iterate list="shipmentItemDetailList" entry="sid">
+                <set field="quantityRemaining" from="sid.quantity - (sid.quantityAcceptedTotal ?: 0) - (sid.quantityRejectedTotal ?: 0)"/>
+
+                <service-call name="mantle.shipment.ShipmentServices.receive#ShipmentProduct"
+                        in-map="[shipmentId:shipmentId, productId:sid.productId, statusId:statusId,
+                            quantityAccepted:quantityRemaining, facilityId:facilityId]"/>
+            </iterate>
+
+            <!-- consider doing this automatically when all quantities of all items are received -->
+            <service-call name="mantle.shipment.ShipmentServices.deliver#Shipment" out-map="context" in-map="[shipmentId:shipmentId]"/>
+        </actions>
+    </service>
+    <service verb="receive" noun="ShipmentProduct">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+
+            <auto-parameters entity-name="mantle.product.asset.Asset" include="nonpk"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="facilityId"><description>If not specified uses ShipmentRouteSegment.destinationFacilityId.</description></parameter>
+            <!-- AssetReceipt fields -->
+            <parameter name="quantityAccepted" type="BigDecimal" required="true"/>
+            <parameter name="quantityRejected" type="BigDecimal" default="0.0"/>
+            <parameter name="rejectionReasonEnumId"/>
+            <!-- Lot fields (note that both Asset and Lot have manufacturedDate; Asset.expectedEndOfLife is equivalent to Lot.expirationDate) -->
+            <parameter name="lotNumber"/>
+            <parameter name="expirationDate" type="Date"/>
+            <parameter name="mfgPartyId"><description>Defaults to Shipment.fromPartyId (if lotNumber and no lotId)</description></parameter>
+        </in-parameters>
+        <out-parameters><parameter name="assetIdList" type="List"><parameter name="assetId"/></parameter></out-parameters>
+        <actions>
+            <if condition="quantityAccepted &lt; 0.0"><return error="true" message="Quantity Accepted may not be negative"/></if>
+            <if condition="quantityRejected != null &amp;&amp; quantityRejected &lt; 0.0"><return error="true" message="Quantity Rejected may not be negative"/></if>
+
+            <if condition="!facilityId">
+                <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="shipmentRouteSegmentList">
+                    <econdition field-name="shipmentId"/><order-by field-name="-shipmentRouteSegmentSeqId"/></entity-find>
+                <set field="facilityId" from="shipmentRouteSegmentList?.first?.destinationFacilityId"/>
+            </if>
+            <if condition="!facilityId"><return error="true" message="Cannot receive Product ${productId} on Shipment ${shipmentId}, no facilityId specified."/></if>
+            <if condition="!lotId &amp;&amp; lotNumber &amp;&amp; !mfgPartyId">
+                <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+                <set field="mfgPartyId" from="shipment.fromPartyId"/>
+            </if>
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList" cache="false">
+                <econdition field-name="shipmentId"/><econdition field-name="productId"/></entity-find>
+            <set field="assetIdList" from="[]"/>
+            <set field="quantityAcceptedRemaining" from="quantityAccepted"/>
+            <set field="quantityRejectedRemaining" from="quantityRejected"/>
+            <iterate list="shipmentItemSourceList" entry="shipmentItemSource">
+                <set field="updateQuantityNotHandled" from="shipmentItemSource.quantityNotHandled &gt; 0.0"/>
+                <!-- to handle transfer shipments with issuance before receipt and generally more flexible calc quantityNotHandled instead of getting from SIS -->
+                <set field="quantityNotHandled" from="shipmentItemSource.quantity"/>
+                <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="assetReceiptList">
+                    <econdition field-name="shipmentItemSourceId" from="shipmentItemSource.shipmentItemSourceId"/></entity-find>
+                <iterate list="assetReceiptList" entry="assetReceipt">
+                    <set field="quantityNotHandled" from="quantityNotHandled - (assetReceipt.quantityAccepted ?: 0.0) - (assetReceipt.quantityRejected ?: 0.0)"/>
+                </iterate>
+
+                <set field="quantityToAccept" from="quantityNotHandled > quantityAcceptedRemaining ? quantityAcceptedRemaining : quantityNotHandled"/>
+                <set field="quantityAcceptedRemaining" from="quantityAcceptedRemaining > quantityNotHandled ? quantityAcceptedRemaining - quantityNotHandled : 0.0"/>
+                <set field="quantityNotHandled" from="quantityNotHandled - quantityToAccept"/>
+
+                <set field="quantityToReject" from="quantityNotHandled > quantityRejectedRemaining ? quantityRejectedRemaining : quantityNotHandled"/>
+                <set field="quantityRejectedRemaining" from="quantityRejectedRemaining > quantityNotHandled ? quantityRejectedRemaining - quantityNotHandled : 0.0"/>
+                <set field="quantityNotHandled" from="quantityNotHandled - quantityToReject"/>
+
+                <service-call name="mantle.product.AssetServices.receive#Asset" out-map="receiveAssetOut"
+                        in-map="context + [shipmentItemSourceId:shipmentItemSource.shipmentItemSourceId, shipmentPackageSeqId:null,
+                            orderId:shipmentItemSource.orderId, orderItemSeqId:shipmentItemSource.orderItemSeqId,
+                            returnId:shipmentItemSource.returnId, returnItemSeqId:shipmentItemSource.returnItemSeqId,
+                            quantity:quantityToAccept, quantityRejected:quantityToReject]"/>
+                <script>assetIdList.add(receiveAssetOut.assetId)</script>
+
+                <!-- update quantityNotHandled and status -->
+                <if condition="quantityNotHandled &lt;= 0"><set field="shipmentItemSource.statusId" value="SisReceived"/></if>
+                <if condition="updateQuantityNotHandled"><set field="shipmentItemSource.quantityNotHandled" from="quantityNotHandled"/></if>
+                <entity-update value-field="shipmentItemSource"/>
+
+                <!-- on Shipment Item Received mark Order as Completed (IF all order part items are completed) -->
+                <if condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+                    <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                        <field-map field-name="orderId" from="shipmentItemSource.orderId"/>
+                        <field-map field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                    </entity-find-one>
+                    <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
+                            in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+                </if>
+            </iterate>
+
+            <if condition="quantityAcceptedRemaining > 0 || quantityRejectedRemaining > 0">
+                <!-- <message>Not sufficient quantity in item source(s) to receive ${quantityAcceptedRemaining} of ${quantityAccepted} accepted or ${quantityRejectedRemaining} of ${quantityRejected} rejected.</message> -->
+                <!-- ShipmentItemSource(s) all used up, just receive outside context of an order/etc -->
+                <service-call name="mantle.product.AssetServices.receive#Asset" out-map="receiveAssetOut"
+                        in-map="context + [productId:productId, quantity:quantityAcceptedRemaining, shipmentId:shipmentId,
+                            facilityId:facilityId, quantityRejected:quantityRejectedRemaining, rejectionReasonEnumId:rejectionReasonEnumId]"/>
+                <script>assetIdList.add(receiveAssetOut.assetId)</script>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ============================================ -->
+    <!-- ========== Misc Shipment Services ========== -->
+    <!-- ============================================ -->
+
+    <service verb="convert" noun="ProductBoxQuantity">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="originalQuantity" type="BigDecimal"/>
+            <parameter name="shipmentBoxTypeId"/>
+            <parameter name="originalQuantityUomId"><description>If not specified uses ShipmentBoxType.capacityUomId</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="originalQuantityUomId"/>
+            <parameter name="convertedQuantity" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <if condition="originalQuantity == null">
+                <set field="convertedQuantity" from="0"/>
+                <return/>
+            </if>
+
+            <if condition="shipmentBoxTypeId &amp;&amp; !originalQuantityUomId">
+                <entity-find-one entity-name="mantle.shipment.ShipmentBoxType" value-field="shipmentBoxType" cache="true"/>
+                <set field="originalQuantityUomId" from="shipmentBoxType.capacityUomId"/>
+            </if>
+
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true"/>
+            <if condition="!product?.amountUomId"><return error="true" message="Cannot convert quantity for product [${productId}], no amountUomId found."/></if>
+
+            <service-call name="org.moqui.impl.BasicServices.convert#Uom" out-map="convertQuantityOut"
+                    in-map="[uomId:originalQuantityUomId, toUomId:product.amountUomId, amount:originalQuantity]"/>
+            <set field="convertedQuantity" from="convertQuantityOut?.convertedAmount ?: 0"/>
+        </actions>
+    </service>
+    <service verb="get" noun="ShipmentPackageWeight">
+        <description>Calculate package weight including box type and contents (products by ShippingWeight), converting units as needed</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentPackageSeqId" required="true"/>
+            <parameter name="shipmentBoxTypeId"/>
+            <parameter name="weightUomId"><description>If not specified defaults to ShipmentBoxType.weightUomId</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="weight" type="BigDecimal"/>
+            <parameter name="weightUomId"/>
+        </out-parameters>
+        <actions>
+            <if condition="!shipmentBoxTypeId">
+                <entity-find-one entity-name="mantle.shipment.ShipmentPackage" value-field="shipmentPackage"/>
+                <if condition="shipmentPackage == null"><return type="danger" message="Package ${shipmentPackageSeqId} not found for shipment ${shipmentId}, not calculating weight"/></if>
+                <set field="shipmentBoxTypeId" from="shipmentPackage.shipmentBoxTypeId"/>
+            </if>
+            <if condition="!shipmentBoxTypeId"><return type="warning" message="No box type specified or set on package, not calculating weight"/></if>
+            <entity-find-one entity-name="mantle.shipment.ShipmentBoxType" value-field="shipmentBoxType"/>
+            <if condition="shipmentBoxType == null"><return type="danger" message="Box type not found with ID ${shipmentBoxTypeId}"/></if>
+            <if condition="!shipmentBoxType.boxWeight"><return type="danger" message="Box type ${shipmentBoxTypeId} has no weight"/></if>
+            <if condition="!shipmentBoxType.weightUomId"><return type="danger" message="Box type ${shipmentBoxTypeId} has no weight unit (UOM)"/></if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="pkgContentList">
+                <econdition field-name="shipmentId"/><econdition field-name="shipmentPackageSeqId"/></entity-find>
+            <if condition="!pkgContentList"><return type="warning" message="No contents found for package ${shipmentPackageSeqId} of shipment ${shipmentId}, no calculating weight"/></if>
+
+            <set field="weightUomId" from="weightUomId ?: shipmentBoxType.weightUomId ?: 'WT_lb'"/>
+            <set field="boxWeight" from="shipmentBoxType.boxWeight"/>
+            <if condition="weightUomId != shipmentBoxType.weightUomId">
+                <service-call name="org.moqui.impl.BasicServices.convert#Uom" out-map="convertOut" out-map-add-to-existing="false"
+                        in-map="[uomId:shipmentBoxType.weightUomId, toUomId:weightUomId, amount:boxWeight]"/>
+                <set field="boxWeight" from="convertOut.convertedAmount"/>
+            </if>
+
+            <set field="contentWeight" from="0.0"/>
+            <iterate list="pkgContentList" entry="pkgContent">
+                <entity-find-one entity-name="mantle.product.ProductDimension" value-field="weightDim" cache="true">
+                    <field-map field-name="productId" from="pkgContent.productId"/>
+                    <field-map field-name="dimensionTypeId" value="ShippingWeight"/>
+                </entity-find-one>
+                <if condition="weightDim == null">
+                    <entity-find-one entity-name="mantle.product.ProductDimension" value-field="weightDim" cache="true">
+                        <field-map field-name="productId" from="pkgContent.productId"/>
+                        <field-map field-name="dimensionTypeId" value="Weight"/>
+                    </entity-find-one>
+                </if>
+                <if condition="!weightDim?.value"><return type="danger" message="Product ${pkgContent.productId} has no Shipping Weight dimension value"/></if>
+                <if condition="!weightDim?.valueUomId"><return type="danger" message="Product ${pkgContent.productId} has no Shipping Weight dimension unit (UOM)"/></if>
+
+                <set field="itemWeight" from="weightDim.value * (pkgContent.quantity ?: 0.0)"/>
+                <if condition="weightUomId != weightDim.valueUomId">
+                    <service-call name="org.moqui.impl.BasicServices.convert#Uom" out-map="convertOut" out-map-add-to-existing="false"
+                            in-map="[uomId:weightDim.valueUomId, toUomId:weightUomId, amount:itemWeight]"/>
+                    <set field="itemWeight" from="convertOut.convertedAmount"/>
+                </if>
+
+                <set field="contentWeight" from="contentWeight + itemWeight"/>
+            </iterate>
+
+            <set field="weight" from="boxWeight + contentWeight"/>
+        </actions>
+    </service>
+
+    <service verb="print" noun="ShipmentLabels">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="networkPrinterId"/>
+            <parameter name="shipmentRouteSegmentSeqId"/>
+            <parameter name="shipmentPackageSeqId"/>
+            <parameter name="makeDefaultPrinter" type="Boolean" default="false"/>
+            <parameter name="returnLabels" type="Boolean" default="false">
+                <description>Print return labels instead of standard/outgoing labels</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="printJobIdList" type="List"><parameter name="printJobId"/></parameter>
+        </out-parameters>
+        <actions>
+            <if condition="!networkPrinterId"><set field="networkPrinterId" from="ec.user.getPreference('Shipment.networkPrinterId.default')"/></if>
+            <if condition="!networkPrinterId"><return error="true" message="No networkPrinterId specified and no Shipment.networkPrinterId.default preference found"/></if>
+            <if condition="makeDefaultPrinter"><script>ec.user.setPreference('Shipment.networkPrinterId.default', networkPrinterId)</script></if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentPackageRouteSeg" list="packageRouteSegList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="shipmentRouteSegmentSeqId" ignore-if-empty="true"/>
+                <econdition field-name="shipmentPackageSeqId" ignore-if-empty="true"/>
+                <order-by field-name="shipmentRouteSegmentSeqId,shipmentPackageSeqId"/>
+            </entity-find>
+            <iterate list="packageRouteSegList" entry="packageRouteSeg">
+                <set field="labelUrl" from="returnLabels ? packageRouteSeg.returnLabelUrl : packageRouteSeg.labelUrl"/>
+                <set field="labelImage" from="returnLabels ? packageRouteSeg.getSerialBlob('returnLabelImage') : packageRouteSeg.getSerialBlob('labelImage')"/>
+                <if condition="!labelUrl &amp;&amp; labelImage == null">
+                    <message>Package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId} has no ${returnLabels ? 'return' : 'outgoing'} label URL or image</message>
+                    <continue/>
+                </if>
+                <!-- get label binary from URL -->
+                <if condition="labelImage == null"><script><![CDATA[
+                    byte[] labelBytes = null
+                    contentType = null
+                    try {
+                        org.moqui.context.ExecutionContext ec = context.ec
+                        org.moqui.util.RestClient.RestResponse labelResponse = ec.service.rest().method("GET").uri((String) labelUrl).call()
+                        if (labelResponse.statusCode == 200) {
+                            labelBytes = labelResponse.bytes()
+                            contentType = labelResponse.getContentType()
+                            if (labelBytes == null || labelBytes.length == 0)
+                                ec.message.addMessage("Got empty response downloading label for package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId}")
+                        } else {
+                            ec.message.addMessage("Error downloading label for package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId}: ${labelResponse.getReasonPhrase()}")
+                        }
+                    } catch (Exception e) {
+                        ec.logger.log(ec.logger.ERROR_INT, "Error downloading label for package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId} at ${labelUrl}: ${e.toString()}", e)
+                        ec.message.addMessage("Error downloading label for package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId}: ${e.toString()}")
+                    }
+                    if (labelBytes != null && labelBytes.length > 0) labelImage = new javax.sql.rowset.serial.SerialBlob(labelBytes)
+                ]]></script></if>
+                <if condition="labelImage == null"><continue/></if>
+
+                <set field="jobName" value="ShipmentLabel${shipmentId}-${packageRouteSeg.shipmentRouteSegmentSeqId}-${packageRouteSeg.shipmentPackageSeqId}"/>
+                <service-call name="org.moqui.impl.PrintServices.print#Document" out-map="printOut" out-map-add-to-existing="false"
+                        in-map="[networkPrinterId:networkPrinterId, jobName:jobName, serialBlob:labelImage, contentType:contentType]"/>
+                <message>Printed label for package ${packageRouteSeg.shipmentPackageSeqId} route segment ${packageRouteSeg.shipmentRouteSegmentSeqId}, print job ${printOut.printJobId} CUPS job ${printOut.jobId}</message>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="complete" noun="ShipmentPack">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="carrierAndShipmentMethod"/>
+            <parameter name="networkPrinterId"/>
+            <parameter name="makeDefaultPrinter" type="Boolean" default="false"/>
+            <parameter name="getLabels" type="Boolean" default="false"/>
+            <parameter name="getReturnLabels" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="srsList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+            <set field="shipmentRouteSegmentSeqId" from="srsList ? srsList[0].shipmentRouteSegmentSeqId : null"/>
+            <if condition="!shipmentRouteSegmentSeqId"><return error="true" message="No route segment found for shipment ${shipmentId}"/></if>
+
+            <!-- always run this, even if no carrierAndShipmentMethod, does some normalization -->
+            <service-call name="mantle.shipment.ShipmentServices.update#ShipmentAndRouteSegment" in-map="context" transaction="force-new"/>
+
+            <!-- set shipment Packed in separate TX (force-new) so that any later errors don't undo this -->
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment ${shipmentId} not found"/></if>
+            <if condition="shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked']">
+                <service-call name="mantle.shipment.ShipmentServices.pack#Shipment" in-map="[shipmentId:shipmentId]" transaction="force-new"/></if>
+
+            <!-- if CC payment(s) make sure captured (Delivered) before getting labels, etc -->
+            <!-- new logic: get total of invoices, make sure payments greater where CC is Delivered or Confirmed, other instruments in any active status -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisInvoiceList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="invoiceId" operator="is-not-null"/>
+                <select-field field-name="invoiceId"/>
+            </entity-find>
+            <if condition="sisInvoiceList">
+                <entity-find entity-name="mantle.account.invoice.Invoice" list="invoiceList">
+                    <econdition field-name="invoiceId" operator="in" from="sisInvoiceList*.invoiceId"/>
+                    <econdition field-name="statusId" operator="not-equals" value="InvoiceCancelled"/>
+                    <select-field field-name="invoiceTotal"/>
+                </entity-find>
+                <set field="invoiceTotal" from="invoiceList*.invoiceTotal.sum()"/>
+
+                <if condition="invoiceTotal">
+                    <entity-find entity-name="mantle.shipment.ShipmentOrderPayment" list="shipmentPaymentList" distinct="true">
+                        <econdition field-name="shipmentId"/>
+                        <select-field field-name="paymentId,paymentInstrumentEnumId,statusId,amount"/>
+                    </entity-find>
+                    <set field="paymentTotal" from="0.0"/>
+                    <iterate list="shipmentPaymentList" entry="shipmentPayment">
+                        <if condition="shipmentPayment.paymentInstrumentEnumId == 'PiCreditCard'"><then>
+                            <if condition="shipmentPayment.statusId in ['PmntDelivered', 'PmntConfirmed']">
+                                <set field="paymentTotal" from="paymentTotal + shipmentPayment.amount"/></if>
+                        </then><else>
+                            <if condition="!(shipmentPayment.statusId in ['PmntCancelled', 'PmntVoid', 'PmntDeclined'])">
+                                <set field="paymentTotal" from="paymentTotal + shipmentPayment.amount"/></if>
+                        </else></if>
+                    </iterate>
+
+                    <if condition="paymentTotal &lt; invoiceTotal">
+                        <return type="warning" message="Captured credit card and other payments total ${paymentTotal} is less than shipment invoice total ${invoiceTotal} so not automatically getting labels"/>
+                    </if>
+                </if>
+            </if>
+
+
+
+            <!-- old approach instead of looking at invoices, problematic because a single declined payment will block it even if other payments done:
+            <entity-find entity-name="mantle.shipment.ShipmentOrderPayment" list="shipmentPaymentList" distinct="true">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="statusId" operator="not-in" value="PmntCancelled,PmntVoid"/>
+                <select-field field-name="paymentId,paymentInstrumentEnumId,statusId"/>
+            </entity-find>
+            <set field="foundBadCc" from="false"/>
+            <iterate list="shipmentPaymentList" entry="shipmentPayment">
+                <if condition="shipmentPayment.paymentInstrumentEnumId == 'PiCreditCard' &amp;&amp; !(shipmentPayment.statusId in ['PmntDelivered', 'PmntConfirmed'])">
+                    <entity-find-one entity-name="moqui.basic.StatusItem" value-field="pmntStatus">
+                        <field-map field-name="statusId" from="shipmentPayment.statusId"/></entity-find-one>
+                    <message type="warning">Credit Card Payment ${shipmentPayment.paymentId} not captured (${pmntStatus?.description}), not getting labels</message>
+                    <set field="foundBadCc" from="true"/>
+                </if>
+            </iterate>
+            <if condition="foundBadCc"><return/></if>
+            -->
+
+            <!-- get and print labels -->
+            <if condition="getLabels">
+                <service-call name="mantle.shipment.CarrierServices.request#ShipmentLabels"
+                        in-map="[shipmentId:shipmentId, getReturnLabels:false]"/>
+
+                <!-- make sure label is successful before printing or getting return label -->
+                <set field="hasAllLabels" from="true"/>
+                <entity-find entity-name="mantle.shipment.ShipmentPackageRouteSeg" list="packageRouteSegList">
+                    <econdition field-name="shipmentId"/><econdition field-name="shipmentRouteSegmentSeqId"/></entity-find>
+                <iterate list="packageRouteSegList" entry="packageRouteSeg">
+                    <if condition="!packageRouteSeg.gatewayLabelId &amp;&amp; packageRouteSeg.labelImage == null &amp;&amp; !packageRouteSeg.labelUrl">
+                        <set field="hasAllLabels" from="false"/></if>
+                </iterate>
+
+                <if condition="hasAllLabels"><then>
+                    <!-- if printer specified, print now -->
+                    <if condition="networkPrinterId"><service-call name="mantle.shipment.ShipmentServices.print#ShipmentLabels"
+                            in-map="[returnLabels:false] + context"/></if>
+                    <!-- get and print return labels -->
+                    <if condition="getReturnLabels">
+                        <service-call name="mantle.shipment.CarrierServices.request#ShipmentLabels"
+                                in-map="[shipmentId:shipmentId, getReturnLabels:true]"/>
+                        <if condition="networkPrinterId"><service-call name="mantle.shipment.ShipmentServices.print#ShipmentLabels"
+                                in-map="[returnLabels:true] + context"/></if>
+                    </if>
+                </then><else>
+                    <message type="danger">Could not get labels, not printing or getting return labels</message>
+                </else></if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ============================================ -->
+    <!-- ========== Status Update Services ========== -->
+    <!-- ============================================ -->
+
+    <service verb="pack" noun="Shipment">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="packedDate" type="Timestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="oldStatusId"/><parameter name="statusChanged" type="Boolean"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found with ID ${shipmentId}"/></if>
+            <set field="shipmentTypeEnum" from="shipment.'ShipmentType#moqui.basic.Enumeration'"/>
+            <set field="isIncoming" from="shipmentTypeEnum?.enumId == 'ShpTpIncoming' || shipmentTypeEnum?.parentEnumId == 'ShpTpIncoming'"/>
+            <if condition="!isIncoming">
+                <!-- check for Assembly Task with unused component quantities -->
+                <if condition="shipment.assemblyWorkEffortId">
+                    <service-call name="mantle.work.ManufacturingServices.get#ConsumedAssetRemaining"
+                            in-map="[workEffortId:shipment.assemblyWorkEffortId]" out-map="assemblyAssetInfo"/>
+                    <if condition="assemblyAssetInfo.componentIssuedAvailable">
+                        <iterate list="assemblyAssetInfo.componentIssuedAvailable" key="componentProductId" entry="componentQty">
+                            <service-call name="mantle.work.ManufacturingServices.unissue#Component"
+                                    in-map="[workEffortId:shipment.assemblyWorkEffortId, componentProductId:componentProductId,
+                                        componentQuantity:componentQty, unissueDate:packedDate]"/>
+                        </iterate>
+                    </if>
+                </if>
+
+                <!-- reduce ShipmentItem.quantity to quantity handled for each item -->
+                <service-call name="mantle.shipment.ShipmentServices.reduce#QuantitiesToHandled" in-map="[shipmentId:shipmentId]"/>
+            </if>
+
+            <set field="packedDate" from="packedDate ?: ec.user.nowTimestamp"/>
+            <service-call name="update#mantle.shipment.Shipment" out-map="context"
+                    in-map="[shipmentId:shipmentId, statusId:'ShipPacked', packedDate:packedDate]"/>
+
+            <!-- on Shipment Item Packed mark Order as Completed (IF all order part items are completed) -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisOrderList" distinct="true">
+                <econdition field-name="shipmentId"/>
+                <select-field field-name="orderId,orderItemSeqId"/>
+            </entity-find>
+            <iterate list="sisOrderList" entry="shipmentItemSource">
+                <if condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+                    <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                        <field-map field-name="orderId" from="shipmentItemSource.orderId"/>
+                        <field-map field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                    </entity-find-one>
+                    <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
+                            in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="ship" noun="Shipment">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="actualStartDate" type="Timestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="oldStatusId"/><parameter name="statusChanged" type="Boolean"/></out-parameters>
+        <actions>
+            <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, statusId:'ShipShipped']" out-map="context"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="shipmentRouteSegmentList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+            <if condition="shipmentRouteSegmentList"><then>
+                <set field="firstRouteSegment" from="shipmentRouteSegmentList.get(0)"/>
+                <service-call name="update#mantle.shipment.ShipmentRouteSegment"
+                        in-map="[shipmentId:shipmentId, shipmentRouteSegmentSeqId:firstRouteSegment.shipmentRouteSegmentSeqId,
+                             actualStartDate:(actualStartDate ?: firstRouteSegment.actualStartDate ?: ec.user.nowTimestamp)]"/>
+            </then><else>
+                <log level="warn" message="No ShipmentRouteSegment found for Shipment ${shipmentId}, not setting actualStartDate"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="deliver" noun="Shipment">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="actualArrivalDate" type="Timestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="oldStatusId"/><parameter name="statusChanged" type="Boolean"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found with ID ${shipmentId}"/></if>
+            <set field="shipmentTypeEnum" from="shipment.'ShipmentType#moqui.basic.Enumeration'"/>
+            <set field="isIncoming" from="shipmentTypeEnum?.enumId == 'ShpTpIncoming' || shipmentTypeEnum?.parentEnumId == 'ShpTpIncoming'"/>
+            <if condition="isIncoming">
+                <service-call name="mantle.shipment.ShipmentServices.reduce#QuantitiesToHandled" in-map="[shipmentId:shipmentId]"/></if>
+
+            <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, statusId:'ShipDelivered']" out-map="context"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="shipmentRouteSegmentList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+            <if condition="shipmentRouteSegmentList"><then>
+                <set field="lastRouteSegment" from="shipmentRouteSegmentList.get(shipmentRouteSegmentList.size()-1)"/>
+                <service-call name="update#mantle.shipment.ShipmentRouteSegment"
+                        in-map="[shipmentId:shipmentId, shipmentRouteSegmentSeqId:lastRouteSegment.shipmentRouteSegmentSeqId,
+                             actualArrivalDate:(actualArrivalDate ?: lastRouteSegment.actualArrivalDate ?: ec.user.nowTimestamp)]"/>
+            </then><else>
+                <log level="warn" message="No ShipmentRouteSegment found for Shipment ${shipmentId}, not setting actualStartDate"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="checkSet" noun="ShipmentDeliveredByPackages">
+        <in-parameters><parameter name="shipmentId"/></in-parameters>
+        <actions>
+            <!-- see if all packages are delivered, if so update Shipment status to ShipDelivered (if statusId in ShipPacked, ShipShipped) -->
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment.statusId in ['ShipPacked', 'ShipShipped']">
+                <entity-find entity-name="mantle.shipment.ShipmentPackageRouteSeg" list="checkSprsList">
+                    <econdition field-name="shipmentId"/></entity-find>
+                <set field="foundNotDelivered" from="false"/>
+                <set field="trackingStatusDate" from="null"/>
+                <iterate list="checkSprsList" entry="checkSprs">
+                    <if condition="checkSprs.trackingStatusEnumId == 'ShTsDelivered'"><then>
+                        <if condition="trackingStatusDate == null || trackingStatusDate &lt; checkSprs.trackingStatusDate">
+                            <set field="trackingStatusDate" from="checkSprs.trackingStatusDate"/></if>
+                    </then><else>
+                        <set field="foundNotDelivered" from="true"/>
+                    </else></if>
+                </iterate>
+                <if condition="checkSprsList &amp;&amp; !foundNotDelivered">
+                    <service-call name="mantle.shipment.ShipmentServices.deliver#Shipment"
+                            in-map="[shipmentId:shipment.shipmentId, actualArrivalDate:trackingStatusDate]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="cancel" noun="Shipment">
+        <!-- TODO: consider changing most of this to always run on through SECA on update#mantle.shipment.Shipment with statusId changed to ShipCancelled -->
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="undoIssueReceive" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="oldStatusId"/><parameter name="statusChanged" type="Boolean"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found with ID ${shipmentId}"/></if>
+            <set field="shipmentTypeEnum" from="shipment.'ShipmentType#moqui.basic.Enumeration'"/>
+            <set field="isIncoming" from="shipmentTypeEnum?.enumId == 'ShpTpIncoming' || shipmentTypeEnum?.parentEnumId == 'ShpTpIncoming'"/>
+            <set field="isOutgoing" from="shipmentTypeEnum?.enumId == 'ShpTpOutgoing' || shipmentTypeEnum?.parentEnumId == 'ShpTpOutgoing'"/>
+            <set field="isTransfer" from="shipmentTypeEnum?.enumId == 'ShpTpTransfer' || shipmentTypeEnum?.parentEnumId == 'ShpTpTransfer'"/>
+
+            <!-- cancel invoices, ONLY for outgoing shipments -->
+            <if condition="isOutgoing">
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisInvoiceList" distinct="true">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="invoiceId" operator="is-not-null"/>
+                    <select-field field-name="invoiceId"/>
+                </entity-find>
+                <set field="invoiceIdList" from="sisInvoiceList*.invoiceId"/>
+                <iterate list="invoiceIdList" entry="invoiceId">
+                    <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice"/>
+                    <if condition="invoice.statusId == 'InvoiceCancelled'"><then>
+                        <message type="info">Invoice ${invoiceId} already cancelled</message>
+                    </then><else>
+                        <service-call name="update#mantle.account.invoice.Invoice" in-map="[invoiceId:invoiceId, statusId:'InvoiceCancelled']"/>
+                    </else></if>
+                </iterate>
+            </if>
+
+            <!-- get related orderIds before unpack/etc -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisOrderList" distinct="true">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="orderId" operator="is-not-null"/>
+                <select-field field-name="orderId"/>
+            </entity-find>
+            <set field="orderIdList" from="sisOrderList*.orderId"/>
+
+            <if condition="undoIssueReceive">
+                <!-- unpack/unissue issuances -->
+                <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="assetIssuanceList">
+                    <econdition field-name="shipmentId"/><econdition field-name="quantity" operator="greater" from="0.0"/></entity-find>
+                <iterate list="assetIssuanceList" entry="assetIssuance">
+                    <service-call name="mantle.shipment.ShipmentServices.unpack#ShipmentItemIssuance"
+                            in-map="[assetIssuanceId:assetIssuance.assetIssuanceId]"/>
+                </iterate>
+
+                <!-- un-receive receipts (zero out) -->
+                <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="assetReceiptList">
+                    <econdition field-name="shipmentId"/><econdition field-name="quantityAccepted" operator="greater" from="0.0"/></entity-find>
+                <iterate list="assetReceiptList" entry="assetReceipt">
+                    <service-call name="mantle.product.AssetServices.update#AssetAndReceipt" in-map="[assetId:assetReceipt.assetId,
+                        assetReceiptId:assetReceipt.assetReceiptId, shipmentId:shipmentId, quantityAccepted:0.0, quantityRejected:0.0]"/>
+                </iterate>
+            </if>
+
+            <if condition="shipment.assemblyWorkEffortId">
+                <service-call name="mantle.work.ManufacturingServices.cancel#AssemblyWorkEffort"
+                        in-map="[workEffortId:shipment.assemblyWorkEffortId]"/>
+            </if>
+
+            <!-- NOTE: cancel/refund labels? NO: warn that need to be refunded -->
+            <!-- NOTE: check Payment auth/delivered and warn that won't cancel/refund payment -->
+
+            <!-- validations to make sure nothing left hanging -->
+            <!-- NOTE: due to an old bug setting the wrong shipmentItemSourceId on AssetIssuance records this needs to work on a sum of quantity and quantityNotHandled -->
+            <!-- old approach was count on ShipmentItemSource where quantity > quantityNotHandled and if record count greater than 0 blow up -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSourceSummary" list="sisAfterList">
+                <econdition field-name="shipmentId"/>
+                <select-field field-name="quantity,quantityNotHandled"/>
+            </entity-find>
+            <set field="sisAfterSum" from="sisAfterList.first()"/>
+            <if condition="sisAfterSum != null &amp;&amp; sisAfterSum.quantity &gt; sisAfterSum.quantityNotHandled">
+                <return error="true" message="Shipment ${shipmentId} has items already handled, cannot cancel."/></if>
+
+            <if condition="isIncoming || isTransfer">
+                <entity-find-count entity-name="mantle.product.receipt.AssetReceipt" count-field="assetReceiptCount">
+                    <econdition field-name="shipmentId"/><econdition field-name="quantityAccepted" operator="greater" from="0.0"/></entity-find-count>
+                <if condition="assetReceiptCount">
+                    <return error="true" message="Incoming shipment ${shipmentId} has items already received, cannot cancel."/></if>
+            </if>
+            <if condition="isOutgoing || isTransfer">
+                <entity-find-count entity-name="mantle.product.issuance.AssetIssuance" count-field="assetIssuanceCount">
+                    <econdition field-name="shipmentId"/><econdition field-name="quantity" operator="greater" from="0.0"/></entity-find-count>
+                <if condition="assetIssuanceCount">
+                    <return error="true" message="Outgoing shipment ${shipmentId} has items already issued/packed, cannot cancel."/></if>
+            </if>
+
+            <service-call name="mantle.shipment.ShipmentServices.reduce#QuantitiesToHandled" in-map="[shipmentId:shipmentId]"/>
+
+            <service-call name="update#mantle.shipment.Shipment" in-map="[shipmentId:shipmentId, statusId:'ShipCancelled']" out-map="context"/>
+
+            <!-- if any orders are Completed they may not still be, see if order needs to be moved back to Approved -->
+            <iterate list="orderIdList" entry="orderId">
+                <service-call name="mantle.order.OrderServices.checkStillComplete#Order" in-map="[orderId:orderId]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="reduce" noun="QuantitiesToHandled">
+        <in-parameters><parameter name="shipmentId" required="true"/></in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.shipment.ShipmentItem" list="shipmentItemList">
+                <econdition field-name="shipmentId"/></entity-find>
+
+            <iterate list="shipmentItemList" entry="shipmentItem">
+                <set field="quantityHandled" from="0.0"/>
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisList">
+                    <econdition field-name="shipmentId"/><econdition field-name="productId" from="shipmentItem.productId"/></entity-find>
+                <iterate list="sisList" entry="sis">
+                    <set field="sisQtyHandled" from="sis.quantity - sis.quantityNotHandled"/>
+                    <set field="quantityHandled" from="quantityHandled + sisQtyHandled"/>
+                </iterate>
+                <if condition="quantityHandled &lt; 0.0">
+                    <!-- normally this should never happen but can with transfer shipment with data in a funny state -->
+                    <log level="warn" message="In reduce#QuantitiesToHandled calculated quantity ${quantityHandled} less than zero for shipment ${shipmentId} product ${shipmentItem.productId}"/>
+                    <set field="quantityHandled" from="0.0"/>
+                </if>
+                <if condition="shipmentItem.quantity != quantityHandled">
+                    <service-call name="mantle.shipment.ShipmentServices.update#ShipmentItem"
+                            in-map="[shipmentId:shipmentId, productId:shipmentItem.productId, quantity:quantityHandled]"/>
+
+                    <!-- reduce ShipmentPackageContent quantity as needed, mostly to undo auto packaging -->
+                    <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="packageContentList">
+                        <econdition field-name="shipmentId"/>
+                        <econdition field-name="productId" from="shipmentItem.productId"/>
+                    </entity-find>
+                    <set field="quantityHandledRem" from="quantityHandled"/>
+                    <iterate list="packageContentList" entry="packageContent">
+                        <if condition="quantityHandledRem &lt; packageContent.quantity"><then>
+                            <if condition="quantityHandledRem == 0.0"><then>
+                                <entity-delete value-field="packageContent"/>
+                            </then><else>
+                                <set field="packageContent.quantity" from="quantityHandledRem"/>
+                                <entity-update value-field="packageContent"/>
+                                <set field="quantityHandledRem" from="0.0"/>
+                            </else></if>
+                        </then><else>
+                            <set field="quantityHandledRem" from="quantityHandledRem - packageContent.quantity"/>
+                        </else></if>
+                    </iterate>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========== Shipment Notification Services ========== -->
+
+    <service verb="send" noun="ShipmentStoreEmail" authenticate="anonymous-view">
+        <description>Called by SECA rule in Shipment.secas.xml on tx-commit so always run async from triggering thread</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="emailTypeEnumId" required="true"/>
+            <parameter name="toAddresses"><text-email/></parameter>
+            <parameter name="forceByType" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList" distinct="true">
+                <econdition field-name="shipmentId"/><select-field field-name="orderId,invoiceId"/></entity-find>
+            <set field="orderIdSet" from="new HashSet(shipmentItemSourceList*.orderId)"/>
+            <set field="invoiceIdSet" from="new HashSet(shipmentItemSourceList*.invoiceId)"/>
+            <script>orderIdSet.remove(null); invoiceIdSet.remove(null)</script>
+            <if condition="!orderIdSet"><return/></if>
+
+            <entity-find entity-name="mantle.order.OrderHeader" list="orderHeaderList">
+                <econdition field-name="orderId" operator="in" from="orderIdSet"/></entity-find>
+            <set field="productStoreIdSet" from="new HashSet(orderHeaderList*.productStoreId)"/>
+            <script>productStoreIdSet.remove(null)</script>
+            <if condition="!productStoreIdSet"><return/></if>
+
+            <entity-find entity-name="mantle.product.store.ProductStoreEmail" list="storeEmailList">
+                <date-filter/><econdition field-name="productStoreId" operator="in" from="productStoreIdSet"/>
+                <econdition field-name="emailTypeEnumId"/>
+            </entity-find>
+            <if condition="storeEmailList">
+                <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+                <set field="toPartyId" from="shipment.toPartyId"/>
+
+                <!-- get to party email address -->
+                <if condition="!toAddresses">
+                    <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="emailInfo"
+                            in-map="[partyId:toPartyId, emailContactMechPurposeId:'EmailShippingDest', defaultToPrimaryPurpose:true]"/>
+                    <set field="toAddresses" from="emailInfo.emailAddress"/>
+                    <!-- get to party userId for toUserId -->
+                    <entity-find entity-name="moqui.security.UserAccount" list="userAccountList" limit="1">
+                        <econdition field-name="partyId" from="toPartyId"/></entity-find>
+                    <if condition="userAccountList"><set field="toUserId" from="userAccountList[0].userId"/></if>
+                </if>
+                <if condition="!toAddresses"><return/></if>
+
+                <!-- send email for each configured -->
+                <iterate list="storeEmailList" entry="storeEmail">
+                    <if condition="!storeEmail.emailTemplateId"><continue/></if>
+
+                    <if condition="!forceByType">
+                        <entity-find entity-name="mantle.shipment.ShipmentEmailMessageDetail" list="existingMessages">
+                            <econdition field-name="shipmentId"/><econdition field-name="emailTypeEnumId"/>
+                            <select-field field-name="emailMessageId"/>
+                        </entity-find>
+                        <if condition="existingMessages">
+                            <message type="warning">Not sending ${emailTypeEnumId} email for shipment ${shipmentId}, found messages: ${existingMessages*.emailMessageId}</message>
+                            <continue/>
+                        </if>
+                    </if>
+
+                    <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
+                        <field-map field-name="productStoreId" from="storeEmail.productStoreId"/></entity-find-one>
+                    <!-- simple bodyParameters, let the screen do data prep -->
+                    <set field="bodyParameters" from="[shipmentId:shipmentId, orderIdSet:new TreeSet(orderIdSet),
+                        invoiceId:(invoiceIdSet ? invoiceIdSet.first() : null),
+                        storeDomain:productStore.storeDomain, profileUrlPath:productStore.profileUrlPath,
+                        headerImagePath:storeEmail.headerImagePath, detailLinkPath:storeEmail.detailLinkPath]"/>
+
+                    <if condition="!storeEmail.emailTemplateId"><continue/></if>
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" out-map="sendOut" out-map-add-to-existing="false"
+                            in-map="[emailTemplateId:storeEmail.emailTemplateId, emailTypeEnumId:emailTypeEnumId,
+                                toAddresses:toAddresses, bodyParameters:bodyParameters, toUserId:toUserId]"/>
+                    <script>if (sendOut.emailMessageId) { ec.service.sync().name("create#mantle.shipment.ShipmentEmailMessage")
+                            .parameter("shipmentId", shipmentId).parameter("emailMessageId", sendOut.emailMessageId).disableAuthz().call() }</script>
+                    <message>Email sent to ${toAddresses}${sendOut.emailMessageId ? ', message ID ' + sendOut.emailMessageId : ''}</message>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ============================================== -->
+    <!-- ========== ShipmentContent Services ========== -->
+    <!-- ============================================== -->
+
+    <service verb="create" noun="ShipmentContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.shipment.ShipmentContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="shipmentContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.shipment.ShipmentContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.shipment.ShipmentServices.save#ShipmentContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="ShipmentContent">
+        <in-parameters>
+            <parameter name="shipmentContentId" required="true"/>
+            <auto-parameters entity-name="mantle.shipment.ShipmentContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.shipment.ShipmentContent" value-field="shipmentContent"/>
+                <service-call name="mantle.shipment.ShipmentServices.save#ShipmentContentFile" out-map="context"
+                        in-map="context + [shipmentId:shipmentContent.shipmentId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.shipment.ShipmentContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="ShipmentContentFile">
+        <in-parameters>
+            <parameter name="shipmentContentId" required="true"/>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/shipment/${shipmentId}/content_${shipmentContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.shipment.ShipmentContent"
+                    in-map="[shipmentContentId:shipmentContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+</services>

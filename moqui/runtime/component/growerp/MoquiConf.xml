@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd">
+
+    <default-property name="paymentGatewayConfigId" value="TEST_APPROVE"/>   <!--  for test: TEST_APPROVE stripe: StripeDemo-->
+    <!--default-property name="instance_purpose" value="test"/-->
+    <screen-facade>
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="growerp" menu-include="false" no-sub-path="true"
+                location="component://growerp/screen/rest.xml"/>
+        </screen>
+    </screen-facade>
+</moqui-conf>

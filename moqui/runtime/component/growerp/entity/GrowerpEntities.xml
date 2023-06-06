@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
+
+    <!--extend-entity entity-name="Asset" package="mantle.product.asset">
+        <relationship type="one" related="mantle.facility.FacilityLocation" short-alias="location">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqid"/>
+        </relationship>
+    </extend-entity-->
+
+    <extend-entity entity-name="GlAccount" package="mantle.ledger.account" sequence-primary-prefix="n">
+        <field name="accountCode" type="text-medium" default="null"/>
+        <index name="GLACCT_UNQCD" unique="false">
+            <index-field name="accountCode"/>
+        </index>
+    </extend-entity>
+
+    <extend-entity entity-name="UserAccount" package="moqui.security">
+        <field name="telephoneNumber" type="text-medium">
+            <description>The telephone number to use for forgot password chats and other system messages.</description></field>
+    </extend-entity>
+
+    <extend-entity entity-name="Payment" package="mantle.account.payment"
+            sequence-primary-prefix="pay">
+        <field name="itemTypeGlAccountId" type="id"><description>Is used for posting this payment without invoice</description></field>
+        <relationship type="one" title="ItemType" related="mantle.ledger.account.GlAccount" short-alias="itemTypeGlAccount">
+            <key-map field-name="itemTypeGlAccountId"/></relationship>
+    </extend-entity>
+
+    <extend-entity entity-name="SalesOpportunity" package="mantle.sales.opportunity">
+        <field name="ownerPartyId" type="id">
+            <description>The company owner, to separate companies.</description></field>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId"/></relationship>
+    </extend-entity>
+
+    <extend-entity entity-name="Party" package="mantle.party">
+        <field name="vatPerc" type="number-decimal"/>
+        <field name="salesPerc" type="number-decimal"/>
+    </extend-entity>
+
+    <extend-entity entity-name="PostalAddress" package="mantle.party.contact">
+        <field name="stateProvince" type="text-medium"></field>
+    </extend-entity>
+
+    <extend-entity entity-name="OrderHeader" package="mantle.order"
+        sequence-primary-prefix="ord"/>
+
+    <extend-entity entity-name="Invoice" package="mantle.account.invoice"
+        sequence-primary-prefix="inv"/>
+
+    <extend-entity entity-name="Shipment" package="mantle.shipment"
+        sequence-primary-prefix="shp"/>
+
+    <extend-entity entity-name="AcctgTrans" package="mantle.ledger.transaction"
+        sequence-primary-prefix="trn"/>
+
+    <entity entity-name="AssetRental" package="growerp.product">
+        <field name="assetRentalId" type="id" is-pk="true"/>
+        <field name="assetId" type="id"/>
+        <field name="productId" type="id"/>
+        <field name="orderId" type="id"/>
+        <field name="orderItemSeqId" type="id"/>
+        <field name="rentalFromDate" type="date-time"/>
+        <field name="rentalThruDate" type="date-time"/>
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+        <relationship type="one-nofk" related="mantle.order.OrderHeader" short-alias="orderHeader"/>
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem"/>
+    </entity>
+
+    <entity entity-name="Statistics" package="growerp.general">
+        <field name="ownerPartyId" type="id" is-pk="true"/>
+        <field name="admins" type="number-integer"/>
+        <field name="employees" type="number-integer"/>
+        <field name="suppliers" type="number-integer"/>
+        <field name="leads" type="number-integer"/>
+        <field name="customers" type="number-integer"/>
+        <field name="openSlsOrders" type="number-integer"/>
+        <field name="openPurOrders" type="number-integer"/>
+        <field name="opportunities" type="number-integer"/>
+        <field name="myOpportunities" type="number-integer"/>
+        <field name="categories" type="number-integer"/>
+        <field name="products" type="number-integer"/>
+        <field name="assets" type="number-integer"/>
+        <field name="salesInvoicesNotPaidCount" type="number-integer"/>
+        <field name="salesInvoicesNotPaidAmount" type="number-float"/>
+        <field name="purchInvoicesNotPaidCount" type="number-integer"/>
+        <field name="purchInvoicesNotPaidAmount" type="number-float"/>
+        <field name="allTasks" type="number-integer"/>
+        <field name="notInvoicedHours" type="number-integer"/>
+        <field name="outgoingShipments" type="number-integer"/>
+        <field name="incomingShipments" type="number-integer"/>
+        <field name="whLocations" type="number-integer"/>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId"/></relationship>
+    </entity>
+
+    <entity entity-name="ChatMessage" package="growerp.general">
+        <field name="chatMessageId" type="id" is-pk="true"/>
+        <field name="content" type="text-medium"/>
+        <field name="chatRoomId" type="id"/>
+        <field name="fromUserId" type="id"/>
+        <relationship type="one" title="From" related="moqui.security.UserAccount">
+            <key-map field-name="fromUserId"/></relationship>
+        <relationship type="one" related="growerp.general.ChatRoom">
+            <key-map field-name="chatRoomId"/></relationship>
+    </entity>
+
+    <entity entity-name="ChatRoom" package="growerp.general">
+        <field name="chatRoomId" type="id" is-pk="true"/>
+        <field name="chatRoomName" type="text-medium"/>
+        <field name="isPrivate" type="text-indicator"/>
+        <field name="isActive" type="text-indicator"/>
+        <field name="ownerPartyId" type="id"/>
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId"/></relationship>
+    </entity>
+
+    <entity entity-name="ChatRoomMember" package="growerp.general">
+        <field name="chatRoomId" type="id" is-pk="true"/>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="isActive" type="text-indicator"/>
+        <field name="hasRead" type="text-indicator"/>
+
+        <relationship type="one" title="User" related="moqui.security.UserAccount">
+            <key-map field-name="userId"/></relationship>
+        <relationship type="one" title="Room" related="growerp.general.ChatRoom">
+            <key-map field-name="chatRoomId"/></relationship>
+    </entity>
+
+    <entity entity-name="ProductStoreContent" package="growerp.store">
+        <field name="productStoreContentId" type="id" is-pk="true"/>
+        <field name="productStoreId" type="id"/>
+        <field name="contentLocation" type="text-medium"/>
+        <field name="contentTypeEnumId" type="id"/>
+        <field name="description" type="text-long"/>
+        <field name="contentDate" type="date-time" default="ec.user.nowTimestamp"/>
+        <field name="userId" type="id" default="ec.user.userId"/>
+        <relationship type="one" related="mantle.product.store.ProductStore"/>
+        <relationship type="one" title="ProductStoreContentType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="contentTypeEnumId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Product Store Content Type" enumTypeId="ProductStoreContentType"/>
+            <moqui.basic.Enumeration enumId="PrstImageSmall" description="Image" enumTypeId="ProductStoreContentType"/>
+            <moqui.basic.Enumeration enumId="PrstImageMedium" description="Image" enumTypeId="ProductStoreContentType"/>
+            <moqui.basic.Enumeration enumId="PrstImageLarge" description="Image" enumTypeId="ProductStoreContentType"/>
+        </seed-data>
+    </entity>
+
+    <entity entity-name="Interface" package="growerp.general">
+        <field name="interfaceId" type="id" is-pk="true"/>
+        <field name="baseUrl" type="text-medium"/>
+        <field name="apiKey" type="text-long"/>
+        <field name="secretKey" type="text-medium"/>
+        <field name="value1" type="text-medium"/>
+        <field name="value2" type="text-medium"/>
+        <field name="value3" type="text-medium"/>
+        <field name="apiVersion" type="text-short"/>
+    </entity>
+
+</entities>

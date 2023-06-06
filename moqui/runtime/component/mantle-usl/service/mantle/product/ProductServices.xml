@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="find" noun="ProductByIdValue">
+        <in-parameters>
+            <parameter name="idValue" required="true"/>
+            <parameter name="ownerPartyId"/>
+            <parameter name="shipmentId"><description>For Product lookup in the context of a Shipment, common case for scanned IDs</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productId"/>
+        </out-parameters>
+        <actions>
+            <if condition="shipmentId">
+                <entity-find entity-name="mantle.shipment.ShipmentItem" list="shipmentItemList">
+                    <econdition field-name="shipmentId"/>
+                </entity-find>
+                <set field="productIdList" from="shipmentItemList*.productId"/>
+            </if>
+
+            <if condition="ownerPartyId"><then>
+                <set field="ownerPartyIds" from="['_NA_', ownerPartyId]"/>
+            </then><else>
+                <!-- if an AssetOwner Party is specified for the Shipment use it as the Product.ownerPartyId -->
+                <entity-find entity-name="mantle.shipment.ShipmentParty" list="assetOwnerPartyList">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="roleTypeId" value="AssetOwner"/>
+                    <order-by field-name="partyId"/>
+                </entity-find>
+                <if condition="assetOwnerPartyList">
+                    <set field="ownerPartyIds" from="['_NA_'] + assetOwnerPartyList*.partyId"/></if>
+            </else></if>
+
+            <!-- see if idValue is a pseudoId -->
+            <entity-find entity-name="mantle.product.Product" list="productByPseudoList">
+                <econdition field-name="pseudoId" from="idValue"/>
+                <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                <econdition field-name="productId" operator="in" from="productIdList" ignore-if-empty="true"/>
+                <select-field field-name="productId"/>
+            </entity-find>
+            <if condition="productByPseudoList"><set field="productId" from="productByPseudoList[0].productId"/></if>
+            <!-- see if idValue is a ProductIdentification.idValue -->
+            <if condition="!productId">
+                <entity-find entity-name="mantle.product.ProductIdentificationAndProduct" list="prodIdentList">
+                    <econdition field-name="idValue"/>
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                    <econdition field-name="productId" operator="in" from="productIdList" ignore-if-empty="true"/>
+                </entity-find>
+                <if condition="prodIdentList.size() == 1"><then>
+                    <set field="productId" from="prodIdentList[0].productId"/>
+                </then><else-if condition="prodIdentList.size() &gt; 1">
+                    <message type="warning">Found multiple products with ID ${idValue}: ${prodIdentList*.productId.join(', ')}</message>
+                </else-if></if>
+            </if>
+            <!-- lastly see if idValue is a productId, respecting ownerPartyId if specified -->
+            <if condition="!productId">
+                <entity-find entity-name="mantle.product.Product" list="productByProdIdList">
+                    <econdition field-name="productId" from="idValue"/>
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                    <select-field field-name="productId"/>
+                </entity-find>
+                <if condition="productByProdIdList"><set field="productId" from="productByProdIdList[0].productId"/></if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="clone" noun="Product">
+        <in-parameters>
+            <parameter name="baseProductId" required="true" default="productId"/>
+            <parameter name="productId"/>
+            <auto-parameters entity-name="mantle.product.Product" include="nonpk"/>
+            <parameter name="copyCategories" type="Boolean" default="true"/>
+            <parameter name="copyFeatures" type="Boolean" default="true"/>
+            <parameter name="copyDimensions" type="Boolean" default="true"/>
+            <parameter name="copyAssocFrom" type="Boolean" default="true"/>
+            <parameter name="copyAssocTo" type="Boolean" default="true"/>
+            <parameter name="copyPrices" type="Boolean" default="true"/>
+            <parameter name="copyContent" type="Boolean" default="true"/>
+            <parameter name="copyIdentifications" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="productId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="false">
+                <field-map field-name="productId" from="baseProductId"/></entity-find-one>
+
+            <entity-set value-field="product" include="nonpk"/>
+            <!-- pseudoId is unique, clear to get default if new one not passed in -->
+            <set field="product.pseudoId" from="pseudoId ?: null"/>
+
+            <if condition="productId &amp;&amp; productId != baseProductId"><then>
+                <set field="product.productId" from="productId"/>
+            </then><else>
+                <set field="product.productId" from="null"/>
+                <entity-sequenced-id-primary value-field="product"/>
+            </else></if>
+
+            <entity-create value-field="product"/>
+            <set field="productId" from="product.productId"/>
+
+            <if condition="copyCategories">
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="pcmList" cache="false">
+                    <date-filter/><econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pcmList" entry="pcm"><set field="pcm.productId" from="productId"/><entity-create value-field="pcm"/></iterate>
+            </if>
+            <if condition="copyFeatures">
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAppl" list="pfaList" cache="false">
+                    <date-filter/><econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pfaList" entry="pfa"><set field="pfa.productId" from="productId"/><entity-create value-field="pfa"/></iterate>
+            </if>
+            <if condition="copyDimensions">
+                <entity-find entity-name="mantle.product.ProductDimension" list="pdimList" cache="false">
+                    <econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pdimList" entry="pdim"><set field="pdim.productId" from="productId"/><entity-create value-field="pdim"/></iterate>
+            </if>
+
+            <if condition="copyAssocFrom">
+                <entity-find entity-name="mantle.product.ProductAssoc" list="pasList" cache="false">
+                    <date-filter/><econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pasList" entry="pas"><set field="pas.productId" from="productId"/><entity-create value-field="pas"/></iterate>
+            </if>
+            <if condition="copyAssocTo">
+                <entity-find entity-name="mantle.product.ProductAssoc" list="pasList" cache="false">
+                    <date-filter/><econdition field-name="toProductId" from="baseProductId"/></entity-find>
+                <iterate list="pasList" entry="pas"><set field="pas.toProductId" from="productId"/><entity-create value-field="pas"/></iterate>
+            </if>
+
+            <if condition="copyPrices">
+                <entity-find entity-name="mantle.product.ProductPrice" list="pasList" cache="false">
+                    <date-filter/><econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pasList" entry="pas">
+                    <set field="pas.productId" from="productId"/>
+                    <set field="pas.productPriceId" from="null"/>
+                    <entity-sequenced-id-primary value-field="pas"/>
+                    <entity-create value-field="pas"/>
+                </iterate>
+            </if>
+            <if condition="copyContent">
+                <entity-find entity-name="mantle.product.ProductContent" list="pcntList" cache="false">
+                    <date-filter/><econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pcntList" entry="pcnt">
+                    <set field="pcnt.productId" from="productId"/>
+                    <set field="pcnt.productContentId" from="null"/>
+                    <entity-sequenced-id-primary value-field="pcnt"/>
+                    <entity-create value-field="pcnt"/>
+                </iterate>
+            </if>
+            <if condition="copyIdentifications">
+                <entity-find entity-name="mantle.product.ProductIdentification" list="pasList" cache="false">
+                    <econdition field-name="productId" from="baseProductId"/></entity-find>
+                <iterate list="pasList" entry="pas"><set field="pas.productId" from="productId"/><entity-create value-field="pas"/></iterate>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ============================= -->
+    <!-- Services for Product Features -->
+
+    <service verb="create" noun="ProductFeature">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.feature.ProductFeature" include="nonpk"/>
+            <parameter name="productFeatureTypeEnumId" required="true"/>
+            <parameter name="description" required="true"/>
+            <parameter name="productId"><description>If specified apply to product after create</description></parameter>
+            <parameter name="applTypeEnumId" default-value="PfatStandard"/>
+            <parameter name="fromDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="sequenceNum" type="Long"/>
+            <parameter name="amount" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters><parameter name="productFeatureId"/></out-parameters>
+        <actions>
+            <set field="description" from="description.trim()"/>
+            <entity-find entity-name="mantle.product.feature.ProductFeature" list="existingList">
+                <econdition field-name="productFeatureTypeEnumId"/>
+                <econdition field-name="description" ignore-case="true"/>
+                <econdition field-name="ownerPartyId"/><!-- not ignore-if-empty, if null match against null -->
+            </entity-find>
+            <if condition="existingList"><then>
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="typeEnum">
+                    <field-map field-name="enumId" from="productFeatureTypeEnumId"/></entity-find-one>
+                <message type="warning">Feature ${existingList[0].description} of type ${typeEnum?.description ?: productFeatureTypeEnumId} already exists</message>
+                <set field="productFeatureId" from="existingList[0].productFeatureId"/>
+            </then><else>
+                <service-call name="create#mantle.product.feature.ProductFeature" in-map="context" out-map="context"/>
+            </else></if>
+
+            <if condition="productId">
+                <service-call name="mantle.product.ProductServices.apply#ProductFeatures"
+                        in-map="[productId:productId, productFeatureIdList:[productFeatureId], applTypeEnumId:applTypeEnumId,
+                            fromDate:fromDate, sequenceNum:sequenceNum, amount:amount]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="apply" noun="ProductFeatures">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="applTypeEnumId" default-value="PfatStandard"/>
+            <parameter name="productFeatureIdList" type="List"><parameter name="productFeatureId"/></parameter>
+            <parameter name="fromDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="sequenceNum" type="Long"/>
+            <parameter name="amount" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <iterate list="productFeatureIdList" entry="productFeatureId">
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAppl" list="existingAppls">
+                    <date-filter/><econdition field-name="productId"/>
+                    <econdition field-name="productFeatureId"/>
+                    <econdition field-name="applTypeEnumId"/>
+                </entity-find>
+                <if condition="existingAppls"><then>
+                    <entity-find-one entity-name="mantle.product.feature.ProductFeature" value-field="productFeature"/>
+                    <message type="warning">Feature ${ec.resource.expand('ProductFeatureNameTemplate','',productFeature)} already applied</message>
+                </then><else>
+                    <service-call name="create#mantle.product.feature.ProductFeatureAppl" in-map="context"/>
+                </else></if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="find" noun="ProductFeatures">
+        <description>Finds all product features (optionally limited by appl type) for a product and any feature groups
+            associated with a category that the product is a member of. The result is a List of entity values for
+            either the ProductFeatureAndAppl or ProductFeatureAndGroupAppl view entities.</description>
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="applTypeEnumId"/>
+            <parameter name="productFeatureGroupIdSet" type="Set"><parameter name="productFeatureGroupId"/></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productFeatureList" type="List"><parameter name="productFeature" type="Map"/></parameter>
+        </out-parameters>
+        <actions>
+            <set field="productFeatureList" from="[]"/>
+
+            <entity-find entity-name="mantle.product.feature.ProductFeatureAndAppl" list="pfaaList">
+                <date-filter/><econdition field-name="productId"/>
+                <econdition field-name="applTypeEnumId" from="applTypeEnumId" ignore-if-empty="true"/>
+            </entity-find>
+            <script>productFeatureList.addAll(pfaaList)</script>
+
+            <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="pcmList">
+                <date-filter/><econdition field-name="productId"/></entity-find>
+            <iterate list="pcmList" entry="pcm">
+                <entity-find entity-name="mantle.product.feature.ProductCategoryFeatGrpAppl" list="pcfgaList">
+                    <date-filter/><econdition field-name="productCategoryId" from="pcm.productCategoryId"/>
+                    <econdition field-name="productFeatureGroupId" operator="in" from="productFeatureGroupIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="applTypeEnumId" ignore-if-empty="true"/>
+                </entity-find>
+                <iterate list="pcfgaList" entry="pcfga">
+                    <entity-find entity-name="mantle.product.feature.ProductFeatureAndGroupAppl" list="pfagaList">
+                        <date-filter/><econdition field-name="productFeatureGroupId" from="pcfga.productFeatureGroupId"/></entity-find>
+                    <script>productFeatureList.addAll(pfagaList)</script>
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="find" noun="ProductFeatureGroups">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="applTypeEnumId" default-value="PfatSelectable"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productFeatureGroupList" type="List"><parameter name="productFeatureGroup" type="Map"/></parameter>
+        </out-parameters>
+        <actions>
+            <set field="productFeatureGroupList" from="[]"/>
+
+            <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="pcmList">
+                <date-filter/><econdition field-name="productId"/></entity-find>
+            <iterate list="pcmList" entry="pcm">
+                <entity-find entity-name="mantle.product.feature.ProductCategoryFeatGrpAppl" list="pcfgaList">
+                    <date-filter/><econdition field-name="productCategoryId" from="pcm.productCategoryId"/>
+                    <econdition field-name="productFeatureGroupId" operator="in" from="productFeatureGroupIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="applTypeEnumId" from="applTypeEnumId" ignore-if-empty="true"/>
+                </entity-find>
+                <iterate list="pcfgaList" entry="pcfga">
+                    <entity-find-one entity-name="mantle.product.feature.ProductFeatureGroup" value-field="pfg" cache="true">
+                        <field-map field-name="productFeatureGroupId" from="pcfga.productFeatureGroupId"/></entity-find-one>
+                    <script>productFeatureGroupList.add(pfg)</script>
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="find" noun="ProductCategoryFeatures">
+        <in-parameters>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="applTypeEnumId"/>
+            <parameter name="productFeatureTypeEnumId"/>
+            <parameter name="productFeatureGroupIdSet" type="Set"><parameter name="productFeatureGroupId"/></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productFeatureList" type="List"><parameter name="productFeature" type="Map"/></parameter>
+        </out-parameters>
+        <actions>
+            <set field="productFeatureMap" from="[:]"/>
+            <entity-find entity-name="mantle.product.feature.ProductCategoryFeatGrpAppl" list="pcfgaList">
+                <date-filter/><econdition field-name="productCategoryId"/>
+                <econdition field-name="productFeatureGroupId" operator="in" from="productFeatureGroupIdSet" ignore-if-empty="true"/>
+                <econdition field-name="applTypeEnumId" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="pcfgaList" entry="pcfga">
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAndGroupAppl" list="pfagaList">
+                    <date-filter/><econdition field-name="productFeatureGroupId" from="pcfga.productFeatureGroupId"/>
+                    <econdition field-name="productFeatureTypeEnumId" ignore-if-empty="true"/>
+                </entity-find>
+                <iterate list="pfagaList" entry="pfaga">
+                    <script>productFeatureMap.put(pfaga.productFeatureId, pfaga)</script>
+                </iterate>
+            </iterate>
+            <set field="productFeatureList" from="new ArrayList(productFeatureMap.values())"/>
+        </actions>
+    </service>
+    <service verb="get" noun="ProductCategoryFeatureList">
+        <in-parameters>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="applTypeEnumId"/>
+            <parameter name="productFeatureTypeEnumId"/>
+            <parameter name="productFeatureGroupIdSet" type="Set"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"/></out-parameters>
+        <actions>
+            <service-call name="mantle.product.ProductServices.find#ProductCategoryFeatures" out-map="context" in-map="context"/>
+            <script>
+                resultList = []
+                for (def productFeature in productFeatureList)
+                    resultList.add([productFeatureId:productFeature.productFeatureId, label:ec.resource.expand('ProductFeatureNameTemplate', '', productFeature)])
+            </script>
+        </actions>
+    </service>
+    <service verb="get" noun="FeatureByIactnOrAll">
+        <description>Look for related features by ProductFeatureIactn and if none found get all of the given feature type.</description>
+        <in-parameters>
+            <parameter name="productFeatureId"/>
+            <parameter name="findByTo" type="Boolean" default="false"/>
+            <parameter name="productFeatureTypeEnumId" required="true"/>
+            <parameter name="iactnTypeEnumId" default-value="PfitCompatible"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"><parameter name="result" type="Map"/></parameter></out-parameters>
+        <actions>
+            <if condition="productFeatureId">
+                <entity-find entity-name="mantle.product.feature.ProductFeatureIactn" list="iactnList">
+                    <econdition field-name="productFeatureId" ignore="findByTo"/>
+                    <econdition field-name="toProductFeatureId" from="productFeatureId" ignore="!findByTo"/>
+                    <econdition field-name="iactnTypeEnumId"/>
+                </entity-find>
+            </if>
+            <set field="resultList" from="[]"/>
+            <iterate list="iactnList" entry="iactn">
+                <if condition="findByTo">
+                    <entity-find-one entity-name="mantle.product.feature.ProductFeature" value-field="feature" cache="true">
+                        <field-map field-name="productFeatureId" from="iactn.productFeatureId"/></entity-find-one>
+                    <else>
+                        <entity-find-one entity-name="mantle.product.feature.ProductFeature" value-field="feature" cache="true">
+                            <field-map field-name="productFeatureId" from="iactn.toProductFeatureId"/></entity-find-one>
+                    </else>
+                </if>
+                <if condition="feature.productFeatureTypeEnumId == productFeatureTypeEnumId">
+                    <script>resultList.add([productFeatureId:feature.productFeatureId, label:ec.resource.expand('ProductFeatureNameTemplate', '', feature)])</script>
+                </if>
+            </iterate>
+            <if condition="!resultList">
+                <entity-find entity-name="mantle.product.feature.ProductFeature" list="featureList">
+                    <econdition field-name="productFeatureTypeEnumId"/></entity-find>
+                <iterate list="featureList" entry="feature">
+                    <script>resultList.add([productFeatureId:feature.productFeatureId, label:ec.resource.expand('ProductFeatureNameTemplate', '', feature)])</script>
+                </iterate>
+            </if>
+            <order-map-list list="resultList"><order-by field-name="label"/></order-map-list>
+        </actions>
+    </service>
+
+    <!-- =================================== -->
+    <!-- Services for Products with Variants -->
+
+    <service verb="find" noun="VariantProduct">
+        <in-parameters>
+            <parameter name="baseProductId" required="true" default="productId"/>
+            <parameter name="productId"/>
+            <parameter name="productFeatureIdSet" type="Set" required="true"><parameter name="productFeatureId"/></parameter>
+            <parameter name="productTypeEnumId"/>
+            <parameter name="assetTypeEnumId"/>
+            <parameter name="assetClassEnumId"/>
+            <parameter name="createIfMissing" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters><parameter name="productId"/></out-parameters>
+        <actions>
+            <if condition="productFeatureIdSet.size() == 0"><return/></if>
+            <set field="productFeatureIdList" from="new ArrayList(productFeatureIdSet)"/>
+
+            <!-- find variants with first feature, filter from there -->
+            <set field="firstProductFeatureId" from="productFeatureIdList[0]"/>
+            <script>productFeatureIdList.remove(0)</script>
+            <entity-find entity-name="ProductAssocAndToFeatureAppl" list="paatafaList">
+                <date-filter/><econdition field-name="productId" from="baseProductId"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+                <econdition field-name="applTypeEnumId" operator="in" value="PfatDistinguishing,PfatStandard"/>
+                <econdition field-name="productFeatureId" from="firstProductFeatureId"/>
+            </entity-find>
+
+            <set field="productId" from="null"/>
+            <iterate list="paatafaList" entry="paatafa">
+                <set field="hasAllFeatures" from="true"/>
+                <iterate list="productFeatureIdList" entry="productFeatureId">
+                    <entity-find-count entity-name="mantle.product.feature.ProductFeatureAppl" count-field="pfaCount">
+                        <date-filter/><econdition field-name="productId" from="paatafa.toProductId"/>
+                        <econdition field-name="applTypeEnumId" operator="in" value="PfatDistinguishing,PfatStandard"/>
+                        <econdition field-name="productFeatureId"/>
+                    </entity-find-count>
+                    <if condition="pfaCount == 0"><set field="hasAllFeatures" from="false"/><break/></if>
+                </iterate>
+                <if condition="hasAllFeatures"><set field="productId" from="paatafa.toProductId"/><break/></if>
+            </iterate>
+
+            <!-- no productId and createIfMissing=true? create one... -->
+            <if condition="!productId &amp;&amp; createIfMissing">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                    <field-map field-name="productId" from="baseProductId"/></entity-find-one>
+                <entity-find entity-name="mantle.product.feature.ProductFeature" list="featureList">
+                    <econdition field-name="productFeatureId" operator="in" from="productFeatureIdSet"/></entity-find>
+                <service-call name="mantle.product.ProductServices.create#VariantProduct" out-map="context"
+                        in-map="[product:product, productTypeEnumId:productTypeEnumId, assetClassEnumId:assetClassEnumId,
+                            assetTypeEnumId:assetTypeEnumId, featureList:featureList]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="VariantProductsInfo">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="productStoreId"/>
+            <parameter name="priceUomId"/>
+            <parameter name="locale"/>
+            <parameter name="vendorPartyId"/>
+            <parameter name="customerPartyId"/>
+            <parameter name="getAvailableInventory" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="minPrice" type="BigDecimal"/>
+            <parameter name="maxPrice" type="BigDecimal"/>
+            <parameter name="isDiscounted" type="Boolean"/>
+            <parameter name="featureTypeInfoList" type="List"><parameter name="featureTypeInfo" type="Map">
+                <parameter name="enumId"/>
+                <parameter name="description"/>
+                <parameter name="sequenceNum" type="Long"/>
+                <parameter name="featureInfoList" type="List"><parameter name="featureInfo">
+                    <parameter name="productFeatureId"/>
+                    <parameter name="productFeatureTypeEnumId"/>
+                    <parameter name="description"/>
+                    <parameter name="abbrev"/>
+                    <parameter name="idCode"/>
+                    <parameter name="sequenceNum" type="Long"/>
+                </parameter></parameter>
+            </parameter></parameter>
+            <!-- maybe not needed, use featureTypeInfoList
+            <parameter name="selectableByType" type="Map">
+                <description>Sorted Map (LinkedHashMap) with key productFeatureTypeEnumId and value is a List of ProductFeature objects</description></parameter>
+            -->
+            <parameter name="productInfoList" type="List"><parameter name="productInfo" type="Map">
+                <!-- flat productFeatureIds for easy find/filter -->
+                <parameter name="productFeatureId1"/>
+                <parameter name="productFeatureId2"/>
+                <parameter name="productFeatureId3"/>
+                <parameter name="productFeatureIdByTypeId" type="Map"/>
+                <parameter name="productId"/>
+                <parameter name="pseudoId"/>
+                <parameter name="productName"/>
+                <parameter name="price" type="BigDecimal"/>
+                <parameter name="listPrice" type="BigDecimal"/>
+                <parameter name="priceUomId"/>
+                <parameter name="smallImageProductContentId"/>
+                <parameter name="availableToPromiseTotal" type="BigDecimal">
+                    <description>Only populated if productStoreId AND getAvailableInventory</description></parameter>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.feature.ProductFeatureAndAppl" list="pfApplList" cache="true">
+                <date-filter/><econdition field-name="productId"/>
+                <econdition field-name="applTypeEnumId" value="PfatSelectable"/>
+                <order-by field-name="sequenceNum,productFeatureTypeEnumId,defaultSequenceNum,description"/>
+            </entity-find>
+            <!-- TODO -->
+        </actions>
+    </service>
+
+    <service verb="create" noun="VariantProducts">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="productTypeEnumId"/>
+            <parameter name="assetTypeEnumId"/>
+            <parameter name="assetClassEnumId"/>
+            <parameter name="productFeatureGroupIdSet" type="Set"><parameter name="productFeatureGroupId"/></parameter>
+            <parameter name="copyCategoryMembers" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.Product" value-field="product"/>
+
+            <!-- find all PfatSelectable features for the product and related categories -->
+            <service-call name="mantle.product.ProductServices.find#ProductFeatures" out-map="context"
+                in-map="[productId:productId, applTypeEnumId:'PfatSelectable', productFeatureGroupIdSet:productFeatureGroupIdSet]"/>
+
+            <!-- split by feature type -->
+            <set field="featuresByType" from="[:]"/>
+            <iterate list="productFeatureList" entry="productFeature">
+                <script>addToListInMap(productFeature.productFeatureTypeEnumId, productFeature, featuresByType)</script></iterate>
+            <!-- now we want an ordered list to track the index -->
+            <set field="featureListList" from="[]"/>
+            <!-- add each List to List ordered by the key for consistency -->
+            <set field="featureTypeTreeSet" from="new TreeSet(featuresByType.keySet())"/>
+            <iterate list="featureTypeTreeSet" entry="featureType"><script>featureListList.add(featuresByType.get(featureType))</script></iterate>
+
+            <!-- create a variant for each combination of features by type -->
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+                import org.moqui.entity.EntityCondition
+
+                ExecutionContext ec = context.ec
+
+                def recursiveCreate(ExecutionContext ec, EntityValue product, List<List<EntityValue>> featureListList,
+                                    ArrayList<EntityValue> featureList, int level) {
+
+                    for (int i = 0; i < featureListList[level].size(); i++) {
+                        featureList[level] = featureListList.get(level).get(i)
+                        if (level == featureListList.size() - 1) {
+                            // at the bottom, create the variant
+                            ec.service.sync().name("mantle.product.ProductServices.create#VariantProduct")
+                                    .parameters([product:product, productTypeEnumId:productTypeEnumId,
+                                                 assetTypeEnumId:assetTypeEnumId, assetClassEnumId:assetClassEnumId,
+                                                 featureList:featureList, copyCategoryMembers:copyCategoryMembers])
+                                    .call()
+                        } else {
+                            recursiveCreate(ec, product, featureListList, featureList, level + 1)
+                        }
+                    }
+                }
+
+                recursiveCreate(ec, product, featureListList, new ArrayList(featureListList.size()), 0)
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="create" noun="VariantProduct">
+        <in-parameters>
+            <parameter name="product" type="EntityValue" required="true"/>
+            <parameter name="productTypeEnumId"/>
+            <parameter name="assetTypeEnumId"/>
+            <parameter name="assetClassEnumId"/>
+            <parameter name="featureList" type="List"/>
+            <parameter name="copyStandardFeatures" type="Boolean" default="true"/>
+            <parameter name="copyCategoryMembers" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters><parameter name="productId"/></out-parameters>
+        <actions>
+            <if condition="copyStandardFeatures">
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAppl" list="standardFeatureList">
+                    <date-filter/><econdition field-name="productId" from="product.productId"/>
+                    <econdition field-name="applTypeEnumId" value="PfatStandard"/></entity-find>
+            </if>
+            <if condition="copyCategoryMembers">
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="pcmList">
+                    <date-filter/><econdition field-name="productId" from="product.productId"/></entity-find>
+            </if>
+
+            <script><![CDATA[
+                import org.moqui.entity.EntityCondition
+
+                productId = product.pseudoId ?: product.productId
+                String productName = product.productName
+                for (EntityValue feature in featureList) {
+                    // get the feature type Enumeration record for the description
+                    EntityValue typeEnum = ec.entity.find("moqui.basic.Enumeration")
+                            .condition("enumId", feature.productFeatureTypeEnumId).useCache(true).one()
+                    productId = productId + "_" + (feature.abbrev ?: feature.productFeatureId)
+                    productName = productName + " " + feature.description
+                }
+
+                // see if product exists (by ID) before creating
+                EntityValue existingProduct = ec.entity.find("mantle.product.Product")
+                        .condition("productId", productId).one()
+                if (existingProduct) return
+
+                // see if variant with the same features exists
+                EntityList allVariants = ec.entity.find("mantle.product.ProductAssoc")
+                        .condition([productId: product.productId, productAssocTypeEnumId: "PatVariant"])
+                        .conditionDate(null, null, null).list()
+                Set checkProductIds = new HashSet((Collection) allVariants.toProductId)
+                for (EntityValue feature in featureList) {
+                    if (!checkProductIds) break
+                    EntityList remainingWithFeature = ec.entity.find("mantle.product.feature.ProductFeatureAppl")
+                            .condition("productId", EntityCondition.IN, checkProductIds)
+                            .condition("productFeatureId", feature.productFeatureId).list()
+                    checkProductIds = new HashSet((Collection) remainingWithFeature.productId)
+                }
+                if (checkProductIds) {
+                    productId = checkProductIds.iterator().next()
+                    return
+                }
+
+                EntityValue newProduct = product.cloneValue()
+                newProduct.productName = productName; newProduct.productId = productId
+                if (productTypeEnumId) newProduct.productTypeEnumId = productTypeEnumId
+                if (assetTypeEnumId) newProduct.assetTypeEnumId = assetTypeEnumId
+                if (assetClassEnumId) newProduct.assetClassEnumId = assetClassEnumId
+                newProduct.pseudoId = null
+                newProduct.create()
+
+                ec.service.sync().name("create", "mantle.product.ProductAssoc")
+                        .parameters([productId:product.productId, toProductId:newProduct.productId,
+                                     productAssocTypeEnumId:"PatVariant", fromDate:ec.user.nowTimestamp]).call()
+
+                for (EntityValue feature in featureList) {
+                    ec.service.sync().name("create", "mantle.product.feature.ProductFeatureAppl")
+                            .parameters([productId:newProduct.productId, productFeatureId:feature.productFeatureId,
+                                         fromDate:ec.user.nowTimestamp, applTypeEnumId:"PfatDistinguishing"]).call()
+                }
+
+                for (EntityValue feature in standardFeatureList) {
+                    ec.service.sync().name("create", "mantle.product.feature.ProductFeatureAppl")
+                            .parameters([productId:newProduct.productId, productFeatureId:feature.productFeatureId,
+                                         fromDate:ec.user.nowTimestamp, applTypeEnumId:"PfatStandard"]).call()
+                }
+
+                for (EntityValue pcm in pcmList) {
+                    ec.service.sync().name("create", "mantle.product.category.ProductCategoryMember")
+                            .parameters([productId:newProduct.productId, productCategoryId:pcm.productCategoryId,
+                                         fromDate:ec.user.nowTimestamp]).call()
+                }
+
+                ec.logger.info("Created variant of ${product.productId}: ${newProduct.productId}:${newProduct.productName}")
+
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="VariantProducts">
+        <description>WARNING: This service deletes all variant products including dependent records and associations
+            with the specified product.</description>
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="callOutServiceName"><description>Name of a service to call for each variant
+                (by delete#Product), will pass in the productId.</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.ProductAssoc" list="assocList">
+                <!-- don't filter by date, we'll be deleting products want to get all of them -->
+                <econdition field-name="productId"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+            </entity-find>
+            <iterate list="assocList" entry="assoc">
+                <service-call name="mantle.product.ProductServices.delete#Product" ignore-error="true" transaction="force-new"
+                        in-map="[productId:assoc.toProductId, callOutServiceName:callOutServiceName]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="delete" noun="Product">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="callOutServiceName"><description>Call this service before deleting anything else, passes
+                in productId.</description></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="callOutServiceName">
+                <service-call name="${callOutServiceName}" in-map="[productId:productId]"/></if>
+
+            <!-- recursively delete variants/assocs -->
+            <service-call name="mantle.product.ProductServices.delete#VariantProducts"
+                    in-map="[productId:productId, callOutServiceName:callOutServiceName]"/>
+
+            <entity-find-one entity-name="mantle.product.Product" value-field="product"/>
+            <if condition="product != null">
+                <script>deletedProduct = product.deleteWithRelated(new HashSet(['assocs', 'toAssocs', 'contents', 'dimensions', 'geos',
+                                                                   'identifications', 'parties', 'prices', 'categories', 'features']))</script>
+                <if condition="deletedProduct"><then><message>Deleted product ${product.pseudoId}: ${product.productName}</message></then>
+                    <else><message>Not deleting product ${product.pseudoId}: ${product.productName}, has records that use it</message></else></if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- =========================================== -->
+    <!-- ========== Product Bulk Services ========== -->
+    <!-- =========================================== -->
+
+    <service verb="add" noun="ProductsToCategory">
+        <in-parameters>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="productIdList" type="List"><parameter name="productId"/></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!productIdList"><return type="danger" message="No products specified"/></if>
+
+            <set field="addedCount" from="0"/>
+            <set field="alreadyCount" from="0"/>
+            <iterate list="productIdList" entry="productId">
+                <set field="productId" from="productId.trim()"/>
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="existingPcmList">
+                    <date-filter/><econdition field-name="productId"/><econdition field-name="productCategoryId"/></entity-find>
+                <if condition="!existingPcmList"><then>
+                    <service-call name="create#mantle.product.category.ProductCategoryMember"
+                            in-map="[productId:productId, productCategoryId:productCategoryId, fromDate:ec.user.nowTimestamp]"/>
+                    <script>addedCount++</script>
+                </then><else>
+                    <script>alreadyCount++</script>
+                </else></if>
+            </iterate>
+
+            <entity-find-one entity-name="mantle.product.category.ProductCategory" value-field="productCategory">
+                <field-map field-name="productCategoryId"/></entity-find-one>
+            <message>Added ${addedCount} products to category ${ec.resource.expand('ProductCategoryNameTemplate','',productCategory)} (${alreadyCount} were already in it)</message>
+        </actions>
+    </service>
+    <service verb="remove" noun="ProductsFromCategory">
+        <in-parameters>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="productIdList" type="List"><parameter name="productId"/></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!productIdList"><return type="danger" message="No products specified"/></if>
+
+            <set field="removedCount" from="0"/>
+            <set field="alreadyCount" from="0"/>
+            <iterate list="productIdList" entry="productId">
+                <set field="productId" from="productId.trim()"/>
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember" list="existingPcmList">
+                    <date-filter/><econdition field-name="productId"/><econdition field-name="productCategoryId"/></entity-find>
+                <if condition="existingPcmList"><then>
+                    <iterate list="existingPcmList" entry="existingPcm">
+                        <service-call name="update#mantle.product.category.ProductCategoryMember"
+                                in-map="[productId:productId, productCategoryId:productCategoryId, fromDate:existingPcm.fromDate, thruDate:ec.user.nowTimestamp]"/>
+                    </iterate>
+                    <script>removedCount++</script>
+                </then><else>
+                    <script>alreadyCount++</script>
+                </else></if>
+            </iterate>
+
+            <entity-find-one entity-name="mantle.product.category.ProductCategory" value-field="productCategory">
+                <field-map field-name="productCategoryId"/></entity-find-one>
+            <message>Removed ${removedCount} products from category ${ec.resource.expand('ProductCategoryNameTemplate','',productCategory)} (${alreadyCount} were not in it)</message>
+        </actions>
+    </service>
+
+    <service verb="add" noun="FeatureToProducts">
+        <in-parameters>
+            <parameter name="productFeatureId" required="true"/>
+            <parameter name="applTypeEnumId" required="true"/>
+            <parameter name="productIdList" type="List"><parameter name="productId"/></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!productIdList"><return type="danger" message="No products specified"/></if>
+
+            <set field="addedCount" from="0"/>
+            <set field="alreadyCount" from="0"/>
+            <iterate list="productIdList" entry="productId">
+                <set field="productId" from="productId.trim()"/>
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAppl" list="existingPfaList">
+                    <date-filter/><econdition field-name="productId"/><econdition field-name="productFeatureId"/></entity-find>
+                <if condition="!existingPfaList"><then>
+                    <service-call name="create#mantle.product.feature.ProductFeatureAppl"
+                            in-map="[productId:productId, productFeatureId:productFeatureId, applTypeEnumId:applTypeEnumId, fromDate:ec.user.nowTimestamp]"/>
+                    <script>addedCount++</script>
+                </then><else>
+                    <script>alreadyCount++</script>
+                </else></if>
+            </iterate>
+
+            <entity-find-one entity-name="mantle.product.feature.ProductFeature" value-field="productFeature">
+                <field-map field-name="productFeatureId"/></entity-find-one>
+            <message>Added feature ${ec.resource.expand('ProductFeatureNameTemplate','',productFeature)} to ${addedCount} products (${alreadyCount} already had it)</message>
+        </actions>
+    </service>
+    <service verb="remove" noun="FeatureFromProducts">
+        <in-parameters>
+            <parameter name="productFeatureId" required="true"/>
+            <parameter name="productIdList" type="List"><parameter name="productId"/></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!productIdList"><return type="danger" message="No products specified"/></if>
+
+            <set field="removedCount" from="0"/>
+            <set field="alreadyCount" from="0"/>
+            <iterate list="productIdList" entry="productId">
+                <set field="productId" from="productId.trim()"/>
+                <entity-find entity-name="mantle.product.feature.ProductFeatureAppl" list="existingPfaList">
+                    <date-filter/><econdition field-name="productId"/><econdition field-name="productFeatureId"/></entity-find>
+                <if condition="existingPfaList"><then>
+                    <iterate list="existingPfaList" entry="existingPfa">
+                        <service-call name="update#mantle.product.feature.ProductFeatureAppl"
+                                in-map="[productId:productId, productFeatureId:productFeatureId,
+                                    fromDate:existingPfa.fromDate, thruDate:ec.user.nowTimestamp]"/>
+                    </iterate>
+                    <script>removedCount++</script>
+                </then><else>
+                    <script>alreadyCount++</script>
+                </else></if>
+            </iterate>
+
+            <entity-find-one entity-name="mantle.product.feature.ProductFeature" value-field="productFeature">
+                <field-map field-name="productFeatureId"/></entity-find-one>
+            <message>Removed feature ${ec.resource.expand('ProductFeatureNameTemplate','',productFeature)} from ${removedCount} products (${alreadyCount} did not have it)</message>
+        </actions>
+    </service>
+
+    <!-- ================================================================== -->
+    <!-- ========== Product and ProductCategory Content Services ========== -->
+    <!-- ================================================================== -->
+
+    <service verb="create" noun="ProductContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.ProductContent" include="nonpk"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="contentText" allow-html="any"/>
+            <parameter name="textExtension" default-value="html"/>
+            <parameter name="filename"/>
+        </in-parameters>
+        <out-parameters><parameter name="productContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.product.ProductContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0"><then>
+                <service-call name="mantle.product.ProductServices.save#ProductContentFile" in-map="context"/>
+            </then><else>
+                <if condition="!contentText"><set field="contentText" value="[placeholder - delete me]"/></if>
+                <if condition="!filename"><set field="filename" value="${productContentTypeEnumId}_${productContentId}.${textExtension ?: 'html'}"/></if>
+                <!-- NOTE: no need to use mantle.content.large.root for this -->
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+                <set field="contentLocation" value="${contentRoot}/product/${productId}/${filename}"/>
+                <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+                <script>docRr.putText(contentText)</script>
+                <service-call name="update#mantle.product.ProductContent" in-map="[productContentId:productContentId, contentLocation:contentLocation]"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="update" noun="ProductContent">
+        <in-parameters>
+            <parameter name="productContentId" required="true"/>
+            <auto-parameters entity-name="mantle.product.ProductContent" include="nonpk"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="contentText" allow-html="any"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0"><then>
+                <entity-find-one entity-name="mantle.product.ProductContent" value-field="productContent"/>
+                <service-call name="mantle.product.ProductServices.save#ProductContentFile" out-map="context"
+                        in-map="context + [productId:productContent.productId]"/>
+            </then><else-if condition="contentText">
+                <entity-find-one entity-name="mantle.product.ProductContent" value-field="productContent"/>
+                <set field="docRr" from="ec.resource.getLocationReference(productContent.contentLocation)"/>
+                <script>docRr.putText(contentText)</script>
+            </else-if></if>
+            <service-call name="update#mantle.product.ProductContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="ProductContentFile">
+        <in-parameters>
+            <parameter name="productContentId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/product/${productId}/content_${productContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.product.ProductContent"
+                    in-map="[productContentId:productContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ProductCategoryContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.category.ProductCategoryContent" include="nonpk"/>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="contentText" allow-html="any"/>
+            <parameter name="textExtension" default-value="html"/>
+            <parameter name="filename"/>
+        </in-parameters>
+        <out-parameters><parameter name="productCategoryContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.product.category.ProductCategoryContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0"><then>
+                <service-call name="mantle.product.ProductServices.save#ProductCategoryContentFile" in-map="context"/>
+            </then><else>
+                <if condition="!contentText"><set field="contentText" value="[placeholder - delete me]"/></if>
+                <if condition="!filename"><set field="filename" value="${categoryContentTypeEnumId}_${productCategoryContentId}.${textExtension ?: 'html'}"/></if>
+                <!-- NOTE: no need to use mantle.content.large.root for this -->
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+                <set field="contentLocation" value="${contentRoot}/product/${productCategoryId}/${filename}"/>
+                <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+                <script>docRr.putText(contentText)</script>
+                <service-call name="update#mantle.product.category.ProductCategoryContent" in-map="[productCategoryContentId:productCategoryContentId, contentLocation:contentLocation]"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="update" noun="ProductCategoryContent">
+        <in-parameters>
+            <parameter name="productCategoryContentId" required="true"/>
+            <auto-parameters entity-name="mantle.product.category.ProductCategoryContent" include="nonpk"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="contentText" allow-html="any"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0"><then>
+                <entity-find-one entity-name="mantle.product.category.ProductCategoryContent" value-field="productCategoryContent"/>
+                <service-call name="mantle.product.ProductServices.save#ProductCategoryContentFile" out-map="context"
+                              in-map="context + [productCategoryId:productCategoryContent.productCategoryId, saveContentLocation:false]"/>
+            </then><else-if condition="contentText">
+                <entity-find-one entity-name="mantle.product.category.ProductCategoryContent" value-field="productCategoryContent"/>
+                <set field="docRr" from="ec.resource.getLocationReference(productCategoryContent.contentLocation)"/>
+                <script>docRr.putText(contentText)</script>
+            </else-if></if>
+            <service-call name="update#mantle.product.category.ProductCategoryContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="ProductCategoryContentFile">
+        <in-parameters>
+            <parameter name="productCategoryContentId" required="true"/>
+            <parameter name="productCategoryId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/productCategory/${productCategoryId}/content_${productCategoryContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.product.category.ProductCategoryContent"
+                                                              in-map="[productCategoryContentId:productCategoryContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProductManualDocumentData" authenticate="anonymous-view" no-remember-parameters="true">
+        <implements service="org.moqui.EntityServices.add#ManualDocumentData"/>
+        <actions>
+            <set field="productId" from="document.productId"/>
+            <entity-find entity-name="mantle.product.ProductContent" list="productContentList">
+                <date-filter/><econdition field-name="productId"/></entity-find>
+
+            <set field="contents" from="[]"/>
+            <iterate list="productContentList" entry="productContent">
+                <set field="contentRef" from="ec.resource.getLocationReference(productContent.contentLocation)"/>
+                <if condition="contentRef != null &amp;&amp; contentRef.isText()">
+                    <set field="contentText" from="contentRef.getText()"/>
+                    <if condition="contentText">
+                        <script>contents.add([productContentId:productContent.productContentId, contentText:contentText,
+                                              productContentTypeEnumId:productContent.productContentTypeEnumId])</script>
+                    </if>
+                </if>
+            </iterate>
+
+            <set field="document.contents" from="contents"/>
+        </actions>
+    </service>
+</services>

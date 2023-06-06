@@ -1,0 +1,20 @@
+<ul class="list-unstyled">
+    <li><h6 class="left-menu-heading">ACCOUNT SETTINGS</h6></li>
+    <router-link :to="'/account#profile'" tag="li" class="menu-item text-wrap">
+        Profile
+    </router-link>
+    <router-link :to="'/account#shipping'" tag="li" class="menu-item text-wrap">
+        Shipping Address
+    </router-link>
+    <router-link :to="'/account#payment'" tag="li" class="menu-item text-wrap">
+        Payment Method
+    </router-link>
+
+    <li><h6 class="left-menu-heading">MY ORDERS</h6></li>
+    <router-link :to="'/orders#current'" tag="li" class="menu-item text-wrap">
+        Current Orders
+    </router-link>
+    <router-link :to="'/orders#order'" tag="li" class="menu-item text-wrap">
+        Order History
+    </router-link>
+</ul>

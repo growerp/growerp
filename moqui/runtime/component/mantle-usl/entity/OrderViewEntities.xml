@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.order -->
+    <!--  - mantle.order.return -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.order -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="OrderHeaderAndPart" package="mantle.order">
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader"/>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="ORHD">
+            <key-map field-name="orderId"/></member-entity>
+        <alias-all entity-alias="ORHD"/>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/></alias-all>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <!-- the lastUpdatedStamp on OrderHeader gets all major order updates because of the revisionNumber increment on major field changes -->
+        <alias name="lastUpdatedStamp" entity-alias="ORHD"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderPartFindView" package="mantle.order">
+        <!-- NOTE: this is one of various entities with a LOT of aliased fields, only select those that are needed! -->
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart"/>
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader" join-from-alias="OPRT">
+            <key-map field-name="orderId"/></member-entity>
+        <!-- for finding order parts by productId and perhaps other fields, generally filter by these only (don't select) -->
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+
+        <member-entity entity-alias="CSTRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="CSCLS" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+
+        <member-relationship entity-alias="OPPTY" join-from-alias="OPRT" relationship="parties" join-optional="true"/>
+        <member-relationship entity-alias="SMEN" join-from-alias="OPRT" relationship="shipmentMethod" join-optional="true"/>
+
+        <member-entity entity-alias="SHCBIS" entity-name="mantle.order.ShipmentCountByItemSource" join-from-alias="OITM"
+                join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+
+        <!-- for finding order parts by quantity reserved or reserved in a particular location type (like locationTypeEnumId=FltPick) -->
+        <member-entity entity-alias="AARS" entity-name="mantle.product.issuance.AssetAndReservationSummary" join-from-alias="OITM"
+                sub-select="true" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/>
+        </member-entity>
+        <member-entity entity-alias="AAIS" entity-name="mantle.product.issuance.AssetIssuanceSummary" join-from-alias="OITM"
+                sub-select="true" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/>
+        </member-entity>
+        <!-- for orders with PtPickAssembly type products also need BOM total quantity -->
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <!-- NOTE: join PAS from PROD instead of OITM so that PROD will be included if any PAS fields selected (ie play the autotrim) -->
+        <member-entity entity-alias="PAS" entity-name="mantle.product.ProductAssocSummary" join-from-alias="PROD"
+                sub-select="true" join-optional="true">
+            <key-map field-name="productId"/>
+        </member-entity>
+
+        <member-relationship entity-alias="PADR" join-from-alias="OPRT" relationship="postalAddress"/>
+
+        <alias-all entity-alias="ORHD"/>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/></alias-all>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="itemTypeEnumId" entity-alias="OITM"/>
+        <alias name="productId" entity-alias="OITM"/>
+        <alias name="quantity" entity-alias="OITM"/>
+        <alias name="quantityTotal" entity-alias="OITM" field="quantity" function="sum"/>
+
+        <alias name="customerRoleTypeId" entity-alias="CSTRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="customerClassificationId" entity-alias="CSCLS" field="partyClassificationId"/>
+        <alias name="customerClassFromDate" entity-alias="CSCLS" field="fromDate"/>
+        <alias name="customerClassThruDate" entity-alias="CSCLS" field="thruDate"/>
+        <alias name="otherPartyId" entity-alias="OPPTY" field="partyId"/>
+        <alias name="otherRoleTypeId" entity-alias="OPPTY" field="roleTypeId"/>
+
+        <alias name="shipmentMethodSequenceNum" entity-alias="SMEN" field="sequenceNum"/>
+
+        <alias name="shipItemQuantity" entity-alias="SHCBIS" field="quantity"/>
+        <alias name="shipWorkEffortId" entity-alias="SHCBIS"/>
+        <alias name="shipmentCount" entity-alias="SHCBIS"/>
+
+        <alias name="locationTypeEnumId" entity-alias="AARS"/>
+        <alias name="resQuantity" entity-alias="AARS" field="quantity" function="sum"/>
+        <alias name="quantityNotAvailable" entity-alias="AARS" function="sum"/>
+        <alias name="issuedQuantity" entity-alias="AAIS" field="quantity" function="sum"/>
+        <alias name="itemBomQuantityTotal" function="sum" entity-alias="PAS" field="bomQuantityTotal" type="number-decimal">
+            <case><when expression="PROD.PRODUCT_TYPE_ENUM_ID = 'PtPickAssembly'">
+                <complex-alias operator="*">
+                    <complex-alias-field entity-alias="OITM" field="quantity"/>
+                    <complex-alias-field entity-alias="PAS" field="bomQuantityTotal" default-value="1"/>
+                </complex-alias>
+            </when><else>
+                <complex-alias expression="OITM.QUANTITY"/>
+            </else></case>
+        </alias>
+
+        <alias name="stateProvinceGeoId" entity-alias="PADR"/>
+        <alias name="countryGeoId" entity-alias="PADR"/>
+    </view-entity>
+    <view-entity entity-name="ShipmentCountByItemSource" package="mantle.order">
+        <member-entity entity-alias="SHIS" entity-name="mantle.shipment.ShipmentItemSource"/>
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment" join-from-alias="SHIS">
+            <key-map field-name="shipmentId"/></member-entity>
+        <alias name="orderId" entity-alias="SHIS"/>
+        <alias name="orderItemSeqId" entity-alias="SHIS"/>
+        <alias name="quantity" entity-alias="SHIS"/>
+        <alias name="shipWorkEffortId" entity-alias="SHMT"/>
+        <alias name="shipmentCount" entity-alias="SHMT" field="shipmentId" function="count"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderHeaderAndPartSummary" package="mantle.order">
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader"/>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="ORHD">
+            <key-map field-name="orderId"/></member-entity>
+        <alias-all entity-alias="ORHD"/>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/><exclude field="partTotal"/></alias-all>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="orderCount" entity-alias="ORHD" field="orderId" function="count-distinct"/>
+        <alias name="partTotal" entity-alias="OPRT" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="OrderHeaderPartFacilityStatus" package="mantle.order">
+        <!-- NOTE: this is one of various entities with a LOT of aliased fields, only select those that are needed! -->
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader"/>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="ORHD">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="STSI" entity-name="moqui.basic.StatusItem" join-from-alias="ORHD">
+            <key-map field-name="statusId"/></member-entity>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="CSTRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="CSCLS" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="ORHD"/>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/></alias-all>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="statusDescription" entity-alias="STSI" field="description"/>
+        <alias name="facilityName" entity-alias="FAC"/>
+        <alias name="pseudoId" entity-alias="FAC"/>
+        <alias name="customerRoleTypeId" entity-alias="CSTRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="customerClassificationId" entity-alias="CSCLS" field="partyClassificationId"/>
+        <alias name="customerClassFromDate" entity-alias="CSCLS" field="fromDate"/>
+        <alias name="customerClassThruDate" entity-alias="CSCLS" field="thruDate"/>
+    </view-entity>
+    <view-entity entity-name="OrderPartPartyDetail" package="mantle.order">
+        <member-entity entity-alias="OPP" entity-name="mantle.order.OrderPartParty"/>
+        <member-entity entity-alias="RTP" entity-name="mantle.party.RoleType" join-from-alias="OPP">
+            <key-map field-name="roleTypeId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="OPP">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="OPP"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="RTP"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemDetail" package="mantle.order">
+        <!-- NOTE: this is one of various entities with a LOT of aliased fields, only select those that are needed! -->
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OHDR" entity-name="mantle.order.OrderHeader" join-from-alias="OITM">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="CSTRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="OITM"><exclude field="priority"/></alias-all>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/></alias-all>
+        <alias-all entity-alias="OHDR"/>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="customerRoleTypeId" entity-alias="CSTRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemProductDetail" package="mantle.order">
+        <!-- NOTE: this is one of various entities with a LOT of aliased fields, only select those that are needed! -->
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OHDR" entity-name="mantle.order.OrderHeader" join-from-alias="OITM">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="CSTRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="OITM">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PCM" entity-name="mantle.product.category.ProductCategoryMember" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA1" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA2" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA3" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="OITM"><exclude field="productCategoryId"/><exclude field="quantity"/>
+            <exclude field="unitAmount"/><exclude field="priority"/></alias-all>
+        <alias-all entity-alias="OPRT"><exclude field="statusId"/><exclude field="signatureRequiredEnumId"/></alias-all>
+        <alias-all entity-alias="OHDR"/>
+        <alias-all entity-alias="PROD"><exclude field="statusId"/><exclude field="comments"/></alias-all>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="customerRoleTypeId" entity-alias="CSTRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="productCategoryId" entity-alias="PCM"/>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="OITM" field="quantity"/>
+                <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+            </complex-alias>
+        </alias>
+        <alias entity-alias="OITM" name="quantity" function="sum"/>
+        <alias entity-alias="PFA1" name="productFeatureId1" field="productFeatureId"/>
+        <alias entity-alias="PFA2" name="productFeatureId2" field="productFeatureId"/>
+        <alias entity-alias="PFA3" name="productFeatureId3" field="productFeatureId"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemAndPart" package="mantle.order">
+        <!-- NOTE: this is one of various entities with a LOT of aliased fields, only select those that are needed! -->
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <alias-all entity-alias="OITM"><exclude field="priority"/></alias-all>
+        <alias-all entity-alias="OPRT"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderItemBillingDetail" package="mantle.order">
+        <member-entity entity-alias="OIBL" entity-name="mantle.order.OrderItemBilling"/>
+        <member-relationship entity-alias="OITM" join-from-alias="OIBL" relationship="orderItem"/>
+        <member-relationship entity-alias="ASTR" join-from-alias="OIBL" relationship="receipt" join-optional="true"/>
+        <member-relationship entity-alias="ASTI" join-from-alias="OIBL" relationship="issuance" join-optional="true"/>
+        <alias-all entity-alias="OITM"><exclude field="quantity"/></alias-all>
+        <alias-all entity-alias="OIBL"/>
+        <alias name="itemQuantity" entity-alias="OITM" field="quantity"/>
+        <alias name="receiptAssetId" entity-alias="ASTR" field="assetId"/>
+        <alias name="issuanceAssetId" entity-alias="ASTI" field="assetId"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemBillingQuantity" package="mantle.order">
+        <member-entity entity-alias="OIBL" entity-name="mantle.order.OrderItemBilling"/>
+        <alias name="orderId" entity-alias="OIBL"/>
+        <alias name="orderItemSeqId" entity-alias="OIBL"/>
+        <alias name="invoiceId" entity-alias="OIBL"/>
+        <alias name="invoiceItemSeqId" entity-alias="OIBL"/>
+        <alias name="quantity" entity-alias="OIBL" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemBillingTotal" package="mantle.order">
+        <member-entity entity-alias="OIBL" entity-name="mantle.order.OrderItemBilling"/>
+        <member-relationship entity-alias="IITM" join-from-alias="OIBL" relationship="invoiceItem"/>
+        <alias-all entity-alias="OIBL"><exclude field="quantity"/><exclude field="amount"/></alias-all>
+        <alias name="quantity" entity-alias="OIBL" function="sum">
+            <description>Quantity from OrderItemBilling, only count quantity for the given OrderItem in case InvoiceItem represents multiple</description></alias>
+        <alias name="amount" entity-alias="IITM"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderItemSummary" package="mantle.order">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <alias-all entity-alias="OITM"><exclude field="quantity"/><exclude field="selectedAmount"/><exclude field="unitAmount"/>
+            <exclude field="promoTimesUsed"/></alias-all>
+        <alias name="quantity" entity-alias="OITM" function="sum"/>
+        <alias name="minAmount" entity-alias="OITM" field="unitAmount" function="min"/>
+        <alias name="maxAmount" entity-alias="OITM" field="unitAmount" function="max"/>
+        <alias name="itemTotal" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="OITM" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <alias name="promoTimesUsed" entity-alias="OITM" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemAndPartSummary" package="mantle.order">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-relationship entity-alias="OHDR" join-from-alias="OPRT" relationship="orderHeader"/>
+        <member-relationship entity-alias="CPRL" join-from-alias="OPRT" relationship="customerRoles" join-optional="true"/>
+        <member-relationship entity-alias="VPRL" join-from-alias="OPRT" relationship="vendorRoles" join-optional="true"/>
+        <alias-all entity-alias="OITM"><exclude field="quantity"/><exclude field="selectedAmount"/><exclude field="unitAmount"/>
+            <exclude field="promoTimesUsed"/><exclude field="priority"/></alias-all>
+        <alias-all entity-alias="OPRT"/>
+        <alias name="placedDate" entity-alias="OHDR"/>
+        <alias name="quantity" entity-alias="OITM" function="sum"/>
+        <alias name="minAmount" entity-alias="OITM" field="unitAmount" function="min"/>
+        <alias name="maxAmount" entity-alias="OITM" field="unitAmount" function="max"/>
+        <alias name="avgAmount" entity-alias="OITM" field="unitAmount" function="avg"/>
+        <alias name="itemTotal" function="sum" type="number-decimal"><complex-alias operator="*">
+            <complex-alias-field entity-alias="OITM" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <alias name="promoTimesUsed" entity-alias="OITM" function="sum"/>
+        <alias name="customerRoleTypeId" entity-alias="CPRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VPRL" field="roleTypeId"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderItemSalesSummary" package="mantle.order">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OHDR" entity-name="mantle.order.OrderHeader" join-from-alias="OITM">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="OITM" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ASIC" entity-name="mantle.product.issuance.AssetAndIssuanceCost" join-from-alias="OITM"
+                join-optional="true" sub-select="true"><!-- sub-select on view-entity for join in sub-select -->
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/>
+        </member-entity>
+
+        <alias name="issuedQuantity" entity-alias="ASIC" field="quantity" function="sum"/>
+        <alias name="totalCost" entity-alias="ASIC" field="issuanceCost" function="sum"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="ownerPartyId"/>
+        <alias entity-alias="OITM" name="orderId"/><!-- for a summary report this shouldn't be selected -->
+        <alias entity-alias="OITM" name="productId"/>
+        <alias entity-alias="OITM" name="itemTypeEnumId"/>
+        <alias entity-alias="OITM" name="quantity" function="sum"/>
+        <alias name="totalSales" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="OITM" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <alias name="totalIssued" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASIC" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <alias name="minUnitAmount" entity-alias="OITM" field="unitAmount" function="min"/>
+        <alias name="maxUnitAmount" entity-alias="OITM" field="unitAmount" function="max"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="vendorPartyId" entity-alias="OPRT"/>
+        <alias name="customerPartyId" entity-alias="OPRT"/>
+        <alias name="orderStatusId" entity-alias="OHDR" field="statusId"/>
+        <alias name="placedDate" entity-alias="OHDR"/>
+        <alias name="productStoreId" entity-alias="OHDR"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderItemIssuanceSummary" package="mantle.order">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="LOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem" join-from-alias="ASI">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="quantity"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="receivedDate"/><exclude field="manufacturedDate"/><exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantity" entity-alias="ASI" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="LOT" name="mfgPartyId"/>
+        <alias entity-alias="LOT" name="lotNumber"/>
+        <alias entity-alias="OITM" name="orderId"/><!-- for a summary report this shouldn't be selected -->
+        <alias name="totalSales" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASI" field="quantity"/>
+            <complex-alias-field entity-alias="OITM" field="unitAmount"/>
+        </complex-alias></alias>
+        <alias name="totalCost" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASI" field="quantity"/>
+            <complex-alias-field entity-alias="AST" field="acquireCost"/>
+        </complex-alias></alias>
+        <alias name="minUnitAmount" entity-alias="OITM" field="unitAmount" function="min"/>
+        <alias name="maxUnitAmount" entity-alias="OITM" field="unitAmount" function="max"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemShipBillSummary" package="mantle.order">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="OHDR" entity-name="mantle.order.OrderHeader" join-from-alias="OITM">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="OITM">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance" join-from-alias="OITM" join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <member-entity entity-alias="OIB" entity-name="mantle.order.OrderItemBilling" join-from-alias="OITM" join-optional="true" sub-select="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+
+        <alias-all entity-alias="OITM"/>
+        <alias name="placedDate" entity-alias="OHDR"/>
+        <alias name="statusId" entity-alias="OHDR"/>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="vendorPartyId" entity-alias="OPRT"/>
+        <alias name="customerPartyId" entity-alias="OPRT"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="pseudoId" entity-alias="PROD"/>
+        <alias name="productName" entity-alias="PROD"/>
+        <alias name="ownerPartyId" entity-alias="PROD"/>
+        <alias name="issuedQuantity" entity-alias="ASI" field="quantity" function="sum"/>
+        <alias name="billedQuantity" entity-alias="OIB" field="quantity" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="OrderItemShipSummary" package="mantle.order">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <member-entity entity-alias="SHMT" entity-name="mantle.shipment.Shipment" join-from-alias="SIS">
+            <key-map field-name="shipmentId"/></member-entity>
+        <alias-all entity-alias="OITM"><exclude field="quantity"/></alias-all>
+        <alias-all entity-alias="SIS"><exclude field="productId"/><exclude field="quantity"/><exclude field="quantityNotHandled"/></alias-all>
+        <alias name="orderQuantity" entity-alias="OITM" field="quantity" function="sum"/>
+        <alias name="shipmentStatusId" entity-alias="SHMT" field="statusId"/>
+        <alias name="shipmentFromPartyId" entity-alias="SHMT" field="fromPartyId"/>
+        <alias name="shipmentToPartyId" entity-alias="SHMT" field="toPartyId"/>
+        <alias name="shipmentQuantity" entity-alias="SIS" field="quantity" function="sum"/>
+        <alias name="quantityHandled" function="sum"><complex-alias operator="-">
+            <complex-alias-field entity-alias="SIS" field="quantity"/>
+            <complex-alias-field entity-alias="SIS" field="quantityNotHandled"/>
+        </complex-alias></alias>
+    </view-entity>
+
+    <view-entity entity-name="OrderEmailMessageDetail" package="mantle.order">
+        <member-entity entity-alias="OEM" entity-name="mantle.order.OrderEmailMessage"/>
+        <member-entity entity-alias="EMSG" entity-name="moqui.basic.email.EmailMessage" join-from-alias="OEM">
+            <key-map field-name="emailMessageId"/></member-entity>
+        <alias-all entity-alias="OEM"/><alias-all entity-alias="EMSG"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.order.return -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="ReturnHeaderDetail" package="mantle.order.return">
+        <member-entity entity-alias="RTNH" entity-name="mantle.order.return.ReturnHeader"/>
+        <member-entity entity-alias="CSTRL" entity-name="mantle.party.PartyRole" join-from-alias="RTNH" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="RTNH" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <member-relationship entity-alias="RITM" join-from-alias="RTNH" relationship="items" join-optional="true"/>
+        <member-relationship entity-alias="OHDR" join-from-alias="RITM" relationship="orderHeader" join-optional="true"/>
+        <alias-all entity-alias="RTNH"/>
+        <alias name="customerRoleTypeId" entity-alias="CSTRL" field="roleTypeId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="orderId" entity-alias="RITM"/>
+        <alias name="orderDisplayId" entity-alias="OHDR" field="displayId"/>
+        <alias name="orderExternalId" entity-alias="OHDR" field="externalId"/>
+    </view-entity>
+    <view-entity entity-name="ReturnableOrderItemView" package="mantle.order.return">
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem"/>
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader" join-from-alias="OITM">
+            <key-map field-name="orderId"/></member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderPartSeqId"/></member-entity>
+        <member-entity entity-alias="OIBL" entity-name="mantle.order.OrderItemBilling" join-from-alias="OITM">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <member-relationship entity-alias="IITM" join-from-alias="OIBL" relationship="invoiceItem"/>
+
+        <alias name="orderId" entity-alias="OITM"/>
+        <alias name="orderItemSeqId" entity-alias="OITM"/>
+        <alias name="itemTypeEnumId" entity-alias="OITM"/>
+        <alias name="productId" entity-alias="OITM"/>
+        <!-- best not to include this with sum on invoiceQuantity: <alias name="quantity" entity-alias="OITM"/> -->
+        <alias name="placedDate" entity-alias="ORHD"/>
+        <!-- if it's invoiced we don't care about status: <alias name="statusId" entity-alias="OPRT"/> -->
+        <alias name="vendorPartyId" entity-alias="OPRT"/>
+        <alias name="customerPartyId" entity-alias="OPRT"/>
+        <alias name="invoiceQuantity" entity-alias="OIBL" field="quantity" function="sum"/>
+        <alias name="invoiceAmount" entity-alias="IITM" field="amount"/>
+    </view-entity>
+    <view-entity entity-name="ReturnItemQuantity" package="mantle.order.return">
+        <member-entity entity-alias="RTIT" entity-name="mantle.order.return.ReturnItem"/>
+        <alias name="orderId" entity-alias="RTIT"/>
+        <alias name="orderItemSeqId" entity-alias="RTIT"/>
+        <alias name="statusId" entity-alias="RTIT"/>
+        <alias name="responseAmount" entity-alias="RTIT"/>
+        <alias name="returnQuantity" entity-alias="RTIT" function="sum"/>
+    </view-entity>
+</entities>

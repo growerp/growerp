@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.request -->
+    <!--  - mantle.request.requirement -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.request -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="Request" package="mantle.request" cache="never" sequence-bank-size="10">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="requestTypeEnumId" type="id"/>
+        <field name="requestCategoryId" type="id"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="requestName" type="text-medium"/>
+        <field name="description" type="text-long"/>
+        <field name="priority" type="number-integer"/>
+        <field name="requestDate" type="date-time"/>
+        <field name="responseRequiredDate" type="date-time"/>
+        <field name="requestResolutionEnumId" type="id"/>
+        <field name="rootWorkEffortId" type="id"/>
+        <field name="facilityId" type="id"/>
+        <field name="productStoreId" type="id"/>
+        <field name="salesChannelEnumId" type="id"/>
+        <field name="emailContactMechId" type="id"><description>Where to send the results of the request.</description></field>
+        <field name="maximumAmountUomId" type="id"/>
+        <field name="currencyUomId" type="id"/>
+        <field name="filedByPartyId" type="id"/>
+        <field name="visitId" type="id"/>
+
+        <relationship type="one" title="RequestType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="requestTypeEnumId"/></relationship>
+        <relationship type="one" related="mantle.request.RequestCategory" short-alias="category"/>
+        <relationship type="one" title="Request" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" title="RequestResolution" related="moqui.basic.Enumeration" short-alias="resolution">
+            <key-map field-name="requestResolutionEnumId"/></relationship>
+        <relationship type="one" title="Root" related="mantle.work.effort.WorkEffort" short-alias="rootWorkEffort">
+            <key-map field-name="rootWorkEffortId" related="workEffortId"/></relationship>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.product.store.ProductStore" short-alias="store"/>
+        <relationship type="one" title="SalesChannel" related="moqui.basic.Enumeration" short-alias="salesChannel">
+            <key-map field-name="salesChannelEnumId"/></relationship>
+        <relationship type="one" title="Email" related="mantle.party.contact.ContactMech" short-alias="emailContactMech">
+            <key-map field-name="emailContactMechId"/></relationship>
+        <relationship type="one" title="MaximumAmount" related="moqui.basic.Uom" short-alias="maximumAmountUom">
+            <key-map field-name="maximumAmountUomId"/></relationship>
+        <relationship type="one" title="Currency" related="moqui.basic.Uom" short-alias="currencyUom">
+            <key-map field-name="currencyUomId"/></relationship>
+        <relationship type="one" title="FiledBy" related="mantle.party.Party" short-alias="filedBy">
+            <key-map field-name="filedByPartyId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestWorkEffort" short-alias="workEfforts">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestParty" short-alias="parties">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="one" related="moqui.server.Visit" short-alias="visit"/>
+
+        <relationship type="many" related="mantle.request.RequestCommEvent" short-alias="communicationEvents">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestItem" short-alias="items">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestNote" short-alias="notes">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestParty" short-alias="parties">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.RequestWorkEffort" short-alias="workEfforts">
+            <key-map field-name="requestId"/></relationship>
+        <relationship type="many" related="mantle.request.WikiPageRequest" short-alias="wikiPages">
+            <key-map field-name="requestId"/></relationship>
+
+        <seed-data>
+            <!-- Request Type -->
+            <moqui.basic.EnumerationType description="Request Type" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtBugFix" description="Bug Fix" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtNewFeature" description="New Feature" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtInformation" description="Information" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtProposal" description="Proposal" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtQuote" description="Quote" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtSupport" description="Support" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtInventory" description="Inventory" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtPurchase" description="Purchase" enumTypeId="RequestType"/>
+            <moqui.basic.Enumeration enumId="RqtContact" description="Contact Us" enumTypeId="RequestType"/>
+
+            <!-- Request Status -->
+            <moqui.basic.StatusType description="Request Status" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="Draft" sequenceNum="0" statusId="ReqDraft" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="Submitted" sequenceNum="1" statusId="ReqSubmitted" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="Reviewed" sequenceNum="3" statusId="ReqReviewed" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="In Progress" sequenceNum="4" statusId="ReqInProgress" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="Completed" sequenceNum="5" statusId="ReqCompleted" statusTypeId="Request"/>
+            <moqui.basic.StatusItem description="Cancelled" sequenceNum="99" statusId="ReqCancelled" statusTypeId="Request"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqDraft" toStatusId="ReqSubmitted" transitionName="Submit"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqDraft" toStatusId="ReqCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqSubmitted" toStatusId="ReqCompleted" transitionName="Complete"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqSubmitted" toStatusId="ReqReviewed" transitionName="Reviewed"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqSubmitted" toStatusId="ReqInProgress" transitionName="Start Progress"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqSubmitted" toStatusId="ReqCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqReviewed" toStatusId="ReqCompleted" transitionName="Complete"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqReviewed" toStatusId="ReqInProgress" transitionName="Start Progress"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqReviewed" toStatusId="ReqCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqInProgress" toStatusId="ReqSubmitted" transitionName="Stop Progress (to Submitted)"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqInProgress" toStatusId="ReqCompleted" transitionName="Complete"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqInProgress" toStatusId="ReqCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="ReqCompleted" toStatusId="ReqInProgress" transitionName="Re-open"/>
+
+            <!-- Request Resolution -->
+            <moqui.basic.EnumerationType description="Request Resolution" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrFixed" description="Fixed" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrCantReproduce" description="Can't Reproduce" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrWontFix" description="Won't Fix" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrDuplicate" description="Duplicate" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrRejected" description="Rejected" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrInsufficient" description="Insufficient Information" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrCompleted" description="Completed" enumTypeId="RequestResolution"/>
+            <moqui.basic.Enumeration enumId="RrUnresolved" description="Unresolved" enumTypeId="RequestResolution"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="RequestCategory" package="mantle.request">
+        <field name="requestCategoryId" type="id" is-pk="true"/>
+        <field name="parentCategoryId" type="id"/>
+        <field name="responsiblePartyId" type="id">
+            <description>Party (person or group) responsible for Requests in this Category.</description>
+        </field>
+        <field name="description" type="text-medium"/>
+        <relationship type="one" title="Parent" related="mantle.request.RequestCategory" short-alias="parent">
+            <key-map field-name="parentCategoryId" related="requestCategoryId"/></relationship>
+        <relationship type="one" title="Responsible" related="Party" short-alias="responsible">
+            <key-map field-name="responsiblePartyId"/></relationship>
+    </entity>
+    <entity entity-name="RequestCommEvent" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="communicationEventId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one" related="CommunicationEvent" short-alias="communicationEvent"/>
+    </entity>
+    <entity entity-name="RequestContent" package="mantle.request" cache="never">
+        <field name="requestContentId" type="id" is-pk="true"/>
+        <field name="requestId" type="id"/>
+        <field name="contentLocation" type="text-medium"/>
+        <field name="contentTypeEnumId" type="id"/>
+        <field name="contentDate" type="date-time" default="ec.user.nowTimestamp"/>
+        <field name="description" type="text-long"/>
+        <field name="userId" type="id" default="ec.user.userId"/>
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one" title="RequestContentType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="contentTypeEnumId"/></relationship>
+        <relationship type="one" related="moqui.security.UserAccount"/>
+        <seed-data>
+            <!-- Request Content Type -->
+            <moqui.basic.EnumerationType description="Request Content Type" enumTypeId="RequestContentType"/>
+            <moqui.basic.Enumeration description="Internal" enumId="RqCntInternal" enumTypeId="RequestContentType"/>
+            <moqui.basic.Enumeration description="User Defined" enumId="RqCntUserDefined" enumTypeId="RequestContentType"/>
+            <moqui.basic.Enumeration description="Documentation" enumId="RqCntDocumentation" enumTypeId="RequestContentType"/>
+            <moqui.basic.Enumeration description="Story" enumId="RqCntStory" enumTypeId="RequestContentType"/>
+            <moqui.basic.Enumeration description="Image" enumId="RqCntImage" enumTypeId="RequestContentType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="RequestItem" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="requestItemSeqId" type="id" is-pk="true"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="requiredByDate" type="date-time"/>
+        <field name="productId" type="id"/>
+        <field name="quantity" type="number-decimal"/>
+        <field name="selectedAmount" type="number-decimal"><description>When Product.amountRequire=Y the amount goes here to supplement the quantity.</description></field>
+        <field name="maximumAmount" type="currency-amount"><description>The maximum amount (price) to pay for the item.</description></field>
+        <field name="description" type="text-medium"/>
+        <field name="supplierPartyId" type="id"/>
+
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one" title="Request" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+        <relationship type="one" title="Supplier" related="mantle.party.Party" short-alias="supplier">
+            <key-map field-name="supplierPartyId"/></relationship>
+    </entity>
+    <entity entity-name="RequestItemAssoc" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="requestItemSeqId" type="id" is-pk="true"/>
+        <field name="otherRequestId" type="id" is-pk="true"/>
+        <field name="otherRequestItemSeqId" type="id" is-pk="true"/>
+        <field name="quantity" type="number-decimal"/>
+        <relationship type="one" related="mantle.request.RequestItem" short-alias="item"/>
+        <relationship type="one" title="Other" related="mantle.request.RequestItem" short-alias="otherItem">
+            <key-map field-name="otherRequestId" related="requestId"/>
+            <key-map field-name="otherRequestItemSeqId" related="requestItemSeqId"/>
+        </relationship>
+    </entity>
+    <entity entity-name="RequestItemOrder" package="mantle.request" cache="never">
+        <field name="requestItemOrderId" type="id" is-pk="true"/>
+        <field name="requestId" type="id"/>
+        <field name="requestItemSeqId" type="id"/>
+        <field name="orderId" type="id"/>
+        <field name="orderItemSeqId" type="id"/>
+        <field name="quantity" type="number-decimal"/>
+        <relationship type="one" related="mantle.request.RequestItem" short-alias="requestItem">
+            <key-map field-name="requestId"/>
+            <key-map field-name="requestItemSeqId"/>
+        </relationship>
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem">
+            <key-map field-name="orderId"/>
+            <key-map field-name="orderItemSeqId"/>
+        </relationship>
+    </entity>
+    <entity entity-name="RequestNote" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="noteDate" type="date-time" is-pk="true" default="ec.user.nowTimestamp"/>
+        <field name="requestItemSeqId" type="id"/>
+        <field name="noteText" type="text-very-long"/>
+        <field name="userId" type="id" default="ec.user.userId"/>
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one-nofk" related="mantle.request.RequestItem" short-alias="item">
+            <key-map field-name="requestId"/>
+            <key-map field-name="requestItemSeqId"/>
+        </relationship>
+    </entity>
+    <entity entity-name="RequestParty" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="receiveNotifications" type="text-indicator"/>
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
+        <relationship type="one" related="mantle.party.RoleType" short-alias="role"/>
+        <relationship type="one-nofk" related="mantle.party.Person" short-alias="person"/>
+        <relationship type="one-nofk" related="mantle.party.Organization" short-alias="organization"/>
+        <seed-data>
+            <moqui.basic.Enumeration description="Request" enumId="RgpRequest" enumTypeId="RoleGroup"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="Assignee"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="Manager"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="Reporter"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="Watcher"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="Customer"/>
+            <mantle.party.RoleGroupMember  roleGroupEnumId="RgpRequest" roleTypeId="CustomerBillTo"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="RequestWorkEffort" package="mantle.request" cache="never">
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="workEffortId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.request.Request" short-alias="request"/>
+        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort"/>
+    </entity>
+    <entity entity-name="WikiPageRequest" package="mantle.request" cache="never">
+        <field name="wikiPageId" type="id" is-pk="true"/>
+        <field name="requestId" type="id" is-pk="true"/>
+        <relationship type="one" related="moqui.resource.wiki.WikiPage"/>
+        <relationship type="one" related="mantle.request.Request"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.request.requirement -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="Requirement" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="requirementTypeEnumId" type="id"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="facilityId" type="id"/>
+        <field name="deliverableId" type="id"/>
+        <field name="assetId" type="id"/>
+        <field name="productId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <field name="requirementStartDate" type="date-time"/>
+        <field name="requiredByDate" type="date-time"/>
+        <field name="estimatedBudget" type="currency-amount"/>
+        <field name="quantity" type="number-decimal"/>
+        <field name="useCase" type="text-very-long"/>
+        <field name="reason" type="text-long"/>
+        <relationship type="one" title="RequirementType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="requirementTypeEnumId"/></relationship>
+        <relationship type="one" title="Requirement" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.work.effort.Deliverable" short-alias="deliverable"/>
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+
+        <seed-data>
+            <!-- Requirement Type -->
+            <moqui.basic.EnumerationType description="Requirement Type" enumTypeId="RequirementType"/>
+            <moqui.basic.Enumeration description="Customer" enumId="RqTpCustomer" enumTypeId="RequirementType"/>
+            <moqui.basic.Enumeration description="Internal" enumId="RqTpInternal" enumTypeId="RequirementType"/>
+            <moqui.basic.Enumeration description="Product" enumId="RqTpProduct" enumTypeId="RequirementType"/>
+            <moqui.basic.Enumeration description="Inventory" enumId="RqTpInventory" enumTypeId="RequirementType"/>
+            <moqui.basic.Enumeration description="Work" enumId="RqTpWork" enumTypeId="RequirementType"/>
+
+            <!-- Requirement Status -->
+            <moqui.basic.StatusType description="Requirement Status" statusTypeId="Requirement"/>
+            <moqui.basic.StatusItem description="Proposed" sequenceNum="1" statusId="RqmtStProposed" statusTypeId="Requirement"/>
+            <moqui.basic.StatusItem description="Created" sequenceNum="2" statusId="RqmtStCreated" statusTypeId="Requirement"/>
+            <moqui.basic.StatusItem description="Approved" sequenceNum="3" statusId="RqmtStApproved" statusTypeId="Requirement"/>
+            <moqui.basic.StatusItem description="Ordered" sequenceNum="4" statusId="RqmtStOrdered" statusTypeId="Requirement"/>
+            <moqui.basic.StatusItem description="Rejected" sequenceNum="9" statusId="RqmtStRejected" statusTypeId="Requirement"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStProposed" toStatusId="RqmtStApproved" transitionName="Accept"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStProposed" toStatusId="RqmtStRejected" transitionName="Reject"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStCreated" toStatusId="RqmtStApproved" transitionName="Accept"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStCreated" toStatusId="RqmtStRejected" transitionName="Reject"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStApproved" toStatusId="RqmtStOrdered" transitionName="Order"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="RqmtStApproved" toStatusId="RqmtStRejected" transitionName="Reject"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="RequirementBudgetAllocation" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="budgetItemSeqId" type="id" is-pk="true"/>
+        <field name="amount" type="currency-amount"/>
+        <relationship type="one" related="BudgetItem">
+            <key-map field-name="budgetId"/>
+            <key-map field-name="budgetItemSeqId"/>
+        </relationship>
+        <relationship type="one" related="mantle.request.requirement.Requirement"/>
+    </entity>
+    <entity entity-name="RequirementRequestItem" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="requestId" type="id" is-pk="true"/>
+        <field name="requestItemSeqId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.request.requirement.Requirement"/>
+        <relationship type="one" related="mantle.request.RequestItem">
+            <key-map field-name="requestId"/>
+            <key-map field-name="requestItemSeqId"/>
+        </relationship>
+    </entity>
+    <entity entity-name="RequirementParty" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="mantle.request.requirement.Requirement" short-alias="requirement"/>
+        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
+        <relationship type="one" related="mantle.party.RoleType" short-alias="role"/>
+    </entity>
+    <entity entity-name="RequirementOrderItem" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="orderId" type="id" is-pk="true"/>
+        <field name="orderItemSeqId" type="id" is-pk="true"/>
+        <field name="quantity" type="number-decimal"/>
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem">
+            <key-map field-name="orderId"/>
+            <key-map field-name="orderItemSeqId"/>
+        </relationship>
+        <relationship type="one" related="mantle.request.requirement.Requirement" short-alias="requirement"/>
+    </entity>
+    <entity entity-name="WorkRequirementFulfillment" package="mantle.request.requirement" cache="never">
+        <field name="requirementId" type="id" is-pk="true"/>
+        <field name="workEffortId" type="id" is-pk="true"/>
+        <field name="fulfillmentTypeEnumId" type="id"/>
+        <relationship type="one" related="mantle.request.requirement.Requirement" short-alias="requirement"/>
+        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort"/>
+        <relationship type="one" title="WorkRequirementFulfillmentType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="fulfillmentTypeEnumId"/></relationship>
+        <seed-data>
+            <!-- Work Requirement Fulfillment Type -->
+            <moqui.basic.EnumerationType description="Work Requirement Fulfillment Type" enumTypeId="WorkRequirementFulfillmentType"/>
+            <moqui.basic.Enumeration description="Implements" enumId="WrfImplements" enumTypeId="WorkRequirementFulfillmentType"/>
+            <moqui.basic.Enumeration description="Fixes" enumId="WrfFixes" enumTypeId="WorkRequirementFulfillmentType"/>
+            <moqui.basic.Enumeration description="Deploys" enumId="WrfDeploys" enumTypeId="WorkRequirementFulfillmentType"/>
+            <moqui.basic.Enumeration description="Tests" enumId="WrfTests" enumTypeId="WorkRequirementFulfillmentType"/>
+            <moqui.basic.Enumeration description="Delivers" enumId="WrfDelivers" enumTypeId="WorkRequirementFulfillmentType"/>
+        </seed-data>
+    </entity>
+</entities>

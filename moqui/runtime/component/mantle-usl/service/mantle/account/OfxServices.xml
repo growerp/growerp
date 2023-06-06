@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="upload" noun="OfxVersion1">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="ofxFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="ofxFile == null || ofxFile.size == 0">
+                <return error="true" message="No OFX file content uploaded"/></if>
+            <set field="ofxString" from="ofxFile.getString('UTF-8')"/>
+            <service-call name="mantle.account.OfxServices.import#OfxVersion1" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="consume" noun="OfxV1SystemMessage">
+        <implements service="org.moqui.impl.SystemMessageServices.consume#SystemMessage"/>
+        <actions>
+            <entity-find-one entity-name="moqui.service.message.SystemMessage" value-field="systemMessage"/>
+            <set field="ofxString" from="systemMessage.messageText"/>
+
+            <!-- determine paymentMethodId by PaymentMethodFileType record -->
+            <entity-find entity-name="mantle.account.method.PaymentMethodFileType" list="pmftList">
+                <econdition field-name="fileTypeEnumId" value="PmftOfx"/>
+                <econdition field-name="systemMessageTypeId" from="systemMessage.systemMessageTypeId"/>
+                <econdition field-name="systemMessageRemoteId" from="systemMessage.systemMessageRemoteId"/>
+            </entity-find>
+            <if condition="pmftList.size() == 0">
+                <return error="true" message="Could not find paymentMethodId from PaymentMethodFileType record for file type PmftOfx message type ${systemMessage.systemMessageTypeId} remote ${systemMessage.systemMessageRemoteId}"/>
+            </if>
+
+            <!-- weird but allow multiple in case transactions should be added for more than one BankAccount -->
+            <iterate list="pmftList" entry="pmft">
+                <set field="paymentMethodId" from="pmft.paymentMethodId"/>
+                <service-call name="mantle.account.OfxServices.import#OfxVersion1" in-map="context"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="OfxVersion1">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="ofxString" required="true" allow-html="any"/>
+        </in-parameters>
+        <actions>
+            <set field="sgmlReader" from="new org.moqui.impl.util.SimpleSgmlReader(ofxString)"/>
+            <set field="header" from="sgmlReader.getHeader()"/>
+            <set field="ofxNode" from="sgmlReader.getRoot()"/>
+            <!-- <log message="====== ofxString: ${ofxString}"/> -->
+            <!-- <log message="====== headerMap: ${header}"/> -->
+            <!-- <log message="====== ofxNode:\n${ofxNode}"/> -->
+
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+            <entity-find-one entity-name="mantle.account.method.BankAccount" value-field="bankAccount"/>
+            
+
+            <set field="STMTRS" from="ofxNode.BANKMSGSRSV1?.getAt(0)?.STMTTRNRS?.getAt(0)?.STMTRS?.getAt(0)"/>
+            <if condition="!STMTRS"><return error="true" message="Invalid OFX file, could not find STMTRS element"/></if>
+
+            <!-- TODO: Support CreditCard, PayPal, etc accounts; for now allow but don't validate acct number, etc -->
+            <!-- <if condition="!bankAccount"><return error="true" message="Payment Method [${paymentMethodId}] is not a Bank Account"/></if> -->
+
+            <!-- make sure the bank account matches -->
+            <if condition="bankAccount">
+                <set field="BANKACCTFROM" from="STMTRS.BANKACCTFROM?.getAt(0)"/>
+                <if condition="BANKACCTFROM">
+                    <!-- make sure routingNumber matches STMTRS.BANKACCTFROM.BANKID -->
+                    <set field="BANKID" from="BANKACCTFROM.BANKID[0].text()"/>
+                    <if condition="bankAccount.routingNumber != BANKID">
+                        <message error="true">OFX BANKID [${BANKID}] does not match routing number [${bankAccount.routingNumber}] on Bank Account [${paymentMethodId}]</message></if>
+                    <!-- make sure accountNumber matches STMTRS.BANKACCTFROM.ACCTID (note: may be partial, use contains) -->
+                    <set field="ACCTID" from="BANKACCTFROM.ACCTID[0].text()"/>
+                    <if condition="!ACCTID.contains(bankAccount.accountNumber)">
+                        <message error="true">OFX ACCTID [${ACCTID}] does not match (or contain) account number [${bankAccount.accountNumber}] on Bank Account [${paymentMethodId}]</message></if>
+                </if>
+                <!-- make sure the currency matches -->
+                <set field="CURDEF" from="STMTRS.CURDEF?.getAt(0)?.text()"/>
+                <if condition="CURDEF &amp;&amp; paymentMethod.currencyUomId">
+                    <if condition="CURDEF != paymentMethod.currencyUomId">
+                        <message error="true">OFX currency (CURDEF) [${CURDEF}] does not match account currency [${paymentMethod.currencyUomId}] on Bank Account [${paymentMethodId}]</message></if>
+                </if>
+            </if>
+
+            <check-errors/>
+
+            <!-- import the transactions -->
+            <set field="BANKTRANLIST" from="STMTRS.BANKTRANLIST?.getAt(0)"/>
+            <iterate list="BANKTRANLIST?.STMTTRN" entry="STMTTRN">
+                <set field="fitId" from="STMTTRN.FITID[0].text()"/>
+                <!-- if we already have the tx skip it -->
+                <entity-find-one entity-name="mantle.account.method.PaymentMethodTrans" value-field="paymentMethodTrans">
+                    <field-map field-name="paymentMethodId"/><field-map field-name="fitId"/></entity-find-one>
+                <if condition="paymentMethodTrans"><continue/></if>
+
+                <!-- create the tx record -->
+
+                <!-- possible formats include: yyyyMMdd (GMT), yyyyMMddHHmmss (GMT), yyyyMMddHHmmss.SSS (GMT), yyyyMMddHHmmss.SSS[-5:EST] -->
+                <set field="postedDate" from="sgmlReader.parseOfxDateTime(STMTTRN.DTPOSTED[0].text())"/>
+                <!-- <log message="========= DTPOSTED=${DTPOSTED}, orig=${STMTTRN.DTPOSTED[0].text()}, postedDate=${postedDate}"/> -->
+
+                <!-- as per spec amount will only contain a comma if used as a decimal separator, so replace with a dot and parse to BD -->
+                <set field="TRNAMT" from="STMTTRN.TRNAMT[0].text()"/>
+                <if condition="TRNAMT.contains(',')"><set field="TRNAMT" from="TRNAMT.replace(',', '.')"/></if>
+                <set field="transAmount" from="new BigDecimal(TRNAMT)"/>
+
+                <set field="transName" from="STMTTRN.NAME?.getAt(0)?.text() ?: STMTTRN.PAYEE?.getAt(0)?.text()"/>
+
+                <set field="transCode" from="STMTTRN.TRNTYPE[0].text()"/>
+                <set field="transType" from="transCode"/>
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="transTypeEnum">
+                    <field-map field-name="enumTypeId" value="PaymentMethodTransType"/>
+                    <field-map field-name="enumCode" from="transType"/>
+                </entity-find-one>
+                <if condition="transTypeEnum"><set field="transType" from="transTypeEnum.enumId"/></if>
+
+                <service-call name="create#mantle.account.method.PaymentMethodTrans" in-map="[paymentMethodId:paymentMethodId,
+                        fitId:fitId, transType:transType, transCode:transCode, postedDate:postedDate,
+                        transAmount:transAmount, transName:transName, transMemo:STMTTRN.MEMO?.getAt(0)?.text(),
+                        checkNumber:STMTTRN.CHECKNUM?.getAt(0)?.text(), refNumber:STMTTRN.REFNUM?.getAt(0)?.text()]"/>
+            </iterate>
+
+            <!-- update ledgerBalance, availableBalance, balanceDate (only if more recent than last balanceDate) -->
+            <set field="LEDGERBAL" from="STMTRS.LEDGERBAL?.getAt(0)"/>
+            <if condition="LEDGERBAL">
+                <set field="BALAMT" from="LEDGERBAL.BALAMT[0].text()"/>
+                <if condition="BALAMT.contains(',')"><set field="BALAMT" from="BALAMT.replace(',', '.')"/></if>
+                <set field="ledgerBalance" from="new BigDecimal(BALAMT)"/>
+                <set field="balanceDate" from="sgmlReader.parseOfxDateTime(LEDGERBAL.DTASOF[0].text())"/>
+            </if>
+            <set field="AVAILBAL" from="STMTRS.AVAILBAL?.getAt(0)"/>
+            <if condition="AVAILBAL">
+                <set field="BALAMT" from="AVAILBAL.BALAMT[0].text()"/>
+                <if condition="BALAMT.contains(',')"><set field="BALAMT" from="BALAMT.replace(',', '.')"/></if>
+                <set field="availableBalance" from="new BigDecimal(BALAMT)"/>
+                <set field="balanceDate" from="balanceDate ?: sgmlReader.parseOfxDateTime(LEDGERBAL.DTASOF[0].text())"/>
+            </if>
+            <!-- <log message="========= ${balanceDate}: ${ledgerBalance}, ${availableBalance}"/> -->
+            <if condition="balanceDate &amp;&amp; (!paymentMethod.balanceDate || balanceDate &gt; paymentMethod.balanceDate)">
+                <service-call name="mantle.account.PaymentMethodServices.update#PaymentMethodMutable"
+                        in-map="[paymentMethodId:paymentMethodId, ledgerBalance:ledgerBalance,
+                            availableBalance:availableBalance, balanceDate:balanceDate]"/>
+            </if>
+        </actions>
+    </service>
+</services>

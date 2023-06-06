@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="demo">
+
+    <!-- NOTE 1265184000000 = 2010-02-03 00:00:00 US/Pacific -->
+
+    <!-- Example applyCond on active org filter to disable it for ORG_ZIZI_SERVICES -->
+    <moqui.security.EntityFilterSet entityFilterSetId="MANTLE_ACTIVE_ORG" applyCond="activeOrgId &amp;&amp; activeOrgId != 'ORG_ZIZI_SERVICES'"/>
+
+    <!-- A position for demo/test data -->
+    <moqui.basic.Enumeration description="Programming" enumId="WktpProgramming" enumTypeId="WorkType"/>
+    <mantle.humanres.position.EmplPositionClass title="Programmer" emplPositionClassId="Programmer"/>
+    <mantle.humanres.position.EmplPositionClassWorkType emplPositionClassId="Programmer" workTypeEnumId="WktpProgramming"/>
+
+    <!-- ========== DEMO VENDOR Ziziwork Industries (internal organization) DATA ========== -->
+    <mantle.party.Party partyId="ORG_ZIZI_CORP" pseudoId="ZICORP" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_CORP"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_CORP" organizationName="Ziziwork Industries"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_CORP" roleTypeId="OrgInternal"/>
+    <mantle.party.PartyContent partyContentId="ZICORP_LOGO" partyId="ORG_ZIZI_CORP" partyContentTypeEnumId="PcntLogoImage"
+            contentLocation="component://SimpleScreens/screen/ssstatic/images/Return.png"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_SALES" pseudoId="ZISAL" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_SALES"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_SALES" organizationName="Ziziwork Sales"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_SALES" roleTypeId="OrgInternal"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_SALES" roleTypeId="Vendor"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_SALES" relationshipTypeEnumId="PrtOrgRollup"
+            fromPartyId="ORG_ZIZI_SALES" fromRoleTypeId="OrgInternal" toPartyId="ORG_ZIZI_CORP" toRoleTypeId="OrgInternal"
+            fromDate="1265184000000"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_HR" pseudoId="ZIHR" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_HR"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_HR" organizationName="Ziziwork Human Resources"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_HR" roleTypeId="OrgInternal"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_HR" relationshipTypeEnumId="PrtOrgRollup"
+            fromPartyId="ORG_ZIZI_HR" fromRoleTypeId="OrgInternal" toPartyId="ORG_ZIZI_CORP" toRoleTypeId="OrgInternal"
+            fromDate="1265184000000"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_SERVICES" pseudoId="ZISER" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_SERVICES"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_SERVICES" organizationName="Ziziwork Services"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_SERVICES" roleTypeId="OrgInternal"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_SERVICES" roleTypeId="Vendor"/>
+    <mantle.party.PartyContent partyContentId="ZISER_LOGO" partyId="ORG_ZIZI_SERVICES" partyContentTypeEnumId="PcntLogoImage"
+            contentLocation="component://SimpleScreens/screen/ssstatic/images/Vendor.png"/>
+
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_SERVICES" relationshipTypeEnumId="PrtOrgRollup"
+            fromPartyId="ORG_ZIZI_SERVICES" fromRoleTypeId="OrgInternal" toPartyId="ORG_ZIZI_CORP" toRoleTypeId="OrgInternal"
+            fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_SVCS_PA" contactMechTypeEnumId="CmtPostalAddress"/>
+    <mantle.party.contact.PostalAddress contactMechId="ORG_ZIZI_SVCS_PA" toName="Ziziwork Services"
+            address1="51 W. Center St." address2="" unitNumber="1234"
+            city="Orem" stateProvinceGeoId="USA_UT" countryGeoId="USA" postalCode="84057" postalCodeExt="4605"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_PA"
+            contactMechPurposeId="PostalPayment" fromDate="1265184000000"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_PA"
+            contactMechPurposeId="PostalBilling" fromDate="1265184000000"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_SVCS_PT" contactMechTypeEnumId="CmtTelecomNumber"/>
+    <mantle.party.contact.TelecomNumber contactMechId="ORG_ZIZI_SVCS_PT" countryCode="1" areaCode="801" contactNumber="123-4567"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_PT"
+            contactMechPurposeId="PhonePayment" fromDate="1265184000000"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_PT"
+            contactMechPurposeId="PhoneBilling" fromDate="1265184000000"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_SVCS_PE" contactMechTypeEnumId="CmtEmailAddress"
+            infoString="payment.biziwork.services@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_PE"
+            contactMechPurposeId="EmailPayment" fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_SVCS_BE" contactMechTypeEnumId="CmtEmailAddress"
+            infoString="billing.biziwork.services@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_SERVICES" contactMechId="ORG_ZIZI_SVCS_BE"
+            contactMechPurposeId="EmailBilling" fromDate="1265184000000"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_DEVA" pseudoId="ZIDVA" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_SERVICES"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_DEVA" organizationName="Ziziwork Dev Team A"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_DEVA" roleTypeId="OrgTeam"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_DEVB" pseudoId="ZIDVB" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_SERVICES"/>
+    <mantle.party.Organization partyId="ORG_ZIZI_DEVB" organizationName="Ziziwork Dev Team B"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_DEVB" roleTypeId="OrgTeam"/>
+
+    <!-- Add Mantle data for the John Doe user (other user data in Moqui example component) -->
+    <mantle.party.Party partyId="EX_JOHN_DOE" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="EX_JOHN_DOE" firstName="John" middleName="" lastName="Doe"/>
+    <mantle.party.PartyRole partyId="EX_JOHN_DOE" roleTypeId="Manager"/>
+    <mantle.party.PartyRelationship partyRelationshipId="EX_JOHN_DOE_OBS" relationshipTypeEnumId="PrtRepresentative"
+            fromPartyId="EX_JOHN_DOE" fromRoleTypeId="Manager" toPartyId="ORG_ZIZI_SERVICES" toRoleTypeId="Vendor"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship relationshipTypeEnumId="PrtAgent" fromPartyId="EX_JOHN_DOE"
+            toPartyId="ORG_ZIZI_SERVICES" toRoleTypeId="OrgInternal"/>
+    <!-- NOTE: Party could have an email address ContactMech, but use the UserAccount.emailAddress as the primary address or when only one is needed/desired -->
+    <moqui.security.UserAccount userId="EX_JOHN_DOE" partyId="EX_JOHN_DOE"/>
+    <!-- default billing and payment rates for EX_JOHN_DOE -->
+    <mantle.humanres.rate.RateAmount rateAmountId="EX_JOHN_DOE-STCL" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprClient"
+            timePeriodUomId="TF_hr" workEffortId="" partyId="EX_JOHN_DOE" emplPositionClassId=""
+            fromDate="1265184000000" thruDate="" rateAmount="120.00" rateCurrencyUomId="USD"/>
+    <mantle.humanres.rate.RateAmount rateAmountId="EX_JOHN_DOE-STVN" rateTypeEnumId="RatpStandard" ratePurposeEnumId="RaprVendor"
+            timePeriodUomId="TF_hr" workEffortId="" partyId="EX_JOHN_DOE" emplPositionClassId=""
+            fromDate="1265184000000" thruDate="" rateAmount="75.00" rateCurrencyUomId="USD"/>
+    <!-- pay John Doe (vendor) even if no charge to client -->
+    <mantle.humanres.rate.RateAmount rateAmountId="EX_JOHN_DOE-NCVN" rateTypeEnumId="RatpNoCharge" ratePurposeEnumId="RaprVendor"
+            timePeriodUomId="TF_hr" workEffortId="" partyId="EX_JOHN_DOE" emplPositionClassId=""
+            fromDate="1265184000000" thruDate="" rateAmount="75.00" rateCurrencyUomId="USD"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_JD" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="ORG_ZIZI_JD" firstName="Joe" middleName="" lastName="Developer"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_JD" roleTypeId="Employee"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_JD" roleTypeId="Assignee"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_JD_EMP" relationshipTypeEnumId="PrtEmployee"
+            fromPartyId="ORG_ZIZI_JD" fromRoleTypeId="Employee" toPartyId="ORG_ZIZI_SERVICES" toRoleTypeId="OrgEmployer"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_JD_TM" relationshipTypeEnumId="PrtMember"
+            fromPartyId="ORG_ZIZI_JD" fromRoleTypeId="Assignee" toPartyId="ORG_ZIZI_DEVA" toRoleTypeId="OrgTeam"
+            fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_JD_EM" contactMechTypeEnumId="CmtEmailAddress" infoString="joe.developer@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_JD" contactMechId="ORG_ZIZI_JD_EM"
+            contactMechPurposeId="EmailPrimary" fromDate="1265184000000" thruDate=""/>
+    <moqui.security.UserAccount userId="ORG_ZIZI_JD" username="joe.developer" userFullName="Joe Developer"
+            currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
+            passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US" timeZone="US/Eastern"
+            emailAddress="joe.developer@test.com" partyId="ORG_ZIZI_JD"/>
+
+    <mantle.party.Party partyId="ORG_ZIZI_BD" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="ORG_ZIZI_BD" firstName="Bob" middleName="" lastName="Developer"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_BD" roleTypeId="Employee"/>
+    <mantle.party.PartyRole partyId="ORG_ZIZI_BD" roleTypeId="Assignee"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_BD_EMP" relationshipTypeEnumId="PrtEmployee"
+            fromPartyId="ORG_ZIZI_BD" fromRoleTypeId="Employee" toPartyId="ORG_ZIZI_SERVICES" toRoleTypeId="OrgEmployer"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_BD_TM" relationshipTypeEnumId="PrtMember"
+            fromPartyId="ORG_ZIZI_BD" fromRoleTypeId="Assignee" toPartyId="ORG_ZIZI_DEVA" toRoleTypeId="OrgTeam"
+            fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_BD_EM" contactMechTypeEnumId="CmtEmailAddress" infoString="bob.developer@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ZIZI_BD" contactMechId="ORG_ZIZI_BD_EM"
+            contactMechPurposeId="EmailPrimary" fromDate="1265184000000" thruDate=""/>
+    <moqui.security.UserAccount userId="ORG_ZIZI_BD" username="bob.developer" userFullName="Bob Developer"
+            currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
+            passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US" timeZone="US/Eastern"
+            emailAddress="bob.developer@test.com" partyId="ORG_ZIZI_BD"/>
+
+    <!-- Ziziwork Accounting Configuration -->
+    <mantle.ledger.LedgerServices.initPartyAccountingConfiguration sourcePartyId="DefaultSettings"
+            organizationPartyId="ORG_ZIZI_CORP" realTimeGlSummary="Y"/>
+
+
+    <!-- ========== DEMO CLIENT DATA ========== -->
+    <mantle.party.Party partyId="ORG_ACME" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ORG_ACME" organizationName="Another Company Making Everything"/>
+    <mantle.party.PartyRole partyId="ORG_ACME" roleTypeId="Customer"/>
+    <mantle.party.PartyRole partyId="ORG_ACME" roleTypeId="CustomerBillTo"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ORG_ACME_BA" contactMechTypeEnumId="CmtPostalAddress"/>
+    <mantle.party.contact.PostalAddress contactMechId="ORG_ACME_BA" toName="Another Company Making Everything"
+            attnName="Accounts Payable" address1="1350 E. Flamingo Rd." address2="" unitNumber="1234"
+            city="Las Vegas" stateProvinceGeoId="USA_NV" countryGeoId="USA" postalCode="89119" postalCodeExt="5263"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ACME" contactMechId="ORG_ACME_BA"
+            contactMechPurposeId="PostalBilling" fromDate="1265184000000"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ORG_ACME_BT" contactMechTypeEnumId="CmtTelecomNumber"/>
+    <mantle.party.contact.TelecomNumber contactMechId="ORG_ACME_BT" countryCode="1" areaCode="702" contactNumber="123-4567"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ACME" contactMechId="ORG_ACME_BT"
+            contactMechPurposeId="PhoneBilling" fromDate="1265184000000"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ORG_ACME_BE" contactMechTypeEnumId="CmtEmailAddress"
+            infoString="billing.acme@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ACME" contactMechId="ORG_ACME_BE"
+            contactMechPurposeId="EmailBilling" fromDate="1265184000000"/>
+
+    <mantle.party.Party partyId="ORG_ACME_TM" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ORG_ACME_TM" organizationName="Team ACME"/>
+    <mantle.party.PartyRole partyId="ORG_ACME_TM" roleTypeId="OrgTeam"/>
+
+    <mantle.party.Party partyId="ORG_ACME_BA" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="ORG_ACME_BA" firstName="Bob" middleName="" lastName="Acme"/>
+    <mantle.party.PartyRole partyId="ORG_ACME_BA" roleTypeId="ClientBilling"/>
+    <mantle.party.PartyRole partyId="ORG_ACME_BA" roleTypeId="Assignee"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ACME_BA_CB" relationshipTypeEnumId="PrtRepresentative"
+            fromPartyId="ORG_ACME_BA" fromRoleTypeId="ClientBilling" toPartyId="ORG_ACME" toRoleTypeId="Customer"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ACME_BA_TM" relationshipTypeEnumId="PrtMember"
+            fromPartyId="ORG_ACME_BA" fromRoleTypeId="Assignee" toPartyId="ORG_ACME_TM" toRoleTypeId="OrgTeam"
+            fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ACME_BA_EM" contactMechTypeEnumId="CmtEmailAddress" infoString="bob.acme@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ACME_BA" contactMechId="ORG_ACME_BA_EM"
+            contactMechPurposeId="EmailPrimary" fromDate="1265184000000" thruDate=""/>
+
+    <mantle.party.Party partyId="ORG_ACME_SA" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="ORG_ACME_SA" firstName="Sheldon" middleName="" lastName="Acme"/>
+    <mantle.party.PartyRole partyId="ORG_ACME_SA" roleTypeId="ClientManager"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ACME_SA_CM" relationshipTypeEnumId="PrtRepresentative"
+            fromPartyId="ORG_ACME_SA" fromRoleTypeId="ClientManager" toPartyId="ORG_ACME" toRoleTypeId="Customer"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ACME_SA_TM" relationshipTypeEnumId="PrtMember"
+            fromPartyId="ORG_ACME_SA" fromRoleTypeId="Assignee" toPartyId="ORG_ACME_TM" toRoleTypeId="OrgTeam"
+            fromDate="1265184000000"/>
+    <mantle.party.contact.ContactMech contactMechId="ORG_ACME_SA_EM" contactMechTypeEnumId="CmtEmailAddress" infoString="sheldon.acme@test.com"/>
+    <mantle.party.contact.PartyContactMech partyId="ORG_ACME_SA" contactMechId="ORG_ACME_SA_EM"
+            contactMechPurposeId="EmailPrimary" fromDate="1265184000000" thruDate=""/>
+    <moqui.security.UserAccount userId="ORG_ACME_SA" username="sheldon.acme" userFullName="Sheldon Acme"
+            currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
+            passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US" timeZone="US/Eastern"
+            emailAddress="sheldon.acme@test.com" partyId="ORG_ACME_SA"/>
+
+    <!-- Another CLIENT -->
+    <mantle.party.Party partyId="ORG_BLUTH" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ORG_BLUTH" organizationName="Bluth Corp"/>
+    <mantle.party.PartyRole partyId="ORG_BLUTH" roleTypeId="Customer"/>
+    <mantle.party.PartyRole partyId="ORG_BLUTH" roleTypeId="CustomerBillTo"/>
+
+    <mantle.party.Party partyId="ORG_BLUTH_GOB" partyTypeEnumId="PtyPerson"/>
+    <mantle.party.Person partyId="ORG_BLUTH_GOB" firstName="Gob" middleName="" lastName="Bluth"/>
+    <mantle.party.PartyRole partyId="ORG_BLUTH_GOB" roleTypeId="ClientBilling"/>
+    <mantle.party.PartyRole partyId="ORG_BLUTH_GOB" roleTypeId="ClientManager"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_BLUTH_GOB_BL" relationshipTypeEnumId="PrtRepresentative"
+            fromPartyId="ORG_BLUTH_GOB" fromRoleTypeId="ClientBilling" toPartyId="ORG_BLUTH" toRoleTypeId="Customer"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_BLUTH_GOB_MGR" relationshipTypeEnumId="PrtRepresentative"
+            fromPartyId="ORG_BLUTH_GOB" fromRoleTypeId="ClientManager" toPartyId="ORG_BLUTH" toRoleTypeId="Customer"
+            fromDate="1265184000000"/>
+    <moqui.security.UserAccount userId="ORG_BLUTH_GOB" username="gob.bluth" userFullName="Gob Bluth"
+            currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
+            passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US" timeZone="US/Pacific"
+            emailAddress="gob.bluth@test.com" partyId="ORG_BLUTH_GOB"/>
+
+    <!-- ========== DEMO RETAILER DATA ========== -->
+    <mantle.party.Party partyId="ORG_ZIZI_RETAIL" pseudoId="ZIRET" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_RETAIL">
+        <organization organizationName="Ziziwork Retail &amp; Wholesale"/>
+        <roles roleTypeId="OrgInternal"/>
+
+        <contents partyContentId="ZIRET_LOGO" partyContentTypeEnumId="PcntLogoImage"
+                contentLocation="component://SimpleScreens/screen/ssstatic/images/Customer.png"/>
+
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_PA" contactMechTypeEnumId="CmtPostalAddress">
+            <mantle.party.contact.PostalAddress toName="Ziziwork Retail &amp; Wholesale"
+                    address1="51 W. Center St." address2="" unitNumber="2345"
+                    city="Orem" stateProvinceGeoId="USA_UT" countryGeoId="USA" postalCode="84057" postalCodeExt="4605"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PostalPayment" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PostalBilling" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_SA" contactMechTypeEnumId="CmtPostalAddress">
+            <mantle.party.contact.PostalAddress toName="Ziziwork Retail &amp; Wholesale"
+                    address1="51 W. Center St." address2="" unitNumber="5432"
+                    city="Orem" stateProvinceGeoId="USA_UT" countryGeoId="USA" postalCode="84057" postalCodeExt="4605"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PostalShippingDest" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PostalShippingOrigin" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_PT" contactMechTypeEnumId="CmtTelecomNumber">
+            <mantle.party.contact.TelecomNumber countryCode="1" areaCode="801" contactNumber="234-5678"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PhonePayment" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PhoneBilling" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PhoneShippingOrigin" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="PhoneShippingDest" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_PE" contactMechTypeEnumId="CmtEmailAddress"
+                infoString="payment.biziwork.retail@test.com">
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="EmailPayment" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_BE" contactMechTypeEnumId="CmtEmailAddress"
+                infoString="billing.biziwork.retail@test.com">
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="EmailBilling" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+        <mantle.party.contact.ContactMech contactMechId="ORG_ZIZI_RTL_SE" contactMechTypeEnumId="CmtEmailAddress"
+                infoString="shipping.biziwork.retail@test.com">
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="EmailShippingDest" fromDate="1265184000000"/>
+            <mantle.party.contact.PartyContactMech contactMechPurposeId="EmailShippingOrigin" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+
+        <mantle.party.PartyContent partyContentTypeEnumId="PcntPaymentSignaturePrimary"
+                contentLocation="component://webroot/screen/webroot/images/LincolnSignature.png"/>
+
+        <paymentMethods paymentMethodId="ZIRET_BA" paymentMethodTypeEnumId="PmtBankAccount"
+                ownerPartyId="ORG_ZIZI_RETAIL" fromDate="1265184000000" description="Demo Bank Account"
+                postalContactMechId="ORG_ZIZI_RTL_PA" telecomContactMechId="ORG_ZIZI_RTL_PT"
+                companyNameOnAccount="Ziziwork Retail">
+            <bankAccount bankName="Demo Bank" typeEnumId="BatChecking" routingNumber="123456789" accountNumber="54321"
+                    lastCheckNumber="1000" posPayFormatEnumId="PmftZionsBankCsv"
+                    nachaImmedDest="123456789" nachaImmedOrig="000054321" nachaCompanyId="54321" nachaEntryDescription="Operations"/>
+        </paymentMethods>
+    </mantle.party.Party>
+    <mantle.party.PartyRelationship partyRelationshipId="ORG_ZIZI_RETAIL" relationshipTypeEnumId="PrtOrgRollup"
+            fromPartyId="ORG_ZIZI_RETAIL" fromRoleTypeId="OrgInternal" toPartyId="ORG_ZIZI_CORP" toRoleTypeId="OrgInternal"
+            fromDate="1265184000000"/>
+    <mantle.party.PartyRelationship relationshipTypeEnumId="PrtAgent" fromPartyId="EX_JOHN_DOE"
+            toPartyId="ORG_ZIZI_RETAIL" toRoleTypeId="OrgInternal"/>
+
+    <!-- bank integration examples: send Positive Pay, NACHA -->
+    <moqui.service.message.SystemMessageRemote systemMessageRemoteId="DemoZiretBankSftp" description="Demo ZIRET Bank SFTP Local"
+            sendUrl="localhost:22" username="sftp_user" password=""/>
+
+    <moqui.service.message.SystemMessageType systemMessageTypeId="DemoZiretPosPay" description="Demo ZIRET Positive Pay"
+            produceServiceName="mantle.account.PaymentMethodServices.produce#PaymentMethodFileSystemMessage"
+            sendServiceName="org.moqui.sftp.SftpMessageServices.send#SystemMessageSftp"
+            sendPath="/sftp_user/${systemMessageTypeId}/PosPay-${remoteMessageId?:systemMessageId}-${dateTime}.csv"/>
+    <mantle.account.method.PaymentMethodFileType paymentMethodId="ZIRET_BA" fileTypeEnumId="PmftZionsBankCsv"
+            systemMessageTypeId="DemoZiretPosPay" systemMessageRemoteId="DemoZiretBankSftp"/>
+    <moqui.service.job.ServiceJob jobName="DemoZiret_send_PosPay" description="Demo ZIRET Send Positive Pay"
+            serviceName="mantle.account.PositivePayServices.send#PositivePayJob" cronExpression="0 0 2 * * ?" paused="Y">
+        <parameters parameterName="paymentMethodId" parameterValue="ZIRET_BA"/>
+        <parameters parameterName="lookBackDays" parameterValue="7"/>
+    </moqui.service.job.ServiceJob>
+
+    <moqui.service.message.SystemMessageType systemMessageTypeId="DemoZiretNacha" description="Demo ZIRET NACHA"
+            produceServiceName="mantle.account.PaymentMethodServices.produce#PaymentMethodFileSystemMessage"
+            sendServiceName="org.moqui.sftp.SftpMessageServices.send#SystemMessageSftp"
+            receiveServiceName=""
+            consumeServiceName="mantle.account.NachaServices.consume#NachaReturnSystemMessage"
+            sendPath="/sftp_user/${systemMessageTypeId}/NACHA-${remoteMessageId?:systemMessageId}-${dateTime}.txt"
+            receivePath="/sftp_user/${systemMessageTypeId}/return" receiveFilePattern=".*\.txt"
+            receiveResponseEnumId="MsgRrMove" receiveMovePath="/sftp_user/${systemMessageTypeId}/return/received"/>
+    <mantle.account.method.PaymentMethodFileType paymentMethodId="ZIRET_BA" fileTypeEnumId="PmftNacha"
+            systemMessageTypeId="DemoZiretNacha" systemMessageRemoteId="DemoZiretBankSftp"/>
+    <!--
+    <moqui.service.job.ServiceJob jobName="DemoZiret_send_Nacha" description="Demo ZIRET Send NACHA"
+            serviceName="mantle.account.NachaServices.generate#NachaFile" cronExpression="0 0 2 * * ?" paused="Y">
+        <parameters parameterName="paymentMethodId" parameterValue="ZIRET_BA"/>
+        <parameters parameterName="produceSystemMessage" parameterValue="true"/>
+    </moqui.service.job.ServiceJob>
+    -->
+
+    <!-- bank integration examples: poll to receive OFX/QFX, BAI 2 -->
+    <moqui.service.message.SystemMessageType systemMessageTypeId="DemoZiretOfx" description="Demo ZIRET OFX/QFX"
+            receiveServiceName=""
+            consumeServiceName="mantle.account.OfxServices.consume#OfxV1SystemMessage"
+            receivePath="/sftp_user/${systemMessageTypeId}" receiveFilePattern=".*"
+            receiveResponseEnumId="MsgRrMove" receiveMovePath="/sftp_user/${systemMessageTypeId}/received"/>
+    <mantle.account.method.PaymentMethodFileType paymentMethodId="ZIRET_BA" fileTypeEnumId="PmftOfx"
+            systemMessageTypeId="DemoZiretOfx" systemMessageRemoteId="DemoZiretBankSftp"/>
+    <moqui.service.job.ServiceJob jobName="DemoZiretSftp_poll_OFX" description="Demo ZIRET SFTP Poll OFX"
+            serviceName="org.moqui.sftp.SftpMessageServices.poll#SystemMessageSftp" cronExpression="0 0 2 * * ?" paused="Y">
+        <parameters parameterName="systemMessageTypeId" parameterValue="DemoZiretOfx"/>
+        <parameters parameterName="systemMessageRemoteId" parameterValue="DemoZiretBankSftp"/>
+    </moqui.service.job.ServiceJob>
+
+    <moqui.service.message.SystemMessageType systemMessageTypeId="DemoZiretBai2" description="Demo ZIRET BAI 2"
+            receiveServiceName=""
+            consumeServiceName="mantle.account.BaiServices.consume#Bai2SystemMessage"
+            receivePath="/sftp_user/${systemMessageTypeId}" receiveFilePattern=".*"
+            receiveResponseEnumId="MsgRrMove" receiveMovePath="/sftp_user/${systemMessageTypeId}/received"/>
+    <mantle.account.method.PaymentMethodFileType paymentMethodId="ZIRET_BA" fileTypeEnumId="PmftBai2"
+            systemMessageTypeId="DemoZiretBai2" systemMessageRemoteId="DemoZiretBankSftp"/>
+    <moqui.service.job.ServiceJob jobName="DemoZiretSftp_poll_BAI2" description="Demo ZIRET SFTP Poll BAI 2"
+            serviceName="org.moqui.sftp.SftpMessageServices.poll#SystemMessageSftp" cronExpression="0 0 2 * * ?" paused="Y">
+        <parameters parameterName="systemMessageTypeId" parameterValue="DemoZiretBai2"/>
+        <parameters parameterName="systemMessageRemoteId" parameterValue="DemoZiretBankSftp"/>
+    </moqui.service.job.ServiceJob>
+
+    <!-- ========== DEMO CUSTOMER DATA ========== -->
+    <!-- Demo Customer: Joe Q Public (joe@public.com) -->
+    <mantle.party.Party partyId="CustJqp" partyTypeEnumId="PtyPerson" ownerPartyId="ORG_ZIZI_RETAIL">
+        <person firstName="Joe" middleName="Q" lastName="Public"/>
+        <roles roleTypeId="Customer"/>
+        <classifications partyClassificationId="CustConsumer" fromDate="1265184000000"/>
+
+        <userAccounts userId="CustJqp" username="joe@public.com" userFullName="Joe Q Public"
+                currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"
+                passwordHint="framework name, lowercase" currencyUomId="USD" locale="en_US" emailAddress="joe@public.com"/>
+        <mantle.party.contact.ContactMech contactMechId="CustJqpPem" contactMechTypeEnumId="CmtEmailAddress" infoString="joe@public.com">
+            <parties contactMechPurposeId="EmailPrimary" fromDate="1265184000000"/></mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="CustJqpTeln" contactMechTypeEnumId="CmtTelecomNumber">
+            <telecomNumber countryCode="1" areaCode="702" contactNumber="234-5678"/>
+            <parties contactMechPurposeId="PhonePrimary" fromDate="1265184000000" allowSolicitation="Y"/>
+        </mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="CustJqpAddr" contactMechTypeEnumId="CmtPostalAddress">
+            <postalAddress toName="Joe Q. Public" attnName="" address1="1350 E. Flamingo Rd." address2="" unitNumber="2345"
+                    city="Las Vegas" stateProvinceGeoId="USA_NV" countryGeoId="USA" postalCode="89119" postalCodeExt="5263"
+                    telecomContactMechId="CustJqpTeln"/>
+            <parties contactMechPurposeId="PostalPrimary" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+
+        <paymentMethods paymentMethodId="CustJqpCc" paymentMethodTypeEnumId="PmtCreditCard"
+                ownerPartyId="CustJqp" fromDate="1265184000000" description="Visa ************1111"
+                postalContactMechId="CustJqpAddr" telecomContactMechId="CustJqpTeln"
+                firstNameOnAccount="JOE Q" lastNameOnAccount="PUBLIC">
+            <creditCard creditCardTypeEnumId="CctVisa" cardNumber="4111111111111111" expireDate="08/2020"/>
+        </paymentMethods>
+    </mantle.party.Party>
+    <!-- Demo Company Customer: Joe's Distributing -->
+    <mantle.party.Party partyId="JoeDist" partyTypeEnumId="PtyOrganization" ownerPartyId="ORG_ZIZI_RETAIL">
+        <organization organizationName="Joe &amp; Joe's Distributing"/>
+        <roles roleTypeId="Customer"/>
+        <classifications partyClassificationId="CustDistributor" fromDate="1265184000000"/>
+        <settings partySettingTypeId="CustomerSingleLot" settingValue="BlY"/>
+        <settings partySettingTypeId="CustomerNewerInventory" settingValue="BlY"/>
+
+        <mantle.party.contact.ContactMech contactMechId="JoeDistPem" contactMechTypeEnumId="CmtEmailAddress" infoString="joe@public.com">
+            <parties contactMechPurposeId="EmailPrimary" fromDate="1265184000000"/></mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="JoeDistTeln" contactMechTypeEnumId="CmtTelecomNumber">
+            <telecomNumber countryCode="1" areaCode="702" contactNumber="234-5678"/>
+            <parties contactMechPurposeId="PhonePrimary" fromDate="1265184000000" extension="1234" allowSolicitation="Y"/>
+            <parties contactMechPurposeId="PhoneBilling" fromDate="1265184000000" extension="4321" allowSolicitation="N"/>
+        </mantle.party.contact.ContactMech>
+
+        <mantle.party.contact.ContactMech contactMechId="JoeDistAddr" contactMechTypeEnumId="CmtPostalAddress">
+            <postalAddress toName="Joe &amp; Joe's Distributing" attnName="" address1="1350 E. Flamingo Rd." address2="" unitNumber="3456"
+                    city="Las Vegas" stateProvinceGeoId="USA_NV" countryGeoId="USA" postalCode="89119" postalCodeExt="5263"
+                    telecomContactMechId="JoeDistTeln"/>
+            <parties contactMechPurposeId="PostalPrimary" fromDate="1265184000000"/>
+            <parties contactMechPurposeId="PostalBilling" fromDate="1265184000000"/>
+        </mantle.party.contact.ContactMech>
+
+        <paymentMethods paymentMethodId="JoeDistCc" paymentMethodTypeEnumId="PmtCreditCard"
+                ownerPartyId="JoeDist" fromDate="1265184000000" description="Visa ************1111"
+                postalContactMechId="JoeDistAddr" telecomContactMechId="JoeDistTeln"
+                firstNameOnAccount="JOE Q" lastNameOnAccount="PUBLIC" companyNameOnAccount="JOE'S DISTRIBUTING">
+            <creditCard creditCardTypeEnumId="CctVisa" cardNumber="4111111111111111" expireDate="08/2020"/>
+        </paymentMethods>
+        <paymentMethods paymentMethodId="JoeDistBa" paymentMethodTypeEnumId="PmtBankAccount"
+                ownerPartyId="JoeDist" fromDate="1265184000000" description="ZBank Account 54321"
+                postalContactMechId="JoeDistAddr" telecomContactMechId="JoeDistTeln"
+                firstNameOnAccount="JOE Q" lastNameOnAccount="PUBLIC" companyNameOnAccount="JOE'S DISTRIBUTING">
+            <bankAccount bankName="Demo Z Bank" typeEnumId="BatChecking" routingNumber="987654321" accountNumber="54321"/>
+        </paymentMethods>
+    </mantle.party.Party>
+
+    <!-- ========== DEMO SUPPLIER DATA ========== -->
+    <mantle.party.Party partyId="ZiddlemanInc" partyTypeEnumId="PtyOrganization"/>
+    <mantle.party.Organization partyId="ZiddlemanInc" organizationName="Ziddleman &amp; Sons Suppliers Inc."/>
+    <mantle.party.PartyRole partyId="ZiddlemanInc" roleTypeId="Supplier"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ZiddlemanIncAddr" contactMechTypeEnumId="CmtPostalAddress"/>
+    <mantle.party.contact.PostalAddress contactMechId="ZiddlemanIncAddr" toName="Ziddleman &amp; Sons Suppliers"
+            attnName="" address1="1350 E. Flamingo Rd." address2="" unitNumber="9876"
+            city="Las Vegas" stateProvinceGeoId="USA_NV" countryGeoId="USA" postalCode="89119" postalCodeExt="5263"/>
+    <mantle.party.contact.PartyContactMech partyId="ZiddlemanInc" contactMechId="ZiddlemanIncAddr"
+            contactMechPurposeId="PostalShippingOrigin" fromDate="1265184000000"/>
+    <mantle.party.contact.PartyContactMech partyId="ZiddlemanInc" contactMechId="ZiddlemanIncAddr"
+            contactMechPurposeId="PostalPayment" fromDate="1265184000000"/>
+
+    <mantle.party.contact.ContactMech contactMechId="ZiddlemanIncTeln" contactMechTypeEnumId="CmtTelecomNumber"/>
+    <mantle.party.contact.TelecomNumber contactMechId="ZiddlemanIncTeln" countryCode="1" areaCode="702" contactNumber="987-6543"/>
+    <mantle.party.contact.PartyContactMech partyId="ZiddlemanInc" contactMechId="ZiddlemanIncTeln"
+            contactMechPurposeId="PhoneShippingOrigin" fromDate="1265184000000"/>
+    <mantle.party.contact.PartyContactMech partyId="ZiddlemanInc" contactMechId="ZiddlemanIncTeln"
+            contactMechPurposeId="PhonePayment" fromDate="1265184000000"/>
+
+    <paymentMethods paymentMethodId="ZiddlemanInc_BA" paymentMethodTypeEnumId="PmtBankAccount"
+            ownerPartyId="ZiddlemanInc" fromDate="1265184000000" description="Demo Ziddleman Bank Account"
+            postalContactMechId="ZiddlemanIncAddr" telecomContactMechId="ZiddlemanIncTeln"
+            companyNameOnAccount="Ziddleman &amp; Sons Suppliers">
+        <bankAccount bankName="Demo Z Bank" typeEnumId="BatChecking" routingNumber="987654321" accountNumber="12345"/>
+    </paymentMethods>
+</entity-facade-xml>

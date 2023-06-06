@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="modify" noun="ProductPrice" type="interface">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="quantity" type="BigDecimal" required="true"/>
+            <parameter name="priceUomId" required="true"/>
+            <parameter name="pricePurposeEnumId" required="true"/>
+            <parameter name="productStoreId"/><parameter name="vendorPartyId"/><parameter name="customerPartyId"/>
+            <parameter name="price" type="BigDecimal"/>
+            <parameter name="productPriceId"/>
+            <parameter name="listPrice" type="BigDecimal"/>
+            <parameter name="listProductPriceId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="price" type="BigDecimal"/>
+            <parameter name="listPrice" type="BigDecimal"/>
+        </out-parameters>
+    </service>
+    <service verb="run" noun="ProductPriceKS">
+        <!-- run from a ProductPriceModify record with serviceName = mantle.product.PriceServices.run#ProductPriceKS -->
+        <implements service="mantle.product.PriceServices.modify#ProductPrice"/>
+        <actions>
+            <!-- run the ProductPriceKS knowledge session rules -->
+            <if condition="ec.factory.getToolFactory('KIE')"><then>
+                <set field="priceKieSession" from="ec.getTool('KIE', null)?.getStatelessKieSession('ProductPriceKS')"/>
+                <if condition="priceKieSession != null"><then>
+                    <script>priceKieSession.execute([])</script>
+                </then><else>
+                    <log level="warn" message="KIE was found but ProductPriceKS KIE Session, not running price rules, using price lookup only"/>
+                </else></if>
+            </then><else>
+                <log level="debug" message="KIE not found, not running price rules, using price lookup only"/>
+            </else></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProductPriceByType">
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="priceTypeEnumId" required="true"/>
+            <parameter name="quantity" type="BigDecimal" default="1.0"/>
+            <parameter name="validDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="priceUomId" default="ec.user.getPreference('CurrencyDefault') ?: 'USD'"/>
+            <parameter name="pricePurposeEnumId" default-value="PppPurchase"/>
+            <parameter name="productStoreId"/><parameter name="vendorPartyId"/><parameter name="customerPartyId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="price" type="BigDecimal"/>
+            <parameter name="productPriceId"/>
+            <parameter name="priceUomId"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.ProductPrice" list="currentPriceListAll">
+                <date-filter valid-date="validDate"/><econdition field-name="priceTypeEnumId"/>
+                <econdition field-name="productId"/><econdition field-name="priceUomId"/>
+                <econdition field-name="pricePurposeEnumId" or-null="true"/>
+                <econdition field-name="productStoreId" or-null="true"/>
+                <econdition field-name="vendorPartyId" or-null="true"/>
+                <econdition field-name="customerPartyId" or-null="true"/>
+                <econdition field-name="price" operator="is-not-null"/>
+                <!-- get most recent price records first, get highest qualifying (<=quantity) minQuantity records first -->
+                <order-by field-name="-fromDate,-minQuantity"/>
+            </entity-find>
+            <if condition="currentPriceListAll.size() == 0"><return/></if>
+
+            <!-- filter by minQuantity after to maximize cache hits, simplify clearing -->
+            <set field="currentPriceList" from="currentPriceListAll.findAll({ Map it -&gt; ((BigDecimal) it.minQuantity) &lt;= ((BigDecimal) quantity) })"/>
+
+            <!-- use the maximal match, priority customer, vendor, then store (each if applicable/specified) -->
+            <!-- <log level="warn" message="Price by type ${priceTypeEnumId} list ${currentPriceListAll}"/> -->
+            <set field="productPrice" from="findMaximalMatch(currentPriceList,
+                    [customerPartyId:customerPartyId, vendorPartyId:vendorPartyId, productStoreId:productStoreId])"/>
+            <set field="productPriceId" from="productPrice?.productPriceId"/>
+            <set field="price" from="productPrice?.price"/>
+        </actions>
+    </service>
+    <service verb="get" noun="ProductPrice" authenticate="anonymous-view">
+        <description>Use ProductPrice records plus modifier services to determine the price to charge or pay for a Product.</description>
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="quantity" type="BigDecimal" default="1.0"/>
+            <parameter name="validDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="priceUomId" default="ec.user.getPreference('CurrencyDefault') ?: 'USD'"/>
+            <parameter name="pricePurposeEnumId" default-value="PppPurchase"/>
+            <parameter name="productStoreId"/><parameter name="vendorPartyId"/><parameter name="customerPartyId"/>
+            <!-- TODO: to support look for records with this first and then with null: <parameter name="agreementId"/> -->
+            <!-- TODO: to support look for records with this first and then with null: <parameter name="agreementItemSeqId"/> -->
+            <parameter name="defaultToListPrice" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="price" type="BigDecimal"/>
+            <parameter name="productPriceId"/>
+            <parameter name="listPrice" type="BigDecimal"/>
+            <parameter name="listProductPriceId"/>
+            <parameter name="priceUomId"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="currentOut"
+                    in-map="context + [priceTypeEnumId:'PptCurrent']"/>
+            <set field="productPriceId" from="currentOut.productPriceId"/>
+            <set field="price" from="currentOut.price"/>
+
+            <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="listOut"
+                    in-map="context + [priceTypeEnumId:'PptList']"/>
+            <set field="listProductPriceId" from="listOut.productPriceId"/>
+            <set field="listPrice" from="listOut.price"/>
+
+            <if condition="!price || !listPrice">
+                <!-- see if this is a variant of a virtual product, if so get price from virtual -->
+                <entity-find entity-name="mantle.product.ProductAssoc" list="varAssocList">
+                    <date-filter/>
+                    <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+                    <econdition field-name="toProductId" from="productId"/>
+                </entity-find>
+                <if condition="varAssocList">
+                    <set field="virtualProductId" from="varAssocList[0].productId"/>
+                    <if condition="!price">
+                        <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="currentOut" out-map-add-to-existing="false"
+                                in-map="context + [productId:virtualProductId, priceTypeEnumId:'PptCurrent']"/>
+                        <set field="productPriceId" from="currentOut.productPriceId"/>
+                        <set field="price" from="currentOut.price"/>
+                    </if>
+                    <if condition="!listPrice">
+                        <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="listOut" out-map-add-to-existing="false"
+                                in-map="context + [productId:virtualProductId, priceTypeEnumId:'PptList']"/>
+                        <set field="listProductPriceId" from="listOut.productPriceId"/>
+                        <set field="listPrice" from="listOut.price"/>
+                    </if>
+                </if>
+            </if>
+
+            <!-- if no price default to listPrice or ZERO -->
+            <if condition="defaultToListPrice &amp;&amp; !price">
+                <set field="price" from="listPrice ?: BigDecimal.ZERO"/></if>
+
+
+            <!-- <log level="warn" message="========== BEFORE rules productId=${productId}, price=${price}, listPrice=${listPrice}"/> -->
+
+            <entity-find entity-name="mantle.product.ProductPriceModify" list="priceModifyList" cache="true">
+                <order-by field-name="sequenceNum"/></entity-find>
+            <script><![CDATA[
+            for (priceModify in priceModifyList) { try {
+                Map parmMap = new HashMap(context)
+                List modParameterList = priceModify.parameters
+                for (modParameter in modParameterList) parmMap.put(modParameter.parameterName, modParameter.parameterValue)
+
+                Map serviceRegister = priceModify.serviceRegister
+                Map result = ec.service.sync().name(serviceRegister.serviceName).parameters(parmMap).disableAuthz().call()
+                // ec.logger.warn("Ran price service ${serviceRegister.serviceName} result: ${result}")
+                if (!ec.message.hasError()) ec.context.putAll(result)
+            } catch (Throwable t) {
+                ec.logger.log(300, "Error calling price modify ${priceModify.priceModifyId}", t)
+            } }
+            ]]></script>
+
+            <!-- <log level="warn" message="========== AFTER rules productId=${productId}, price=${price}, listPrice=${listPrice}"/> -->
+        </actions>
+    </service>
+    <service verb="get" noun="OrderProductPrice">
+        <description>In addition to productId and quantity recommended use is to specify orderId and orderPartSeqId which are used
+            to determine priceUomId, pricePurposeEnumId, productStoreId, vendorPartyId, and customerPartyId</description>
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="quantity" type="BigDecimal" default="1"/>
+
+            <parameter name="orderId"/>
+            <parameter name="orderPartSeqId"/>
+
+            <parameter name="priceUomId"><description>If not specified defaults to OrderHeader.currencyUomId, then
+                ProductStore.defaultCurrencyUomId, then the CurrencyDefault user preference (usually for the ALL_USERS group) then USD.</description></parameter>
+            <parameter name="pricePurposeEnumId"><description>If not specified defaults to PppPurchase unless OrderHeader is
+                recurring (recurCronExpression not empty) then defaults to PppRecurring</description></parameter>
+
+            <parameter name="productStoreId"/><parameter name="vendorPartyId"/><parameter name="customerPartyId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="price" type="BigDecimal"/>
+            <parameter name="productPriceId"/>
+            <parameter name="listPrice" type="BigDecimal"/>
+            <parameter name="listProductPriceId"/>
+            <parameter name="priceUomId"/>
+        </out-parameters>
+        <actions>
+            <if condition="orderId">
+                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                    <field-map field-name="orderId"/></entity-find-one>
+                <set field="productStoreId" from="productStoreId ?: orderHeader?.productStoreId"/>
+                <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
+                    <field-map field-name="productStoreId"/></entity-find-one>
+                <set field="priceUomId" from="priceUomId ?: orderHeader?.currencyUomId ?: productStore?.defaultCurrencyUomId ?: ec.user.getPreference('CurrencyDefault') ?: 'USD'"/>
+                <set field="pricePurposeEnumId" from="pricePurposeEnumId ?: (orderHeader?.recurCronExpression ? 'PppRecurring' : 'PppPurchase')"/>
+
+                <if condition="orderPartSeqId">
+                    <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+                    <set field="vendorPartyId" from="(vendorPartyId ?: orderPart?.vendorPartyId) ?: productStore?.organizationPartyId"/>
+                    <set field="customerPartyId" from="(customerPartyId ?: orderPart?.customerPartyId) ?: ec.user.userAccount?.partyId"/>
+                </if>
+                <set field="vendorPartyId" from="orderPart?.vendorPartyId ?: productStore?.organizationPartyId"/>
+            </if>
+
+            <if condition="!pricePurposeEnumId"><set field="pricePurposeEnumId" value="PppPurchase"/></if>
+            <!-- don't defaultToListPrice for Recurring prices so we can see if there really is a Recurring price in order to default to Purchase purpose below -->
+            <set field="defaultToListPrice" from="pricePurposeEnumId != 'PppRecurring'"/>
+            <service-call name="mantle.product.PriceServices.get#ProductPrice" in-map="context" out-map="context"/>
+
+            <!-- if no Recurring price try again with Purchase purpose -->
+            <if condition="!price &amp;&amp; pricePurposeEnumId == 'PppRecurring'">
+                <set field="pricePurposeEnumId" value="PppPurchase"/>
+                <set field="defaultToListPrice" from="true"/>
+                <service-call name="mantle.product.PriceServices.get#ProductPrice" in-map="context" out-map="context"/>
+            </if>
+        </actions>
+    </service>
+</services>

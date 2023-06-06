@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="RateAmount">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.humanres.rate.RateAmount" include="nonpk">
+                <exclude field-name="rateTypeEnumId"/>
+                <exclude field-name="ratePurposeEnumId"/>
+                <exclude field-name="rateAmount"/>
+            </auto-parameters>
+            <parameter name="rateTypeEnumId" default-value="RatpStandard"/>
+            <parameter name="ratePurposeEnumId" default-value="RaprVendor"/>
+            <parameter name="rateAmount" required="true" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters><parameter name="rateAmountId"/></out-parameters>
+        <actions>
+            <!-- If the timePeriodUomId (which may not be time related) is not set, attempt to default it
+                 to what makes the most sense; 'Each' for anything containing the word Piece, and
+                 'Hour' for anything else. -->
+            <set field="timePeriodUomId" from="timePeriodUomId?:(rateTypeEnumId.contains('Piece')?'OTH_ea':'TF_hr')"/>
+            <service-call name="create#mantle.humanres.rate.RateAmount" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="RateAmount">
+        <description>Limited update of RateAmount record</description>
+        <in-parameters>
+            <parameter name="rateAmountId" required="true"/>
+            <parameter name="fromDate" type="Timestamp"/>
+            <parameter name="thruDate" type="Timestamp"/>
+            <parameter name="rateAmount" type="BigDecimal" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="rateAmountId"/></out-parameters>
+        <actions>
+            <service-call name="update#mantle.humanres.rate.RateAmount" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+</services>

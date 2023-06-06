@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="anonymous-view" allow-extra-path="true">
+    <parameter name="productId"/>
+    <parameter name="addedCorrect"/>
+    <parameter name="categoryId"/>
+
+    <transition name="addToCart">
+        <actions>
+            <service-call name="popstore.CartServices.add#Product" out-map="addOut"
+                in-map="[productId:productId, quantity:quantity, currencyUomId:currencyUomId, productStoreId: productStoreId]"/> 
+                <set field="addedCorrect" from="false"/>
+                <if condition="addOut.orderHeader != null">
+                    <set field="addedCorrect" from="true"/>
+                </if>
+        </actions>
+        <conditional-response url="."><condition><expression>categoryId != null</expression></condition><parameter name="categoryId"/><parameter name="addedCorrect"/></conditional-response>
+        <conditional-response url="."><condition><expression>searchParameter != null</expression></condition><parameter name="searchParameter"/><parameter name="addedCorrect"/></conditional-response>
+        <default-response url="."><parameter name="addedCorrect"/></default-response>
+        <error-response url="."/>
+    </transition>
+
+    <transition name="removeCartItem">
+        <actions>
+            <service-call name="popstore.CartServices.delete#OrderItem" in-map="[orderId: orderId, orderItemSeqId: orderItemSeqId]"/>
+            <if condition="categoryId != null">
+                <set field="categoryId" from="categoryId"/>
+                <set field="categoryName" from="categoryName"/>
+            </if>
+            <if condition="searchParameter != null">
+                <set field="searchParameter" from="searchParameter"/>
+            </if>
+        </actions>
+        <conditional-response url="."><condition><expression>categoryId != null</expression></condition><parameter name="categoryId"/><parameter name="addedCorrect"/></conditional-response>
+        <conditional-response url="."><condition><expression>searchParameter != null</expression></condition><parameter name="searchParameter"/><parameter name="addedCorrect"/></conditional-response>
+        <default-response url="."/>
+    </transition>
+
+    <transition name="addReview">
+        <actions>
+            <service-call name="popstore.ProductServices.create#ProductReview" 
+                in-map="[productId:productId, productRating:productRating, productReview:productReview]"/>
+        </actions>
+        <default-response url="."/>
+        <error-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <!-- get productStore/currency from store setting -->
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+                requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]"
+             out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <set field="currencyUomId" from="productStoreIdContext.defaultCurrencyUomId"/>
+
+     	<set field="star" from="5"/>
+        <set field="imgContent" from="[]"/>
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <if condition="searchParameter"><set field="searchParameter" from="URLEncoder.encode(searchParameter, 'UTF-8')"/></if>
+        <if condition="extraPathNameList &amp;&amp; !productId"><set field="productId" from="extraPathNameList[0]"/></if>
+        <if condition="extraPathNameList &amp;&amp; !addedCorrect"><set field="addedCorrect" from="extraPathNameList[1]"/></if>
+        <if condition="extraPathNameList &amp;&amp; !categoryId"><set field="categoryId" from="extraPathNameList[2]"/></if>
+
+
+        <!-- if user requests product variant then display the virtual with proper selection -->
+        <entity-find entity-name="mantle.product.ProductAssoc" list="productAssocs">
+            <econdition field-name="toProductId" from="productId"/>
+            <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+            <date-filter/>
+        </entity-find>
+
+        <if condition="productAssocs">
+            <set field="selectedOptionId" from="productId"/>
+            <set field="productId" from="productAssocs[0].productId"/>
+        </if>
+
+        <!-- View Allow -->
+        <entity-find-one entity-name="mantle.product.Product" value-field="productEntity">
+            <field-map field-name="productId"/>
+        </entity-find-one>
+
+        <service-call name="popstore.ProductServices.get#ViewAllowProducts"
+                      in-map="[productStoreId: productStoreId, productList: [productEntity]]"
+                      out-map="out"/>
+
+        <if condition="out.productList.size() == 0">
+            <then>
+                <return error="true" message="Product not found with ID ${productId}"/>
+            </then>
+        </if>
+    </pre-actions>
+    <actions>
+        <service-call name="popstore.ProductServices.get#ProductInfo" out-map="product" in-map="[productId:productId, priceUomId: currencyUomId]"/>
+        <service-call name="popstore.ProductServices.get#ProductQuantity" out-map="productQuantity" in-map="[productId:productId]"/>
+        <service-call name="popstore.ProductServices.get#ProductReviews" out-map="reviewsList" in-map="[productId:productId]"/>
+        <service-call name="popstore.ProductServices.find#ProductAvailability" in-map="context" out-map="context" />
+
+        <service-call name="popstore.CartServices.get#CartInfo" in-map="context" out-map="productsInCart" />
+
+        <set field="inStock" from="false"/>
+        <if condition="product.productTypeEnumId == 'PtVirtual'">
+            <service-call name="popstore.ProductServices.get#ProductVariantsDisplayInfo" 
+                in-map="context" out-map="variantsList" />
+        <else>
+            <if condition="productAvailability.get(productId)">
+                <set field="inStock" from="true"/>
+            </if>
+        </else>
+        </if>
+
+        <if condition="categoryId">
+            <service-call name="popstore.ProductServices.get#CategoryInfo" out-map="category" in-map="[productCategoryId:categoryId]"/>
+        </if>
+        <set field="canShow" from="''"/>
+        <set field="specialInstrLocation" from="product.contentList.find({'PcntSpecialInstr' == it.productContentTypeEnumId})?.contentLocation"/>
+        <if condition="specialInstrLocation">
+            <set field="specialInstructions" from="ec.resource.getLocationText(specialInstrLocation, true)"/>
+        </if>
+
+        <set field="faqLocation" from="product.contentList.find({'PcntFAQ' == it.productContentTypeEnumId})?.contentLocation"/>
+        <script>canShow = faqLocation?.endsWith(".html") ? true : false;</script>
+        <if condition="faqLocation &amp;&amp; canShow">
+            <set field="faq" from="ec.resource.getLocationText(faqLocation, true)"/>
+        </if>
+        <set field="lifestyleLocation" from="product.contentList.find({'PcntDirections' == it.productContentTypeEnumId})?.contentLocation"/>
+        <script>canShow = lifestyleLocation?.endsWith(".html") ? true : false;</script>
+        <if condition="lifestyleLocation &amp;&amp; canShow">
+            <set field="lifestyle" from="ec.resource.getLocationText(lifestyleLocation, true)"/>
+        </if>
+        <set field="labelLocation" from="product.contentList.find({'PcntLabelText' == it.productContentTypeEnumId})?.contentLocation"/>
+        <script>canShow = labelLocation?.endsWith(".html") ? true : false;</script>
+        <if condition="labelLocation &amp;&amp; canShow">
+            <set field="label" from="ec.resource.getLocationText(labelLocation, true)"/>
+        </if>
+        <set field="imageLabel" from="product.contentList.find({'PcntLabelImage' == it.productContentTypeEnumId})"/>
+        <set field="imageDetail" from="product.contentList.find({'PcntImageDetail' == it.productContentTypeEnumId})"/>
+
+        <set field="transparencyLocation" from="product.contentList.find({'PcntProductTransparency' == it.productContentTypeEnumId})?.contentLocation"/>
+        <script>canShow = transparencyLocation?.endsWith(".html") ? true : false;</script>
+        <if condition="transparencyLocation &amp;&amp; canShow">
+            <set field="transparency" from="ec.resource.getLocationText(transparencyLocation, true)"/>
+        </if>
+
+        <!-- Awards Tab -->
+        <set field="awardsLocation" from="product.contentList.find({'PcntAwards' == it.productContentTypeEnumId})?.contentLocation"/>
+        <script>canShow = awardsLocation?.endsWith(".html") ? true : false;</script>
+        <if condition="awardsLocation &amp;&amp; canShow">
+            <set field="awards" from="ec.resource.getLocationText(awardsLocation, true)"/>
+        </if>
+    </actions>
+
+
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_product}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

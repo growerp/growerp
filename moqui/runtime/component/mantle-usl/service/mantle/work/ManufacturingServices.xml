@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="ProductionRunDisplayInfo">
+        <in-parameters><parameter name="workEffortId" required="true"/></in-parameters>
+        <out-parameters>
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="statusHistoryList" type="List"><parameter name="auditLog" type="Map"/></parameter>
+
+            <parameter name="lineFacility" type="Map"/>
+            <parameter name="warehouseFacility" type="Map"/>
+            <parameter name="currentFacilityIdList" type="List"><parameter name="facilityId"/></parameter>
+            <parameter name="inventoryFacilityId"/>
+            <parameter name="inventoryFacility" type="Map"/>
+
+            <parameter name="consumeList" type="List"><parameter name="consumeItem" type="Map"/></parameter>
+            <parameter name="consumeProductIdList" type="List"><parameter name="productId"/></parameter>
+            <parameter name="produceList" type="List"><parameter name="produceItem" type="Map"/></parameter>
+            <parameter name="produceProductIdList" type="List"><parameter name="productId"/></parameter>
+            <parameter name="combinedProductIdList" type="List"><parameter name="productId"/></parameter>
+            <parameter name="assetSummaryList" type="List">
+                <description>List of AssetSummaryView records for all products consumed and produced, to be filtered and used as needed.</description>
+                <parameter name="assetSummary" type="Map"/>
+            </parameter>
+
+            <parameter name="issuanceSummaryList" type="List">
+                <description>Summary of quantities of assets issued (consumed) by productId.</description>
+                <parameter name="issuanceSummary" type="Map"/>
+            </parameter>
+            <parameter name="receiptSummaryList" type="List">
+                <description>Summary of quantities of assets received (produced) by productId.</description>
+                <parameter name="receiptSummary" type="Map"/>
+            </parameter>
+
+            <parameter name="equipmentList" type="List"><parameter name="equipment" type="Map"/></parameter>
+            <parameter name="weapdList" type="List">
+                <description>List of WorkEffortAndPartyDetail values.</description>
+                <parameter name="weapd" type="Map"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- The Production Run WorkEffort -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+
+            <entity-find entity-name="moqui.entity.EntityAuditLog" list="statusHistoryList">
+                <econdition field-name="changedEntityName" value="mantle.work.effort.WorkEffort"/>
+                <econdition field-name="changedFieldName" value="statusId"/>
+                <econdition field-name="pkPrimaryValue" from="workEffortId"/>
+                <order-by field-name="changedDate"/>
+            </entity-find>
+
+            <!-- Line and Warehouse Facilities -->
+            <entity-find-related-one value-field="workEffort" relationship-name="mantle.facility.Facility" to-value-field="lineFacility"/>
+            <entity-find-related-one value-field="lineFacility" relationship-name="Parent#mantle.facility.Facility" to-value-field="warehouseFacility"/>
+            <set field="currentFacilityIdList" from="[workEffort.facilityId]"/>
+            <script>if (warehouseFacility) currentFacilityIdList.add(warehouseFacility.facilityId)</script>
+            <!-- use the warehouse for inventory unless there is no warehouse, then use the line (the direct facility on the run) -->
+            <set field="inventoryFacilityId" from="warehouseFacility?.facilityId ?: lineFacility?.facilityId"/>
+            <set field="inventoryFacility" from="warehouseFacility ?: lineFacility"/>
+
+            <!-- Products to consume and produce -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProductDetail" list="allProdList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="productName"/></entity-find>
+            <filter-map-list list="allProdList" to-list="consumeList"><field-map field-name="typeEnumId" value="WeptConsume"/></filter-map-list>
+            <filter-map-list list="allProdList" to-list="produceList"><field-map field-name="typeEnumId" value="WeptProduce"/></filter-map-list>
+            <order-map-list list="produceList"><order-by field-name="pseudoId"/><order-by field-name="productName"/></order-map-list>
+            <order-map-list list="consumeList"><order-by field-name="pseudoId"/><order-by field-name="productName"/></order-map-list>
+            <set field="consumeProductIdList" from="consumeList ? consumeList*.productId : []"/>
+            <set field="produceProductIdList" from="produceList ? produceList*.productId : []"/>
+            <set field="combinedProductIdList" from="consumeProductIdList + produceProductIdList"/>
+
+            <if condition="combinedProductIdList">
+                <entity-find entity-name="mantle.product.asset.AssetSummaryView" list="assetSummaryList">
+                    <econdition field-name="productId" operator="in" from="combinedProductIdList"/>
+                    <econdition field-name="facilityId" from="inventoryFacilityId"/>
+                    <select-field field-name="productId"/>
+                    <select-field field-name="availableToPromiseTotal"/><select-field field-name="quantityOnHandTotal"/>
+                </entity-find>
+            </if>
+
+            <entity-find entity-name="mantle.product.issuance.AssetIssuanceSummary" list="issuanceSummaryList">
+                <econdition field-name="workEffortId"/><select-field field-name="productId"/>
+                <select-field field-name="quantity"/></entity-find>
+            <entity-find entity-name="mantle.product.receipt.AssetReceiptSummary" list="receiptSummaryList">
+                <econdition field-name="workEffortId"/><select-field field-name="productId"/>
+                <select-field field-name="quantityAccepted"/></entity-find>
+
+            <!-- Equipment -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortAssetAndAssign" list="equipmentList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="assetName"/></entity-find>
+
+            <!-- Party Assignments -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortAndPartyDetail" list="weapdList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="firstName,lastName,organizationName"/></entity-find>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ProductionRun">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetEvent"/>
+            <parameter name="purposeEnumId" default-value="WepProductionRun"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+
+            <parameter name="facilityId" required="true"><description>The Production Line Facility to use, or the Warehouse where done.</description></parameter>
+
+            <parameter name="consumeProductId"/>
+            <parameter name="consumeEstimatedQuantity" type="BigDecimal"/>
+            <parameter name="produceProductId"/>
+            <parameter name="produceEstimatedQuantity" type="BigDecimal"/>
+
+            <parameter name="originFacilityId"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.work.effort.WorkEffort" in-map="context" out-map="context"/>
+
+            <if condition="consumeProductId">
+                <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                        in-map="[workEffortId:workEffortId, productId:consumeProductId, typeEnumId:'WeptConsume',
+                            fromDate:ec.user.nowTimestamp, estimatedQuantity:consumeEstimatedQuantity]"/>
+            </if>
+            <if condition="produceProductId">
+                <service-call name="mantle.work.ManufacturingServices.get#ProductBomDetail"
+                        in-map="[productId:produceProductId, produceQuantity:produceEstimatedQuantity]" out-map="bomOutMap"/>
+                <iterate list="bomOutMap.bomDetailList" entry="bom">
+                    <if condition="consumeProductId != bom.productIdSet[0]">
+                        <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                                in-map="[workEffortId:workEffortId, productId:bom.productIdSet[0], typeEnumId:'WeptConsume',
+                                    fromDate:ec.user.nowTimestamp, estimatedQuantity:bom.bomQuantity]"/>
+                    </if>
+                </iterate>
+
+                <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                        in-map="[workEffortId:workEffortId, productId:produceProductId, typeEnumId:'WeptProduce',
+                            fromDate:ec.user.nowTimestamp, estimatedQuantity:produceEstimatedQuantity]"/>
+            </if>
+            <if condition="originFacilityId">
+                <service-call name="create#mantle.work.effort.WorkEffortFacility"
+                        in-map="[workEffortId:workEffortId, facilityId:originFacilityId, typeEnumId:'WeftOrigin']"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="create" noun="ShipmentAssemblyWorkEffort">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="actualStartDate" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="assemblyWorkEffortId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment" for-update="true"/>
+            <if condition="shipment.assemblyWorkEffortId">
+                <!-- return the existing ID and warn about it, shouldn't be called when already exists for Shipment -->
+                <set field="assemblyWorkEffortId" from="shipment.assemblyWorkEffortId"/>
+                <return type="warning" message="Assembly Task ${shipment.assemblyWorkEffortId} already exists for Shipment ${shipmentId}"/>
+            </if>
+
+            <!-- make sure a WorkEffort is needed -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemAssocView" list="assemblyItemList">
+                <date-filter/>
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="itemProductTypeEnumId" value="PtPickAssembly"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+                <order-by field-name="productId,productIdTo"/>
+            </entity-find>
+
+            <if condition="!assemblyItemList">
+                <return type="warning" message="Not creating Assembly Task for Shipment ${shipmentId} with no Pick Assembly products"/></if>
+
+            <!-- get facilityId from first SRS originFacilityId -->
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="srsList">
+                <econdition field-name="shipmentId"/>
+                <order-by field-name="shipmentRouteSegmentSeqId"/>
+            </entity-find>
+            <if condition="srsList"><set field="facilityId" from="srsList[0].originFacilityId"/></if>
+
+            <!-- create the WorkEffort -->
+            <set field="workEffortName" value="Shipment ${shipmentId} Assembly"/>
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="createWeOut"
+                    in-map="[workEffortTypeEnumId:'WetTask', purposeEnumId:'WepPickAssembly', statusId:'WeInProgress',
+                        ownerPartyId:shipment.fromPartyId, productStoreId:shipment.productStoreId, facilityId:facilityId,
+                        workEffortName:workEffortName, actualStartDate:actualStartDate]"/>
+            <set field="assemblyWorkEffortId" from="createWeOut.workEffortId"/>
+
+            <!-- set on shipment -->
+            <set field="shipment.assemblyWorkEffortId" from="assemblyWorkEffortId"/>
+            <entity-update value-field="shipment"/>
+
+            <!-- add products to produce (PtPickAssembly) and consume (assembly components) -->
+            <set field="assemblyIdsHandled" from="new HashSet()"/>
+            <set field="componentQtyById" from="[:]"/>
+            <iterate list="assemblyItemList" entry="assemblyItem">
+                <if condition="!assemblyIdsHandled.contains(assemblyItem.productId)">
+                    <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                            in-map="[workEffortId:assemblyWorkEffortId, productId:assemblyItem.productId, fromDate:new Timestamp(0),
+                                typeEnumId:'WeptProduce', statusId:'WepdCreated', estimatedQuantity:assemblyItem.quantity]"/>
+                    <script>assemblyIdsHandled.add(assemblyItem.productId)</script>
+                </if>
+
+                <set field="curCompQty" from="(assemblyItem.quantity ?: 0.0) * (assemblyItem.componentQuantity ?: 1.0)"/>
+                <script>componentQtyById.put(assemblyItem.toProductId, (componentQtyById.get(assemblyItem.toProductId) ?: 0.0) + curCompQty)</script>
+            </iterate>
+
+            <!-- <log level="warn" message="componentQtyById: ${componentQtyById}"/> -->
+            <iterate list="componentQtyById" key="componentProductId" entry="componentQty">
+                <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                        in-map="[workEffortId:assemblyWorkEffortId, productId:componentProductId, fromDate:new Timestamp(0),
+                            typeEnumId:'WeptConsume', statusId:'WepdCreated', estimatedQuantity:componentQty]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="set" noun="ProducedProductQuantity">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="estimatedQuantity" type="BigDecimal" required="true"/>
+        </in-parameters>
+        <actions>
+            <!-- get all products and split into consume and produce lists -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="produceWepList">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="productId"/>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-find>
+            <set field="currentQty" from="produceWepList ? produceWepList*.estimatedQuantity.sum() : 0.0"/>
+
+            <if condition="estimatedQuantity &gt; currentQty"><then>
+                <!-- increase qty -->
+                <if condition="produceWepList"><then>
+                    <set field="produceWep" from="produceWepList[0]"/>
+                    <service-call name="update#mantle.work.effort.WorkEffortProduct"
+                            in-map="[workEffortId:workEffortId, productId:productId, fromDate:produceWep.fromDate,
+                                estimatedQuantity:((produceWep.estimatedQuantity ?: 0.0) + (estimatedQuantity - currentQty))]"/>
+                </then><else>
+                    <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                            in-map="[workEffortId:workEffortId, productId:productId, fromDate:new Timestamp(0),
+                                typeEnumId:'WeptProduce', statusId:'WepdCreated', estimatedQuantity:estimatedQuantity]"/>
+                </else></if>
+
+                <service-call name="mantle.work.ManufacturingServices.recreate#ConsumeProductsFromProduce"
+                        in-map="[workEffortId:workEffortId]"/>
+            </then><else-if condition="estimatedQuantity &lt; currentQty">
+                <!-- decrease qty -->
+                <set field="quantityRemaining" from="currentQty - estimatedQuantity"/>
+                <iterate list="produceWepList" entry="produceWep">
+                    <if condition="quantityRemaining == 0.0"><break/></if>
+
+                    <set field="quantityToReduce" from="produceWep.estimatedQuantity &gt; quantityRemaining ?
+                            quantityRemaining : produceWep.estimatedQuantity"/>
+                    <set field="quantityRemaining" from="quantityRemaining &gt; quantityToReduce ? (quantityRemaining - quantityToReduce) : 0.0"/>
+
+                    <service-call name="update#mantle.work.effort.WorkEffortProduct"
+                            in-map="[workEffortId:workEffortId, productId:productId, fromDate:produceWep.fromDate,
+                                estimatedQuantity:((produceWep.estimatedQuantity ?: 0.0) - quantityToReduce)]"/>
+                </iterate>
+
+                <service-call name="mantle.work.ManufacturingServices.recreate#ConsumeProductsFromProduce"
+                        in-map="[workEffortId:workEffortId]"/>
+            </else-if></if>
+
+            <!-- if quantity reduced and now PA WorkEffort has all inventory complete it, set actualCompletionDate -->
+            <service-call name="mantle.work.ManufacturingServices.get#ProducedProductComplete"
+                    in-map="[workEffortId:workEffortId]" out-map="producedCompleteOut"/>
+            <if condition="producedCompleteOut.allEstimatedProduced"><then>
+                <service-call name="update#mantle.work.effort.WorkEffort"
+                        in-map="[workEffortId:workEffortId, statusId:'WeComplete', actualCompletionDate:ec.user.nowTimestamp]"/>
+            </then><else>
+                <service-call name="update#mantle.work.effort.WorkEffort"
+                        in-map="[workEffortId:workEffortId, statusId:'WeInProgress', actualCompletionDate:null]"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="recreate" noun="ConsumeProductsFromProduce">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <actions>
+            <!-- delete all existing Consume products -->
+            <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortProduct">
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptConsume"/>
+            </entity-delete-by-condition>
+
+            <!-- get BOM data for all Produce products -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProductAssoc" list="produceBomAssocList">
+                <date-filter/>
+                <date-filter from-field-name="componentFromDate" thru-field-name="componentThruDate"/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-find>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="produceWepList">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-find>
+
+            <set field="componentQtyById" from="[:]"/>
+            <iterate list="produceWepList" entry="produceWep">
+                <filter-map-list list="produceBomAssocList" to-list="curBomAssocList">
+                    <field-map field-name="productId" from="produceWep.productId"/></filter-map-list>
+                <iterate list="curBomAssocList" entry="curBomAssoc">
+                    <set field="usedQuantity" from="(produceWep.estimatedQuantity ?: 0.0) * (curBomAssoc.componentQuantity ?: 1.0)"/>
+                    <script>addToBigDecimalInMap(curBomAssoc.toProductId, usedQuantity, componentQtyById)</script>
+                </iterate>
+            </iterate>
+            <log level="warn" message="componentQtyById: ${componentQtyById}"/>
+
+            <iterate list="componentQtyById" key="componentProductId" entry="componentQty">
+                <service-call name="create#mantle.work.effort.WorkEffortProduct"
+                        in-map="[workEffortId:workEffortId, productId:componentProductId, fromDate:new Timestamp(0),
+                            typeEnumId:'WeptConsume', statusId:'WepdCreated', estimatedQuantity:componentQty]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="produce" noun="AvailableAssemblies">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="shipmentId"><description>If specified will issue to this Shipment</description></parameter>
+            <parameter name="receivedDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+
+            <service-call name="mantle.work.ManufacturingServices.get#ConsumedAssetRemaining"
+                    in-map="[workEffortId:workEffortId]" out-map="context"/>
+
+            <while condition="assemblyCanProduceQty">
+                <set field="assemblyProductId" from="assemblyCanProduceQty.keySet().iterator().next()"/>
+                <set field="assemblyProduceQty" from="assemblyCanProduceQty.get(assemblyProductId)"/>
+                <if condition="assemblyProduceQty">
+                    <!-- look for existing Asset to update instead of receiving new -->
+                    <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="existingReceiptList">
+                        <econdition field-name="productId" from="assemblyProductId"/>
+                        <econdition field-name="workEffortId"/>
+                        <order-by field-name="assetReceiptId"/>
+                    </entity-find>
+                    <if condition="existingReceiptList"><then>
+                        <set field="existingReceipt" from="existingReceiptList[0]"/>
+                        <service-call name="mantle.product.AssetServices.update#AssetAndReceipt" out-map="updateOut" out-map-add-to-existing="false"
+                                in-map="[assetId:existingReceipt.assetId, assetReceiptId:existingReceipt.assetReceiptId,
+                                    workEffortId:workEffortId, receivedDate:packDate,
+                                    quantityAccepted:((existingReceipt.quantityAccepted ?: 0.0) + assemblyProduceQty)]"/>
+
+                        <set field="packAssetId" from="existingReceipt.assetId"/>
+                    </then><else>
+                        <!-- produce the product (receive asset) -->
+                        <service-call name="mantle.product.AssetServices.receive#Asset" out-map="receiveOut" out-map-add-to-existing="false"
+                                in-map="[productId:assemblyProductId, quantity:assemblyProduceQty, statusId:'AstPromised',
+                                    receivedDate:receivedDate, facilityId:workEffort.facilityId,
+                                    ownerPartyId:workEffort.ownerPartyId, workEffortId:workEffortId]"/>
+
+                        <set field="packAssetId" from="receiveOut.assetId"/>
+                    </else></if>
+
+                    <!-- issue to Shipment -->
+                    <if condition="shipmentId">
+                        <service-call name="mantle.shipment.ShipmentServices.pack#ShipmentProduct"
+                                in-map="[productId:assemblyProductId, shipmentId:shipmentId, shipmentPackageSeqId:shipmentPackageSeqId,
+                                    quantity:assemblyProduceQty, packDate:packDate, assetId:packAssetId]"/>
+                    </if>
+                </if>
+
+                <!-- call get#ConsumedAssetRemaining again to reset assemblyCanProduceQty Map for next iteration -->
+                <service-call name="mantle.work.ManufacturingServices.get#ConsumedAssetRemaining"
+                        in-map="[workEffortId:workEffortId]" out-map="context"/>
+            </while>
+        </actions>
+    </service>
+
+    <service verb="breakDown" noun="Assembly">
+        <in-parameters>
+            <parameter name="assetId" required="true"/>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="quantityToBreakDown" type="BigDecimal"><description>Defaults to Asset.quantityOnHandTotal</description></parameter>
+            <parameter name="breakDownDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="asset" type="EntityValue"/>
+            <parameter name="unissueAssemblyComponents" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="quantityBrokenDown" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <if condition="asset == null"><entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset" for-update="true"/></if>
+            <if condition="quantityToBreakDown == null"><set field="quantityToBreakDown" from="asset.quantityOnHandTotal"/></if>
+
+            <if condition="!quantityToBreakDown"><return/></if>
+            <if condition="quantityToBreakDown &gt; asset.quantityOnHandTotal">
+                <return error="true" message="Quantity to break down ${quantityToBreakDown} is more than Asset ${assetId} on hand ${asset.quantityOnHandTotal}"/></if>
+
+            <!-- undo WE produce (AssetReceipt) by zeroing quantity -->
+            <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="assetReceiptList">
+                <econdition field-name="assetId"/>
+                <econdition field-name="workEffortId"/>
+                <order-by field-name="assetReceiptId"/>
+            </entity-find>
+
+            <set field="quantityRemaining" from="quantityToBreakDown"/>
+            <!-- on second thought is impossible if cancel issuance succeeded, maybe for validation sometime: <if condition="quantityRemaining &gt; asset.quantityOnHandTotal"></if> -->
+            <iterate list="assetReceiptList" entry="assetReceipt">
+                <if condition="quantityRemaining == 0.0"><break/></if>
+
+                <set field="quantityToReduce" from="(assetReceipt.quantityAccepted ?: 0.0) &gt; quantityRemaining ?
+                            quantityRemaining : assetReceipt.quantityAccepted"/>
+                <set field="quantityRemaining" from="quantityRemaining &gt; quantityToReduce ? (quantityRemaining - quantityToReduce) : 0.0"/>
+
+                <service-call name="mantle.product.AssetServices.update#AssetAndReceipt" out-map="updateOut" out-map-add-to-existing="false"
+                        in-map="[assetId:assetId, assetReceiptId:assetReceipt.assetReceiptId, workEffortId:workEffortId,
+                            quantityAccepted:(assetReceipt.quantityAccepted - quantityToReduce)]"/>
+            </iterate>
+
+            <set field="quantityBrokenDown" from="quantityToBreakDown - quantityRemaining"/>
+            <if condition="unissueAssemblyComponents">
+                <service-call name="mantle.work.ManufacturingServices.unissue#AssemblyComponents"
+                        in-map="[workEffortId:workEffortId, assemblyProductId:asset.productId, assemblyQuantity:quantityBrokenDown]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="unissue" noun="AssemblyComponents">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="assemblyProductId" required="true"/>
+            <!-- FUTURE: consider making optional Defaults to WorkEffortProduct.estimatedQuantity (WeptProduce) -->
+            <parameter name="assemblyQuantity" type="BigDecimal" required="true">
+                <description>Unissues up to this * ProductAssoc.quantity for each component</description></parameter>
+            <parameter name="unissueDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <!-- get Shipment info before loop, for re-reserve -->
+            <entity-find entity-name="mantle.shipment.Shipment" list="shipmentList">
+                <econdition field-name="assemblyWorkEffortId" from="workEffortId"/></entity-find>
+            <if condition="shipmentList.size() == 1"><set field="shipmentId" from="shipmentList[0].shipmentId"/></if>
+            <if condition="shipmentId">
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="assemblySisList">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="productId" from="assemblyProductId"/>
+                    <order-by field-name="shipmentItemSourceId"/>
+                </entity-find>
+            </if>
+
+            <entity-find entity-name="mantle.product.ProductAssoc" list="bomAssocList">
+                <date-filter/>
+                <econdition field-name="productId" from="assemblyProductId"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+            </entity-find>
+            <iterate list="bomAssocList" entry="bomAssoc">
+                <service-call name="mantle.work.ManufacturingServices.unissue#Component"
+                        in-map="[workEffortId:workEffortId, componentProductId:bomAssoc.toProductId,
+                            componentQuantity:(assemblyQuantity * (bomAssoc.quantity ?: 1.0)), unissueDate:unissueDate]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="unissue" noun="Component">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="componentProductId" required="true"/>
+            <parameter name="componentQuantity" type="BigDecimal" required="true">
+                <description>Unissues up to this quantity for each component</description></parameter>
+            <parameter name="unissueDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="issuanceList">
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="productId" from="componentProductId"/>
+                <order-by field-name="assetIssuanceId"/>
+            </entity-find>
+
+            <set field="quantityRemaining" from="componentQuantity"/>
+            <iterate list="issuanceList" entry="issuance">
+                <if condition="quantityRemaining == 0.0"><break/></if>
+
+                <!-- for re-reservation get orderId, orderItemSeqId from ShipmentItemSource for assembly Product on Shipment for assembly, if applicable -->
+                <!-- NOTE: this is the only way to re-reserve PtPickAssembly because issuances to WorkEffort are NOT associated
+                    with the order (and should not be, is not the final AssetIssuance that should be associated with the OrderItem) -->
+                <if condition="assemblySisList"><then>
+                    <set field="curSisQtyRemaining" from="(issuance.quantity ?: 0.0) &gt; quantityRemaining ? quantityRemaining : issuance.quantity"/>
+                    <iterate list="assemblySisList" entry="assemblySis">
+                        <if condition="curSisQtyRemaining == 0.0"><break/></if>
+
+                        <set field="quantityToReduce" from="(assemblySis.quantity ?: 0.0) &gt; quantityRemaining ? quantityRemaining : assemblySis.quantity"/>
+                        <set field="curSisQtyRemaining" from="curSisQtyRemaining &gt; quantityToReduce ? (curSisQtyRemaining - quantityToReduce) : 0.0"/>
+                        <set field="quantityRemaining" from="quantityRemaining &gt; quantityToReduce ? (quantityRemaining - quantityToReduce) : 0.0"/>
+
+                        <service-call name="mantle.product.AssetServices.cancel#AssetIssuance"
+                                in-map="[assetIssuanceId:issuance.assetIssuanceId, cancelDate:unissueDate, quantityToCancel:quantityToReduce,
+                                    orderId:assemblySis.orderId, orderItemSeqId:assemblySis.orderItemSeqId]"/>
+                    </iterate>
+                </then><else>
+                    <set field="quantityToReduce" from="(issuance.quantity ?: 0.0) &gt; quantityRemaining ? quantityRemaining : issuance.quantity"/>
+                    <set field="quantityRemaining" from="quantityRemaining &gt; quantityToReduce ? (quantityRemaining - quantityToReduce) : 0.0"/>
+
+                    <service-call name="mantle.product.AssetServices.cancel#AssetIssuance"
+                            in-map="[assetIssuanceId:issuance.assetIssuanceId, cancelDate:unissueDate, quantityToCancel:quantityToReduce]"/>
+                </else></if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="cancel" noun="AssemblyWorkEffort">
+        <description>Cancel (undo) all assets produced and consumed and set WE status to cancelled</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="cancelDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <!-- get all issuances (consumed) and receipts (produced) for the WorkEffort -->
+            <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="issuanceList">
+                <econdition field-name="workEffortId"/></entity-find>
+            <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="receiptList">
+                <econdition field-name="workEffortId"/></entity-find>
+
+            <!-- break down assemblies (unproduce/unreceive) -->
+            <set field="assemblyQtyByAssetId" from="[:]"/>
+            <iterate list="receiptList" entry="receipt">
+                <script>addToBigDecimalInMap(receipt.assetId, receipt.quantityAccepted, assemblyQtyByAssetId)</script></iterate>
+            <iterate list="assemblyQtyByAssetId" key="assetId" entry="assetQuantity">
+                <service-call name="mantle.work.ManufacturingServices.breakDown#Assembly"
+                        in-map="[assetId:assetId, workEffortId:workEffortId, quantityToBreakDown:assetQuantity,
+                            unissueAssemblyComponents:false, breakDownDate:cancelDate]"/>
+            </iterate>
+
+            <!-- unissue components -->
+            <set field="componentIssuedQtyByProduct" from="[:]"/>
+            <iterate list="issuanceList" entry="issuance">
+                <script>addToBigDecimalInMap(issuance.productId, issuance.quantity, componentIssuedQtyByProduct)</script></iterate>
+            <iterate list="componentIssuedQtyByProduct" key="componentProductId" entry="componentQuantity">
+                <service-call name="mantle.work.ManufacturingServices.unissue#Component"
+                        in-map="[workEffortId:workEffortId, componentProductId:componentProductId,
+                            componentQuantity:componentQuantity, unissueDate:cancelDate]"/>
+            </iterate>
+
+            <service-call name="update#mantle.work.effort.WorkEffort"
+                    in-map="[workEffortId:workEffortId, statusId:'WeCancelled', actualCompletionDate:null]"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ConsumedAssetRemaining">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="consumeWepList" type="List"><parameter name="consumeWep" type="Map"/></parameter>
+            <parameter name="produceWepList" type="List"><parameter name="produceWep" type="Map"/></parameter>
+            <parameter name="componentIssuedQtyByProduct" type="Map"/>
+            <parameter name="componentUsedQtyByProduct" type="Map"/>
+            <parameter name="componentIssuedAvailable" type="Map"><description>Issued to WE and available, or in other words unused in produced assemblies</description></parameter>
+            <parameter name="assemblyCanProduceQty" type="Map"/>
+            <parameter name="assemblyReceivedByProduct" type="Map"/>
+        </out-parameters>
+        <actions>
+            <!-- get all products and split into consume and produce lists -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="allWorkEffortProductList">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <order-by field-name="productId"/>
+            </entity-find>
+            <filter-map-list list="allWorkEffortProductList" to-list="consumeWepList">
+                <field-map field-name="typeEnumId" value="WeptConsume"/></filter-map-list>
+            <filter-map-list list="allWorkEffortProductList" to-list="produceWepList">
+                <field-map field-name="typeEnumId" value="WeptProduce"/></filter-map-list>
+
+            <!-- get all issuances (consumed) and receipts (produced) for the WorkEffort -->
+            <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="issuanceList">
+                <econdition field-name="workEffortId"/></entity-find>
+            <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="receiptList">
+                <econdition field-name="workEffortId"/></entity-find>
+
+            <!-- get BOM data for all Produce products -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProductAssoc" list="produceBomAssocList">
+                <date-filter/>
+                <date-filter from-field-name="componentFromDate" thru-field-name="componentThruDate"/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-find>
+
+            <!-- get total quantities of products consumed (issued) -->
+            <set field="componentIssuedQtyByProduct" from="[:]"/>
+            <iterate list="issuanceList" entry="issuance">
+                <script>addToBigDecimalInMap(issuance.productId, issuance.quantity, componentIssuedQtyByProduct)</script></iterate>
+
+            <!-- get total quantities of products produced (received) -->
+            <set field="assemblyReceivedByProduct" from="[:]"/>
+            <iterate list="receiptList" entry="receipt">
+                <script>addToBigDecimalInMap(receipt.productId, receipt.quantityAccepted, assemblyReceivedByProduct)</script></iterate>
+
+            <!-- get total quantities of consumed assets use in produced products  -->
+            <set field="componentUsedQtyByProduct" from="[:]"/>
+            <iterate list="receiptList" entry="receipt">
+                <filter-map-list list="produceBomAssocList" to-list="curBomAssocList">
+                    <field-map field-name="productId" from="receipt.productId"/></filter-map-list>
+                <iterate list="curBomAssocList" entry="curBomAssoc">
+                    <set field="usedQuantity" from="(receipt.quantityAccepted ?: 0.0) * (curBomAssoc.componentQuantity ?: 1.0)"/>
+                    <script>addToBigDecimalInMap(curBomAssoc.toProductId, usedQuantity, componentUsedQtyByProduct)</script>
+                </iterate>
+            </iterate>
+
+            <!-- get available quantities of products consumed to use in production (consumed/issued - used) -->
+            <set field="componentIssuedAvailable" from="[:]"/>
+            <iterate list="componentIssuedQtyByProduct" key="productId" entry="issuedQuantity">
+                <set field="usedQuantity" from="componentUsedQtyByProduct.get(productId) ?: 0.0"/>
+                <set field="availQuantity" from="(issuedQuantity ?: 0.0) - usedQuantity"/>
+                <script>if (availQuantity != 0.0) componentIssuedAvailable.put(productId, availQuantity)</script>
+            </iterate>
+
+            <!-- determine quantities of produce products that can be produced with available quantity consumed -->
+            <set field="assemblyCanProduceQty" from="[:]"/>
+            <iterate list="produceWepList" entry="produceProd">
+                <filter-map-list list="produceBomAssocList" to-list="curBomAssocList">
+                    <field-map field-name="productId" from="produceProd.productId"/></filter-map-list>
+                <set field="produceQty" from="0.0"/>
+                <iterate list="curBomAssocList" entry="curBomAssoc">
+                    <set field="availableQty" from="componentIssuedAvailable.get(curBomAssoc.toProductId)"/>
+                    <!-- no availableQty for any component means cannot produce product -->
+                    <if condition="!availableQty"><set field="produceQty" from="0.0"/><break/></if>
+                    <set field="compScale" from="curBomAssoc.componentQuantity != null ? curBomAssoc.componentQuantity.scale() : 0"/>
+                    <set field="proratedQty" from="availableQty.divide((curBomAssoc.componentQuantity ?: 1.0), compScale, BigDecimal.ROUND_FLOOR)"/>
+                    <if condition="produceQty == 0.0 || produceQty &gt; proratedQty">
+                        <set field="produceQty" from="proratedQty"/></if>
+                </iterate>
+                <if condition="produceQty">
+                    <if condition="produceQty &gt; produceProd.estimatedQuantity">
+                        <set field="produceQty" from="produceProd.estimatedQuantity"/></if>
+                    <script>assemblyCanProduceQty.put(produceProd.productId, produceQty)</script>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="get" noun="ProducedProductComplete">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="estimatedQtyByProduct" type="Map"/>
+            <parameter name="producedQtyByProduct" type="Map"/>
+            <parameter name="allEstimatedProduced" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="producedQtyByProduct" from="[:]"/>
+            <entity-find entity-name="mantle.product.receipt.AssetReceipt" list="receiptList">
+                <econdition field-name="workEffortId"/></entity-find>
+            <iterate list="receiptList" entry="receipt">
+                <script>addToBigDecimalInMap(receipt.productId, receipt.quantityAccepted, producedQtyByProduct)</script></iterate>
+
+            <set field="estimatedQtyByProduct" from="[:]"/>
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="produceProductList">
+                <date-filter/>
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptProduce"/>
+            </entity-find>
+            <iterate list="produceProductList" entry="produceProduct">
+                <script>addToBigDecimalInMap(produceProduct.productId, produceProduct.estimatedQuantity, estimatedQtyByProduct)</script></iterate>
+
+            <set field="allEstimatedProduced" from="true"/>
+            <iterate list="estimatedQtyByProduct" key="productId" entry="estQuantity">
+                <if condition="estQuantity &gt; (producedQtyByProduct.get(productId) ?: 0.0)">
+                    <set field="allEstimatedProduced" from="false"/>
+                    <!-- falsified, done -->
+                    <break/>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProductionRunProduceConsumeDetail">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="excludeWithMatchingConsume" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="produceBomDetailList" type="List"><parameter name="produceBomDetailMap" type="Map">
+                <parameter name="productId"/>
+                <parameter name="workEffortProductDetail" type="Map"/>
+                <parameter name="estimatedQuantity" type="BigDecimal"/>
+                <parameter name="bomDetailList" type="List"><parameter name="bomDetailMap" type="Map">
+                    <parameter name="bomQuantity" type="BigDecimal"/>
+                    <parameter name="productIdSet" type="Set"><parameter name="productId"/></parameter>
+                    <parameter name="estConsumeQuantity" type="BigDecimal"/>
+                    <parameter name="quantityNeeded" type="BigDecimal"/>
+                    <parameter name="quantityRemaining" type="BigDecimal"/>
+                </parameter></parameter>
+            </parameter></parameter>
+            <parameter name="consumeQuantityRemainingMap" type="Map"/>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortProductDetail" list="allProdList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="productName"/></entity-find>
+            <filter-map-list list="allProdList" to-list="consumeList"><field-map field-name="typeEnumId" value="WeptConsume"/></filter-map-list>
+            <filter-map-list list="allProdList" to-list="produceList"><field-map field-name="typeEnumId" value="WeptProduce"/></filter-map-list>
+
+            <!-- get a total by productId for the consume products, reduce that quantity for each produce product record to get total count -->
+            <set field="consumeQuantityRemainingMap" from="[:]"/>
+            <iterate list="consumeList" entry="consumeMap">
+                <script>addToBigDecimalInMap(consumeMap.productId, consumeMap.estimatedQuantity, consumeQuantityRemainingMap)</script></iterate>
+
+
+            <set field="produceBomDetailList" from="[]"/>
+            <iterate list="produceList" entry="produceWepd">
+                <service-call name="mantle.work.ManufacturingServices.get#ProductBomDetail"
+                        in-map="[productId:produceWepd.productId]" out-map="bomDetOut"/>
+
+                <set field="allQuantitiesMatch" from="true"/>
+                <iterate list="bomDetOut.bomDetailList" entry="bomDetailMap">
+                    <set field="estConsumeQuantity" from="0"/>
+                    <iterate list="bomDetailMap.productIdSet" entry="bomProductId">
+                        <script>estConsumeQuantity += (consumeQuantityRemainingMap[bomProductId] ?: 0)</script></iterate>
+
+                    <set field="bomDetailMap.quantityNeeded" from="(bomDetailMap.bomQuantity ?: 1) * (produceWepd.estimatedQuantity ?: 0)"/>
+
+                    <!-- <log level="warn" message="========= Produce ${produceWepd.productId}: quantityNeeded=${bomDetailMap.quantityNeeded}, estConsumeQuantity=${estConsumeQuantity}, consume(s) ${bomDetailMap.productIdSet}"/> -->
+
+                    <!-- only use up to quantityNeeded from quantity consumed for product(s) -->
+                    <if condition="bomDetailMap.quantityNeeded &lt; estConsumeQuantity">
+                        <set field="estConsumeQuantity" from="bomDetailMap.quantityNeeded"/></if>
+
+                    <!-- reduce consumeQuantityRemainingMap entry(ies) by estConsumeQuantity -->
+                    <set field="consumeReduceRemaining" from="estConsumeQuantity"/>
+                    <iterate list="bomDetailMap.productIdSet" entry="bomProductId">
+                        <set field="curReduce" from="(consumeQuantityRemainingMap[bomProductId] ?: 0) &gt; consumeReduceRemaining ? consumeReduceRemaining : (consumeQuantityRemainingMap[bomProductId] ?: 0)"/>
+                        <set field="consumeReduceRemaining" from="consumeReduceRemaining - curReduce"/>
+                        <script>addToBigDecimalInMap(bomProductId, -curReduce, consumeQuantityRemainingMap)</script>
+                        <if condition="consumeReduceRemaining == 0"><break/></if>
+                    </iterate>
+
+                    <set field="bomDetailMap.estConsumeQuantity" from="estConsumeQuantity"/>
+                    <set field="bomDetailMap.quantityRemaining" from="bomDetailMap.quantityNeeded - estConsumeQuantity"/>
+                    <if condition="bomDetailMap.quantityRemaining != 0"><set field="allQuantitiesMatch" from="false"/></if>
+                </iterate>
+
+                <if condition="allQuantitiesMatch &amp;&amp; excludeWithMatchingConsume"><continue/></if>
+
+                <script>produceBomDetailList.add([productId:produceWepd.productId, workEffortProductDetail:produceWepd,
+                                                  estimatedQuantity:produceWepd.estimatedQuantity,
+                                                  bomDetailList:bomDetOut.bomDetailList])</script>
+            </iterate>
+
+            <!-- clean out consumeQuantityRemainingMap -->
+            <iterate list="new ArrayList(consumeQuantityRemainingMap.keySet())" entry="curProductId">
+                <script>if (consumeQuantityRemainingMap[curProductId] == 0) consumeQuantityRemainingMap.remove(curProductId)</script></iterate>
+        </actions>
+    </service>
+    
+    <service verb="get" noun="ProductBomDetail">
+        <description>Given a Product to Produce in a Production Run find the BOM associated products (PatMfgBom) and if
+            an associated product is a variant of another include the virtual for it too (ie allow either the virtual or
+            variant to be consumed in the run). If a Product to Produce is a variant of a virtual Product and it has no
+            BOM associated products, allow the product it is a variant of to take place of the BOM associations as a
+            production run may involve sorting inventory into its various variants.</description>
+        <in-parameters>
+            <parameter name="productId" required="true"/>
+            <parameter name="produceQuantity" default="1.0" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="bomDetailList" type="List"><parameter name="bomDetailMap" type="Map">
+                <parameter name="bomQuantity" type="BigDecimal"/>
+                <parameter name="productIdSet" type="Set"><parameter name="productId"/></parameter>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <!-- BOM assoc is from Product to Produce and to its various Products to Consume -->
+            <entity-find entity-name="mantle.product.ProductAssoc" list="bomAssocList" cache="true">
+                <econdition field-name="productId"/>
+                <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+                <order-by field-name="sequenceNum,toProductId"/>
+            </entity-find>
+            <set field="bomDetailList" from="[]"/>
+            <iterate list="bomAssocList" entry="bomAssoc">
+                <set field="productIdSet" from="new HashSet([bomAssoc.toProductId])"/>
+
+                <!-- see if the associated product is a variant of anything, if so include that too -->
+                <!-- Variant assoc is from virtual to variant, so search by to product -->
+                <entity-find entity-name="mantle.product.ProductAssoc" list="variantAssocList" cache="true">
+                    <econdition field-name="toProductId" from="bomAssoc.toProductId"/>
+                    <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+                    <order-by field-name="sequenceNum,productId"/>
+                </entity-find>
+                <iterate list="variantAssocList" entry="variantAssoc"><script>productIdSet.add(variantAssoc.productId)</script></iterate>
+
+                <script>bomDetailList.add([bomQuantity:(bomAssoc.quantity ?: 1) * produceQuantity, productIdSet:productIdSet])</script>
+            </iterate>
+
+            <!-- no BOM? also allow variant assoc for sorting setups -->
+            <if condition="!bomDetailList">
+                <entity-find entity-name="mantle.product.ProductAssoc" list="varAssocList" cache="true">
+                    <econdition field-name="toProductId" from="productId"/>
+                    <econdition field-name="productAssocTypeEnumId" value="PatVariant"/>
+                    <order-by field-name="sequenceNum,productId"/>
+                </entity-find>
+                <set field="bomDetailList" from="[]"/>
+                <!-- should generally be just one, but iterate just in case -->
+                <iterate list="varAssocList" entry="varAssoc">
+                    <set field="productIdSet" from="new HashSet([varAssoc.productId])"/>
+                    <script>bomDetailList.add([bomQuantity:1 * produceQuantity, productIdSet:productIdSet])</script>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProductionRunPickInfo">
+        <description>Get information for a production run pick sheet.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="locationOrderBy" default-value="facilityId,areaId,aisleId,sectionId,levelId,positionId"/>
+            <parameter name="productOrderBy" default-value="pseudoId,productName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="originFacility" type="Map"/>
+            <parameter name="destinationFacility" type="Map"/>
+
+            <parameter name="lineFacility" type="Map"/>
+            <parameter name="warehouseFacility" type="Map"/>
+            <parameter name="inventoryFacilityId"/>
+            <parameter name="inventoryFacility" type="Map"/>
+            <parameter name="consumeProductList" type="List"><parameter name="productItem" type="Map"/></parameter>
+            <parameter name="consumeProductIdList" type="List"><parameter name="productId"/></parameter>
+            <parameter name="equipmentList" type="List"><parameter name="equipment" type="Map"/></parameter>
+
+            <parameter name="locationInfoList" type="List">
+                <description>
+                    locationInfoList is a  List of Maps with:
+                      - FacilityLocation fields [facilityId, locationTypeEnumId, areaId, aisleId, sectionId, levelId, positionId]
+                      - locationTypeEnum
+                      - GeoPoint fields [latitude, longitude, elevation, elevationUomId]
+                      - productInfoList - List of Maps with:
+                        - Product fields (all fields from entity)
+                        - quantity
+                </description>
+                <parameter name="locationInfo" type="Map"/>
+            </parameter>
+            <parameter name="productInfoList" type="List">
+                <description>
+                    productInfoList is a List of Maps with:
+                      - Product fields (all fields from entity)
+                      - quantity
+                      - locationInfoList
+                        - FacilityLocation fields [facilityId, locationTypeEnumId, areaId, aisleId, sectionId, levelId, positionId]
+                        - locationTypeEnum
+                        - GeoPoint fields [latitude, longitude, elevation, elevationUomId]
+                        - quantity
+                </description>
+                <parameter name="productInfo" type="Map"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+
+                    <!-- Line and Warehouse Facilities -->
+            <entity-find-related-one value-field="workEffort" relationship-name="mantle.facility.Facility" to-value-field="lineFacility"/>
+            <entity-find-related-one value-field="lineFacility" relationship-name="Parent#mantle.facility.Facility" to-value-field="warehouseFacility"/>
+            <!-- use the warehouse for inventory unless there is no warehouse, then use the line (the direct facility on the run) -->
+            <set field="inventoryFacilityId" from="warehouseFacility?.facilityId ?: lineFacility?.facilityId"/>
+            <set field="inventoryFacility" from="warehouseFacility ?: lineFacility"/>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortAssetAndAssign" list="equipmentList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="assetName"/></entity-find>
+
+            <!-- Get the picklist info by product, by location -->
+
+            <set field="productInfoList" from="[]"/>
+            <set field="locationInfoMap" from="[:]"/>
+
+            <!-- TODO from here down -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortProduct" list="consumeProductList">
+                <date-filter/><econdition field-name="workEffortId"/>
+                <econdition field-name="typeEnumId" value="WeptConsume"/>
+            </entity-find>
+            <set field="consumeProductIdList" from="consumeProductList?.productId ?: []"/>
+
+            <iterate list="consumeProductList" entry="consumeItem">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="consumeItem.productId"/></entity-find-one>
+
+                <set field="productLocationInfoMap" from="[:]"/>
+
+                <if condition="!consumeItem.estimatedQuantity"><continue/></if>
+
+                <!-- find assets more generally for the product, like the reservation algorithm -->
+                <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                    <econdition field-name="productId" from="consumeItem.productId"/>
+                    <econdition field-name="statusId" value="AstAvailable"/>
+                    <econdition field-name="availableToPromiseTotal" operator="greater" from="0"/>
+                    <econdition field-name="facilityId" from="inventoryFacilityId" ignore-if-empty="true"/>
+                    <order-by field-name="receivedDate"/><!-- Ascending by receivedDate, FIFO -->
+                </entity-find>
+
+                <set field="curQuantityNotHandled" from="consumeItem.estimatedQuantity"/>
+                <iterate list="assetList" entry="asset">
+                    <set field="assetLocKey" from="[facilityId:asset.facilityId, locationSeqId:asset.locationSeqId]"/>
+                    <entity-find-one entity-name="mantle.facility.FacilityLocation" value-field="facLoc">
+                        <field-map field-name="facilityId" from="asset.facilityId"/>
+                        <field-map field-name="locationSeqId" from="asset.locationSeqId"/>
+                    </entity-find-one>
+                    <set field="locationTypeEnum" from="facLoc?.'FacilityLocationType#moqui.basic.Enumeration'"/>
+
+                    <set field="locationInfo" from="locationInfoMap.get(assetLocKey)"/>
+                    <if condition="!locationInfo">
+                        <set field="locationInfo" from="[productInfoMap:[:], locationTypeEnum:locationTypeEnum]"/>
+                        <script>if (facLoc) locationInfo.putAll(facLoc)</script>
+                        <if condition="facLoc?.geoPointId">
+                            <entity-find-one entity-name="moqui.basic.GeoPoint" value-field="geoPoint">
+                                <field-map field-name="facLoc.geoPointId"/></entity-find-one>
+                            <script>if (geoPoint) locationInfo.putAll(geoPoint)</script>
+                        </if>
+                        <script>locationInfoMap.put(assetLocKey, locationInfo)</script>
+                    </if>
+
+                    <set field="productLocationInfo" from="productLocationInfoMap.get(assetLocKey)"/>
+                    <if condition="!productLocationInfo">
+                        <set field="productLocationInfo" from="[locationTypeEnum:locationTypeEnum]"/>
+                        <script>if (facLoc) productLocationInfo.putAll(facLoc)</script>
+                        <if condition="facLoc?.geoPointId">
+                            <entity-find-one entity-name="moqui.basic.GeoPoint" value-field="geoPoint">
+                                <field-map field-name="facLoc.geoPointId"/></entity-find-one>
+                            <script>if (geoPoint) productLocationInfo.putAll(geoPoint)</script>
+                        </if>
+                        <script>productLocationInfoMap.put(assetLocKey, productLocationInfo)</script>
+                    </if>
+
+                    <set field="quantityToAdd" from="curQuantityNotHandled > asset.availableToPromiseTotal ? asset.availableToPromiseTotal : curQuantityNotHandled"/>
+
+                    <!-- handle quantity for locationInfoList -->
+                    <set field="productInfo" from="locationInfo.productInfoMap.get(consumeItem.productId)"/>
+                    <if condition="!productInfo"><script>
+                        productInfo = [:]
+                        productInfo.putAll(product)
+                        locationInfo.productInfoMap.put(consumeItem.productId, productInfo)
+                    </script></if>
+                    <script>addToBigDecimalInMap("quantity", quantityToAdd, productInfo)</script>
+
+                    <!-- handle quantity for productInfoList -->
+                    <script>addToBigDecimalInMap("quantity", quantityToAdd, productLocationInfo)</script>
+                    <set field="curQuantityNotHandled" from="curQuantityNotHandled - quantityToAdd"/>
+                    <if condition="curQuantityNotHandled == 0"><break/></if>
+                </iterate>
+
+                <set field="productLocationInfoList" from="new ArrayList(productLocationInfoMap.values())"/>
+                <order-map-list list="productLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+
+                <script>
+                    productInfo = [locationInfoList:productLocationInfoList,
+                                   productLocationInfoMap:productLocationInfoMap,
+                                   quantity:consumeItem.estimatedQuantity]
+                    productInfo.putAll(product)
+                    productInfoList.add(productInfo)
+                </script>
+            </iterate>
+
+            <!-- go through locationInfoMap and create productInfoList from productInfoMap, then sort -->
+            <iterate list="locationInfoMap" entry="locationInfo" key="assetLocKey">
+                <set field="locationInfo.productInfoList" from="new ArrayList(locationInfo.productInfoMap.values())"/>
+                <order-map-list list="locationInfo.productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            </iterate>
+            <set field="locationInfoList" from="new ArrayList(locationInfoMap.values())"/>
+            <order-map-list list="locationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+
+            <!-- order productInfoList, all that is needed at this point -->
+            <order-map-list list="productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+        </actions>
+    </service>
+</services>

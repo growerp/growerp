@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
+
+    <always-actions>
+        <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+            requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]" out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+
+        <service-call name="popstore.StoreServices.get#StoreInfo" in-map="[productStoreId:productStoreId]" out-map="storeInfo"/>
+        <set field="productStore" from="storeInfo.productStore"/>
+        <set field="wikiSpaceId" from="productStore?.wikiSpaceId"/>
+
+        <if condition="ec.user.userAccount">
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
+                <field-map field-name="partyId" from="ec.user.userAccount.partyId"/>
+            </entity-find-one>
+        </if>
+    </always-actions>
+
+    <transition name="getLogo" read-only="true"><!-- should use rest interface -->
+        <actions>
+            <entity-find entity-name="mantle.party.PartyContent" list="partyContentList" cache="true">
+                <econdition field-name="partyContentTypeEnumId" value="PcntLogoImage"/>
+                <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+            </entity-find>
+            <if condition="partyContentList">
+                <script>ec.web.sendResourceResponse(partyContentList[0].contentLocation, true)</script>
+                <else>
+                    <script>ec.web.sendResourceResponse("dbresource://GrowERP/images/growerp_logo.jpg", true)</script>
+                </else>
+            </if>
+        </actions><default-response type="none"/>
+    </transition>
+
+    <transition name="getContent" read-only="true"><!-- should use rest interface -->
+        <parameter name="contentId"/>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyContent" list="partyContentList" cache="true">
+                <econdition field-name="partyContentTypeEnumId" value="PcntInternal"/>
+                <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+                <econdition field-name="contentId"/>
+            </entity-find>
+            <if condition="partyContentList">
+                <script>ec.web.sendResourceResponse(partyContentList[0].contentLocation, true)</script>
+                <else>
+                    <script>ec.web.sendResourceResponse("dbresource://GrowERP/images/growerp_logo.jpg", true)</script>
+                </else>
+            </if>
+        </actions><default-response type="none"/>
+    </transition>
+
+    <transition name="getImage" read-only="true"><!-- should use rest interface -->
+        <actions>
+            <entity-find entity-name="growerp.store.ProductStoreContent" list="storeImages" cache="true" limit="1">
+                <econdition field-name="productStoreId" from="productStore.productStoreId"/>
+                <econdition field-name="contentTypeEnumId" value="PrstImageLarge"/>
+                <econdition field-name="description" operator="like" value="${sri.screenUrlInfo.extraPathNameList.join('/')}%" ignore-case="true"/>
+            </entity-find>
+            <if condition="storeImages">
+                <script>ec.web.sendResourceResponse(storeImages[0].contentLocation, true)</script>
+                <else>
+                    <script>logger.error("== image: ${sri.screenUrlInfo.extraPathNameList.join('/')} not found")</script>
+                </else>
+            </if>
+        </actions><default-response type="none"/>
+    </transition>
+
+    <transition name="config.js" read-only="true">
+        <actions>
+            <script><![CDATA[
+                // NOTE: storeInfo prepared in always-actions above
+                // set productStoreId in the session
+                ec.web.sessionAttributes.productStoreId = productStoreId
+                // add apiKey and moquiSessionToken for current user and session
+                if (ec.user.username) { try { storeInfo.apiKey = ec.user.getLoginKey() } catch (Exception e) { } }
+                else storeInfo.apiKey = null
+                storeInfo.moquiSessionToken = ec.web.sessionToken
+                String partyId = (ec.user.username ? ec.user.userAccount?.partyId : null) ?: ec.web.sessionAttributes.customerPartyId
+                if (partyId) { storeInfo.customerInfo = ec.service.sync().name("popstore.CustomerServices.get#CustomerInfo").call() }
+                // generate and send the JS response
+                String storeInfoJson = groovy.json.JsonOutput.toJson(storeInfo)
+                String jsText = """
+var storeInfo = ${storeInfoJson};
+\$.extend(storeConfig, storeInfo.productStore, storeInfo.settings);
+"""
+                ec.web.sendTextResponse(jsText, "application/javascript", null)
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="logOut" read-only="true">
+        <actions>
+            <service-call name="popstore.CustomerServices.logout#Customer"/>
+        </actions>
+        <default-response url="."/>
+    </transition>
+
+    <subscreens default-item="home" always-use-full-path="true"/>
+
+    <pre-actions>
+        <set field="home" value="/"/>
+        <!-- lookup configured browse root category from storeInfo -->
+        <set field="browseRootCategory" from="storeInfo.categoryByType.PsctBrowseRoot"/>
+        <set field="browseRootCategoryId" from="browseRootCategory?.productCategoryId"/>
+        <!-- get browseRootCategoryInfo for subCategoryList used in header, etc -->
+        <if condition="browseRootCategoryId">
+            <service-call name="popstore.ProductServices.get#CategoryInfo" out-map="browseRootCategoryInfo"
+                in-map="[productCategoryId:browseRootCategoryId]"/>
+        </if>
+        <!-- get allProductsInfo for subCategoryList used in header, etc --> 
+        <set field="allProducts" from="storeInfo.categoryByType.PsctSearch"/>
+        <set field="allProductsId" from="storeInfo.categoryByType.PsctSearch?.productCategoryId"/>
+        <if condition="allProductsId">
+            <service-call name="popstore.ProductServices.get#CategoryInfo" out-map="allProductsInfo"
+                in-map="[productCategoryId:allProductsId]"/>
+        </if>
+        <!-- cartInfo for cart count in header/navbar -->
+        <service-call name="popstore.CartServices.get#CartInfo" out-map="cartInfo" in-map="context"/>
+
+        <!-- get css data in json format -->
+        <set field="location" value="${storeInfo.settings.PsstContentLocation}/content/websiteColor.json"/>
+        <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
+        <set field="style" value="{}"/>
+        <if condition="contentRef != null">
+            <set field="text" from="contentRef.getText()"/>
+            <if condition="text != null">
+                <set field="style" from="text"/>
+            </if>
+        </if>
+        <!-- create own version of styles.css -->
+        <script>
+            import groovy.json.JsonSlurper
+            // get settings
+            JsonSlurper slurper = new JsonSlurper()
+            context.putAll(slurper.parseText(style))
+            // get target filepath
+            newRef = ec.resource.getLocationReference("component://PopRestStore/screen/store/components/styles/${storeInfo.productStore.productStoreId}.css")
+            String newFilePath = newRef.getUrl().toExternalForm().substring(5)
+            // render ftl file
+            String location = "component://PopRestStore/screen/store/components/styles.css.ftl"
+            css = ec.resource.getTemplateRendererByLocation(location)
+            Writer fw = new FileWriter(newFilePath)
+            css.render(location, fw)
+            fw.close()
+      </script>
+
+        <!-- get settings used in subscreens -->
+        <set field="template_server_root" from="storeInfo.settings.template_server_root" default-value="component://PopRestStore/template/store/root.html.ftl"/>
+        <set field="template_server_header" from="storeInfo.settings.template_server_header" default-value="component://PopRestStore/template/store/navbar.html.ftl"/>
+        <set field="template_server_footer" from="storeInfo.settings.template_server_footer" default-value="component://PopRestStore/template/store/footer.html.ftl"/>
+        <set field="template_server_home" from="storeInfo.settings.template_server_home" default-value="component://PopRestStore/template/store/home.html.ftl"/>
+        <set field="template_server_category" from="storeInfo.settings.template_server_category" default-value="component://PopRestStore/template/store/category.html.ftl"/>
+        <set field="template_server_product" from="storeInfo.settings.template_server_product" default-value="component://PopRestStore/template/store/product.html.ftl"/>
+        <set field="template_server_content" from="storeInfo.settings.template_server_content" default-value="component://PopRestStore/template/store/help.html.ftl"/>
+        <set field="template_server_search" from="storeInfo.settings.template_server_search" default-value="component://PopRestStore/template/store/search.html.ftl"/>
+    </pre-actions>
+
+    <widgets>
+        <section name="website" condition="productStoreId != null &amp;&amp; productStoreId != 'POPC_DEFAULT'">
+            <widgets>
+                <render-mode><text type="html" location="${template_server_root}"/></render-mode>
+            </widgets>
+            <fail-widgets>
+                <label text="$productStoreId"/>
+                <label text="${ec.web.sendError(404, 'Not a valid website url', null)}"/>
+            </fail-widgets>
+        </section>
+    </widgets>
+</screen>

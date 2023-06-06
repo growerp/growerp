@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="FullCalendarData">
+        <description>Get data to display WorkEffort events with the FullCalender JS library (see http://fullcalendar.io/)</description>
+        <in-parameters>
+            <parameter name="facilityId"/>
+            <parameter name="facilityIdList" type="List"><parameter name="facilityId"/></parameter>
+            <parameter name="partyId"/>
+            <parameter name="partyIdList" type="List"><parameter name="partyId"/></parameter>
+            <parameter name="assetId"/>
+            <parameter name="assetIdList" type="List"><parameter name="assetId"/></parameter>
+            <parameter name="start" required="true"/>
+            <parameter name="end" required="true"/>
+            <parameter name="titleGString" default-value="\${(workEffort.workEffortName ?: (workEffort.purposeEnumId ? workEffort.purpose.description : 'Event')) + ' [' + workEffort.workEffortId + ']'}"/>
+            <parameter name="urlGString"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="eventList" type="List">
+                <parameter name="eventMap" type="Map">
+                    <parameter name="id"/>
+                    <parameter name="title"/>
+                    <parameter name="start"><description>actualStartDate or estimatedStartDate as ISO8601 formatted String</description></parameter>
+                    <parameter name="end"><description>actualCompletionDate or estimatedCompletionDate (or if null start date +
+                        actualWorkDuration, estimatedWorkDuration, or estimatedWorkTime) as a ISO8601 (yyyy-MM-dd'T'HH:mm:ss) formatted String</description></parameter>
+                    <!-- NOTE: consider supporting allDay, color, etc in the future with WorkEffort fields -->
+                    <parameter name="url"><description>Only returned if urlGString is specified</description></parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- start and end are ISO8601 date strings -->
+            <set field="startTs" from="ec.l10n.parseTimestamp(start.toString() + ' 00:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+            <set field="endTs" from="ec.l10n.parseTimestamp(end.toString() + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+            <!-- <log level="warn" message="=========== Event FullCalendarData start ${start} - ${startTs} end ${end} - ${endTs}"/> -->
+            <set field="startDate" from="ec.l10n.parseDate(start.toString(), 'yyyy-MM-dd')"/>
+            <set field="endDate" from="ec.l10n.parseDate(end.toString(), 'yyyy-MM-dd')"/>
+
+            <set field="facilityIdSet" from="new HashSet()"/>
+            <if condition="facilityId"><script>facilityIdSet.add(facilityId)</script></if>
+            <if condition="facilityIdList"><script>facilityIdSet.addAll(facilityIdList)</script></if>
+            <set field="partyIdSet" from="new HashSet()"/>
+            <if condition="partyId"><script>partyIdSet.add(partyId)</script></if>
+            <if condition="partyIdList"><script>partyIdSet.addAll(partyIdList)</script></if>
+            <set field="assetIdSet" from="new HashSet()"/>
+            <if condition="assetId"><script>assetIdSet.add(assetId)</script></if>
+            <if condition="assetIdList"><script>assetIdSet.addAll(assetIdList)</script></if>
+
+            <set field="eventList" from="[]"/>
+            <if condition="!facilityIdSet &amp;&amp; !partyIdSet &amp;&amp; !assetIdSet"><return/></if>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortPartyAsset" list="workEffortList">
+                <econdition field-name="workEffortTypeEnumId" value="WetEvent"/>
+                <econditions combine="or">
+                    <econdition field-name="visibilityEnumId" value="WevAllUsers"/>
+                    <econdition field-name="facilityId" operator="in" from="facilityIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="assetId" operator="in" from="assetIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="ownerPartyId" operator="in" from="partyIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="partyId" operator="in" from="partyIdSet" ignore-if-empty="true"/>
+                </econditions>
+                <!-- for events look for start date within the range -->
+                <econditions combine="or">
+                    <econditions combine="and">
+                        <econditions combine="or">
+                            <econdition field-name="estimatedStartDate" operator="greater-equals" from="startTs"/>
+                            <econdition field-name="recurStartCron" operator="is-not-null"/>
+                        </econditions>
+                        <econdition field-name="estimatedStartDate" operator="less-equals" from="endTs"/>
+                        <econditions combine="or">
+                            <econdition field-name="recurEndDate" operator="greater-equals" from="startTs"/>
+                            <econdition field-name="recurEndDate" operator="is-null"/>
+                        </econditions>
+                    </econditions>
+                    <econditions combine="and">
+                        <econditions combine="or">
+                            <econdition field-name="actualStartDate" operator="greater-equals" from="startTs"/>
+                            <econdition field-name="recurStartCron" operator="is-not-null"/>
+                        </econditions>
+                        <econdition field-name="actualStartDate" operator="less-equals" from="endTs"/>
+                        <econditions combine="or">
+                            <econdition field-name="recurEndDate" operator="greater-equals" from="startTs"/>
+                            <econdition field-name="recurEndDate" operator="is-null"/>
+                        </econditions>
+                    </econditions>
+                    <econditions combine="and">
+                        <econditions combine="or">
+                            <econdition field-name="allDayStart" operator="greater-equals" from="startDate"/>
+                            <econdition field-name="recurStartCron" operator="is-not-null"/>
+                        </econditions>
+                        <econdition field-name="allDayStart" operator="less-equals" from="endDate"/>
+                        <econditions combine="or">
+                            <econdition field-name="recurEndDate" operator="greater-equals" from="startDate"/>
+                            <econdition field-name="recurEndDate" operator="is-null"/>
+                        </econditions>
+                    </econditions>
+                </econditions>
+                <select-field field-name="workEffortId,purposeEnumId,workEffortName,description,location,timeUomId,allDayStart,allDayEnd"/>
+                <select-field field-name="actualStartDate,actualCompletionDate,actualWorkTime,actualWorkDuration"/>
+                <select-field field-name="estimatedStartDate,estimatedCompletionDate,estimatedWorkTime,estimatedWorkDuration,recurStartCron"/>
+            </entity-find>
+
+            <iterate list="workEffortList" entry="workEffort">
+
+                <set field="title" from="ec.resource.expand(titleGString, '')"/>
+                <set field="startEndOut" from="null"/>
+                <service-call name="mantle.work.WorkEffortServices.get#WorkEffortStartEnd" out-map="startEndOut"
+                        in-map="[workEffortId:workEffort.workEffortId, workEffort:workEffort]"/>
+
+                <if condition="workEffort.recurStartCron != null">
+                    <script><![CDATA[
+                    parser = new com.cronutils.parser.CronParser(com.cronutils.model.definition.CronDefinitionBuilder.instanceDefinitionFor(com.cronutils.model.CronType.QUARTZ))
+                    quartzCron = parser.parse(workEffort.recurStartCron)
+                    startZdt = java.time.ZonedDateTime.ofInstant(startDate.toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant(), java.time.ZoneId.systemDefault());
+                    endZdt = java.time.ZonedDateTime.ofInstant(endDate.toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant(), java.time.ZoneId.systemDefault());
+                    startEndOutStartZdt = java.time.ZonedDateTime.ofInstant(startEndOut.startDate.toLocalDateTime().toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant(), java.time.ZoneId.systemDefault());
+                    startEndDiff = 0
+                    if(startEndOut.endDate != null) {
+                        startEndDiff = startEndOut.endDate.getTime() - startEndOut.startDate.getTime() 
+                    }
+                
+                    executionTime = com.cronutils.model.time.ExecutionTime.forCron(quartzCron)
+                    nextExecution = startZdt;
+                    while(nextExecution.isBefore(endZdt)) {
+                        nextExecution = executionTime.nextExecution(nextExecution).get()
+                        if (!startEndOutStartZdt.isBefore(nextExecution)) {
+                            continue
+                        }
+                        endExecution = nextExecution.plus(startEndDiff, java.time.temporal.ChronoUnit.MILLIS);
+                        dateFormat = 'yyyy-MM-dd\'T\'HH:mm:ss'
+                        if (startEndOut.allDay) {
+                            dateFormat = 'yyyy-MM-dd'
+                        }    
+                        start = ec.l10n.format(Date.from(nextExecution.toInstant()), dateFormat)
+                        end = ec.l10n.format(Date.from(endExecution.toInstant()), dateFormat)
+                        eventList.add([id:workEffort.workEffortId, title:title, start:start, end:end, url:url, allDay:startEndOut.allDay])
+                    }
+                    ]]></script>
+                <else>
+                    <if condition="startEndOut.allDay"><then>
+                        <set field="start" from="ec.l10n.format(startEndOut.startDate, 'yyyy-MM-dd')"/>
+                        <set field="end" from="ec.l10n.format(startEndOut.endDate, 'yyyy-MM-dd')"/>
+                    </then><else>
+                        <set field="start" from="ec.l10n.format(startEndOut.startDate, 'yyyy-MM-dd\'T\'HH:mm:ss')"/>
+                        <set field="end" from="ec.l10n.format(startEndOut.endDate, 'yyyy-MM-dd\'T\'HH:mm:ss')"/>
+                    </else></if>
+                    <if condition="urlGString"><then><set field="url" from="ec.resource.expand(urlGString, '')"/></then>
+                        <else><set field="url" value=""/></else></if>
+                    <script>eventList.add([id:workEffort.workEffortId, title:title, start:start, end:end, url:url, allDay:startEndOut.allDay])</script>
+                </else>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Event">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetEvent"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="description"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="resolutionEnumId" default-value="WerUnresolved"/>
+            <parameter name="priority" type="Long" default="5"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+
+            <parameter name="ownerPartyId" default-value="${ec.user.userAccount?.partyId}"/>
+            <parameter name="assignToPartyId"/>
+            <parameter name="assignRoleTypeId" default-value="Assignee"/>
+            <parameter name="assignStatusId" default-value="WeptAssigned"/>
+            <parameter name="requestId"/>
+            <parameter name="assetId"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <set field="seqName" value="Project_${rootWorkEffortId}"/>
+            <service-call name="create#mantle.work.effort.WorkEffort" in-map="context" out-map="context"/>
+            <if condition="assignToPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:assignToPartyId,
+                        roleTypeId:assignRoleTypeId, fromDate:ec.user.nowTimestamp, statusId:assignStatusId]"/>
+            </if>
+            <if condition="requestId"><service-call name="create#mantle.request.RequestWorkEffort"
+                    in-map="[workEffortId:workEffortId, requestId:requestId]"/></if>
+            <if condition="assetId"><service-call name="create#mantle.work.effort.WorkEffortAssetAssign"
+                    in-map="[workEffortId:workEffortId, assetId:assetId, fromDate:ec.user.nowTimestamp, statusId:'WeaaAssigned']"/></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="NextBusinessDay">
+        <description>Find the next business day skipping Saturday and Sunday unless specified not to, and skipping holidays by
+            organizationPartyId (WorkEffort.ownerPartyId) and workEffortCategoryIds. WorkEffort records must have
+            purposeEnumId=WepHoliday and the a single day date in the WorkEffort.allDayStart field.</description>
+        <in-parameters>
+            <parameter name="startDate" type="Date" required="true"/>
+            <parameter name="skipSaturday" type="Boolean" default="true"/>
+            <parameter name="skipSunday" type="Boolean" default="true"/>
+            <parameter name="organizationPartyId"><description>If specified matches against WorkEffort.ownerPartId to find holidays</description></parameter>
+            <parameter name="workEffortCategoryIds" type="List"><description>If specified matches against WorkEffort records in
+                these categories to find holidays, such as HolidayUsaBank or HolidayUsaFed</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="nextDayDate" type="Date"/>
+            <parameter name="calendarDays" type="Integer"/>
+            <parameter name="skipWeekends" type="Integer"/>
+            <parameter name="skipHolidays" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                Calendar nextDayCal = ec.user.nowCalendar
+                nextDayCal.setTime(startDate)
+                nextDayCal.add(Calendar.DAY_OF_MONTH, 1)
+                calendarDays = 1
+                skipWeekends = 0
+                skipHolidays = 0
+                if (skipSaturday && nextDayCal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                    nextDayCal.add(Calendar.DAY_OF_MONTH, 1)
+                    calendarDays += 1
+                    skipWeekends += 1
+                }
+                if (skipSunday && nextDayCal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    nextDayCal.add(Calendar.DAY_OF_MONTH, 1)
+                    calendarDays += 1
+                    skipWeekends += 1
+                }
+                nextDayDate = new java.sql.Date(nextDayCal.getTimeInMillis())
+            ]]></script>
+            <!-- see if it falls on a holiday -->
+            <if condition="organizationPartyId || workEffortCategoryIds">
+                <entity-find-count entity-name="mantle.work.effort.WorkEffortAndCategoryAppl" count-field="holidayCount">
+                    <econdition field-name="purposeEnumId" value="WepHoliday"/>
+                    <econdition field-name="allDayStart" from="nextDayDate"/>
+                    <econditions combine="or">
+                        <econdition field-name="ownerPartyId" from="organizationPartyId" ignore-if-empty="true"/>
+                        <econdition field-name="workEffortCategoryId" operator="in" from="workEffortCategoryIds" ignore-if-empty="true"/>
+                    </econditions>
+                </entity-find-count>
+                <!-- recurse to get next business day (skip weekends and holidays again) -->
+                <if condition="holidayCount">
+                    <service-call name="mantle.work.EventServices.get#NextBusinessDay" out-map="nextOut" in-map="context + [startDate:nextDayDate]"/>
+                    <set field="nextDayDate" from="nextOut.nextDayDate"/>
+                    <set field="calendarDays" from="calendarDays + nextOut.calendarDays"/>
+                    <set field="skipWeekends" from="skipWeekends + nextOut.skipWeekends"/>
+                    <set field="skipHolidays" from="skipHolidays + nextOut.skipHolidays + 1"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="FutureBusinessDay">
+        <description>Looks into the future businessDays days, checking each day to see if it is a business day and if not it is
+            skipped over; for example if starting on a Friday and Sat/Sun plus a holiday on Monday are skipped the following Tuesday
+            will be the next business day, and if going forward 5 business days and there are no other holiday then it will move
+            forward 3 more business days (4 so far) to the following Friday, then going to the next business day to get 5 it jumps
+            to the following Monday, in this case we went forward 5 business days and skipped 5 days so calendarDays will be 10</description>
+        <in-parameters>
+            <parameter name="startDate" type="Date" required="true"/>
+            <parameter name="businessDays" type="Integer" required="true"/>
+            <parameter name="skipSaturday" type="Boolean" default="true"/>
+            <parameter name="skipSunday" type="Boolean" default="true"/>
+            <parameter name="organizationPartyId"/>
+            <parameter name="workEffortCategoryIds" type="List"/><!-- for example ['HolidayUsaBank'] -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="futureDayDate" type="Date"/>
+            <parameter name="calendarDays" type="Integer"/>
+            <parameter name="skipWeekends" type="Integer"/>
+            <parameter name="skipHolidays" type="Integer"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            futureDayDate = startDate
+            calendarDays = 0
+            skipWeekends = 0
+            skipHolidays = 0
+            for (int i = businessDays; i > 0; i--) {
+                Map nextOut = ec.service.sync().name("mantle.work.EventServices.get#NextBusinessDay")
+                        .parameters(context + [startDate:futureDayDate]).call()
+                futureDayDate = nextOut.nextDayDate
+                calendarDays += nextOut.calendarDays
+                skipWeekends += nextOut.skipWeekends
+                skipHolidays += nextOut.skipHolidays
+                // ec.logger.warn("business days left ${i-1} futureDayDate ${futureDayDate} calendarDays ${calendarDays} skipWeekends ${skipWeekends} skipHolidays ${skipHolidays}")
+            }
+        ]]></script></actions>
+    </service>
+</services>

@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="run" noun="BudgetExpenseReport">
+        <in-parameters>
+            <parameter name="budgetId" required="true"/>
+            <parameter name="accountCode"/><parameter name="accountCode_op" default-value="contains"/><parameter name="accountCode_ic" default-value="Y"/>
+            <parameter name="accountName"/><parameter name="accountName_op" default-value="contains"/><parameter name="accountName_ic" default-value="Y"/>
+            <parameter name="pageSize" type="Integer" default="30"/><parameter name="pageIndex" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="budget" type="Map"/>
+            <parameter name="timePeriod" type="Map"/>
+            <parameter name="subTimePeriodList" type="List"><parameter name="subTimePeriod" type="Map"/></parameter>
+            <parameter name="subTimePeriodSize" type="Integer"/>
+            <parameter name="glAccountCodeMask"/><parameter name="accountCodeFormatter" type="javax.swing.text.MaskFormatter"/>
+            <parameter name="glAccountInfoList" type="List"><parameter name="glAccountInfo" type="Map">
+                <parameter name="glAccountId"/><parameter name="accountCode"/><parameter name="accountName"/>
+                <parameter name="actualMain" type="BigDecimal"/><parameter name="amountMain" type="BigDecimal"/>
+                <parameter name="actualPer1" type="BigDecimal"/><parameter name="amountPer1" type="BigDecimal"/>
+                <parameter name="actualPer2" type="BigDecimal"/><parameter name="amountPer2" type="BigDecimal"/>
+                <parameter name="actualPer3" type="BigDecimal"/><parameter name="amountPer3" type="BigDecimal"/>
+                <parameter name="actualPer4" type="BigDecimal"/><parameter name="amountPer4" type="BigDecimal"/>
+                <parameter name="actualPer5" type="BigDecimal"/><parameter name="amountPer5" type="BigDecimal"/>
+                <parameter name="actualPer6" type="BigDecimal"/><parameter name="amountPer6" type="BigDecimal"/>
+                <parameter name="actualPer7" type="BigDecimal"/><parameter name="amountPer7" type="BigDecimal"/>
+                <parameter name="actualPer8" type="BigDecimal"/><parameter name="amountPer8" type="BigDecimal"/>
+                <parameter name="actualPer9" type="BigDecimal"/><parameter name="amountPer9" type="BigDecimal"/>
+                <parameter name="actualPer10" type="BigDecimal"/><parameter name="amountPer10" type="BigDecimal"/>
+                <parameter name="actualPer11" type="BigDecimal"/><parameter name="amountPer11" type="BigDecimal"/>
+                <parameter name="actualPer12" type="BigDecimal"/><parameter name="amountPer12" type="BigDecimal"/>
+            </parameter></parameter>
+            <parameter name="glAccountInfoListCount" type="Integer"/><parameter name="glAccountInfoListPageSize" type="Integer"/>
+            <parameter name="glAccountInfoListPageIndex" type="Integer"/><parameter name="glAccountInfoListPageMaxIndex" type="Integer"/>
+            <parameter name="glAccountInfoListPageRangeLow" type="Integer"/><parameter name="glAccountInfoListPageRangeHigh" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>
+            <set field="timePeriod" from="budget.timePeriod"/>
+
+            <if condition="timePeriod?.partyId">
+                <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                              in-map="[organizationPartyId:timePeriod.partyId]"/>
+                <!-- <set field="currencyUomId" from="partyAcctgPreference?.baseCurrencyUomId"/> -->
+                <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask"/>
+                <if condition="glAccountCodeMask">
+                    <set field="accountCodeFormatter" from="new javax.swing.text.MaskFormatter(glAccountCodeMask)"/>
+                    <script>accountCodeFormatter.setValueContainsLiteralCharacters(false)</script>
+                </if>
+            </if>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItem" list="budgetItemList">
+                <econdition field-name="budgetId"/></entity-find>
+
+            <if condition="budget.timePeriodId &amp;&amp; budget.subTimePeriodTypeId">
+                <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
+                              in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+                <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
+                <set field="subTimePeriodIds" from="new ArrayList(subTimePeriodList*.timePeriodId)"/>
+                <set field="allTimePeriodIds" from="new ArrayList()"/>
+                <script>allTimePeriodIds.add(budget.timePeriodId)</script>
+                <script>allTimePeriodIds.addAll(subTimePeriodIds)</script>
+            </if>
+            <set field="subTimePeriodSize" from="subTimePeriodList?.size() ?: 0"/>
+
+            <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="expenseClassOut"
+                          in-map="[parentEnumId:'EXPENSE', includeNested:true]"/>
+            <set field="expenseClassEnumIds" from="expenseClassOut.enumIdSet"/>
+            <set field="pageSize" from="pageSize ?: '30'"/>
+            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization" list="glAccountInfoList">
+                <search-form-inputs default-order-by="accountCode"/>
+                <econdition field-name="organizationPartyId" from="timePeriod?.partyId" ignore-if-empty="true"/>
+                <econdition field-name="glAccountClassEnumId" operator="in" from="expenseClassEnumIds"/>
+                <select-field field-name="glAccountId,accountCode,accountName"/>
+            </entity-find>
+            <!-- used glAccountInfoList to get pagination fields with entity-find, will be augmented with period amounts, etc
+                so use glAccountList for direct entity values (glAccountInfoList gets set to empty list later) -->
+            <set field="glAccountList" from="glAccountInfoList"/>
+
+            <set field="glAccountIds" from="glAccountList*.glAccountId"/>
+            <entity-find entity-name="mantle.ledger.account.GlAccountOrgTimePeriod" list="glaotpList">
+                <econdition field-name="organizationPartyId" from="timePeriod?.partyId" ignore-if-empty="true"/>
+                <econdition field-name="glAccountId" operator="in" from="glAccountIds"/>
+                <econdition field-name="timePeriodId" operator="in" from="allTimePeriodIds"/>
+                <select-field field-name="glAccountId,timePeriodId,postedDebits"/>
+            </entity-find>
+
+            <script><![CDATA[
+                budgetItemsByGlId = new HashMap<String, ArrayList>()
+                for (Map curBi in budgetItemList) {
+                    String glAccountId = curBi.glAccountId
+                    ArrayList curBiList = budgetItemsByGlId.get(glAccountId)
+                    if (curBiList == null) {
+                        curBiList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        budgetItemsByGlId.put(glAccountId, curBiList)
+                    }
+
+                    String subTimePeriodId = (String) curBi.subTimePeriodId
+                    if (subTimePeriodId == null) {
+                        curBiList.set(0, curBi)
+                    } else {
+                        int subPeriodIndex = subTimePeriodIds.indexOf(subTimePeriodId)
+                        if (subPeriodIndex >= 0) curBiList.set(subPeriodIndex + 1, curBi)
+                    }
+                }
+
+                glaotpByGlId = new HashMap<String, ArrayList>()
+                for (Map curGlaotp in glaotpList) {
+                    String glAccountId = curGlaotp.glAccountId
+                    ArrayList curGltpList = glaotpByGlId.get(glAccountId)
+                    if (curGltpList == null) {
+                        curGltpList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        glaotpByGlId.put(glAccountId, curGltpList)
+                    }
+
+                    int subPeriodIndex = allTimePeriodIds.indexOf(curGlaotp.timePeriodId)
+                    if (subPeriodIndex >= 0) curGltpList.set(subPeriodIndex, curGlaotp)
+                }
+
+                glAccountInfoList = new ArrayList<Map>(glAccountList.size())
+                for (Map glAccount in glAccountList) {
+                    String glAccountId = glAccount.glAccountId
+
+                    List curBiList = budgetItemsByGlId.get(glAccountId)
+                    List curGltpList = glaotpByGlId.get(glAccountId)
+
+                    BigDecimal actualMain = curGltpList?.get(0)?.postedDebits
+                    BigDecimal amountMain = curBiList?.get(0)?.amount
+                    if (amountMain == null && actualMain != null) amountMain = BigDecimal.ZERO
+                    Map infoMap = [glAccountId:glAccountId, accountCode:glAccount.accountCode, accountName:glAccount.accountName,
+                                   actualMain:actualMain, amountMain:amountMain]
+                    BigDecimal subPerActualTotal = BigDecimal.ZERO
+                    BigDecimal subPerTotal = BigDecimal.ZERO
+                    for (int i = 1; i <= subTimePeriodSize; i++) {
+                        BigDecimal curActual = curGltpList?.get(i)?.postedDebits
+                        BigDecimal curAmount = curBiList?.get(i)?.amount
+                        if (curAmount == null && curActual != null) curAmount = BigDecimal.ZERO
+                        if (curActual != null) { infoMap.put('actualPer' + i, curActual); subPerActualTotal += curActual }
+                        if (curAmount != null) { infoMap.put('amountPer' + i, curAmount); subPerTotal += curAmount }
+                    }
+                    infoMap.put('subPerActualTotal', subPerActualTotal)
+                    infoMap.put('subPerTotal', subPerTotal)
+
+                    glAccountInfoList.add(infoMap)
+                }
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="run" noun="BudgetExpenseDetailReport">
+        <in-parameters><parameter name="budgetId" required="true"/></in-parameters>
+        <out-parameters>
+            <parameter name="budget" type="Map"/>
+            <parameter name="timePeriod" type="Map"/>
+            <parameter name="subTimePeriodList" type="List"><parameter name="subTimePeriod" type="Map"/></parameter>
+            <parameter name="subTimePeriodSize" type="Integer"/>
+            <parameter name="glAccountCodeMask"/><parameter name="accountCodeFormatter" type="javax.swing.text.MaskFormatter"/>
+            <parameter name="detailInfoList" type="List"><parameter name="detailInfo" type="Map">
+                <parameter name="glAccountId"/><parameter name="accountCode"/><parameter name="accountName"/>
+                <parameter name="assetId"/><parameter name="facilityId"/>
+                <parameter name="actualMain" type="BigDecimal"/><parameter name="amountMain" type="BigDecimal"/>
+                <parameter name="actualPer1" type="BigDecimal"/><parameter name="amountPer1" type="BigDecimal"/>
+                <parameter name="actualPer2" type="BigDecimal"/><parameter name="amountPer2" type="BigDecimal"/>
+                <parameter name="actualPer3" type="BigDecimal"/><parameter name="amountPer3" type="BigDecimal"/>
+                <parameter name="actualPer4" type="BigDecimal"/><parameter name="amountPer4" type="BigDecimal"/>
+                <parameter name="actualPer5" type="BigDecimal"/><parameter name="amountPer5" type="BigDecimal"/>
+                <parameter name="actualPer6" type="BigDecimal"/><parameter name="amountPer6" type="BigDecimal"/>
+                <parameter name="actualPer7" type="BigDecimal"/><parameter name="amountPer7" type="BigDecimal"/>
+                <parameter name="actualPer8" type="BigDecimal"/><parameter name="amountPer8" type="BigDecimal"/>
+                <parameter name="actualPer9" type="BigDecimal"/><parameter name="amountPer9" type="BigDecimal"/>
+                <parameter name="actualPer10" type="BigDecimal"/><parameter name="amountPer10" type="BigDecimal"/>
+                <parameter name="actualPer11" type="BigDecimal"/><parameter name="amountPer11" type="BigDecimal"/>
+                <parameter name="actualPer12" type="BigDecimal"/><parameter name="amountPer12" type="BigDecimal"/>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>
+            <set field="timePeriod" from="budget.timePeriod"/>
+            <if condition="timePeriod == null"><return error="true" message="Budget ${budgetId} has no Time Period"/></if>
+
+            <if condition="timePeriod.partyId">
+                <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                              in-map="[organizationPartyId:timePeriod.partyId]"/>
+                <!-- <set field="currencyUomId" from="partyAcctgPreference?.baseCurrencyUomId"/> -->
+                <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask"/>
+                <if condition="glAccountCodeMask">
+                    <set field="accountCodeFormatter" from="new javax.swing.text.MaskFormatter(glAccountCodeMask)"/>
+                    <script>accountCodeFormatter.setValueContainsLiteralCharacters(false)</script>
+                </if>
+            </if>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItem" list="budgetItemList">
+                <econdition field-name="budgetId"/></entity-find>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItemAndDetail" list="budgetItemDetailList">
+                <econdition field-name="budgetId"/>
+                <econditions combine="or">
+                    <econdition field-name="assetId" operator="is-not-null"/>
+                    <econdition field-name="facilityId" operator="is-not-null"/>
+                </econditions>
+                <select-field field-name="amount,assetId,facilityId,glAccountId,subTimePeriodId"/>
+            </entity-find>
+
+            <if condition="budget.timePeriodId &amp;&amp; budget.subTimePeriodTypeId">
+                <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
+                              in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+                <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
+                <set field="subTimePeriodIds" from="new ArrayList(subTimePeriodList*.timePeriodId)"/>
+                <set field="allTimePeriodIds" from="new ArrayList()"/>
+                <script>allTimePeriodIds.add(budget.timePeriodId)</script>
+                <script>allTimePeriodIds.addAll(subTimePeriodIds)</script>
+            </if>
+            <set field="subTimePeriodSize" from="subTimePeriodList?.size() ?: 0"/>
+
+            <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="expenseClassOut"
+                          in-map="[parentEnumId:'EXPENSE', includeNested:true]"/>
+            <set field="expenseClassEnumIds" from="expenseClassOut.enumIdSet"/>
+            <set field="pageSize" from="pageSize ?: '30'"/>
+            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization" list="glAccountList">
+                <econdition field-name="organizationPartyId" from="timePeriod.partyId"/>
+                <econdition field-name="glAccountClassEnumId" operator="in" from="expenseClassEnumIds"/>
+                <select-field field-name="glAccountId,accountCode,accountName"/>
+                <order-by field-name="accountCode"/>
+            </entity-find>
+            <set field="glAccountIds" from="glAccountList*.glAccountId"/>
+
+            <!-- get GlAccount level actuals from GlAccountOrgTimePeriod -->
+            <entity-find entity-name="mantle.ledger.account.GlAccountOrgTimePeriod" list="glaotpList">
+                <econdition field-name="organizationPartyId" from="timePeriod.partyId"/>
+                <econdition field-name="glAccountId" operator="in" from="glAccountIds"/>
+                <econdition field-name="timePeriodId" operator="in" from="allTimePeriodIds"/>
+                <select-field field-name="glAccountId,timePeriodId,postedDebits"/>
+            </entity-find>
+
+            <!-- get detail level actuals from InvoiceItemDetail, etc through InvoiceItemDetailTotal -->
+            <set field="iidtListByPeriod" from="new ArrayList(subTimePeriodSize + 1)"/>
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[timePeriod:timePeriod]" out-map="periodInfo"/>
+            <set field="fromTimestamp" from="periodInfo.fromTimestamp"/>
+            <set field="thruTimestamp" from="periodInfo.thruTimestamp"/>
+
+            <entity-find entity-name="mantle.account.invoice.InvoiceItemDetailTotal" list="mainIidtList">
+                <econdition field-name="organizationPartyId" from="timePeriod.partyId"/>
+                <econdition field-name="glAccountId" operator="in" from="glAccountIds"/>
+                <econdition field-name="transactionDate" operator="greater-equals" from="fromTimestamp"/>
+                <econdition field-name="transactionDate" operator="less-equals" from="thruTimestamp"/>
+                <!-- do we want this? if expense allocated maybe better to always include: <econdition field-name="isPosted" value="Y"/> -->
+                <select-field field-name="glAccountId,assetId,facilityId,totalAmount"/>
+            </entity-find>
+            <script>iidtListByPeriod.add(mainIidtList)</script>
+            <iterate list="subTimePeriodList" entry="subTimePeriod">
+                <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[subTimePeriod:subTimePeriod]" out-map="subPeriodInfo"/>
+                <entity-find entity-name="mantle.account.invoice.InvoiceItemDetailTotal" list="subIidtList">
+                    <econdition field-name="organizationPartyId" from="timePeriod.partyId"/>
+                    <econdition field-name="glAccountId" operator="in" from="glAccountIds"/>
+                    <econdition field-name="transactionDate" operator="greater-equals" from="subPeriodInfo.fromTimestamp"/>
+                    <econdition field-name="transactionDate" operator="less-equals" from="subPeriodInfo.thruTimestamp"/>
+                    <!-- do we want this? if expense allocated maybe better to always include: <econdition field-name="isPosted" value="Y"/> -->
+                    <select-field field-name="glAccountId,assetId,facilityId,totalAmount"/>
+                </entity-find>
+                <script>iidtListByPeriod.add(subIidtList)</script>
+            </iterate>
+            <!-- <log level="warn" message="iidtListByPeriod: ${iidtListByPeriod}"/> -->
+
+            <script><![CDATA[
+                // structure BudgetItem records
+                budgetItemsByGlId = new HashMap<String, ArrayList>()
+                for (Map curBi in budgetItemList) {
+                    String glAccountId = curBi.glAccountId
+                    ArrayList curBiList = budgetItemsByGlId.get(glAccountId)
+                    if (curBiList == null) {
+                        curBiList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        budgetItemsByGlId.put(glAccountId, curBiList)
+                    }
+
+                    String subTimePeriodId = (String) curBi.subTimePeriodId
+                    if (subTimePeriodId == null) {
+                        curBiList.set(0, curBi)
+                    } else {
+                        int subPeriodIndex = subTimePeriodIds.indexOf(subTimePeriodId)
+                        if (subPeriodIndex >= 0) curBiList.set(subPeriodIndex + 1, curBi)
+                    }
+                }
+
+                // structure GlAccountOrgTimePeriod records
+                glaotpByGlId = new HashMap<String, ArrayList>()
+                for (Map curGlaotp in glaotpList) {
+                    String glAccountId = curGlaotp.glAccountId
+                    ArrayList curGltpList = glaotpByGlId.get(glAccountId)
+                    if (curGltpList == null) {
+                        curGltpList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        glaotpByGlId.put(glAccountId, curGltpList)
+                    }
+
+                    int subPeriodIndex = allTimePeriodIds.indexOf(curGlaotp.timePeriodId)
+                    if (subPeriodIndex >= 0) curGltpList.set(subPeriodIndex, curGlaotp)
+                }
+
+                // structure BudgetItemDetail records
+                detailsByGlAssetOrFacility = new HashMap<String, ArrayList>()
+                assetIdsByGl = new HashMap<String, Set>()
+                facilityIdsByGl = new HashMap<String, Set>()
+                for (Map curBid in budgetItemDetailList) {
+                    String glAccountId = curBid.glAccountId
+                    String assetId = curBid.assetId
+                    String facilityId = curBid.facilityId
+
+                    String bidMapKey
+                    if (assetId) {
+                        bidMapKey = glAccountId + ':A:' + assetId
+                        Set assetIdSet = assetIdsByGl.get(glAccountId)
+                        if (assetIdSet == null) { assetIdSet = new TreeSet(); assetIdsByGl.put(glAccountId, assetIdSet) }
+                        assetIdSet.add(assetId)
+                    } else if (facilityId) {
+                        bidMapKey = glAccountId + ':F:' + facilityId
+                        Set facilityIdSet = facilityIdsByGl.get(glAccountId)
+                        if (facilityIdSet == null) { facilityIdSet = new TreeSet(); facilityIdsByGl.put(glAccountId, facilityIdSet) }
+                        facilityIdSet.add(facilityId)
+                    } else {
+                        continue
+                    }
+
+                    ArrayList curBidList = detailsByGlAssetOrFacility.get(bidMapKey)
+                    if (curBidList == null) {
+                        curBidList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        detailsByGlAssetOrFacility.put(bidMapKey, curBidList)
+                    }
+
+                    String subTimePeriodId = (String) curBid.subTimePeriodId
+                    if (subTimePeriodId == null) {
+                        curBidList.set(0, curBid)
+                    } else {
+                        int subPeriodIndex = subTimePeriodIds.indexOf(subTimePeriodId)
+                        if (subPeriodIndex >= 0) curBidList.set(subPeriodIndex + 1, curBid)
+                    }
+                }
+
+                // structure InvoiceItemDetail records
+                iiDetailsByGlAssetOrFacility = new HashMap<String, ArrayList>()
+                for (int subPeriodIdx = 0; subPeriodIdx <= subTimePeriodSize; subPeriodIdx++) {
+                    List curIidtList = iidtListByPeriod.get(subPeriodIdx)
+                    for (Map curIidt in curIidtList) {
+                        String glAccountId = curIidt.glAccountId
+                        String assetId = curIidt.assetId
+                        String facilityId = curIidt.facilityId
+
+                        String iidMapKey
+                        if (assetId) {
+                            iidMapKey = glAccountId + ':A:' + assetId
+                            Set assetIdSet = assetIdsByGl.get(glAccountId)
+                            if (assetIdSet == null) { assetIdSet = new TreeSet(); assetIdsByGl.put(glAccountId, assetIdSet) }
+                            assetIdSet.add(assetId)
+                        } else if (facilityId) {
+                            iidMapKey = glAccountId + ':F:' + facilityId
+                            Set facilityIdSet = facilityIdsByGl.get(glAccountId)
+                            if (facilityIdSet == null) { facilityIdSet = new TreeSet(); facilityIdsByGl.put(glAccountId, facilityIdSet) }
+                            facilityIdSet.add(facilityId)
+                        } else {
+                            continue
+                        }
+
+                        ArrayList curBidList = iiDetailsByGlAssetOrFacility.get(iidMapKey)
+                        if (curBidList == null) {
+                            curBidList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                            iiDetailsByGlAssetOrFacility.put(iidMapKey, curBidList)
+                        }
+                        curBidList.set(subPeriodIdx, curIidt)
+                    }
+                }
+
+                // create detailInfoList based on glAccountList plus assets and facilities for each
+                detailInfoList = new ArrayList<Map>()
+                for (Map glAccount in glAccountList) {
+                    String glAccountId = glAccount.glAccountId
+
+                    List curBiList = budgetItemsByGlId.get(glAccountId)
+                    List curGltpList = glaotpByGlId.get(glAccountId)
+
+                    if (curBiList || curGltpList) {
+                        BigDecimal actualMain = curGltpList?.get(0)?.postedDebits
+                        BigDecimal amountMain = curBiList?.get(0)?.amount
+                        if (amountMain == null && actualMain != null) amountMain = BigDecimal.ZERO
+                        Map infoMap = [glAccountId:glAccountId, accountCode:glAccount.accountCode, accountName:glAccount.accountName,
+                                       actualMain:actualMain, amountMain:amountMain]
+                        BigDecimal subPerActualTotal = BigDecimal.ZERO
+                        BigDecimal subPerTotal = BigDecimal.ZERO
+                        for (int i = 1; i <= subTimePeriodSize; i++) {
+                            BigDecimal curActual = curGltpList?.get(i)?.postedDebits
+                            BigDecimal curAmount = curBiList?.get(i)?.amount
+                            if (curAmount == null && curActual != null) curAmount = BigDecimal.ZERO
+                            if (curActual != null) { infoMap.put('actualPer' + i, curActual); subPerActualTotal += curActual }
+                            if (curAmount != null) { infoMap.put('amountPer' + i, curAmount); subPerTotal += curAmount }
+                        }
+                        infoMap.put('subPerActualTotal', subPerActualTotal)
+                        infoMap.put('subPerTotal', subPerTotal)
+
+                        detailInfoList.add(infoMap)
+                    }
+
+                    // add asset entries to list
+                    Set assetIds = assetIdsByGl.get(glAccountId)
+                    for (String assetId in assetIds) {
+                        String curDetailKey = glAccountId + ':A:' + assetId
+                        ArrayList curBidList = detailsByGlAssetOrFacility.get(curDetailKey)
+                        ArrayList curIidList = iiDetailsByGlAssetOrFacility.get(curDetailKey)
+
+                        BigDecimal actualMain = curIidList?.get(0)?.totalAmount
+                        BigDecimal amountMain = curBidList?.get(0)?.amount
+                        if (amountMain == null && actualMain != null) amountMain = BigDecimal.ZERO
+                        Map infoMap = [glAccountId:glAccountId, accountCode:glAccount.accountCode, accountName:glAccount.accountName,
+                                       assetId:assetId, actualMain:actualMain, amountMain:amountMain]
+                        BigDecimal subPerActualTotal = BigDecimal.ZERO
+                        BigDecimal subPerTotal = BigDecimal.ZERO
+                        for (int i = 1; i <= subTimePeriodSize; i++) {
+                            BigDecimal curActual = curIidList?.get(i)?.totalAmount
+                            BigDecimal curAmount = curBidList?.get(i)?.amount
+                            if (curAmount == null && curActual != null) curAmount = BigDecimal.ZERO
+                            if (curActual != null) { infoMap.put('actualPer' + i, curActual); subPerActualTotal += curActual }
+                            if (curAmount != null) { infoMap.put('amountPer' + i, curAmount); subPerTotal += curAmount }
+                        }
+                        infoMap.put('subPerActualTotal', subPerActualTotal)
+                        infoMap.put('subPerTotal', subPerTotal)
+
+                        detailInfoList.add(infoMap)
+                    }
+
+                    // add facility details entries to list
+                    Set facilityIds = facilityIdsByGl.get(glAccountId)
+                    for (String facilityId in facilityIds) {
+                        String curDetailKey = glAccountId + ':F:' + facilityId
+                        ArrayList curBidList = detailsByGlAssetOrFacility.get(curDetailKey)
+                        ArrayList curIidList = iiDetailsByGlAssetOrFacility.get(curDetailKey)
+
+                        BigDecimal actualMain = curIidList?.get(0)?.totalAmount
+                        BigDecimal amountMain = curBidList?.get(0)?.amount
+                        if (amountMain == null && actualMain != null) amountMain = BigDecimal.ZERO
+                        Map infoMap = [glAccountId:glAccountId, accountCode:glAccount.accountCode, accountName:glAccount.accountName,
+                                       facilityId:facilityId, actualMain:actualMain, amountMain:amountMain]
+                        BigDecimal subPerActualTotal = BigDecimal.ZERO
+                        BigDecimal subPerTotal = BigDecimal.ZERO
+                        for (int i = 1; i <= subTimePeriodSize; i++) {
+                            BigDecimal curActual = curIidList?.get(i)?.totalAmount
+                            BigDecimal curAmount = curBidList?.get(i)?.amount
+                            if (curAmount == null && curActual != null) curAmount = BigDecimal.ZERO
+                            if (curActual != null) { infoMap.put('actualPer' + i, curActual); subPerActualTotal += curActual }
+                            if (curAmount != null) { infoMap.put('amountPer' + i, curAmount); subPerTotal += curAmount }
+                        }
+                        infoMap.put('subPerActualTotal', subPerActualTotal)
+                        infoMap.put('subPerTotal', subPerTotal)
+
+                        detailInfoList.add(infoMap)
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>

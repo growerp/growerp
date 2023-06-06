@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="lookup" noun="ById">
+        <in-parameters><parameter name="lookupId"/></in-parameters>
+        <out-parameters>
+            <parameter name="asset" type="Map"/>
+            <parameter name="container" type="Map"/>
+            <parameter name="facility" type="Map"/>
+            <parameter name="invoice" type="Map"/>
+            <parameter name="orderHeader" type="Map"/>
+            <parameter name="returnHeader" type="Map"/>
+            <parameter name="party" type="Map"/>
+            <parameter name="partyBadge" type="Map"/>
+            <parameter name="payment" type="Map"/>
+            <parameter name="product" type="Map"/>
+            <parameter name="productList" type="List"><parameter name="product" type="Map"/></parameter>
+            <parameter name="shipment" type="Map"/>
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="acctgTrans" type="Map"/>
+
+            <parameter name="assetId"/>
+            <parameter name="containerId"/>
+            <parameter name="facilityId"/>
+            <parameter name="invoiceId"/>
+            <parameter name="orderId"/>
+            <parameter name="returnId"/>
+            <parameter name="partyId"/>
+            <parameter name="partyBadgeId"/>
+            <parameter name="paymentId"/>
+            <parameter name="productId"/>
+            <parameter name="shipmentId"/>
+            <parameter name="workEffortId"/>
+            <parameter name="acctgTransId"/>
+        </out-parameters>
+        <actions>
+            <if condition="!lookupId"><return/></if>
+
+            <!-- Asset -->
+            <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                <field-map field-name="assetId" from="lookupId"/></entity-find-one>
+            <if condition="asset == null">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="serialNumber" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="asset != null"><set field="assetId" from="asset.assetId"/></if>
+
+            <!-- Container -->
+            <entity-find-one entity-name="mantle.product.asset.Container" value-field="container">
+                <field-map field-name="containerId" from="lookupId"/></entity-find-one>
+            <if condition="container == null">
+                <entity-find-one entity-name="mantle.product.asset.Container" value-field="container">
+                    <field-map field-name="serialNumber" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="container != null"><set field="containerId" from="container.containerId"/></if>
+
+            <!-- Facility -->
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
+                <field-map field-name="facilityId" from="lookupId"/></entity-find-one>
+            <if condition="facility == null">
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="facility">
+                    <field-map field-name="pseudoId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="facility != null"><set field="facilityId" from="facility.facilityId"/></if>
+
+            <!-- Invoice -->
+            <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice">
+                <field-map field-name="invoiceId" from="lookupId"/></entity-find-one>
+            <if condition="invoice != null"><set field="invoiceId" from="invoice.invoiceId"/></if>
+
+            <!-- OrderHeader -->
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="lookupId"/></entity-find-one>
+            <if condition="orderHeader == null">
+                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                    <field-map field-name="displayId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="orderHeader == null">
+                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                    <field-map field-name="externalId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="orderHeader == null">
+                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                    <field-map field-name="originId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="orderHeader != null"><set field="orderId" from="orderHeader.orderId"/></if>
+
+            <!-- ReturnHeader -->
+            <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader">
+                <field-map field-name="returnId" from="lookupId"/></entity-find-one>
+            <if condition="returnHeader == null">
+                <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader">
+                    <field-map field-name="displayId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="returnHeader == null">
+                <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader">
+                    <field-map field-name="externalId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="returnHeader == null">
+                <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader">
+                    <field-map field-name="originId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="returnHeader != null"><set field="returnId" from="returnHeader.returnId"/></if>
+
+            <!-- Party -->
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                <field-map field-name="partyId" from="lookupId"/></entity-find-one>
+            <if condition="party == null">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                    <field-map field-name="pseudoId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="party == null">
+                <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="partyIdent">
+                    <field-map field-name="idValue" from="lookupId"/></entity-find-one>
+                <if condition="partyIdent?.partyId">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                        <field-map field-name="partyId" from="partyIdent.partyId"/></entity-find-one>
+                </if>
+            </if>
+            <if condition="party != null"><set field="partyId" from="party.partyId"/></if>
+
+            <!-- PartyBadge -->
+            <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
+                <field-map field-name="partyBadgeId" from="lookupId"/></entity-find-one>
+            <if condition="partyBadge == null">
+                <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
+                    <field-map field-name="serialNumber" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="partyBadge == null">
+                <entity-find-one entity-name="mantle.party.PartyBadge" value-field="partyBadge">
+                    <field-map field-name="storedValue" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="partyBadge != null"><set field="partyBadgeId" from="partyBadge.partyBadgeId"/></if>
+            <if condition="party == null &amp;&amp; partyBadge?.partyId">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                    <field-map field-name="partyId" from="partyBadge.partyId"/></entity-find-one>
+                <set field="partyId" from="party?.partyId"/>
+            </if>
+
+            <!-- Payment -->
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment">
+                <field-map field-name="paymentId" from="lookupId"/></entity-find-one>
+            <if condition="payment == null">
+                <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment">
+                    <field-map field-name="paymentRefNum" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="payment != null"><set field="paymentId" from="payment.paymentId"/></if>
+
+            <!-- Product(s) -->
+            <set field="productList" from="[]"/>
+            <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                <field-map field-name="productId" from="lookupId"/></entity-find-one>
+            <if condition="product != null"><script>productList.add(product)</script></if>
+            <entity-find-one entity-name="mantle.product.Product" value-field="productByPseudo">
+                <field-map field-name="pseudoId" from="lookupId"/></entity-find-one>
+            <if condition="productByPseudo != null &amp;&amp; productByPseudo.productId != product?.productId">
+                <if condition="product == null"><set field="product" from="productByPseudo"/></if>
+                <script>productList.add(productByPseudo)</script>
+            </if>
+            <entity-find entity-name="mantle.product.ProductIdentification" list="productIdentList">
+                <econdition field-name="idValue" from="lookupId"/>
+                <order-by field-name="productId"/>
+            </entity-find>
+            <entity-find entity-name="mantle.product.ProductOtherIdentification" list="productOtherIdentList">
+                <econdition field-name="idValue" from="lookupId"/>
+                <order-by field-name="productId"/>
+            </entity-find>
+            <iterate list="(productIdentList + productOtherIdentList)" entry="productIdent">
+                <entity-find-one entity-name="mantle.product.Product" value-field="productByIdent">
+                    <field-map field-name="productId" from="productIdent?.productId"/></entity-find-one>
+                <if condition="productByIdent != null">
+                    <if condition="product == null"><set field="product" from="productByIdent"/></if>
+                    <script>productList.add(productByIdent)</script>
+                </if>
+            </iterate>
+            <if condition="product != null"><set field="productId" from="product.productId"/></if>
+
+            <!-- Shipment -->
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment">
+                <field-map field-name="shipmentId" from="lookupId"/></entity-find-one>
+            <if condition="shipment == null">
+                <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment">
+                    <field-map field-name="externalId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="shipment == null">
+                <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment">
+                    <field-map field-name="originId" from="lookupId"/></entity-find-one>
+            </if>
+            <if condition="shipment != null"><set field="shipmentId" from="shipment.shipmentId"/></if>
+
+            <!-- WorkEffort -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort">
+                <field-map field-name="workEffortId" from="lookupId"/></entity-find-one>
+            <if condition="workEffort != null"><set field="workEffortId" from="workEffort.workEffortId"/></if>
+
+            <!-- AcctgTrans -->
+            <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans" value-field="acctgTrans">
+                <field-map field-name="acctgTransId" from="lookupId"/></entity-find-one>
+            <if condition="acctgTrans != null"><set field="acctgTransId" from="acctgTrans.acctgTransId"/></if>
+        </actions>
+    </service>
+
+    <service verb="search" noun="MantleFiltered">
+        <implements service="org.moqui.search.SearchServices.search#DataDocuments"/>
+        <actions>
+            <!-- add wildcards to query string for partial words -->
+            <set field="queryString" from="elasticQueryAutoWildcard(queryString, false)"/>
+
+            <!-- if we have activeOrgId or filterOrgIds see if user has active org or user org filters -->
+            <set field="activeOrgId" from="ec.user.context?.activeOrgId"/>
+            <set field="filterOrgIds" from="ec.user.context?.filterOrgIds"/>
+            <!-- <log level="warn" message="Doing general search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
+            <if condition="!documentType"><then>
+                <!-- this is the same as the MantleProduct constraint below: overly restrictive for Party and other document types, but only way to limit safely (for user org at least) -->
+
+                <!-- apply if there if a Product or Party filter -->
+                <!-- NOTE: using entityFilterSetId is a hack that only works for these 'standard' filter sets, would be
+                    better to pick apart filterMap to see what's used, but this is specific to activeOrgId and filterOrgIds anyway -->
+                <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.product.Product')"/>
+                <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                <if condition="!entityFilterSetId">
+                    <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')"/>
+                    <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                </if>
+                <script><![CDATA[
+                    if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + filterOrgIds.join(' OR ') + ')'
+                    } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + activeOrgId + ' OR _NA_)'
+                    }
+                ]]></script>
+            </then><else-if condition="documentType == 'MantleParty'">
+                <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')"/>
+                <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                <script><![CDATA[
+                    if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + (filterOrgIds ? filterOrgIds.join(' OR ') + ' OR ' : '') + '_NA_)'
+                    } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + activeOrgId + ' OR _NA_)'
+                    }
+                ]]></script>
+            </else-if><else-if condition="documentType == 'MantleProduct'">
+                <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.product.Product')"/>
+                <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                <script><![CDATA[
+                    if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + filterOrgIds.join(' OR ') + ')'
+                    } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
+                        queryString = (queryString ? queryString + ' AND ' : '' ) + 'ownerPartyId:(' + activeOrgId + ' OR _NA_)'
+                    }
+                ]]></script>
+            </else-if></if>
+            <!-- <log level="warn" message="Doing general search with documentType ${documentType} indexName ${indexName} queryString ${queryString}"/> -->
+
+            <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
+                    in-map="context + [flattenDocument:false]"/>
+        </actions>
+    </service>
+</services>

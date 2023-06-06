@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.other.budget -->
+    <!--  - mantle.other.tax -->
+    <!-- ========================================================= -->
+
+    <!-- ========================================================= -->
+    <!-- mantle.other.budget -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="Budget" package="mantle.other.budget">
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="budgetTypeEnumId" type="id"/>
+        <field name="timePeriodId" type="id"/>
+        <field name="subTimePeriodTypeId" type="id"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="currencyUomId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <field name="comments" type="text-long"/>
+        <relationship type="one" title="BudgetType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="budgetTypeEnumId"/></relationship>
+        <relationship type="one" related="mantle.party.time.TimePeriod" short-alias="timePeriod"/>
+        <relationship type="one" title="Budget" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" title="Currency" related="moqui.basic.Uom" short-alias="currencyUom">
+            <key-map field-name="currencyUomId"/></relationship>
+        <seed-data>
+            <!-- Budget Type -->
+            <moqui.basic.EnumerationType description="Budget Type" enumTypeId="BudgetType"/>
+            <moqui.basic.Enumeration description="Capital" enumId="BudgetCapital" enumTypeId="BudgetType"/>
+            <moqui.basic.Enumeration description="Operating" enumId="BudgetOperating" enumTypeId="BudgetType"/>
+
+            <!-- Budget Status -->
+            <moqui.basic.StatusType description="Budget" statusTypeId="Budget"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="BudgetItem" package="mantle.other.budget">
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="budgetItemSeqId" type="id" is-pk="true"/>
+        <field name="budgetItemTypeEnumId" type="id"/>
+        <field name="itemTypeEnumId" type="id"/>
+        <field name="glAccountId" type="id"/>
+        <field name="amount" type="currency-amount"/>
+        <field name="productId" type="id"/>
+        <field name="quantity" type="number-decimal"/>
+        <field name="quantityUomId" type="id"/>
+        <field name="purpose" type="text-medium"/>
+        <field name="justification" type="text-medium"/>
+        <field name="subTimePeriodId" type="id"><description>A TimePeriod for the item within the TimePeriod for the entire budget</description></field>
+        <relationship type="one" related="mantle.other.budget.Budget" short-alias="budget"/>
+        <relationship type="one" title="BudgetItemType" related="moqui.basic.Enumeration" short-alias="budgetItemType">
+            <key-map field-name="budgetItemTypeEnumId"/></relationship>
+        <relationship type="one" title="ItemType" related="moqui.basic.Enumeration" short-alias="itemType">
+            <key-map field-name="itemTypeEnumId"/></relationship>
+        <relationship type="one" related="mantle.ledger.account.GlAccount" short-alias="glAccount"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+        <relationship type="one" title="Quantity" related="moqui.basic.Uom" short-alias="quantityUom">
+            <key-map field-name="quantityUomId"/></relationship>
+        <relationship type="one" title="Sub" related="mantle.party.time.TimePeriod" short-alias="subTimePeriod">
+            <key-map field-name="subTimePeriodId"/></relationship>
+
+        <relationship type="many" related="mantle.other.budget.BudgetItemDetail" short-alias="details">
+            <key-map field-name="budgetId"/><key-map field-name="budgetItemSeqId"/></relationship>
+
+        <seed-data>
+            <!-- Budget Item Type -->
+            <moqui.basic.EnumerationType description="Budget Item Type" enumTypeId="BudgetItemType"/>
+            <moqui.basic.Enumeration description="Required" enumId="BdgItRequired" enumTypeId="BudgetItemType"/>
+            <moqui.basic.Enumeration description="Discretionary" enumId="BdgItDiscretionary" enumTypeId="BudgetItemType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="BudgetItemDetail" package="mantle.other.budget" cache="never">
+        <field name="budgetItemDetailId" type="id" is-pk="true"/>
+        <field name="budgetId" type="id" not-null="true"/>
+        <field name="budgetItemSeqId" type="id" not-null="true"/>
+        <field name="facilityId" type="id"/>
+        <field name="assetId" type="id"/>
+        <field name="amount" type="currency-precise"/>
+        <field name="productId" type="id"/>
+        <field name="quantity" type="number-decimal"/>
+
+        <relationship type="one-nofk" related="mantle.other.budget.Budget" short-alias="budget"/>
+        <relationship type="one" related="mantle.other.budget.BudgetItem" short-alias="budgetItem"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+    </entity>
+    <entity entity-name="BudgetReview" package="mantle.other.budget">
+        <field name="budgetReviewId" type="id" is-pk="true"/>
+        <field name="budgetId" type="id"/>
+        <field name="partyId" type="id"/>
+        <field name="budgetReviewResultEnumId" type="id"/>
+        <field name="reviewDate" type="date-time"/>
+        <relationship type="one" related="Budget"/>
+        <relationship type="one" related="Party"/>
+        <relationship type="one" title="BudgetReviewResult" related="moqui.basic.Enumeration">
+            <key-map field-name="budgetReviewResultEnumId"/></relationship>
+        <seed-data>
+            <!-- Budget Review Result -->
+            <moqui.basic.EnumerationType description="Budget Review Result" enumTypeId="BudgetReviewResult"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="BudgetRevision" package="mantle.other.budget">
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="revisionSeqId" type="id" is-pk="true"/>
+        <field name="dateRevised" type="date-time"/>
+        <field name="description" type="text-medium"/>
+        <relationship type="one" related="Budget"/>
+    </entity>
+    <entity entity-name="BudgetRevisionImpact" package="mantle.other.budget">
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="budgetItemSeqId" type="id" is-pk="true"/>
+        <field name="revisionSeqId" type="id" is-pk="true"/>
+        <field name="revisedAmount" type="currency-amount"/>
+        <field name="addDeleteFlag" type="text-indicator"/>
+        <field name="revisionReason" type="text-medium"/>
+        <relationship type="one" related="Budget"/>
+        <relationship type="one" related="BudgetItem">
+            <key-map field-name="budgetId"/><key-map field-name="budgetItemSeqId"/></relationship>
+        <relationship type="one" related="BudgetRevision">
+            <key-map field-name="budgetId"/><key-map field-name="revisionSeqId"/></relationship>
+    </entity>
+    <entity entity-name="BudgetParty" package="mantle.other.budget">
+        <field name="budgetId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <relationship type="one" related="Budget"/>
+        <relationship type="one" related="Party"/>
+        <relationship type="one" related="RoleType"/>
+    </entity>
+    <entity entity-name="BudgetScenario" package="mantle.other.budget">
+        <field name="budgetScenarioId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+    </entity>
+    <entity entity-name="BudgetScenarioApplication" package="mantle.other.budget">
+        <field name="budgetScenarioApplicId" type="id" is-pk="true"/>
+        <field name="budgetScenarioId" type="id" is-pk="true"/>
+        <field name="budgetId" type="id"/>
+        <field name="budgetItemSeqId" type="id"/>
+        <field name="amountChange" type="currency-amount"/>
+        <field name="percentageChange" type="number-decimal"/>
+        <relationship type="one" related="BudgetScenario"/>
+        <relationship type="one" related="Budget"/>
+        <relationship type="one" related="BudgetItem">
+            <key-map field-name="budgetId"/><key-map field-name="budgetItemSeqId"/></relationship>
+    </entity>
+    <entity entity-name="BudgetScenarioRule" package="mantle.other.budget">
+        <field name="budgetScenarioId" type="id" is-pk="true"/>
+        <field name="budgetItemTypeEnumId" type="id" is-pk="true"/>
+        <field name="amountChange" type="currency-amount"/>
+        <field name="percentageChange" type="number-decimal"/>
+        <relationship type="one" related="BudgetScenario"/>
+        <relationship type="one" title="BudgetItemType" related="moqui.basic.Enumeration">
+            <key-map field-name="budgetItemTypeEnumId"/></relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.other.tax -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="TaxAuthority" package="mantle.other.tax">
+        <description>For tax and other government authorities in any domain (sales/VAT, income, labor, etc)</description>
+        <field name="taxAuthorityId" type="id" is-pk="true"/>
+        <field name="taxAuthorityTypeEnumId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <field name="taxAuthGeoId" type="id"/>
+        <field name="taxAuthPartyId" type="id"/>
+        <field name="requireTaxIdForExemption" type="text-indicator"/>
+        <field name="taxIdFormatPattern" type="text-medium"/>
+        <field name="includeTaxInPrice" type="text-indicator"><description>This is mainly for VAT tax authorities</description></field>
+        <relationship type="one" title="TaxAuthorityType" related="moqui.basic.Enumeration">
+            <key-map field-name="taxAuthorityTypeEnumId"/></relationship>
+        <relationship type="one" title="TaxAuth" related="moqui.basic.Geo">
+            <key-map field-name="taxAuthGeoId"/></relationship>
+        <relationship type="one" title="TaxAuth" related="mantle.party.Party">
+            <key-map field-name="taxAuthPartyId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Tax Authority Type" enumTypeId="TaxAuthorityType"/>
+            <moqui.basic.Enumeration enumId="TatFederal" description="Federal/Country" enumTypeId="TaxAuthorityType"/>
+            <moqui.basic.Enumeration enumId="TatState" description="State/Province" enumTypeId="TaxAuthorityType"/>
+            <moqui.basic.Enumeration enumId="TatCounty" description="County/Parish/Borough" enumTypeId="TaxAuthorityType"/>
+            <moqui.basic.Enumeration enumId="TatCity" description="City" enumTypeId="TaxAuthorityType"/>
+            <!-- use TatCounty or TatCity instead: <moqui.basic.Enumeration enumId="TatLocal" description="Local" enumTypeId="TaxAuthorityType"/> -->
+        </seed-data>
+    </entity>
+    <entity entity-name="TaxAuthorityAssoc" package="mantle.other.tax">
+        <field name="taxAuthorityId" type="id" is-pk="true"/>
+        <field name="toTaxAuthorityId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="assocTypeEnumId" type="id"/>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority"/>
+        <relationship type="one" title="To" related="mantle.other.tax.TaxAuthority">
+            <key-map field-name="toTaxAuthorityId"/></relationship>
+        <relationship type="one" title="TaxAuthorityAssocType" related="moqui.basic.Enumeration">
+            <key-map field-name="assocTypeEnumId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Tax Authority Assoc Type" enumTypeId="TaxAuthorityAssocType"/>
+            <!-- Example: California is a tax exemption inheritor of the USA, there is a tax exemption inheritance from USA to CA, taxAuthGeoId=USA toTaxAuthGeoId=CA -->
+            <moqui.basic.Enumeration enumId="TaatExemption" description="Exemption Inheritance" enumTypeId="TaxAuthorityAssocType"/>
+            <moqui.basic.Enumeration enumId="TaatCollAgent" description="Collection Agent" enumTypeId="TaxAuthorityAssocType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="TaxAuthorityCategory" package="mantle.other.tax">
+        <field name="taxAuthorityId" type="id" is-pk="true"/>
+        <field name="productCategoryId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority"/>
+        <relationship type="one" related="mantle.product.category.ProductCategory"/>
+    </entity>
+    <entity entity-name="TaxAuthorityParty" package="mantle.other.tax">
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="taxAuthorityId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="partyTaxId" type="text-short"/>
+        <field name="isExempt" type="text-indicator"/>
+        <field name="isNexus" type="text-indicator">
+            <description>If Party has a sufficient presence in the area to have to charge tax set to Y.</description>
+        </field>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority"/>
+    </entity>
+    <!-- Using a Drools Decision Table instead of this (much more flexible):
+    <entity entity-name="TaxAuthorityRate" package="mantle.other.tax">
+        <field name="taxAuthorityRateId" type="id" is-pk="true"/>
+        <field name="taxAuthorityId" type="id"/>
+        <field name="rateTypeEnumId" type="id"/>
+        <field name="productStoreId" type="id"/>
+        <field name="productCategoryId" type="id"/>
+        <field name="titleTransferEnumId" type="id"/>
+        <field name="minItemPrice" type="currency-amount"/>
+        <field name="minPurchase" type="currency-amount"/>
+        <field name="taxShipping" type="text-indicator"/>
+        <field name="taxPercentage" type="number-decimal"/>
+        <field name="taxPromotions" type="text-indicator"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="description" type="text-medium"/>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority">
+            <key-map field-name="taxAuthGeoId"/><key-map field-name="taxAuthPartyId"/></relationship>
+        <relationship type="one" title="TaxAuthorityRateType" related="moqui.basic.Enumeration">
+            <key-map field-name="rateTypeEnumId"/></relationship>
+        <relationship type="one" related="ProductStore"/>
+        <relationship type="one" related="ProductCategory"/>
+        <seed-data>
+            <!- - Tax Authority Rate Type - ->
+            <moqui.basic.EnumerationType description="Tax Authority Rate Type" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="SALES_TAX" description="Sales Tax" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="USE_TAX" description="Use Tax" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="VAT_TAX" description="Value Added Tax" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="INCOME_TAX" description="Income Tax" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="EXPORT_TAX" description="Export Tax" enumTypeId="TaxAuthorityRateType"/>
+            <moqui.basic.Enumeration enumId="IMPORT_TAX" description="Import Tax" enumTypeId="TaxAuthorityRateType"/>
+        </seed-data>
+    </entity>
+    -->
+
+    <entity entity-name="TaxGatewayConfig" package="mantle.other.tax">
+        <field name="taxGatewayConfigId" type="id" is-pk="true"/>
+        <field name="taxGatewayTypeEnumId" type="id"><description>Each payment gateway integration should define a
+            TaxGatewayType Enumeration record plus an entity with a shared PK (ie PK is taxGatewayTypeEnumId).</description></field>
+        <field name="description" type="text-medium"/>
+        <field name="calculateServiceName" type="text-medium"><description>Service implementing
+            mantle.other.TaxServices.calculate#SalesTax interface.</description></field>
+        <relationship type="one" title="TaxGatewayType" related="moqui.basic.Enumeration">
+            <key-map field-name="taxGatewayTypeEnumId"/></relationship>
+        <seed-data>
+            <!-- Tax Gateway Type -->
+            <moqui.basic.EnumerationType description="Tax Gateway Type" enumTypeId="TaxGatewayType"/>
+            <moqui.basic.Enumeration description="Local Tax Gateway" enumId="TaxGtwyLocal" enumTypeId="TaxGatewayType"/>
+
+            <mantle.other.tax.TaxGatewayConfig taxGatewayConfigId="LOCAL"
+                    taxGatewayTypeEnumId="TaxGtwyLocal" description="Local gateway for sales tax calc"
+                    calculateServiceName="mantle.other.TaxServices.calculate#SalesTaxLocal"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="TaxStatement" package="mantle.other.tax">
+        <field name="taxStatementId" type="id" is-pk="true"/>
+        <field name="timePeriodId" type="id"/>
+        <field name="partyId" type="id"><description>The Party the statement is for</description></field>
+        <field name="partyRelationshipId" type="id"><description>For employment relationships when a wage/tax statement</description></field>
+        <field name="taxAuthorityId" type="id"/>
+        <field name="formId" type="id"/>
+        <field name="formResponseId" type="id"/>
+        <relationship type="one" related="mantle.party.time.TimePeriod"/>
+        <relationship type="one" related="mantle.humanres.employment.Employment"/>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority"/>
+        <relationship type="one" related="moqui.screen.form.DbForm"/>
+        <relationship type="one" related="moqui.screen.form.FormResponse"/>
+        <seed-data>
+            <moqui.basic.Enumeration description="Tax Statement" enumId="DbfpTaxStatement" enumTypeId="DbFormPurpose"/>
+        </seed-data>
+    </entity>
+</entities>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-include="false" require-authentication="anonymous-all" history="false">
+
+    <transition name="sendOtp">
+        <service-call name="org.moqui.impl.UserServices.send#ExternalAuthcCode" in-map="[factorId:factorId]"/>
+        <default-response url="."/>
+    </transition>
+
+    <transition name="verifyUserAuthcFactor">
+        <actions>
+            <set field="username" from="ec.web.sessionAttributes.moquiPreAuthcUsername"/>
+            <service-call name="org.moqui.impl.UserServices.validate#ExternalUserAuthcCode"
+                    in-map="[code:code]" out-map="validateOut"/>
+            <if condition="validateOut.verified"><then>
+                <script>ec.user.internalLoginUser(validateOut.username)</script>
+            </then><else>
+                <message type="danger" public="true">Authentication code not valid</message>
+            </else></if>
+        </actions>
+        <conditional-response url="/"><condition><expression>verified</expression></condition></conditional-response>
+        <default-response url="."/>
+    </transition>
+
+
+    <pre-actions><script>
+        if (ec.user.userId || !ec.web.sessionAttributes.moquiAuthcFactorRequired) { sri.sendRedirectAndStopRender('/') }
+    </script></pre-actions>
+
+    <actions>
+        <service-call name="org.moqui.impl.UserServices.get#ExternalUserAuthcFactorInfo" out-map="context"/>
+    </actions>
+
+    <widgets>
+        <container id="content" style="Login"><container style="inner"><container style="container-fluid">
+            <section-iterate name="headerSavedMessages" list="ec.web?.savedMessages" entry="message"><widgets>
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-success fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${message}" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+            <section-iterate name="headerSavedErrors" list="ec.web?.savedErrors" entry="errorMessage"><widgets>
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-danger fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${errorMessage}" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+            <section-iterate name="headerSavedValidationErrors" list="ec.web?.savedValidationErrors" entry="validationError"><widgets>
+                <!-- TODO: put these by fields instead of in header -->
+                <render-mode><text type="html"><![CDATA[<div class="alert alert-danger fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>]]></text></render-mode>
+                <label text="${validationError.message} (for field ${validationError.field})" type="h4"/>
+                <render-mode><text type="html"><![CDATA[</div>]]></text></render-mode>
+            </widgets></section-iterate>
+
+            <section name="UserHasAuthcFactors" condition="factorTypeEnumIds"><widgets>
+                <render-mode><text type="html" location="component://webroot/screen/webroot/SecondFactor.html.ftl"/></render-mode>
+            </widgets><fail-widgets>
+                <label type="h1" text="Your account requires a code to login and you do not have any setup. Contact an Administrator."/>
+                <link url="/Login" text="Back to Login"/>
+            </fail-widgets></section>
+        </container></container></container>
+    </widgets>
+</screen>

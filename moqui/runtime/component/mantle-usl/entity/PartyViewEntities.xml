@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.party -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="FindPartyView" package="mantle.party">
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
+        <member-entity entity-alias="PTRL" entity-name="mantle.party.PartyRole" join-from-alias="PTY">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="USRACT" entity-name="UserAccount" join-from-alias="PTY">
+            <key-map field-name="partyId"/></member-entity>
+        <!-- when querying on combined name both of these will be joined in but only one or the other will match, so make them optional (left) -->
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+
+        <member-entity entity-alias="PCLA" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PCLS" entity-name="mantle.party.PartyClassification" join-from-alias="PCLA" join-optional="true">
+            <key-map field-name="partyClassificationId"/></member-entity>
+
+        <member-entity entity-alias="PAPCM" entity-name="mantle.party.contact.PartyContactMech" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PADR" entity-name="mantle.party.contact.PostalAddress" join-from-alias="PAPCM" join-optional="true">
+            <key-map field-name="contactMechId"/></member-entity>
+
+        <member-entity entity-alias="TNPCM" entity-name="mantle.party.contact.PartyContactMech" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="TELNM" entity-name="mantle.party.contact.TelecomNumber" join-from-alias="TNPCM" join-optional="true">
+            <key-map field-name="contactMechId"/></member-entity>
+
+        <member-entity entity-alias="EMPCM" entity-name="mantle.party.contact.PartyContactMech" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="EMCM" entity-name="mantle.party.contact.ContactMech" join-from-alias="EMPCM" join-optional="true">
+            <key-map field-name="contactMechId"/></member-entity>
+
+        <member-entity entity-alias="ASST" entity-name="mantle.product.asset.Asset" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId" related="ownerPartyId"/></member-entity>
+
+        <alias entity-alias="PTY" name="partyId"/>
+        <alias entity-alias="PTY" name="pseudoId"/>
+        <alias entity-alias="PTY" name="partyTypeEnumId"/>
+        <alias entity-alias="PTY" name="disabled"/>
+        <alias entity-alias="PTY" name="hasDuplicates"/>
+
+        <alias entity-alias="PTRL" name="roleTypeId"/>
+        <alias entity-alias="USRACT" name="username"/>
+
+        <alias entity-alias="ORG" name="organizationName"/>
+        <alias entity-alias="PER" name="firstName"/>
+        <alias entity-alias="PER" name="middleName"/>
+        <alias entity-alias="PER" name="lastName"/>
+        <alias entity-alias="PER" name="birthDate"/>
+
+        <alias name="partyClassificationId" entity-alias="PCLA"/>
+        <alias name="partyClassFromDate" entity-alias="PCLA" field="fromDate"/>
+        <alias name="partyClassThruDate" entity-alias="PCLA" field="thruDate"/>
+        <alias name="classificationTypeEnumId" entity-alias="PCLS"/>
+
+        <alias entity-alias="PADR" name="address1"/>
+        <alias entity-alias="PADR" name="address2"/>
+        <alias entity-alias="PADR" name="city"/>
+        <alias entity-alias="PADR" name="stateProvinceGeoId"/>
+        <alias entity-alias="PADR" name="postalCode"/>
+
+        <alias entity-alias="TELNM" name="countryCode"/>
+        <alias entity-alias="TELNM" name="areaCode"/>
+        <alias entity-alias="TELNM" name="contactNumber"/>
+
+        <alias name="emailAddress" entity-alias="EMCM" field="infoString"/>
+        <alias name="emailContactMechPurposeId" entity-alias="EMPCM" field="contactMechPurposeId"/>
+        <alias name="emailFromDate" entity-alias="EMPCM" field="fromDate"/>
+        <alias name="emailThruDate" entity-alias="EMPCM" field="thruDate"/>
+
+        <alias name="assetSerialNumber" entity-alias="ASST" field="serialNumber"/>
+    </view-entity>
+
+    <view-entity entity-name="PersonAndUserAccount" package="mantle.party">
+        <description>For finding a Person along with Party and optional UserAccount records, generally by partyId or
+            fields on Party or Person. When finding by userId or fields on UserAccount user PersonWithUserAccount.</description>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="USRACT" entity-name="moqui.security.UserAccount" join-from-alias="PER" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PER"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="USRACT"><exclude field="partyId"/></alias-all>
+        <alias name="partyId" entity-alias="PTY"/>
+        <alias name="pseudoId" entity-alias="PTY"/>
+        <alias name="ownerPartyId" entity-alias="PTY"/>
+        <alias name="externalId" entity-alias="PTY"/>
+    </view-entity>
+    <view-entity entity-name="PersonWithUserAccount" package="mantle.party">
+        <description>Like PersonAndUserAccount but UserAccount not optional (necessary for find by userId that might be null)</description>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="USRACT" entity-name="moqui.security.UserAccount" join-from-alias="PER">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PER"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="USRACT"><exclude field="partyId"/></alias-all>
+        <alias name="partyId" entity-alias="PTY"/>
+        <alias name="pseudoId" entity-alias="PTY"/>
+        <alias name="ownerPartyId" entity-alias="PTY"/>
+        <alias name="externalId" entity-alias="PTY"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyDetail" package="mantle.party">
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+    <view-entity entity-name="PartyDetailAndRole" package="mantle.party">
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party"/>
+        <member-entity entity-alias="PTRL" entity-name="mantle.party.PartyRole" join-from-alias="PTY">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias entity-alias="PTRL" name="roleTypeId"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyRoleAndType" package="mantle.party">
+        <member-entity entity-alias="PTRL" entity-name="mantle.party.PartyRole"/>
+        <member-entity entity-alias="RLTP" entity-name="mantle.party.RoleType" join-from-alias="PTRL">
+            <key-map field-name="roleTypeId"/></member-entity>
+        <alias-all entity-alias="PTRL"/>
+        <alias-all entity-alias="RLTP"/>
+    </view-entity>
+    <view-entity entity-name="RoleGroupMemberAndType" package="mantle.party">
+        <member-entity entity-alias="RGM" entity-name="mantle.party.RoleGroupMember"/>
+        <member-entity entity-alias="RLTP" entity-name="mantle.party.RoleType" join-from-alias="RGM">
+            <key-map field-name="roleTypeId"/></member-entity>
+        <alias-all entity-alias="RGM"/>
+        <alias-all entity-alias="RLTP"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyFromAndRelationship" package="mantle.party">
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PREL"/>
+        <alias-all entity-alias="PTY"><exclude field="partyId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="ORG"><exclude field="partyId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="PartyToAndRelationship" package="mantle.party">
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PREL"/>
+        <alias-all entity-alias="PTY"><exclude field="partyId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="ORG"><exclude field="partyId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="PartyFromAndToRelationship" package="mantle.party">
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship"/>
+        <member-entity entity-alias="PTYF" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PERF" entity-name="mantle.party.Person" join-from-alias="PTYF" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORGF" entity-name="mantle.party.Organization" join-from-alias="PTYF" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PTYT" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PERT" entity-name="mantle.party.Person" join-from-alias="PTYT" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORGT" entity-name="mantle.party.Organization" join-from-alias="PTYT" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PREL"/>
+        <alias-all entity-alias="PTYF" prefix="from"><exclude field="partyId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PERF" prefix="from"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="ORGF" prefix="from"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="PTYT" prefix="to"><exclude field="partyId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PERT" prefix="to"><exclude field="partyId"/></alias-all>
+        <alias-all entity-alias="ORGT" prefix="to"><exclude field="partyId"/></alias-all>
+    </view-entity>
+
+    <view-entity entity-name="PartyBadgeAndScan" package="mantle.party">
+        <member-entity entity-alias="PBA" entity-name="mantle.party.PartyBadge"/>
+        <member-entity entity-alias="PBSC" entity-name="mantle.party.PartyBadgeScan" join-from-alias="PBA">
+            <key-map field-name="partyBadgeId"/></member-entity>
+        <alias-all entity-alias="PBA"/>
+        <alias-all entity-alias="PBSC"/>
+    </view-entity>
+    <view-entity entity-name="PartyClassificationAndAppl" package="mantle.party">
+        <member-entity entity-alias="PCA" entity-name="mantle.party.PartyClassificationAppl"/>
+        <member-entity entity-alias="PCLS" entity-name="mantle.party.PartyClassification" join-from-alias="PCA">
+            <key-map field-name="partyClassificationId"/></member-entity>
+        <alias-all entity-alias="PCA"/>
+        <alias-all entity-alias="PCLS"/>
+    </view-entity>
+
+    <view-entity entity-name="PartySettingTypeAndRole" package="mantle.party">
+        <member-entity entity-alias="PSET" entity-name="mantle.party.PartySettingType"/>
+        <member-relationship entity-alias="PSTR" join-from-alias="PSET" relationship="roles" join-optional="true"/>
+        <alias-all entity-alias="PSET"/>
+        <alias-all entity-alias="PSTR"/>
+    </view-entity>
+    
+    <view-entity entity-name="PartyIdentAndEnumGroup" package="mantle.party">
+        <member-entity entity-alias="PID" entity-name="mantle.party.PartyIdentification"/>
+        <member-entity entity-alias="ENUM" entity-name="moqui.basic.Enumeration" join-from-alias="PID">
+            <key-map field-name="partyIdTypeEnumId"/></member-entity>
+        <member-entity entity-alias="EGM" entity-name="moqui.basic.EnumGroupMember" join-from-alias="ENUM">
+            <key-map field-name="enumId"/>
+        </member-entity>
+        <alias-all entity-alias="PID"/>
+        <alias-all entity-alias="ENUM">
+            <exclude field="sequenceNum"/>
+        </alias-all>
+        <alias-all entity-alias="EGM"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.party.agreement -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="AgreementAndTerm" package="mantle.party.agreement">
+        <member-entity entity-alias="AGMT" entity-name="mantle.party.agreement.Agreement"/>
+        <member-entity entity-alias="AGTRM" entity-name="mantle.party.agreement.AgreementTerm" join-from-alias="AGMT">
+            <key-map field-name="agreementId"/></member-entity>
+        <alias-all entity-alias="AGMT"/>
+        <alias-all entity-alias="AGTRM"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.party.communication -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="CommunicationEventAndPurpose" package="mantle.party.communication">
+        <member-entity entity-alias="CEV" entity-name="mantle.party.communication.CommunicationEvent"/>
+        <member-entity entity-alias="CEVP" entity-name="mantle.party.communication.CommunicationEventPurpose" 
+                join-from-alias="CEV" join-optional="true">
+            <key-map field-name="communicationEventId"/></member-entity>
+        <alias-all entity-alias="CEV"/>
+        <alias-all entity-alias="CEVP"/>
+    </view-entity>
+    <view-entity entity-name="WikiPageCommEventDetail" package="mantle.party.communication">
+        <member-entity entity-alias="WPCE" entity-name="mantle.party.communication.WikiPageCommunicationEvent"/>
+        <member-entity entity-alias="CEV" entity-name="mantle.party.communication.CommunicationEvent" join-from-alias="WPCE">
+            <key-map field-name="communicationEventId"/></member-entity>
+        <alias-all entity-alias="WPCE"/>
+        <alias-all entity-alias="CEV"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.party.contact -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="ContactMechTelecomNumber" package="mantle.party.contact">
+        <member-entity entity-alias="CTM" entity-name="mantle.party.contact.ContactMech"/>
+        <member-entity entity-alias="TLNM" entity-name="mantle.party.contact.TelecomNumber" join-from-alias="CTM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="CTM"/>
+        <alias-all entity-alias="TLNM"/>
+    </view-entity>
+    <view-entity entity-name="ContactMechPostalAddress" package="mantle.party.contact">
+        <member-entity entity-alias="CTM" entity-name="mantle.party.contact.ContactMech"/>
+        <member-entity entity-alias="PADD" entity-name="mantle.party.contact.PostalAddress" join-from-alias="CTM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="CTM"/>
+        <alias-all entity-alias="PADD"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyContactMechInfo" package="mantle.party.contact">
+        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="CM"/>
+    </view-entity>
+    <view-entity entity-name="PartyContactMechPostalAddress" package="mantle.party.contact">
+        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="PA" entity-name="mantle.party.contact.PostalAddress" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="STG" entity-name="moqui.basic.Geo" join-from-alias="PA" join-optional="true">
+            <key-map field-name="stateProvinceGeoId" related="geoId"/></member-entity>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="PA"/>
+        <alias entity-alias="STG" name="stateGeoName" field="geoName"/>
+        <alias entity-alias="STG" name="stateGeoCodeAlpha2" field="geoCodeAlpha2"/>
+        <alias entity-alias="STG" name="stateGeoCodeAlpha3" field="geoCodeAlpha3"/>
+    </view-entity>
+    <view-entity entity-name="PartyContactMechPostalAddressOnly" package="mantle.party.contact">
+        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"/>
+        <member-entity entity-alias="PA" entity-name="mantle.party.contact.PostalAddress" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="PA"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyContactMechTelecomNumber" package="mantle.party.contact">
+        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="TN" entity-name="mantle.party.contact.TelecomNumber" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="TN"/>
+    </view-entity>
+
+    <view-entity entity-name="PartyContactMechAndClass" package="mantle.party">
+        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="PCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="PCA" entity-name="mantle.party.PartyClassificationAppl" join-from-alias="PCM">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="PCM"/>
+        <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="PCA"><exclude field="fromDate"/><exclude field="thruDate"/></alias-all>
+        <alias name="pcaFromDate" entity-alias="PCA" field="fromDate"/>
+        <alias name="pcaThruDate" entity-alias="PCA" field="thruDate"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.party.time -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="TimePeriodAndType" package="mantle.party.time">
+        <member-entity entity-alias="TMPD" entity-name="mantle.party.time.TimePeriod"/>
+        <member-entity entity-alias="TPT" entity-name="mantle.party.time.TimePeriodType" join-from-alias="TMPD">
+            <key-map field-name="timePeriodTypeId"/></member-entity>
+        <alias-all entity-alias="TMPD"/>
+        <alias-all entity-alias="TPT"/>
+    </view-entity>
+</entities>

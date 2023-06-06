@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="import" noun="Entities">
+        <description> Import general entities</description>
+        <in-parameters>
+            <parameter name="entities" required="true" type="Map"/>
+            <parameter name="classificationId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relComp"/>
+            <if condition="entities.companies">
+                <iterate list="entities.companies" entry="company">
+                    <if condition="company.partyId == '_MOD_'">
+                        <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee" list="parties">
+                            <econdition field-name="ownerPartyId" from="relComp.ownerPartyId"/>
+                            <econdition field-name="companyName" operator="like" value="${company.name}%"/>
+                        </entity-find>
+                        <if condition="parties">
+                            <set field="company.partyId" from="parties[0].companyPartyId"/>
+                            <service-call name="growerp.100.PartyServices100.update#Company"
+                                in-map="[company: company]"/>
+                        </if>
+                        <else>
+                            <service-call name="growerp.100.PartyServices100.create#Company"
+                                in-map="[company: company]"/>
+                        </else>
+                    </if>
+                </iterate></if>
+            <if condition="entities.users">
+                <iterate list="entities.users" entry="user">
+                    <service-call name="growerp.100.PartyServices100.create#User"
+                        in-map="[user: user]"/>
+                </iterate></if>
+            <if condition="entities.categories">
+                <iterate list="entities.categories" entry="category">
+                    <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                        in-map="[category: category, classificationId: classificationId]"/>
+                </iterate></if>
+            <if condition="entities.products">
+                <iterate list="entities.products" entry="product">
+                    <service-call name="growerp.100.CatgProdServices100.create#Product"
+                        in-map="[product: product, classificationId: classificationId]"/>
+                </iterate></if>
+            <if condition="entities.assets">
+                <iterate list="entities.assets" entry="asset">
+                    <service-call name="growerp.100.CatgProdServices100.create#Asset"
+                        in-map="[asset: asset, classificationId: classificationId]"/>
+                </iterate></if>
+            </actions>
+    </service>
+    
+    <service verb="export" noun="Categories">
+        <description>
+            send categories csv file
+        </description>
+        <in-parameters>
+            <parameter name="classificationId"/>
+        </in-parameters>
+        <actions>
+            <set field="emailAddress" from="ec.user.userAccount.emailAddress"/>
+            <set field="userAccount" from="ec.user.userAccount"/>
+            <set field="bodyParameters" from="[classificationId: classificationId]"/>
+            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
+                in-map="[emailTemplateId: 'GrowerpExportCategories',
+                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
+                out-map="context"/>
+            <message public="true" type="success">A Categories CSV file was sent by email to ${userAccount.emailAddress}.</message>
+        </actions></service>
+
+    <service verb="get" noun="ExportCategories">
+        <description>
+            Get Categories information into a CSV file attachement
+        </description>
+        <in-parameters>
+            <parameter name="classificationId"></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fileText"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
+                in-map="[classificationId: classificationId]" out-map="context"/>
+            <set field="fileText" value=""/>
+            <script><![CDATA[
+                import org.apache.commons.csv.CSVPrinter
+                import org.apache.commons.csv.CSVFormat
+                import org.apache.commons.csv.CSVRecord
+                import org.apache.commons.csv.QuoteMode
+                StringBuilder outSb = new StringBuilder()
+                CSVPrinter printer = CSVFormat.DEFAULT.withHeader(
+                    "name", "description", "image").print(outSb)
+                for (Map item in categories) {
+                    printer.printRecord(item.categoryName,
+                                        item.description,
+                                        item.image)}
+                fileText = outSb.toString()
+            ]]></script>
+            <!--log message="output in catgories CSV: ${fileText}"/-->
+        </actions>
+    </service>
+    
+    <service verb="import" noun="Categories">
+        <description> Import a list of categories</description>
+        <in-parameters>
+            <parameter name="categoryList" required="true" type="Map">
+                <parameter name="categories" type="List">
+                    <parameter name="category" type="Map">
+                        <parameter name="categoryName"/>
+                        <parameter name="description"/>
+                        <parameter name="image"/>
+                    </parameter>
+                </parameter>
+            </parameter>
+            <parameter name="classificationId" required="true"/>
+        </in-parameters>
+        <actions>
+            <iterate list="categoryList.categories" entry="category">
+                <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                    in-map="[category: category, classificationId: classificationId]"/>
+            </iterate>
+            <message public="true" type="success">Categories Upload completed</message>
+        </actions>
+    </service>
+    
+    <service verb="export" noun="Products">
+        <description>
+            send products csv file
+        </description>
+        <actions>
+            <set field="emailAddress" from="ec.user.userAccount.emailAddress"/>
+            <set field="userAccount" from="ec.user.userAccount"/>
+            <set field="bodyParameters" from="[classificationId: classificationId]"/>
+            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
+                in-map="[emailTemplateId: 'GrowerpExportProducts',
+                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
+                out-map="context"/>
+            <message public="true" type="success">A Products CSV file was sent by email to ${userAccount.emailAddress}.</message>
+        </actions></service>
+
+    <service verb="get" noun="ExportProducts">
+        <description>
+            Get Products information into a CSV file attachement
+        </description>
+        <out-parameters>
+            <parameter name="fileText"/>
+        </out-parameters>
+        <actions>
+            <script>logger.warn("getting products")</script>
+            <service-call name="growerp.100.CatgProdServices100.get#Products"
+               out-map="context"/>
+               <set field="fileText" value=""/>
+            <script><![CDATA[
+                import org.apache.commons.csv.CSVPrinter
+                import org.apache.commons.csv.CSVFormat
+                import org.apache.commons.csv.CSVRecord
+                import org.apache.commons.csv.QuoteMode
+                StringBuilder outSb = new StringBuilder()
+                CSVPrinter printer = CSVFormat.DEFAULT.withHeader(
+                    "name", "description", "Product Type Id", "image", "assetClassId","List Price","Price","Use Warehouse","Nbr of Assets","Category1", "Category2", "Category3").print(outSb)
+                for (Map item in products) {
+                    printer.printRecord(item.productName,
+                                        item.description,
+                                        item.productTypeId,
+                                        item.image,
+                                        item.assetClassId,
+                                        item.listPrice,
+                                        item.price,
+                                        item.requireInventory,
+                                        item.assetCount,
+                                        item.categories[0] ? item.categories[0].categoryName :'',
+                                        item.categories[1] ? item.categories[1].categoryName :'',
+                                        item.categories[2] ? item.categories[2].categoryName :'',
+                                        )}
+                fileText = outSb.toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="import" noun="Products">
+        <description> Import a list of products</description>
+        <in-parameters>
+            <parameter name="productList" required="true" type="Map">
+                <parameter name="products" type="List">
+                    <parameter name="product" required="true" type="Map">
+                        <parameter name="productTypeId"/>
+                        <parameter name="assetClassId" default-value="Hotel Room"/>
+                        <parameter name="productName"/>
+                        <parameter name="description"/>
+                        <parameter name="price"/>
+                        <parameter name="listPrice"/>
+                        <parameter name="categories" type="List">
+                            <parameter name="category" type="Map">
+                                <parameter name="categoryId"/>
+                            </parameter>
+                        </parameter>
+                        <parameter name="useWarehouse" type="Boolean"/>
+                        <parameter name="assetCount"/>
+                        <parameter name="image"/>
+                    </parameter>
+                </parameter>
+            </parameter>
+            <parameter name="classificationId" required="true"/>
+        </in-parameters>
+        <actions>
+            <iterate list="productList.products" entry="product">
+                <service-call name="growerp.100.CatgProdServices100.create#Product"
+                    in-map="[product: product, classificationId: classificationId]"/>
+            </iterate>
+            <message public="true" type="success">Products Upload completed</message>
+        </actions>
+    </service>
+    
+</services>

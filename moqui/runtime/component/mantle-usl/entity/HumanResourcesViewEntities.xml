@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.humanres.ability -->
+    <!--  - mantle.humanres.employment -->
+    <!--  - mantle.humanres.position -->
+    <!--  - mantle.humanres.rate -->
+    <!--  - mantle.humanres.recruitment -->
+    <!-- ========================================================= -->
+
+    <!-- ========================================================= -->
+    <!-- mantle.humanres.ability -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.humanres.employment -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="EmploymentAndRelationship" package="mantle.humanres.employment">
+        <member-entity entity-alias="EMPL" entity-name="mantle.humanres.employment.Employment"/>
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship" join-from-alias="EMPL">
+            <key-map field-name="partyRelationshipId"/></member-entity>
+        <alias-all entity-alias="EMPL"/>
+        <alias-all entity-alias="PREL"/>
+    </view-entity>
+    <view-entity entity-name="EmploymentFromDetail" package="mantle.humanres.employment">
+        <member-entity entity-alias="EMPL" entity-name="mantle.humanres.employment.Employment"/>
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship" join-from-alias="EMPL">
+            <key-map field-name="partyRelationshipId"/></member-entity>
+        <member-entity entity-alias="EPOS" entity-name="mantle.humanres.position.EmplPosition" join-from-alias="EMPL">
+            <key-map field-name="emplPositionId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PID" entity-name="mantle.party.PartyIdentification" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <econdition field-name="partyIdTypeEnumId" value="PtidSsn"/>
+            </entity-condition>
+        </member-entity>
+        <alias-all entity-alias="EMPL"/>
+        <alias-all entity-alias="PREL"/>
+        <alias-all entity-alias="EPOS" prefix="position"/>
+        <alias-all entity-alias="PTY"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias-all entity-alias="PID"/>
+    </view-entity>
+    <view-entity entity-name="EmploymentSalaryFromDetail" package="mantle.humanres.employment">
+        <member-entity entity-alias="EMPL" entity-name="mantle.humanres.employment.Employment"/>
+        <member-entity entity-alias="EMSA" entity-name="mantle.humanres.employment.EmploymentSalary" join-from-alias="EMPL">
+            <key-map field-name="partyRelationshipId"/></member-entity>
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship" join-from-alias="EMPL">
+            <key-map field-name="partyRelationshipId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="EMPL"/>
+        <alias-all entity-alias="EMSA"><exclude field="timePeriodTypeId"/></alias-all>
+        <alias-all entity-alias="PREL"><exclude field="fromDate"/><exclude field="thruDate"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PTY"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+
+    <view-entity entity-name="PayrollAdjustmentAndDetail" package="mantle.humanres.employment">
+        <member-entity entity-alias="PADJ" entity-name="mantle.humanres.employment.PayrollAdjustment"/>
+        <member-entity entity-alias="PADTL" entity-name="mantle.humanres.employment.PayrollAdjustmentDetail" join-from-alias="PADJ">
+            <key-map field-name="payrollAdjustmentId"/></member-entity>
+        <member-entity entity-alias="PAFS" entity-name="mantle.humanres.employment.PayrollAdjustmentFedStts"
+                join-from-alias="PADJ" join-optional="true">
+            <key-map field-name="payrollAdjustmentId"/></member-entity>
+        <member-entity entity-alias="PASS" entity-name="mantle.humanres.employment.PayrollAdjustmentStateStts"
+                join-from-alias="PADJ" join-optional="true">
+            <key-map field-name="payrollAdjustmentId"/></member-entity>
+        <alias-all entity-alias="PADJ"/>
+        <alias-all entity-alias="PADTL"/>
+        <alias-all entity-alias="PAFS"/>
+        <alias-all entity-alias="PASS"/>
+    </view-entity>
+    <view-entity entity-name="WageAndTaxStatementFromDetail" package="mantle.humanres.employment">
+        <member-entity entity-alias="WATS" entity-name="mantle.other.tax.TaxStatement"/>
+        <member-entity entity-alias="TXAU" entity-name="mantle.other.tax.TaxAuthority" join-from-alias="WATS">
+            <key-map field-name="taxAuthorityId"/></member-entity>
+        <member-entity entity-alias="PREL" entity-name="mantle.party.PartyRelationship" join-from-alias="WATS">
+            <key-map field-name="partyRelationshipId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="PREL">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="WATS"/>
+        <alias-all entity-alias="TXAU" prefix="txau"/>
+        <alias-all entity-alias="PREL"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PTY"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+    <view-entity entity-name="WorkTypeRiskClassAndDetail" package="mantle.humanres.employment">
+        <member-entity entity-alias="WTRC" entity-name="mantle.humanres.employment.WorkTypeRiskClass"/>
+        <member-entity entity-alias="STG" entity-name="moqui.basic.Geo" join-from-alias="WTRC">
+            <key-map field-name="geoId"/></member-entity>
+        <member-entity entity-alias="ENWT" entity-name="moqui.basic.Enumeration" join-from-alias="WTRC">
+            <key-map field-name="workTypeEnumId" related="enumId"/></member-entity>
+        <alias-all entity-alias="WTRC"/>
+        <alias-all entity-alias="STG"/>
+        <alias-all entity-alias="ENWT"/>
+    </view-entity>
+    <view-entity entity-name="TimeEntryFacility" package="mantle.humanres.employment">
+        <member-entity entity-alias="TE" entity-name="mantle.work.time.TimeEntry"/>
+        <member-entity entity-alias="WEF" entity-name="mantle.work.effort.WorkEffortFacility" join-from-alias="TE">
+            <key-map field-name="workEffortId"/></member-entity>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="WEF">
+            <key-map field-name="facilityId"/></member-entity>
+        <alias-all entity-alias="TE"/>
+        <alias-all entity-alias="FAC"/>
+    </view-entity>
+    <view-entity entity-name="TimeEntryRiskClass" package="mantle.humanres.employment">
+        <member-entity entity-alias="TE" entity-name="mantle.work.time.TimeEntry"/>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="TE">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="WTRC" entity-name="mantle.humanres.employment.WorkTypeRiskClass" join-from-alias="TE">
+            <key-map field-name="workTypeEnumId"/>
+            <entity-condition><econdition entity-alias="FAC" field-name="stateGeoId" to-field-name="geoId"/></entity-condition>
+        </member-entity>
+        <alias-all entity-alias="TE"/>
+        <alias-all entity-alias="WTRC"><exclude field="geoId"/></alias-all>
+        <alias name="stateGeoId" entity-alias="FAC"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.humanres.position -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="EmplPositionClassPartyClass" package="mantle.humanres.position">
+        <member-entity entity-alias="EPCP" entity-name="mantle.humanres.position.EmplPositionClassParty"/>
+        <member-entity entity-alias="EPCL" entity-name="mantle.humanres.position.EmplPositionClass" join-from-alias="EPCP">
+            <key-map field-name="emplPositionClassId"/></member-entity>
+        <alias-all entity-alias="EPCP"/>
+        <alias-all entity-alias="EPCL"/>
+    </view-entity>
+    <view-entity entity-name="EmplPositionClassPartyDetail" package="mantle.humanres.position">
+        <member-entity entity-alias="EPCP" entity-name="mantle.humanres.position.EmplPositionClassParty"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="EPCP">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="EPCP"/>
+        <alias-all entity-alias="PTY"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+    <view-entity entity-name="EmplPositionClassWorkTypeDetail" package="mantle.humanres.position">
+        <member-entity entity-alias="EPCWT" entity-name="mantle.humanres.position.EmplPositionClassWorkType"/>
+        <member-entity entity-alias="ENUM" entity-name="moqui.basic.Enumeration" join-from-alias="EPCWT">
+            <key-map field-name="workTypeEnumId" related="enumId"/></member-entity>
+        <alias-all entity-alias="EPCWT"/>
+        <alias-all entity-alias="ENUM"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.humanres.rate -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.humanres.recruitment -->
+    <!-- ========================================================= -->
+
+</entities>

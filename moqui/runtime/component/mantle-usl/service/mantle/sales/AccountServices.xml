@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="create" noun="Account" authenticate="false">
+        <description>Create a Sales Account, an Organization Party with the Account and Customer roles.</description>
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.Organization" include="nonpk"/>
+            <parameter name="organizationName" required="true"/>
+            <parameter name="disabled" default-value="N"/>
+            <parameter name="roleTypeId"/>
+            <parameter name="parentAccountPartyId"/>
+        </in-parameters>
+        <out-parameters><parameter name="partyId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId:'PtyOrganization', disabled:disabled]" out-map="newPartyOut"/>
+            <set field="partyId" from="newPartyOut.partyId"/>
+            <service-call name="create#mantle.party.Organization" in-map="context"/>
+
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Account']"/>
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Customer']"/>
+            <if condition="roleTypeId &amp;&amp; !(roleTypeId in ['Account', 'Customer'])">
+                <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
+
+            <if condition="parentAccountPartyId">
+                <service-call name="create#mantle.party.PartyRelationship" in-map="[fromDate:ec.user.nowTimestamp,
+                        relationshipTypeEnumId:'PrtOrgRollup', fromPartyId:partyId, toPartyId:parentAccountPartyId,
+                        fromRoleTypeId:'Account', toRoleTypeId:'Account']"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="create" noun="Contact" authenticate="false">
+        <description>Create a Sales Contact, a Person Party with the Contact role (contact of an Account/Customer).</description>
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.Person" include="nonpk"/>
+            <parameter name="firstName" required="true"/>
+            <parameter name="disabled" default-value="N"/>
+            <parameter name="accountPartyId" required="true"/>
+            <parameter name="roleTypeId"/>
+            <parameter name="fromRoleTypeId" default-value="Contact"/>
+            <parameter name="toRoleTypeId" default-value="Account"/>
+        </in-parameters>
+        <out-parameters><parameter name="partyId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.Party" in-map="[partyTypeEnumId:'PtyPerson', disabled:disabled]" out-map="newPartyOut"/>
+            <set field="partyId" from="newPartyOut.partyId"/>
+            <service-call name="create#mantle.party.Person" in-map="context"/>
+
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Contact']"/>
+            <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Customer']"/>
+            <if condition="roleTypeId &amp;&amp; !(roleTypeId in ['Contact', 'Customer'])">
+                <service-call name="create#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
+
+            <if condition="accountPartyId">
+                <service-call name="create#mantle.party.PartyRelationship" in-map="[fromDate:ec.user.nowTimestamp,
+                        relationshipTypeEnumId:'PrtContact', fromPartyId:partyId, toPartyId:accountPartyId,
+                        fromRoleTypeId:fromRoleTypeId, toRoleTypeId:toRoleTypeId]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="add" noun="Contact" authenticate="false">
+        <description>Add a Sales Contact, a Person Party with the Contact role (contact of an Account/Customer).</description>
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="accountPartyId" required="true"/>
+            <parameter name="roleTypeId"/>
+            <parameter name="fromRoleTypeId" default-value="Contact"/>
+            <parameter name="toRoleTypeId" default-value="Account"/>
+        </in-parameters>
+        <out-parameters><parameter name="partyId"/></out-parameters>
+        <actions>
+            <service-call name="store#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Contact']"/>
+            <service-call name="store#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:'Customer']"/>
+            <if condition="roleTypeId &amp;&amp; !(roleTypeId in ['Contact', 'Customer'])">
+                <service-call name="store#mantle.party.PartyRole" in-map="[partyId:partyId, roleTypeId:roleTypeId]"/></if>
+
+            <service-call name="create#mantle.party.PartyRelationship" in-map="[fromDate:ec.user.nowTimestamp,
+                    relationshipTypeEnumId:'PrtContact', fromPartyId:partyId, toPartyId:accountPartyId,
+                    fromRoleTypeId:fromRoleTypeId, toRoleTypeId:toRoleTypeId]"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="Contact" authenticate="false">
+        <description>Does not actually delete.  Expires a Sales Contact, a Person Party with the Contact role (contact of an Account/Customer).</description>
+        <in-parameters>
+            <parameter name="partyRelationshipId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.party.PartyRelationship" in-map="[partyRelationshipId:partyRelationshipId,thruDate:ec.user.nowTimestamp]"/>
+        </actions>
+    </service>
+</services>

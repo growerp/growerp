@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<secas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-eca-3.xsd">
+    <!-- On all Work Efforts auto set actualStartDate on WeInProgress and actualCompletionDate on WeComplete -->
+    <seca id="WorkEffortStartCompleteDates" service="update#mantle.work.effort.WorkEffort" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId in ['WeInProgress', 'WeComplete']</expression></condition>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+            <if condition="workEffort.actualStartDate == null &amp;&amp; statusId == 'WeInProgress'"><then>
+                <set field="workEffort.actualStartDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="workEffort"/>
+            </then><else-if condition="workEffort.actualCompletionDate == null &amp;&amp; statusId == 'WeComplete'">
+                <set field="workEffort.actualCompletionDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="workEffort"/>
+            </else-if></if>
+        </actions>
+    </seca>
+
+    <!-- Shipment Ship/Load Status Check - based on associated Shipment Status -->
+    <seca id="WorkEffortShipLoadStatusCheck" service="update#mantle.work.effort.WorkEffort" when="pre-validate">
+        <condition><expression>workEffortId &amp;&amp; statusId in ['WeComplete', 'WeClosed', 'WeCancelled']</expression></condition>
+        <actions><service-call name="mantle.work.ShipmentWorkServices.check#ShipmentLoadStatusChange"
+                in-map="[workEffortId:workEffortId, statusId:statusId]"/></actions>
+    </seca>
+    <!-- Shipment Ship/Load Auto Status based on associated Shipment Status -->
+    <seca id="WorkEffortShipLoadStatusAuto" service="update#mantle.shipment.Shipment" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; (statusId in ['ShipPicked', 'ShipPacked', 'ShipShipped', 'ShipCancelled'] ||
+            oldStatusId in ['ShipPicked', 'ShipPacked', 'ShipShipped', 'ShipCancelled'])</expression></condition>
+        <actions><service-call name="mantle.work.ShipmentWorkServices.set#ShipmentLoadStatusOnShipmentStatus"
+                in-map="[shipmentId:shipmentId, statusId:statusId]"/></actions>
+    </seca>
+</secas>

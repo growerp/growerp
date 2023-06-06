@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<!-- General Guideline Verbs: GET=find, POST=create/do, PUT=store (create or update), PATCH=update, DELETE=delete  -->
+
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/rest-api-3.xsd"
+        name="mantle" displayName="Mantle USL REST API" version="1.2.0"
+        description="Mantle services and various convenient entity operations are available through this API.
+            Not all possible entity operations are included in this API as they can be done through the automatic Entity
+            REST API using Mantle entity names. See more information about Mantle at
+            [http://www.moqui.org/mantle.html](http://www.moqui.org/mantle.html)">
+
+    <resource name="lookup" description="Lookup from various entities by ID"><method type="get">
+        <service name="mantle.GeneralServices.lookup#ById"/></method></resource>
+
+    <!-- ========== My Info (no partyId or userId, services for current user) ========== -->
+    <resource name="my">
+        <resource name="userOrgInfo"><method type="get">
+            <service name="mantle.party.PartyServices.setup#UserOrganizationInfo"/></method></resource>
+        <resource name="noticeCounts"><method type="get">
+            <service name="mantle.party.PartyServices.get#UserNoticeCounts"/></method></resource>
+    </resource>
+
+    <!-- ========== Parties ========== -->
+    <resource name="parties" description="Parties - Customers, Suppliers, Contacts, Employees, etc">
+        <method type="get"><service name="mantle.party.PartyServices.find#Party"/></method>
+
+        <id name="partyId">
+            <method type="get"><entity name="parties" masterName="default" operation="one"/></method>
+            <method type="patch"><entity name="parties" masterName="default" operation="update"/></method>
+
+            <resource name="contact"><method type="get">
+                <entity name="parties" masterName="contact" operation="one"/></method></resource>
+            <resource name="basic"><method type="get">
+                <entity name="parties" masterName="basic" operation="one"/></method></resource>
+
+            <resource name="user">
+                <method type="post"><service name="mantle.party.PartyServices.create#PartyUserAccount"/></method>
+                <method type="patch"><service name="mantle.party.PartyServices.update#PartyUserAccount"/></method>
+            </resource>
+            <resource name="personAndUser"><method type="patch">
+                <service name="mantle.party.PartyServices.update#Account"/></method></resource>
+
+            <resource name="roles">
+                <method type="get"><entity name="mantle.party.PartyRole" operation="list"/></method>
+                <id name="roleTypeId">
+                    <method type="get"><entity name="mantle.party.PartyRole" operation="one"/></method>
+                    <method type="post"><entity name="mantle.party.PartyRole" operation="create"/></method>
+                    <method type="delete"><entity name="mantle.party.PartyRole" operation="delete"/></method>
+                </id>
+            </resource>
+            <resource name="identifications">
+                <method type="get"><entity name="mantle.party.PartyIdentification" operation="list"/></method>
+                <method type="post"><entity name="mantle.party.PartyIdentification" operation="create"/></method>
+                <id name="partyIdTypeEnumId">
+                    <method type="get"><entity name="mantle.party.PartyIdentification" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.party.PartyIdentification" operation="update"/></method>
+                    <method type="delete"><entity name="mantle.party.PartyIdentification" operation="delete"/></method>
+                </id>
+            </resource>
+            <resource name="badges">
+                <method type="get"><entity name="mantle.party.PartyBadge" operation="list"/></method>
+            </resource>
+            <resource name="settings">
+                <method type="get"><entity name="mantle.party.PartySetting" operation="list"/></method>
+                <id name="partySettingTypeId">
+                    <method type="get"><service name="mantle.party.PartyServices.get#PartySettingValue"/></method>
+                    <method type="put"><service name="mantle.party.PartyServices.store#PartySetting"/></method>
+                    <method type="delete"><entity name="mantle.party.PartySetting" operation="delete"/></method>
+                </id>
+            </resource>
+
+            <resource name="contactMechs">
+                <method type="get"><entity name="mantle.party.contact.PartyContactMechInfo" operation="list"/></method>
+                <method type="put"><service name="mantle.party.ContactServices.store#PartyContactInfo"/></method>
+
+                <id name="contactMechId">
+                    <method type="delete"><service name="mantle.party.ContactServices.delete#PartyContactMech"/></method>
+                    <resource name="postalAddress"><method type="patch">
+                        <service name="mantle.party.ContactServices.update#PartyPostalAddress"/></method></resource>
+                    <resource name="telecomNumber"><method type="patch">
+                        <service name="mantle.party.ContactServices.update#PartyTelecomNumber"/></method></resource>
+                    <resource name="other"><method type="patch">
+                        <service name="mantle.party.ContactServices.update#PartyContactOther"/></method></resource>
+                </id>
+
+                <resource name="info"><method type="get">
+                    <service name="mantle.party.ContactServices.get#PartyContactInfo"/></method></resource>
+                <resource name="infoList"><method type="get">
+                    <service name="mantle.party.ContactServices.get#PartyContactInfoList"/></method></resource>
+
+                <resource name="postalAddresses">
+                    <method type="get"><entity name="mantle.party.contact.PartyContactMechPostalAddress" operation="list"/></method>
+                    <resource name="findOrCreate"><method type="post">
+                        <service name="mantle.party.ContactServices.findOrCreate#PartyPostalAddress"/></method></resource>
+                </resource>
+                <resource name="telecomNumbers"><method type="get">
+                    <entity name="mantle.party.contact.PartyContactMechTelecomNumber" operation="list"/></method></resource>
+                <resource name="emailAddresses"><resource name="primary"><method type="get">
+                    <service name="mantle.party.ContactServices.get#PrimaryEmailAddress"/></method></resource></resource>
+                <resource name="other"><method type="patch">
+                    <service name="mantle.party.ContactServices.update#PartyContactOther"/></method></resource>
+            </resource>
+
+            <resource name="communicationEvents"><method type="get">
+                <service name="mantle.party.CommunicationServices.find#PartyCommunicationEvents"/></method></resource>
+
+            <!-- TODO content services -->
+
+            <resource name="paymentMethods">
+                <method type="put"><service name="mantle.account.PaymentMethodServices.store#PaymentMethodInfo"/></method>
+
+                <resource name="info"><method type="get">
+                    <service name="mantle.account.PaymentMethodServices.get#PartyPaymentMethodInfo"/></method></resource>
+                <resource name="infoList"><method type="get">
+                    <service name="mantle.account.PaymentMethodServices.get#PartyPaymentMethodInfoList"/></method></resource>
+            </resource>
+        </id>
+
+        <!-- curl -X GET -u john.doe:moqui -i http://localhost:8080/rest/s1/mantle/parties/search?firstName=John -->
+        <resource name="search"><method type="get">
+            <service name="mantle.party.PartyServices.search#Party"/></method></resource>
+
+        <resource name="person"><method type="post">
+            <service name="mantle.party.PartyServices.create#Person"/></method></resource>
+        <resource name="personAndUser"><method type="post">
+            <service name="mantle.party.PartyServices.create#Account"/></method></resource>
+        <resource name="organization"><method type="post">
+            <service name="mantle.party.PartyServices.create#Organization"/></method></resource>
+        <resource name="sales">
+            <resource name="account"><method type="post">
+                <service name="mantle.sales.AccountServices.create#Account"/></method></resource>
+            <resource name="contact"><method type="post">
+                <service name="mantle.sales.AccountServices.create#Contact"/></method></resource>
+            <resource name="personCustomer"><method type="post">
+                <service name="mantle.party.PartyServices.create#PersonCustomer"/></method></resource>
+        </resource>
+
+        <resource name="badges">
+            <id name="partyBadgeId">
+                <method type="get"><service name="mantle.party.PartyServices.get#PartyBadgeInfo"/></method>
+                <method type="patch"><entity name="mantle.party.PartyBadge" operation="update"/></method>
+                <method type="delete"><entity name="mantle.party.PartyBadge" operation="delete"/></method>
+            </id>
+            <resource name="lookup"><id name="scanValue"><method type="get">
+                <service name="mantle.party.PartyServices.lookup#PartyBadge"/></method></id></resource>
+            <resource name="scan"><id name="scanValue"><method type="get">
+                <service name="mantle.party.PartyServices.scan#PartyBadge"/></method></id></resource>
+        </resource>
+
+        <resource name="roleTypes">
+            <method type="get"><entity name="mantle.party.RoleType" operation="list"/></method>
+            <id name="roleTypeId">
+                <method type="get"><entity name="mantle.party.RoleType" operation="one"/></method>
+            </id>
+        </resource>
+
+        <!-- ========== Contact Mechanisms ========== -->
+        <resource name="contactMechs" description="Contact Mechanisms - Postal Address, Telecom Number, Email Address, etc; limited options here, most under parties and facilities">
+            <id name="contactMechId">
+                <method type="get"><entity name="contactMechs" masterName="default" operation="one"/></method>
+                <resource name="mutable"><method type="patch">
+                    <service name="mantle.party.ContactServices.update#ContactMechMutable"/></method></resource>
+                <resource name="postalAddress"><resource name="geoIdSet"><method type="get">
+                    <service name="mantle.party.ContactServices.get#PostalAddressGeoIdSet"/></method></resource></resource>
+            </id>
+
+            <resource name="postalAddresses"><method type="post">
+                <service name="mantle.party.ContactServices.create#PostalAddress"/></method></resource>
+            <resource name="telecomNumbers"><method type="post">
+                <service name="mantle.party.ContactServices.create#TelecomNumber"/></method></resource>
+            <resource name="emailAddresses"><method type="post">
+                <service name="mantle.party.ContactServices.create#EmailAddress"/></method></resource>
+            <resource name="others"><method type="post">
+                <service name="mantle.party.ContactServices.create#ContactMechOther"/></method></resource>
+
+            <resource name="purposes">
+                <method type="get"><entity name="mantle.party.contact.ContactMechPurpose" operation="list"/></method>
+                <id name="contactMechPurposeId">
+                    <method type="get"><entity name="mantle.party.contact.ContactMechPurpose" operation="one"/></method></id>
+            </resource>
+        </resource>
+
+        <!-- ========== Communication Events ========== -->
+        <resource name="communicationEvents" description="Communication Events - Message, Call, etc">
+            <method type="get"><entity name="communicationEvents" operation="list"/></method>
+            <method type="post"><service name="mantle.party.CommunicationServices.create#Message"/></method>
+            <id name="communicationEventId">
+                <method type="get"><entity name="communicationEvents" masterName="default" operation="one"/></method>
+                <method type="patch"><entity name="communicationEvents" operation="update"/></method>
+                <resource name="reply"><method type="post">
+                    <service name="mantle.party.CommunicationServices.reply#CommunicationEvent"/></method></resource>
+            </id>
+        </resource>
+
+        <!-- ========== Payment Methods ========== -->
+        <resource name="paymentMethods" description="Payment Methods - Bank Accounts, Credit Cards, etc">
+            <method type="get"><entity name="paymentMethods" operation="list"/></method>
+            <method type="post"><entity name="paymentMethods" operation="create"/></method>
+
+            <id name="paymentMethodId">
+                <method type="get"><entity name="paymentMethods" masterName="default" operation="one"/></method>
+                <method type="delete"><service name="mantle.account.PaymentMethodServices.delete#PaymentMethod"/></method>
+
+                <resource name="mutable"><method type="patch">
+                    <service name="mantle.account.PaymentMethodServices.update#PaymentMethodMutable"/></method></resource>
+                <resource name="expunge"><method type="delete">
+                    <service name="mantle.account.PaymentMethodServices.expunge#PaymentMethod"/></method></resource>
+
+                <resource name="creditCard"><method type="patch">
+                    <service name="mantle.account.PaymentMethodServices.update#CreditCard"/></method></resource>
+                <resource name="bankAccount"><method type="patch">
+                    <service name="mantle.account.PaymentMethodServices.update#BankAccount"/></method></resource>
+
+                <resource name="nacha"><method type="get">
+                    <service name="mantle.account.NachaServices.generate#NachaFile"/></method></resource>
+                <resource name="positivePay"><method type="get">
+                    <service name="mantle.account.PositivePayServices.generate#PositivePayFile"/></method></resource>
+                <resource name="ofx1"><method type="post">
+                    <service name="mantle.account.OfxServices.import#OfxVersion1"/></method></resource>
+
+                <resource name="trans">
+                    <method type="get"><entity name="mantle.account.method.PaymentMethodTrans" operation="list"/></method>
+                    <id name="fitId">
+                        <method type="get"><entity name="mantle.account.method.PaymentMethodTrans" operation="one"/></method>
+                        <resource name="reconcile"><method type="post">
+                            <service name="mantle.account.ReconciliationServices.reconcile#PaymentMethodTrans"/></method></resource>
+                    </id>
+                    <resource name="match"><method type="post">
+                        <service name="mantle.account.ReconciliationServices.match#PaymentMethodTransUnmatched"/></method></resource>
+                </resource>
+
+                <!-- TODO content services -->
+            </id>
+
+            <resource name="creditCards"><method type="post">
+                <service name="mantle.account.PaymentMethodServices.create#CreditCard"/></method></resource>
+            <resource name="bankAccounts"><method type="post">
+                <service name="mantle.account.PaymentMethodServices.create#BankAccount"/></method></resource>
+        </resource>
+    </resource>
+
+    <!-- ========== Facilities ========== -->
+    <resource name="facilities" description="Facilities - Warehouse, Dock, Line, Office, Land, etc">
+        <method type="get"><entity name="facilities" operation="list"/></method>
+        <method type="post"><service name="mantle.facility.FacilityServices.create#Facility"/></method>
+
+        <id name="facilityId">
+            <method type="get"><entity name="facilities" masterName="default" operation="one"/></method>
+            <method type="patch"><service name="mantle.facility.FacilityServices.update#Facility"/></method>
+
+            <resource name="locations">
+                <method type="get"><entity name="mantle.facility.FacilityLocation" operation="list"/></method>
+                <method type="post"><service name="mantle.facility.FacilityServices.create#FacilityLocation"/></method>
+
+                <id name="locationSeqId">
+                    <method type="get"><entity name="mantle.facility.FacilityLocation" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.facility.FacilityLocation" operation="update"/></method>
+                    <!-- maybe better not to go to this level of detail, in general for simple CrUD operations better to use Entity REST API:
+                    <resource name="products">
+                        <method type="get"><entity name="mantle.facility.ProductFacilityLocation" operation="list"/></method>
+                        <method type="post"><entity name="mantle.facility.ProductFacilityLocation" operation="create"/></method>
+                        <id name="productId">
+                            <method type="get"><entity name="mantle.facility.ProductFacilityLocation" operation="one"/></method>
+                            <method type="post"><entity name="mantle.facility.ProductFacilityLocation" operation="update"/></method>
+                            <method type="delete"><entity name="mantle.facility.ProductFacilityLocation" operation="delete"/></method>
+                        </id>
+                    </resource>
+                    -->
+                </id>
+            </resource>
+            <resource name="certifications">
+                <method type="get"><entity name="mantle.facility.FacilityCertification" operation="list"/></method>
+                <method type="post"><entity name="mantle.facility.FacilityCertification" operation="create"/></method>
+                <id name="facilityCertificationId">
+                    <!-- TODO handle documentFile type org.apache.commons.fileupload.FileItem; for the myriad *Content resources too -->
+                    <method type="patch"><service name="mantle.facility.FacilityServices.update#FacilityCertification"/></method>
+                </id>
+            </resource>
+            <resource name="contactMechs">
+                <method type="get"><entity name="mantle.facility.FacilityContactMechInfo" operation="list"/></method>
+
+                <id name="contactMechId">
+                    <method type="delete"><service name="mantle.facility.ContactServices.delete#FacilityContactMech"/></method>
+                    <resource name="postalAddress"><method type="patch">
+                        <service name="mantle.facility.ContactServices.update#FacilityPostalAddress"/></method></resource>
+                    <resource name="telecomNumber"><method type="patch">
+                        <service name="mantle.facility.ContactServices.update#FacilityTelecomNumber"/></method></resource>
+                    <resource name="other"><method type="patch">
+                        <service name="mantle.facility.ContactServices.update#FacilityContactOther"/></method></resource>
+                </id>
+
+                <resource name="info"><method type="get">
+                    <service name="mantle.facility.ContactServices.get#FacilityContactInfo"/></method></resource>
+
+                <resource name="postalAddresses"><method type="get">
+                    <entity name="mantle.facility.FacilityContactMechPostalAddress" operation="list"/></method></resource>
+                <resource name="telecomNumbers"><method type="get">
+                    <entity name="mantle.facility.FacilityContactMechTelecomNumber" operation="list"/></method></resource>
+                <resource name="other"><method type="patch">
+                    <service name="mantle.facility.ContactServices.update#FacilityContactOther"/></method></resource>
+            </resource>
+
+            <resource name="products"><id name="productId">
+                <resource name="physicalQuantity"><method type="post">
+                    <service name="mantle.product.AssetServices.record#PhysicalInventoryQuantity"/></method></resource>
+                <resource name="physicalChange"><method type="post">
+                    <service name="mantle.product.AssetServices.record#PhysicalInventoryChange"/></method></resource>
+            </id></resource>
+
+            <!-- TODO content services -->
+        </id>
+    </resource>
+
+    <!-- ========== Products ========== -->
+    <resource name="products" description="Products - Finished Goods, Materials, Supplies, Equipment, etc">
+        <!-- TODO use product search service -->
+
+        <id name="productId">
+            <method type="get"><entity name="products" masterName="default" operation="one"/></method>
+            <method type="patch"><entity name="products" operation="update"/></method>
+            <method type="delete"><service name="mantle.product.ProductServices.delete#Product"/></method>
+
+            <resource name="price"><method type="get">
+                <service name="mantle.product.PriceServices.get#ProductPrice"/></method></resource>
+            <resource name="features"><method type="get">
+                <service name="mantle.product.ProductServices.find#ProductFeatures"/></method></resource>
+            <resource name="featureGroups"><method type="get">
+                <service name="mantle.product.ProductServices.find#ProductFeatureGroups"/></method></resource>
+            <resource name="variants">
+                <method type="get"><service name="mantle.product.ProductServices.find#VariantProduct"/></method>
+                <method type="post"><service name="mantle.product.ProductServices.create#VariantProducts"/></method>
+                <method type="delete"><service name="mantle.product.ProductServices.delete#VariantProducts"/></method>
+            </resource>
+            <resource name="bom"><method type="get">
+                <service name="mantle.work.ManufacturingServices.get#ProductBomDetail"/></method></resource>
+
+            <resource name="clone"><method type="post">
+                <service name="mantle.product.ProductServices.clone#Product"/></method></resource>
+
+            <resource name="categories">
+                <method type="get"><entity name="mantle.product.category.ProductCategoryMember" operation="list"/></method>
+                <method type="post"><entity name="mantle.product.category.ProductCategoryMember" operation="create"/></method>
+                <id name="productCategoryId">
+                    <method type="get"><entity name="mantle.product.category.ProductCategoryMember" operation="list"/></method>
+                    <id name="fromDate">
+                        <method type="get"><entity name="mantle.product.category.ProductCategoryMember" operation="one"/></method>
+                        <method type="patch"><entity name="mantle.product.category.ProductCategoryMember" operation="update"/></method>
+                        <method type="delete"><entity name="mantle.product.category.ProductCategoryMember" operation="delete"/></method>
+                    </id>
+                </id>
+            </resource>
+            <resource name="dimensions">
+                <method type="get"><entity name="mantle.product.ProductDimension" operation="list"/></method>
+                <method type="post"><entity name="mantle.product.ProductDimension" operation="create"/></method>
+                <id name="dimensionTypeId">
+                    <method type="get"><entity name="mantle.product.ProductDimension" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.product.ProductDimension" operation="update"/></method>
+                    <method type="delete"><entity name="mantle.product.ProductDimension" operation="delete"/></method>
+                </id>
+            </resource>
+            <resource name="identifications">
+                <method type="get"><entity name="mantle.product.ProductIdentification" operation="list"/></method>
+                <method type="post"><entity name="mantle.product.ProductIdentification" operation="create"/></method>
+                <id name="productIdTypeEnumId">
+                    <method type="get"><entity name="mantle.product.ProductIdentification" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.product.ProductIdentification" operation="update"/></method>
+                    <method type="delete"><entity name="mantle.product.ProductIdentification" operation="delete"/></method>
+                </id>
+            </resource>
+            <resource name="prices">
+                <method type="get"><entity name="mantle.product.ProductPrice" operation="list"/></method>
+                <method type="post"><entity name="mantle.product.ProductPrice" operation="create"/></method>
+                <id name="productPriceId">
+                    <method type="get"><entity name="mantle.product.ProductPrice" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.product.ProductPrice" operation="update"/></method>
+                    <method type="delete"><entity name="mantle.product.ProductPrice" operation="delete"/></method>
+                </id>
+            </resource>
+            <resource name="subscriptionResources">
+                <method type="get"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="list"/></method>
+                <method type="post"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="create"/></method>
+                <id name="subscriptionResourceId">
+                    <method type="get"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="list"/></method>
+                    <id name="fromDate">
+                        <method type="get"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="one"/></method>
+                        <method type="patch"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="update"/></method>
+                        <method type="delete"><entity name="mantle.product.subscription.ProductSubscriptionResource" operation="delete"/></method>
+                    </id>
+                </id>
+            </resource>
+
+            <!-- TODO content services -->
+        </id>
+
+        <resource name="categories">
+            <method type="get"><entity name="categories" operation="list"/></method>
+            <id name="productCategoryId">
+                <method type="get"><entity name="categories" masterName="default" operation="one"/></method>
+
+                <resource name="features"><method type="get">
+                    <service name="mantle.product.ProductServices.find#ProductCategoryFeatures"/></method></resource>
+            </id>
+        </resource>
+        <resource name="features">
+            <method type="get"><entity name="features" operation="list"/></method>
+            <id name="productFeatureId">
+                <method type="get"><entity name="features" masterName="default" operation="one"/></method>
+            </id>
+            <resource name="byIactnOrAll"><method type="get">
+                <service name="mantle.product.ProductServices.get#FeatureByIactnOrAll"/></method></resource>
+            <resource name="groups">
+                <id name="productFeatureGroupId">
+                    <method type="get"><entity name="featureGroups" masterName="default" operation="one"/></method>
+                </id>
+            </resource>
+        </resource>
+        <resource name="subscriptions">
+            <method type="get"><entity name="subscriptions" operation="list"/></method>
+            <id name="subscriptionId">
+                <method type="get"><entity name="subscriptions" masterName="default" operation="one"/></method>
+            </id>
+            <resource name="resources">
+                <method type="get"><entity name="subscriptionResources" operation="list"/></method>
+                <id name="subscriptionResourceId">
+                    <method type="get"><entity name="subscriptionResources" masterName="default" operation="one"/></method>
+                    <resource name="fulfill"><method type="post">
+                        <service name="mantle.product.SubscriptionServices.fulfill#ProductSubscriptionResource"/></method></resource>
+                </id>
+            </resource>
+        </resource>
+        <resource name="stores">
+            <method type="get"><entity name="productStores" operation="list"/></method>
+            <method type="post"><entity name="productStores" masterName="default" operation="create"/></method>
+            <id name="productStoreId">
+                <method type="get"><entity name="productStores" masterName="default" operation="one"/></method>
+                <method type="put"><entity name="productStores" masterName="default" operation="update"/></method>
+                <resource name="shippingOptions"><method type="get">
+                    <service name="mantle.product.StoreServices.get#StoreShippingOptions"/></method></resource>
+            </id>
+        </resource>
+        <resource name="dimensionTypes">
+            <method type="get"><entity name="mantle.product.ProductDimensionType" operation="list"/></method>
+            <id name="dimensionTypeId">
+                <method type="get"><entity name="mantle.product.ProductDimensionType" operation="one"/></method>
+            </id>
+        </resource>
+    </resource>
+
+    <!-- ========== Assets ========== -->
+    <resource name="assets" description="Assets - Inventory, Supplies, Equipment, etc">
+        <method type="get"><entity name="assets" operation="list"/></method>
+
+        <id name="assetId">
+            <method type="get"><entity name="assets" masterName="default" operation="one"/></method>
+
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.product.AssetServices.get#AssetDisplayInfo"/></method></resource>
+            <resource name="receipt"><method type="patch">
+                <service name="mantle.product.AssetServices.update#AssetAndReceipt"/></method></resource>
+            <resource name="replaceParty"><method type="post">
+                <service name="mantle.product.AssetServices.replace#AssetPartyAssignment"/></method></resource>
+
+            <resource name="reservations">
+                <resource name="displace"><method type="post">
+                    <service name="mantle.product.AssetServices.displace#AssetReservations"/></method></resource>
+            </resource>
+            <resource name="maintenance">
+                <method type="get"><entity name="mantle.product.maintenance.AssetMaintenance" operation="list"/></method>
+                <method type="post"><service name="mantle.product.EquipmentServices.create#AssetMaintenance"/></method>
+                <id name="assetMaintenanceId">
+                    <method type="get"><entity name="mantle.product.maintenance.AssetMaintenance" operation="one"/></method>
+                    <!-- TODO content services -->
+                </id>
+                <resource name="product"><id name="productMaintenanceId"><resource name="needed"><method type="get">
+                    <service name="mantle.product.EquipmentServices.get#AssetMaintenanceNeeded"/></method></resource></id></resource>
+            </resource>
+        </id>
+
+        <resource name="equipment"><method type="post">
+            <service name="mantle.product.EquipmentServices.create#Equipment"/></method></resource>
+        <resource name="receive"><method type="post">
+            <service name="mantle.product.AssetServices.receive#Asset"/></method></resource>
+
+        <resource name="reservations">
+            <method type="get"><entity name="mantle.product.issuance.AssetReservation" operation="list"/></method>
+            <id name="assetReservationId">
+                <method type="get"><entity name="mantle.product.issuance.AssetReservation" operation="one"/></method>
+                <resource name="reduce"><method type="post">
+                    <service name="mantle.product.AssetServices.reduce#AssetReservation"/></method></resource>
+                <resource name="move"><method type="post">
+                    <service name="mantle.product.AssetServices.move#AssetReservation"/></method></resource>
+            </id>
+        </resource>
+    </resource>
+
+    <!-- ========== Work Efforts ========== -->
+    <resource name="workEfforts" description="Work Efforts - Projects, Tasks, Events, Production Runs, Shipment Loads, etc">
+        <method type="get"><entity name="workEfforts" operation="list"/></method>
+
+        <id name="workEffortId">
+            <method type="get"><entity name="workEfforts" masterName="default" operation="one"/></method>
+            <method type="patch"><entity name="workEfforts" operation="update"/></method>
+
+            <resource name="project">
+                <method type="patch"><service name="mantle.work.ProjectServices.update#Project"/></method>
+                <resource name="stats"><method type="get">
+                    <service name="mantle.work.ProjectServices.get#ProjectStats"/></method></resource>
+                <resource name="parties"><method type="get">
+                    <service name="mantle.work.ProjectServices.get#ProjectParties"/></method></resource>
+                <resource name="teams"><method type="get">
+                    <service name="mantle.work.ProjectServices.get#ProjectTeams"/></method></resource>
+                <resource name="milestones"><method type="get">
+                    <service name="mantle.work.ProjectServices.get#ProjectMilestones"/></method></resource>
+                <resource name="tasks"><method type="get">
+                    <service name="mantle.work.ProjectServices.get#ProjectTasks"/></method></resource>
+            </resource>
+            <resource name="task">
+                <method type="patch"><service name="mantle.work.TaskServices.update#Task"/></method>
+                <resource name="milestone"><method type="patch">
+                    <service name="mantle.work.TaskServices.set#TaskMilestone"/></method></resource>
+            </resource>
+            <resource name="timeEntries">
+                <method type="post"><service name="mantle.work.TaskServices.add#TaskTime"/></method>
+                <method type="put"><service name="mantle.work.TimeServices.store#WorkEffortPartyTime"/></method>
+            </resource>
+            <resource name="milestone"><method type="patch">
+                <service name="mantle.work.ProjectServices.update#Milestone"/></method></resource>
+            <resource name="run">
+                <resource name="displayInfo"><method type="get">
+                    <service name="mantle.work.ManufacturingServices.get#ProductionRunDisplayInfo"/></method></resource>
+                <resource name="produceConsume"><method type="get">
+                    <service name="mantle.work.ManufacturingServices.get#ProductionRunProduceConsumeDetail"/></method></resource>
+                <resource name="pickInfo"><method type="get">
+                    <service name="mantle.work.ManufacturingServices.get#ProductionRunPickInfo"/></method></resource>
+            </resource>
+
+            <resource name="comments">
+                <method type="post"><service name="mantle.work.TaskServices.add#TaskComment"/></method>
+            </resource>
+
+            <resource name="assets">
+                <id name="assetId">
+                    <resource name="consume"><method type="post">
+                        <service name="mantle.product.AssetServices.issue#AssetToWorkEffort"/></method></resource>
+                </id>
+            </resource>
+            <!-- TODO content services -->
+            <resource name="parties">
+                <resource name="replace"><method type="post">
+                    <service name="mantle.work.WorkEffortServices.replace#WorkEffortParty"/></method></resource>
+            </resource>
+            <resource name="products">
+                <id name="productId">
+                    <method type="put"><service name="mantle.work.WorkEffortServices.add#WorkEffortProduct"/></method>
+
+                    <resource name="consume"><method type="post">
+                        <service name="mantle.product.AssetServices.issue#AnyAssetToWorkEffort"/></method></resource>
+                    <resource name="issuances"><method type="get">
+                        <entity name="mantle.product.issuance.AssetIssuance" operation="list"/></method></resource>
+
+                    <resource name="produce"><method type="post">
+                        <service name="mantle.product.AssetServices.receive#Asset"/></method></resource>
+                    <resource name="receipts"><method type="get">
+                        <entity name="mantle.product.receipt.AssetReceipt" operation="list"/></method></resource>
+                </id>
+            </resource>
+
+            <resource name="orderItems">
+                <method type="get"><entity name="mantle.order.OrderItemWorkEffort" operation="list"/></method>
+            </resource>
+
+            <resource name="startEnd"><method type="get">
+                <service name="mantle.work.WorkEffortServices.get#WorkEffortStartEnd"/></method></resource>
+            <resource name="clone"><method type="post">
+                <service name="mantle.work.WorkEffortServices.clone#WorkEffort"/></method></resource>
+        </id>
+
+        <resource name="events"><method type="post">
+            <service name="mantle.work.EventServices.create#Event"/></method></resource>
+        <resource name="projects"><method type="post">
+            <service name="mantle.work.ProjectServices.create#Project"/></method></resource>
+        <resource name="tasks">
+            <method type="post"><service name="mantle.work.TaskServices.create#Task"/></method>
+            <resource name="simple"><method type="post">
+                <service name="mantle.work.TaskServices.create#SimpleTask"/></method></resource>
+        </resource>
+        <resource name="milestones"><method type="post">
+            <service name="mantle.work.ProjectServices.create#Milestone"/></method></resource>
+        <resource name="runs"><method type="post">
+            <service name="mantle.work.ManufacturingServices.create#ProductionRun"/></method></resource>
+        <resource name="loads"><method type="post">
+            <service name="mantle.work.ShipmentWorkServices.create#ShipmentLoadShip"/></method></resource>
+
+        <resource name="calendar">
+            <resource name="events"><method type="get">
+                <service name="mantle.work.EventServices.get#FullCalendarData"/></method></resource>
+            <resource name="tasks"><method type="get">
+                <service name="mantle.work.TaskServices.get#FullCalendarData"/></method></resource>
+        </resource>
+
+        <resource name="timeEntries">
+            <method type="get"><entity name="timeEntries" operation="list"/></method>
+            <method type="put"><service name="mantle.work.TimeServices.store#TimeEntry"/></method>
+            <id name="timeEntryId">
+                <method type="get"><entity name="timeEntries" operation="one"/></method>
+
+                <resource name="amount"><method type="get">
+                    <service name="mantle.work.TimeServices.get#TimeEntryAmount"/></method></resource>
+                <resource name="rate"><method type="get">
+                    <service name="mantle.work.TimeServices.get#TimeEntryRate"/></method></resource>
+            </id>
+            <resource name="clockIn"><method type="post">
+                <service name="mantle.work.TimeServices.create#TimeEntryClockIn"/></method></resource>
+            <resource name="workEfforts"><method type="put">
+                <service name="mantle.work.TimeServices.store#TimeEntryWorkEffort"/></method></resource>
+            <resource name="summaryFile"><method type="post">
+                <service name="mantle.work.TimeServices.store#TimeSummaryFile"/></method></resource>
+            <resource name="summaryFile"><method type="post">
+                <service name="mantle.work.TimeServices.import#TimeSummaryFile"/></method></resource>
+            <resource name="detailFile"><method type="post">
+                <service name="mantle.work.TimeServices.import#TimeDetailFile"/></method></resource>
+        </resource>
+    </resource>
+
+    <!-- ========== Orders ========== -->
+    <resource name="orders" description="Orders - Purchase and Sales">
+        <method type="get"><entity name="mantle.order.OrderHeaderAndPart" operation="list"/></method>
+        <method type="post"><service name="mantle.order.OrderServices.create#Order"/></method>
+        <method type="put"><service name="mantle.order.OrderBulkServices.store#Order"/></method>
+
+        <id name="orderId">
+            <method type="get"><entity name="orders" masterName="default" operation="one"/></method>
+
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.order.OrderInfoServices.get#OrderDisplayInfo"/></method></resource>
+
+            <resource name="parts">
+                <method type="post"><service name="mantle.order.OrderServices.create#OrderPart"/></method>
+
+                <id name="orderPartSeqId">
+                    <method type="patch"><service name="mantle.order.OrderServices.update#OrderPart"/></method>
+
+                    <resource name="shipping"><resource name="calculate"><method type="post">
+                        <service name="mantle.shipment.CarrierServices.calculate#OrderPartShipping"/></method></resource></resource>
+                    <resource name="payments">
+                        <method type="get"><entity name="payments" operation="list"/></method>
+                        <method type="post"><service name="mantle.order.OrderServices.add#OrderPartPayment"/></method>
+                    </resource>
+                    <resource name="invoices"><method type="post">
+                        <service name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice"/></method></resource>
+                    <resource name="shipments">
+                        <method type="post"><service name="mantle.shipment.ShipmentServices.ship#OrderPart"/></method>
+                        <id name="shipmentId"><method type="post">
+                            <service name="mantle.shipment.ShipmentServices.add#OrderPartToShipment"/></method></id>
+                    </resource>
+                    <resource name="subscriptions"><resource name="fulfill"><method type="post">
+                        <service name="mantle.product.SubscriptionServices.fulfill#OrderPartSubscriptions"/></method></resource></resource>
+
+                    <resource name="return"><method type="post">
+                        <service name="mantle.order.ReturnServices.create#ReturnFromOrder"/></method></resource>
+                </id>
+            </resource>
+
+            <resource name="items">
+                <method type="post"><service name="mantle.order.OrderServices.create#OrderItem"/></method>
+                <id name="orderItemSeqId">
+                    <method type="patch"><service name="mantle.order.OrderServices.update#OrderItem"/></method>
+                    <method type="delete"><service name="mantle.order.OrderServices.delete#OrderItem"/></method>
+
+                    <resource name="reservations">
+                        <method type="get"><entity name="mantle.product.issuance.AssetReservation" operation="list"/></method>
+                        <method type="post"><service name="mantle.product.AssetServices.reserve#AssetForOrderItem"/></method>
+                        <method type="delete"><service name="mantle.product.AssetServices.remove#OrderItemReservations"/></method>
+                    </resource>
+
+                    <resource name="billings"><method type="get">
+                        <entity name="mantle.order.OrderItemBilling" operation="list"/></method></resource>
+                    <resource name="shipments"><method type="get">
+                        <entity name="mantle.shipment.ShipmentItemSource" operation="list"/></method></resource>
+
+                    <resource name="issuances"><method type="get">
+                        <entity name="mantle.product.issuance.AssetIssuance" operation="list"/></method></resource>
+                    <resource name="receipts"><method type="get">
+                        <entity name="mantle.product.receipt.AssetReceipt" operation="list"/></method></resource>
+
+                    <resource name="workEfforts">
+                        <method type="get"><entity name="mantle.order.OrderItemWorkEffort" operation="list"/></method>
+                        <id name="workEffortId">
+                            <method type="post"><entity name="mantle.order.OrderItemWorkEffort" operation="create"/></method>
+                            <method type="delete"><entity name="mantle.order.OrderItemWorkEffort" operation="delete"/></method>
+                        </id>
+                    </resource>
+
+                    <resource name="return"><method type="post">
+                        <service name="mantle.order.ReturnServices.add#OrderItemToReturn"/></method></resource>
+                </id>
+            </resource>
+            <resource name="productItems"><id name="orderItemSeqId"><method type="patch">
+                <service name="mantle.order.OrderServices.update#OrderProductQuantity"/></method></id></resource>
+
+            <!-- TODO content services -->
+
+            <resource name="shippingBilling"><method type="put">
+                <service name="mantle.order.OrderServices.set#OrderBillingShippingInfo"/></method></resource>
+
+            <resource name="shipping"><resource name="calculate"><method type="post">
+                <service name="mantle.shipment.CarrierServices.calculate#OrderShipping"/></method></resource></resource>
+            <resource name="salesTax"><resource name="calculate"><method type="post">
+                <service name="mantle.other.TaxServices.calculate#OrderSalesTax"/></method></resource></resource>
+
+            <resource name="payments"><resource name="authorize"><method type="post">
+                <service name="mantle.account.PaymentServices.authorize#OrderPayments"/></method></resource></resource>
+
+            <resource name="assets"><resource name="reserve"><method type="post">
+                <service name="mantle.product.AssetServices.reserve#AssetsForOrder"/></method></resource></resource>
+            <resource name="subscriptions"><resource name="fulfill"><method type="post">
+                <service name="mantle.product.SubscriptionServices.fulfill#OrderSubscriptions"/></method></resource></resource>
+
+            <resource name="propose"><method type="post">
+                <service name="mantle.order.OrderServices.propose#Order"/></method></resource>
+            <resource name="place"><method type="post">
+                <service name="mantle.order.OrderServices.place#Order"/></method></resource>
+            <resource name="approve"><method type="post">
+                <service name="mantle.order.OrderServices.approve#Order"/></method></resource>
+            <resource name="cancel"><method type="post">
+                <service name="mantle.order.OrderServices.cancel#Order"/></method></resource>
+
+            <resource name="billings"><method type="get">
+                <entity name="mantle.order.OrderItemBilling" operation="list"/></method></resource>
+
+            <resource name="clone"><method type="post">
+                <service name="mantle.order.OrderServices.clone#Order"/></method></resource>
+        </id>
+        <resource name="productQuantity"><method type="put">
+            <service name="mantle.order.OrderServices.add#OrderProductQuantity"/></method></resource>
+    </resource>
+
+    <!-- ========== Shipments ========== -->
+    <resource name="shipments" description="Shipments - Incoming and Outgoing">
+        <method type="get"><entity name="mantle.shipment.ShipmentFindView" operation="list"/></method>
+        <method type="post"><service name="mantle.shipment.ShipmentServices.create#Shipment"/></method>
+
+        <id name="shipmentId">
+            <method type="get"><entity name="shipments" masterName="default" operation="one"/></method>
+            <method type="patch"><service name="mantle.shipment.ShipmentServices.update#ShipmentAndRouteSegment"/></method>
+
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.shipment.ShipmentServices.get#ShipmentDisplayInfo"/></method></resource>
+            <resource name="contactInfo"><method type="get">
+                <service name="mantle.shipment.ShipmentServices.get#ShipmentContactInfo"/></method></resource>
+            <resource name="pickPackInfo"><method type="get">
+                <service name="mantle.shipment.ShipmentServices.get#ShipmentPickPackInfo"/></method></resource>
+
+            <resource name="items">
+                <method type="get"><entity name="mantle.shipment.ShipmentItem" operation="list"/></method>
+                <method type="post"><service name="mantle.shipment.ShipmentServices.create#ShipmentItem"/></method>
+
+                <id name="productId">
+                    <method type="patch"><service name="mantle.shipment.ShipmentServices.update#ShipmentItem"/></method>
+
+                    <resource name="sources"><method type="get">
+                        <entity name="mantle.shipment.ShipmentItemSource" operation="list"/></method></resource>
+                    <resource name="contents">
+                        <method type="get"><entity name="mantle.shipment.ShipmentPackageContent" operation="list"/></method>
+                        <id name="shipmentPackageSeqId"><method type="get">
+                            <entity name="mantle.shipment.ShipmentPackageContent" operation="one"/></method></id>
+                    </resource>
+
+                    <resource name="pack"><method type="post">
+                        <service name="mantle.shipment.ShipmentServices.pack#ShipmentProduct"/></method></resource>
+                    <resource name="issuances"><method type="get">
+                        <entity name="mantle.product.issuance.AssetIssuance" operation="list"/></method></resource>
+
+                    <resource name="receive"><method type="post">
+                        <service name="mantle.shipment.ShipmentServices.receive#ShipmentProduct"/></method></resource>
+                    <resource name="receipts"><method type="get">
+                        <entity name="mantle.product.receipt.AssetReceipt" operation="list"/></method></resource>
+                </id>
+            </resource>
+            <resource name="itemSources"><method type="get">
+                <entity name="mantle.shipment.ShipmentItemSource" operation="list"/></method></resource>
+
+            <resource name="packages">
+                <method type="get"><entity name="mantle.shipment.ShipmentPackage" operation="list"/></method>
+                <method type="post"><service name="mantle.shipment.ShipmentServices.create#ShipmentPackage"/></method>
+
+                <id name="shipmentPackageSeqId">
+                    <method type="get"><entity name="mantle.shipment.ShipmentPackage" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.shipment.ShipmentPackage" operation="update"/></method>
+
+                    <resource name="contents">
+                        <method type="get"><entity name="mantle.shipment.ShipmentPackageContent" operation="list"/></method>
+                        <method type="post"><entity name="mantle.shipment.ShipmentPackageContent" operation="create"/></method>
+                        <id name="productId">
+                            <method type="get"><entity name="mantle.shipment.ShipmentPackageContent" operation="one"/></method>
+                            <method type="patch"><entity name="mantle.shipment.ShipmentPackageContent" operation="update"/></method>
+                        </id>
+                    </resource>
+                </id>
+            </resource>
+            <resource name="routeSegments">
+                <method type="get"><entity name="mantle.shipment.ShipmentRouteSegment" operation="list"/></method>
+                <method type="post"><entity name="mantle.shipment.ShipmentRouteSegment" operation="create"/></method>
+
+                <id name="shipmentRouteSegmentSeqId">
+                    <method type="get"><entity name="mantle.shipment.ShipmentRouteSegment" operation="one"/></method>
+                    <method type="patch"><entity name="mantle.shipment.ShipmentRouteSegment" operation="update"/></method>
+                </id>
+            </resource>
+
+            <!-- TODO content services -->
+
+            <resource name="orders"><method type="post">
+                <service name="mantle.shipment.ShipmentServices.add#OrderPartToShipment"/></method></resource>
+            <resource name="salesInvoices"><method type="post">
+                <service name="mantle.account.InvoiceServices.create#SalesShipmentInvoices"/></method></resource>
+            <resource name="purchaseInvoices"><method type="post">
+                <service name="mantle.account.InvoiceServices.create#PurchaseShipmentInvoices"/></method></resource>
+
+            <resource name="issue"><method type="post">
+                <service name="mantle.product.AssetServices.issue#Asset"/></method></resource>
+
+            <resource name="pack"><method type="post">
+                <service name="mantle.shipment.ShipmentServices.pack#Shipment"/></method></resource>
+            <resource name="ship"><method type="post">
+                <service name="mantle.shipment.ShipmentServices.ship#Shipment"/></method></resource>
+            <resource name="receive"><method type="post">
+                <service name="mantle.shipment.ShipmentServices.receive#EntireShipment"/></method></resource>
+
+            <resource name="returnAndResell"><method type="post">
+                <service name="mantle.order.ReturnServices.returnAndResell#Shipment"/></method></resource>
+            <resource name="return"><method type="post">
+                <service name="mantle.order.ReturnServices.return#Shipment"/></method></resource>
+            <resource name="resell"><method type="post">
+                <service name="mantle.order.ReturnServices.resell#Shipment"/></method></resource>
+        </id>
+
+        <resource name="itemSources">
+            <id name="shipmentItemSourceId">
+                <method type="get"><entity name="mantle.shipment.ShipmentItemSource" operation="one"/></method>
+                <resource name="pack"><method type="post">
+                    <service name="mantle.shipment.ShipmentServices.pack#ShipmentItemSource"/></method></resource>
+            </id>
+        </resource>
+    </resource>
+
+    <!-- ========== Returns ========== -->
+    <resource name="returns" description="Returns - Customer and Vendor">
+        <method type="get"><entity name="returns" operation="list"/></method>
+        <method type="post"><service name="mantle.order.ReturnServices.create#Return"/></method>
+
+        <id name="returnId">
+            <method type="get"><entity name="returns" masterName="default" operation="one"/></method>
+
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.order.ReturnServices.get#ReturnDisplayInfo"/></method></resource>
+            <resource name="returnable"><method type="get">
+                <service name="mantle.order.ReturnServices.find#ReturnableOrderItems"/></method></resource>
+            <resource name="items">
+                <method type="get"><entity name="returnItems" operation="list"/></method>
+                <method type="post"><entity name="returnItems" operation="create"/></method>
+
+                <id name="returnItemSeqId">
+                    <method type="get"><entity name="returnItems" operation="one"/></method>
+
+                    <resource name="shipments"><method type="get">
+                        <entity name="mantle.shipment.ShipmentItemSource" operation="list"/></method></resource>
+                    <resource name="issuances"><method type="get">
+                        <entity name="mantle.product.issuance.AssetIssuance" operation="list"/></method></resource>
+                    <resource name="receipts"><method type="get">
+                        <entity name="mantle.product.receipt.AssetReceipt" operation="list"/></method></resource>
+
+                    <resource name="receive"><method type="post">
+                        <service name="mantle.order.ReturnServices.receive#ReturnItem"/></method></resource>
+                    <resource name="response"><method type="post">
+                        <service name="mantle.order.ReturnServices.process#ReturnItemResponses"/></method></resource>
+                    <resource name="cancel"><method type="patch">
+                        <service name="mantle.order.ReturnServices.cancel#ReturnItem"/></method></resource>
+                </id>
+
+                <resource name="orderItem"><method type="post">
+                    <service name="mantle.order.ReturnServices.add#OrderItemToReturn"/></method></resource>
+            </resource>
+
+            <resource name="request"><method type="post">
+                <service name="mantle.order.ReturnServices.request#Return"/></method></resource>
+            <resource name="approve"><method type="post">
+                <service name="mantle.order.ReturnServices.approve#Return"/></method></resource>
+            <resource name="cancel"><method type="post">
+                <service name="mantle.order.ReturnServices.cancel#Return"/></method></resource>
+
+            <resource name="shipments">
+                <method type="get"><entity name="mantle.shipment.ShipmentItemSource" operation="list"/></method>
+                <method type="post"><service name="mantle.order.ReturnServices.create#ReturnShipment"/></method>
+                <id name="shipmentId"><method type="post">
+                    <service name="mantle.order.ReturnServices.add#ReturnToShipment"/></method></id>
+            </resource>
+
+            <resource name="response"><method type="post">
+                <service name="mantle.order.ReturnServices.process#ReturnItemResponses"/></method></resource>
+        </id>
+    </resource>
+
+    <!-- ========== Invoices ========== -->
+    <resource name="invoices" description="Invoices - Payable and Receivable">
+        <method type="get"><entity name="invoices" operation="list"/></method>
+        <method type="post"><service name="mantle.account.InvoiceServices.create#Invoice"/></method>
+
+        <id name="invoiceId">
+            <method type="get"><entity name="invoices" masterName="default" operation="one"/></method>
+            <method type="patch"><service name="mantle.account.InvoiceServices.update#Invoice"/></method>
+
+            <resource name="closed"><method type="patch">
+                <service name="mantle.account.InvoiceServices.update#InvoiceClosed"/></method></resource>
+
+            <resource name="totals"><method type="get">
+                <service name="mantle.account.InvoiceServices.get#InvoiceTotal"/></method></resource>
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.account.InvoiceServices.get#InvoiceDisplayInfo"/></method></resource>
+            <resource name="printInfo"><method type="get">
+                <service name="mantle.account.InvoiceServices.get#InvoicePrintInfo"/></method></resource>
+
+            <resource name="items">
+                <method type="post"><service name="mantle.account.InvoiceServices.create#InvoiceItem"/></method>
+                <id name="invoiceItemSeqId">
+                    <method type="patch"><service name="mantle.account.InvoiceServices.update#InvoiceItem"/></method>
+                    <method type="delete"><service name="mantle.account.InvoiceServices.delete#InvoiceItem"/></method>
+                </id>
+            </resource>
+
+            <resource name="payments">
+                <method type="post"><service name="mantle.account.PaymentServices.create#InvoicePayment"/></method>
+
+                <id name="paymentId">
+                    <resource name="apply"><method type="post">
+                        <service name="mantle.account.PaymentServices.apply#InvoicePayment"/></method></resource>
+                    <resource name="promisedSend"><method type="post">
+                        <service name="mantle.account.PaymentServices.send#PromisedPayment"/></method></resource>
+                </id>
+
+                <!-- TODO: a way to get PaymentApplication by toInvoiceId, either included here as a separate end point -->
+                <resource name="applications"><method type="get">
+                    <entity name="paymentApplications" operation="list"/></method></resource>
+            </resource>
+            <resource name="toInvoices"><id name="toInvoiceId">
+                <resource name="apply"><method type="post">
+                    <service name="mantle.account.PaymentServices.apply#InvoiceToInvoice"/></method></resource>
+            </id></resource>
+
+            <resource name="orders"><id name="orderId"><resource name="parts"><id name="orderPartSeqId">
+                <resource name="applyPayments"><method type="post">
+                    <service name="mantle.account.PaymentServices.apply#OrderPaymentsToInvoice"/></method></resource>
+            </id></resource></id></resource>
+
+            <!-- TODO content services -->
+
+            <resource name="adjust"><method type="post">
+                <service name="mantle.account.InvoiceServices.adjust#Invoice"/></method></resource>
+            <resource name="cancel"><method type="post">
+                <service name="mantle.account.InvoiceServices.cancel#Invoice"/></method></resource>
+        </id>
+    </resource>
+
+    <!-- ========== Payments ========== -->
+    <resource name="payments" description="Payments - Incoming and Outgoing">
+        <method type="get"><entity name="payments" operation="list"/></method>
+        <method type="post"><service name="mantle.account.PaymentServices.create#Payment"/></method>
+
+        <id name="paymentId">
+            <method type="get"><entity name="payments" masterName="default" operation="one"/></method>
+            <method type="patch"><service name="mantle.account.PaymentServices.update#Payment"/></method>
+
+            <resource name="totals"><method type="get">
+                <service name="mantle.account.PaymentServices.get#PaymentTotals"/></method></resource>
+            <resource name="displayInfo"><method type="get">
+                <service name="mantle.account.PaymentServices.get#PaymentDisplayInfo"/></method></resource>
+
+            <resource name="invoices"><id name="invoiceId">
+                <resource name="apply"><method type="post">
+                    <service name="mantle.account.PaymentServices.apply#InvoicePayment"/></method></resource>
+            </id></resource>
+            <resource name="toPayments"><id name="toPaymentId">
+                <resource name="apply"><method type="post">
+                    <service name="mantle.account.PaymentServices.apply#PaymentToPayment"/></method></resource>
+            </id></resource>
+            <!-- TODO: a way to get PaymentApplication by toPaymentId, either included here as a separate end point -->
+            <resource name="applications"><method type="get">
+                <entity name="paymentApplications" operation="list"/></method></resource>
+
+            <resource name="createRefund"><method type="post">
+                <service name="mantle.account.PaymentServices.create#RefundPayment"/></method></resource>
+
+            <!-- TODO content services -->
+
+            <resource name="gateways">
+                <resource name="authorize"><method type="post">
+                    <service name="mantle.account.PaymentServices.authorize#SinglePayment"/></method></resource>
+                <resource name="store"><id name="productStoreId">
+                    <resource name="authorize"><method type="post">
+                        <service name="mantle.account.PaymentServices.authorize#StorePayment"/></method></resource>
+                </id></resource>
+                <resource name="capture"><method type="post">
+                    <service name="mantle.account.PaymentServices.capture#SinglePayment"/></method></resource>
+                <resource name="release"><method type="post">
+                    <service name="mantle.account.PaymentServices.release#SinglePayment"/></method></resource>
+                <resource name="refund"><method type="post">
+                    <service name="mantle.account.PaymentServices.refund#SinglePayment"/></method></resource>
+            </resource>
+
+            <resource name="checkNumberAssign"><method type="post">
+                <service name="mantle.account.PaymentServices.assign#BankAccountCheckNumber"/></method></resource>
+            <resource name="void"><method type="post">
+                <service name="mantle.account.PaymentServices.void#Payment"/></method></resource>
+        </id>
+
+        <resource name="checkInfo"><method type="get">
+            <service name="mantle.account.PaymentServices.get#PaymentCheckInfo"/></method></resource>
+        <resource name="applications"><id name="paymentApplicationId">
+            <method type="get"><entity name="paymentApplications" operation="one"/></method>
+            <resource name="unapply"><method type="post">
+                <service name="mantle.account.PaymentServices.unapply#PaymentApplication"/></method></resource>
+        </id></resource>
+    </resource>
+
+    <!-- ========== Financial Accounts ========== -->
+    <resource name="financialAccounts" description="Financial Accounts - Customer and Supplier Credit, Gift Card/Certificate, General Deposit or Loan, etc">
+        <method type="get"><entity name="financialAccounts" operation="list"/></method>
+        <method type="post"><service name="mantle.account.FinancialAccountServices.create#FinancialAccount"/></method>
+        <id name="finAccountId">
+            <method type="get"><entity name="financialAccounts" masterName="default" operation="one"/></method>
+            <method type="patch"><service name="mantle.account.FinancialAccountServices.update#FinancialAccount"/></method>
+
+            <resource name="auths"><method type="get">
+                <entity name="mantle.account.financial.FinancialAccountAuth" operation="list"/></method></resource>
+            <resource name="trans"><method type="get">
+                <entity name="mantle.account.financial.FinancialAccountTrans" operation="list"/></method></resource>
+
+            <resource name="adjust"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.adjust#FinancialAccount"/></method></resource>
+            <resource name="deposit"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.deposit#FinancialAccount"/></method></resource>
+            <resource name="withdraw"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.withdraw#FinancialAccount"/></method></resource>
+            <resource name="disburse"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.disburse#FinancialAccount"/></method></resource>
+            <resource name="authorize"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.authorize#FinancialAccount"/></method></resource>
+
+            <resource name="statement"><method type="get">
+                <service name="mantle.account.FinancialAccountServices.get#StatementPrintInfo"/></method></resource>
+            <resource name="totals"><method type="get">
+                <service name="mantle.account.FinancialAccountServices.calculate#FinancialAccountTotals"/></method></resource>
+        </id>
+        <resource name="getOrCreate"><method type="post">
+            <service name="mantle.account.FinancialAccountServices.getOrCreate#FinancialAccount"/></method></resource>
+        <resource name="auths"><id name="finAccountAuthId">
+            <method type="get"><entity name="mantle.account.financial.FinancialAccountAuth" operation="one"/></method>
+            <resource name="expire"><method type="post">
+                <service name="mantle.account.FinancialAccountServices.expire#FinancialAccountAuth"/></method></resource>
+        </id></resource>
+        <resource name="trans"><id name="finAccountTransId"><method type="get">
+            <entity name="mantle.account.financial.FinancialAccountTrans" operation="one"/></method></id></resource>
+        <resource name="transfer"><method type="post">
+            <service name="mantle.account.FinancialAccountServices.transfer#FinancialAccount"/></method></resource>
+    </resource>
+
+    <!-- ========== General Ledger ========== -->
+    <resource name="gl" description="General Ledger - Transactions, Reports, etc">
+        <resource name="trans">
+            <method type="get"><entity name="acctgTrans" operation="list"/></method>
+            <method type="post"><service name="mantle.ledger.LedgerServices.create#AcctgTrans"/></method>
+            <id name="acctgTransId">
+                <method type="get"><entity name="acctgTrans" masterName="default" operation="one"/></method>
+                <method type="patch"><service name="mantle.ledger.LedgerServices.update#AcctgTrans"/></method>
+                <method type="delete"><service name="mantle.ledger.LedgerServices.delete#AcctgTrans"/></method>
+
+                <resource name="entry">
+                    <method type="get"><entity name="mantle.ledger.transaction.AcctgTransEntry" operation="list"/></method>
+                    <method type="post"><service name="mantle.ledger.LedgerServices.create#AcctgTransEntry"/></method>
+                    <id name="acctgTransEntrySeqId">
+                        <method type="patch"><service name="mantle.ledger.LedgerServices.update#AcctgTransEntry"/></method>
+                        <method type="delete"><service name="mantle.ledger.LedgerServices.delete#AcctgTransEntry"/></method>
+                        <resource name="move"><method type="post">
+                            <service name="mantle.ledger.LedgerServices.move#AcctgTransEntry"/></method></resource>
+                    </id>
+                </resource>
+
+                <resource name="trialBalance"><method type="get">
+                    <service name="mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance"/></method></resource>
+                <resource name="post"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.post#AcctgTrans"/></method></resource>
+                <resource name="reverse"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.post#ReverseAcctgTrans"/></method></resource>
+            </id>
+        </resource>
+        <resource name="organizations"><id name="organizationPartyId">
+            <resource name="init"><method type="post">
+                <service name="mantle.ledger.LedgerServices.init#PartyAccountingConfiguration"/></method></resource>
+            <resource name="periods">
+                <resource name="checkNext"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.check#NextFiscalTimePeriods"/></method></resource>
+            </resource>
+            <resource name="balanceSheet"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#BalanceSheet"/></method></resource>
+            <resource name="incomeStatement"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#IncomeStatement"/></method></resource>
+            <resource name="cashFlowStatement"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#CashFlowStatement"/></method></resource>
+            <resource name="retainedEarningsStatement"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#RetainedEarningsStatement"/></method></resource>
+            <resource name="financialRatios"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#FinancialRatios"/></method></resource>
+            <resource name="postedAmountSummary"><method type="post">
+                <service name="mantle.ledger.LedgerReportServices.run#PostedAmountSummary"/></method></resource>
+        </id></resource>
+        <resource name="periods">
+            <id name="timePeriodId">
+                <resource name="recalculate"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgTimePeriodAmounts"/></method></resource>
+                <resource name="close"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.close#FinancialTimePeriod"/></method></resource>
+                <resource name="reopen"><method type="post">
+                    <service name="mantle.ledger.LedgerServices.reopen#FinancialTimePeriod"/></method></resource>
+            </id>
+        </resource>
+    </resource>
+</resource>

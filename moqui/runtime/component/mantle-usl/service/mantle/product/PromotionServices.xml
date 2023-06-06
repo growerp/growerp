@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="apply" noun="Promotion" type="interface">
+        <description>
+            Implement this interface (mantle.product.PromotionServices.apply#Promotion) for services that apply a promotion to an order.
+            When creating an OrderItem set isPromo to 'Y' so that it will be removed on order changes before promotions are applied.
+        </description>
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId" required="true"/>
+            <parameter name="storePromotionId" required="true"/>
+            <parameter name="promoCodeId"/>
+            <parameter name="useLimit" type="BigDecimal"/>
+            <parameter name="itemDescription"/>
+        </in-parameters>
+    </service>
+    <service verb="apply" noun="OrderPromotions">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId"/>
+            <parameter name="orderHeader" type="EntityValue"/>
+        </in-parameters>
+        <actions>
+            <set field="openStatusIdList" from="['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']"/>
+
+            <if condition="orderHeader == null"><entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/></if>
+            <set field="productStoreId" from="orderHeader.productStoreId"/>
+            <if condition="!productStoreId"><return/></if>
+
+            <!-- remove existing promotion items -->
+            <entity-delete-by-condition entity-name="mantle.order.OrderItem">
+                <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                <econdition field-name="isPromo" value="Y"/>
+            </entity-delete-by-condition>
+
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId" ignore-if-empty="true"/>
+                <order-by field-name="orderPartSeqId"/>
+            </entity-find>
+            <set field="firstOrderPart" from="orderPartList?.first"/>
+            <set field="customerPartyId" from="firstOrderPart?.customerPartyId"/>
+
+            <!-- get all active promos for store -->
+            <entity-find entity-name="mantle.product.store.ProductStorePromotion" list="storePromoList" cache="true">
+                <date-filter valid-date="orderHeader.placedDate"/>
+                <econdition field-name="productStoreId"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+
+            <set field="applicablePromoList" from="new ArrayList(storePromoList.size())"/>
+            <set field="promoCodesByPromo" from="[:]"/>
+            <set field="useLimitByPromo" from="[:]"/>
+            <iterate list="storePromoList" entry="storePromo">
+                <set field="useLimitMin" from="1000.0"/>
+
+                <!-- see if store matches order -->
+                <if condition="storePromo.productStoreId">
+                    <!-- NOTE: could make more strict and require a store on the order to require code, but more flexible to not -->
+                    <if condition="orderHeader.productStoreId &amp;&amp; storePromo.productStoreId != orderHeader.productStoreId">
+                        <continue/></if>
+                </if>
+
+                <!-- check requireCode, see if valid code on order -->
+                <if condition="storePromo.requireCode == 'Y'">
+                    <entity-find entity-name="mantle.order.OrderPromoCode" list="orderPromoCodeList">
+                        <econdition field-name="orderId"/></entity-find>
+                    <!-- no codes on order? skip promo -->
+                    <if condition="orderPromoCodeList.size() == 0"><continue/></if>
+                    <set field="orderCodeIds" from="orderPromoCodeList*.promoCodeId"/>
+                    <!-- is this code associated with the promo? -->
+                    <entity-find entity-name="mantle.product.store.ProductStorePromoCode" list="storePromoCodeList">
+                        <date-filter valid-date="orderHeader.placedDate"/>
+                        <econdition field-name="promoCodeId" operator="in" from="orderCodeIds"/>
+                        <econdition field-name="storePromotionId" from="storePromo.storePromotionId"/>
+                    </entity-find>
+
+                    <set field="validPromoCodeId" from="null"/>
+                    <iterate list="storePromoCodeList" entry="storePromoCode">
+                        <!-- check requireParty for customerPartyId match -->
+                        <if condition="storePromoCode.requireParty == 'Y'">
+                            <!-- no customer? skip promo code -->
+                            <if condition="!customerPartyId"><continue/></if>
+                            <entity-find-one entity-name="mantle.product.store.ProductStorePromoCodeParty" value-field="promoCodeParty">
+                                <field-map field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                                <field-map field-name="partyId" from="customerPartyId"/>
+                            </entity-find-one>
+                            <!-- customer not associated with code? skip promo code -->
+                            <if condition="promoCodeParty == null"><continue/></if>
+                        </if>
+
+                        <!-- check useLimitPerCode (all uses of code, regardless of customer) -->
+                        <if condition="storePromoCode.useLimitPerCode">
+                            <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                                <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                                <econdition field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                                <select-field field-name="promoTimesUsed"/>
+                            </entity-find>
+                            <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                            <set field="curUseLimit" from="storePromoCode.useLimitPerCode - promoTimesUsed"/>
+                            <!-- if no use limit available treat as not applicable code -->
+                            <if condition="curUseLimit &lt;= 0.0"><continue/></if>
+                            <if condition="curUseLimit &lt; useLimitMin"><set field="useLimitMin" from="curUseLimit"/></if>
+                        </if>
+                        <!-- check useLimitPerCustomer -->
+                        <if condition="storePromoCode.useLimitPerCustomer">
+                            <if condition="customerPartyId"><then>
+                                <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                                    <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                                    <econdition field-name="customerPartyId"/>
+                                    <econdition field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                                    <select-field field-name="promoTimesUsed"/>
+                                </entity-find>
+                                <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                                <set field="curUseLimit" from="storePromoCode.useLimitPerCustomer - promoTimesUsed"/>
+                            </then><else>
+                                <set field="curUseLimit" from="storePromoCode.useLimitPerCustomer"/>
+                            </else></if>
+                            <!-- if no use limit available treat as not applicable code -->
+                            <if condition="curUseLimit &lt;= 0.0"><continue/></if>
+                            <if condition="curUseLimit &lt; useLimitMin"><set field="useLimitMin" from="curUseLimit"/></if>
+                        </if>
+
+                        <set field="validPromoCodeId" from="storePromoCode.promoCodeId"/>
+                        <break/>
+                    </iterate>
+
+                    <if condition="validPromoCodeId"><then>
+                        <script>promoCodesByPromo.put(storePromo.storePromotionId, validPromoCodeId)</script>
+                    </then><else>
+                        <!-- no valid promo code found? skip promo -->
+                        <continue/>
+                    </else></if>
+                </if>
+
+                <!-- check useLimitPerOrder -->
+                <if condition="storePromo.useLimitPerOrder &amp;&amp;storePromo.useLimitPerOrder &lt; useLimitMin">
+                    <set field="useLimitMin" from="storePromo.useLimitPerOrder"/></if>
+                <!-- check useLimitPerPromotion -->
+                <if condition="storePromo.useLimitPerPromotion">
+                    <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                        <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                        <econdition field-name="storePromotionId" from="storePromo.storePromotionId"/>
+                        <select-field field-name="promoTimesUsed"/>
+                    </entity-find>
+                    <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                    <set field="curUseLimit" from="storePromo.useLimitPerPromotion - promoTimesUsed"/>
+                    <if condition="curUseLimit &lt; useLimitMin"><set field="useLimitMin" from="curUseLimit"/></if>
+                </if>
+                <!-- check useLimitPerCustomer -->
+                <if condition="storePromo.useLimitPerCustomer">
+                    <if condition="customerPartyId"><then>
+                        <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                            <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                            <econdition field-name="customerPartyId"/>
+                            <econdition field-name="storePromotionId" from="storePromo.storePromotionId"/>
+                            <select-field field-name="promoTimesUsed"/>
+                        </entity-find>
+                        <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                        <set field="curUseLimit" from="storePromo.useLimitPerCustomer - promoTimesUsed"/>
+                    </then><else>
+                        <set field="curUseLimit" from="storePromo.useLimitPerCustomer"/>
+                    </else></if>
+                    <if condition="curUseLimit &lt; useLimitMin"><set field="useLimitMin" from="curUseLimit"/></if>
+                </if>
+
+                <if condition="useLimitMin &lt;= 0.0"><then>
+                    <!-- no use limit available for promo? skip it -->
+                    <!-- <log level="warn" message="Skipping promo ${storePromo.storePromotionId}"/> -->
+                    <continue/>
+                </then><else>
+                    <script>useLimitByPromo.put(storePromo.storePromotionId, useLimitMin)</script>
+                </else></if>
+
+                <!-- all checks done, add to list to execute -->
+                <!-- <log level="warn" message="Adding promo to execute ${storePromo.storePromotionId}"/> -->
+                <script>applicablePromoList.add(storePromo)</script>
+            </iterate>
+
+            <!-- run the promotion services -->
+            <script><![CDATA[
+            for (storePromo in applicablePromoList) {
+                String storePromotionId = storePromo.storePromotionId
+                try {
+                    Map parmMap = new HashMap(context)
+                    parmMap.put("itemDescription", storePromo.itemDescription)
+                    List promoParameterList = storePromo.parameters
+                    for (promoParameter in promoParameterList) parmMap.put(promoParameter.parameterName, promoParameter.parameterValue)
+                    parmMap.put("storePromotionId", storePromotionId)
+                    parmMap.put("promoCodeId", promoCodesByPromo.get(storePromotionId))
+                    parmMap.put("useLimit", useLimitByPromo.get(storePromotionId))
+                    // ec.logger.warn("Calling store promotion service ${storePromotionId} promoCodeId ${promoCodesByPromo.get(storePromotionId)} useLimit ${useLimitByPromo.get(storePromotionId)}")
+
+                    Map serviceRegister = storePromo.serviceRegister
+                    Map result = ec.service.sync().name(serviceRegister.serviceName).parameters(parmMap).softValidate(true).disableAuthz().call()
+                    if (result != null && !ec.message.hasError()) ec.context.putAll(result)
+                } catch (Throwable t) {
+                    ec.logger.log(300, "Error calling store promotion service ${storePromotionId}", t)
+                }
+            }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="add" noun="OrderPromoCode">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="promoCode" required="true"/>
+        </in-parameters>
+        <actions>
+            <set field="openStatusIdList" from="['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']"/>
+
+            <!-- make sure code is valid -->
+            <entity-find entity-name="mantle.product.store.ProductStorePromoCode" list="storePromoCodeList">
+                <econdition field-name="promoCode" ignore-case="true"/></entity-find>
+            <set field="storePromoCode" from="storePromoCodeList[0]"/>
+            <if condition="storePromoCode == null">
+                <entity-find-one entity-name="mantle.product.store.ProductStorePromoCode" value-field="storePromoCode">
+                    <field-map field-name="promoCodeId" from="promoCode"/></entity-find-one>
+            </if>
+            <if condition="storePromoCode == null">
+                <script>ec.message.addPublic("Promotion code ${promoCode} is not valid", "warning")</script>
+                <return/>
+            </if>
+            <!-- see if code already on order -->
+            <entity-find-one entity-name="mantle.order.OrderPromoCode" value-field="existingOrderPromoCode">
+                <field-map field-name="orderId"/><field-map field-name="promoCodeId" from="storePromoCode.promoCodeId"/></entity-find-one>
+            <if condition="existingOrderPromoCode != null">
+                <script>ec.message.addPublic("Promotion code ${promoCode} is already on this order", "success")</script>
+                <return/>
+            </if>
+
+            <!-- make sure has a promotion -->
+            <set field="storePromotion" from="storePromoCode.storePromotion"/>
+            <if condition="storePromotion == null">
+                <script>ec.message.addPublic("No promotion found for code ${promoCode}", "warning")</script>
+                <return/>
+            </if>
+            <!-- see if store matches order -->
+            <if condition="storePromotion.productStoreId">
+                <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+                <!-- NOTE: could make more strict and require a store on the order to require code, but more flexible to not -->
+                <if condition="orderHeader.productStoreId &amp;&amp; storePromotion.productStoreId != orderHeader.productStoreId">
+                    <script>ec.message.addPublic("Promotion code ${promoCode} is not valid for this store", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+
+            <!-- check promo code from/thru dates -->
+            <if condition="storePromoCode.fromDate != null &amp;&amp; ec.user.nowTimestamp &lt; storePromoCode.fromDate">
+                <script>ec.message.addPublic("Promotion code ${promoCode} is not valid until ${ec.l10n.format(storePromoCode.fromDate, 'dd MMM yyyy h:mm a')}", "warning")</script>
+                <return/>
+            </if>
+            <if condition="storePromoCode.thruDate != null &amp;&amp; ec.user.nowTimestamp &gt; storePromoCode.thruDate">
+                <script>ec.message.addPublic("Promotion code ${promoCode} expired at ${ec.l10n.format(storePromoCode.thruDate, 'dd MMM yyyy h:mm a')}", "warning")</script>
+                <return/>
+            </if>
+            <!-- check promotion from/thru dates -->
+            <if condition="storePromotion.fromDate != null &amp;&amp; ec.user.nowTimestamp &lt; storePromotion.fromDate">
+                <script>ec.message.addPublic("Promotion for code ${promoCode} is not valid until ${ec.l10n.format(storePromotion.fromDate, 'dd MMM yyyy h:mm a')}", "warning")</script>
+                <return/>
+            </if>
+            <if condition="storePromotion.thruDate != null &amp;&amp; ec.user.nowTimestamp &gt; storePromotion.thruDate">
+                <script>ec.message.addPublic("Promotion for code ${promoCode} expired at ${ec.l10n.format(storePromotion.thruDate, 'dd MMM yyyy h:mm a')}", "warning")</script>
+                <return/>
+            </if>
+
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/><order-by field-name="orderPartSeqId"/></entity-find>
+            <set field="firstOrderPart" from="orderPartList?.first"/>
+            <set field="customerPartyId" from="firstOrderPart?.customerPartyId"/>
+
+            <!-- check storePromoCode.requireParty -->
+            <if condition="storePromoCode.requireParty == 'Y'">
+                <if condition="!customerPartyId">
+                    <script>ec.message.addPublic("Promotion code ${promoCode} requires that a customer be set on the order", "warning")</script>
+                    <return/>
+                </if>
+                <entity-find-one entity-name="mantle.product.store.ProductStorePromoCodeParty" value-field="promoCodeParty">
+                    <field-map field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                    <field-map field-name="partyId" from="customerPartyId"/>
+                </entity-find-one>
+                <if condition="promoCodeParty == null">
+                    <script>ec.message.addPublic("Customer not allowed to use promotion code ${promoCode}", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+
+            <!-- check storePromoCode.useLimitPerCode (all uses of code, regardless of customer) -->
+            <if condition="storePromoCode.useLimitPerCode">
+                <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                    <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                    <econdition field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                    <select-field field-name="promoTimesUsed"/>
+                </entity-find>
+                <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                <set field="curUseLimit" from="storePromoCode.useLimitPerCode - promoTimesUsed"/>
+                <if condition="curUseLimit &lt;= 0.0">
+                    <script>ec.message.addPublic("Promotion code ${promoCode} has already been used the maximum times allowed", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+            <!-- check storePromoCode.useLimitPerCustomer -->
+            <if condition="storePromoCode.useLimitPerCustomer">
+                <if condition="customerPartyId"><then>
+                    <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                        <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                        <econdition field-name="customerPartyId"/>
+                        <econdition field-name="promoCodeId" from="storePromoCode.promoCodeId"/>
+                        <select-field field-name="promoTimesUsed"/>
+                    </entity-find>
+                    <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                    <set field="curUseLimit" from="storePromoCode.useLimitPerCustomer - promoTimesUsed"/>
+                </then><else>
+                    <set field="curUseLimit" from="storePromoCode.useLimitPerCustomer"/>
+                </else></if>
+                <if condition="curUseLimit &lt;= 0.0">
+                    <script>ec.message.addPublic("You have used promotion code ${promoCode} as many times as allowed (${storePromoCode.useLimitPerCustomer})", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+
+            <!-- check useLimitPerPromotion -->
+            <if condition="storePromotion.useLimitPerPromotion">
+                <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                    <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                    <econdition field-name="storePromotionId" from="storePromotion.storePromotionId"/>
+                    <select-field field-name="promoTimesUsed"/>
+                </entity-find>
+                <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                <set field="curUseLimit" from="storePromotion.useLimitPerPromotion - promoTimesUsed"/>
+                <if condition="curUseLimit &lt;= 0.0">
+                    <script>ec.message.addPublic("Promotion for code ${promoCode} has already been used the maximum times allowed", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+            <!-- check useLimitPerCustomer -->
+            <if condition="storePromotion.useLimitPerCustomer">
+                <if condition="customerPartyId"><then>
+                    <entity-find entity-name="mantle.order.OrderItemAndPartSummary" list="itemSummaryList">
+                        <econdition field-name="statusId" operator="in" from="openStatusIdList"/>
+                        <econdition field-name="customerPartyId"/>
+                        <econdition field-name="storePromotionId" from="storePromotion.storePromotionId"/>
+                        <select-field field-name="promoTimesUsed"/>
+                    </entity-find>
+                    <set field="promoTimesUsed" from="itemSummaryList?.first?.promoTimesUsed ?: 0.0"/>
+                    <set field="curUseLimit" from="storePromotion.useLimitPerCustomer - promoTimesUsed"/>
+                </then><else>
+                    <set field="curUseLimit" from="storePromotion.useLimitPerCustomer"/>
+                </else></if>
+                <if condition="curUseLimit &lt;= 0.0">
+                    <script>ec.message.addPublic("You have used the promotion for code ${promoCode} as many times as allowed (${storePromotion.useLimitPerCustomer})", "warning")</script>
+                    <return/>
+                </if>
+            </if>
+
+            <!-- add the code -->
+            <service-call name="create#mantle.order.OrderPromoCode" in-map="[orderId:orderId, promoCodeId:storePromoCode.promoCodeId]"/>
+            <!-- trigger promo re-apply -->
+            <iterate list="orderPartList" entry="orderPart">
+                <service-call name="mantle.order.OrderServices.handle#OrderMajorChange"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="remove" noun="OrderPromoCode">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="promoCodeId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="delete#mantle.order.OrderPromoCode" in-map="context"/>
+
+            <!-- trigger promo re-apply -->
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/><order-by field-name="orderPartSeqId"/></entity-find>
+            <iterate list="orderPartList" entry="orderPart">
+                <service-call name="mantle.order.OrderServices.handle#OrderMajorChange"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========== Standard Promotion Services ========== -->
+
+    <service verb="apply" noun="NewCustomerDiscount">
+        <description>Apply a discountPercent to each OrderItem with itemTypeEnumId=ItemProduct if the customer is a new customer (no previous orders)</description>
+        <implements service="mantle.product.PromotionServices.apply#Promotion"/>
+        <in-parameters>
+            <parameter name="discountPercent" type="BigDecimal" required="true">
+                <description>Required. Discount percent for new customers as a plain number like 10 or 25.</description></parameter>
+            <parameter name="itemsWithPromo" type="Boolean" default="false">
+                <description>If true apply to product item quantities that already have another promotion (defaults to false)</description></parameter>
+            <parameter name="includeNonConsumer" type="Boolean" default="false">
+                <description>If true apply when customer has a customer classification other than Consumer (defaults to false)</description></parameter>
+            <parameter name="requireAccountForWeb" type="Boolean" default="true">
+                <description>If true (default) for Web orders only apply if the customer has a User Account</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+            <set field="customerPartyId" from="orderPart?.customerPartyId"/>
+            <!-- if no customer we don't know if they are new so don't apply -->
+            <if condition="!customerPartyId"><return/></if>
+
+            <if condition="requireAccountForWeb &amp;&amp; orderHeader?.salesChannelEnumId == 'ScWeb'">
+                <!-- anonymous (no UserAccount) customers should not receive this discount -->
+                <entity-find entity-name="moqui.security.UserAccount" list="userAccounts">
+                    <econdition field-name="partyId" from="customerPartyId"/><select-field field-name="userId"/></entity-find>
+                <if condition="!userAccounts"><return/></if>
+            </if>
+
+            <!-- does the customer have a classification other than consumer? -->
+            <if condition="!includeNonConsumer">
+                <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="classApplList">
+                    <date-filter/><econdition field-name="partyId" from="customerPartyId"/>
+                    <econdition field-name="classificationTypeEnumId" value="PcltCustomer"/>
+                </entity-find>
+                <iterate list="classApplList" entry="classAppl">
+                    <if condition="classAppl.partyClassificationId != 'CustConsumer'"><return/></if>
+                </iterate>
+            </if>
+
+            <!-- is the customer a new customer? -->
+            <if condition="orderPart.isNewCustomer != 'Y'">
+                <!-- if isNewCustomer flag set to Y always treat as new customer -->
+                <set field="includeStatuses" from="['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']"/>
+                <entity-find-count entity-name="mantle.order.OrderHeaderAndPart" count-field="ordersCount">
+                    <econdition field-name="customerPartyId"/><econdition field-name="orderId" operator="not-equals"/>
+                    <econdition field-name="statusId" operator="in" from="includeStatuses"/>
+                    <econdition field-name="partStatusId" operator="in" from="includeStatuses" or-null="true"/>
+                </entity-find-count>
+                <if condition="ordersCount"><return/></if>
+            </if>
+
+            <!-- get the ProductStorePromoCode record for the promoCode to save with the OrderItem(s) generated; will be null if no promoCodeId -->
+            <entity-find-one entity-name="mantle.product.store.ProductStorePromoCode" value-field="storePromoCode"/>
+            
+            <!-- NOTE: default to 1000 as an arbitrary high number for when there is no use limit; could also refactor here and main promo apply service for null/0 handling -->
+            <set field="useLimitRemaining" from="useLimit ?: 1000.0"/>
+
+            <!-- apply promo to each eligible item -->
+            <entity-find entity-name="mantle.order.OrderItem" list="prodItemList">
+                <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                <econdition field-name="itemTypeEnumId" value="ItemProduct"/>
+            </entity-find>
+            <iterate list="prodItemList" entry="orderItem">
+                <service-call name="mantle.order.OrderServices.get#OrderItemTotal" out-map-add-to-existing="false"
+                        in-map="[orderItem:orderItem, getChildrenTotals:true]" out-map="orderItemTotalOut"/>
+                <if condition="!orderItemTotalOut.combinedAmount"><continue/></if>
+                <if condition="itemsWithPromo"><then>
+                    <set field="promoQuantity" from="orderItem.quantity"/>
+                </then><else>
+                    <set field="promoQuantity" from="orderItem.quantity - orderItemTotalOut.promoQuantityUsed"/>
+                </else></if>
+                <!-- check useLimit -->
+                <if condition="promoQuantity &gt; useLimitRemaining"><set field="promoQuantity" from="useLimitRemaining"/></if>
+                <!-- <log level="warn" message="useLimitRemaining ${useLimitRemaining} quantity ${orderItem.quantity} promoQuantityUsed ${orderItemTotalOut.promoQuantityUsed} promoQuantity ${promoQuantity}"/> -->
+                <!-- make sure not less than or equal to zero -->
+                <if condition="promoQuantity &lt;= 0.0"><continue/></if>
+                <!-- deduct from useLimit -->
+                <set field="useLimitRemaining" from="useLimitRemaining - promoQuantity"/>
+                <!-- create promo item -->
+                <set field="discountAmount" from="-(orderItemTotalOut.combinedAmount * (discountPercent/100.0)).setScale(2, BigDecimal.ROUND_HALF_UP)"/>
+                <service-call name="create#mantle.order.OrderItem" out-map="createItemOut"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, parentItemSeqId:orderItem.orderItemSeqId,
+                                 itemTypeEnumId:'ItemDiscount', quantity:promoQuantity, unitAmount:discountAmount, productId:orderItem.productId,
+                                 sourcePercentage:discountPercent, storePromotionId:storePromotionId,
+                                 promoCodeId:promoCodeId, promoCodeText:storePromoCode?.promoCode,
+                                 isPromo:'Y', promoQuantity:promoQuantity, promoTimesUsed:promoQuantity,
+                                 itemDescription:ec.resource.expand(itemDescription, '')?:'New Customer Discount']"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="apply" noun="BuyGetDiscount">
+        <description>Apply discountPercent to getQuantity based on buyQuantity for a single item for each buy+get quantity.
+            Configure with ProductStorePromoParameter records like this for buy 3 get 1 free (100% discount):
+            buyQuantity:3, getQuantity:1, discountPercent:100}</description>
+        <implements service="mantle.product.PromotionServices.apply#Promotion"/>
+        <in-parameters>
+            <parameter name="buyQuantity" type="BigDecimal" required="true">
+                <description>Required. Quantity to buy to qualify for the discount but that does not get the discount applied.</description></parameter>
+            <parameter name="getQuantity" type="BigDecimal" required="true">
+                <description>Required. Quantity that will receive the discount (must have at least Buy + Get in cart to apply).</description></parameter>
+            <parameter name="discountPercent" type="BigDecimal" required="true">
+                <description>Required. Discount percentage such as 50 for half off, 100 for free; applies to Get quantity only.</description></parameter>
+            <parameter name="listDiffPercent" type="BigDecimal">
+                <description>Optional. Don't apply promotion if order item unit amount is less than list price by this percentage.</description></parameter>
+            <parameter name="itemsWithPromo" type="Boolean" default="false">
+                <description>If true apply to product item quantities that already have another promotion (defaults to false)</description></parameter>
+            <parameter name="includeNonConsumer" type="Boolean" default="false">
+                <description>If true apply when customer has a classification other than Consumer (defaults to false)</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+            <set field="customerPartyId" from="orderPart?.customerPartyId"/>
+
+            <!-- does the customer have a classification other than consumer? -->
+            <if condition="customerPartyId &amp;&amp; !includeNonConsumer">
+                <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="classApplList">
+                    <date-filter/><econdition field-name="partyId" from="customerPartyId"/>
+                    <econdition field-name="classificationTypeEnumId" value="PcltCustomer"/>
+                </entity-find>
+                <iterate list="classApplList" entry="classAppl">
+                    <if condition="classAppl.partyClassificationId != 'CustConsumer'"><return/></if>
+                </iterate>
+            </if>
+
+            <entity-find entity-name="mantle.product.store.ProductStorePromoProduct" list="psppList" cache="true">
+                <econdition field-name="storePromotionId"/></entity-find>
+            <set field="includeProductIdSet" from="new HashSet()"/>
+            <set field="excludeProductIdSet" from="new HashSet()"/>
+            <iterate list="psppList" entry="pspp">
+                <if condition="pspp.excludeProduct == 'Y'"><then><script>excludeProductIdSet.add(pspp.productId)</script></then>
+                    <else><script>includeProductIdSet.add(pspp.productId)</script></else></if>
+            </iterate>
+
+            <!-- get the ProductStorePromoCode record for the promoCode to save with the OrderItem(s) generated; will be null if no promoCodeId -->
+            <entity-find-one entity-name="mantle.product.store.ProductStorePromoCode" value-field="storePromoCode"/>
+
+            <!-- NOTE: default to 1000 as an arbitrary high number for when there is no use limit; could also refactor here and main promo apply service for null/0 handling -->
+            <set field="useLimitRemaining" from="useLimit ?: 1000.0"/>
+
+            <set field="buyGetQuantity" from="buyQuantity + getQuantity"/>
+            <if condition="buyGetQuantity &lt;= 0.0">
+                <log level="error" message="Promotion ${storePromotionId} has buyQuantity ${buyQuantity} getQuantity ${getQuantity} with total &lt;= 0.0 which is invalid, not applying promotion"/>
+                <return/>
+            </if>
+
+            <!-- apply promo to each eligible item -->
+            <entity-find entity-name="mantle.order.OrderItem" list="prodItemList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId"/>
+                <econdition field-name="itemTypeEnumId" value="ItemProduct"/>
+                <econdition field-name="productId" operator="in" from="includeProductIdSet" ignore-if-empty="true"/>
+                <econdition field-name="productId" operator="not-in" from="excludeProductIdSet" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="prodItemList" entry="orderItem">
+                <service-call name="mantle.order.OrderServices.get#OrderItemTotal" out-map-add-to-existing="false"
+                        in-map="[orderItem:orderItem, getChildrenTotals:true]" out-map="orderItemTotalOut"/>
+                <!-- <log level="warn" message="orderItemTotalOut ${orderItemTotalOut}"/> -->
+                <if condition="!orderItemTotalOut.combinedAmount"><continue/></if>
+
+                <!-- if listDiffPercent specified check now -->
+                <if condition="listDiffPercent != null">
+                    <set field="unitAmount" from="orderItem.unitAmount ?: 0.0"/>
+                    <set field="listDiffRatio" from="((BigDecimal) listDiffPercent).divide(100.0, 4, BigDecimal.ROUND_HALF_UP)"/>
+                    <service-call name="mantle.product.PriceServices.get#OrderProductPrice" out-map="itemPriceOut"
+                            in-map="[productId:orderItem.productId, orderId:orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+                    <if condition="itemPriceOut.listPrice"><then>
+                        <set field="minApplyPrice" from="((BigDecimal) itemPriceOut.listPrice).multiply(BigDecimal.ONE.minus(listDiffRatio))"/>
+                        <if condition="unitAmount &lt; minApplyPrice">
+                            <log message="Not applying store promo ${storePromotionId} to order ${orderId} item ${orderItem.orderItemSeqId} product ${orderItem.productId}, unitAmount ${unitAmount} less than ${minApplyPrice} which is list ${itemPriceOut.listPrice} minus ${listDiffPercent} percent"/>
+                            <continue/>
+                        </if>
+                    </then><else>
+                        <log level="warn" message="Product ${orderItem.productId} has no List Price, ignoring listDiffPercent for store promo ${storePromotionId} order ${orderId}"/>
+                    </else></if>
+                </if>
+
+                <if condition="itemsWithPromo"><then>
+                    <set field="eligibleQuantity" from="orderItem.quantity != null ? orderItem.quantity : 1.0"/>
+                </then><else>
+                    <set field="eligibleQuantity" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) - orderItemTotalOut.promoQuantityUsed"/>
+                </else></if>
+
+                <set field="timesToApply" from="(eligibleQuantity / buyGetQuantity).setScale(0, BigDecimal.ROUND_DOWN)"/>
+                <!-- check useLimit -->
+                <if condition="timesToApply &gt; useLimitRemaining"><set field="timesToApply" from="useLimitRemaining"/></if>
+                <!-- deduct from useLimit -->
+                <set field="useLimitRemaining" from="useLimitRemaining - timesToApply"/>
+
+                <set field="itemQuantity" from="timesToApply * getQuantity"/>
+                <set field="promoQuantity" from="timesToApply * buyGetQuantity"/><!-- quantity 'consumed' by the promo is buy + get -->
+                <!-- <log level="warn" message="quantity ${orderItem.quantity} promoQuantityUsed ${orderItemTotalOut.promoQuantityUsed} eligibleQuantity ${eligibleQuantity} timesToApply ${timesToApply} buyGetQuantity ${buyGetQuantity} itemQuantity ${itemQuantity} promoQuantity ${promoQuantity}"/> -->
+                <if condition="timesToApply == 0"><continue/></if>
+
+                <!-- create promo item -->
+                <set field="discountAmount" from="-(orderItemTotalOut.combinedAmount*(discountPercent/100.0)).setScale(2, BigDecimal.ROUND_HALF_UP)"/>
+                <service-call name="create#mantle.order.OrderItem" out-map="createItemOut"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, parentItemSeqId:orderItem.orderItemSeqId,
+                             itemTypeEnumId:'ItemDiscount', quantity:itemQuantity, unitAmount:discountAmount, productId:orderItem.productId,
+                             sourcePercentage:discountPercent, storePromotionId:storePromotionId,
+                             promoCodeId:promoCodeId, promoCodeText:storePromoCode?.promoCode,
+                             isPromo:'Y', promoQuantity:promoQuantity, promoTimesUsed:timesToApply,
+                             itemDescription:ec.resource.expand(itemDescription, '')?:('Buy ' + buyQuantity + ' Get ' + getQuantity + ' at ' + discountPercent + '% off')]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="apply" noun="FlatDiscount">
+        <description>Apply discountAmount per quantity. Best limited by applicable products and with one or more use limits.</description>
+        <implements service="mantle.product.PromotionServices.apply#Promotion"/>
+        <in-parameters>
+            <parameter name="discountAmount" type="BigDecimal" required="true">
+                <description>Required. Discount Amount applied per quantity. Set limits per order and/or customer on promo or code (if no limit specified defaults to 1).</description></parameter>
+            <parameter name="itemsWithPromo" type="Boolean" default="false">
+                <description>If true apply to product item quantities that already have another promotion (defaults to false)</description></parameter>
+            <parameter name="includeNonConsumer" type="Boolean" default="false">
+                <description>If true apply when customer has a classification other than Consumer (defaults to false)</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+            <set field="customerPartyId" from="orderPart?.customerPartyId"/>
+
+            <!-- does the customer have a classification other than consumer? -->
+            <if condition="customerPartyId &amp;&amp; !includeNonConsumer">
+                <entity-find entity-name="mantle.party.PartyClassificationAndAppl" list="classApplList">
+                    <date-filter/><econdition field-name="partyId" from="customerPartyId"/>
+                    <econdition field-name="classificationTypeEnumId" value="PcltCustomer"/>
+                </entity-find>
+                <iterate list="classApplList" entry="classAppl">
+                    <if condition="classAppl.partyClassificationId != 'CustConsumer'"><return/></if>
+                </iterate>
+            </if>
+
+            <entity-find entity-name="mantle.product.store.ProductStorePromoProduct" list="psppList" cache="true">
+                <econdition field-name="storePromotionId"/></entity-find>
+            <set field="includeProductIdSet" from="new HashSet()"/>
+            <set field="excludeProductIdSet" from="new HashSet()"/>
+            <iterate list="psppList" entry="pspp">
+                <if condition="pspp.excludeProduct == 'Y'"><then><script>excludeProductIdSet.add(pspp.productId)</script></then>
+                    <else><script>includeProductIdSet.add(pspp.productId)</script></else></if>
+            </iterate>
+
+            <!-- get the ProductStorePromoCode record for the promoCode to save with the OrderItem(s) generated; will be null if no promoCodeId -->
+            <entity-find-one entity-name="mantle.product.store.ProductStorePromoCode" value-field="storePromoCode"/>
+
+            <!-- NOTE: default use limit is 1000.0 so if that then set to 1.0 as a more sensible default -->
+            <set field="useLimitRemaining" from="!useLimit || useLimit == 1000.0 ? 1.0 : useLimit"/>
+
+            <!-- apply promo to each eligible item -->
+            <entity-find entity-name="mantle.order.OrderItem" list="prodItemList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId"/>
+                <econdition field-name="itemTypeEnumId" value="ItemProduct"/>
+                <econdition field-name="productId" operator="in" from="includeProductIdSet" ignore-if-empty="true"/>
+                <econdition field-name="productId" operator="not-in" from="excludeProductIdSet" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="prodItemList" entry="orderItem">
+                <service-call name="mantle.order.OrderServices.get#OrderItemTotal" out-map-add-to-existing="false"
+                        in-map="[orderItem:orderItem, getChildrenTotals:true]" out-map="orderItemTotalOut"/>
+                <!-- <log level="warn" message="orderItemTotalOut ${orderItemTotalOut}"/> -->
+                <if condition="!orderItemTotalOut.combinedAmount"><continue/></if>
+
+                <if condition="itemsWithPromo"><then>
+                    <set field="eligibleQuantity" from="orderItem.quantity != null ? orderItem.quantity : 1.0"/>
+                </then><else>
+                    <set field="eligibleQuantity" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) - orderItemTotalOut.promoQuantityUsed"/>
+                </else></if>
+
+                <!-- check useLimit -->
+                <if condition="eligibleQuantity &gt; useLimitRemaining"><set field="eligibleQuantity" from="useLimitRemaining"/></if>
+                <!-- deduct from useLimit -->
+                <set field="useLimitRemaining" from="useLimitRemaining - eligibleQuantity"/>
+
+                <set field="itemQuantity" from="eligibleQuantity"/>
+                <set field="promoQuantity" from="eligibleQuantity"/>
+                <!-- <log level="warn" message="quantity ${orderItem.quantity} promoQuantityUsed ${orderItemTotalOut.promoQuantityUsed} eligibleQuantity ${eligibleQuantity} itemQuantity ${itemQuantity} promoQuantity ${promoQuantity}"/> -->
+                <if condition="eligibleQuantity == 0.0"><continue/></if>
+
+                <!-- create promo item -->
+                <if condition="discountAmount &gt; orderItemTotalOut.combinedAmount">
+                    <set field="discountAmount" from="orderItemTotalOut.combinedAmount"/></if>
+                <service-call name="create#mantle.order.OrderItem" out-map="createItemOut"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, parentItemSeqId:orderItem.orderItemSeqId,
+                             itemTypeEnumId:'ItemDiscount', quantity:itemQuantity, unitAmount:-discountAmount, productId:orderItem.productId,
+                             storePromotionId:storePromotionId, promoCodeId:promoCodeId, promoCodeText:storePromoCode?.promoCode,
+                             isPromo:'Y', promoQuantity:promoQuantity, promoTimesUsed:eligibleQuantity,
+                             itemDescription:ec.resource.expand(itemDescription, '')?:('Get ' + ec.l10n.format(discountAmount, '#,##0.00') + ' off')]"/>
+            </iterate>
+        </actions>
+    </service>
+</services>

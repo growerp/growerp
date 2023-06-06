@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="upload" noun="BaiVersion2">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="baiFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="baiFile == null || baiFile.size == 0">
+                <return error="true" message="No BAI file content uploaded"/></if>
+            <set field="baiString" from="baiFile.getString('UTF-8')"/>
+            <service-call name="mantle.account.BaiServices.import#BaiVersion2" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="consume" noun="Bai2SystemMessage">
+        <implements service="org.moqui.impl.SystemMessageServices.consume#SystemMessage"/>
+        <actions>
+            <entity-find-one entity-name="moqui.service.message.SystemMessage" value-field="systemMessage"/>
+            <set field="baiString" from="systemMessage.messageText"/>
+
+            <!-- determine paymentMethodId by PaymentMethodFileType record -->
+            <entity-find entity-name="mantle.account.method.PaymentMethodFileType" list="pmftList">
+                <econdition field-name="fileTypeEnumId" value="PmftBai2"/>
+                <econdition field-name="systemMessageTypeId" from="systemMessage.systemMessageTypeId"/>
+                <econdition field-name="systemMessageRemoteId" from="systemMessage.systemMessageRemoteId"/>
+            </entity-find>
+            <if condition="pmftList.size() == 0">
+                <return error="true" message="Could not find paymentMethodId from PaymentMethodFileType record for file type PmftBai2 message type ${systemMessage.systemMessageTypeId} remote ${systemMessage.systemMessageRemoteId}"/>
+            </if>
+
+            <!-- weird but allow multiple in case transactions should be added for more than one BankAccount -->
+            <iterate list="pmftList" entry="pmft">
+                <set field="paymentMethodId" from="pmft.paymentMethodId"/>
+                <service-call name="mantle.account.BaiServices.import#BaiVersion2" in-map="context"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="BaiVersion2">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="baiString" required="true" allow-html="any"/>
+        </in-parameters>
+        <actions>
+            <set field="typeMap" from="[
+                '108' : 'PMTT_CREDIT',
+                '409' : 'PMTT_DEBIT',
+                '475' : 'PMTT_CHECK',
+                '354' : 'PMTT_INT', '654' : 'PMTT_INT',
+                '295' : 'PMTT_ATM', '595' : 'PMTT_ATM',
+                '142' : 'PMTT_PAYMENT', '451' : 'PMTT_PAYMENT',
+                '174' : 'PMTT_OTHER',
+                '277' : 'PMTT_ZBA_CRTR', '577' : 'PMTT_ZBA_DBTR'
+            ]"/>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+            <entity-find-one entity-name="mantle.account.method.BankAccount" value-field="bankAccount"/>
+            <script><![CDATA[
+                BigDecimal BD_100 = new BigDecimal(100)
+                def currencyCode = "USD"
+                def lastCode = null
+
+                def routingNumber
+                def accountNumber
+                def postedDate
+                def paymentTransaction = [:]
+                def statusCodes = new HashMap()
+
+                transactionTotalAmount = 0
+
+                def parseStatusCodes(List fieldSet, Map results) {
+                    for (int i = 0; i < fieldSet.size(); i+=4) {
+                        amount = fieldSet[i+1]
+                        if (amount) {
+                            results.put(fieldSet[i], new BigDecimal(amount)/100)
+                        }
+                    }
+                }
+
+                baiString.splitEachLine(',') {fields ->
+                    String code = fields[0]
+
+                    // Code 88 continue a previous record, so, when we encounter it we should know
+                    // which type it belongs to
+                    if ('88' != code) lastCode = code
+
+                    // validate the originator ID that should match the bank routing number
+                    if ('02' == code) {
+                        routingNumber = fields[1]
+                        if (routingNumber != bankAccount.routingNumber) {
+                            ec.message.addError(ec.resource.expand('BAI originator ID ${originatorId} does not match routing number ${routingNumber} on Bank Account ${paymentMethodId}', '',
+                                    [originatorId: routingNumber, routingNumber: bankAccount.routingNumber, paymentMethodId: paymentMethodId]))
+                            routingNumber = null
+                        }
+
+                        if ('1' != fields[3]) {
+                            ec.message.addError("Only groups of type Update can be processed")
+                        }
+
+                        if (fields[6]) currencyCode = fields[6]
+
+                        // save As-of-Date as a common date for all transactions
+                        postedDate = ec.l10n.parseTimestamp(fields[4] + ' ' + fields[5], "yyMMdd HHmm")
+                    }
+
+                    // validate the company account number
+                    if (routingNumber && '03' == code) {
+                        accountNumber = fields[1]
+                        if (accountNumber != bankAccount.accountNumber) {
+                            ec.message.addError(ec.resource.expand('Customer account number ${customerAccountNumber} does not match account number ${bankAccount.accountNumber} on Bank Account ${paymentMethodId}', '',
+                                    [customerAccountNumber: accountNumber, accountNumber: bankAccount.accountNumber, paymentMethodId: paymentMethodId]))
+                            accountNumber = null
+                        }
+
+                        if (fields[2]) currencyCode = fields[2]
+                        /* don't bother:
+                        if (currencyCode != paymentMethod.currencyUomId) {
+                            ec.message.addError(ec.resource.expand('Imported currency [${importedCurrency}] does not match account currency [${currencyUomId}] on Bank Account [${paymentMethodId}]', '',
+                                    [importedCurrency: currencyCode, currencyUomId: paymentMethod.currencyUomId, paymentMethodId: paymentMethodId]))
+                        }
+                        */
+
+                        parseStatusCodes(fields[3..fields.size()-1], statusCodes)
+                    }
+
+                    if (ec.message.hasError()) return
+
+                    // create the transaction prepared during previous iteration and clear saved transaction details
+                    if ('16' == code || '49' == code) {
+                        if (paymentTransaction) {
+                            BigDecimal curTransAmount = (BigDecimal) paymentTransaction.transAmount
+                            if (curTransAmount) transactionTotalAmount += curTransAmount.abs()
+                            // ec.logger.info("TX ${curTransAmount} total ${transactionTotalAmount}")
+
+                            // NOTE: there is no consistent ID from the financial institution for BAI 2 files so can't use to match against existing records
+                            // if (ec.entity.find("mantle.account.method.PaymentMethodTrans").condition([paymentMethodId:paymentMethodId, fitId:paymentTransaction.fitId]).count() == 0)
+
+                            // use a custom sequence for fitId since there is no reliable ID in the file
+                            paymentTransaction.fitId = ec.entity.sequencedIdPrimary("mantle.account.method.PaymentMethodTrans." + paymentMethodId, 1, 10)
+                            // create the record
+                            ec.service.sync().name("create#mantle.account.method.PaymentMethodTrans").parameters(paymentTransaction).call()
+                            paymentTransaction = [:]
+                        }
+                    }
+
+                    // process transaction
+                    if (routingNumber && accountNumber && ('16' == code || '88' == code)) {
+                        if ('16' == code) {
+                            paymentTransaction.paymentMethodId = paymentMethodId
+                            paymentTransaction.postedDate = postedDate
+
+                            String transDetailType = fields[1]
+                            paymentTransaction.transCode = transDetailType
+
+                            transType = typeMap.get(transDetailType) ?: transDetailType
+                            paymentTransaction.transType = transType
+
+                            String amountString = fields[2]
+                            paymentTransaction.transAmount = amountString ? new BigDecimal(amountString).divide(BD_100, 2, BigDecimal.ROUND_HALF_UP) : 0.0
+                            // negate transAmount based on first digit of transDetailType (for debits): 4, 5, 6
+                            if (transDetailType.startsWith('4') || transDetailType.startsWith('5') || transDetailType.startsWith('6'))
+                                paymentTransaction.transAmount = -paymentTransaction.transAmount
+
+                            def bankRefNum
+                            fundType = fields[3]
+                            if ('S' == fundType) {
+                                bankRefNum = fields[7]
+                            } else if ('V' == fundType) {
+                                bankRefNum = fields[6]
+                            } else if ('D' == fundType) {
+                                int daysCount = Integer.valueOf(fields[4])
+                                bankRefNum = fields[5 + daysCount * 2]
+                            } else {
+                                bankRefNum = fields[4]
+                            }
+                            if (bankRefNum) {
+                                paymentTransaction.refNumber = bankRefNum
+                            }
+
+                            if ("474" == transDetailType || "475" == transDetailType || "395" == transDetailType) {
+                                paymentTransaction.checkNumber = fields[5]
+                            }
+
+                            memo = fields[6]
+                            if (memo && memo != "/") {
+                                paymentTransaction.transMemo = memo
+                            }
+
+                        } else if ('88' == code) {
+                            if ('16' == lastCode && paymentTransaction) {
+                                // continuation record that contains a memo fo the previous transaction
+                                composedText = paymentTransaction.transMemo
+                                if (!composedText) composedText = ""
+                                for (int i = 1; i < fields.size(); i++) {
+                                    if (composedText.length() > 0) composedText += " "
+                                    composedText += fields[i]
+                                }
+                                paymentTransaction.transMemo = composedText
+
+                            } else if ('03' == lastCode) {
+                                // continue record that contains various status codes
+                                parseStatusCodes(fields[1..fields.size()-1], statusCodes)
+                            }
+                        }
+                    }
+
+                    // close the account
+                    if ('49' == code) {
+                        accountNumber = null
+
+                        // check control sum and generate error if it mismatches the processed transactions
+                        totalAmount = transactionTotalAmount
+                        statusCodes.each{k, v -> totalAmount += v}
+                        controlSum = fields[1] ? new BigDecimal(fields[1])/100 : 0
+                        if (totalAmount != controlSum) {
+                            ec.message.addError("Control sum ${controlSum} did not match total ${totalAmount} in BAI file dated ${postedDate} for Bank Account ${paymentMethodId}")
+                        }
+                    }
+                    // close the group of accounts
+                    if ('98' == code) {
+                        routingNumber = null
+                    }
+                }
+
+                closingLedger = statusCodes.get("015")
+                closingAvailable = statusCodes.get("045")
+                if (postedDate && (!paymentMethod.balanceDate || postedDate > paymentMethod.balanceDate)) {
+                    ec.service.sync().name("mantle.account.PaymentMethodServices.update#PaymentMethodMutable")
+                            .parameters([paymentMethodId:paymentMethodId, ledgerBalance:closingLedger,
+                            availableBalance:closingAvailable, balanceDate:postedDate]).call()
+                }
+
+            ]]></script>
+        </actions>
+    </service>
+</services>

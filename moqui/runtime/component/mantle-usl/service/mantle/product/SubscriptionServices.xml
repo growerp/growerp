@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="init" noun="SubscriptionResource" type="interface">
+        <in-parameters><parameter name="subscriptionId" required="true"/></in-parameters>
+    </service>
+    <service verb="renew" noun="SubscriptionResourceAccess" type="interface">
+        <in-parameters><parameter name="subscriptionId" required="true"/></in-parameters>
+    </service>
+    <service verb="revoke" noun="SubscriptionResourceAccess" type="interface">
+        <in-parameters><parameter name="subscriptionId" required="true"/></in-parameters>
+    </service>
+    <service verb="restore" noun="SubscriptionResourceAccess" type="interface">
+        <in-parameters><parameter name="subscriptionId" required="true"/></in-parameters>
+    </service>
+    <service verb="destroy" noun="SubscriptionResource" type="interface">
+        <in-parameters><parameter name="subscriptionId" required="true"/></in-parameters>
+    </service>
+
+    <service verb="fulfill" noun="OrderSubscriptions">
+        <description>Called by SECA rule when an order goes to the OrderApproved status.
+            Calls fulfill#OrderPartSubscriptions for each order part.</description>
+        <in-parameters><parameter name="orderId" required="true"/></in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader" >
+                <field-map field-name="orderId"/></entity-find-one>
+            <if condition="orderHeader.recurCronExpression != null">
+                <return/>
+            </if>
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/><order-by field-name="orderPartSeqId"/></entity-find>
+            <iterate list="orderPartList" entry="orderPart">
+                <service-call name="mantle.product.SubscriptionServices.fulfill#OrderPartSubscriptions"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="fulfill" noun="OrderPartSubscriptions">
+        <description>
+            Called by fulfill#OrderSubscriptions which is called by SECA rule on the Order Approved status.
+
+            Looks for digital products on the order with ProductSubscriptionResource records, and if there is
+            no Subscription record for the OrderItem and SubscriptionResource then fulfills the
+            ProductSubscriptionResource and bills for the OrderItem.
+        </description>
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                <order-by field-name="orderItemSeqId"/>
+            </entity-find>
+
+            <set field="fulfilledOrderItemList" from="[]"/>
+            <iterate list="orderItemList" entry="orderItem">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="orderItem.productId"/></entity-find-one>
+                <if condition="product?.productTypeEnumId in ['PtDigital', 'PtDigitalAsset']">
+                    <entity-find entity-name="mantle.product.subscription.ProductSubscriptionResource"
+                            list="productSubscriptionResourceList" cache="true">
+                        <econdition field-name="productId" from="product.productId"/></entity-find>
+                    <iterate list="productSubscriptionResourceList" entry="productSubscriptionResource">
+                        <!-- make sure this hasn't been fulfilled yet -->
+                        <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubscriptionList">
+                            <econdition field-name="orderId" from="orderItem.orderId"/>
+                            <econdition field-name="orderItemSeqId" from="orderItem.orderItemSeqId"/>
+                            <econdition field-name="subscriptionResourceId" from="productSubscriptionResource.subscriptionResourceId"/>
+                        </entity-find>
+
+                        <if condition="!existingSubscriptionList">
+                            <service-call name="mantle.product.SubscriptionServices.fulfill#ProductSubscriptionResource"
+                                    in-map="[orderId:orderItem.orderId, orderItemSeqId:orderItem.orderItemSeqId,
+                                        productId:orderItem.productId,
+                                        subscriptionResourceId:productSubscriptionResource.subscriptionResourceId,
+                                        fromDate:productSubscriptionResource.fromDate]"/>
+                            <script>fulfilledOrderItemList.add(orderItem)</script>
+                        </if>
+                    </iterate>
+                </if>
+            </iterate>
+
+            <if condition="fulfilledOrderItemList">
+                <!-- create invoice for items in fulfilledOrderItemList -->
+                <service-call name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" out-map="context"
+                        in-map="context + [statusId:'InvoiceFinalized', partialOrderItemList:fulfilledOrderItemList]"/>
+
+                <!-- if there are Payment(s) associated with the order, apply them to the invoice (this captures them, etc too) -->
+                <service-call name="mantle.account.PaymentServices.apply#OrderPaymentsToInvoice"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, invoiceId:invoiceId]"/>
+
+                <!-- complete order part if all items in it are fulfilled -->
+                <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
+                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="fulfill" noun="ProductSubscriptionResource">
+        <description>
+            Called by fulfill#OrderSubscriptions which is called by SECA rule on the Order Approved status.
+
+            Creates a Subscription record starting now or after an active Subscription ends.
+            Calls the SubscriptResource init service if one is configured.
+        </description>
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderItemSeqId" required="true"/>
+            <parameter name="productId" required="true"/>
+            <parameter name="subscriptionResourceId" required="true"/>
+            <parameter name="fromDate" type="Timestamp" required="false"/>
+        </in-parameters>
+        <out-parameters><parameter name="subscriptionId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.SubscriptionResource" value-field="subscriptionResource"/>
+            <entity-find-one entity-name="mantle.product.subscription.ProductSubscriptionResource" value-field="psr"/>
+            <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem"/>
+            <set field="orderPart" from="orderItem.'mantle.order.OrderPart'"/>
+            <set field="customerPartyId" from="orderPart.customerPartyId"/>
+
+            <!-- determine fromDate (either last Subscription.thruDate if in future, or nowTimestamp -->
+            <!-- TODO: for renewals of a particular subscription, get resourceInstanceId from somewhere... (maybe OrderItem?) -->
+            <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubscriptionList">
+                <econdition field-name="subscriptionResourceId" from="subscriptionResourceId"/>
+                <econdition field-name="subscriberPartyId" from="customerPartyId"/>
+                <econdition field-name="resourceInstanceId" ignore-if-empty="true"/>
+                <order-by field-name="-thruDate"/>
+            </entity-find>
+            <if condition="fromDate == null">
+                <set field="fromDate" from="existingSubscriptionList?.first?.thruDate ?: ec.user.nowTimestamp"/></if>
+            <if condition="!resourceInstanceId &amp;&amp; existingSubscriptionList">
+                <set field="resourceInstanceId" from="existingSubscriptionList[0].resourceInstanceId"/></if>
+
+            <!-- determine thruDate (fromDate + psr.availableTime given psr.availableTimeUomId) -->
+            <script>
+            int thruOffset = (orderItem.quantity ?: 1) * (psr.availableTime ?: 1)
+            thruDateCal = ec.user.getNowCalendar()
+            thruDateCal.setTimeInMillis(fromDate.getTime())
+            thruDateCal.add(getCalendarFieldFromUomId(psr.availableTimeUomId ?: 'TF_mon'), thruOffset)
+            thruDate = new java.sql.Timestamp(thruDateCal.getTimeInMillis())
+            </script>
+
+            <log level="info" message="Creating Subscription for customer [${customerPartyId}], resource [${subscriptionResourceId}], order item [${ec.resource.expand('OrderItemNameTemplate','')}], fromDate: ${fromDate}, thruDate: ${thruDate}"/>
+
+            <!-- create Subscription record -->
+            <service-call name="create#mantle.product.subscription.Subscription" out-map="context"
+                in-map="[subscriptionTypeEnumId:'StProduct', subscriptionResourceId:subscriptionResourceId,
+                    subscriberPartyId:customerPartyId, deliverToContactMechId:null,
+                    orderId:orderId, orderItemSeqId:orderItemSeqId, productId:productId,
+                    fromDate:fromDate, thruDate:thruDate, resourceInstanceId:resourceInstanceId,
+                    availableTime:psr.availableTime, availableTimeUomId:psr.availableTimeUomId, useTime:psr.useTime,
+                    useTimeUomId:psr.useTimeUomId, useCountLimit:psr.useCountLimit]"/>
+            <log level="warn" message="Created Subscription ${subscriptionId} tx cache active ${ec.transaction.isTransactionCacheActive()}, tx ${ec.transaction.getTransactionManager().getTransaction()}"/>
+
+            <!-- if no previous subscription call init service, otherwise call renew and restore services if/as configured -->
+            <if condition="existingSubscriptionList"><then>
+                <if condition="subscriptionResource?.renewServiceName">
+                    <service-call name="${subscriptionResource.renewServiceName}" out-map="renewOut"
+                            in-map="[subscriptionId:subscriptionId]"/>
+                </if>
+                <if condition="subscriptionResource?.restoreAccessServiceName">
+                    <service-call name="${subscriptionResource.restoreAccessServiceName}" out-map="restoreOut"
+                            in-map="[subscriptionId:subscriptionId]"/>
+                </if>
+            </then><else>
+                <if condition="subscriptionResource?.initServiceName">
+                    <service-call name="${subscriptionResource.initServiceName}" out-map="initOut"
+                            in-map="[subscriptionId:subscriptionId]"/>
+                </if>
+            </else></if>
+        </actions>
+    </service>
+</services>

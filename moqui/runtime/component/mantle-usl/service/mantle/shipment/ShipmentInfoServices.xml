@@ -1,0 +1,1211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ==================================================== -->
+    <!-- ========== Shipment View/Display Services ========== -->
+    <!-- ==================================================== -->
+
+    <service verb="get" noun="ShipmentDisplayInfo">
+        <in-parameters><parameter name="shipmentId"/></in-parameters>
+        <out-parameters>
+            <parameter name="shipmentId"/>
+            <parameter name="shipment" type="Map"/>
+            <parameter name="statusItem" type="Map"/>
+            <parameter name="shipmentTypeEnum" type="Map"/>
+            <parameter name="isIncoming" type="Boolean"/><parameter name="isOutgoing" type="Boolean"/><parameter name="isTransfer" type="Boolean"/>
+            <parameter name="allowUpdate" type="Boolean"/>
+            <parameter name="hasNoItems" type="Boolean"/>
+            <parameter name="statusHistoryList" type="List"><parameter name="auditLog" type="Map"/></parameter>
+
+            <parameter name="fromPartyId"><description>Shipment.fromPartyId or if empty then warehouse Facility.ownerPartyId</description></parameter>
+            <parameter name="fromPartyDetail" type="Map"/>
+            <parameter name="fromContactInfo" type="Map"><description>The from ship info, first by
+                ShipmentRouteSegment.origin* fields then the warehouse Facility
+                (using mantle.facility.ContactServices.get#FacilityDefaultShipOrigin) or if no warehouse or contact info
+                found then from the mantle.party.ContactServices.get#PartyContactInfo service for the fromPartyId.</description></parameter>
+            <parameter name="toPartyId"/>
+            <parameter name="toPartyDetail" type="Map"/>
+            <parameter name="toContactInfo" type="Map"><description>The to ship info, first by ShipmentRouteSegment.dest*,
+                then from the mantle.party.ContactServices.get#PartyContactInfo service for Shipment.toPartyId.</description></parameter>
+            <parameter name="productStore" type="Map"/>
+
+            <parameter name="shipmentItemDetailList" type="List"><parameter name="shipmentItemDetail" type="Map"/></parameter>
+            <parameter name="shipmentRouteSegmentList" type="List"><parameter name="shipmentRouteSegment" type="Map"/></parameter>
+            <parameter name="firstRouteSegment" type="Map"/>
+            <parameter name="firstShipmentMethodEnum" type="Map"/>
+            <parameter name="firstCarrierDetail" type="Map"/>
+            <parameter name="lastRouteSegment" type="Map"/>
+            <parameter name="originFacility" type="Map"/>
+            <parameter name="destinationFacility" type="Map"/>
+
+            <parameter name="shipmentPackageList" type="List"><parameter name="shipmentPackage" type="Map"/></parameter>
+            <parameter name="allShipmentPackageContentList" type="List"><parameter name="shipmentPackageContent" type="Map"/></parameter>
+            <parameter name="packageRouteSegList" type="List"><parameter name="packageRouteSeg" type="Map"/></parameter>
+            <parameter name="shipmentItemSourceList" type="List"><parameter name="shipmentItemSource"/></parameter>
+            <parameter name="orderIdSet" type="Set"><parameter name="orderId"/></parameter>
+            <parameter name="returnIdSet" type="Set"><parameter name="returnId"/></parameter>
+            <parameter name="invoiceIdSet" type="Set"><parameter name="invoiceId"/></parameter>
+            <parameter name="invoiceList" type="List"><parameter name="invoice" type="Map"/></parameter>
+            <parameter name="contentList" type="List"><parameter name="content" type="Map"/></parameter>
+
+            <parameter name="acctgTransList" type="List"><parameter name="acctgTrans" type="Map"/></parameter>
+            <parameter name="acctgTransIdSet" type="Set"><parameter name="acctgTransId"/></parameter>
+
+            <parameter name="anyReceived" type="Boolean"/><parameter name="allReceived" type="Boolean"/>
+            <parameter name="allItemsPacked" type="Boolean"/><parameter name="anyItemPacked" type="Boolean"/>
+
+            <parameter name="shippingGatewayConfigId"/>
+            <parameter name="shippingGatewayConfig" type="Map"/>
+            <parameter name="hasAllLabels" type="Boolean"/><parameter name="hasAnyLabels" type="Boolean"/>
+            <parameter name="hasAllTrackingCodes" type="Boolean"/>
+            <parameter name="destContactMechValid" type="Boolean"/>
+
+            <parameter name="curCarrierDetail" type="Map"/>
+            <parameter name="curShipmentMethodEnum" type="Map"/>
+            <parameter name="curCarrierShipmentMethod" type="Map"/>
+            <parameter name="orderCarrierDetail" type="Map"/>
+            <parameter name="orderShipmentMethodEnum" type="Map"/>
+            <parameter name="orderCarrierShipmentMethod" type="Map"/>
+
+            <parameter name="assemblyWorkEffort" type="Map"/>
+            <parameter name="assemblyAssetInfo" type="Map">
+                <description>If Shipment.assemblyWorkEffortId, a Map with the results of a call to ManufacturingServices.get#ConsumedAssetRemaining</description></parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.shipment.ShipmentServices.get#ShipmentContactInfo" out-map="context" in-map="[shipmentId:shipmentId]"/>
+            <set field="productStore" from="shipment.productStore"/>
+
+            <set field="statusItem" from="shipment.'Shipment#moqui.basic.StatusItem'"/>
+            <set field="shipmentTypeEnum" from="shipment.'ShipmentType#moqui.basic.Enumeration'"/>
+            <set field="isIncoming" from="shipmentTypeEnum?.enumId == 'ShpTpIncoming' || shipmentTypeEnum?.parentEnumId == 'ShpTpIncoming'"/>
+            <set field="isOutgoing" from="shipmentTypeEnum?.enumId == 'ShpTpOutgoing' || shipmentTypeEnum?.parentEnumId == 'ShpTpOutgoing'"/>
+            <set field="isTransfer" from="shipmentTypeEnum?.enumId == 'ShpTpTransfer' || shipmentTypeEnum?.parentEnumId == 'ShpTpTransfer'"/>
+            <set field="allowUpdate" from="shipment.statusId in ['ShipInput', 'ShipScheduled', 'ShipPicked'] ||
+                    (isIncoming &amp;&amp; shipment.statusId in ['ShipShipped', 'ShipPacked'])"/>
+
+            <entity-find entity-name="moqui.entity.EntityAuditLog" list="statusHistoryList">
+                <econdition field-name="changedEntityName" value="mantle.shipment.Shipment"/>
+                <econdition field-name="changedFieldName" value="statusId"/>
+                <econdition field-name="pkPrimaryValue" from="shipmentId"/>
+                <order-by field-name="changedDate"/>
+            </entity-find>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItemDetail" list="shipmentItemDetailList">
+                <econdition field-name="shipmentId"/><order-by field-name="pseudoId"/></entity-find>
+            <set field="hasNoItems" from="shipmentItemDetailList.size() == 0 || shipmentItemDetailList*.quantity.sum() == 0.0"/>
+
+            <set field="firstShipmentMethodEnum" from="firstRouteSegment?.shipmentMethod"/>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="firstCarrierDetail">
+                <field-map field-name="partyId" from="firstRouteSegment?.carrierPartyId"/></entity-find-one>
+
+            <entity-find entity-name="mantle.shipment.ShipmentPackage" list="shipmentPackageList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentPackageSeqId"/></entity-find>
+            <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="allShipmentPackageContentList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentPackageSeqId,productId"/></entity-find>
+
+            <entity-find entity-name="mantle.shipment.ShipmentPackageRouteSeg" list="packageRouteSegList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId,shipmentPackageSeqId"/></entity-find>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <set field="orderIdSet" from="new TreeSet()"/>
+            <set field="returnIdSet" from="new TreeSet()"/>
+            <set field="invoiceIdSet" from="new TreeSet()"/>
+            <iterate list="shipmentItemSourceList" entry="shipmentItemSource"><script>
+                if (shipmentItemSource.orderId) orderIdSet.add(shipmentItemSource.orderId)
+                if (shipmentItemSource.returnId) returnIdSet.add(shipmentItemSource.returnId)
+                if (shipmentItemSource.invoiceId) invoiceIdSet.add(shipmentItemSource.invoiceId)
+            </script></iterate>
+            <if condition="invoiceIdSet"><entity-find entity-name="mantle.account.invoice.Invoice" list="invoiceList">
+                <econdition field-name="invoiceId" operator="in" from="invoiceIdSet"/></entity-find></if>
+
+            <entity-find entity-name="mantle.shipment.ShipmentContent" list="contentList">
+                <econdition field-name="shipmentId"/><order-by field-name="-contentDate"/></entity-find>
+
+            <!-- get associated accounting transactions -->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="acctgTransList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <set field="acctgTransIdSet" from="new TreeSet(acctgTransList*.acctgTransId)"/>
+
+            <if condition="isIncoming || isTransfer">
+                <set field="allReceived" from="true"/>
+                <iterate list="shipmentItemDetailList" entry="sid">
+                    <if condition="sid.quantity &lt; ((sid.quantityAcceptedTotal?:0.0) + (sid.quantityRejectedTotal?:0.0))">
+                        <set field="allReceived" from="false"/><break/></if>
+                </iterate>
+                <set field="anyReceived" from="false"/>
+                <iterate list="shipmentItemDetailList" entry="sid">
+                    <if condition="sid.quantityAcceptedTotal || sid.quantityRejectedTotal">
+                        <set field="anyReceived" from="true"/><break/></if>
+                </iterate>
+            </if>
+            <if condition="isOutgoing || isTransfer">
+                <set field="allItemsPacked" from="true"/>
+                <iterate list="shipmentItemSourceList" entry="sisCheck">
+                    <if condition="sisCheck.quantityNotHandled &gt; 0.0">
+                        <set field="allItemsPacked" from="false"/><break/></if>
+                </iterate>
+                <set field="anyItemPacked" from="false"/>
+                <iterate list="shipmentItemSourceList" entry="sisCheck">
+                    <if condition="sisCheck.quantityNotHandled &lt; sisCheck.quantity">
+                        <set field="anyItemPacked" from="true"/><break/></if>
+                </iterate>
+            </if>
+
+            <set field="hasAllLabels" from="true"/>
+            <set field="hasAllTrackingCodes" from="true"/>
+            <set field="hasAnyLabels" from="false"/>
+            <iterate list="packageRouteSegList" entry="packageRouteSeg">
+                <if condition="packageRouteSeg.gatewayLabelId || packageRouteSeg.labelImage != null || packageRouteSeg.labelUrl">
+                    <then><set field="hasAnyLabels" from="true"/></then>
+                    <else><set field="hasAllLabels" from="false"/></else>
+                </if>
+                <if condition="!packageRouteSeg.trackingCode"><set field="hasAllTrackingCodes" from="false"/></if>
+            </iterate>
+
+            <set field="shippingGatewayConfigId" from="firstRouteSegment.shippingGatewayConfigId"/>
+            <!-- if no gateway on ShipmentRouteSegment and Shipment.productStoreId look up from store first -->
+            <if condition="!shippingGatewayConfigId &amp;&amp; shipment?.productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStoreShippingGateway" value-field="storeShippingGateway" cache="true">
+                    <field-map field-name="productStoreId" from="shipment.productStoreId"/>
+                    <field-map field-name="carrierPartyId" from="firstRouteSegment?.carrierPartyId"/>
+                </entity-find-one>
+                <set field="shippingGatewayConfigId" from="storeShippingGateway?.shippingGatewayConfigId"/>
+            </if>
+            <!-- if still no shippingGatewayConfigId and Shipment.fromPartyId lookup setting there -->
+            <if condition="!shippingGatewayConfigId &amp;&amp; shipment?.fromPartyId">
+                <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
+                        in-map="[partyId:shipment.fromPartyId, partySettingTypeId:'DefaultShipmentGatewayConfigId']"/>
+                <set field="shippingGatewayConfigId" from="ptySettingOut?.settingValue"/>
+            </if>
+            <!-- if still no shippingGatewayConfigId try the global or user preference -->
+            <if condition="!shippingGatewayConfigId">
+                <set field="shippingGatewayConfigId" from="ec.user.getPreference('DefaultShipmentGatewayConfigId')"/></if>
+
+            <if condition="shippingGatewayConfigId"><entity-find-one entity-name="mantle.shipment.carrier.ShippingGatewayConfig" value-field="shippingGatewayConfig"/></if>
+
+            <!-- get dest ContactMech for trust level -->
+            <if condition="lastRouteSegment.destPostalContactMechId">
+                <entity-find-one entity-name="mantle.party.contact.ContactMech" value-field="destContactMech">
+                    <field-map field-name="contactMechId" from="lastRouteSegment.destPostalContactMechId"/></entity-find-one>
+            </if>
+            <set field="destContactMechValid" from="destContactMech != null &amp;&amp; destContactMech.trustLevelEnumId in ['CmtlValid', 'CmtlVerified']"/>
+
+            <if condition="firstRouteSegment.carrierPartyId &amp;&amp; firstRouteSegment.carrierPartyId != '_NA_'">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="curCarrierDetail" cache="true">
+                    <field-map field-name="partyId" from="firstRouteSegment.carrierPartyId"/></entity-find-one>
+            </if>
+            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="curShipmentMethodEnum">
+                <field-map field-name="enumId" from="firstRouteSegment.shipmentMethodEnumId"/></entity-find-one>
+            <entity-find-one entity-name="mantle.shipment.carrier.CarrierShipmentMethod" value-field="curCarrierShipmentMethod">
+                <field-map field-name="carrierPartyId" from="firstRouteSegment.carrierPartyId"/>
+                <field-map field-name="shipmentMethodEnumId" from="firstRouteSegment.shipmentMethodEnumId"/>
+            </entity-find-one>
+
+            <!-- get order carrier and method info -->
+            <entity-find entity-name="mantle.shipment.ShipmentItemSourceOrderItem" list="sisOrderItemList" distinct="true">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="orderId" operator="is-not-null"/>
+                <econdition field-name="orderPartSeqId" operator="is-not-null"/>
+                <select-field field-name="orderId,orderPartSeqId"/>
+            </entity-find>
+            <if condition="sisOrderItemList">
+                <entity-find-one entity-name="mantle.order.OrderPart" value-field="firstOrderPart">
+                    <field-map field-name="orderId" from="sisOrderItemList[0].orderId"/>
+                    <field-map field-name="orderPartSeqId" from="sisOrderItemList[0].orderPartSeqId"/>
+                </entity-find-one>
+                <if condition="firstOrderPart != null">
+                    <if condition="firstOrderPart.carrierPartyId &amp;&amp; firstOrderPart.carrierPartyId != '_NA_'">
+                        <entity-find-one entity-name="mantle.party.PartyDetail" value-field="orderCarrierDetail" cache="true">
+                            <field-map field-name="partyId" from="firstOrderPart.carrierPartyId"/></entity-find-one>
+                    </if>
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="orderShipmentMethodEnum">
+                        <field-map field-name="enumId" from="firstOrderPart.shipmentMethodEnumId"/></entity-find-one>
+                    <entity-find-one entity-name="mantle.shipment.carrier.CarrierShipmentMethod" value-field="orderCarrierShipmentMethod">
+                        <field-map field-name="carrierPartyId" from="firstOrderPart.carrierPartyId"/>
+                        <field-map field-name="shipmentMethodEnumId" from="firstOrderPart.shipmentMethodEnumId"/>
+                    </entity-find-one>
+                </if>
+            </if>
+
+            <!-- get Assembly WorkEffort Info -->
+            <if condition="shipment.assemblyWorkEffortId">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="assemblyWorkEffort">
+                    <field-map field-name="workEffortId" from="shipment.assemblyWorkEffortId"/></entity-find-one>
+                <service-call name="mantle.work.ManufacturingServices.get#ConsumedAssetRemaining"
+                        in-map="[workEffortId:shipment.assemblyWorkEffortId]" out-map="assemblyAssetInfo"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="ShipmentContactInfo">
+        <description>Get contact info for a Shipment (same structure in the info Map as get#PartyContactInfo) using the
+            ShipmentRouteSegment origin* and dest* fields, then look at origin and dest Facility shipping or primary
+            contact info then if still not found look for the Shipment from and to Party shipping contact info.
+        </description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentRouteSegmentSeqId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipment" type="Map"/>
+            <parameter name="shipmentRouteSegmentList" type="List"><parameter name="shipmentRouteSegment" type="Map"/></parameter>
+            <parameter name="firstRouteSegment" type="Map"/>
+            <parameter name="carrierParty" type="Map"/>
+            <parameter name="shipmentMethodEnum" type="Map"/>
+            <parameter name="carrierShipmentMethod" type="Map"/>
+            <parameter name="lastRouteSegment" type="Map"/>
+            <parameter name="originFacility" type="Map"/>
+            <parameter name="destinationFacility" type="Map"/>
+
+            <parameter name="fromPartyId"><description>Shipment.fromPartyId or if empty then warehouse Facility.ownerPartyId</description></parameter>
+            <parameter name="fromPartyDetail" type="Map"/>
+            <parameter name="fromContactInfo" type="Map"><description>The from ship info, first by
+                ShipmentRouteSegment.origin* fields then the warehouse Facility
+                (using mantle.facility.ContactServices.get#FacilityDefaultShipOrigin) or if no warehouse or contact info
+                found then from the mantle.party.ContactServices.get#PartyContactInfo service for the fromPartyId.</description></parameter>
+            <parameter name="logoImageLocation"/>
+            <parameter name="toPartyId"/>
+            <parameter name="toPartyDetail" type="Map"/>
+            <parameter name="toContactInfo" type="Map"><description>The to ship info, first by ShipmentRouteSegment.dest*,
+                then from the mantle.party.ContactServices.get#PartyContactInfo service for Shipment.toPartyId.</description></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipment == null"><return error="true" message="Shipment not found with ID ${shipmentId}"/></if>
+
+            <!-- get the first ShipmentRouteSegment -->
+            <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="shipmentRouteSegmentList">
+                <econdition field-name="shipmentId"/>
+                <econdition field-name="shipmentRouteSegmentSeqId" ignore-if-empty="true"/>
+                <order-by field-name="shipmentRouteSegmentSeqId"/>
+            </entity-find>
+            <set field="firstRouteSegment" from="shipmentRouteSegmentList ? shipmentRouteSegmentList.first() : null"/>
+            <set field="lastRouteSegment" from="shipmentRouteSegmentList ? shipmentRouteSegmentList.last() : null"/>
+
+            <if condition="firstRouteSegment?.carrierPartyId">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="carrierParty" cache="true">
+                    <field-map field-name="partyId" from="firstRouteSegment.carrierPartyId"/></entity-find-one>
+            </if>
+            <if condition="firstRouteSegment?.shipmentMethodEnumId">
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="shipmentMethodEnum" cache="true">
+                    <field-map field-name="enumId" from="firstRouteSegment.shipmentMethodEnumId"/></entity-find-one>
+            </if>
+            <if condition="firstRouteSegment?.carrierPartyId &amp;&amp; firstRouteSegment?.carrierPartyId != '_NA_' &amp;&amp; firstRouteSegment?.shipmentMethodEnumId">
+                <entity-find-one entity-name="mantle.shipment.carrier.CarrierShipmentMethod" value-field="carrierShipmentMethod" cache="true">
+                    <field-map field-name="carrierPartyId" from="firstRouteSegment.carrierPartyId"/>
+                    <field-map field-name="shipmentMethodEnumId" from="firstRouteSegment.shipmentMethodEnumId"/>
+                </entity-find-one>
+            </if>
+
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="originFacility">
+                <field-map field-name="facilityId" from="firstRouteSegment?.originFacilityId"/></entity-find-one>
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="destinationFacility">
+                <field-map field-name="facilityId" from="lastRouteSegment?.destinationFacilityId"/></entity-find-one>
+
+            <set field="fromPartyId" from="shipment.fromPartyId ?: warehouseFacility?.ownerPartyId"/>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="fromPartyDetail">
+                <field-map field-name="partyId" from="fromPartyId"/></entity-find-one>
+
+            <if condition="firstRouteSegment?.originPostalContactMechId">
+                <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="fromContactInfo"
+                        in-map="[partyId:fromPartyId, postalContactMechId:firstRouteSegment.originPostalContactMechId,
+                            telecomContactMechPurposeId:'PhoneShippingOrigin', emailContactMechPurposeId:'EmailShippingOrigin']"/>
+            </if>
+            <if condition="!fromContactInfo &amp;&amp; firstRouteSegment?.originFacilityId">
+                <set field="fromContactIdMap" from="[facilityId:firstRouteSegment?.originFacilityId,
+                        postalContactMechId:firstRouteSegment?.originPostalContactMechId,
+                        telecomContactMechId:firstRouteSegment?.originTelecomContactMechId]"/>
+                <!-- will handle the contactMechIds if we have them now, otherwise use the purposes to look up -->
+                <service-call name="mantle.facility.ContactServices.get#FacilityContactInfo" out-map="fromContactInfo"
+                        in-map="fromContactIdMap + [postalContactMechPurposeId:'PostalShippingOrigin',
+                            telecomContactMechPurposeId:'PhoneShippingOrigin', emailContactMechPurposeId:'EmailShippingOrigin']"/>
+            </if>
+            <!-- will handle the contactMechIds if we have them now, otherwise use the purposes to look up -->
+            <if condition="!fromContactInfo &amp;&amp; fromPartyId">
+                <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="fromContactInfo"
+                        in-map="[partyId:fromPartyId, postalContactMechPurposeId:'PostalShippingOrigin',
+                        telecomContactMechPurposeId:'PhoneShippingOrigin', emailContactMechPurposeId:'EmailShippingOrigin']"/>
+                <service-call name="mantle.party.PartyServices.get#PartyContentLocation" out-map="logoImageOut"
+                        in-map="[partyId:fromPartyId, partyContentTypeEnumIdList:['PcntLogoImage', 'PcntPrimaryImage']]"/>
+                <set field="logoImageLocation" from="logoImageOut.contentLocation"/>
+            </if>
+
+            <set field="toPartyId" from="shipment.toPartyId"/>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="toPartyDetail">
+                <field-map field-name="partyId" from="toPartyId"/></entity-find-one>
+
+            <if condition="lastRouteSegment?.destPostalContactMechId">
+                <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="toContactInfo"
+                        in-map="[partyId:toPartyId, postalContactMechId:lastRouteSegment.destPostalContactMechId,
+                            telecomContactMechPurposeId:'PhoneShippingDest', emailContactMechPurposeId:'EmailShippingDest']"/>
+            </if>
+            <if condition="!toContactInfo &amp;&amp; lastRouteSegment?.destinationFacilityId">
+                <set field="toContactIdMap" from="[facilityId:lastRouteSegment.destinationFacilityId,
+                        postalContactMechId:lastRouteSegment.destPostalContactMechId,
+                        telecomContactMechId:lastRouteSegment.destTelecomContactMechId]"/>
+                <!-- will handle the contactMechIds if we have them now, otherwise use the purposes to look up -->
+                <service-call name="mantle.facility.ContactServices.get#FacilityContactInfo" out-map="toContactInfo"
+                        in-map="toContactIdMap + [postalContactMechPurposeId:'PostalShippingDest',
+                            telecomContactMechPurposeId:'PhoneShippingDest', emailContactMechPurposeId:'EmailShippingDest']"/>
+            </if>
+            <!-- will handle the contactMechIds if we have them now, otherwise use the purposes to look up -->
+            <if condition="!toContactInfo &amp;&amp; toPartyId">
+                <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="toContactInfo"
+                        in-map="[partyId:toPartyId, postalContactMechPurposeId:'PostalShippingDest',
+                            telecomContactMechPurposeId:'PhoneShippingDest', emailContactMechPurposeId:'EmailShippingDest']"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="ShipmentShippingOptions">
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="shipmentRouteSegmentSeqId"/>
+            <parameter name="carrierPartyIdList" type="List"><parameter name="carrierPartyId"/></parameter>
+            <parameter name="getRates" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shippingOptions" type="List"><parameter name="option" type="Map">
+                <parameter name="carrierPartyId"/><parameter name="carrierName"/>
+                <parameter name="shipmentMethodEnumId"/><parameter name="shipmentMethodDescription"/>
+                <parameter name="shippingTotal" type="BigDecimal"/>
+            </parameter></parameter>
+            <parameter name="postalContactMechId"><description>Return if address was validated and replaced</description></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.shipment.Shipment" value-field="shipment"/>
+            <if condition="shipmentRouteSegmentSeqId"><then>
+                <entity-find-one entity-name="mantle.shipment.ShipmentRouteSegment" value-field="routeSegment"/>
+            </then><else>
+                <entity-find entity-name="mantle.shipment.ShipmentRouteSegment" list="routeSegmentList">
+                    <econdition field-name="shipmentId"/><order-by field-name="shipmentRouteSegmentSeqId"/></entity-find>
+                <set field="routeSegment" from="routeSegmentList[0]"/>
+            </else></if>
+
+            <if condition="shipment.productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
+                    <field-map field-name="productStoreId" from="shipment.productStoreId"/></entity-find-one>
+            </if>
+            <if condition="productStore != null &amp;&amp; productStore.shipmentAnyCarrierMethod != 'Y'">
+                <!-- if the Shipment is associated with a ProductStore get shipping options from the store config -->
+                <set field="productStoreId" from="shipment.productStoreId"/>
+                <entity-find entity-name="mantle.product.store.ProductStoreShipOptionDetail" list="shipOptionList" cache="true">
+                    <econdition field-name="productStoreId"/>
+                    <econdition field-name="carrierPartyId" operator="in" from="carrierPartyIdList" ignore-if-empty="true"/>
+                    <order-by field-name="carrierPartyId,sequenceNum"/>
+                </entity-find>
+
+                <!-- find all gateways configured and carriers for each -->
+                <set field="carrierIdSet" from="new HashSet(shipOptionList*.carrierPartyId)"/>
+                <entity-find entity-name="mantle.product.store.ProductStoreShippingGateway" list="storeGatewayList">
+                    <econdition field-name="productStoreId"/><econdition field-name="carrierPartyId" operator="in" from="carrierIdSet"/></entity-find>
+                <set field="carriersByGateway" from="[:]"/>
+                <iterate list="storeGatewayList" entry="storeGateway">
+                    <script>addToSetInMap(storeGateway.shippingGatewayConfigId, storeGateway.carrierPartyId, carriersByGateway)</script></iterate>
+            </if>
+            <if condition="!carriersByGateway">
+                <!-- otherwise use more general options -->
+                <set field="shippingGatewayConfigId" from="routeSegment.shippingGatewayConfigId"/>
+                <if condition="!shippingGatewayConfigId &amp;&amp; shipment?.fromPartyId">
+                    <!-- if Shipment.fromPartyId lookup setting there -->
+                    <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
+                            in-map="[partyId:shipment.fromPartyId, partySettingTypeId:'DefaultShipmentGatewayConfigId']"/>
+                    <set field="shippingGatewayConfigId" from="ptySettingOut?.settingValue"/>
+                </if>
+                <if condition="!shippingGatewayConfigId">
+                    <set field="shippingGatewayConfigId" from="ec.user.getPreference('DefaultShipmentGatewayConfigId')"/></if>
+
+                <if condition="shippingGatewayConfigId">
+                    <!-- include all CarrierShipmentMethod records -->
+                    <if condition="carrierPartyIdList"><then>
+                        <entity-find entity-name="mantle.shipment.carrier.CarrierShipmentMethod" list="shipOptionList" cache="false">
+                            <econdition field-name="carrierPartyId" operator="in" from="carrierPartyIdList"/>
+                            <order-by field-name="carrierPartyId,sequenceNum"/>
+                        </entity-find>
+                    </then><else>
+                        <entity-find entity-name="mantle.shipment.carrier.CarrierShipmentMethod" list="shipOptionList" cache="true">
+                            <order-by field-name="carrierPartyId,sequenceNum"/></entity-find>
+                    </else></if>
+
+                    <set field="carriersByGateway" from="[(shippingGatewayConfigId):new HashSet(shipOptionList*.carrierPartyId)]"/>
+                </if>
+            </if>
+
+            <!-- get rates -->
+            <if condition="getRates &amp;&amp; shipOptionList &amp;&amp; carriersByGateway">
+                <!-- build package info list -->
+                <set field="packageInfoList" from="[]"/>
+                <entity-find entity-name="mantle.shipment.ShipmentPackage" list="packageList">
+                    <econdition field-name="shipmentId"/><order-by field-name="shipmentPackageSeqId"/></entity-find>
+                <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="shipmentPackageContentList">
+                    <econdition field-name="shipmentId"/><order-by field-name="productId"/></entity-find>
+                <iterate list="packageList" entry="pkg">
+                    <filter-map-list list="shipmentPackageContentList" to-list="curContentList">
+                        <field-map field-name="shipmentPackageSeqId" from="pkg.shipmentPackageSeqId"/></filter-map-list>
+                    <set field="quantityByProductId" from="[:]"/>
+                    <iterate list="curContentList" entry="curContent"><script>quantityByProductId.put(curContent.productId, curContent.quantity)</script></iterate>
+
+                    <script>packageInfoList.add([shipmentBoxTypeId:pkg.shipmentBoxTypeId, weight:pkg.weight,
+                            weightUomId:pkg.weightUomId, shipmentPackageSeqId:pkg.shipmentPackageSeqId, quantityByProductId:quantityByProductId])</script>
+                </iterate>
+                <!-- get origin address direct or through facility -->
+                <set field="originPostalContactMechId" from="routeSegment.originPostalContactMechId"/>
+                <if condition="!originPostalContactMechId &amp;&amp; routeSegment.originFacilityId">
+                    <service-call name="mantle.facility.ContactServices.get#FacilityDefaultShipOrigin" out-map="facOriginOut"
+                            in-map="[facilityId:routeSegment.originFacilityId]"/>
+                    <set field="originPostalContactMechId" from="facOriginOut.postalContactMechId"/>
+                </if>
+
+                <!-- <log message="getting rates origin ${originPostalContactMechId} dest ${routeSegment.destPostalContactMechId} packageList ${packageList} carriersByGateway ${carriersByGateway}"/> -->
+                <if condition="packageList &amp;&amp; originPostalContactMechId &amp;&amp; routeSegment.destPostalContactMechId">
+                    <!-- if Shipment.productStoreId and store has a label markup setting prep it here -->
+                    <if condition="shipment.productStoreId">
+                        <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true">
+                            <field-map field-name="productStoreId" from="shipment.productStoreId"/></entity-find-one>
+                    </if>
+
+                    <!-- iterate over shipping gateways and get rates from each -->
+                    <iterate list="carriersByGateway" entry="carrierPartyIdSet" key="shippingGatewayConfigId">
+                        <entity-find-one entity-name="mantle.shipment.carrier.ShippingGatewayConfig" value-field="shippingGatewayConfig" cache="true">
+                            <field-map field-name="shippingGatewayConfigId"/></entity-find-one>
+                        <if condition="!shippingGatewayConfig?.getShippingRatesBulkName"><continue/></if>
+
+                        <!-- split shipOptionList to only include options for carriers for current gateway -->
+                        <set field="curShipOptionList" from="shipOptionList.findAll({ it.carrierPartyId in carrierPartyIdSet })"/>
+                        <!-- call bulk shipping rates service for current gateway -->
+                        <service-call name="${shippingGatewayConfig.getShippingRatesBulkName}" out-map="bulkOut" out-map-add-to-existing="false"
+                                in-map="[shippingGatewayConfigId:shippingGatewayConfigId, carrierShipmentMethodList:curShipOptionList,
+                                    fromPartyId:shipment.fromPartyId, toPartyId:shipment.toPartyId,
+                                    originFacilityId:routeSegment.originFacilityId, originPostalContactMechId:originPostalContactMechId,
+                                    destPostalContactMechId:routeSegment.destPostalContactMechId, packageInfoList:packageInfoList,
+                                    productStoreId:shipment.productStoreId, vendorPartyId:shipment.fromPartyId,
+                                    currencyUomId:shipment.costUomId]"/>
+                        <!-- if the dest address was validated/cleansed and new record created then update -->
+                        <if condition="bulkOut.destPostalContactMechId &amp;&amp; bulkOut.destPostalContactMechId != routeSegment.destPostalContactMechId">
+                            <set field="routeSegment.destPostalContactMechId" from="bulkOut.destPostalContactMechId"/>
+                            <entity-update value-field="routeSegment"/>
+                        </if>
+                        <!-- make sure there is a return value for each in carrierShipmentMethodList -->
+                        <set field="shippingRateInfoList" from="bulkOut.shippingRateInfoList"/>
+                        <if condition="shippingRateInfoList">
+                            <set field="newShipOptionList" from="[]"/>
+                            <iterate list="shipOptionList" entry="shipOption">
+                                <set field="shippingRateInfo" from="shippingRateInfoList.find({ it.carrierPartyId == shipOption.carrierPartyId &amp;&amp; it.shipmentMethodEnumId == shipOption.shipmentMethodEnumId })"/>
+                                <if condition="shippingRateInfo != null"><then>
+                                    <if condition="productStore?.markupShipmentShipLabels == 'Y' || ec.user.getPreference('AllStoresMarkupLabelShipment') == 'true'">
+                                        <service-call name="mantle.shipment.CarrierServices.get#ShipLabelMarkup" out-map="markupOut" out-map-add-to-existing="false"
+                                                in-map="[productStoreId:productStore.productStoreId, carrierPartyId:shippingRateInfo.carrierPartyId,
+                                                    shipmentMethodEnumId:shippingRateInfo.shipmentMethodEnumId]"/>
+                                    </if>
+                                    <set field="markupAmount" from="markupOut?.markupAmount ?: 0.0"/>
+                                    <set field="markupMultiplier" from="markupOut?.markupMultiplier ?: 0.0"/>
+
+                                    <if condition="(markupMultiplier != 0.0 || markupAmount != 0.0) &amp;&amp; shippingRateInfo.shippingTotal">
+                                        <set field="shippingRateInfo.shippingTotal" from="shippingRateInfo.shippingTotal + markupAmount +
+                                                (markupMultiplier as BigDecimal).multiply(shippingRateInfo.shippingTotal).setScale(2, BigDecimal.ROUND_HALF_UP)"/>
+                                    </if>
+
+                                    <script>newShipOptionList.add(shippingRateInfo)</script>
+                                </then><else>
+                                    <script>newShipOptionList.add(shipOption)</script>
+                                </else></if>
+                            </iterate>
+                            <set field="shipOptionList" from="newShipOptionList"/>
+                        </if>
+                    </iterate>
+                </if>
+            </if>
+
+            <!-- make output list -->
+            <set field="shippingOptions" from="[]"/>
+            <iterate list="shipOptionList" entry="shipOption">
+                <set field="shippingOption" from="new HashMap(shipOption)"/>
+                <if condition="!shipOption.description || shipOption.sequenceNum == null">
+                    <entity-find-one entity-name="mantle.shipment.carrier.CarrierShipmentMethod" value-field="carrierShipmentMethod">
+                        <field-map field-name="carrierPartyId" from="shipOption.carrierPartyId"/>
+                        <field-map field-name="shipmentMethodEnumId" from="shipOption.shipmentMethodEnumId"/>
+                    </entity-find-one>
+                    <set field="shippingOption.description" from="shippingOption.description ?: carrierShipmentMethod?.description"/>
+                    <set field="shippingOption.sequenceNum" from="shippingOption.sequenceNum ?: carrierShipmentMethod?.sequenceNum"/>
+                </if>
+                <entity-find-one entity-name="mantle.party.Party" value-field="carrierParty" cache="true">
+                    <field-map field-name="partyId" from="shipOption.carrierPartyId"/></entity-find-one>
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="shipmentMethodEnum">
+                    <field-map field-name="enumId" from="shipOption.shipmentMethodEnumId"/></entity-find-one>
+                <set field="shippingOption.carrierName" from="carrierParty.pseudoId"/>
+                <set field="shippingOption.shipmentMethodDescription" from="shipmentMethodEnum.description"/>
+                <script>shippingOptions.add(shippingOption)</script>
+            </iterate>
+            <order-map-list list="shippingOptions"><order-by field-name="carrierName"/><order-by field-name="sequenceNum"/></order-map-list>
+        </actions>
+    </service>
+
+    <!-- =============================================== -->
+    <!-- ========== Shipping/Packing Services ========== -->
+    <!-- =============================================== -->
+
+    <service verb="get" noun="ShipmentLoadPickInfo">
+        <description>Get information for a picklist document for all shipments in a shipment ship/load work effort.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="locationOrderBy" default-value="facilityId,sequenceNum,areaId,aisleId,sectionId,levelId,positionId"/>
+            <parameter name="productOrderBy" default-value="pseudoId,productName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="dockFacility" type="Map"/>
+            <parameter name="warehouseFacility" type="Map"><description>The warehouse the shipments come
+                from. Based on WorkEffort.facilityId unless it is a dock type facility and has a warehouse parent
+                facility.</description></parameter>
+            <parameter name="assignedAssetList" type="List"/>
+
+            <parameter name="shipmentList" type="List"/>
+            <parameter name="shipmentPickPackInfoList" type="List"><description>List of Maps withs result from calls to
+                the get#ShipmentPickPackInfo service.</description></parameter>
+
+            <!-- The following are consolidated lists for picking -->
+            <parameter name="reservedLocationInfoList" type="List"/>
+            <parameter name="otherLocationInfoList" type="List"/>
+            <!-- reservedLocationInfoList and otherLocationInfoList are List of Maps with:
+              - FacilityLocation fields [facilityId, locationTypeEnumId, areaId, aisleId, sectionId, levelId, positionId]
+              - locationTypeEnum
+              - GeoPoint fields [latitude, longitude, elevation, elevationUomId]
+              - productInfoList - List of Maps with:
+                - Product fields (all fields from entity)
+                - quantity
+                - quantityByBin - Map with key binLocationNumber (from ShipmentItemSource or Shipment, may be null) and value quantity
+            -->
+            <parameter name="productInfoList" type="List"/>
+            <!-- productInfoList is a List of Maps with:
+              - Product fields (all fields from entity)
+              - quantity
+              - reservedLocationInfoList
+                - FacilityLocation fields [facilityId, locationTypeEnumId, areaId, aisleId, sectionId, levelId, positionId]
+                - locationTypeEnum
+                - GeoPoint fields [latitude, longitude, elevation, elevationUomId]
+                - quantity
+                - quantityByBin - Map with key binLocationNumber (from ShipmentItemSource or Shipment, may be null) and value quantity
+              - otherLocationInfoList (same fields as reservedLocationInfoList)
+            -->
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="dockFacility">
+                <field-map field-name="facilityId" from="workEffort.facilityId"/></entity-find-one>
+            <!-- for any of these alternatives originFacilityId may still be null -->
+            <if condition="dockFacility &amp;&amp; dockFacility.facilityTypeEnumId != 'FcTpWarehouse'"><then>
+                <entity-find-one entity-name="mantle.facility.Facility" value-field="warehouseFacility">
+                    <field-map field-name="facilityId" from="dockFacility.parentFacilityId"/></entity-find-one>
+            </then><else-if condition="dockFacility?.facilityTypeEnumId == 'FcTpWarehouse'">
+                <set field="warehouseFacility" from="dockFacility"/>
+                <set field="dockFacility" from="null"/>
+            </else-if></if>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortAssetAndAssign" list="assignedAssetList">
+                <date-filter/><econdition field-name="workEffortId"/><order-by field-name="assetName"/></entity-find>
+
+            <entity-find entity-name="mantle.shipment.Shipment" list="shipmentList">
+                <econdition field-name="shipWorkEffortId" from="workEffortId"/>
+                <order-by field-name="binLocationNumber,shipmentId"/></entity-find>
+
+            <set field="shipmentPickPackInfoList" from="[]"/>
+
+            <set field="productInfoMap" from="[:]"/>
+            <set field="reservedLocationInfoMap" from="[:]"/>
+            <set field="otherLocationInfoMap" from="[:]"/>
+
+            <!-- get ShipmentPickPackInfo and combine for picklist (by location, by product) -->
+            <iterate list="shipmentList" entry="shipment">
+                <set field="pickInfoOut" from="null"/>
+                <service-call name="mantle.shipment.ShipmentServices.get#ShipmentPickPackInfo" out-map="pickInfoOut" out-map-add-to-existing="false"
+                        in-map="[shipmentId:shipment.shipmentId, locationOrderBy:locationOrderBy, productOrderBy:productOrderBy]"/>
+                <script>shipmentPickPackInfoList.add(pickInfoOut)</script>
+                <!-- <log message="======== pickInfoOut:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(pickInfoOut))}"/> -->
+                <!-- <log message="======== pickInfoOut.packageInfoList:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(pickInfoOut.packageInfoList))}"/> -->
+                <!-- <log message="======== pickInfoOut.productInfoList:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(pickInfoOut.productInfoList))}"/> -->
+
+                <iterate list="pickInfoOut.productInfoList" entry="curProductInfo">
+                    <set field="productInfo" from="productInfoMap.get(curProductInfo.productId)"/>
+                    <if condition="productInfo != null"><then>
+                        <!-- merge curProductInfo into productInfo -->
+                        <set field="productInfo.quantity" from="productInfo.quantity + curProductInfo.quantity"/>
+
+                        <iterate list="curProductInfo.productReservedLocationInfoMap" entry="curLocationInfo" key="assetLocKey">
+                            <set field="locationInfo" from="productInfo.productReservedLocationInfoMap.get(assetLocKey)"/>
+                            <if condition="locationInfo"><then>
+                                <set field="locationInfo.quantity" from="locationInfo.quantity + curLocationInfo.quantity"/>
+                                <iterate list="curLocationInfo.quantityByBin" entry="quantity" key="binLocationNumber">
+                                    <script>addToBigDecimalInMap(binLocationNumber, quantity, locationInfo.quantityByBin)</script>
+                                </iterate>
+                            </then><else>
+                                <script>productInfo.productReservedLocationInfoMap.put(assetLocKey, curLocationInfo)</script>
+                            </else></if>
+                        </iterate>
+                        <iterate list="curProductInfo.productOtherLocationInfoMap" entry="curLocationInfo" key="assetLocKey">
+                            <set field="locationInfo" from="productInfo.productOtherLocationInfoMap.get(assetLocKey)"/>
+                            <if condition="locationInfo"><then>
+                                <set field="locationInfo.quantity" from="locationInfo.quantity + curLocationInfo.quantity"/>
+                                <iterate list="curLocationInfo.quantityByBin" entry="quantity" key="binLocationNumber">
+                                    <script>addToBigDecimalInMap(binLocationNumber, quantity, locationInfo.quantityByBin)</script>
+                                </iterate>
+                            </then><else>
+                                <script>productInfo.productOtherLocationInfoMap.put(assetLocKey, curLocationInfo)</script>
+                            </else></if>
+                        </iterate>
+                    </then><else>
+                        <script>productInfoMap.put(curProductInfo.productId, new LinkedHashMap(curProductInfo))</script>
+                    </else></if>
+                </iterate>
+
+                <iterate list="pickInfoOut.reservedLocationInfoMap" entry="curLocationInfo" key="assetLocKey">
+                    <set field="locationInfo" from="reservedLocationInfoMap.get(assetLocKey)"/>
+                    <if condition="locationInfo"><then>
+                        <!-- merge curLocationInfo into locationInfo -->
+                        <iterate list="curLocationInfo.productInfoMap" entry="curProductInfo" key="productId">
+                            <set field="productInfo" from="locationInfo.productInfoMap.get(productId)"/>
+                            <if condition="productInfo"><then>
+                                <set field="productInfo.quantity" from="productInfo.quantity + curProductInfo.quantity"/>
+                                <iterate list="curProductInfo.quantityByBin" entry="quantity" key="binLocationNumber">
+                                    <script>addToBigDecimalInMap(binLocationNumber, quantity, productInfo.quantityByBin)</script>
+                                </iterate>
+                            </then><else>
+                                <script>locationInfo.productInfoMap.put(productId, curProductInfo)</script>
+                            </else></if>
+                        </iterate>
+                    </then><else>
+                        <script>reservedLocationInfoMap.put(assetLocKey, curLocationInfo)</script>
+                    </else></if>
+                </iterate>
+                <iterate list="pickInfoOut.otherLocationInfoMap" entry="curLocationInfo" key="assetLocKey">
+                    <set field="locationInfo" from="otherLocationInfoMap.get(assetLocKey)"/>
+                    <if condition="locationInfo"><then>
+                        <!-- merge curLocationInfo into locationInfo -->
+                        <iterate list="curLocationInfo.productInfoMap" entry="curProductInfo" key="productId">
+                            <set field="productInfo" from="locationInfo.productInfoMap.get(productId)"/>
+                            <if condition="productInfo"><then>
+                                <set field="productInfo.quantity" from="productInfo.quantity + curProductInfo.quantity"/>
+                                <iterate list="curProductInfo.quantityByBin" entry="quantity" key="binLocationNumber">
+                                    <script>addToBigDecimalInMap(binLocationNumber, quantity, productInfo.quantityByBin)</script>
+                                </iterate>
+                            </then><else>
+                                <script>locationInfo.productInfoMap.put(productId, curProductInfo)</script>
+                            </else></if>
+                        </iterate>
+                    </then><else>
+                        <script>otherLocationInfoMap.put(assetLocKey, curLocationInfo)</script>
+                    </else></if>
+                </iterate>
+            </iterate>
+
+            <!-- create and order Lists from Maps for productInfoList -->
+            <set field="productInfoList" from="new ArrayList(productInfoMap.values())"/>
+            <order-map-list list="productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            <iterate list="productInfoList" entry="productInfo">
+                <set field="productInfo.reservedLocationInfoList" from="new ArrayList(productInfo.productReservedLocationInfoMap.values())"/>
+                <order-map-list list="productInfo.reservedLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+                <set field="productInfo.otherLocationInfoList" from="new ArrayList(productInfo.productOtherLocationInfoMap.values())"/>
+                <order-map-list list="productInfo.otherLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+            </iterate>
+            <!-- <log message="======== productInfoList:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(productInfoList))}"/> -->
+
+            <!-- create and order Lists from Maps for reservedLocationInfoList and otherLocationInfoList -->
+            <set field="reservedLocationInfoList" from="new ArrayList(reservedLocationInfoMap.values())"/>
+            <order-map-list list="reservedLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+            <!-- <log message="======== reservedLocationInfoList:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(reservedLocationInfoList))}"/> -->
+            <iterate list="reservedLocationInfoList" entry="locationInfo">
+                <set field="locationInfo.productInfoList" from="new ArrayList(locationInfo.productInfoMap.values())"/>
+                <order-map-list list="locationInfo.productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            </iterate>
+            <set field="otherLocationInfoList" from="new ArrayList(otherLocationInfoMap.values())"/>
+            <order-map-list list="otherLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+            <iterate list="otherLocationInfoList" entry="locationInfo">
+                <set field="locationInfo.productInfoList" from="new ArrayList(locationInfo.productInfoMap.values())"/>
+                <order-map-list list="locationInfo.productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ShipmentPickPackInfo">
+        <description>Get information for single shipment pick sheet or pack insert documents.</description>
+        <in-parameters>
+            <parameter name="shipmentId" required="true"/>
+            <parameter name="locationOrderBy" default-value="facilityId,sequenceNum,areaId,aisleId,sectionId,levelId,positionId"/>
+            <parameter name="productOrderBy" default-value="pseudoId,productName"/>
+            <parameter name="templateSettingSuffix"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shipment" type="Map"/>
+            <parameter name="orderIdSet" type="Set"><parameter name="orderId"/></parameter>
+            <parameter name="orderPartList" type="List"><parameter name="orderHeaderAndPart" type="Map"/></parameter>
+            <parameter name="invoiceIdSet" type="Set"><parameter name="invoiceId"/></parameter>
+            <parameter name="invoiceList" type="List"><parameter name="invoice" type="Map"/></parameter>
+
+            <parameter name="firstRouteSegment" type="Map"/>
+            <parameter name="carrierParty" type="Map"/>
+            <parameter name="shipmentMethodEnum" type="Map"/>
+            <parameter name="carrierShipmentMethod" type="Map"/>
+            <parameter name="lastRouteSegment" type="Map"/>
+            <parameter name="originFacility" type="Map"/>
+            <parameter name="destinationFacility" type="Map"/>
+
+            <parameter name="fromPartyId"><description>Shipment.fromPartyId or if empty then warehouse Facility.ownerPartyId</description></parameter>
+            <parameter name="fromPartyDetail" type="Map"/>
+            <parameter name="fromContactInfo" type="Map"><description>The from ship info, first by
+                ShipmentRouteSegment.origin* fields then the warehouse Facility
+                (using mantle.facility.ContactServices.get#FacilityDefaultShipOrigin) or if no warehouse or contact info
+                found then from the mantle.party.ContactServices.get#PartyContactInfo service for the fromPartyId.</description></parameter>
+            <parameter name="logoImageLocation"/>
+            <parameter name="toPartyDetail" type="Map"/>
+            <parameter name="toContactInfo" type="Map"><description>The to ship info, first by ShipmentRouteSegment.dest*,
+                then from the mantle.party.ContactServices.get#PartyContactInfo service for Shipment.toPartyId.</description></parameter>
+            <parameter name="toBillingContactInfo" type="Map"><description>If there is an order associated with this shipment the
+                billing address for the order using OrderInfoServices.get#OrderPartBillingAddress</description></parameter>
+
+            <parameter name="reservedLocationInfoList" type="List"><parameter name="reservedLocationInfo" type="Map"/></parameter>
+            <parameter name="otherLocationInfoList" type="List"><parameter name="otherLocationInfo" type="Map"/></parameter>
+            <parameter name="productInfoList" type="List"><parameter name="productInfo" type="Map"/></parameter>
+            <parameter name="packageInfoList" type="List"><parameter name="packageInfo" type="Map"/></parameter>
+
+            <!-- for use by get#PicklistPickInfo and others that need more structured results -->
+            <parameter name="reservedLocationInfoMap" type="Map"/>
+            <parameter name="otherLocationInfoMap" type="Map"/>
+            <parameter name="productInfoMap" type="Map"/>
+
+            <parameter name="templateLocation"><description>If templateSettingSuffix specified this is looked up from
+                ProductStoreSetting and if no setting found for store then from PartySetting.</description></parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.shipment.ShipmentServices.get#ShipmentContactInfo" out-map="context"
+                    in-map="[shipmentId:shipmentId]"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList">
+                <econdition field-name="shipmentId"/></entity-find>
+            <set field="orderIdSet" from="new TreeSet()"/>
+            <set field="invoiceIdSet" from="new TreeSet()"/>
+            <set field="orderPartsById" from="[:]"/>
+            <iterate list="shipmentItemSourceList" entry="shipmentItemSource">
+                <script>
+                if (shipmentItemSource.orderId) orderIdSet.add(shipmentItemSource.orderId)
+                if (shipmentItemSource.invoiceId) invoiceIdSet.add(shipmentItemSource.invoiceId)
+                </script>
+                <if condition="shipmentItemSource.orderId &amp;&amp; shipmentItemSource.orderItemSeqId">
+                    <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                        <field-map field-name="orderId" from="shipmentItemSource.orderId"/>
+                        <field-map field-name="orderItemSeqId" from="shipmentItemSource.orderItemSeqId"/>
+                    </entity-find-one>
+                    <set field="combinedPartId" from="orderItem.orderId + '::' + orderItem.orderPartSeqId"/>
+                    <if condition="orderPartsById.get(combinedPartId) == null">
+                        <entity-find-one entity-name="mantle.order.OrderHeaderAndPart" value-field="orderHeaderAndPart">
+                            <field-map field-name="orderId" from="orderItem.orderId"/>
+                            <field-map field-name="orderPartSeqId" from="orderItem.orderPartSeqId"/>
+                        </entity-find-one>
+                        <script>orderPartsById.put(combinedPartId, orderHeaderAndPart)</script>
+                    </if>
+                </if>
+            </iterate>
+            <if condition="invoiceIdSet"><entity-find entity-name="mantle.account.invoice.Invoice" list="invoiceList">
+                    <econdition field-name="invoiceId" operator="in" from="invoiceIdSet"/></entity-find></if>
+            <set field="orderPartList" from="new ArrayList(orderPartsById.values())"/>
+            <order-map-list list="orderPartList"><order-by field-name="orderId"/><order-by field-name="orderPartSeqId"/></order-map-list>
+
+            <!-- get toBillingContactInfo -->
+            <if condition="orderPartList">
+                <service-call name="mantle.order.OrderInfoServices.get#OrderPartBillingAddress" out-map="billAddrOut"
+                        in-map="[orderId:orderPartList[0].orderId, orderPartSeqId:orderPartList[0].orderPartSeqId]"/>
+                <if condition="billAddrOut.postalContactMechIdList">
+                    <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="toBillingContactInfo"
+                            in-map="[partyId:orderPartList[0].customerPartyId, postalContactMechId:billAddrOut.postalContactMechIdList[0]]"/>
+                </if>
+            </if>
+
+            <set field="assetAllowOtherOwner" from="originFacility?.assetAllowOtherOwner"/>
+            <set field="ownerPartyIdSet" from="new HashSet()"/>
+            <script>if (orderPartList) ownerPartyIdSet.addAll(orderPartList*.vendorPartyId)</script>
+            <if condition="ownerPartyIdSet &amp;&amp; assetAllowOtherOwner != 'Y'">
+                <set field="origOwnerPartyIdList" from="new ArrayList(ownerPartyIdSet)"/>
+                <iterate list="origOwnerPartyIdList" entry="ownerPartyId">
+                    <!-- look for parent org(s) if any, include assets from parent org too -->
+                    <entity-find entity-name="mantle.party.PartyRelationship" list="parentRelList" cache="true">
+                        <date-filter/>
+                        <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup"/>
+                        <econdition field-name="fromPartyId" from="ownerPartyId"/>
+                        <econdition field-name="toPartyId" operator="is-not-null"/>
+                    </entity-find>
+                    <script>if (parentRelList) ownerPartyIdSet.addAll(parentRelList*.toPartyId)</script>
+                </iterate>
+            </if>
+
+            <!-- Get the shipment pick/pack info by product, by reserved location, by other location -->
+
+            <set field="productInfoList" from="[]"/>
+            <set field="productInfoMap" from="[:]"/>
+            <set field="reservedLocationInfoMap" from="[:]"/>
+            <set field="otherLocationInfoMap" from="[:]"/>
+            <set field="issuedLocationInfoMap" from="[:]"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentItem" list="shipmentItemList">
+                <econdition field-name="shipmentId"/><order-by field-name="productId"/></entity-find>
+
+            <!-- pre-process ShipmentItems -->
+            <set field="shipmentProductList" from="[]"/>
+            <iterate list="shipmentItemList" entry="shipmentItem">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="shipmentItem.productId"/></entity-find-one>
+
+                <!-- if product type is PtPickAssembly look up components and build info for each -->
+                <if condition="product.productTypeEnumId == 'PtPickAssembly'"><then>
+                    <entity-find entity-name="mantle.product.ProductAssoc" list="assocList">
+                        <date-filter/>
+                        <econdition field-name="productId" from="shipmentItem.productId"/>
+                        <econdition field-name="productAssocTypeEnumId" value="PatMfgBom"/>
+                    </entity-find>
+                    <iterate list="assocList" entry="assoc">
+                        <script>shipmentProductList.add([productId:assoc.toProductId, shipmentProductId:shipmentItem.productId,
+                                quantity:shipmentItem.quantity, qtyMultiplier:assoc.quantity])</script>
+                    </iterate>
+                </then><else>
+                    <script>shipmentProductList.add([productId:shipmentItem.productId, shipmentProductId:shipmentItem.productId,
+                            quantity:shipmentItem.quantity, qtyMultiplier:1.0])</script>
+                </else></if>
+            </iterate>
+
+            <iterate list="shipmentProductList" entry="shipmentProduct">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product" cache="true">
+                    <field-map field-name="productId" from="shipmentProduct.productId"/></entity-find-one>
+
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="sisList">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="productId" from="shipmentProduct.shipmentProductId"/>
+                </entity-find>
+
+                <set field="productQuantity" from="0.0"/>
+                <set field="productReservedLocationInfoMap" from="[:]"/>
+                <set field="productOtherLocationInfoMap" from="[:]"/>
+                <set field="priceQuantityMap" from="[:]"/>
+                <iterate list="sisList" entry="sis">
+                    <if condition="!sis.quantityNotHandled"><continue/></if>
+                    <set field="binLocationNumber" from="sis.binLocationNumber ?: shipment.binLocationNumber ?: 'N/A'"/>
+
+                    <!-- find assets by reservation, if any in place -->
+                    <entity-find entity-name="mantle.product.issuance.AssetReservation" list="assetResList">
+                        <econdition field-name="orderId" from="sis.orderId"/>
+                        <econdition field-name="orderItemSeqId" from="sis.orderItemSeqId"/>
+                        <!-- also filter by productId for pick assemblies PtPickAssembly -->
+                        <econdition field-name="productId" from="shipmentProduct.productId"/>
+                    </entity-find>
+                    <set field="reservedAssetIds" from="assetResList*.assetId"/>
+                    <set field="curQuantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) * (shipmentProduct.qtyMultiplier ?: 1.0)"/>
+
+                    <iterate list="assetResList" entry="assetRes">
+                        <set field="resAsset" from="assetRes.asset"/>
+                        <set field="assetLocKey" from="[facilityId:resAsset.facilityId, locationSeqId:resAsset.locationSeqId, lotId:resAsset.lotId]"/>
+                        <set field="facLoc" from="resAsset.location"/>
+                        <set field="geoPoint" from="facLoc?.geoPoint"/>
+                        <entity-find-one entity-name="mantle.product.asset.LotAndMfgParty" value-field="lotAndMfg" cache="true">
+                            <field-map field-name="lotId" from="resAsset.lotId"/></entity-find-one>
+                        <set field="assetLocInfo" from="[locationTypeEnum:facLoc?.type, lot:lotAndMfg, container:resAsset.container]"/>
+                        <script>if (facLoc != null) assetLocInfo.putAll(facLoc)</script>
+                        <script>if (geoPoint != null) assetLocInfo.putAll(geoPoint)</script>
+
+
+                        <set field="reservedLocationInfo" from="reservedLocationInfoMap.get(assetLocKey)"/>
+                        <if condition="!reservedLocationInfo">
+                            <set field="reservedLocationInfo" from="new HashMap(assetLocInfo)"/>
+                            <set field="reservedLocationInfo.productInfoMap" from="[:]"/>
+                            <script>reservedLocationInfoMap.put(assetLocKey, reservedLocationInfo)</script>
+                        </if>
+
+                        <set field="productReservedLocationInfo" from="productReservedLocationInfoMap.get(assetLocKey)"/>
+                        <if condition="!productReservedLocationInfo">
+                            <set field="productReservedLocationInfo" from="new HashMap(assetLocInfo)"/>
+                            <set field="productReservedLocationInfo.quantity" from="0.0"/>
+                            <set field="productReservedLocationInfo.quantityByBin" from="new TreeMap()"/>
+                            <script>productReservedLocationInfoMap.put(assetLocKey, productReservedLocationInfo)</script>
+                        </if>
+
+                        <set field="quantityNotIssued" from="assetRes.quantityNotIssued ?: 0.0"/>
+                        <set field="quantityToAdd" from="curQuantityNotHandled > quantityNotIssued ? quantityNotIssued : curQuantityNotHandled"/>
+                        <set field="productQuantity" from="productQuantity + quantityToAdd"/>
+
+                        <!-- handle quantity for reservedLocationInfoList -->
+                        <set field="reservedProductInfo" from="reservedLocationInfo.productInfoMap.get(shipmentProduct.productId)"/>
+                        <if condition="!reservedProductInfo"><script>
+                            reservedProductInfo = [quantity:0.0, quantityByBin:new TreeMap()]
+                            reservedProductInfo.putAll(product)
+                            reservedLocationInfo.productInfoMap.put(shipmentProduct.productId, reservedProductInfo)
+                        </script></if>
+                        <set field="reservedProductInfo.quantity" from="reservedProductInfo.quantity + quantityToAdd"/>
+                        <script>addToBigDecimalInMap(binLocationNumber, quantityToAdd, reservedProductInfo.quantityByBin)</script>
+
+                        <!-- handle quantity for productInfoList -->
+                        <set field="productReservedLocationInfo.quantity" from="productReservedLocationInfo.quantity + quantityToAdd"/>
+                        <script>addToBigDecimalInMap(binLocationNumber, quantityToAdd, productReservedLocationInfo.quantityByBin)</script>
+
+                        <!-- <log level="warn" message="shipment ${shipment.shipmentId} product ${shipmentProduct.productId} quantityToAdd ${quantityToAdd} reservedProductInfo.quantity ${reservedProductInfo.quantity} productReservedLocationInfo.quantity ${productReservedLocationInfo.quantity}"/> -->
+
+                        <set field="curQuantityNotHandled" from="curQuantityNotHandled - quantityToAdd"/>
+                        <if condition="curQuantityNotHandled == 0.0"><break/></if>
+                    </iterate>
+
+                    <!-- TODO: change to use AssetServices.get#AvailableInventory service with small changes to get more data? -->
+                    <!-- find assets more generally for the product, like the reservation algorithm -->
+                    <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                        <econdition field-name="productId" from="shipmentProduct.productId"/>
+                        <econdition field-name="statusId" value="AstAvailable"/>
+                        <econdition field-name="availableToPromiseTotal" operator="greater" from="0"/>
+                        <econdition field-name="facilityId" from="originFacility?.facilityId" ignore-if-empty="true"/>
+                        <econdition field-name="assetId" operator="not-in" from="reservedAssetIds" ignore-if-empty="true"/>
+                        <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIdSet" ignore="assetAllowOtherOwner == 'Y' || !ownerPartyIdSet"/>
+                        <order-by field-name="receivedDate"/><!-- Ascending by receivedDate, FIFO -->
+                    </entity-find>
+                    <!-- NOTE: these are alternate locations, reset curQuantityNotHandled for full list of recommended alternatives -->
+                    <set field="curQuantityNotHandled" from="(sis.quantityNotHandled ?: 0.0) * (shipmentProduct.qtyMultiplier ?: 1.0)"/>
+                    <iterate list="assetList" entry="asset">
+                        <set field="assetLocKey" from="[facilityId:asset.facilityId, locationSeqId:asset.locationSeqId, lotId:asset.lotId]"/>
+                        <set field="facLoc" from="asset.location"/>
+                        <set field="geoPoint" from="facLoc?.geoPoint"/>
+                        <entity-find-one entity-name="mantle.product.asset.LotAndMfgParty" value-field="lotAndMfg" cache="true">
+                            <field-map field-name="lotId" from="asset.lotId"/></entity-find-one>
+                        <set field="assetLocInfo" from="[locationTypeEnum:facLoc?.type, lot:lotAndMfg, container:asset.container]"/>
+                        <script>if (facLoc != null) assetLocInfo.putAll(facLoc)</script>
+                        <script>if (geoPoint != null) assetLocInfo.putAll(geoPoint)</script>
+
+                        <set field="otherLocationInfo" from="otherLocationInfoMap.get(assetLocKey)"/>
+                        <if condition="!otherLocationInfo">
+                            <set field="otherLocationInfo" from="new HashMap(assetLocInfo)"/>
+                            <set field="otherLocationInfo.productInfoMap" from="[:]"/>
+                            <script>otherLocationInfoMap.put(assetLocKey, otherLocationInfo)</script>
+                        </if>
+
+                        <set field="productOtherLocationInfo" from="productOtherLocationInfoMap.get(assetLocKey)"/>
+                        <if condition="!productOtherLocationInfo">
+                            <set field="productOtherLocationInfo" from="new HashMap(assetLocInfo)"/>
+                            <set field="productOtherLocationInfo.quantity" from="0.0"/>
+                            <set field="productOtherLocationInfo.quantityByBin" from="new TreeMap()"/>
+                            <script>productOtherLocationInfoMap.put(assetLocKey, productOtherLocationInfo)</script>
+                        </if>
+
+                        <set field="quantityToAdd" from="curQuantityNotHandled > asset.availableToPromiseTotal ? asset.availableToPromiseTotal : curQuantityNotHandled"/>
+
+                        <!-- handle quantity for otherLocationInfoList -->
+                        <set field="productInfo" from="otherLocationInfo.productInfoMap.get(shipmentProduct.productId)"/>
+                        <if condition="!productInfo"><script>
+                            productInfo = [quantity:0.0, quantityByBin:new TreeMap()]
+                            productInfo.putAll(product)
+                            otherLocationInfo.productInfoMap.put(shipmentProduct.productId, productInfo)
+                        </script></if>
+                        <set field="productInfo.quantity" from="productInfo.quantity + quantityToAdd"/>
+                        <script>addToBigDecimalInMap(binLocationNumber, quantityToAdd, productInfo.quantityByBin)</script>
+
+                        <!-- handle quantity for productInfoList -->
+                        <set field="productOtherLocationInfo.quantity" from="productOtherLocationInfo.quantity + quantityToAdd"/>
+                        <script>addToBigDecimalInMap(binLocationNumber, quantityToAdd, productOtherLocationInfo.quantityByBin)</script>
+
+                        <set field="curQuantityNotHandled" from="curQuantityNotHandled - quantityToAdd"/>
+                        <if condition="curQuantityNotHandled == 0.0"><break/></if>
+                    </iterate>
+                </iterate>
+
+                <set field="productReservedLocationInfoList" from="new ArrayList(productReservedLocationInfoMap.values())"/>
+                <order-map-list list="productReservedLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+                <set field="productOtherLocationInfoList" from="new ArrayList(productOtherLocationInfoMap.values())"/>
+                <order-map-list list="productOtherLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+
+                <set field="productIssuedLocationInfoMap" from="[:]"/>
+                <entity-find entity-name="mantle.product.issuance.AssetIssuance" list="assetIssuanceList">
+                    <econdition field-name="shipmentId"/><econdition field-name="productId" from="shipmentProduct.productId"/></entity-find>
+                <iterate list="assetIssuanceList" entry="assetIssuance">
+                    <set field="issAsset" from="assetIssuance.asset"/>
+                    <set field="assetLocKey" from="[facilityId:issAsset.facilityId, locationSeqId:issAsset.locationSeqId, lotId:issAsset.lotId]"/>
+
+                    <!-- get location and lot info -->
+                    <set field="facLoc" from="issAsset.location"/>
+                    <set field="geoPoint" from="facLoc?.geoPoint"/>
+                    <entity-find-one entity-name="mantle.product.asset.LotAndMfgParty" value-field="lotAndMfg" cache="true">
+                        <field-map field-name="lotId" from="issAsset.lotId"/></entity-find-one>
+                    <set field="assetLocInfo" from="[locationTypeEnum:facLoc?.type, lot:lotAndMfg]"/>
+                    <script>if (facLoc != null) assetLocInfo.putAll(facLoc)</script>
+                    <script>if (geoPoint != null) assetLocInfo.putAll(geoPoint)</script>
+
+
+                    <set field="issuedLocationInfo" from="issuedLocationInfoMap.get(assetLocKey)"/>
+                    <if condition="!issuedLocationInfo">
+                        <set field="issuedLocationInfo" from="new HashMap(assetLocInfo)"/>
+                        <set field="issuedLocationInfo.productInfoMap" from="[:]"/>
+                        <script>issuedLocationInfoMap.put(assetLocKey, issuedLocationInfo)</script>
+                    </if>
+
+                    <set field="productIssuedLocationInfo" from="productIssuedLocationInfoMap.get(assetLocKey)"/>
+                    <if condition="!productIssuedLocationInfo">
+                        <set field="productIssuedLocationInfo" from="new HashMap(assetLocInfo)"/>
+                        <script>productIssuedLocationInfoMap.put(assetLocKey, productIssuedLocationInfo)</script>
+                    </if>
+
+                    <!-- add to total productQuantity (along with reserved qty) -->
+                    <set field="productQuantity" from="productQuantity + assetIssuance.quantity"/>
+                    <!-- handle quantity for issuedLocationInfoList -->
+                    <set field="issuedProductInfo" from="issuedLocationInfo.productInfoMap.get(shipmentProduct.productId)"/>
+                    <if condition="!issuedProductInfo"><script>
+                        issuedProductInfo = [:]
+                        issuedProductInfo.putAll(product)
+                        issuedLocationInfo.productInfoMap.put(shipmentProduct.productId, issuedProductInfo)
+                    </script></if>
+                    <script>addToBigDecimalInMap('quantity', assetIssuance.quantity, issuedProductInfo)</script>
+                    <!-- handle quantity for productInfoList -->
+                    <script>addToBigDecimalInMap('quantity', assetIssuance.quantity, productIssuedLocationInfo)</script>
+
+                    <!-- get price (unitAmount), may be more than one for multiple orders or order items across issuances -->
+                    <set field="issOrderItem" from="assetIssuance.orderItem"/>
+                    <if condition="issOrderItem != null">
+                        <if condition="productIssuedLocationInfo.priceQuantityMap == null"><set field="productIssuedLocationInfo.priceQuantityMap" from="[:]"/></if>
+                        <script>addToBigDecimalInMap(issOrderItem.unitAmount, assetIssuance.quantity, productIssuedLocationInfo.priceQuantityMap)</script>
+                        <script>addToBigDecimalInMap(issOrderItem.unitAmount, assetIssuance.quantity, priceQuantityMap)</script>
+                    </if>
+                </iterate>
+
+                <set field="productIssuedLocationInfoList" from="new ArrayList(productIssuedLocationInfoMap.values())"/>
+                <order-map-list list="productIssuedLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+
+                <script>
+                    productInfo = [reservedLocationInfoList:productReservedLocationInfoList,
+                                   productReservedLocationInfoMap:productReservedLocationInfoMap,
+                                   otherLocationInfoList:productOtherLocationInfoList,
+                                   productOtherLocationInfoMap:productOtherLocationInfoMap,
+                                   productIssuedLocationInfoList:productIssuedLocationInfoList,
+                                   quantity:productQuantity, priceQuantityMap:priceQuantityMap]
+                    productInfo.putAll(product)
+                    productInfoList.add(productInfo)
+                    productInfoMap.put(shipmentProduct.productId, productInfo)
+                </script>
+            </iterate>
+
+            <!-- go through reservedLocationInfoMap and otherLocationInfoMap and create productInfoList from productInfoMap, then sort -->
+            <iterate list="reservedLocationInfoMap" entry="locationInfo" key="assetLocKey">
+                <set field="locationInfo.productInfoList" from="new ArrayList(locationInfo.productInfoMap.values())"/>
+                <order-map-list list="locationInfo.productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            </iterate>
+            <iterate list="otherLocationInfoMap" entry="locationInfo" key="assetLocKey">
+                <set field="locationInfo.productInfoList" from="new ArrayList(locationInfo.productInfoMap.values())"/>
+                <order-map-list list="locationInfo.productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+            </iterate>
+            <set field="reservedLocationInfoList" from="new ArrayList(reservedLocationInfoMap.values())"/>
+            <order-map-list list="reservedLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+            <set field="otherLocationInfoList" from="new ArrayList(otherLocationInfoMap.values())"/>
+            <order-map-list list="otherLocationInfoList"><order-by field-name="${locationOrderBy}"/></order-map-list>
+
+            <!-- order productInfoList, all that is needed at this point -->
+            <order-map-list list="productInfoList"><order-by field-name="${productOrderBy}"/></order-map-list>
+
+            <set field="orderedQuantityByProductId" from="[:]"/>
+            <set field="otherPartyProductIdByProductId" from="[:]"/>
+            <set field="shippedQuantityByProductId" from="[:]"/>
+            <if condition="orderIdSet">
+                <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                    <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+                <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+                <!-- get total quantity ordered by product across all orders in shipment -->
+                <entity-find entity-name="mantle.order.OrderItemSummary" list="orderItemSummaryList">
+                    <econdition field-name="orderId" operator="in" from="orderIdSet"/>
+                    <econdition field-name="productId" operator="is-not-null"/>
+                    <econdition field-name="itemTypeEnumId" operator="in" from="productItemTypes"/>
+                    <select-field field-name="productId,quantity"/>
+                </entity-find>
+                <iterate list="orderItemSummaryList" entry="oiSummary">
+                    <script>orderedQuantityByProductId.put(oiSummary.productId, oiSummary.quantity)</script></iterate>
+
+                <entity-find entity-name="mantle.order.OrderItem" list="orderItemProductIdList">
+                    <econdition field-name="orderId" operator="in" from="orderIdSet"/>
+                    <econdition field-name="productId" operator="is-not-null"/>
+                    <econdition field-name="otherPartyProductId" operator="is-not-null"/>
+                    <select-field field-name="productId,otherPartyProductId"/>
+                </entity-find>
+                <iterate list="orderItemProductIdList" entry="orderItem">
+                    <script>otherPartyProductIdByProductId.put(orderItem.productId, orderItem.otherPartyProductId)</script></iterate>
+
+                <!-- get total quantity shipped across all orders in shipment (including this one) -->
+                <entity-find entity-name="mantle.shipment.ShipmentItemSourceSummary" list="sisSummaryList">
+                    <econdition field-name="orderId" operator="in" from="orderIdSet"/>
+                    <econdition field-name="productId" operator="is-not-null"/>
+                    <select-field field-name="productId,quantityShipped"/>
+                </entity-find>
+                <iterate list="sisSummaryList" entry="sisSummary">
+                    <script>shippedQuantityByProductId.put(sisSummary.productId, sisSummary.quantityShipped)</script></iterate>
+            </if>
+
+            <!-- <log message="======== productInfoMap:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(productInfoMap))}"/> -->
+
+            <!-- assemble packageInfoList -->
+            <entity-find entity-name="mantle.shipment.ShipmentPackage" list="shipmentPackageList">
+                <econdition field-name="shipmentId"/><order-by field-name="shipmentPackageSeqId"/></entity-find>
+            <set field="packageInfoList" from="[]"/>
+            <iterate list="shipmentPackageList" entry="shipmentPackage">
+                <set field="shipmentBoxType" from="shipmentPackage.boxType"/>
+                <set field="weightUom" from="shipmentPackage.weightUom"/>
+                <entity-find entity-name="mantle.shipment.ShipmentPackageContent" list="shipmentPackageContentList">
+                    <econdition field-name="shipmentId"/>
+                    <econdition field-name="shipmentPackageSeqId" from="shipmentPackage.shipmentPackageSeqId"/>
+                    <order-by field-name="productId"/>
+                </entity-find>
+                <set field="contentInfoList" from="[]"/>
+                <iterate list="shipmentPackageContentList" entry="packageContent">
+                    <set field="productInfo" from="productInfoMap.get(packageContent.productId)"/>
+                    <script>contentInfoList.add([packageContent:packageContent, productInfo:productInfo,
+                            quantityOrdered:orderedQuantityByProductId.get(packageContent.productId),
+                            otherPartyProductId:otherPartyProductIdByProductId.get(packageContent.productId),
+                            quantityShipped:shippedQuantityByProductId.get(packageContent.productId)])</script>
+                </iterate>
+                <script>packageInfoList.add([shipmentPackage:shipmentPackage, shipmentBoxType:shipmentBoxType, weightUom:weightUom,
+                                             contentInfoList:contentInfoList])</script>
+            </iterate>
+
+            <!-- <log message="======== packageInfoList:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(packageInfoList))}"/> -->
+
+            <if condition="templateSettingSuffix">
+                <!-- see if a template is configured by ProductStoreSetting -->
+                <set field="templateLocation" from="null"/>
+                <entity-find entity-name="mantle.shipment.ShipmentItemSource" list="shipmentItemSourceList" distinct="true">
+                    <econdition field-name="shipmentId"/>
+                    <select-field field-name="orderId"/>
+                </entity-find>
+                <set field="orderIdSet" from="new HashSet(shipmentItemSourceList*.orderId)"/>
+                <if condition="orderIdSet">
+                    <entity-find entity-name="mantle.order.OrderHeader" list="orderHeaderList" distinct="true">
+                        <econdition field-name="orderId" operator="in" from="orderIdSet"/>
+                        <econdition field-name="productStoreId" operator="is-not-null"/>
+                        <select-field field-name="productStoreId"/>
+                    </entity-find>
+                    <set field="productStoreIdSet" from="new HashSet(orderHeaderList*.productStoreId)"/>
+                    <if condition="productStoreIdSet">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="productStoreSettingList" cache="true">
+                            <date-filter/>
+                            <econdition field-name="productStoreId" from="productStoreIdSet.first()"/>
+                            <econdition field-name="settingTypeEnumId" value="Psst${templateSettingSuffix}"/>
+                            <order-by field-name="-fromDate"/>
+                        </entity-find>
+                        <if condition="productStoreSettingList">
+                            <set field="templateLocation" from="productStoreSettingList[0].settingValue"/></if>
+                    </if>
+                </if>
+                <!-- if no template setting for store look for PartySetting on Shipment.fromPartyId -->
+                <if condition="!templateLocation &amp;&amp; shipment.fromPartyId">
+                    <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
+                            in-map="[partyId:shipment.fromPartyId, partySettingTypeId:('Org' + templateSettingSuffix)]"/>
+                    <set field="templateLocation" from="ptySettingOut?.settingValue"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+</services>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.other.budget -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="BudgetAndTimePeriod" package="mantle.other.budget">
+        <member-entity entity-alias="BDGT" entity-name="mantle.other.budget.Budget"/>
+        <member-entity entity-alias="TMPD" entity-name="mantle.party.time.TimePeriod" join-from-alias="BDGT">
+            <key-map field-name="timePeriodId"/></member-entity>
+        <alias-all entity-alias="BDGT"/>
+        <alias-all entity-alias="TMPD"/>
+    </view-entity>
+    <view-entity entity-name="BudgetItemAndDetail" package="mantle.other.budget">
+        <member-entity entity-alias="BIT" entity-name="mantle.other.budget.BudgetItem"/>
+        <member-entity entity-alias="BIDET" entity-name="mantle.other.budget.BudgetItemDetail" join-from-alias="BIT">
+            <key-map field-name="budgetId"/><key-map field-name="budgetItemSeqId"/></member-entity>
+        <alias-all entity-alias="BIT"><exclude field="amount"/><exclude field="productId"/><exclude field="quantity"/></alias-all>
+        <alias-all entity-alias="BIDET"/>
+        <alias name="itemAmount" entity-alias="BIT" field="amount"/>
+        <alias name="itemProductId" entity-alias="BIT" field="productId"/>
+        <alias name="itemQuantity" entity-alias="BIT" field="quantity"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.other.tax -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="TaxStatementPeriodAuthority" package="mantle.other.tax">
+        <member-entity entity-alias="WATS" entity-name="mantle.other.tax.TaxStatement"/>
+        <member-entity entity-alias="TXAU" entity-name="mantle.other.tax.TaxAuthority" join-from-alias="WATS">
+            <key-map field-name="taxAuthorityId"/></member-entity>
+        <member-entity entity-alias="TPED" entity-name="mantle.party.time.TimePeriod" join-from-alias="WATS">
+            <key-map field-name="timePeriodId"/></member-entity>
+        <alias-all entity-alias="WATS"/>
+        <alias-all entity-alias="TXAU" prefix="txau"/>
+        <alias-all entity-alias="TPED"><exclude field="partyId"/></alias-all>
+        <alias name="periodPartyId" entity-alias="TPED" field="partyId"/>
+    </view-entity>
+    <view-entity entity-name="TaxStatementPartyDetail" package="mantle.other.tax">
+        <member-entity entity-alias="TXST" entity-name="mantle.other.tax.TaxStatement"/>
+        <member-entity entity-alias="TXAU" entity-name="mantle.other.tax.TaxAuthority" join-from-alias="TXST">
+            <key-map field-name="taxAuthorityId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="TXST">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="TXST" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="TXST" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="TXST"/>
+        <alias-all entity-alias="TXAU" prefix="txau"/>
+        <alias-all entity-alias="PTY"><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+    </view-entity>
+</entities>

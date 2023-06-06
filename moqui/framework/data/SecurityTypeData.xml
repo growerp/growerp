@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed">
+    <moqui.basic.Enumeration description="Moqui Administrators" enumId="UgtMoquiAdmin" enumTypeId="UserGroupType"/>
+    <moqui.basic.Enumeration description="Remote Systems" enumId="UgtRemoteSystems" enumTypeId="UserGroupType"/>
+
+    <!-- User Group for full-access Administrators -->
+    <moqui.security.UserGroup userGroupId="ADMIN" description="Administrators (full access)" groupTypeEnumId="UgtMoquiAdmin"/>
+    <moqui.security.UserGroup userGroupId="ADMIN_ADV" description="Administrators - Advanced" groupTypeEnumId="UgtMoquiAdmin"/>
+
+    <!-- A default/automatic group for all users -->
+    <moqui.security.UserGroup userGroupId="ALL_USERS" description="All Users (all users members by default)"/>
+
+    <!-- An artifact group for remote EntitySync calls; members of other groups like remote API only groups would use this as well -->
+    <moqui.security.ArtifactGroup artifactGroupId="EntitySyncServices" description="EntitySync Services"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="EntitySyncServices" artifactName="org.moqui.impl.EntitySyncServices.put#EntitySyncData"
+            nameIsPattern="N" artifactTypeEnumId="AT_SERVICE" inheritAuthz="Y"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="EntitySyncServices" artifactName="org.moqui.impl.EntitySyncServices.get#EntitySyncData"
+            nameIsPattern="N" artifactTypeEnumId="AT_SERVICE" inheritAuthz="Y"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="EntitySyncServicesADMIN" userGroupId="ADMIN" artifactGroupId="EntitySyncServices"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+    <!-- An artifact group for remote SystemMessage calls; members of other groups like remote API only groups would use this as well -->
+    <moqui.security.ArtifactGroup artifactGroupId="SystemMessageServices" description="SystemMessage Services"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="SystemMessageServices"
+            artifactName="org.moqui.impl.SystemMessageServices.receive#IncomingSystemMessage"
+            nameIsPattern="N" artifactTypeEnumId="AT_SERVICE" inheritAuthz="Y"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="SystemMessageServicesADMIN" userGroupId="ADMIN" artifactGroupId="SystemMessageServices"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+    <moqui.security.UserGroup userGroupId="SYSMSG_RECEIVE" description="System Message Receivers" groupTypeEnumId="UgtRemoteSystems"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="SystemMessageServicesSYSMSG" userGroupId="SYSMSG_RECEIVE" artifactGroupId="SystemMessageServices"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+
+    <!-- Special Permissions -->
+    <moqui.security.UserPermission userPermissionId="ADMIN_PASSWORD" description="Admin Password Update"/>
+    <moqui.security.UserGroupPermission userGroupId="ADMIN" userPermissionId="ADMIN_PASSWORD" fromDate="0"/>
+
+    <moqui.security.UserPermission userPermissionId="ADMIN_LOGIN_AS" description="Admin Login As User"/>
+    <moqui.security.UserGroupPermission userGroupId="ADMIN_ADV" userPermissionId="ADMIN_LOGIN_AS" fromDate="0"/>
+    <moqui.security.UserPermission userPermissionId="SQL_RUNNER_WEB" description="Tools: SQL Runner"/>
+    <moqui.security.UserGroupPermission userGroupId="ADMIN_ADV" userPermissionId="SQL_RUNNER_WEB" fromDate="0"/>
+    <moqui.security.UserPermission userPermissionId="GROOVY_SHELL_WEB" description="Tools: Groovy Shell"/>
+    <moqui.security.UserGroupPermission userGroupId="ADMIN_ADV" userPermissionId="GROOVY_SHELL_WEB" fromDate="0"/>
+</entity-facade-xml>

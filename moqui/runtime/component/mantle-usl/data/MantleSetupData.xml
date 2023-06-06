@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!-- Artifact group for all of the Mantle REST API via the mantle resource (the root resource) -->
+    <artifactGroups artifactGroupId="MANTLE_API" description="Mantle REST API (via root resource)">
+        <artifacts artifactTypeEnumId="AT_REST_PATH" artifactName="/mantle" inheritAuthz="Y"/>
+        <authz artifactAuthzId="MANTLE_API_ADMIN" userGroupId="ADMIN" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+    <!-- Not enabled by default, risky having read/write access to all mantle data, here as an example for testing:
+    <moqui.security.ArtifactGroupMember artifactGroupId="MANTLE_API" artifactName="mantle\..*"
+            nameIsPattern="Y" artifactTypeEnumId="AT_ENTITY" inheritAuthz="Y"/>
+    -->
+    <!-- Artifact group for all of the Mantle REST API via the mantle resource (the root resource) -->
+    <artifactGroups artifactGroupId="MANTLE_MY_API" description="Mantle My Info REST API">
+        <artifacts artifactTypeEnumId="AT_REST_PATH" artifactName="/mantle/my" inheritAuthz="Y"/>
+        <authz artifactAuthzId="MANTLE_MY_API_ALL" userGroupId="ALL_USERS" authzTypeEnumId="AUTHZT_ALLOW" authzActionEnumId="AUTHZA_ALL"/>
+    </artifactGroups>
+
+    <!-- Special Permissions - NOTE: other such permissions that the data model seed data relies on are in MantleUdmSetupData.xml in mantle-udm -->
+    <userPermissions userPermissionId="ORDER_APPROVE" description="Order Approve"/>
+    <userGroupPermissions userGroupId="ADMIN" userPermissionId="ORDER_APPROVE" fromDate="0"/>
+    <userPermissions userPermissionId="CARD_NUMBER_EDIT" description="Credit Card Number Edit"/>
+    <userGroupPermissions userGroupId="ADMIN" userPermissionId="CARD_NUMBER_EDIT" fromDate="0"/>
+
+    <userPermissions userPermissionId="FISCAL_REOPEN" description="Fiscal Period Reopen"/>
+    <userGroupPermissions userGroupId="ADMIN" userPermissionId="FISCAL_REOPEN" fromDate="0"/>
+    <userPermissions userPermissionId="GL_POST_CLOSED" description="GL Post to Closed Period"/>
+    <userGroupPermissions userGroupId="ADMIN" userPermissionId="GL_POST_CLOSED" fromDate="0"/>
+
+    <userPermissions userPermissionId="TIME_ENTRY_RATE" description="Time Entry Rate Override"/>
+    <userGroupPermissions userGroupId="ADMIN" userPermissionId="TIME_ENTRY_RATE" fromDate="0"/>
+
+    <moqui.basic.Enumeration enumId="AllStoresMarkupLabelShipment" description="All Product Stores Markup Shipment Labels (set to 'true')" enumTypeId="UserPreferenceKey"/>
+    <moqui.basic.Enumeration enumId="AllStoresMarkupLabelOrder" description="All Product Stores Markup Order Shipping (set to 'true')" enumTypeId="UserPreferenceKey"/>
+
+    <!-- Configuration for Internal Financial Account Payment Processing -->
+    <moqui.basic.Enumeration description="Financial Account" enumId="PgtFinancialAccount" enumTypeId="PaymentGatewayType"/>
+    <mantle.account.method.PaymentGatewayConfig paymentGatewayConfigId="FinancialAccountLocal"
+            paymentGatewayTypeEnumId="PgtFinancialAccount" description="Financial Account Local"
+            authorizeServiceName="mantle.account.FinancialAccountServices.authorize#FinancialAccountPayment"
+            captureServiceName="mantle.account.FinancialAccountServices.capture#FinancialAccountPayment"
+            releaseServiceName="mantle.account.FinancialAccountServices.release#FinancialAccountPayment"
+            refundServiceName="mantle.account.FinancialAccountServices.refund#FinancialAccountPayment"/>
+
+    <moqui.service.ServiceRegister serviceRegisterId="OrderPayment50Split" serviceTypeEnumId="SettleTermOrderPmt"
+            description="Settlement Term Order Payments - Half on Due Date, Half After Delivery"
+            serviceName="mantle.order.OrderServices.create#OrderPayments50Split"/>
+    <mantle.account.invoice.SettlementTerm settlementTermId="OrderPayment50Split30Days" termTypeEnumId="TtFinPaymentDays"
+            description="Half Due In Advance, Half Due 30 Days after Invoice" termValue="30" termValueUomId="TF_day"
+            orderPmtServiceRegisterId="OrderPayment50Split"/>
+
+    <!-- ========== Global Preferences ========== -->
+
+    <!-- User Group Preference for mantle content root, used in various services; these may be modified after install or for custom installs -->
+    <moqui.security.UserGroupPreference userGroupId="ALL_USERS" preferenceKey="mantle.content.root"
+            preferenceValue="dbresource://mantle/content"/>
+    <moqui.security.UserGroupPreference userGroupId="ALL_USERS" preferenceKey="mantle.content.large.root"
+            preferenceValue="dbresource://mantle/content"/>
+
+    <moqui.resource.DbResource resourceId="MANTLE" filename="mantle" isFile="N"/>
+    <moqui.resource.DbResource resourceId="MANTLE_CONTENT" filename="content" isFile="N" parentResourceId="MANTLE"/>
+    <moqui.resource.DbResource resourceId="MCNT_ASSET" filename="asset" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_FACILITY" filename="facility" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_INVOICE" filename="invoice" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_ORDER" filename="order" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_PARTY" filename="party" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_PAYMENT" filename="payment" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_PAYMENT_METHOD" filename="paymentMethod" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_PRODUCT" filename="product" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_REQUEST" filename="request" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_SHIPMENT" filename="shipment" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+    <moqui.resource.DbResource resourceId="MCNT_WORK" filename="work" isFile="N" parentResourceId="MANTLE_CONTENT"/>
+
+    <!-- ========== Organization Based Entity Filters ========== -->
+
+    <!-- User organization entity filters; see mantle.party.PartyServices.setup#UserOrganizationInfo -->
+    <moqui.security.EntityFilterSet entityFilterSetId="MANTLE_USER_ORG" description="User Organization Filters">
+        <filters entityFilterId="MANTLE_USER_ORG_1" entityName="mantle.account.invoice.Invoice" joinOr="Y"
+                filterMap="[fromPartyId:filterOrgIds, toPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_2" entityName="mantle.account.payment.Payment" joinOr="Y"
+                filterMap="[fromPartyId:filterOrgIds, toPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_3" entityName="mantle.order.OrderPart" joinOr="Y"
+                filterMap="[vendorPartyId:filterOrgIds, customerPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_3R" entityName="mantle.order.return.ReturnHeader" joinOr="Y"
+                filterMap="[vendorPartyId:filterOrgIds, customerPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_4" entityName="mantle.shipment.Shipment" joinOr="Y"
+                filterMap="[fromPartyId:filterOrgIds, toPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_5" entityName="mantle.account.financial.FinancialAccount" filterMap="[organizationPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_6" entityName="mantle.ledger.transaction.AcctgTrans" filterMap="[organizationPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_7" entityName="mantle.party.time.TimePeriod" filterMap="[partyId:filterOrgIds]"/>
+        <!-- PartyRelationship: toPartyId in filterOrgIds OR relationshipTypeEnumId != PrtEmployee -->
+        <!-- don't include by default, adds overhead and only applicable to very specific HR or payroll use cases:
+        <filters entityFilterId="MANTLE_USER_ORG_8" entityName="mantle.party.PartyRelationship"
+                filterMap="[_join:'or', _list:[[toPartyId:filterOrgIds, _comp:'in'], [relationshipTypeEnumId:(filterOrgIds ? 'PrtEmployee' : null), _comp:'!=']]]"/>
+        -->
+        <!-- Party filter allows _NA_ for user org, needed for general/shared parties like carriers, etc -->
+        <filters entityFilterId="MANTLE_USER_ORG_9" entityName="mantle.party.Party" joinOr="Y"
+                filterMap="[ownerPartyId:(['_NA_']+filterOrgIds)]"/>
+        <!-- NOTE: Product, Category, and Feature user org filters do not include ownerPartyId '_NA_', if not associated can't see/use -->
+        <filters entityFilterId="MANTLE_USER_ORG_A" entityName="mantle.product.Product" filterMap="[ownerPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_B" entityName="mantle.product.category.ProductCategory" filterMap="[ownerPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_C" entityName="mantle.product.feature.ProductFeature" filterMap="[ownerPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_D" entityName="mantle.product.store.ProductStore" filterMap="[organizationPartyId:filterOrgIds]"/>
+        <filters entityFilterId="MANTLE_USER_ORG_F" entityName="mantle.facility.Facility" filterMap="[ownerPartyId:filterOrgIds]"/>
+    </moqui.security.EntityFilterSet>
+    <moqui.security.EntityFilterSet entityFilterSetId="MANTLE_ACTIVE_ORG" description="Active Organization Filters" applyCond="activeOrgId" allowMissingAlias="Y">
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_1" entityName="mantle.account.invoice.Invoice" joinOr="Y"
+                filterMap="[fromPartyId:activeOrgId, toPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_2" entityName="mantle.account.payment.Payment" joinOr="Y"
+                filterMap="[fromPartyId:activeOrgId, toPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_3" entityName="mantle.order.OrderPart" joinOr="Y"
+                filterMap="[vendorPartyId:activeOrgId, customerPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_3R" entityName="mantle.order.return.ReturnHeader" joinOr="Y"
+                filterMap="[vendorPartyId:activeOrgId, customerPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_4" entityName="mantle.shipment.Shipment" joinOr="Y"
+                filterMap="[fromPartyId:activeOrgId, toPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_5" entityName="mantle.account.financial.FinancialAccount" filterMap="[organizationPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_6" entityName="mantle.ledger.transaction.AcctgTrans" filterMap="[organizationPartyId:activeOrgId]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_7" entityName="mantle.party.time.TimePeriod"
+                filterMap="[_join:'or', _list:[[partyId:activeOrgId], [timePeriodTypeId:(activeOrgId?'Sales%':null), _comp:'like']]]"/>
+        <!-- PartyRelationship: toPartyId == activeOrgId OR relationshipTypeEnumId != PrtEmployee -->
+        <!-- don't include by default, adds overhead and only applicable to very specific HR or payroll use cases:
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_8" entityName="mantle.party.PartyRelationship"
+                filterMap="[_join:'or', _list:[[toPartyId:activeOrgId], [relationshipTypeEnumId:(activeOrgId ? 'PrtEmployee' : null), _comp:'!=']]]"/>
+        -->
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_9" entityName="mantle.party.Party" joinOr="Y"
+                filterMap="[ownerPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_A" entityName="mantle.product.Product"
+                filterMap="[ownerPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_B" entityName="mantle.product.category.ProductCategory"
+                filterMap="[ownerPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_C" entityName="mantle.product.feature.ProductFeature"
+                filterMap="[ownerPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/>
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_D" entityName="mantle.product.store.ProductStore"
+                filterMap="[organizationPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/>
+        <!-- allow these for 3rd party facilities regardless of active org:
+        <filters entityFilterId="MANTLE_ACTIVE_ORG_F" entityName="mantle.facility.Facility"
+                filterMap="[ownerPartyId:activeOrgId?[activeOrgId,'_NA_']:null]"/> -->
+    </moqui.security.EntityFilterSet>
+
+    <!-- ========== Notifications - Business Event ========== -->
+
+    <!-- Notification: High Priority Order -->
+    <moqui.security.user.NotificationTopic topic="OrderHighPriority" description="Order - High Priority" typeString="danger"
+            showAlert="Y" alertNoAutoHide="Y" persistOnSend="Y" receiveNotifications="Y" isPrivate="Y" emailTemplateId="NOTIFICATION"
+            titleTemplate="High Priority Order ${orderId}:${orderPartSeqId} - Priority ${priority}"
+            linkTemplate="/vapps/PopcAdmin/Order/OrderDetail?orderId=${orderId}"/>
+
+    <!-- ========== Registered Services ========== -->
+
+    <!-- Registered Services: Product Price Modify -->
+    <moqui.service.ServiceRegister serviceRegisterId="ProductPriceKS" serviceTypeEnumId="ProductPriceModify"
+            description="Mantle Price Drools Knowledge Set" serviceName="mantle.product.PriceServices.run#ProductPriceKS"/>
+    <!-- add the ProductPriceKS drools rules -->
+    <mantle.product.ProductPriceModify priceModifyId="ProductPriceKS" serviceRegisterId="ProductPriceKS"/>
+
+    <!-- Registered Services: Store Promotion -->
+    <moqui.service.ServiceRegister serviceRegisterId="NewCustomerDiscount" serviceTypeEnumId="ProductStorePromotion"
+            description="New Customer Discount" serviceName="mantle.product.PromotionServices.apply#NewCustomerDiscount"/>
+    <moqui.service.ServiceRegister serviceRegisterId="BuyGetDiscount" serviceTypeEnumId="ProductStorePromotion"
+            description="Buy X Get Y at Z% Discount" serviceName="mantle.product.PromotionServices.apply#BuyGetDiscount"/>
+    <moqui.service.ServiceRegister serviceRegisterId="FlatDiscount" serviceTypeEnumId="ProductStorePromotion"
+            description="Flat Discount per Quantity" serviceName="mantle.product.PromotionServices.apply#FlatDiscount"/>
+
+    <!-- Registered Services: Store Order Pre-Approve Validation -->
+    <moqui.service.ServiceRegister serviceRegisterId="OrderManualApprove" serviceTypeEnumId="OrderValidate"
+            description="Require Manual Approval" serviceName="mantle.order.OrderInfoServices.validate#OrderRequireManual"/>
+
+    <!-- ========== Service Jobs ========== -->
+
+    <!-- Service Job: Auto-approve Orders Delayed - every 15 minutes by default -->
+    <moqui.service.job.ServiceJob jobName="autoApprove_OrdersDelayed" description="Auto-approve Orders Delayed"
+            serviceName="mantle.order.OrderServices.autoApprove#OrdersDelayed" cronExpression="0 0/15 * * * ?" paused="N"
+            transactionTimeout="1800"/>
+    <!-- Service Job: Create Recurring Orders - every night at 2:00 am -->
+    <moqui.service.job.ServiceJob jobName="create_RecurringOrders" description="Create Recurring Orders"
+            serviceName="mantle.order.OrderServices.create#RecurringOrders" cronExpression="0 0 2 * * ?" paused="N"
+            transactionTimeout="1800"/>
+
+    <!-- Service Job: Recalculate GL Account Org Summaries - once per hour by default -->
+    <moqui.service.job.ServiceJob jobName="recalculate_GlAccountOrgSummaries" description="Recalculate GL Account Org Summaries"
+            serviceName="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" cronExpression="0 0 * * * ?" paused="N"
+            transactionTimeout="1800"/>
+
+    <!-- Service Job: Poll Payment Gateway Details (paused by default; cron for every night at 2:00 am) -->
+    <moqui.service.job.ServiceJob jobName="poll_PaymentGatewayDetails" description="Poll Payment Gateway Details"
+            serviceName="mantle.account.PaymentServices.poll#PaymentGatewayDetails" cronExpression="0 0 2 * * ?" paused="Y"
+            transactionTimeout="1800"/>
+
+    <!-- Service Job: Send Sales Invoice Past Due Emails (paused by default; cron for every Monday at 2:00 am) -->
+    <moqui.service.job.ServiceJob jobName="send_SalesInvoicePastDueEmails" description="Send Sales Invoice Past Due Emails"
+            serviceName="mantle.account.InvoiceServices.send#SalesInvoicePastDueEmails" cronExpression="0 0 2 ? * MON" paused="Y"
+            transactionTimeout="3600">
+        <parameters parameterName="daysPastDue" parameterValue="7"/>
+        <parameters parameterName="daysPastInvoice" parameterValue="40"/>
+        <parameters parameterName="daysLastEmail" parameterValue="2"/>
+        <parameters parameterName="alsoPrimaryEmails" parameterValue="false"/>
+        <!-- <parameters parameterName="organizationPartyIdList" parameterValue=""/> -->
+    </moqui.service.job.ServiceJob>
+
+    <!-- Service Job: Payroll Processing -->
+    <moqui.security.user.NotificationTopic topic="ProcessTimePeriodPay" description="Payroll Period Process Pay Completed"
+            typeString="success" showAlert="Y" persistOnSend="Y" receiveNotifications="Y"
+            titleTemplate="Process Pay Completed for Payroll Period ${parameters.timePeriodId} for pay date ${ec.l10n.format(results.payDate, '')}, total pay ${ec.l10n.format(results.totalPayAmount, '0.00')}"
+            errorTitleTemplate="Error in Process Pay for Payroll Period ${parameters.timePeriodId}: ${serviceCallRun.errors}"
+            linkTemplate=""/>
+    <moqui.service.job.ServiceJob jobName="ProcessTimePeriodPay" description="Process Pay for Payroll Period"
+            serviceName="mantle.humanres.PayrollServices.process#TimePeriodPay" topic="ProcessTimePeriodPay"/>
+
+    <!-- Service Job: Check All Parties for Duplicates (paused by default; cron for every night at 2:00 am) -->
+    <moqui.service.job.ServiceJob jobName="check_AllPartyDuplicates" description="Check All Parties for Duplicates"
+            serviceName="mantle.party.DuplicateServices.check#AllPartyDuplicates" cronExpression="0 0 2 * * ?" paused="Y"
+            transactionTimeout="3600"/>
+</entity-facade-xml>

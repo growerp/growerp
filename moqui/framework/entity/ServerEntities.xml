@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- moqui.server -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="ArtifactHit" package="moqui.server" use="nontransactional"
+            cache="never" sequence-bank-size="100">
+        <field name="hitId" type="id" is-pk="true"/>
+        <field name="visitId" type="id"/>
+        <field name="userId" type="id"/>
+        <field name="artifactType" type="text-medium"/>
+        <field name="artifactSubType" type="text-medium"/>
+        <field name="artifactName" type="text-medium"><description>The name of the artifact hit. For XML Screens
+            request it is "${webapp-name}.${screen-path}"</description></field>
+        <field name="parameterString" type="text-long"/>
+        <field name="startDateTime" type="date-time"/>
+        <field name="runningTimeMillis" type="number-float"/>
+        <field name="isSlowHit" type="text-indicator"/>
+        <field name="outputSize" type="number-integer"/>
+        <field name="wasError" type="text-indicator"/>
+        <field name="errorMessage" type="text-long"/>
+        <field name="requestUrl" type="text-long"/>
+        <field name="referrerUrl" type="text-long"/>
+        <field name="serverIpAddress" type="id"/>
+        <field name="serverHostName" type="text-medium"/>
+        <relationship type="one-nofk" related="moqui.server.Visit"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount"/>
+        <index name="ARTIFACT_HIT_VST"><index-field name="visitId"/></index>
+        <index name="ARTIFACT_HIT_USR"><index-field name="userId"/></index>
+    </entity>
+    <entity entity-name="ArtifactHitBin" package="moqui.server" use="nontransactional"
+            cache="never" sequence-bank-size="100">
+        <field name="hitBinId" type="id" is-pk="true"/>
+        <field name="artifactType" type="text-medium"/>
+        <field name="artifactSubType" type="text-medium"/>
+        <field name="artifactName" type="text-medium"/>
+        <field name="serverIpAddress" type="id"/>
+        <field name="serverHostName" type="text-medium"/>
+        <field name="binStartDateTime" type="date-time"/>
+        <field name="binEndDateTime" type="date-time"/>
+        <field name="hitCount" type="number-integer"/>
+        <field name="totalTimeMillis" type="number-decimal"/>
+        <field name="totalSquaredTime" type="number-decimal"><description>Total (sum) of the squared running times for
+            calculating incremental standard deviation.</description></field>
+        <field name="minTimeMillis" type="number-decimal"/>
+        <field name="maxTimeMillis" type="number-decimal"/>
+        <field name="slowHitCount" type="number-integer"><description>After 100 hits count of hits more that 2.6
+            standard deviations above average (both avg and std dev adjusted incrementally).</description></field>
+    </entity>
+    <view-entity entity-name="ArtifactHitReport" package="moqui.server" cache="never">
+        <member-entity entity-alias="AHB" entity-name="moqui.server.ArtifactHitBin"/>
+        <alias entity-alias="AHB" name="artifactType"/><!-- this will group by automatically -->
+        <alias entity-alias="AHB" name="artifactSubType"/><!-- this will group by automatically -->
+        <alias entity-alias="AHB" name="artifactName"/><!-- this will group by automatically -->
+        <alias entity-alias="AHB" name="hitCount" function="sum"/>
+        <alias entity-alias="AHB" name="totalTimeMillis" function="sum"/>
+        <alias entity-alias="AHB" name="totalSquaredTime" function="sum"/>
+        <alias entity-alias="AHB" name="firstHitDateTime" field="binStartDateTime" function="min"/>
+        <alias entity-alias="AHB" name="lastHitDateTime" field="binEndDateTime" function="max"/>
+        <alias entity-alias="AHB" name="minTimeMillis" function="min"/>
+        <alias entity-alias="AHB" name="maxTimeMillis" function="max"/>
+        <alias entity-alias="AHB" name="slowHitCount" function="sum"/>
+    </view-entity>
+
+    <entity entity-name="Visit" package="moqui.server" sequence-bank-size="100" use="nontransactional" cache="never">
+        <field name="visitId" type="id" is-pk="true"/>
+        <field name="visitorId" type="id"/>
+        <field name="userId" type="id"/>
+        <field name="userCreated" type="text-indicator"/>
+        <field name="sessionId" type="text-medium"/>
+        <field name="serverIpAddress" type="id"/>
+        <field name="serverHostName" type="text-medium"/>
+        <field name="webappName" type="text-medium"/>
+        <field name="initialLocale" type="text-short"/>
+        <field name="initialRequest" type="text-long"/>
+        <field name="initialReferrer" type="text-long"/>
+        <field name="initialUserAgent" type="text-medium"/>
+        <field name="clientIpAddress" type="text-short"/>
+        <field name="clientHostName" type="text-medium"/>
+        <field name="clientUser" type="text-medium"/>
+        <field name="clientIpIspName" type="text-short"/>
+        <field name="clientIpPostalCode" type="text-short"/>
+        <field name="clientIpCity" type="text-short"/>
+        <field name="clientIpMetroCode" type="text-short"/>
+        <field name="clientIpRegionCode" type="text-short"/>
+        <field name="clientIpRegionName" type="text-short"/>
+        <field name="clientIpStateProvGeoId" type="id"/>
+        <field name="clientIpCountryGeoId" type="id"/>
+        <field name="clientIpLatitude" type="text-short"/>
+        <field name="clientIpLongitude" type="text-short"/>
+        <field name="clientIpTimeZone" type="text-short"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one-nofk" related="moqui.server.Visitor"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount"/>
+        <relationship type="one-nofk" title="ClientIpStateProv" related="Geo">
+            <key-map field-name="clientIpStateProvGeoId" related="geoId"/></relationship>
+        <relationship type="one-nofk" title="ClientIpCountry" related="Geo">
+            <key-map field-name="clientIpCountryGeoId" related="geoId"/></relationship>
+        <!-- expensive for updates <index name="VisitThruIndex" unique="false"><index-field name="thruDate"/></index> -->
+        <index name="VISIT_USER_ACC"><index-field name="userId"/></index>
+        <index name="VISIT_VISITOR"><index-field name="visitorId"/></index>
+    </entity>
+    <view-entity entity-name="VisitUserSummary" package="moqui.server">
+        <member-entity entity-alias="VST" entity-name="moqui.server.Visit"/>
+        <alias entity-alias="VST" name="userId"/>
+        <alias entity-alias="VST" name="visitCount" field="visitId" function="count"/>
+        <alias entity-alias="VST" name="fromDateMin" field="fromDate" function="min"/>
+        <alias entity-alias="VST" name="fromDateMax" field="fromDate" function="max"/>
+        <alias entity-alias="VST" name="fromDate"/><!-- filter only, don't select -->
+    </view-entity>
+    <entity entity-name="Visitor" package="moqui.server" cache="never" sequence-primary-use-uuid="true">
+        <!-- NOTE: using uuid for PK instead of sequence because of annoying false positive in web security scan that thinks the cookie for it is a session cookie -->
+        <field name="visitorId" type="id" is-pk="true"/>
+        <field name="createdDate" type="date-time"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- moqui.server.instance -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="InstanceHost" package="moqui.server.instance" use="configuration">
+        <field name="instanceHostId" type="id" is-pk="true"/>
+        <field name="hostTypeId" type="id"/>
+        <field name="hostProtocol" type="text-short"/>
+        <field name="hostAddress" type="text-medium"/>
+        <field name="adminPort" type="number-integer"/>
+        <field name="username" type="text-short"/>
+        <field name="password" type="text-medium" encrypt="true"/>
+        <relationship type="one" related="moqui.server.instance.InstanceHostType" short-alias="hostType"/>
+    </entity>
+    <entity entity-name="InstanceHostType" package="moqui.server.instance" use="configuration">
+        <field name="hostTypeId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="initService" type="text-medium"/>
+        <field name="startService" type="text-medium"/>
+        <field name="stopService" type="text-medium"/>
+        <field name="removeService" type="text-medium"/>
+        <field name="checkService" type="text-medium"/>
+
+        <seed-data>
+            <moqui.server.instance.InstanceHostType hostTypeId="docker" description="Docker"
+                    initService="org.moqui.impl.InstanceServices.init#InstanceDocker"
+                    startService="org.moqui.impl.InstanceServices.start#InstanceDocker"
+                    stopService="org.moqui.impl.InstanceServices.stop#InstanceDocker"
+                    removeService="org.moqui.impl.InstanceServices.remove#InstanceDocker"
+                    checkService="org.moqui.impl.InstanceServices.check#InstanceDocker"/>
+
+            <!-- see: https://docs.docker.com/engine/reference/commandline/dockerd/#bind-docker-to-another-host-port-or-a-unix-socket -->
+            <moqui.server.instance.InstanceHost instanceHostId="LocalDocker" hostTypeId="docker"
+                    hostProtocol="http" hostAddress="127.0.0.1" adminPort="2375"/>
+            <!-- for future reference, connect with TLS; need some way to specify and pass the cert
+            <moqui.server.instance.InstanceHost instanceHostId="LocalDockerTLS" hostTypeId="docker"
+                    hostProtocol="https" hostAddress="127.0.0.1" adminPort="2376"/>
+            -->
+        </seed-data>
+    </entity>
+    <view-entity entity-name="InstanceHostDetail" package="moqui.server.instance">
+        <member-entity entity-alias="INH" entity-name="moqui.server.instance.InstanceHost"/>
+        <member-entity entity-alias="IHT" entity-name="moqui.server.instance.InstanceHostType" join-from-alias="INH">
+            <key-map field-name="hostTypeId"/></member-entity>
+        <alias-all entity-alias="INH"/>
+        <alias name="typeDescription" entity-alias="IHT" field="description"/>
+    </view-entity>
+
+    <entity entity-name="InstanceImage" package="moqui.server.instance" use="configuration">
+        <field name="instanceImageId" type="id" is-pk="true"/>
+        <field name="imageTypeId" type="id"/>
+        <field name="hostTypeId" type="id"/>
+        <field name="imageName" type="text-medium"/>
+        <!-- better as part of the name? <field name="imageDigest" type="text-medium"/> -->
+        <field name="registryLocation" type="text-medium"/>
+        <field name="username" type="text-short"/>
+        <field name="password" type="text-medium" encrypt="true"/>
+        <field name="emailAddress" type="text-medium"/>
+        <relationship type="one" related="moqui.server.instance.InstanceImageType" short-alias="imageType"/>
+        <relationship type="one" related="moqui.server.instance.InstanceHostType" short-alias="hostType"/>
+    </entity>
+    <entity entity-name="InstanceImageType" package="moqui.server.instance" use="configuration">
+        <field name="imageTypeId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="defaultInitCommand" type="text-medium"/>
+        <field name="defaultNetworkMode" type="text-short"/>
+        <relationship type="many" related="moqui.server.instance.InstanceImageTypeEnv" short-alias="envs">
+            <key-map field-name="imageTypeId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.InstanceImageTypeLink" short-alias="links">
+            <key-map field-name="imageTypeId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.InstanceImageTypeVolume" short-alias="vols">
+            <key-map field-name="imageTypeId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.InstanceImageTypeHostConfig" short-alias="hostConfigs">
+            <key-map field-name="imageTypeId"/></relationship>
+
+        <seed-data>
+            <!-- matches configuration in nginx-mysql-compose.yml -->
+            <moqui.server.instance.InstanceImageType imageTypeId="moqui" description="Moqui Default Virtual Host"
+                    defaultInitCommand="conf=conf/MoquiProductionConf.xml" defaultNetworkMode="moqui_default">
+                <!-- NOTE: defaultNetworkMode set to a network name, using docker compose use the '-p moqui' argument so moqui
+                    is the app/project name and moqui_default is the network name; use plain 'bridge' or other instead of a network
+                    name to use the default docker bridge or other network -->
+                <envs envName="VIRTUAL_HOST" envValue="${appInstance.hostName}"/>
+                <envs envName="webapp_http_host" envValue="${appInstance.hostName}"/>
+                <envs envName="webapp_http_port" envValue="80"/>
+                <envs envName="webapp_https_port" envValue="443"/>
+                <envs envName="webapp_https_enabled" envValue="true"/><!-- NOTE: change this to false for dev/test without https -->
+
+                <envs envName="entity_ds_db_conf" envValue="${appInstance.database?.type?.confName?:''}"/>
+                <envs envName="entity_ds_host" envValue="${appInstance.database?.instanceAddress ?: appInstance.database?.hostAddress ?: ''}"/>
+                <envs envName="entity_ds_port" envValue="${appInstance.database?.hostPort?:''}"/>
+                <envs envName="entity_ds_database" envValue="${appInstance.hostName.replace('.', '_')}"/>
+                <!-- <envs envName="entity_ds_schema" envValue=""/> -->
+                <envs envName="entity_ds_user" envValue="${appInstance.hostName.replace('.', '_')}"/>
+                <envs envName="entity_ds_password" envValue="${org.moqui.util.StringUtilities.getRandomString(15)}"/>
+
+                <links instanceName="moqui-database"/>
+
+                <vols mountPoint="/opt/moqui/runtime/log" volumeName="${appInstance.hostName.replace('.', '_')}-runtime_log"/>
+                <vols mountPoint="/opt/moqui/runtime/txlog" volumeName="${appInstance.hostName.replace('.', '_')}-runtime_txlog"/>
+                <vols mountPoint="/opt/moqui/runtime/sessions" volumeName="${appInstance.hostName.replace('.', '_')}-runtime_sessions"/>
+                <vols mountPoint="/opt/moqui/runtime/db" volumeName="${appInstance.hostName.replace('.', '_')}-runtime_db"/>
+                <vols mountPoint="/opt/moqui/runtime/elasticsearch" volumeName="${appInstance.hostName.replace('.', '_')}-runtime_elasticsearch"/>
+            </moqui.server.instance.InstanceImageType>
+
+            <!-- these have no registryLocation, username, etc as they are intended to be pulled from Docker Hub -->
+            <moqui.server.instance.InstanceImage instanceImageId="DockerMoquiFramework" imageTypeId="moqui" hostTypeId="docker"
+                    imageName="moqui/moquiframework:latest"/>
+            <moqui.server.instance.InstanceImage instanceImageId="DockerMoquiDemo" imageTypeId="moqui" hostTypeId="docker"
+                    imageName="moqui/moquidemo:latest"/>
+            <moqui.server.instance.InstanceImage instanceImageId="DockerHiveMind" imageTypeId="moqui" hostTypeId="docker"
+                    imageName="moqui/hivemind:latest"/>
+            <moqui.server.instance.InstanceImage instanceImageId="DockerPopCommerce" imageTypeId="moqui" hostTypeId="docker"
+                    imageName="moqui/popcommerce:latest"/>
+            <!-- this is mainly for local testing -->
+            <moqui.server.instance.InstanceImage instanceImageId="DockerMoquiLocal" imageTypeId="moqui" hostTypeId="docker"
+                    imageName="moqui"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="InstanceImageTypeEnv" package="moqui.server.instance" use="configuration">
+        <field name="imageTypeId" type="id" is-pk="true"/>
+        <field name="envName" type="text-medium" is-pk="true"/>
+        <field name="envValue" type="text-medium" encrypt="true"/>
+        <relationship type="one" related="moqui.server.instance.InstanceImageType"/>
+    </entity>
+    <entity entity-name="InstanceImageTypeLink" package="moqui.server.instance" use="configuration">
+        <field name="imageTypeId" type="id" is-pk="true"/>
+        <field name="instanceName" type="text-medium" is-pk="true"/>
+        <field name="aliasName" type="text-medium"/>
+        <relationship type="one" related="moqui.server.instance.InstanceImageType"/>
+    </entity>
+    <entity entity-name="InstanceImageTypeVolume" package="moqui.server.instance" use="configuration">
+        <field name="imageTypeId" type="id" is-pk="true"/>
+        <field name="mountPoint" type="text-medium" is-pk="true"/>
+        <field name="volumeName" type="text-medium"/>
+        <relationship type="one" related="moqui.server.instance.InstanceImageType"/>
+    </entity>
+    <entity entity-name="InstanceImageTypeHostConfig" package="moqui.server.instance" use="configuration">
+        <field name="imageTypeId" type="id" is-pk="true"/>
+        <field name="hostConfigName" type="text-medium" is-pk="true"/>
+        <field name="hostConfigValue" type="text-medium"/>
+        <field name="type" type="text-short"/>
+        <relationship type="one" related="moqui.server.instance.InstanceImageType"/>
+    </entity>
+    <view-entity entity-name="InstanceImageDetail" package="moqui.server.instance">
+        <member-entity entity-alias="IIMG" entity-name="moqui.server.instance.InstanceImage"/>
+        <member-entity entity-alias="IIT" entity-name="moqui.server.instance.InstanceImageType" join-from-alias="IIMG">
+            <key-map field-name="imageTypeId"/></member-entity>
+        <member-entity entity-alias="IHT" entity-name="moqui.server.instance.InstanceHostType" join-from-alias="IIMG">
+            <key-map field-name="hostTypeId"/></member-entity>
+        <alias-all entity-alias="IIMG"/>
+        <alias name="imageTypeDescription" entity-alias="IIT" field="description"/>
+        <alias name="hostTypeDescription" entity-alias="IHT" field="description"/>
+    </view-entity>
+
+    <entity entity-name="DatabaseHost" package="moqui.server.instance" use="configuration">
+        <field name="databaseHostId" type="id" is-pk="true"/>
+        <field name="databaseTypeId" type="id"/>
+        <field name="hostAddress" type="text-medium"/>
+        <field name="hostPort" type="number-integer"/>
+        <field name="instanceAddress" type="text-medium"><description>If instance accesses DB by different address specify here</description></field>
+        <field name="adminUser" type="text-short"/>
+        <field name="adminPassword" type="text-medium" encrypt="true"/>
+        <relationship type="one" related="moqui.server.instance.DatabaseType" short-alias="type"/>
+    </entity>
+    <entity entity-name="DatabaseType" package="moqui.server.instance" use="configuration">
+        <field name="databaseTypeId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="confName" type="text-short"/>
+        <field name="createService" type="text-medium"/>
+        <field name="checkService" type="text-medium"/>
+
+        <seed-data>
+            <moqui.server.instance.DatabaseType databaseTypeId="mysql" description="MySQL" confName="mysql"
+                    createService="org.moqui.impl.InstanceServices.create#DatabaseMySQL"
+                    checkService="org.moqui.impl.InstanceServices.check#DatabaseMySQL"/>
+            <moqui.server.instance.DatabaseType databaseTypeId="postgres" description="Postgres" confName="postgres"
+                    createService="org.moqui.impl.InstanceServices.create#DatabasePostgres" checkService="org.moqui.impl.InstanceServices.check#DatabasePostgres"/>
+            <!-- matches configuration in nginx-mysql-compose.yml -->
+            <moqui.server.instance.DatabaseHost databaseHostId="LocalMySQL" databaseTypeId="mysql"
+                    hostAddress="127.0.0.1" hostPort="3306" instanceAddress="moqui-database"
+                    adminUser="root" adminPassword="moquiroot"/>
+        </seed-data>
+    </entity>
+    <view-entity entity-name="DatabaseHostDetail" package="moqui.server.instance">
+        <member-entity entity-alias="DBH" entity-name="moqui.server.instance.DatabaseHost"/>
+        <member-entity entity-alias="DBTP" entity-name="moqui.server.instance.DatabaseType" join-from-alias="DBH">
+            <key-map field-name="databaseTypeId"/></member-entity>
+        <alias-all entity-alias="DBH"/>
+        <alias name="typeDescription" entity-alias="DBTP" field="description"/>
+    </view-entity>
+
+    <entity entity-name="AppInstance" package="moqui.server.instance" use="configuration">
+        <field name="appInstanceId" type="id" is-pk="true"/>
+        <field name="instanceImageId" type="id"/>
+        <field name="instanceHostId" type="id"/>
+        <field name="databaseHostId" type="id"/>
+        <field name="hostName" type="text-medium"/>
+        <field name="instanceName" type="text-medium"/>
+        <field name="instanceUuid" type="text-medium"/>
+        <field name="initCommand" type="text-medium"/>
+        <field name="jsonConfig" type="text-long"/>
+        <field name="networkMode" type="text-short"/>
+
+        <relationship type="one" related="moqui.server.instance.InstanceImage" short-alias="image"/>
+        <relationship type="one" related="moqui.server.instance.InstanceHost" short-alias="instanceHost"/>
+        <relationship type="one" related="moqui.server.instance.DatabaseHost" short-alias="database"/>
+        <relationship type="many" related="moqui.server.instance.AppInstanceEnv" short-alias="envs">
+            <key-map field-name="appInstanceId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.AppInstanceLink" short-alias="links">
+            <key-map field-name="appInstanceId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.AppInstanceVolume" short-alias="vols">
+            <key-map field-name="appInstanceId"/></relationship>
+        <relationship type="many" related="moqui.server.instance.AppInstanceHostConfig" short-alias="hostConfigs">
+            <key-map field-name="appInstanceId"/></relationship>
+    </entity>
+    <entity entity-name="AppInstanceEnv" package="moqui.server.instance" use="configuration">
+        <field name="appInstanceId" type="id" is-pk="true"/>
+        <field name="envName" type="text-medium" is-pk="true"/>
+        <field name="envValue" type="text-medium" encrypt="true"/>
+        <relationship type="one" related="moqui.server.instance.AppInstance"/>
+    </entity>
+    <entity entity-name="AppInstanceLink" package="moqui.server.instance" use="configuration">
+        <field name="appInstanceId" type="id" is-pk="true"/>
+        <field name="instanceName" type="text-medium" is-pk="true"/>
+        <field name="aliasName" type="text-medium"/>
+        <relationship type="one" related="moqui.server.instance.AppInstance"/>
+    </entity>
+    <entity entity-name="AppInstanceVolume" package="moqui.server.instance" use="configuration">
+        <field name="appInstanceId" type="id" is-pk="true"/>
+        <field name="mountPoint" type="text-medium" is-pk="true"/>
+        <field name="volumeName" type="text-medium"/>
+        <relationship type="one" related="moqui.server.instance.AppInstance"/>
+    </entity>
+    <entity entity-name="AppInstanceHostConfig" package="moqui.server.instance" use="configuration">
+        <field name="appInstanceId" type="id" is-pk="true"/>
+        <field name="hostConfigName" type="text-medium" is-pk="true"/>
+        <field name="hostConfigValue" type="text-medium"/>
+        <field name="type" type="text-short"/>
+        <relationship type="one" related="moqui.server.instance.AppInstance"/>
+    </entity>
+</entities>

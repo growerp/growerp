@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<secas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-eca-3.xsd">
+    <!-- Order Notifications -->
+    <seca id="OrderPlacedSendEmail" service="update#mantle.order.OrderHeader" when="tx-commit">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderPlaced'</expression></condition>
+        <actions><service-call name="mantle.order.OrderInfoServices.send#OrderStoreEmail"
+                in-map="[orderId:orderId, emailTypeEnumId:'PsetOrderPlaced']"/></actions>
+    </seca>
+    <seca id="OrderApprovedSendEmail" service="update#mantle.order.OrderHeader" when="tx-commit">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderApproved'</expression></condition>
+        <actions><service-call name="mantle.order.OrderInfoServices.send#OrderStoreEmail"
+                in-map="[orderId:orderId, emailTypeEnumId:'PsetOrderApproved']"/></actions>
+    </seca>
+    <seca id="OrderApprovedNotify" service="update#mantle.order.OrderPart" when="tx-commit">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderApproved'</expression></condition>
+        <actions><service-call name="mantle.order.OrderInfoServices.notify#OrderHighPriority"
+                in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId]"/></actions>
+    </seca>
+
+    <!-- Order Auto-Approve (has various constraints checked by service) -->
+    <seca id="OrderPlacedAutoApprove" service="update#mantle.order.OrderHeader" when="post-service" run-on-error="false">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderPlaced'</expression></condition>
+        <actions>
+            <!-- only auto-approve on the fly here if ProductStore.autoApproveDelay is null or 0 -->
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <set field="productStore" from="orderHeader.productStore"/>
+            <set field="autoApproveDelay" from="orderHeader?.productStore?.autoApproveDelay"/>
+            <if condition="!autoApproveDelay">
+                <service-call name="mantle.order.OrderServices.autoApprove#Order" in-map="[orderId:orderId]"/></if>
+        </actions>
+    </seca>
+
+    <!-- Check Order Part Completed after WorkEffort statusId update -->
+    <seca id="OrderItemWorkEffortCheckComplete" service="update#mantle.work.effort.WorkEffort" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId in ['WeComplete', 'WeClosed', 'WeCancelled']</expression></condition>
+        <actions>
+            <!-- will rarely be more than one record, but allow it -->
+            <entity-find entity-name="mantle.order.OrderItemWorkEffort" list="itemWorkEffortList">
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="requiredWork" value="Y"/>
+            </entity-find>
+            <iterate list="itemWorkEffortList" entry="itemWorkEffort">
+                <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                    <field-map field-name="orderId" from="itemWorkEffort.orderId"/>
+                    <field-map field-name="orderItemSeqId" from="itemWorkEffort.orderItemSeqId"/>
+                </entity-find-one>
+                <if condition="orderItem != null">
+                    <service-call name="mantle.order.OrderServices.checkComplete#OrderPart"
+                            in-map="[orderId:orderItem.orderId, orderPartSeqId:orderItem.orderPartSeqId]"/>
+                </if>
+            </iterate>
+        </actions>
+    </seca>
+
+    <!-- Return processing on approval -->
+    <seca id="ReturnApprovedProcess" service="update#mantle.order.return.ReturnHeader" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ReturnApproved'</expression></condition>
+        <actions>
+            <!-- Create Return Shipment on Approved -->
+            <service-call name="mantle.order.ReturnServices.create#ReturnShipment" in-map="context"/>
+            <!-- On ReturnHeader Approved process#ReturnItemResponses, for those with responseImmediate=Y -->
+            <service-call name="mantle.order.ReturnServices.process#ReturnItemResponses" in-map="context"/>
+        </actions>
+    </seca>
+
+    <!-- Receive ReturnItems when Return Shipment Delivered (statusId=ShipDelivered, shipmentTypeEnumId=ShpTpSalesReturn) -->
+    <seca id="ShipmentDeliveredReturnReceive" service="update#mantle.shipment.Shipment" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ShipDelivered'</expression></condition>
+        <actions><service-call name="mantle.order.ReturnServices.receive#ReturnShipmentItems" in-map="context"/></actions>
+    </seca>
+
+    <!-- On ReturnHeader Received process#ReturnItemResponses, all responses not yet processed;
+        consolidates responses as possible (especially for check refunds, replacement orders) -->
+    <seca id="ReturnReceivedProcess" service="update#mantle.order.return.ReturnHeader" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ReturnReceived'</expression></condition>
+        <actions><service-call name="mantle.order.ReturnServices.process#ReturnItemResponses" in-map="context"/></actions>
+    </seca>
+    <!-- On ReturnItem Received process#ReturnItemResponses, all responses not yet processed;
+        more immediate response, but no consolidation (which is nice for check refunds, replacement orders)
+    <seca service="update#mantle.order.return.ReturnItem" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ReturnReceived'</expression></condition>
+        <actions><service-call name="mantle.order.ReturnServices.process#ReturnItemResponses" in-map="context"/></actions>
+    </seca>
+     -->
+</secas>

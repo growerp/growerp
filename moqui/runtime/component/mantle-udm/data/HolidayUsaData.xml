@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- Holidays - Observed USA Federal and Bank -->
+    <mantle.work.effort.WorkEffortCategory workEffortCategoryId="HolidayUsaFed" description="USA Federal Observed Holidays"/>
+    <mantle.work.effort.WorkEffortCategory workEffortCategoryId="HolidayUsaBank" description="USA Bank (Federal Reserve) Observed Holidays"/>
+
+    <!-- Recurring Holidays -->
+    <workEfforts workEffortId="USA_COLD" workEffortName="Columbus Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="1937-10-11" recurStartCron="0 15 10 ? 10 2#2">
+        <categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+
+    <!-- 2017 -->
+    <workEfforts workEffortId="USA_2017_NYD" workEffortName="New Years Day Observed" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-01-02"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_MLKD" workEffortName="Martin Luther King Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-01-16"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_PRSD" workEffortName="Presidents Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-02-20"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_MEMD" workEffortName="Memorial Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-05-29"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_INDD" workEffortName="Independence Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-07-04"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_LBD" workEffortName="Labor Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-09-04"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_COLD" workEffortName="Columbus Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-10-09"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_VETD" workEffortName="Veterans Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-11-10"><categories workEffortCategoryId="HolidayUsaFed"/></workEfforts><!-- not a bank holiday in 2017 -->
+    <workEfforts workEffortId="USA_2017_THGD" workEffortName="Thanksgiving Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-11-23"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2017_CHRD" workEffortName="Christmas Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2017-12-25"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+
+    <!-- 2018 -->
+    <workEfforts workEffortId="USA_2018_NYD" workEffortName="New Years Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-01-01"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_MLKD" workEffortName="Martin Luther King Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-01-15"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_PRSD" workEffortName="Presidents Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-02-19"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_MEMD" workEffortName="Memorial Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-05-28"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_INDD" workEffortName="Independence Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-07-04"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_LBD" workEffortName="Labor Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-09-03"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_COLD" workEffortName="Columbus Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-10-08"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_VETD" workEffortName="Veterans Day Observed" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-11-12"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_THGD" workEffortName="Thanksgiving Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-11-22"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2018_CHRD" workEffortName="Christmas Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2018-12-25"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+
+    <!-- 2019 -->
+    <workEfforts workEffortId="USA_2019_NYD" workEffortName="New Years Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-01-01"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_MLKD" workEffortName="Martin Luther King Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-01-21"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_PRSD" workEffortName="Presidents Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-02-18"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_MEMD" workEffortName="Memorial Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-05-27"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_INDD" workEffortName="Independence Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-07-04"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_LBD" workEffortName="Labor Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-09-02"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_COLD" workEffortName="Columbus Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-10-14"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_VETD" workEffortName="Veterans Day Observed" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-11-11"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_THGD" workEffortName="Thanksgiving Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-11-28"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+    <workEfforts workEffortId="USA_2019_CHRD" workEffortName="Christmas Day" workEffortTypeEnumId="WetEvent" purposeEnumId="WepHoliday"
+            visibilityEnumId="WevAllUsers" allDayStart="2019-12-25"><categories workEffortCategoryId="HolidayUsaFed"/><categories workEffortCategoryId="HolidayUsaBank"/></workEfforts>
+
+    <!-- these could perhaps be generated using cron strings such as these plus adjustments for weekends (federal vs bank rules vary):
+        January 1 - New Year's Day - 1 0 1 1 *
+        Last Monday of May - Memorial Day - 1 0 25,26,27,28,29,30,31 5 1
+        July 4 - Independence Day - 1 0 4 7 *
+        First Monday of September - Labor Day - 1 0 1,2,3,4,5,6,7 9 1
+        2nd Monday of October - Columbus Day - 1 0 8,9,10,11,12,13,14 10 1
+        November 11 - Veterans Day - 1 0 11 11 *
+        4th Thursday of Nov - Thanksgiving - 1 0 22,23,24,25,26,27,28 11 4
+        December 7 - Pearl Harbor Day - 1 0 7 12 *
+        December 25 - Christmas - 1 0 25 12 *
+
+        Other holidays (not generally observed):
+        February 2 - Groundhog Day - 1 0 2 2 *
+        First Sunday of Feb - Super Bowl Sunday - 1 0 1,2,3,4,5,6,7 2 0
+        February 14 - Valentine's Day - 1 0 14 2 *
+        March 17 - St. Patrick's Day - 1 0 17 3 *
+        April 1 - April Fool's Day - 1 0 1 4 *
+        2nd Sunday of May - Mother's Day - 1 0 25,26,27,28,29,30,31 5 1
+        3rd Sunday of June - Father's Day - 1 0 15,16,17,18,19,20,21 6 0
+        October 31 - Halloween - 1 0 31 10 *
+
+        USA Federal Reserve Bank Holidays
+        Holiday	                            2017	    2018	    2019	    2020	    2021
+        New Year's Day	                    January 2**	January 1	January 1	January 1	January 1
+        Martin Luther King Jr.'s Birthday	January 16	January 15	January 21	January 20	January 18
+        Washington's Birthday	            February 20	February 19	February 18	February 17	February 15
+        Memorial Day	                    May 29	    May 28	    May 27	    May 25	    May 31
+        Independence Day	                July 4	    July 4	    July 4	    July 4*	    July 5**
+        Labor Day	                        September 4	September 3	September 2	September 7	September 6
+        Columbus Day	                    October 9	October 8	October 14	October 12	October 11
+        Veterans Day	                    Nov 11*	    Nov 12**	November 11	November 11	November 11
+        Thanksgiving Day	                November 23	November 22	November 28	November 26	November 25
+        Christmas Day	                    December 25	December 25	December 25	December 25	December 25*
+        *Falls on a Saturday, not observed
+        **Falls on a Sunday, observed on Monday
+    -->
+</entity-facade-xml>

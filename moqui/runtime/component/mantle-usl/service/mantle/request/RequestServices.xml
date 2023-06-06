@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="Request">
+        <in-parameters>
+            <auto-parameters include="nonpk"><exclude field-name="visitId"/></auto-parameters>
+            <parameter name="statusId" default-value="ReqDraft"/>
+            <parameter name="priority" type="Long" default="5"/>
+            <parameter name="requestTypeEnumId" default-value="RqtSupport"/>
+            <parameter name="requestResolutionEnumId" default-value="RrUnresolved"/>
+            <parameter name="requestDate" default="ec.user.nowTimestamp"/>
+            <parameter name="filedByPartyId" default="ec.user.userAccount?.partyId"/>
+            <parameter name="assignToPartyId"/>
+            <parameter name="customerPartyId"/>
+            <parameter name="clientPartyId"><description>Retained for backward compatibility, uses Customer role just like customerPartyId</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="requestId"/>
+        </out-parameters>
+        <actions>
+            <set field="visitId" from="ec.user.visitId"/>
+            <service-call name="create#mantle.request.Request" out-map="context" in-map="context"/>
+            <if condition="filedByPartyId"><service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:filedByPartyId, roleTypeId:'Reporter', fromDate:ec.user.nowTimestamp]"/></if>
+            <if condition="assignToPartyId"><service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:assignToPartyId, roleTypeId:'Assignee', fromDate:ec.user.nowTimestamp]"/></if>
+            <if condition="customerPartyId"><service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:customerPartyId, roleTypeId:'Customer', fromDate:ec.user.nowTimestamp]"/></if>
+            <if condition="clientPartyId"><service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:clientPartyId, roleTypeId:'Customer', fromDate:ec.user.nowTimestamp]"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="Request">
+        <in-parameters>
+            <auto-parameters include="nonpk"/>
+            <parameter name="requestId" required="true"/>
+            <parameter name="assignToPartyId"/>
+            <parameter name="customerPartyId"/>
+            <parameter name="clientPartyId"><description>Retained for backward compatibility, uses Customer role just like customerPartyId</description></parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.request.Request" out-map="context" in-map="context"/>
+            <if condition="assignToPartyId"><service-call name="mantle.request.RequestServices.replace#RequestParty"
+                    in-map="[requestId:requestId, roleTypeId:'Assignee', newPartyId:assignToPartyId]"/></if>
+            <if condition="customerPartyId"><service-call name="mantle.request.RequestServices.replace#RequestParty"
+                    in-map="[requestId:requestId, roleTypeId:'Customer', newPartyId:customerPartyId]"/></if>
+            <if condition="clientPartyId"><service-call name="mantle.request.RequestServices.replace#RequestParty"
+                    in-map="[requestId:requestId, roleTypeId:'Customer', newPartyId:clientPartyId]"/></if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ContactRequest">
+        <in-parameters>
+            <parameter name="statusId" default-value="ReqSubmitted"/>
+            <parameter name="priority" type="Long" default="3"/>
+            <parameter name="requestTypeEnumId" default-value="RqtContact"/>
+            <parameter name="requestResolutionEnumId" default-value="RrUnresolved"/>
+            <parameter name="requestDate" default="ec.user.nowTimestamp"/>
+            <parameter name="productStoreId"/>
+            <parameter name="requestName"/>
+            <parameter name="description"/>
+
+            <parameter name="filedByPartyId" default="ec.user.userAccount?.partyId"/>
+            <parameter name="customerPartyId" default="ec.user.userAccount?.partyId"/>
+            <parameter name="firstName"/>
+            <parameter name="lastName"/>
+
+            <parameter name="emailContactMechId"/>
+            <parameter name="emailAddress"><text-email/></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="requestId"/>
+        </out-parameters>
+        <actions>
+            <set field="visitId" from="ec.user.visitId"/>
+
+            <if condition="!customerPartyId">
+                <if condition="!firstName || !lastName || !emailAddress">
+                    <message public="true" type="warning">Please enter your first name, last name, and email address</message>
+                    <return error="true" message="Name or email missing"/>
+                </if>
+                <set field="firstName" from="firstName.trim()"/>
+
+                <!-- search for existing party by email address -->
+                <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailPcmList">
+                    <date-filter/><econdition field-name="infoString" from="emailAddress"/></entity-find>
+                <iterate list="emailPcmList" entry="emailPcm">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                        <field-map field-name="partyId" from="emailPcm.partyId"/></entity-find-one>
+                    <if condition="party.disabled == 'Y' || party.partyTypeEnumId != 'PtyPerson'"><continue/></if>
+                    <if condition="!firstName.equalsIgnoreCase(party.firstName?.trim())"><continue/></if>
+                    <set field="customerPartyId" from="emailPcm.partyId"/>
+                    <set field="emailContactMechId" from="emailPcm.contactMechId"/>
+                    <break/>
+                </iterate>
+
+                <!-- create a party with the name -->
+                <if condition="!customerPartyId">
+                    <service-call name="mantle.party.PartyServices.create#Person" out-map="createPartyOut"
+                            in-map="[firstName:firstName, lastName:lastName, roleTypeId:'Customer']"/>
+                    <set field="customerPartyId" from="createPartyOut.partyId"/>
+                </if>
+
+                <set field="filedByPartyId" from="customerPartyId"/>
+            </if>
+            <if condition="!emailContactMechId">
+                <if condition="emailAddress"><then>
+                    <!-- find a matching one, if none create -->
+                    <set field="emailAddress" from="emailAddress.trim()"/>
+                    <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingEmailList">
+                        <date-filter/><econdition field-name="partyId" from="customerPartyId"/>
+                        <econdition field-name="infoString" from="emailAddress"/>
+                    </entity-find>
+                    <if condition="existingEmailList"><then>
+                        <set field="emailContactMechId" from="existingEmailList[0].contactMechId"/>
+                    </then><else>
+                        <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emailOut"
+                                in-map="[partyId:customerPartyId, emailAddress:emailAddress, contactMechPurposeId:'EmailPrimary']"/>
+                        <set field="emailContactMechId" from="emailOut.contactMechId"/>
+                    </else></if>
+                </then><else>
+                    <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="existingEmailList">
+                        <date-filter/><econdition field-name="partyId" from="customerPartyId"/>
+                        <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress"/>
+                    </entity-find>
+                    <set field="emailContactMechId" from="existingEmailList ? existingEmailList[0].contactMechId : null"/>
+                </else></if>
+            </if>
+            <if condition="!emailContactMechId">
+                <message public="true" type="warning">Please enter your email address</message>
+                <return error="true" message="Email record missing"/>
+            </if>
+
+            <service-call name="create#mantle.request.Request" out-map="context" in-map="context"/>
+            <service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:filedByPartyId, roleTypeId:'Reporter', fromDate:ec.user.nowTimestamp]"/>
+            <service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:customerPartyId, roleTypeId:'Customer', fromDate:ec.user.nowTimestamp]"/>
+
+            <message public="true" type="success">Thank you, we have received your request. Your request number is ${requestId}</message>
+        </actions>
+    </service>
+    <service verb="create" noun="ContactRequestReCaptcha">
+        <implements service="mantle.request.RequestServices.create#ContactRequest"/>
+        <in-parameters><parameter name="reCaptchaToken"/></in-parameters>
+        <actions>
+            <service-call name="org.moqui.impl.GoogleServices.verify#ReCaptcha" in-map="[reCaptchaToken:reCaptchaToken]"/>
+            <service-call name="mantle.request.RequestServices.create#ContactRequest" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="replace" noun="RequestParty">
+        <in-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="roleTypeId" required="true"/>
+            <parameter name="newPartyId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.request.RequestParty" list="rpList">
+                <date-filter/><econdition field-name="requestId"/><econdition field-name="roleTypeId"/></entity-find>
+            <iterate list="rpList" entry="rpValue">
+                <set field="rpValue.thruDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="rpValue"/>
+            </iterate>
+            <service-call name="create#mantle.request.RequestParty"
+                    in-map="[requestId:requestId, partyId:newPartyId, roleTypeId:roleTypeId, fromDate:ec.user.nowTimestamp]"/>
+        </actions>
+    </service>
+
+    <service verb="add" noun="RequestComment">
+        <in-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+        </in-parameters>
+        <actions>
+            <service-call name="create#mantle.party.communication.CommunicationEvent" out-map="context"
+                    in-map="[communicationEventTypeId:'Comment', contactMechTypeEnumId:'CmtWebForm', statusId:'CeSent',
+                        fromPartyId:ec.user.userAccount.partyId, entryDate:ec.user.nowTimestamp,
+                        contentType:contentType, subject:subject, body:body]"/>
+            <service-call name="create#mantle.request.RequestCommEvent"
+                    in-map="[requestId:requestId, communicationEventId:communicationEventId]"/>
+        </actions>
+    </service>
+    <service verb="update" noun="RequestComment">
+        <in-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="communicationEventId" required="true"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.party.communication.CommunicationEvent" out-map="context"
+                    in-map="[communicationEventId:communicationEventId, fromPartyId:ec.user.userAccount.partyId,
+                        contentType:contentType, subject:subject, body:body]"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="RequestComment">
+        <in-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="communicationEventId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="delete#mantle.request.RequestCommEvent"
+                    in-map="[requestId:requestId, communicationEventId:communicationEventId]"/>
+            <service-call name="delete#mantle.party.communication.CommunicationEvent"
+                    in-map="communicationEventId:communicationEventId"/>
+        </actions>
+    </service>
+
+    <!-- ========== RequestContent Services ========== -->
+
+    <service verb="get" noun="RequestContentLocation">
+        <in-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="contentTypeEnumIdList" type="List" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentLocation"/>
+            <parameter name="requestContent"/>
+        </out-parameters>
+        <actions>
+            <iterate list="contentTypeEnumIdList" entry="contentTypeEnumId">
+                <entity-find entity-name="mantle.request.RequestContent" list="requestContentList">
+                    <econdition field-name="requestId"/><econdition field-name="contentTypeEnumId"/>
+                    <order-by field-name="-contentDate"/></entity-find>
+                <if condition="requestContentList">
+                    <set field="requestContent" from="requestContentList[0]"/>
+                    <break/>
+                </if>
+            </iterate>
+            <set field="contentLocation" from="requestContent ? requestContent.contentLocation : null"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="RequestContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.request.RequestContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="requestId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="requestContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.request.RequestContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.request.RequestServices.save#RequestContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="RequestContent">
+        <in-parameters>
+            <parameter name="requestContentId" required="true"/>
+            <auto-parameters entity-name="mantle.request.RequestContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.request.RequestContent" value-field="requestContent"/>
+                <service-call name="mantle.request.RequestServices.save#RequestContentFile" out-map="context"
+                        in-map="context + [requestId:requestContent.requestId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.request.RequestContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="RequestContentFile">
+        <in-parameters>
+            <parameter name="requestContentId" required="true"/>
+            <parameter name="requestId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/request/${requestId}/content_${requestContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.request.RequestContent"
+                    in-map="[requestContentId:requestContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+</services>

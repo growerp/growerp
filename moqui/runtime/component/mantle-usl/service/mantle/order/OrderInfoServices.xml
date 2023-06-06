@@ -1,0 +1,1403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="OrderDisplayInfo">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="itemLimit" type="Integer"/>
+            <parameter name="templateSettingSuffix" default-value="TemplateOrderPrint"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId"/>
+            <parameter name="orderHeader" type="Map"><auto-parameters entity-name="mantle.order.OrderHeader"/></parameter>
+            <parameter name="productStore" type="Map"/>
+            <parameter name="statusItem" type="Map"><auto-parameters entity-name="moqui.basic.StatusItem"/></parameter>
+            <parameter name="editableStatusIds" type="Set"><parameter name="statusId"/></parameter>
+            <parameter name="orderEditable" type="Boolean"/>
+            <parameter name="placeWarnings" type="List"><parameter name="placeWarning"/></parameter>
+            <parameter name="childOrderList" type="List"><parameter name="childOrder" type="Map"/></parameter>
+            <parameter name="recurCronDescription"/>
+
+            <parameter name="orderItemList" type="List"><parameter name="orderItem" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderItem"/></parameter></parameter>
+            <parameter name="orderItemNoParentCount" type="Integer"/>
+            <parameter name="allItemsAuditLogList" type="List"><parameter name="orderItem" type="Map"/></parameter>
+            <parameter name="orderItemWithChildrenSet" type="Set"><parameter name="orderItemSeqId"/></parameter>
+            <parameter name="productItemTypes" type="List"><parameter name="itemTypeEnumId"/></parameter>
+
+            <parameter name="orderPromoCodeDetailList" type="List"><parameter name="orderPromoCode" type="Map"/></parameter>
+            <parameter name="paymentList" type="List"><parameter name="payment" type="Map">
+                <auto-parameters entity-name="mantle.account.payment.Payment"/></parameter></parameter>
+
+            <parameter name="shipmentItemSourceList" type="List"><parameter name="sis" type="Map">
+                <auto-parameters entity-name="mantle.shipment.ShipmentItemSource"/></parameter></parameter>
+            <parameter name="shipmentIdSet" type="Set"><parameter name="shipmentId"/></parameter>
+            <parameter name="quantityNotShippedByItem" type="Map">
+                <description>Key is orderItemSeqId, value is quantity not shipped for item.</description></parameter>
+            <parameter name="quantityNotShippedByPart" type="Map">
+                <description>Key is orderPartSeqId, value is quantity not shipped for all items in part.</description></parameter>
+
+            <parameter name="orderItemBillingList" type="List"><parameter name="oib" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderItemBilling"/></parameter></parameter>
+            <parameter name="invoiceIdSet" type="Set"><parameter name="invoiceId"/></parameter>
+            <parameter name="quantityNotBilledByItem" type="Map">
+                <description>Key is orderItemSeqId, value is quantity not billed for item.</description></parameter>
+            <parameter name="totalNotBilledByItem" type="Map">
+                <description>Key is orderItemSeqId, value is total (quantity * amount) not billed for item.</description></parameter>
+            <parameter name="quantityNotBilledByPart" type="Map">
+                <description>Key is orderPartSeqId, value is quantity not billed for all items in part.</description></parameter>
+
+            <parameter name="returnItemList" type="List"><parameter name="returnItem" type="Map">
+                <auto-parameters entity-name="mantle.order.return.ReturnItem"/></parameter></parameter>
+
+            <parameter name="requestItemOrderList" type="List"><parameter name="rio" type="Map">
+                <auto-parameters entity-name="mantle.request.RequestItemOrder"/></parameter></parameter>
+            <parameter name="requestIdSet" type="Set"><parameter name="requestId"/></parameter>
+
+            <parameter name="statusHistoryList" type="List"><parameter name="auditLog" type="Map">
+                <auto-parameters entity-name="moqui.entity.EntityAuditLog"/></parameter></parameter>
+            <parameter name="orderNoteList" type="List"><parameter name="orderNote" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderNote"/></parameter></parameter>
+
+            <parameter name="systemMessageList" type="List"><parameter name="systemMessage" type="Map"/></parameter>
+
+            <parameter name="orderPartList" type="List"><parameter name="orderPart" type="Map">
+                <auto-parameters entity-name="mantle.order.OrderPart"/></parameter></parameter>
+            <parameter name="firstPart" type="Map"/>
+            <parameter name="firstPartInfo" type="Map"/>
+            <parameter name="orderPartInfoList" type="List"><parameter name="orderPartInfo" type="Map">
+                <parameter name="orderPart" type="Map"><auto-parameters entity-name="mantle.order.OrderPart"/></parameter>
+                <parameter name="partEditable" type="Boolean"/>
+                <parameter name="partOrderItemList" type="List"><parameter name="partOrderItem" type="Map">
+                    <auto-parameters entity-name="mantle.order.OrderItem"/></parameter></parameter>
+                <parameter name="partNoParentOrderItemCount" type="Integer"/>
+                <parameter name="partNoParentOrderItemList" type="List"><parameter name="partOrderItem" type="Map">
+                    <auto-parameters entity-name="mantle.order.OrderItem"/></parameter></parameter>
+                <parameter name="hasShippableItems" type="Boolean"/>
+                <parameter name="singleLot" type="Boolean"/>
+                <parameter name="newerInventory" type="Boolean"/>
+                <parameter name="shipmentMethodEnum" type="Map">
+                    <auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
+                <parameter name="carrierPartyDetail" type="Map"/>
+                <parameter name="partPaymentList" type="List"><parameter name="partPayment" type="Map">
+                    <auto-parameters entity-name="mantle.account.payment.Payment"/></parameter></parameter>
+                <parameter name="partPaymentInfoList" type="List"><parameter name="partPaymentInfo" type="Map">
+                    <parameter name="partPayment" type="Map"><auto-parameters entity-name="mantle.account.payment.Payment"/></parameter>
+                    <parameter name="statusItem" type="Map"><auto-parameters entity-name="moqui.basic.StatusItem"/></parameter>
+                    <parameter name="paymentMethod" type="Map"><auto-parameters entity-name="mantle.account.method.PaymentMethod"/></parameter>
+                    <parameter name="creditCard" type="Map"><auto-parameters entity-name="mantle.account.method.CreditCard"/></parameter>
+                    <parameter name="creditCardTypeEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
+                    <parameter name="maskedCardNumber"/>
+                    <parameter name="postalAddress" type="Map"><auto-parameters entity-name="mantle.party.contact.PostalAddress"/></parameter>
+                    <parameter name="postalAddressStateGeo" type="Map"><auto-parameters entity-name="moqui.basic.Geo"/></parameter>
+                    <parameter name="telecomNumber" type="Map"><auto-parameters entity-name="mantle.party.contact.TelecomNumber"/></parameter>
+                    <parameter name="paymentMethodTypeEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
+                    <parameter name="paymentInstrumentEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
+                    <parameter name="paymentTypeEnum" type="Map"><auto-parameters entity-name="moqui.basic.Enumeration"/></parameter>
+                </parameter></parameter>
+                <parameter name="paymentsTotal" type="BigDecimal"/>
+                <parameter name="partTotalUnpaid" type="BigDecimal"/>
+                <parameter name="postalAddress" type="Map">
+                    <auto-parameters entity-name="mantle.party.contact.PostalAddress"/></parameter>
+                <parameter name="postalAddressStateGeo" type="Map">
+                    <auto-parameters entity-name="moqui.basic.Geo"/></parameter>
+                <parameter name="telecomNumber" type="Map">
+                    <auto-parameters entity-name="mantle.party.contact.TelecomNumber"/></parameter>
+                <parameter name="facility" type="Map">
+                    <auto-parameters entity-name="mantle.facility.Facility"/></parameter>
+                <parameter name="facilityContactInfo" type="Map">
+                    <parameter name="postalContactMechId"/>
+                    <parameter name="postalContactMechPurposeId"/>
+                    <parameter name="postalAddress" type="Map">
+                        <auto-parameters entity-name="mantle.party.contact.PostalAddress"/></parameter>
+                    <parameter name="postalAddressStateGeo" type="Map">
+                        <auto-parameters entity-name="moqui.basic.Geo"/></parameter>
+                    <parameter name="postalAddressGeoPoint" type="Map">
+                        <auto-parameters entity-name="moqui.basic.GeoPoint"/></parameter>
+                    <parameter name="telecomContactMechId"/>
+                    <parameter name="telecomContactMechPurposeId"/>
+                    <parameter name="telecomNumber" type="Map">
+                        <auto-parameters entity-name="mantle.party.contact.TelecomNumber"/></parameter>
+                </parameter>
+                <parameter name="customerDetail" type="Map"><auto-parameters entity-name="mantle.party.PartyDetail"/></parameter>
+                <parameter name="customerEmail"/>
+                <parameter name="vendorDetail" type="Map"><auto-parameters entity-name="mantle.party.PartyDetail"/></parameter>
+                <parameter name="isCustomerInternalOrg" type="Boolean"/>
+                <parameter name="isVendorInternalOrg" type="Boolean"/>
+                <parameter name="orderPartPartyList" type="List"><parameter name="orderPartParty">
+                    <auto-parameters entity-name="mantle.order.OrderPartPartyDetail"/></parameter></parameter>
+                <parameter name="customerShipToDetail" type="Map">
+                    <auto-parameters entity-name="mantle.order.OrderPartPartyDetail"/></parameter>
+                <parameter name="customerBillToDetail" type="Map">
+                    <auto-parameters entity-name="mantle.order.OrderPartPartyDetail"/></parameter>
+                <parameter name="partShipmentItemSourceList" type="List"><parameter name="partSis" type="Map">
+                    <auto-parameters entity-name="mantle.shipment.ShipmentItemSource"/></parameter></parameter>
+                <parameter name="partShipmentIdSet" type="Set"><parameter name="partShipmentId"/></parameter>
+            </parameter></parameter>
+
+            <parameter name="templateLocation"><description>Looked up from ProductStoreSetting and if no setting found for store or
+                no store is associated with the Order then from PartySetting (for vendorPartyId).</description></parameter>
+        </out-parameters>
+        <actions>
+            <set field="placeWarnings" from="[]"/>
+
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <if condition="orderHeader == null"><return error="true" message="Order not found with ID ${orderId}"/></if>
+
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/>
+                <order-by field-name="orderPartSeqId"/>
+            </entity-find>
+            <set field="firstPart" from="orderPartList ? orderPartList[0] : null"/>
+
+            <!--
+            <set field="headerMaster" from="orderHeader.getMasterValueMap('default')"/>
+            <log message="======== Order Master:\n${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(headerMaster))}"/>
+            -->
+
+            <set field="productStore" from="orderHeader.productStore"/>
+            <set field="statusItem" from="orderHeader.status"/>
+
+            <!-- NOTE: these statuses are fairly liberal, may want to restrict more in certain scenarios (such as customer changing an order) -->
+            <set field="editableStatusIds" from="new HashSet(['OrderBeingChanged', 'OrderOpen', 'OrderRequested',
+                'OrderProposed', 'OrderPlaced', 'OrderHold', 'OrderProcessing', 'OrderWishList', 'OrderGiftRegistry', 'OrderAutoReorder'])"/>
+            <set field="orderEditable" from="editableStatusIds.contains(orderHeader.statusId)"/>
+
+            <entity-find entity-name="mantle.order.OrderHeader" list="childOrderList">
+                <econdition field-name="parentOrderId" from="orderId"/>
+                <order-by field-name="entryDate"/>
+            </entity-find>
+            <if condition="orderHeader.recurCronExpression">
+                <set field="recurCronDescription" from="org.moqui.impl.service.ScheduledJobRunner.getCronDescription(orderHeader.recurCronExpression, ec.user.getLocale(), true)"/>
+            </if>
+
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <if condition="itemLimit"><then>
+                <!-- for itemLimit get up to that many items with no children, then get their children -->
+                <set field="orderItemList" from="new org.moqui.impl.entity.EntityListImpl(ec.entity)"/>
+                <iterate list="orderPartList" entry="orderPart">
+                    <entity-find entity-name="mantle.order.OrderItem" list="partTopOrderItemList" limit="itemLimit">
+                        <econdition field-name="orderId"/>
+                        <econdition field-name="orderPartSeqId" from="orderPart.orderPartSeqId"/>
+                        <econdition field-name="parentItemSeqId" operator="is-null"/>
+                        <!-- order-by necessary here to get first itemLimit items -->
+                        <order-by field-name="orderItemSeqId"/>
+                    </entity-find>
+                    <entity-find entity-name="mantle.order.OrderItem" list="partChildOrderItemList">
+                        <econdition field-name="orderId"/>
+                        <econdition field-name="parentItemSeqId" operator="in" from="partTopOrderItemList*.orderItemSeqId"/>
+                        <!-- don't order-by here, will need to do after combining the lists -->
+                    </entity-find>
+                    <script>orderItemList.addAll(partTopOrderItemList); orderItemList.addAll(partChildOrderItemList)</script>
+                </iterate>
+                <script>orderItemList.orderByFields(['orderItemSeqId'])</script>
+
+                <entity-find-count entity-name="mantle.order.OrderItem" count-field="orderItemNoParentCount">
+                    <econdition field-name="orderId"/>
+                    <econdition field-name="parentItemSeqId" operator="is-null"/>
+                </entity-find-count>
+            </then><else>
+                <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                    <econdition field-name="orderId"/>
+                    <order-by field-name="orderItemSeqId"/>
+                </entity-find>
+                <set field="orderItemNoParentCount" from="orderItemList.count({it.parentItemSeqId == null})"/>
+            </else></if>
+            <if condition="!orderItemList"><script>placeWarnings.add(ec.resource.expand('OrderPlaceNoItems', null))</script></if>
+            <!-- put items with parentItemSeqId in the list after their parent -->
+            <script><![CDATA[
+                orderItemWithChildrenSet = new HashSet()
+                List reverseList = orderItemList.cloneList().orderByFields(["-orderItemSeqId"])
+                for (orderItem in reverseList) {
+                    if (orderItem.parentItemSeqId) {
+                        orderItemWithChildrenSet.add(orderItem.parentItemSeqId)
+                        orderItemList.move(orderItemList.indexMatching([orderItemSeqId:orderItem.orderItemSeqId]),
+                                orderItemList.indexMatching([orderItemSeqId:orderItem.parentItemSeqId])+1)
+                    }
+                }
+            ]]></script>
+            <entity-find entity-name="moqui.entity.EntityAuditLog" list="allItemsAuditLogList">
+                <econdition field-name="changedEntityName" value="mantle.order.OrderItem"/>
+                <econdition field-name="changedFieldName" operator="in" value="quantity,unitAmount"/>
+                <econdition field-name="pkPrimaryValue" from="orderId"/>
+                <select-field field-name="changedFieldName,pkSecondaryValue,newValueText,oldValueText,changeReason,changedByUserId,changedDate"/>
+                <order-by field-name="-changedDate"/>
+            </entity-find>
+
+            <!-- get orderPromoCodeDetailList -->
+            <entity-find entity-name="mantle.product.store.OrderPromoCodeDetail" list="orderPromoCodeDetailList">
+                <econdition field-name="orderId"/></entity-find>
+            <!-- get paymentList -->
+            <entity-find-related value-field="orderHeader" relationship-name="mantle.account.payment.Payment"
+                    list="paymentList" order-by-list="['paymentId']"/>
+
+            <!-- get ShipmentItemSource list and derived data -->
+            <entity-find entity-name="mantle.shipment.ShipmentAndItemSource" list="shipmentItemSourceList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="shipmentStatusId" operator="not-in" value="ShipRejected,ShipCancelled"/>
+                <econdition field-name="statusId" operator="not-equals" value="SisCancelled"/>
+            </entity-find>
+            <set field="shipmentIdSet" from="new TreeSet()"/>
+            <set field="quantityNotShippedByItem" from="[:]"/>
+            <set field="quantityNotShippedByPart" from="[:]"/>
+            <script>
+                for (orderItem in orderItemList) {
+                    if (!productItemTypes.contains(orderItem.itemTypeEnumId)) continue
+                    if (!(orderItem.product?.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'])) continue
+                    def orderItemQuantity = (orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)
+                    addToBigDecimalInMap(orderItem.orderItemSeqId, orderItemQuantity, quantityNotShippedByItem)
+                    addToBigDecimalInMap(orderItem.orderPartSeqId, orderItemQuantity, quantityNotShippedByPart)
+                }
+            </script>
+            <iterate list="shipmentItemSourceList" entry="shipmentItemSource"><script>
+                def curOrderItem = orderItemList.find({ it.orderItemSeqId == shipmentItemSource.orderItemSeqId })
+                shipmentIdSet.add(shipmentItemSource.shipmentId)
+                if (curOrderItem != null) {
+                    addToBigDecimalInMap(curOrderItem.orderItemSeqId, -shipmentItemSource.quantity, quantityNotShippedByItem)
+                    addToBigDecimalInMap(curOrderItem.orderPartSeqId, -shipmentItemSource.quantity, quantityNotShippedByPart)
+                }
+            </script></iterate>
+
+            <!-- get OrderItemBilling list and derived data -->
+            <!-- TODO: exclude OrderItemBilling records for cancelled invoices -->
+            <entity-find entity-name="mantle.order.OrderItemBilling" list="orderItemBillingList">
+                <econdition field-name="orderId"/><order-by field-name="orderItemSeqId"/></entity-find>
+            <set field="invoiceIdSet" from="new TreeSet()"/>
+            <set field="quantityNotBilledByItem" from="[:]"/>
+            <set field="totalNotBilledByItem" from="[:]"/>
+            <set field="quantityNotBilledByPart" from="[:]"/>
+            <iterate list="orderItemList" entry="orderItem"><script><![CDATA[
+                def orderItemQuantity = (orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)
+                def orderItemTotal = (orderItemQuantity * (orderItem.unitAmount as BigDecimal ?: 0.0)).setScale(2, BigDecimal.ROUND_HALF_UP)
+                addToBigDecimalInMap(orderItem.orderItemSeqId, orderItemQuantity, quantityNotBilledByItem)
+                addToBigDecimalInMap(orderItem.orderItemSeqId, orderItemTotal, totalNotBilledByItem)
+                addToBigDecimalInMap(orderItem.orderPartSeqId, orderItemQuantity, quantityNotBilledByPart)
+            ]]></script></iterate>
+            <iterate list="orderItemBillingList" entry="orderItemBilling"><script><![CDATA[
+                def curOrderItem = orderItemList.find({ it.orderItemSeqId == orderItemBilling.orderItemSeqId })
+                invoiceIdSet.add(orderItemBilling.invoiceId)
+                if (curOrderItem != null) {
+                    def billedQuantity = orderItemBilling.quantity != null ? orderItemBilling.quantity : 1.0
+                    addToBigDecimalInMap(curOrderItem.orderItemSeqId, -billedQuantity, quantityNotBilledByItem)
+                    addToBigDecimalInMap(curOrderItem.orderPartSeqId, -billedQuantity, quantityNotBilledByPart)
+                    // need to do query to get InvoiceItem for actual amount
+                    def curInvoiceItem = orderItemBilling.invoiceItem
+                    def billedTotal = (billedQuantity * (curInvoiceItem?.amount ?: 0.0)).setScale(2, BigDecimal.ROUND_HALF_UP)
+                    addToBigDecimalInMap(curOrderItem.orderItemSeqId, -billedTotal, totalNotBilledByItem)
+                }
+            ]]></script></iterate>
+
+            <!-- get ReturnItem list -->
+            <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItemList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="statusId" operator="not-equals" value="ReturnCancelled"/>
+                <order-by field-name="orderItemSeqId"/>
+            </entity-find>
+
+            <!-- get RequestItemOrder list and derived data -->
+            <entity-find entity-name="mantle.request.RequestItemOrder" list="requestItemOrderList">
+                <econdition field-name="orderId"/></entity-find>
+            <set field="requestIdSet" from="new TreeSet()"/>
+            <iterate list="requestItemOrderList" entry="requestItemOrder">
+                <script>requestIdSet.add(requestItemOrder.requestId)</script></iterate>
+
+            <!-- get order status history from EntityAuditLog -->
+            <entity-find entity-name="moqui.entity.EntityAuditLog" list="statusHistoryList">
+                <econdition field-name="changedEntityName" value="mantle.order.OrderHeader"/>
+                <econdition field-name="changedFieldName" value="statusId"/>
+                <econdition field-name="pkPrimaryValue" from="orderId"/>
+                <order-by field-name="changedDate"/>
+            </entity-find>
+
+            <entity-find entity-name="mantle.order.OrderNote" list="orderNoteList">
+                <econdition field-name="orderId"/><order-by field-name="-noteDate"/></entity-find>
+
+            <!-- for SystemMessage look at SystemMessage.orderId and OrderSystemMessage to get a Set of systemMessageId -->
+            <entity-find entity-name="moqui.service.message.SystemMessage" list="directSysMsgList">
+                <econdition field-name="orderId"/>
+                <select-field field-name="systemMessageId"/>
+            </entity-find>
+            <entity-find entity-name="mantle.order.OrderSystemMessage" list="orderSysMsgList">
+                <econdition field-name="orderId"/>
+                <select-field field-name="systemMessageId"/>
+            </entity-find>
+            <set field="systemMessageIdSet" from="new HashSet()"/>
+            <if condition="directSysMsgList"><script>systemMessageIdSet.addAll(directSysMsgList*.systemMessageId)</script></if>
+            <if condition="orderSysMsgList"><script>systemMessageIdSet.addAll(orderSysMsgList*.systemMessageId)</script></if>
+            <if condition="systemMessageIdSet">
+                <entity-find entity-name="moqui.service.message.SystemMessage" list="systemMessageList">
+                    <econdition field-name="systemMessageId" operator="in" from="systemMessageIdSet"/>
+                    <order-by field-name="initDate,systemMessageId"/>
+                </entity-find>
+            </if>
+
+            <!-- get order info by part for more detailed display -->
+            <script><![CDATA[
+            import org.moqui.entity.EntityList
+            import org.moqui.entity.EntityValue
+            import org.moqui.context.ExecutionContext
+            ExecutionContext ec = context.ec
+
+            orderPartInfoList = []
+            for (EntityValue orderPart in orderPartList) {
+                EntityValue partStatusItem = (EntityValue) orderPart.status
+                EntityValue partSettlementTerm = (EntityValue) orderPart.settlementTerm
+
+                EntityList partOrderItemList = orderItemList.findAll({ it.orderPartSeqId == orderPart.orderPartSeqId })
+                EntityList partNoParentOrderItemList = partOrderItemList.findAll({ it.parentItemSeqId == null })
+                int partNoParentOrderItemCount = partNoParentOrderItemList.size()
+                // if there is an itemLimit and the no parent (top) item list size is not less than the limit, hit the DB for a full count
+                if (itemLimit && partNoParentOrderItemList.size() >= itemLimit) {
+                    partNoParentOrderItemCount = ec.entity.find("mantle.order.OrderItem").condition("orderId", orderId)
+                            .condition("orderPartSeqId", orderPart.orderPartSeqId).condition("parentItemSeqId", null).count()
+                }
+
+                EntityValue customerDetail = ec.entity.find("mantle.party.PartyDetail").condition("partyId", orderPart.customerPartyId).one()
+                EntityValue vendorDetail = ec.entity.find("mantle.party.PartyDetail").condition("partyId", orderPart.vendorPartyId).one()
+                boolean isCustomerInternalOrg = ec.entity.find("mantle.party.PartyRole")
+                        .condition("partyId", orderPart.customerPartyId).condition("roleTypeId", "OrgInternal").one() as boolean
+                boolean isVendorInternalOrg = ec.entity.find("mantle.party.PartyRole")
+                        .condition("partyId", orderPart.vendorPartyId).condition("roleTypeId", "OrgInternal").one() as boolean
+
+                EntityList orderPartPartyList = ec.entity.find("mantle.order.OrderPartPartyDetail")
+                        .condition([orderId:orderPart.orderId, orderPartSeqId:orderPart.orderPartSeqId]).orderBy("description").list()
+                EntityValue customerShipToDetail = orderPartPartyList.find({ it.roleTypeId == 'CustomerShipTo' })
+                EntityValue customerBillToDetail = orderPartPartyList.find({ it.roleTypeId == 'CustomerBillTo' })
+                String shipToPartyId = customerShipToDetail?.partyId ?: orderPart.customerPartyId
+                String billToPartyId = customerBillToDetail?.partyId ?: orderPart.customerPartyId
+
+                String customerEmail = null
+                if (orderPart.customerPartyId) {
+                    customerEmail = ec.service.sync().name("mantle.party.ContactServices.get#PartyContactInfo")
+                            .parameter("partyId", orderPart.customerPartyId).parameter("emailContactMechPurposeId", "EmailOrder")
+                            .parameter("defaultToPrimaryPurpose", true).call()?.emailAddress
+                }
+
+                boolean hasShippableItems = orderItemList.find({ it.product?.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] }) != null
+                boolean singleLot = false
+                boolean newerInventory = false
+                if (hasShippableItems && orderPart.customerPartyId) {
+                    singleLot = "BlY".equals(ec.service.sync().name("mantle.party.PartyServices.get#PartySettingValue")
+                            .parameter("partySettingTypeId", "CustomerSingleLot").parameter("partyId", orderPart.customerPartyId).call()?.get("settingValue"))
+                    newerInventory = "BlY".equals(ec.service.sync().name("mantle.party.PartyServices.get#PartySettingValue")
+                            .parameter("partySettingTypeId", "CustomerNewerInventory").parameter("partyId", orderPart.customerPartyId).call()?.get("settingValue"))
+                }
+
+                EntityValue carrierPartyDetail = null
+                if (orderPart.carrierPartyId && orderPart.carrierPartyId != "_NA_")
+                    carrierPartyDetail = ec.entity.find("mantle.party.PartyDetail").condition("partyId", orderPart.carrierPartyId).one()
+
+                def partPaymentList = paymentList.cloneList().filterByAnd([orderPartSeqId:orderPart.orderPartSeqId])
+                def partPaymentInfoList = []
+                BigDecimal paymentsTotal = 0
+                for (EntityValue partPayment in partPaymentList) {
+                    if (!(((String) partPayment.statusId) in ['PmntCancelled', 'PmntVoid', 'PmntDeclined'])) {
+                        // NOTE: supports OrderPartParty override for roleTypeId=CustomerBillTo via billToPartyId
+                        if (partPayment.fromPartyId == billToPartyId)
+                            paymentsTotal += (partPayment.amount ?: 0.0)
+                        else if (partPayment.toPartyId == billToPartyId)
+                            paymentsTotal -= (partPayment.amount ?: 0.0)
+                    }
+                    Map partPaymentInfo = [partPayment:partPayment, statusItem:partPayment.status]
+                    EntityValue paymentMethod = (EntityValue) partPayment.method
+                    if (paymentMethod != null) {
+                        partPaymentInfo.paymentMethod = paymentMethod
+                        creditCard = paymentMethod.creditCard
+                        partPaymentInfo.creditCard = creditCard
+                        partPaymentInfo.creditCardTypeEnum = creditCard?.type
+                        cardNumber = creditCard?.cardNumber
+                        partPaymentInfo.maskedCardNumber = cardNumber ? '*'.padRight(cardNumber.length() - 4, '*') + cardNumber.substring(cardNumber.length() - 4, cardNumber.length()) : ''
+                        partPaymentInfo.postalAddress = paymentMethod.PostalAddress
+                        partPaymentInfo.postalAddressStateGeo = partPaymentInfo.postalAddress?."StateProvince#moqui.basic.Geo"
+                        partPaymentInfo.telecomNumber = paymentMethod.TelecomNumber
+                        partPaymentInfo.paymentMethodTypeEnum = paymentMethod.methodType
+                    }
+                    partPaymentInfo.paymentInstrumentEnum = partPayment.instrument
+                    partPaymentInfo.paymentTypeEnum = partPayment.type
+                    partPaymentInfoList.add(partPaymentInfo)
+                }
+                BigDecimal partTotalUnpaid = (orderPart.partTotal ?: 0.0) - (paymentsTotal ?: 0.0)
+
+                if (!orderPart.vendorPartyId) placeWarnings.add(ec.resource.expand('OrderPlacePartNoVendor', null, [orderPart:orderPart]))
+                if (!orderPart.customerPartyId) placeWarnings.add(ec.resource.expand('OrderPlacePartNoCustomer', null, [orderPart:orderPart]))
+                if (paymentsTotal < (BigDecimal) orderPart.partTotal)
+                    placeWarnings.add(ec.resource.expand('OrderPlacePartPaymentIncomplete', null, [orderPart:orderPart]))
+                if (!isCustomerInternalOrg && !orderPart.postalContactMechId)
+                    placeWarnings.add(ec.resource.expand('OrderPlacePartNoShippingAddress', null, [orderPart:orderPart]))
+                if (!isCustomerInternalOrg && !orderPart.shipmentMethodEnumId)
+                    placeWarnings.add(ec.resource.expand('OrderPlacePartNoShippingMethod', null, [orderPart:orderPart]))
+
+                List orderItemSeqIdList = partOrderItemList*.orderItemSeqId
+                List partShipmentItemSourceList = []
+                Set partShipmentIdSet = new TreeSet()
+                for (EntityValue sis in shipmentItemSourceList) if (sis.orderItemSeqId in orderItemSeqIdList) {
+                    partShipmentItemSourceList.add(sis)
+                    partShipmentIdSet.add(sis.shipmentId)
+                }
+
+                EntityValue telecomNumber = (EntityValue) orderPart.'mantle.party.contact.TelecomNumber'
+                EntityValue postalAddress = (EntityValue) orderPart.'mantle.party.contact.PostalAddress'
+                EntityValue postalAddressStateGeo = (EntityValue) postalAddress?."StateProvince#moqui.basic.Geo"
+                EntityValue facility = (EntityValue) orderPart.'mantle.facility.Facility'
+                Map facilityContactInfo = null
+                if (facility) {
+                    Map facShipOut = ec.service.sync().name("mantle.facility.ContactServices.get#FacilityDefaultShipDest")
+                            .parameter("facilityId", orderPart.facilityId).call()
+                    facilityContactInfo = ec.service.sync().name("mantle.facility.ContactServices.get#FacilityContactInfo")
+                            .parameters([facilityId:orderPart.facilityId, postalContactMechId:facShipOut.postalContactMechId,
+                                         telecomContactMechId:facShipOut.telecomContactMechId]).call()
+                }
+
+                // find duplicate orders by customerPartyId and otherPartyOrderId
+                def duplicateOrderPartList = null
+                if (!isCustomerInternalOrg && orderPart.otherPartyOrderId) {
+                    duplicateOrderPartList = ec.entity.find("mantle.order.OrderPart").condition("orderId", "!=", orderId)
+                            .condition("otherPartyOrderId", orderPart.otherPartyOrderId)
+                            .condition("customerPartyId", orderPart.customerPartyId).list()
+                }
+
+                // find applicable open returns
+                Map openReturnsResult = ec.service.sync().name("mantle.order.ReturnServices.find#OrderOpenReturns")
+                        .parameters([orderId:orderPart.orderId, orderPartSeqId:orderPart.orderPartSeqId]).call()
+
+                orderPartInfoList.add([orderPart:orderPart, partEditable:editableStatusIds.contains(orderPart.statusId),
+                        partStatusItem:partStatusItem, partSettlementTerm:partSettlementTerm,
+                        partOrderItemList:partOrderItemList, partNoParentOrderItemList:partNoParentOrderItemList,
+                        partNoParentOrderItemCount:partNoParentOrderItemCount,
+                        hasShippableItems:hasShippableItems, singleLot:singleLot, newerInventory:newerInventory,
+                        carrierPartyDetail:carrierPartyDetail,
+                        shipmentMethodEnum:orderPart."ShipmentMethod#moqui.basic.Enumeration",
+                        partPaymentList:partPaymentList, partPaymentInfoList:partPaymentInfoList,
+                        paymentsTotal:paymentsTotal, partTotalUnpaid:partTotalUnpaid,
+                        postalAddress:postalAddress, postalAddressStateGeo:postalAddressStateGeo,
+                        telecomNumber:telecomNumber, facility:facility,
+                        facilityContactInfo:facilityContactInfo, customerDetail:customerDetail, customerEmail:customerEmail,
+                        vendorDetail:vendorDetail, isCustomerInternalOrg:isCustomerInternalOrg, isVendorInternalOrg:isVendorInternalOrg,
+                        orderPartPartyList:orderPartPartyList, customerShipToDetail:customerShipToDetail,
+                        customerBillToDetail:customerBillToDetail, partShipmentItemSourceList:partShipmentItemSourceList,
+                        partShipmentIdSet:partShipmentIdSet, duplicateOrderPartList:duplicateOrderPartList,
+                        openReturnList:openReturnsResult.openReturnList])
+            }
+            ]]></script>
+            <set field="firstPartInfo" from="orderPartInfoList ? orderPartInfoList[0] : null"/>
+            <!-- <log level="warn" message="======== OrderDisplayInfo orderPartInfoList: ${orderPartInfoList}"/> -->
+
+            <!-- Get templateLocation from settings -->
+            <set field="templateLocation" from="null"/>
+            <!-- see if a template is configured by ProductStoreSetting -->
+            <if condition="orderHeader.productStoreId">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="productStoreSettingList" cache="true">
+                    <date-filter/>
+                    <econdition field-name="productStoreId" from="orderHeader.productStoreId"/>
+                    <econdition field-name="settingTypeEnumId" value="Psst${templateSettingSuffix}"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-find>
+                <if condition="productStoreSettingList">
+                    <set field="templateLocation" from="productStoreSettingList[0].settingValue"/></if>
+            </if>
+            <!-- if no template setting for store look for PartySetting on Shipment.fromPartyId -->
+            <if condition="!templateLocation &amp;&amp; firstPart.vendorPartyId">
+                <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="ptySettingOut"
+                        in-map="[partyId:firstPart.vendorPartyId, partySettingTypeId:('Org' + templateSettingSuffix)]"/>
+                <set field="templateLocation" from="ptySettingOut?.settingValue"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="OrderItemsTotalCount">
+        <in-parameters><parameter name="orderId"/></in-parameters>
+        <out-parameters><parameter name="itemCount" type="BigDecimal"/></out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+            <set field="itemCount" from="0.0"/>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItemList"><econdition field-name="orderId"/></entity-find>
+            <iterate list="orderItemList" entry="orderItem">
+                <if condition="!productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+                <set field="itemCount" from="itemCount + orderItem.quantity"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="get" noun="OrderItemDisplayInfo">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderItemSeqId" required="true"/>
+            <parameter name="orderItem" type="EntityValue"/>
+            <parameter name="orderPart" type="EntityValue"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderItem" type="EntityValue"/>
+            <parameter name="orderPart" type="EntityValue"/>
+            <parameter name="product" type="EntityValue"/>
+            <parameter name="isProductItemType" type="Boolean"/>
+            <parameter name="isShippable" type="Boolean"/>
+            <parameter name="partEditable" type="Boolean"/>
+
+            <parameter name="itemQuantityAuditList" type="List"><parameter name="itemQuantityAudit" type="Map">
+                <parameter name="auditLog" type="Map"/>
+                <parameter name="userAccount" type="Map"/>
+                <parameter name="changeReasonEnum" type="Map"/>
+            </parameter></parameter>
+            <parameter name="itemUnitAmountAuditList" type="List"><parameter name="itemUnitAmountAudit" type="Map">
+                <parameter name="auditLog" type="Map"/>
+                <parameter name="userAccount" type="Map"/>
+                <parameter name="changeReasonEnum" type="Map"/>
+            </parameter></parameter>
+
+            <parameter name="orderItemTotalOut" type="Map"><description>Result from mantle.order.OrderServices.get#OrderItemTotal with getChildrenTotals=true</description></parameter>
+            <parameter name="orderItemQuantity" type="BigDecimal"/>
+            <parameter name="orderItemTotal" type="BigDecimal"/>
+            <parameter name="itemQuantityShipped" type="BigDecimal"/>
+            <parameter name="itemQuantityNotShipped" type="BigDecimal"/>
+            <parameter name="itemQuantityBilled" type="BigDecimal"/>
+            <parameter name="itemAmountBilled" type="BigDecimal"/>
+            <parameter name="itemQuantityNotBilled" type="BigDecimal"/>
+            <parameter name="itemAmountNotBilled" type="BigDecimal"/>
+
+            <parameter name="resInfoList" type="List"><parameter name="resInfo" type="Map">
+                <parameter name="existingRes" type="Map"/><parameter name="assetLot" type="Map"/></parameter></parameter>
+            <parameter name="singleLot" type="Boolean"/>
+            <parameter name="newerInventory" type="Boolean"/>
+            <parameter name="lotIdSet" type="Set"><parameter name="lotId"/></parameter>
+            <parameter name="oldestLotExpire" type="Timestamp"/>
+            <parameter name="newerThanExpireDate" type="Timestamp"/>
+
+            <parameter name="returnItemList" type="List"><parameter name="returnItem" type="Map"/></parameter>
+            <parameter name="returnIdSet" type="Set"><parameter name="returnId"/></parameter>
+            <parameter name="returnableOut" type="Map"><description>Result from mantle.order.ReturnServices.calculate#OrderItemReturnable</description></parameter>
+
+            <parameter name="itemCanDelete" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="editableStatusIds" from="['OrderBeingChanged', 'OrderOpen', 'OrderRequested', 'OrderProposed',
+                    'OrderPlaced', 'OrderHold', 'OrderProcessing', 'OrderWishList', 'OrderGiftRegistry', 'OrderAutoReorder']"/>
+
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <if condition="orderItem == null"><entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem"/></if>
+            <if condition="orderPart == null"><set field="orderPart" from="orderItem.part"/></if>
+
+            <set field="product" from="orderItem.product"/>
+            <set field="isProductItemType" from="orderItem.itemTypeEnumId in productItemTypes"/>
+            <set field="isShippable" from="isProductItemType &amp;&amp; product != null ? product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] : false"/>
+            <set field="partEditable" from="editableStatusIds.contains(orderPart.statusId)"/>
+
+            <!-- item quantity and unitAmount EntityAuditLog records -->
+            <entity-find entity-name="moqui.entity.EntityAuditLog" list="itemAuditLogList">
+                <econdition field-name="changedEntityName" value="mantle.order.OrderItem"/>
+                <econdition field-name="changedFieldName" operator="in" value="quantity,unitAmount"/>
+                <econdition field-name="pkPrimaryValue" from="orderId"/>
+                <econdition field-name="pkSecondaryValue" from="orderItemSeqId"/>
+                <select-field field-name="changedFieldName,pkSecondaryValue,newValueText,oldValueText,changeReason,changedByUserId,changedDate"/>
+                <order-by field-name="-changedDate"/>
+            </entity-find>
+            <set field="itemQuantityAuditList" from="[]"/>
+            <set field="itemUnitAmountAuditList" from="[]"/>
+            <iterate list="itemAuditLogList" entry="auditLog">
+                <entity-find-one entity-name="mantle.party.PersonWithUserAccount" value-field="userAccount">
+                    <field-map field-name="userId" from="auditLog.changedByUserId"/></entity-find-one>
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="changeReasonEnum">
+                    <field-map field-name="enumId" from="auditLog.changeReason"/></entity-find-one>
+                <if condition="auditLog.changedFieldName == 'quantity'"><then>
+                    <script>itemQuantityAuditList.add([auditLog:auditLog, userAccount:userAccount, changeReasonEnum:changeReasonEnum])</script>
+                </then><else>
+                    <script>itemUnitAmountAuditList.add([auditLog:auditLog, userAccount:userAccount, changeReasonEnum:changeReasonEnum])</script>
+                </else></if>
+            </iterate>
+
+            <service-call name="mantle.order.OrderServices.get#OrderItemTotal"
+                    in-map="[orderItem:orderItem, getChildrenTotals:true]" out-map="orderItemTotalOut"/>
+
+            <set field="orderItemQuantity" from="orderItemTotalOut.combinedQuantity"/>
+            <set field="orderItemTotal" from="orderItemTotalOut.itemTotal"/>
+
+            <entity-find entity-name="mantle.shipment.ShipmentAndItemSource" list="shipmentItemSourceList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderItemSeqId"/>
+                <econdition field-name="shipmentStatusId" operator="not-in" value="ShipRejected,ShipCancelled"/>
+                <econdition field-name="statusId" operator="not-equals" value="SisCancelled"/>
+            </entity-find>
+            <set field="itemQuantityShipped" from="shipmentItemSourceList ? shipmentItemSourceList*.quantity.sum() : 0.0"/>
+            <set field="itemQuantityNotShipped" from="orderItemQuantity - itemQuantityShipped"/>
+
+            <entity-find entity-name="mantle.order.OrderItemBilling" list="orderItemBillingList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderItemSeqId"/>
+            </entity-find>
+
+            <set field="itemQuantityBilled" from="0.0"/>
+            <set field="itemAmountBilled" from="0.0"/>
+            <iterate list="orderItemBillingList" entry="orderItemBilling">
+                <set field="billedQuantity" from="orderItemBilling.quantity != null ? orderItemBilling.quantity : 1.0"/>
+                <set field="itemQuantityBilled" from="itemQuantityBilled + billedQuantity"/>
+
+                <set field="curInvoiceItem" from="orderItemBilling.invoiceItem"/>
+                <set field="itemAmountBilled" from="itemAmountBilled + ((billedQuantity * (curInvoiceItem?.amount ?: 0.0)).setScale(2, BigDecimal.ROUND_HALF_UP))"/>
+            </iterate>
+
+            <set field="itemQuantityNotBilled" from="orderItemQuantity - itemQuantityBilled"/>
+            <set field="itemAmountNotBilled" from="orderItemTotal - itemAmountBilled"/>
+
+            <if condition="isShippable &amp;&amp; product != null">
+                <set field="singleLot" from="'BlY'.equals(ec.service.sync().name('mantle.party.PartyServices.get#PartySettingValue')
+                        .parameter('partySettingTypeId', 'CustomerSingleLot').parameter('partyId', orderPart.customerPartyId).call()?.get('settingValue'))"/>
+                <set field="newerInventory" from="'BlY'.equals(ec.service.sync().name('mantle.party.PartyServices.get#PartySettingValue')
+                        .parameter('partySettingTypeId', 'CustomerNewerInventory').parameter('partyId', orderPart.customerPartyId).call()?.get('settingValue'))"/>
+
+                <entity-find entity-name="mantle.product.issuance.AssetReservation" list="existingResList">
+                    <econdition field-name="orderId"/><econdition field-name="orderItemSeqId"/></entity-find>
+                <set field="resInfoList" from="[]"/>
+                <set field="lotIdSet" from="new LinkedHashSet()"/>
+                <set field="oldestLotExpire" from="null"/>
+                <iterate list="existingResList" entry="existingRes">
+                    <entity-find-one entity-name="mantle.product.asset.AssetLotAndMfgParty" value-field="assetLot">
+                        <field-map field-name="assetId" from="existingRes.assetId"/>
+                        <select-field field-name="lotId,pseudoId,lotNumber,manufacturedDate,expirationDate"/>
+                    </entity-find-one>
+                    <script><![CDATA[
+                        if (assetLot?.lotId) lotIdSet.add(assetLot.lotId)
+                        if (assetLot?.expirationDate != null && (oldestLotExpire == null || assetLot.expirationDate < oldestLotExpire))
+                            oldestLotExpire = assetLot.expirationDate
+                        resInfoList.add([existingRes:existingRes, assetLot:assetLot])
+                    ]]></script>
+                </iterate>
+
+                <set field="newerThanExpireDate" from="null"/>
+                <if condition="newerInventory &amp;&amp; orderPart.customerPartyId">
+                    <!-- get most recent asset issued and lot expire date for it -->
+                    <entity-find entity-name="mantle.product.issuance.AssetIssuanceLotSummary" list="issuanceLotList" limit="1">
+                        <econdition field-name="toPartyId" from="orderPart.customerPartyId"/>
+                        <econdition field-name="productId"/>
+                        <select-field field-name="expirationDate,expectedEndOfLife"/>
+                        <order-by field-name="-issuedDate"/>
+                    </entity-find>
+                    <if condition="issuanceLotList">
+                        <set field="newerThanExpireDate" from="issuanceLotList[0].expirationDate ?: issuanceLotList[0].expectedEndOfLife"/></if>
+                </if>
+            </if>
+
+            <!-- returnable quantities and ReturnItems -->
+            <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItemList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderItemSeqId"/>
+                <econdition field-name="statusId" operator="not-equals" value="ReturnCancelled"/>
+                <order-by field-name="orderItemSeqId"/>
+            </entity-find>
+            <service-call name="mantle.order.ReturnServices.calculate#OrderItemReturnable" out-map="returnableOut"
+                    in-map="[orderId:orderItem.orderId, orderItemSeqId:orderItem.orderItemSeqId, orderItemBillingList:orderItemBillingList, returnItemList:returnItemList]"/>
+            <set field="returnIdSet" from="new TreeSet()"/>
+            <iterate list="returnItemList" entry="returnItem">
+                <if condition="returnItem.orderItemSeqId != orderItemSeqId"><continue/></if>
+                <script>returnIdSet.add(returnItem.returnId)</script>
+            </iterate>
+
+            <!-- <log level="warn" message="isShippable ${isShippable} orderItem.quantity ${orderItem.quantity} itemQuantityNotShipped ${itemQuantityNotShipped} itemQuantityNotBilled ${itemQuantityNotBilled} returnableOut.returnedQuantity ${returnableOut.returnedQuantity}"/> -->
+            <set field="itemCanDelete" from="(!isShippable || itemQuantityNotShipped == orderItem.quantity) &amp;&amp; itemQuantityNotBilled == orderItem.quantity &amp;&amp; returnableOut.returnedQuantity == 0.0"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="OrderPartBillingAddress">
+        <description>
+            Find billing address(es) for an OrderPart. Look first for explicitly specified PostalBilling in
+            OrderPartContactMech, then PaymentMethod.postalContactMechId via Payment(s) for OrderPart, then looks for
+            PostalBilling or PostalPrimary address for CustomerBillTo OrderPartParty (if enabled) or for OrderPart.customerPartyId.
+
+            There will usually be a single billing address unless there more than one is explicitly associated with the OrderPart.
+        </description>
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId"><description>Defaults to first part</description></parameter>
+            <parameter name="useCustomerBillTo" type="boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="postalContactMechIdList" type="List"><parameter name="postalContactMechId"/></parameter>
+        </out-parameters>
+        <actions>
+            <set field="postalContactMechIdList" from="[]"/>
+
+            <if condition="!orderPartSeqId">
+                <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                    <econdition field-name="orderId"/>
+                    <select-field field-name="orderPartSeqId"/>
+                    <order-by field-name="orderPartSeqId"/>
+                </entity-find>
+                <set field="orderPartSeqId" from="orderPartList?.first?.orderPartSeqId"/>
+            </if>
+
+            <!-- OrderPartContactMech -->
+            <entity-find entity-name="mantle.order.OrderPartContactMech" list="opcmList">
+                <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                <econdition field-name="contactMechPurposeId" value="PostalBilling"/>
+            </entity-find>
+            <if condition="opcmList"><script>postalContactMechIdList.addAll(opcmList*.contactMechId)</script></if>
+
+            <!-- Payment/PaymentMethod -->
+            <if condition="!postalContactMechIdList">
+                <entity-find entity-name="mantle.account.payment.Payment" list="paymentList">
+                    <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                    <econdition field-name="paymentMethodId" operator="is-not-null"/>
+                </entity-find>
+                <if condition="paymentList">
+                    <entity-find entity-name="mantle.account.method.PaymentMethod" list="paymentMethodList">
+                        <econdition field-name="paymentMethodId" operator="in" from="paymentList*.paymentMethodId"/>
+                        <econdition field-name="postalContactMechId" operator="is-not-null"/>
+                    </entity-find>
+                    <script>postalContactMechIdList.addAll(paymentMethodList*.postalContactMechId)</script>
+                </if>
+            </if>
+
+            <!-- if none found get billing address for CustomerBillTo or customerPartyId -->
+            <if condition="!postalContactMechIdList">
+                <if condition="useCustomerBillTo">
+                    <entity-find entity-name="mantle.order.OrderPartParty" list="oppList">
+                        <econdition field-name="orderId"/><econdition field-name="orderPartSeqId"/>
+                        <econdition field-name="roleTypeId" value="CustomerBillTo"/>
+                    </entity-find>
+                    <if condition="oppList"><set field="billToPartyId" from="oppList[0].partyId"/></if>
+                </if>
+                <if condition="!billToPartyId">
+                    <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart"/>
+                    <if condition="orderPart == null"><return error="true" message="Could not find Order Part ${orderId}:${orderPartSeqId}"/></if>
+                    <set field="billToPartyId" from="orderPart.customerPartyId"/>
+                </if>
+                <if condition="billToPartyId">
+                    <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalPcmList">
+                        <date-filter/><econdition field-name="partyId" from="billToPartyId"/>
+                        <econdition field-name="contactMechPurposeId" value="PostalBilling"/>
+                        <order-by field-name="-fromDate"/>
+                    </entity-find>
+                    <if condition="!postalPcmList">
+                        <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalPcmList">
+                            <date-filter/><econdition field-name="partyId" from="billToPartyId"/>
+                            <econdition field-name="contactMechPurposeId" value="PostalPrimary"/>
+                            <order-by field-name="-fromDate"/>
+                        </entity-find>
+                        <if condition="postalPcmList"><set field="postalContactMechPurposeId" value="PostalPrimary"/></if>
+                    </if>
+                    <if condition="postalPcmList"><script>postalContactMechIdList.add(postalPcmList[0].contactMechId)</script></if>
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="validate" noun="Order" type="interface">
+        <in-parameters><parameter name="orderId" required="true"/></in-parameters>
+        <out-parameters><parameter name="approveWarnings" type="List"><parameter name="approveWarning"/></parameter></out-parameters>
+    </service>
+    <service verb="validate" noun="OrderRequireManual">
+        <implements service="mantle.order.OrderInfoServices.validate#Order"/>
+        <actions>
+            <set field="approveWarnings" from="[]"/>
+            <script>approveWarnings.add(ec.resource.expand('OrderApproveStoreManualApprove', null))</script>
+        </actions>
+    </service>
+
+    <service verb="check" noun="OrderPreApprove">
+        <description>A basic set of checks for possible issues before approving an order. Use an SECA on this service to do
+            additional checks, adding to the approveWarnings List as needed.</description>
+        <in-parameters><parameter name="orderId" required="true"/></in-parameters>
+        <out-parameters>
+            <parameter name="approveWarnings" type="List"><parameter name="approveWarning"/></parameter>
+        </out-parameters>
+        <actions>
+            <set field="approveWarnings" from="[]"/>
+
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <if condition="orderHeader == null"><return/></if>
+
+            <set field="placedDate" from="orderHeader.placedDate"/>
+            <set field="currencyUomId" from="orderHeader.currencyUomId"/>
+            <set field="productStoreId" from="orderHeader.productStoreId"/>
+
+            <set field="orderPartList" from="orderHeader.parts"/>
+            <set field="firstOrderPart" from="orderPartList[0]"/>
+            <set field="orderItemList" from="orderHeader.items"/>
+
+            <set field="customerPartyId" from="firstOrderPart.customerPartyId"/>
+            <set field="vendorPartyId" from="firstOrderPart.vendorPartyId"/>
+            <entity-find-one entity-name="mantle.party.PartyRole" value-field="vendorOrgInternal">
+                <field-map field-name="partyId" from="vendorPartyId"/><field-map field-name="roleTypeId" value="OrgInternal"/></entity-find-one>
+            <set field="isVendorInternalOrg" from="vendorOrgInternal != null"/>
+
+            <!-- check payments for sufficient authorized, promised (or later statuses for each) -->
+            <set field="totalPromised" from="0"/>
+            <set field="totalAuthorized" from="0"/>
+            <entity-find entity-name="mantle.account.payment.Payment" list="paymentList">
+                <econdition field-name="orderId"/></entity-find>
+            <set field="paymentMethodIdSet" from="new HashSet()"/>
+            <iterate list="paymentList" entry="payment">
+                <if condition="payment.statusId in ['PmntAuthorized', 'PmntDelivered', 'PmntConfirmed']"><then>
+                    <set field="totalPromised" from="totalPromised + (payment.amount ?: 0.0)"/>
+                    <set field="totalAuthorized" from="totalAuthorized + (payment.amount ?: 0.0)"/>
+                </then><else-if condition="payment.statusId == 'PmntPromised'">
+                    <set field="totalPromised" from="totalPromised + (payment.amount ?: 0.0)"/>
+                </else-if></if>
+                <if condition="payment.paymentMethodId &amp;&amp; !(payment.statusId in ['PmntCancelled', 'PmntVoid', 'PmntDeclined'])">
+                    <script>paymentMethodIdSet.add(payment.paymentMethodId)</script></if>
+                <if condition="payment.amountUomId != orderHeader.currencyUomId">
+                    <script>approveWarnings.add(ec.resource.expand('OrderApproveCurrencyDifferent', null))</script></if>
+            </iterate>
+            <if condition="totalPromised &lt; orderHeader.grandTotal">
+                <script>approveWarnings.add(ec.resource.expand('OrderApprovePaymentPromisedLow', null))</script></if>
+            <if condition="totalAuthorized &lt; orderHeader.grandTotal">
+                <script>approveWarnings.add(ec.resource.expand('OrderApprovePaymentAuthorizedLow', null))</script></if>
+
+            <!-- don't go beyond here if there is no customer or vendor -->
+            <set field="noCustomerOrVendor" from="false"/>
+            <iterate list="orderPartList" entry="orderPart">
+                <if condition="!orderPart.vendorPartyId">
+                    <script>approveWarnings.add(ec.resource.expand('OrderApprovePartNoVendor', null))</script>
+                    <set field="noCustomerOrVendor" from="true"/>
+                </if>
+                <if condition="!orderPart.customerPartyId">
+                    <script>approveWarnings.add(ec.resource.expand('OrderApprovePartNoCustomer', null))</script>
+                    <set field="noCustomerOrVendor" from="true"/>
+                </if>
+            </iterate>
+            <if condition="noCustomerOrVendor"><return/></if>
+
+            <!-- get all PaymentMethods -->
+            <entity-find entity-name="mantle.account.method.PaymentMethod" list="paymentMethodList">
+                <econdition field-name="paymentMethodId" operator="in" from="paymentMethodIdSet"/></entity-find>
+
+            <!-- get all billing addresses -->
+            <set field="billingAddressIdSet" from="new HashSet(paymentMethodList*.postalContactMechId)"/>
+            <entity-find entity-name="mantle.party.contact.ContactMechPostalAddress" list="billingAddressList">
+                <econdition field-name="contactMechId" operator="in" from="billingAddressIdSet"/></entity-find>
+
+            <!-- get all shipping addresses -->
+            <set field="shippingAddressIdSet" from="new HashSet(orderPartList*.postalContactMechId)"/>
+            <entity-find entity-name="mantle.party.contact.ContactMechPostalAddress" list="shippingAddressList">
+                <econdition field-name="contactMechId" operator="in" from="shippingAddressIdSet"/></entity-find>
+
+            <!-- Call OrderValidate services configured for ProductStore via ProductStoreApprove -->
+            <!-- NOTE: do this before others so that these warnings appear just after payment warnings -->
+            <if condition="productStoreId">
+                <entity-find entity-name="mantle.product.store.ProductStoreApprove" list="productStoreApproveList">
+                    <date-filter valid-date="orderHeader.placedDate"/>
+                    <econdition field-name="productStoreId"/>
+                    <order-by field-name="sequenceNum"/>
+                </entity-find>
+                <script><![CDATA[
+                for (storeApprove in productStoreApproveList) {
+                    String storeApproveId = storeApprove.storeApproveId
+                    try {
+                        Map parmMap = new HashMap()
+                        List promoParameterList = storeApprove.parameters
+                        for (promoParameter in promoParameterList) parmMap.put(promoParameter.parameterName, promoParameter.parameterValue)
+                        parmMap.put("orderId", orderId)
+                        parmMap.put("storeApproveId", storeApproveId)
+
+                        Map serviceRegister = storeApprove.serviceRegister
+                        Map result = ec.service.sync().name(serviceRegister.serviceName).parameters(parmMap).softValidate(true).disableAuthz().call()
+                        if (result != null && result.approveWarnings && !ec.message.hasError())
+                            approveWarnings.addAll(result.approveWarnings)
+                    } catch (Throwable t) {
+                        ec.logger.log(300, "Error calling store order approval validate service ${storeApproveId}", t)
+                    }
+                }
+                ]]></script>
+            </if>
+
+            <entity-find entity-name="moqui.basic.EnumGroupMember" list="productItemTypeEgms" cache="true">
+                <econdition field-name="enumGroupEnumId" value="EngItemsProduct"/></entity-find>
+            <set field="productItemTypes" from="productItemTypeEgms*.enumId"/>
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="storeSettingList">
+                <econdition field-name="productStoreId"/></entity-find>
+
+            <if condition="isVendorInternalOrg"><then>
+                <!-- ========== Sales Order Validations ========== -->
+
+                <!-- TODO: add ProductStore based configuration for all of these validations -->
+
+                <!-- get other OrderParts for various validations -->
+                <set field="includeStatuses" from="['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']"/>
+                <entity-find entity-name="mantle.order.OrderPart" list="otherPartList">
+                    <econdition field-name="customerPartyId"/><econdition field-name="orderId" operator="not-equals"/>
+                    <econdition field-name="statusId" operator="in" from="includeStatuses"/>
+                </entity-find>
+                <set field="otherPartCount" from="otherPartList.size()"/>
+
+                <!-- check new customer (no other orders; see also PromotionServices.apply#NewCustomerDiscount) -->
+                <if condition="otherPartCount == 0 &amp;&amp; !'false'.equals(storeSettingList.find({'PsstOrdApproveNewCust'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <script>approveWarnings.add(ec.resource.expand('OrderApproveNewCustomer', null))</script>
+                </if>
+
+                <!-- check shipping address (for each part) present and valid -->
+                <iterate list="orderPartList" entry="orderPart">
+                    <if condition="!orderPart.postalContactMechId &amp;&amp; !'false'.equals(storeSettingList.find({'PsstOrdApproveAddrMissing'.equals(it.settingTypeEnumId)})?.settingValue)">
+                        <script>approveWarnings.add(ec.resource.expand('Part ${orderPart.orderPartSeqId} has no shipping address', null))</script>
+                        <continue/>
+                    </if>
+                    <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApproveAddrNotValid'.equals(it.settingTypeEnumId)})?.settingValue)">
+                        <entity-find-one entity-name="mantle.party.contact.ContactMechPostalAddress" value-field="postalCm">
+                            <field-map field-name="contactMechId" from="orderPart.postalContactMechId"/></entity-find-one>
+                        <set field="trustLevelEnumId" from="postalCm.trustLevelEnumId ?: 'CmtlNew'"/>
+                        <if condition="!'CmtlValid'.equals(trustLevelEnumId) &amp;&amp; !'CmtlVerified'.equals(trustLevelEnumId)">
+                            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="trustLevelEnum">
+                                <field-map field-name="enumId" from="trustLevelEnumId"/></entity-find-one>
+                            <script>approveWarnings.add(ec.resource.expand('OrderApproveShippingAddressTrust', null))</script>
+                        </if>
+                    </if>
+                </iterate>
+
+                <!-- potential fraud: billing and shipping addresses different (multiple payments: any billing address differs) -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApproveBillShipAddrDiff'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <iterate list="billingAddressList" entry="billingAddress">
+                        <set field="foundCurMatch" from="false"/>
+                        <iterate list="shippingAddressList" entry="shippingAddress">
+                            <!-- if IDs match call it good -->
+                            <if condition="billingAddress.contactMechId == shippingAddress.contactMechId">
+                                <set field="foundCurMatch" from="true"/><break/></if>
+
+                            <!-- if key fields not equal (or present and not equal) continue because it's not a match -->
+                            <if condition="billingAddress.postalCode != shippingAddress.postalCode"><continue/></if>
+                            <if condition="billingAddress.countryGeoId &amp;&amp; shippingAddress.countryGeoId &amp;&amp;
+                                    billingAddress.countryGeoId != shippingAddress.countryGeoId"><continue/></if>
+                            <if condition="billingAddress.unitNumber &amp;&amp; shippingAddress.unitNumber &amp;&amp;
+                                    removeNonAlphaNumeric(billingAddress.unitNumber) != removeNonAlphaNumeric(shippingAddress.unitNumber)"><continue/></if>
+                            <!-- last check tougher, match first number found in address1 -->
+                            <if condition="findFirstNumber(billingAddress.address1) != findFirstNumber(shippingAddress.address1)"><continue/></if>
+                            <!-- if we get here all matched so we're done -->
+                            <set field="foundCurMatch" from="true"/>
+                            <break/>
+                        </iterate>
+                        <if condition="!foundCurMatch"><script>approveWarnings.add(ec.resource.expand(
+                                'Billing address ${billingAddress.address1}, ${billingAddress.postalCode} does not match shipping address', null))</script></if>
+                    </iterate>
+                </if>
+
+                <!-- potential fraud: different names on Party and PaymentMethod -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApprovePayMethNameDiff'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="customerParty">
+                        <field-map field-name="partyId" from="customerPartyId"/></entity-find-one>
+                    <iterate list="paymentMethodList" entry="paymentMethod">
+                        <set field="combinedCustName" value="${customerParty.organizationName?.trim()?:''}${customerParty.firstName?.trim()?:''}${customerParty.middleName ? ' ' + customerParty.middleName.trim() : ''}${customerParty.lastName ? ' ' + customerParty.lastName.trim() : ''}"/>
+                        <set field="combinedPmPersonName" value="${paymentMethod.firstNameOnAccount?.trim()?:''}${paymentMethod.middleNameOnAccount ? ' ' + paymentMethod.middleNameOnAccount.trim() : ''}${paymentMethod.lastNameOnAccount ? ' ' + paymentMethod.lastNameOnAccount.trim() : ''}"/>
+                        <if condition="customerParty.organizationName"><then>
+                            <if condition="customerParty.organizationName.trim().toLowerCase() != paymentMethod.companyNameOnAccount?.trim()?.toLowerCase() &amp;&amp;
+                                    customerParty.organizationName != combinedPmPersonName?.toLowerCase()">
+                                <script>approveWarnings.add(ec.resource.expand(
+                                        'Name on payment method ${paymentMethod.companyNameOnAccount ?: combinedPmPersonName} does not match customer name ${combinedCustName}', null))</script>
+                            </if>
+                        </then><else>
+                            <if condition="combinedCustName?.trim()?.toLowerCase() != combinedPmPersonName?.trim()?.toLowerCase() &amp;&amp;
+                                    (paymentMethod.firstNameOnAccount?.trim()?.toLowerCase() != customerParty.firstName?.trim()?.toLowerCase() ||
+                                        paymentMethod.lastNameOnAccount?.trim()?.toLowerCase() != customerParty.lastName?.trim()?.toLowerCase())">
+                                <script>approveWarnings.add(ec.resource.expand(
+                                        'Name on payment method ${combinedPmPersonName} does not match customer name ${combinedCustName}', null))</script>
+                            </if>
+                        </else></if>
+                    </iterate>
+                </if>
+
+                <!-- TODO: potential fraud: CreditCard card number blacklisted via hashed card number, bank and account number, other payment method types? (if key field(s) available) -->
+                <!--
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApprovePayMethBlacklist'.equals(it.settingTypeEnumId)})?.settingValue)">
+                </if>
+                -->
+
+                <!-- potential fraud: ContactMech blacklisted (shipping address + phone, billing address(es) + phone, email) -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApproveContactBlacklist'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <iterate list="shippingAddressList" entry="addr">
+                        <!-- NOTE: don't need to check these for shipping addresses, checked and displayed when validation ship addresses above (general warning if trust level not Valid):
+                        <if condition="'CmtlBlacklisted' == addr.trustLevelEnumId">
+                            <script>approveWarnings.add(ec.resource.expand('Shipping address ${addr.address1}, ${addr.postalCode} is BLACKLISTED', null))</script><continue/></if>
+                        <if condition="'CmtlGreylisted' == addr.trustLevelEnumId">
+                            <script>approveWarnings.add(ec.resource.expand('Shipping address ${addr.address1}, ${addr.postalCode} is greylisted', null))</script><continue/></if>
+                        -->
+                        <if condition="!addr?.address1">
+                            <script>approveWarnings.add(ec.resource.expand('Shipping address ${addr?.contactMechId} has no Address 1 line', null))</script>
+                            <continue/>
+                        </if>
+
+                        <!-- if current address not black/greylisted then look for others in system (generally more likely/useful) -->
+                        <service-call name="mantle.party.DuplicateServices.find#PostalAddresses" out-map="blacklistAddrOut" out-map-add-to-existing="false"
+                                in-map="[partyId:customerPartyId, address1:addr.address1, unitNumber:addr.unitNumber, postalCode:addr.postalCode,
+                                    postalCodeExt:addr.postalCodeExt, countryGeoId:addr.countryGeoId,
+                                    trustLevelEnumId:'CmtlGreylisted,CmtlBlacklisted']"/>
+                        <if condition="blacklistAddrOut.postalAddressList">
+                            <set field="firstMatch" from="blacklistAddrOut.postalAddressList[0]"/>
+                            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="trustLevelEnum">
+                                <field-map field-name="enumId" from="firstMatch.trustLevelEnumId"/></entity-find-one>
+                            <script>approveWarnings.add(ec.resource.expand('Shipping address ${addr.address1}, ${addr.postalCode} matches ${trustLevelEnum?.description} address ${firstMatch.address1}, ${firstMatch.postalCode}', null))</script>
+                        </if>
+                    </iterate>
+                    <iterate list="billingAddressList" entry="addr">
+                        <!-- skip billing addresses that are also shipping addresses, already checked above -->
+                        <if condition="addr.contactMechId in shippingAddressIdSet"><continue/></if>
+                        <if condition="'CmtlBlacklisted' == addr.trustLevelEnumId">
+                            <script>approveWarnings.add(ec.resource.expand('Billing address ${addr.address1}, ${addr.postalCode} is BLACKLISTED', null))</script>
+                            <continue/>
+                        </if>
+                        <if condition="'CmtlGreylisted' == addr.trustLevelEnumId">
+                            <script>approveWarnings.add(ec.resource.expand('Billing address ${addr.address1}, ${addr.postalCode} is Greylisted', null))</script>
+                            <continue/>
+                        </if>
+                        <!-- if current address not black/greylisted then look for others in system (generally more likely/useful) -->
+                        <service-call name="mantle.party.DuplicateServices.find#PostalAddresses" out-map="blacklistAddrOut" out-map-add-to-existing="false"
+                                in-map="[partyId:customerPartyId, address1:addr.address1, unitNumber:addr.unitNumber, postalCode:addr.postalCode,
+                                    postalCodeExt:addr.postalCodeExt, countryGeoId:addr.countryGeoId,
+                                    trustLevelEnumId:'CmtlGreylisted,CmtlBlacklisted']"/>
+                        <if condition="blacklistAddrOut.postalAddressList">
+                            <set field="firstMatch" from="blacklistAddrOut.postalAddressList[0]"/>
+                            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="trustLevelEnum">
+                                <field-map field-name="enumId" from="firstMatch.trustLevelEnumId"/></entity-find-one>
+                            <script>approveWarnings.add(ec.resource.expand('Billing address ${addr.address1}, ${addr.postalCode} matches ${trustLevelEnum?.description} address ${firstMatch.address1}, ${firstMatch.postalCode}', null))</script>
+                        </if>
+                    </iterate>
+
+                    <!-- TODO: maybe also do phone numbers, etc
+                    <service-call name="mantle.party.DuplicateServices.find#TelecomNumbers" out-map="blacklistTelOut" out-map-add-to-existing="false"
+                            in-map="[partyId:partyId, areaCode:ptn.areaCode, contactNumber:ptn.contactNumber,
+                                trustLevelEnumId:'CmtlGreylisted,CmtlBlacklisted']"/>
+                    -->
+                </if>
+
+                <!-- is this a large order? -->
+                <set field="settingLargeOrderAmount" from="storeSettingList.find({'PsstOrdApproveLargeOrder'.equals(it.settingTypeEnumId)})?.settingValue ?: '0.0'"/>
+                <set field="largeOrderAmountBd" from="settingLargeOrderAmount.isBigDecimal() ? (settingLargeOrderAmount as BigDecimal) : 0.0"/>
+                <if condition="largeOrderAmountBd &amp;&amp; orderHeader.grandTotal &gt; largeOrderAmountBd"><script>approveWarnings.add(ec.resource.expand(
+                        'Large Order: total ${ec.l10n.format(orderHeader.grandTotal, "#,##0.00")} is greater than ${ec.l10n.format(largeOrderAmountBd, "#,##0.00")}', null))
+                </script></if>
+
+                <!-- is this a large Web order? -->
+                <if condition="orderHeader.salesChannelEnumId in ['ScWeb', 'ScWebExternal']">
+                    <set field="settingLargeWebOrderAmount" from="storeSettingList.find({'PsstOrdApproveLargeWebOrder'.equals(it.settingTypeEnumId)})?.settingValue ?: '0.0'"/>
+                    <set field="largeWebOrderAmountBd" from="settingLargeWebOrderAmount.isBigDecimal() ? (settingLargeWebOrderAmount as BigDecimal) : 0.0"/>
+                    <if condition="largeWebOrderAmountBd &amp;&amp; orderHeader.grandTotal &gt; largeWebOrderAmountBd"><script>approveWarnings.add(ec.resource.expand(
+                            'Large Web Order: total ${ec.l10n.format(orderHeader.grandTotal, "#,##0.00")} is greater than ${ec.l10n.format(largeWebOrderAmountBd, "#,##0.00")}', null))
+                    </script></if>
+                </if>
+
+                <!-- is this order much larger than past orders? (by part if 3 or more; avg + 3 std devs) -->
+                <if condition="otherPartCount &gt;= 3">
+                    <set field="settingStdDevTotal" from="storeSettingList.find({'PsstOrdApproveStdDevTotal'.equals(it.settingTypeEnumId)})?.settingValue ?: '3.0'"/>
+                    <set field="stdDevTotalBd" from="settingStdDevTotal.isBigDecimal() ? (settingStdDevTotal as BigDecimal) : 0.0"/>
+                    <if condition="stdDevTotalBd">
+                        <set field="partMaxTotal" from="stdDevMaxFromMapField(otherPartList, 'partTotal', stdDevTotalBd)?.maximum"/>
+                        <iterate list="orderPartList" entry="orderPart">
+                            <if condition="partMaxTotal &amp;&amp; orderPart.partTotal &gt; partMaxTotal"><script>approveWarnings.add(ec.resource.expand(
+                                    'Part ${orderPart.orderPartSeqId} total ${ec.l10n.format(orderPart.partTotal, "#,##0.00")} is greater than ${ec.l10n.format(partMaxTotal, "#,##0.00")}, the average of other order parts plus 3 standard deviations', null))</script></if>
+                        </iterate>
+                    </if>
+                </if>
+
+                <!-- is this order much larger than past orders? (by product if 3 or more; avg + 3 std devs) -->
+                <set field="settingStdDevProdQty" from="storeSettingList.find({'PsstOrdApproveStdDevProdQty'.equals(it.settingTypeEnumId)})?.settingValue ?: '3.0'"/>
+                <set field="stdDevProdQtyBd" from="settingStdDevProdQty.isBigDecimal() ? (settingStdDevProdQty as BigDecimal) : 0.0"/>
+                <if condition="stdDevProdQtyBd">
+                    <iterate list="orderItemList" entry="orderItem">
+                        <set field="productId" from="orderItem.productId"/>
+                        <if condition="!productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+                        <entity-find entity-name="mantle.order.OrderItemAndPart" list="pastItemPartList">
+                            <econdition field-name="customerPartyId"/>
+                            <econdition field-name="orderId" operator="not-equals"/>
+                            <econdition field-name="productId"/>
+                            <econdition field-name="itemTypeEnumId" operator="in" from="productItemTypes"/>
+                            <select-field field-name="quantity"/>
+                        </entity-find>
+                        <if condition="pastItemPartList.size() &lt; 3"><continue/></if>
+                        <set field="quantityMax" from="stdDevMaxFromMapField(pastItemPartList, 'quantity', stdDevProdQtyBd)?.maximum"/>
+                        <if condition="quantityMax &amp;&amp; orderItem.quantity &gt; quantityMax"><script>approveWarnings.add(ec.resource.expand(
+                                'Item ${orderItem.orderItemSeqId} product ${productId} quantity ${ec.l10n.format(orderItem.quantity, "0.##")} is greater than ${ec.l10n.format(quantityMax, "#,##0.##")}, the average of previously ordered quantities plus 3 standard deviations', null))</script></if>
+                    </iterate>
+                </if>
+
+                <!-- get AssetReservation records for various validations -->
+                <entity-find entity-name="mantle.product.issuance.AssetReservation" list="assetResList">
+                    <econdition field-name="orderId"/><order-by field-name="orderItemSeqId"/></entity-find>
+
+                <!-- are there any unavailable reservations? -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApproveInventoryNotAvail'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <set field="arUnavailableMap" from="[:]"/>
+                    <iterate list="assetResList" entry="assetRes">
+                        <if condition="assetRes.quantityNotAvailable">
+                            <script>addToBigDecimalInMap(assetRes.orderItemSeqId, assetRes.quantityNotAvailable, arUnavailableMap)</script></if>
+                    </iterate>
+                    <iterate list="arUnavailableMap" key="orderItemSeqId" entry="quantityNotAvailable">
+                        <set field="curOrderItem" from="orderItemList.find({ it.orderItemSeqId == orderItemSeqId })"/>
+                        <script>approveWarnings.add(ec.resource.expand(
+                                'Item ${orderItemSeqId} has ${ec.l10n.format(quantityNotAvailable, "0.##")} of ${ec.l10n.format(curOrderItem.quantity, "0.##")} not available in inventory', null))</script>
+                    </iterate>
+                </if>
+
+                <!-- see if we need to check for single lot or newer inventory -->
+                <set field="singleLot" from="'BlY'.equals(ec.service.sync().name('mantle.party.PartyServices.get#PartySettingValue')
+                        .parameter('partySettingTypeId', 'CustomerSingleLot').parameter('partyId', orderPart.customerPartyId).call()?.get('settingValue'))"/>
+                <set field="newerInventory" from="'BlY'.equals(ec.service.sync().name('mantle.party.PartyServices.get#PartySettingValue')
+                        .parameter('partySettingTypeId', 'CustomerNewerInventory').parameter('partyId', orderPart.customerPartyId).call()?.get('settingValue'))"/>
+
+                <set field="lotIdSetByItemSeqId" from="[:]"/>
+                <set field="oldestLotExpireByItemSeqId" from="[:]"/>
+                <iterate list="assetResList" entry="assetRes">
+                    <set field="orderItemSeqId" from="assetRes.orderItemSeqId"/>
+
+                    <!-- get data for single lot and newer inventory -->
+                    <if condition="singleLot || newerInventory">
+                        <entity-find-one entity-name="mantle.product.asset.AssetLotAndMfgParty" value-field="assetLot">
+                            <field-map field-name="assetId" from="assetRes.assetId"/>
+                            <select-field field-name="lotId,pseudoId,lotNumber,manufacturedDate,expirationDate"/>
+                        </entity-find-one>
+                        <script><![CDATA[
+                            if (singleLot && assetLot?.lotId) addToSetInMap(orderItemSeqId, assetLot.lotId, lotIdSetByItemSeqId)
+                            def oldestLotExpire = oldestLotExpireByItemSeqId.get(orderItemSeqId)
+                            if (newerInventory && assetLot?.expirationDate != null && (oldestLotExpire == null || assetLot.expirationDate < oldestLotExpire))
+                                oldestLotExpireByItemSeqId.put(orderItemSeqId, assetLot.expirationDate)
+                        ]]></script>
+                    </if>
+                </iterate>
+
+                <!-- if customer has single lot constraint is inventory available from single lot for each item? -->
+                <if condition="singleLot">
+                    <iterate list="lotIdSetByItemSeqId" entry="lotIdSet" key="orderItemSeqId">
+                        <if condition="lotIdSet != null &amp;&amp; lotIdSet.size() &gt; 1"><script>approveWarnings.add(ec.resource.expand(
+                            'Item ${orderItemSeqId} has inventory in more than one lot: ${lotIdSet}', null))</script></if>
+                    </iterate>
+                </if>
+                <if condition="newerInventory">
+                    <iterate list="orderItemList" entry="orderItem">
+                        <set field="oldestLotExpire" from="oldestLotExpireByItemSeqId.get(orderItem.orderItemSeqId)"/>
+                        <if condition="oldestLotExpire == null"><continue/></if>
+
+                        <set field="newerThanExpireDate" from="null"/>
+                        <!-- get most recent asset issued and lot expire date for it -->
+                        <entity-find entity-name="mantle.product.issuance.AssetIssuanceLotSummary" list="issuanceLotList" limit="1">
+                            <econdition field-name="toPartyId" from="customerPartyId"/>
+                            <econdition field-name="productId" from="orderItem.productId"/>
+                            <select-field field-name="expirationDate,expectedEndOfLife"/>
+                            <order-by field-name="-issuedDate"/>
+                        </entity-find>
+                        <if condition="issuanceLotList">
+                            <set field="newerThanExpireDate" from="issuanceLotList[0].expirationDate ?: issuanceLotList[0].expectedEndOfLife"/></if>
+                        <if condition="newerThanExpireDate == null"><continue/></if>
+                        <if condition="oldestLotExpire &lt; newerThanExpireDate"><script>approveWarnings.add(ec.resource.expand(
+                            'In item ${orderItem.orderItemSeqId} oldest lot ${ec.l10n.format(oldestLotExpire, "yyyy-MM-dd")} older than last lot expire ${ec.l10n.format(newerThanExpireDate, "yyyy-MM-dd")}', null))</script></if>
+                    </iterate>
+                </if>
+
+                <!-- is this a large order by percentage of available inventory? more than quantity 10 and 20% of available -->
+                <set field="settingPercAvailInv" from="storeSettingList.find({'PsstOrdApprovePercAvailInv'.equals(it.settingTypeEnumId)})?.settingValue ?: '20.0'"/>
+                <set field="bdPercAvailInv" from="settingPercAvailInv.isBigDecimal() ? settingPercAvailInv as BigDecimal : 0.0"/>
+                <if condition="bdPercAvailInv">
+                    <set field="productIdSet" from="new HashSet()"/><!-- prep this for similar order check below -->
+                    <iterate list="orderItemList" entry="orderItem">
+                        <set field="productId" from="orderItem.productId"/>
+                        <if condition="!productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+                        <script>productIdSet.add(productId)</script>
+                        <set field="quantity" from="orderItem.quantity"/>
+                        <!-- TODO: make the 5 configurable (by ProductStore) -->
+                        <if condition="quantity &lt; 5.0"><continue/></if>
+                        <set field="curOrderPart" from="orderPartList.find({ it.orderPartSeqId == orderItem.orderPartSeqId })"/>
+                        <set field="curFacilityId" from="curOrderPart?.facilityId"/>
+                        <if condition="!curFacilityId"><continue/></if>
+                        <!-- get current available inventory for product in facility; will not include this order as already reserved -->
+                        <entity-find entity-name="mantle.product.asset.AssetSummaryView" list="atpList">
+                            <econdition field-name="productId"/><econdition field-name="facilityId" from="curFacilityId"/>
+                            <having-econditions><econdition field-name="availableToPromiseTotal" operator="greater" from="0.0"/></having-econditions>
+                            <select-field field-name="availableToPromiseTotal"/>
+                        </entity-find>
+                        <if condition="!atpList"><continue/></if>
+                        <set field="availableToPromiseTotal" from="atpList[0].availableToPromiseTotal"/>
+                        <if condition="!availableToPromiseTotal"><continue/></if><!-- if null or zero ATP -->
+                        <set field="curLimit" from="(quantity + availableToPromiseTotal) * (bdPercAvailInv/100.0)"/>
+                        <if condition="quantity &gt; curLimit"><script>approveWarnings.add(ec.resource.expand(
+                                'Item ${orderItem.orderItemSeqId} has ${ec.l10n.format(quantity, "0.##")} which is greater than ${bdPercAvailInv}% of available inventory (${ec.l10n.format(availableToPromiseTotal, "0.##")})', null))</script></if>
+                    </iterate>
+                </if>
+
+                <!-- duplicate/similar order with 24 hours (+/- 24hrs); any other order with any of the products on this order -->
+                <!-- find by OrderHeader.placedDate so it is at least in the Placed status, exclude OrderCancelled and OrderRejected -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApproveSimilar'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <entity-find entity-name="mantle.order.OrderHeaderAndPart" list="nearOrderList">
+                        <econdition field-name="orderId" operator="not-equals"/><econdition field-name="customerPartyId"/>
+                        <econdition field-name="placedDate" operator="greater" from="placedDate - 1"/>
+                        <econdition field-name="placedDate" operator="less" from="placedDate + 1"/>
+                        <econdition field-name="partStatusId" operator="not-in" value="OrderCancelled,OrderRejected"/>
+                        <select-field field-name="orderId,orderPartSeqId,placedDate"/>
+                    </entity-find>
+                    <iterate list="nearOrderList" entry="nearOrder">
+                        <set field="timeDiff" from="placedDate.time - nearOrder.placedDate.time"/><set field="isFuture" from="false"/>
+                        <if condition="timeDiff &lt; 0"><set field="isFuture" from="true"/><set field="timeDiff" from="-timeDiff"/></if>
+                        <set field="diffHours" from="timeDiff / (1000*60*60)"/>
+                        <entity-find entity-name="mantle.order.OrderItem" list="nearItemList">
+                            <econdition field-name="orderId" from="nearOrder.orderId"/>
+                            <econdition field-name="orderPartSeqId" from="nearOrder.orderPartSeqId"/>
+                            <econdition field-name="productId" operator="in" from="productIdSet"/>
+                            <select-field field-name="productId,quantity"/>
+                        </entity-find>
+                        <iterate list="nearItemList" entry="nearItem">
+                            <script>approveWarnings.add(ec.resource.expand('OrderApproveNearOrder', null))</script></iterate>
+                    </iterate>
+                </if>
+
+                <!-- price min/max compare, for each product with min/max prices -->
+                <if condition="!'false'.equals(storeSettingList.find({'PsstOrdApprovePriceMinMax'.equals(it.settingTypeEnumId)})?.settingValue)">
+                    <iterate list="orderItemList" entry="orderItem">
+                        <set field="productId" from="orderItem.productId"/>
+                        <if condition="!productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+                        <set field="unitAmount" from="orderItem.unitAmount"/>
+
+                        <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="minOut"
+                                in-map="[productId:orderItem.productId, quantity:orderItem.quantity, validDate:placedDate,
+                                priceUomId:currencyUomId, productStoreId:productStoreId, vendorPartyId:vendorPartyId,
+                                customerPartyId:customerPartyId, priceTypeEnumId:'PptMinimum']"/>
+                        <set field="minPrice" from="minOut.price"/>
+                        <service-call name="mantle.product.PriceServices.get#ProductPriceByType" out-map="maxOut"
+                                in-map="[productId:orderItem.productId, quantity:orderItem.quantity, validDate:placedDate,
+                                priceUomId:currencyUomId, productStoreId:productStoreId, vendorPartyId:vendorPartyId,
+                                customerPartyId:customerPartyId, priceTypeEnumId:'PptMaximum']"/>
+                        <set field="maxPrice" from="maxOut.price"/>
+
+                        <if condition="minPrice &amp;&amp; unitAmount &lt; minPrice"><script>approveWarnings.add(ec.resource.expand(
+                                'Item ${orderItem.orderItemSeqId} price ${ec.l10n.format(unitAmount, "0.00")} is less than minimum price ${ec.l10n.format(minPrice, "0.00")} for product ${orderItem.productId}', null))</script></if>
+                        <if condition="maxPrice &amp;&amp; unitAmount &gt; maxPrice"><script>approveWarnings.add(ec.resource.expand(
+                                'Item ${orderItem.orderItemSeqId} price ${ec.l10n.format(unitAmount, "0.00")} is greater than maximum price ${ec.l10n.format(maxPrice, "0.00")} for product ${orderItem.productId}', null))</script></if>
+                    </iterate>
+                </if>
+            </then><else>
+                <!-- ========== Purchase Order Validations ========== -->
+
+                <!-- purchase price more than 50% of current sale price -->
+                <iterate list="orderItemList" entry="orderItem">
+                    <set field="productId" from="orderItem.productId"/>
+                    <if condition="!productId || !productItemTypes.contains(orderItem.itemTypeEnumId)"><continue/></if>
+                    <set field="unitAmount" from="orderItem.unitAmount"/>
+
+                    <!-- we don't know the store, customer, etc here so do a less constrained search -->
+                    <entity-find entity-name="mantle.product.ProductPrice" list="currentPriceList" limit="1">
+                        <date-filter valid-date="placedDate"/><econdition field-name="productId"/>
+                        <econdition field-name="priceTypeEnumId" operator="in" value="PptCurrent,PptList"/>
+                        <econdition field-name="priceUomId" from="currencyUomId"/>
+                        <econdition field-name="vendorPartyId" from="customerPartyId" or-null="true"/>
+                        <econdition field-name="pricePurposeEnumId" value="PppPurchase" or-null="true"/>
+                        <order-by field-name="price"/><!-- we want the lowest price -->
+                    </entity-find>
+                    <set field="lowestPrice" from="currentPriceList ? currentPriceList[0].price : null"/>
+                    <set field="purchasePricePercent" from="50.0"/>
+                    <set field="maxPurchasePrice" from="lowestPrice ? lowestPrice * (purchasePricePercent / 100) : null"/>
+
+                    <if condition="maxPurchasePrice &amp;&amp; unitAmount &gt; maxPurchasePrice"><script>approveWarnings.add(ec.resource.expand(
+                        'Item ${orderItem.orderItemSeqId} price ${ec.l10n.format(unitAmount, "0.00")} is greater than ${ec.l10n.format(purchasePricePercent, "0")}% of the lowest sale price ${ec.l10n.format(lowestPrice, "0.00")} for product ${orderItem.productId}', null))</script></if>
+                </iterate>
+            </else></if>
+        </actions>
+    </service>
+
+    <!-- ========== Order Notification Services ========== -->
+
+    <service verb="send" noun="OrderStoreEmail" authenticate="anonymous-view">
+        <description>Called by SECA rule in OrderReturn.secas.xml on tx-commit so always run async from triggering thread</description>
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="emailTypeEnumId" required="true"/>
+            <parameter name="toAddresses"><text-email/></parameter>
+            <parameter name="forceByType" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <if condition="orderHeader == null"><return/></if>
+            <set field="productStoreId" from="orderHeader.productStoreId"/>
+            <if condition="!productStoreId"><return/></if>
+
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
+                <field-map field-name="productStoreId"/></entity-find-one>
+            <entity-find entity-name="mantle.product.store.ProductStoreEmail" list="storeEmailList">
+                <date-filter/><econdition field-name="productStoreId"/><econdition field-name="emailTypeEnumId"/></entity-find>
+            <if condition="storeEmailList">
+                <!-- assume one OrderPart or all order parts have same customerPartyId -->
+                <set field="orderPartList" from="orderHeader.parts"/>
+                <set field="customerPartyId" from="orderPartList[0].customerPartyId"/>
+
+                <!-- get customer email address -->
+                <if condition="!toAddresses &amp;&amp; customerPartyId">
+                    <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="emailInfo"
+                            in-map="[partyId:customerPartyId, emailContactMechPurposeId:'EmailOrder', defaultToPrimaryPurpose:true]"/>
+                    <set field="toAddresses" from="emailInfo.emailAddress"/>
+                    <!-- get customer userId for toUserId -->
+                    <entity-find entity-name="moqui.security.UserAccount" list="userAccountList" limit="1">
+                        <econdition field-name="partyId" from="customerPartyId"/></entity-find>
+                    <if condition="userAccountList"><set field="toUserId" from="userAccountList[0].userId"/></if>
+                </if>
+                <if condition="!toAddresses"><return message="Not sending email for order ${orderId}, no to address specified or found for customer ${customerPartyId}"/></if>
+
+                <!-- send email for each configured -->
+                <iterate list="storeEmailList" entry="storeEmail">
+                    <if condition="!storeEmail.emailTemplateId"><continue/></if>
+
+                    <!-- if email has already been sent (by orderId, emailTypeEnumId) don't send again -->
+                    <if condition="!forceByType">
+                        <entity-find entity-name="mantle.order.OrderEmailMessageDetail" list="existingMessages">
+                            <econdition field-name="orderId"/>
+                            <econdition field-name="emailTypeEnumId"/>
+                            <econdition field-name="statusId" operator="in" value="ES_SENT,ES_RECEIVED,ES_VIEWED"/>
+                            <select-field field-name="emailMessageId"/>
+                        </entity-find>
+                        <if condition="existingMessages">
+                            <message type="warning">Not sending ${emailTypeEnumId} email for order ${orderId}, found messages: ${existingMessages*.emailMessageId}</message>
+                            <continue/>
+                        </if>
+                    </if>
+
+                    <set field="bccAddresses" from="orderHeader.salesChannelEnumId in ['ScWeb', 'ScWebExternal'] ? storeEmail.webOrderBcc : null"/>
+
+                    <!-- simple bodyParameters, let the screen do data prep -->
+                    <set field="bodyParameters" from="[orderId:orderId, storeDomain:productStore.storeDomain,
+                        profileUrlPath:productStore.profileUrlPath, headerImagePath:storeEmail.headerImagePath,
+                        detailLinkPath:storeEmail.detailLinkPath]"/>
+
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" out-map="sendOut" out-map-add-to-existing="false"
+                            in-map="[emailTemplateId:storeEmail.emailTemplateId, emailTypeEnumId:emailTypeEnumId, toAddresses:toAddresses,
+                                bccAddresses:bccAddresses, bodyParameters:bodyParameters, toUserId:toUserId]"/>
+                    <script>if (sendOut.emailMessageId) { ec.service.sync().name("create#mantle.order.OrderEmailMessage").parameter("orderId", orderId)
+                        .parameter("emailMessageId", sendOut.emailMessageId).parameter("orderRevision", orderHeader.orderRevision).disableAuthz().call() }</script>
+                    <message>Email sent to ${toAddresses}${sendOut.emailMessageId ? ', message ID ' + sendOut.emailMessageId : ''}</message>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="notify" noun="OrderHighPriority" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId"/>
+            <parameter name="priorityMax" type="Integer" default="1"/>
+            <parameter name="notificationTopic" default-value="OrderHighPriority"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="orderPartList" entry="orderPart">
+                <if condition="orderPart.priority &gt; priorityMax"><continue/></if>
+                <!-- NOTE: title not expanded here, let NotificationMessage expand it from the 'message' Map -->
+                <set field="title" from="'High Priority Order ${orderId}:${orderPartSeqId} - Priority ${priority}'"/>
+                <script><![CDATA[
+                    def nm = ec.makeNotificationMessage().topic((String) notificationTopic)
+                            .message([orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, priority:orderPart.priority])
+                    nm.send()
+                ]]></script>
+            </iterate>
+        </actions>
+    </service>
+</services>

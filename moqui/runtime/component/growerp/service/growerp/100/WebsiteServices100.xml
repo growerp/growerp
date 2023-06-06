@@ -1,0 +1,899 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="Website">
+        <description>get the website information</description>
+        <in-parameters>
+            <parameter name="classificationId" default="AppAdmin"/><!-- admin, hotel etc -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="website" type="Map" default-value="AppAdmin">
+                <parameter name="id"/><!-- productStoreId -->
+                <parameter name="hostName"/>
+                <parameter name="title"/>
+                <parameter name="websiteContent" type="List">
+                    <parameter name="content" type="Map">
+                        <parameter name="path"/>
+                        <parameter name="title"/>
+                        <parameter name="text"/><!-- dummy value to indicate this is text content -->
+                    </parameter>
+                </parameter>
+                <parameter name="websiteCategories" type="List">
+                    <parameter name="websiteCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                        <parameter name="products" type="List"/>
+                        <parameter name="product" type="Map">
+                            <parameter name="productId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="productCategories" type="List">
+                    <parameter name="productCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                    </parameter>
+                </parameter>
+                <parameter name="colorJson"/>
+                <parameter name="obsidianName"/>
+                <parameter name="measurementId"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="storeDomain" from="classificationId"/>
+            </entity-find>
+            <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="pages">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="pagePath" operator="is-not-null"/>
+                <econdition field-name="pagePath" operator="not-like" value="obsidian%"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="hostNames">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                <econdition field-name="settingTypeEnumId" value="PsstHostname"/>
+            </entity-find>
+            <if condition="hostNames">
+                <set field="hostName" from="hostNames[0].settingValue"/>
+                <else>
+                    <set field="hostName" value="????"/>
+                </else>
+            </if>
+            <if condition="hostName == '10.0.2.2'">
+                <set field="hostName" value="${stores[0].productStoreId}.localhost:8080"/></if>
+            <set field="website" from="[
+                    id: stores[0].productStoreId,
+                    hostName: hostName,
+                    obsidianName: stores[0].profileUrlPath,
+                    ]"/>
+            <set field="website.title" from="stores[0].storeName"/>
+            <!-- texual content -->
+            <set field="websiteContent" from="[]"/>
+            <iterate list="pages" entry="page">
+                <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
+                <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
+                <if condition="contentRef != null">
+                    <set field="contentText" from="contentRef.getText()"/>
+                </if>
+                <if condition="!contentText"><set field="contentText" value=""/></if>
+                <script>
+                    String title = '';
+                    contentText.eachLine {
+                        if (it.startsWith('# ') || it.startsWith('## ')) {
+                            if (title == '')
+                                title = it.substring(it.indexOf(' ') + 1);
+                        }
+                    }
+                </script>
+                <!-- 'x' just to indicate that the content is text otherwise is image-->
+                <script>websiteContent.add([path: page.pagePath, title: title,
+                        text: "x", seqId: page.sequenceNum])</script>
+            </iterate>
+            <entity-find entity-name="growerp.store.ProductStoreContent" list="images">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                <econdition field-name="contentTypeEnumId" value="PrstImageLarge"/>
+                <econdition field-name="description" operator="not-like" value="obsidian%"/>
+            </entity-find>
+            <iterate list="images" entry="image">
+                <script>websiteContent.add([path: image.productStoreContentId,
+                    title: image.description, text:""])</script>
+            </iterate>
+            <set field="website.websiteContent" from="websiteContent"/>
+            <!-- categories and products -->
+            <entity-find entity-name="growerp.website.ProductStoreAndWebsiteCategories" list="items">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="classificationId" from="classificationId"/>
+                <econditions combine="or"><!-- just show deals and new products -->
+                    <econdition field-name="storeCategoryTypeEnumId" value="PsctPromotions"/>
+                    <econdition field-name="storeCategoryTypeEnumId" value="PsctFeatured"/>
+                </econditions>
+            </entity-find>
+            <set field="lastItem" from="null"/>
+            <set field="products" from="[]"/>
+            <set field="categories" from="[]"/>
+            <iterate list="items" entry="item">
+                <if condition="lastItem &amp;&amp; lastItem.productCategoryId != item.productCategoryId">
+                    <set field="categoryOut.products" from="products"/>
+                    <script>categories.add(categoryOut)</script>
+                    <set field="products" from="[]"/>
+                </if>
+                <if condition="!lastItem || lastItem.productCategoryId != item.productCategoryId">
+                    <set field="categoryOut" from="[
+                                categoryId: item.productCategoryId,
+                                categoryName: item.categoryName]"/>
+                </if>
+                <if condition="item.productId">
+                    <script>products.add([productId: item.productId,
+                            productName: item.productName])</script>
+                </if>
+                <set field="lastItem" from="item"/>
+            </iterate>
+            <!-- website categories -->
+            <set field="website.websiteCategories" from="categories"/>
+            <if condition="lastItem">
+                <set field="categoryOut.products" from="products"/>
+                <script>categories.add(categoryOut)</script>
+            </if>
+            <!-- productCategories -->
+            <entity-find entity-name="mantle.product.store.ProductStoreCategory"
+                    list="browseRootCategories">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                <econdition field-name="storeCategoryTypeEnumId" value="PsctBrowseRoot"/>
+            </entity-find>
+            <entity-find entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild"
+                    list="storeCategories">
+                <econdition field-name="parentProductCategoryId"
+                        from="browseRootCategories[0].productCategoryId"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+            <set field="categories" from="[]"/>
+            <iterate list="storeCategories" entry="category">
+                <set field="categoryOut" from="[categoryId: category.productCategoryId,
+                                                categoryName: category.categoryName,
+                                                seqId: category.sequenceNum]"/>
+                <script>categories.add(categoryOut)</script>
+            </iterate>
+            <set field="website.productCategories" from="categories"/>
+            <!-- colors -->
+            <!-- get top resource location -->
+            <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
+                    value-field="topResource">
+                <field-map field-name="productStoreId" from="stores[0].productStoreId"/>
+                <field-map field-name="settingTypeEnumId" value="PsstContentLocation"/>
+            </entity-find-one>
+            <set field="location" value="${topResource.settingValue}/content/websiteColor.json"/>
+            <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
+            <if condition="contentRef != null">
+                <set field="website.colorJson" from="contentRef.getText()"/>
+            </if>
+            <!-- google analytics -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="measurementIds" for-update="true">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                <econdition field-name="settingTypeEnumId" value="PsstMeasurementId"/>
+            </entity-find>
+            <set field="website.measurementId" from="measurementIds[0]?.settingValue"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="Website">
+        <description>update the website information except for webcontent text and images exclude delete</description>
+        <in-parameters>
+            <parameter name="website" type="Map" required="true">
+                <parameter name="id" required="true"/>
+                <parameter name="title"/>
+                <parameter name="hostName"/>
+                <parameter name="websiteContent" type="List">
+                    <parameter name="content" type="Map">
+                        <parameter name="path"/>
+                        <parameter name="title"/><!-- if path found and title empty, page will be deleted -->
+                        <parameter name="text"/>
+                        <parameter name="seqId" type="Integer"/>
+                    </parameter>
+                </parameter>
+                <parameter name="websiteCategories" type="List">
+                    <parameter name="websiteCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                        <parameter name="products" type="List"/>
+                        <parameter name="product" type="Map">
+                            <parameter name="productId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="productCategories" type="List">
+                    <parameter name="productCategory" type="Map">
+                        <parameter name="categoryId"/>
+                    </parameter>
+                </parameter>
+                <parameter name="colorJson"/>
+                <parameter name="obsidianName"/>
+                <parameter name="measurementId"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="website" type="Map">
+                <parameter name="id"/>
+                <parameter name="hostName"/>
+                <parameter name="title"/>
+                <parameter name="websiteContent" type="List">
+                    <parameter name="content" type="Map">
+                        <parameter name="path"/>
+                        <parameter name="title"/>
+                        <parameter name="text"/>
+                        <parameter name="seqId" type="Integer"/>
+                    </parameter>
+                </parameter>
+                <parameter name="websiteCategories" type="List">
+                    <parameter name="websiteCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                        <parameter name="products" type="List"/>
+                        <parameter name="product" type="Map">
+                            <parameter name="productId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="productCategories" type="List">
+                    <parameter name="productCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                    </parameter>
+                </parameter>
+           </parameter>
+           <parameter name="colorJson"/>
+           <parameter name="obsidianName"/>
+           <parameter name="measurementId"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context" 
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.product.store.ProductStore"
+                    list="stores" limit="1" for-update="true">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="productStoreId" from="website.id"/>
+            </entity-find>
+            <if condition="!stores"><then>
+                <set field="website" from="[:]"/>
+              </then>
+              <else>
+                <!-- update title -->
+                <if condition="website.title &amp;&amp; website.title != stores[0].storeName">
+                    <entity-update value-field="(stores[0] + [storeName: website.title])"/></if>
+
+                <!-- update hostname -->
+                <if condition="website.hostName">
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="prodStoreSettings" for-update="true">
+                        <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                        <econdition field-name="settingTypeEnumId" value="PsstHostname"/>
+                    </entity-find>
+                    <if condition="website.hostName.indexOf('.') &gt; 0">
+                        <set field="newPart" from="website.hostName.split('.')[0]"/>
+                        <else><set field="newPart" from="website.hostName"/></else></if>
+                    <set field="host" from="prodStoreSettings[0]
+                        .settingValue.substring(prodStoreSettings[0].settingValue.indexOf('.'))"/>
+                    <if condition="
+                        ['backend', 'test', 'info', 'hotel','freelance', 'ecommerce',
+                        'chat', 'nagios', 'www', 'admin', 'restaurant', 'shop', hospital,
+                        'service', 'realtor' ].contains(newPart.toLowerCase())">        
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                                list="checkList" limit="1">
+                            <econdition field-name="settingValue" from="newPart.toLowerCase() + host"/>
+                            <econdition field-name="settingTypeEnumId" value="PsstHostname"/>
+                        </entity-find>
+                        <if condition="checklist">
+                            <return error="true" message="Name $newPart already taken!"/></if>
+                    </if>
+                    <entity-update value-field="(prodStoreSettings[0] +
+                        [settingValue: newPart.toLowerCase() + host])"/>
+                </if>
+
+                <!-- update content.text or delete -->
+                <iterate list="website.websiteContent" entry="content">
+                    <if condition="content.text">
+                        <!-- found but no title should be deleted -->
+                        <if condition="content.title == '' &amp;&amp; content.path">
+                            <service-call name="org.moqui.impl.WikiServices.delete#WikiPage"
+                                in-map="[wikiSpaceId: stores[0].wikiSpaceId,
+                                            pagePath: content.path]"/>
+                        </if>
+                        <!-- change sequence -->
+                        <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="seqPages">
+                            <econdition field-name="productStoreId" from="website.id"/>
+                            <econdition field-name="pagePath" from="content.path"/></entity-find>
+                        <if condition="seqPages &amp;&amp; content.seqId != seqPages[0].sequenceNum">
+                            <service-call name="update#moqui.resource.wiki.WikiPage"
+                                in-map="wikiPageId: seqPages[0].wikiPageId, sequenceNum: content.seqId"/>
+                        </if>
+                      <else><!-- delete images -->
+                        <if condition="content.title == ''">
+                            <entity-delete-by-condition entity-name="growerp.store.ProductStoreContent">
+                                <econdition field-name="productStoreContentId" from="content.path"/>
+                                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                            </entity-delete-by-condition>
+                        </if>
+                      </else>
+                    </if>
+                </iterate>
+                <!-- website categories -->
+                <iterate list="website.websiteCategories" entry="catg">
+                    <service-call name="growerp.100.CatgProdServices100.update#ProductCategory"
+                        in-map="[category: catg]"/>
+                </iterate>
+                <!-- product categories -->
+                <if condition="website.productCategories">
+                    <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="browseRootCategories">
+                        <econdition field-name="productStoreId" from="website.id"/>
+                        <econdition field-name="storeCategoryTypeEnumId" value="PsctBrowseRoot"/>
+                    </entity-find>
+                    <!-- delete all -->
+                    <entity-delete-by-condition entity-name="mantle.product.category.ProductCategoryRollup">
+                        <econdition field-name="parentProductCategoryId" from="browseRootCategories[0].productCategoryId"/>
+                    </entity-delete-by-condition>
+                    <!-- add all -->
+                    <if condition="website.productCategories[0].categoryId == 'allDelete'">
+                        <set field="website.productCategories" from="[]"/>
+                    </if>
+                    <set field="sequenceNum" value="1" type="Integer"/>
+                    <iterate list="website.productCategories" entry="catg">
+                        <service-call name="create#mantle.product.category.ProductCategoryRollup"
+                            in-map="[parentProductCategoryId: browseRootCategories[0].productCategoryId,
+                                    productCategoryId: catg.categoryId, sequenceNum: sequenceNum++]"/>
+                    </iterate>
+                </if>
+                <!-- colors -->
+                <if condition="website.colorJson">
+                    <!-- get top resource location -->
+                    <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
+                            value-field="topResource">
+                        <field-map field-name="productStoreId" from="stores[0].productStoreId"/>
+                        <field-map field-name="settingTypeEnumId" value="PsstContentLocation"/>
+                    </entity-find-one>
+                    <set field="root" from="topResource.settingValue"/>
+                    <set field="location" value="${root}/content/websiteColor.json"/>
+                    <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                    <script>docRr.putText(website.colorJson)</script>
+                </if>
+                <!-- measurementId -->
+                <if condition="website.measurementId">
+                    <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="measurementIds" for-update="true">
+                        <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                        <econdition field-name="settingTypeEnumId" value="PsstMeasurementId"/>
+                    </entity-find>
+                    <if condition="measurementIds">
+                        <set field="measurementIds[0].settingValue" from="website.measurementId"/>
+                        <entity-update value-field="measurementIds[0]"/>
+                        <else>
+                            <service-call name="create#mantle.product.store.ProductStoreSetting"
+                                in-map="[productStoreId: stores[0].productStoreId,
+                                settingTypeEnumId: 'PsstMeasurementId',
+                                settingValue: website.measurementId]"/>
+                        </else>
+                    </if>
+                </if>
+                <!-- get changed website -->
+                <service-call name="growerp.100.WebsiteServices100.get#Website"
+                    in-map="[classificationId: stores[0].storeDomain]"
+                    out-map="context"/>
+              </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="WebsiteContent">
+        <description>get the content, text and images from the website</description>
+        <in-parameters>
+            <parameter name="classificationId" required="true"/>
+            <parameter name="content" type="Map" required="true">
+                <parameter name="path"/>
+                <parameter name="text"/><!-- not empty to indicate text otherwise image-->
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="content" type="Map">
+                <parameter name="path"/>
+                <parameter name="title"/>
+                <parameter name="text"/>
+                <parameter name="image"/>
+                <parameter name="seqId" type="Integer"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="storeDomain" from="classificationId"/>
+            </entity-find>
+            <if condition="!stores">
+                <return error="true"
+                    message="Could not find product store for path: ${content.path} and classificationId: $classificationId"/></if>
+            <!-- text content -->
+            <if condition="content.text">
+              <then>
+                <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="pages">
+                    <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                    <econdition field-name="pagePath" from="content.path"/>
+                </entity-find>
+                <if condition="!pages">
+                    <return error="true" message="Could not find text page with path: ${content.path}"/>
+                </if>
+                <set field="content" from="[:]"/>
+                <set field="location"
+                    value="${pages[0].rootPageLocation}/content/${pages[0].pagePath}.md.ftl"/>
+                <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
+                <if condition="contentRef != null">
+                    <set field="contentText" from="contentRef.getText()"/>
+                </if>
+                <script>
+                    String title = '';
+                    contentText.eachLine {
+                        if (it.startsWith('# ') || it.startsWith('## ')) {
+                            if (title == '')
+                                title = it.substring(it.indexOf(' ') + 1);
+                        }
+                    }
+                </script>
+                <set field="content" from="[path: pages[0].pagePath, title: title,
+                        text: contentText, seqId: pages[0].sequenceNum]"/>
+              </then>
+              <else>
+                <!-- image content -->
+                <entity-find-one entity-name="growerp.store.ProductStoreContent" value-field="image">
+                    <field-map field-name="productStoreContentId" from="content.path"/>
+                </entity-find-one>
+                <if condition="!image">
+                    <return error="true" message="Could not find image with path: ${content.path}"/>
+                </if>
+                <if condition="image.contentLocation">
+                    <service-call name="growerp.100.ImageServices100.download#Image"
+                        in-map="[contentLocation: image.contentLocation]" out-map="context"/>
+                </if>
+                <set field="content" from="[path: image.productStoreContentId, title: image.description,
+                        image: imageFile]"/>
+              </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="WebsiteContent">
+        <description>update the website information</description>
+        <in-parameters>
+            <parameter name="classificationId" required="true"/>
+            <parameter name="content" type="Map" required="true">
+                <parameter name="path"/>
+                <parameter name="title"/>
+                <parameter name="text"/>
+                <parameter name="image"/>
+                <parameter name="seqId" type="Integer"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="content" type="Map">
+                <parameter name="path"/>
+                <parameter name="title"/>
+                <parameter name="text"/>
+                <parameter name="image"/>
+                <parameter name="seqId" type="Integer"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="storeDomain" from="classificationId"/>
+            </entity-find>
+            <if condition="content.text">
+                <!-- get top resource location -->
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="topResource">
+                    <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                    <econdition field-name="settingTypeEnumId" value="PsstContentLocation"/>
+                </entity-find>
+                <!-- get content resource location -->
+                <entity-find entity-name="moqui.resource.DbResource" list="topResourceContent">
+                    <econdition field-name="parentResourceId" from="topResource[0].settingValue.substring(13)"/>
+                    <econdition field-name="filename" value="content"/>
+                </entity-find>
+                <!-- existing text update? -->
+                <if condition="content.path">
+                  <then>
+                    <!-- found but no title should be deleted -->
+                    <if condition="content.title == '' &amp;&amp; content.path">
+                        <!-- delete -->
+                        <service-call name="org.moqui.impl.WikiServices.delete#WikiPage"
+                            in-map="[wikiSpaceId: stores[0].wikiSpaceId,
+                                        pagePath: content.path]"/>
+                      <else><!-- update -->
+                        <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent"
+                                list="pages">
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                            <econdition field-name="pagePath" from="content.path"/>
+                        </entity-find>
+                        <if condition="!pages">     
+                            <return error="true" message="path: $path not found!"/></if>
+                        <set field="root" from="pages[0].rootPageLocation"/>
+                        <set field="location" value="${root}/content/${content.path}.md.ftl"/>
+                        <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                        <if condition="content.text != docRr.getText()">
+                            <script>docRr.putText(content.text)</script></if>
+                      </else>
+                    </if>
+                  </then>
+                  <else><!-- new text -->
+                    <!-- wikiPage with version and higest seq num-->
+                    <entity-find entity-name="moqui.resource.wiki.WikiPage" list="wikiPages">
+                    <econdition field-name="wikiSpaceId" from="stores[0].wikiSpaceId"/>
+                    <econdition field-name="pagePath" operator="is-not-null"/>
+                    </entity-find>
+                    <set field="seq" value="0" type="Integer"/>
+                    <iterate list="wikiPages" entry="wikiPage">
+                        <if condition="wikiPage.sequenceNum &gt; seq">
+                            <set field="seq" from="wikiPage.sequenceNum"/></if>
+                    </iterate>
+                    <service-call name="create#moqui.resource.wiki.WikiPage"
+                        out-map="context"
+                        in-map="[wikiSpaceId: stores[0].wikiSpaceId,
+                                pagePath:  '==temp==',
+                                sequenceNum: seq + 1,
+                                publishedVersionName: '01']"/>
+                    <service-call name="update#moqui.resource.wiki.WikiPage"
+                        in-map="[wikiPageId: wikiPageId,
+                                pagePath:  wikiPageId]"/>
+                    <set field="content.path" from="wikiPageId"/>
+                    <!-- create db resource -->
+                    <service-call name="create#moqui.resource.DbResource" out-map="context"
+                    in-map="[parentResourceId: topResourceContent[0].resourceId,
+                            isFile: 'Y', filename: wikiPageId + '.md.ftl']"/>
+                    <!-- file -->
+                    <service-call name="create#moqui.resource.DbResourceFile"
+                        in-map="[resourceId: resourceId,
+                                    mimeType: 'text/markdown',
+                                    versionName: '01',
+                                    rootVersionName: '01',
+                                    fileData: content.text]"/>
+                    <!-- history -->
+                    <set field="nowDate" from="ec.user.nowTimestamp"/>
+                    <service-call name="create#moqui.resource.DbResourceFileHistory"
+                        in-map="[resourceId: resourceId,
+                                versionName: '01', isDiff: 'N',
+                                versionDate: nowDate]"/>
+                  </else>  
+                </if>
+              <else>
+                <!-- prodstore image -->
+                <if condition="content.image">
+                    <entity-delete-by-condition
+                        entity-name="growerp.store.ProductStoreContent">
+                        <econdition field-name="productStoreContentId" from="content.path"/>
+                    </entity-delete-by-condition>
+                    <service-call name="growerp.100.ImageServices100.upload#Image"
+                        in-map="[type: 'productStore', id: stores[0].productStoreId,
+                            description: content.title,
+                            base64: content.image]"
+                        out-map="context"/>
+                    <set field="content.path" from="contentId"/>
+                    <else>
+                        <if condition="content.title &amp;&amp; content.path">
+                            <entity-find-one entity-name="growerp.store.ProductStoreContent"
+                                    value-field="storeImage" for-update="true">
+                                <field-map field-name="productStoreContentId" from="content.path"/>
+                            </entity-find-one>
+                            <entity-update value-field="(storeImage + [description: content.title])"/>
+                            <else>
+                                <service-call name="create#growerp.store.ProductStoreContent"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            description: content.title,
+                                            contentTypeEnumId: 'PrstImageLarge']"
+                                    out-map="context"/>
+                                <set field="content.path" from="productStoreContentId"/>
+                            </else>
+                        </if>
+                    </else>
+                </if>
+              </else>
+            </if>
+            <service-call name="growerp.100.WebsiteServices100.get#WebsiteContent"
+                in-map="[content: content, classificationId: classificationId]"
+                out-map="context"/>
+            </actions>
+    </service>
+
+    <service verb="upload" noun="Obsidian">
+        <description>upload an obsidian vault in zip format</description>
+        <in-parameters>
+            <parameter name="classificationId" required="true"/>
+            <parameter name="obsidian" type="Map" required="true">
+                <parameter name="title" default-value="obsidian"/>
+                <parameter name="zip"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="website" type="Map">
+                <parameter name="id"/>
+                <parameter name="hostName"/>
+                <parameter name="title"/>
+                <parameter name="websiteContent" type="List">
+                    <parameter name="content" type="Map">
+                        <parameter name="path"/>
+                        <parameter name="title"/>
+                        <parameter name="text"/>
+                        <parameter name="seqId" type="Integer"/>
+                    </parameter>
+                </parameter>
+                <parameter name="websiteCategories" type="List">
+                    <parameter name="websiteCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                        <parameter name="products" type="List"/>
+                        <parameter name="product" type="Map">
+                            <parameter name="productId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="productCategories" type="List">
+                    <parameter name="productCategory" type="Map">
+                        <parameter name="categoryId"/>
+                        <parameter name="categoryName"/>
+                    </parameter>
+                </parameter>
+           </parameter>
+           <parameter name="colorJson"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores"
+                    limit="1" for-update="true">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+            </entity-find>
+            <entity-find-one entity-name="mantle.product.store.ProductStoreSetting"
+                    value-field="topResource">
+                <field-map field-name="productStoreId" from="stores[0].productStoreId"/>
+                <field-map field-name="settingTypeEnumId" value="PsstContentLocation"/>
+            </entity-find-one>
+            <set field="stores[0].profileUrlPath" from="obsidian.zip ? obsidian.title : null"/>
+            <entity-update value-field="stores[0]"/>
+            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                <field-map field-name="wikiSpaceId" from="stores[0].wikiSpaceId"/>
+            </entity-find-one>
+            <set field="contentRoot" from="topResource.settingValue"/>
+            
+            <!--delete previous wikipages-->
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" for-update="true" list="pages">
+                <econdition field-name="pagePath" operator="like" value="obsidian/%"/>
+                <econdition field-name="wikiSpaceId" from="stores[0].wikiSpaceId"/>
+            </entity-find>
+            <iterate list="pages" entry="page">
+                <entity-delete value-field="page"/>
+                <set field="obsidianFile" from="ec.resource.getLocationReference(contentRoot + '/' + page.pagePath)"/>
+                <if condition="obsidianFile">
+                    <script>obsidianFile.delete()</script>
+                </if>
+            </iterate>
+            <!--delete previous images-->
+            <entity-find entity-name="growerp.store.ProductStoreContent" for-update="true" list="images">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId"/>
+                <econdition field-name="contentLocation" operator="like" value="$contentRoot/content/obsidian%"/>
+            </entity-find>
+            <iterate list="images" entry="image">
+                <entity-delete value-field="image"/>
+                <set field="obsidianFile" from="ec.resource.getLocationReference(image.contentLocation)"/>
+                <if condition="obsidianFile">
+                    <script>obsidianFile.delete()</script>
+                </if>
+            </iterate>
+            <script>
+            import java.util.zip.ZipEntry
+            import java.util.zip.ZipInputStream
+            import java.util.zip.ZipOutputStream
+            import org.moqui.resource.ResourceReference
+            import org.moqui.impl.entity.condition.FieldValueCondition
+            import org.moqui.entity.*
+            import org.moqui.BaseException
+            import java.io.BufferedReader
+            import java.net.*
+            import java.io.*
+
+            if (obsidian.zip == null) {
+                logger.info("=== NO new obsidian created!")
+            } else {
+                // strip leading common path
+                ZipInputStream zis = new ZipInputStream(
+                    new ByteArrayInputStream(Base64.getMimeDecoder().decode(obsidian.zip)));
+                ZipEntry zipEntry = zis.getNextEntry()
+                List names = zipEntry.name.split('/')
+                while (zipEntry != null) {
+                    if (!zipEntry.isDirectory() &amp;&amp; !zipEntry.name.contains('.obsidian')) {
+
+                        if (zipEntry.name.substring(0,zipEntry.name.lastIndexOf('.')).contains('.')) {
+                            throw new BaseException("filenames/paths cannot have a '.' inside: ${zipEntry.name}")
+                        }
+
+                        List currentNames = zipEntry.name.split('/')
+                        for (int x; x &lt; names.size(); x++) {
+                            for (int y; y &lt; names.size(); y++) {
+                                if (names[x] == currentNames[y]) continue
+                                if (x &lt; names.size()) names.remove(x)
+                            }
+                        }
+                    }
+                    zipEntry = zis.getNextEntry()
+                }
+                zis.close()
+
+                // TODO: create all wikipages first to be able to find full path of internal pages??
+                zis = new ZipInputStream(
+                    new ByteArrayInputStream(Base64.getMimeDecoder().decode(obsidian.zip)));
+                zipEntry = zis.getNextEntry()
+                while (zipEntry != null) {
+                    if (zipEntry.isDirectory()) {
+                        zipEntry = zis.getNextEntry()
+                        continue
+                    }
+                    String currentPath = zipEntry.name;
+                    for (String name in names) {
+                        currentPath = currentPath.substring(currentPath.indexOf('/') + 1)
+                    }
+                    if (currentPath.startsWith('.obsidian')) {
+                        zipEntry = zis.getNextEntry()
+                        continue
+                    }
+                    path = "obsidian/" + currentPath
+                    dirPath = path.substring(0,path.lastIndexOf('/') + 1)
+
+                    // create wikiPage, only md files, all data is in the path
+                    if (currentPath.endsWith('.md')) {
+                        wikiPage = ec.entity.makeValue("moqui.resource.wiki.WikiPage")
+                        wikiPage.wikiSpaceId = stores[0].wikiSpaceId
+                        wikiPage.pagePath = path.substring(0,path.indexOf('.'))
+                        wikiPage.publishedVersionName = '01'
+                        wikiPage.setSequencedIdPrimary().create()
+                    }
+                    zipEntry = zis.getNextEntry();
+                }
+                zis.close()
+
+                // save in database
+                zis = new ZipInputStream(
+                    new ByteArrayInputStream(Base64.getMimeDecoder().decode(obsidian.zip)));
+                String path, dirPath;
+                zipEntry = zis.getNextEntry()
+                while (zipEntry != null) {
+                    if (zipEntry.isDirectory()) {
+                        zipEntry = zis.getNextEntry()
+                        continue
+                    }
+                    String currentPath = zipEntry.name;
+                    for (String name in names) {
+                        currentPath = currentPath.substring(currentPath.indexOf('/') + 1)
+                    }
+                    if (currentPath.startsWith('.obsidian')) {
+                        zipEntry = zis.getNextEntry()
+                        continue
+                    }
+                    path = "obsidian/" + currentPath
+                    dirPath = path.substring(0,path.lastIndexOf('/') + 1)
+
+                    // create store content for media
+                    if (!currentPath.endsWith('.md')) {
+                        List pathList = path.split('/')
+                        storeContent = ec.entity.makeValue("growerp.store.ProductStoreContent")
+                        storeContent.productStoreId = stores[0].productStoreId
+                        storeContent.contentLocation = "$contentRoot/content/$path"
+                        storeContent.contentTypeEnumId = "PrstImageLarge"
+                        storeContent.description = "obsidian/${pathList[2]}"
+                        storeContent.setSequencedIdPrimary().create()
+                    }
+
+                    // create/process actual file
+                    ResourceReference fileStream = ec.resource.getLocationReference(
+                        "$contentRoot/content/$path")
+
+                    if (currentPath.endsWith('.md')) {
+                        Scanner sc = new Scanner(zis);
+                        String line = ""
+                        while (sc.hasNextLine()) {
+                            String nextLine = sc.nextLine();
+
+                            // inline display of images
+                            while (nextLine.indexOf("![[") != -1) {
+                                int brackets = nextLine.indexOf("![[");
+                                int closeBrackets = nextLine.indexOf("]]");
+                                String link = nextLine.substring(brackets + 3,closeBrackets)
+                                nextLine = nextLine.substring(0,brackets) \
+                                + "![](/getImage/obsidian/" + link + ")" \
+                                + nextLine.substring(closeBrackets + 2)
+                            }
+
+                            // inclusion of external md file
+                            if (nextLine.indexOf("![](http") != -1) {
+                                int brackets = nextLine.indexOf("![](")
+                                int closeBrackets = nextLine.indexOf(")", brackets)
+                                String link = nextLine.substring(brackets + 4,closeBrackets)
+                                URL url = new URL(link)
+
+                                HttpURLConnection con = (HttpURLConnection) url.openConnection()
+                                con.setRequestMethod("GET");
+                                con.setRequestProperty("Content-Type", "application/md");
+                                con.setConnectTimeout(5000);
+                                con.setReadTimeout(5000);
+                                con.setInstanceFollowRedirects(false);
+                                StringBuffer content;
+                                if (con.getResponseCode() == 200) {
+                                    BufferedReader input = new BufferedReader(
+                                        new InputStreamReader(con.getInputStream()));
+                                    String inputLine;
+                                    content = new StringBuffer();
+                                    while ((inputLine = input.readLine()) != null) {
+                                        content.append(inputLine + '\n');
+                                    }
+                                  input.close();
+                                }
+                                con.disconnect();
+                                nextLine = "${nextLine.substring(0,brackets)}$content${nextLine.substring(closeBrackets + 1)}"
+                            }
+
+                            // internal link to other pages
+                            while (nextLine.indexOf("[[") != -1) {
+                                int brackets = nextLine.indexOf("[[");
+                                int closeBrackets = nextLine.indexOf("]]");
+                                String link = nextLine.substring(brackets + 2,closeBrackets)
+
+                                //logger.info("==br $brackets cl: $closeBrackets link: $link")
+                                //logger.info("==1nl: $nextLine")
+
+                                // find link in wikipage for full length
+                                def links = ec.entity.find("moqui.resource.wiki.WikiPage")
+                                        .condition("wikiSpaceId", stores[0].productStoreId)
+                                        .condition("pagePath", "like", "%" + link).list()
+                                String linkDef = "";
+                                // remove leading numbers
+                                if (Character.isDigit(link.charAt(0))) link = link.substring(link.indexOf(' '))
+                                if (links) {
+                                    linkDef = "\n[$link]: /content/${links[0].pagePath.replace(' ','%20').replace('&amp;','%26')} '$link'\n"
+                                }
+                                nextLine = linkDef + nextLine.substring(0,brackets) \
+                                    + "[$link]" \
+                                    + nextLine.substring(closeBrackets + 2)
+
+                            }
+                            line += nextLine + '\n'
+                        }
+                        fileStream.putText(line);
+                    } else {
+                        fileStream.putStream(zis);
+                    }
+                    zipEntry = zis.getNextEntry();
+                }
+                zis.close()
+            }
+            </script>
+            <service-call name="growerp.100.WebsiteServices100.get#Website"
+                in-map="[classificationId: stores[0].storeDomain]"
+                out-map="context"/>
+        </actions>
+    </service>
+</services>

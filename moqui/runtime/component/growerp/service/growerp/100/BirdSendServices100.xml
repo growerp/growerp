@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="registerAdd" noun="UserToGroup">
+        <in-parameters>
+            <parameter name="email" required="true"/>
+            <parameter name="firstName"/>
+            <parameter name="lastName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultMessage"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.Interface" value-field="interfaceValue">
+                <field-map field-name="interfaceId" value="birdSend"/>
+            </entity-find-one>
+            <set field="apiKey" from="interfaceValue?.apiKey"/>
+            <set field="baseUrl" from="interfaceValue?.baseUrl"/>
+            <set field="groupName" from="interfaceValue?.value1"/>
+            <if condition="!interfaceValue || !baseUrl || !apiKey || !groupName">
+                <return error="false" message="birdsend not configured: missing parameters in table interfaceValue"/>
+            </if>
+            <!-- add user -->
+            <script><![CDATA[
+                import java.io.BufferedReader;
+                import java.io.IOException;
+                import java.io.InputStreamReader;
+                import java.io.OutputStream;
+                import java.net.HttpURLConnection;
+                import java.net.URL;
+                import groovy.json.JsonSlurper;
+
+                // get sequence id
+                Map result = sendGET("v1/sequences")
+                //logger.info("===sequence result: ${result.data}")
+
+                Integer sequenceId;
+                for(sequence in result.data) {
+                    if (sequence.name == groupName) sequenceId = sequence.sequence_id
+                }
+
+                logger.info("===seqId: $sequenceId")
+                if (sequenceId) {
+                    // add user and sequence
+                    result = sendPOST("v1/contacts",
+                    """ { \"email\": \"$email\", \"sequence_id\": $sequenceId, \"fields\":
+                        { \"first_name\": \"$firstName\", \"last_name\": \"$lastName\" }}""".stripIndent())
+                } else {
+                    logger.warn("Sequence group $groupName not found!")
+                }
+
+                //============ closures =============
+
+                def Map sendGET(String path) throws IOException {
+                    URL obj = new URL("$baseUrl/$path");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setRequestProperty("Authorization","Bearer ${apiKey}")
+                    con.setRequestProperty("Content-Type", "application/json")
+                    con.setRequestProperty("Accept", "application/json")
+                    if (con.getResponseCode() == HttpURLConnection.HTTP_OK) { // success
+                        BufferedReader input = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuffer response = new StringBuffer();
+
+                        while ((inputLine = input.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        input.close();
+
+                        // print result
+                        // ec.logger.info("===Result: ${response.toString()}");
+                        return new groovy.json.JsonSlurper().parseText(response.toString())
+                    } else {
+                        ec.logger.info("===GET request did not work: ${con.getResponseCode()} ${con.getResponseMessage()}");
+                    }
+                }
+
+                def sendPOST(String path, String paramsJSON) throws IOException {
+                    URL obj = new URL("$baseUrl/$path");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Authorization","Bearer ${apiKey}")
+                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+                    con.setRequestProperty("Accept", "application/json")
+                    con.setDoInput(true);
+                    con.setDoOutput(true);
+
+                    OutputStream os = con.getOutputStream()
+                    os.write(paramsJSON.getBytes("UTF-8"));
+                    os.flush()
+
+                    int responseCode = con.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                        BufferedReader input = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuffer response = new StringBuffer();
+
+                        while ((inputLine = input.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        input.close();
+
+                        // print result
+                        logger.info(response.toString());
+                    } else {
+                        logger.info("POST request did not work: $responseCode ${con.getResponseMessage()}");
+                    }
+                }
+           ]]></script>
+        </actions>
+    </service>
+</services>

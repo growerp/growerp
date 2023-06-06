@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- ========================== -->
+    <!-- Tax Calculation Interfaces -->
+    <!-- ========================== -->
+
+    <service verb="calculate" noun="SalesTax" type="interface">
+        <!-- Interface for services to implement: mantle.other.TaxServices.calculate#SalesTax -->
+        <in-parameters>
+            <parameter name="referenceId"><description>This is the orderId:orderPartSeqId or invoiceId, if available.</description></parameter>
+            <parameter name="saveResults" type="Boolean"><description>If the tax service supports saving calculated
+                taxes for reporting and filing with authorities set this flag when you want the results saved (this is
+                usually done for invoices but not orders).</description></parameter>
+            <parameter name="taxGatewayConfigId" required="true"/>
+            <parameter name="customerPartyId"/>
+            <parameter name="organizationPartyId"/>
+            <parameter name="originAddressContactMechId"/>
+            <parameter name="destinationAddressContactMechId"/>
+            <parameter name="items" type="List"><parameter name="itemEntry" type="Map">
+                <parameter name="itemId"/>
+                <parameter name="itemTypeEnumId"/>
+                <parameter name="quantity" type="BigDecimal"/>
+                <parameter name="unitAmount" type="BigDecimal"/>
+                <parameter name="unitAmountLessDiscounts" type="BigDecimal"/>
+                <parameter name="itemTotal" type="BigDecimal"/>
+                <parameter name="discountTotal" type="BigDecimal"/>
+                <parameter name="productId"/>
+                <parameter name="taxCode"/>
+                <!-- discounts will be another item of type ItemDiscount, so don't do this for now:
+                <parameter name="discounts" type="List"><parameter name="discountEntry" type="Map">
+                    <parameter name="discountAmount" type="BigDecimal"/>
+                    <parameter name="discountCode"/>
+                </parameter></parameter>
+                -->
+            </parameter></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="taxResults" type="List"><parameter name="taxResult" type="Map">
+                <parameter name="itemId"/>
+                <parameter name="taxQuantity" type="BigDecimal">
+                    <description>Quantity to apply tax to, defaults to OrderItem.quantity</description></parameter>
+                <parameter name="taxAmount" type="BigDecimal">
+                    <description>Tax amount per quantity, typically derived from unitAmountLessDiscounts or unitAmount</description></parameter>
+                <parameter name="taxRate" type="BigDecimal"/>
+                <parameter name="taxAuthorityId"/>
+                <parameter name="taxName"/>
+            </parameter></parameter>
+        </out-parameters>
+    </service>
+
+    <!-- ======================== -->
+    <!-- Tax Calculation Services -->
+    <!-- ======================== -->
+
+    <service verb="calculate" noun="OrderSalesTax">
+        <in-parameters>
+            <parameter name="orderId" required="true"/>
+            <parameter name="orderPartSeqId"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"/>
+            <entity-find-related-one value-field="orderHeader" relationship-name="mantle.product.store.ProductStore"
+                    to-value-field="productStore" cache="true"/>
+            <entity-find-related-one value-field="productStore" relationship-name="mantle.other.tax.TaxGatewayConfig"
+                    to-value-field="taxGatewayConfig" cache="true"/>
+            <if condition="taxGatewayConfig == null">
+                <log message="Not calculating tax for Order ${orderId}, no TaxGatewayConfig found (store: ${productStore?.productStoreId})"/>
+                <return/>
+            </if>
+
+            <!-- if order part has tax (ItemSalesTax or ItemVatTax) items clear them out first -->
+            <entity-delete-by-condition entity-name="mantle.order.OrderItem">
+                <econdition field-name="orderId"/>
+                <econdition field-name="orderPartSeqId" ignore-if-empty="true"/>
+                <econdition field-name="itemTypeEnumId" operator="in" value="ItemSalesTax,ItemVatTax"/>
+            </entity-delete-by-condition>
+
+            <!-- build the parameters for the calculate#SalesTax interface -->
+            <set field="saveResults" from="false"/><!-- don't save result for order, only for invoice -->
+            <set field="taxGatewayConfigId" from="taxGatewayConfig.taxGatewayConfigId"/>
+            <!-- get the inventory facility's PostalShippingOrigin contactMechId -->
+            <entity-find entity-name="mantle.facility.FacilityContactMech" list="fromFcmList" cache="true">
+                <date-filter/>
+                <econdition field-name="facilityId" from="productStore.inventoryFacilityId"/>
+                <econdition field-name="contactMechPurposeId" value="PostalShippingOrigin"/>
+            </entity-find>
+            <set field="fromFcm" from="fromFcmList?.first"/>
+
+            <!-- loop through the OrderParts, or only single OrderPart if orderPartSeqId is specified -->
+            <entity-find entity-name="mantle.order.OrderPart" list="orderPartList">
+                <econdition field-name="orderId"/><econdition field-name="orderPartSeqId" ignore-if-empty="true"/>
+            </entity-find>
+            <iterate list="orderPartList" entry="orderPart">
+                <set field="referenceId" value="${orderId}:${orderPart.orderPartSeqId}"/>
+                <set field="customerPartyId" from="orderPart.customerPartyId"/>
+                <set field="organizationPartyId" from="productStore.organizationPartyId"/>
+                <set field="originAddressContactMechId" from="fromFcm?.contactMechId"/>
+                <set field="destinationAddressContactMechId" from="orderPart.postalContactMechId"/>
+
+                <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                    <econdition field-name="orderId"/><econdition field-name="orderPartSeqId" from="orderPart.orderPartSeqId"/>
+                </entity-find>
+                <set field="items" from="[]"/>
+                <iterate list="orderItemList" entry="orderItem">
+                    <set field="combinedQuantity" from="(orderItem.quantity != null ? orderItem.quantity : 1.0) * (orderItem.selectedAmount ?: 1.0)"/>
+                    <if condition="combinedQuantity == 0.0"><continue/></if>
+
+                    <set field="product" from="orderItem.'mantle.product.Product'"/>
+                    <if condition="!product?.taxable || product?.taxable == 'Y'">
+                        <!-- NOTE: CurrencyRoundingMarker scale here may vary by currency, make configurable -->
+                        <set field="itemTotal" from="(combinedQuantity * (orderItem.unitAmount ?: 0.0)).setScale(2, BigDecimal.ROUND_HALF_UP)"/>
+
+                        <set field="discountTotal" from="0.0"/>
+                        <iterate list="orderItemList" entry="discountItem">
+                            <if condition="discountItem.itemTypeEnumId == 'ItemDiscount' &amp;&amp;
+                                    discountItem.parentItemSeqId == orderItem.orderItemSeqId &amp;&amp; discountItem.unitAmount">
+                                <set field="discountTotal" from="discountTotal + ((discountItem.quantity != null ? discountItem.quantity : 1.0) * discountItem.unitAmount)"/>
+                            </if>
+                        </iterate>
+
+                        <set field="unitAmountLessDiscounts" from="((itemTotal + discountTotal) as BigDecimal).divide(combinedQuantity as BigDecimal, 3, BigDecimal.ROUND_HALF_UP)"/>
+                        <script>items.add([itemId:orderItem.orderItemSeqId, itemTypeEnumId:orderItem.itemTypeEnumId,
+                                quantity:orderItem.quantity, unitAmount:orderItem.unitAmount, unitAmountLessDiscounts:unitAmountLessDiscounts,
+                                itemTotal:itemTotal, discountTotal:discountTotal,
+                                productId:orderItem.productId, taxCode:product?.taxCode])</script>
+                    </if>
+                </iterate>
+
+                <!-- call gateway (could be local) service to calculate shipping charges -->
+                <service-call name="${taxGatewayConfig.calculateServiceName}" in-map="context" out-map="context"/>
+
+                <!-- add tax child OrderItems to db -->
+                <iterate list="taxResults" entry="taxResult">
+                    <if condition="!taxResult.taxAmount"><continue/></if>
+                    <set field="orderItem" from="orderItemList.find({ it.orderItemSeqId == taxResult.itemId })"/>
+                    <if condition="orderItem == null">
+                        <log level="warn" message="In calculate#OrderSalesTax got back entry with invalid orderItemSeqId ${taxResult.itemId} for order ${orderId}, skipping"/>
+                        <continue/>
+                    </if>
+                    <set field="taxAmount" from="(taxResult.taxAmount as BigDecimal).setScale(3, BigDecimal.ROUND_HALF_UP)"/>
+                    <entity-find-one entity-name="mantle.other.tax.TaxAuthority" value-field="taxAuthority" cache="true">
+                        <field-map field-name="taxAuthorityId" from="taxResult.taxAuthorityId"/></entity-find-one>
+                    <set field="itemDescription" value="${taxAuthority?.description ? taxAuthority.description + ' ' : ''}${taxResult.taxName?:''}"/>
+                    <service-call name="create#mantle.order.OrderItem" out-map="context"
+                            in-map="[orderId:orderId, orderPartSeqId:orderPart.orderPartSeqId, parentItemSeqId:taxResult.itemId,
+                                itemTypeEnumId:'ItemSalesTax', quantity:(taxResult.taxQuantity ?: orderItem.quantity),
+                                unitAmount:taxAmount, sourcePercentage:(taxResult.taxRate*100.0),
+                                taxAuthorityId:taxResult.taxAuthorityId, itemDescription:itemDescription]"/>
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="calculate" noun="InvoiceSalesTax">
+        <in-parameters><parameter name="invoiceId" required="true"/></in-parameters>
+        <actions>
+            <!-- TODO: implement this... -->
+        </actions>
+    </service>
+
+    <!-- ======================= -->
+    <!-- Local Sales Tax Gateway -->
+    <!-- ======================= -->
+    
+    <service verb="calculate" noun="SalesTaxLocal">
+        <implements service="mantle.other.TaxServices.calculate#SalesTax"/>
+        <actions>
+            <log level="info" message="Called calculate#SalesTaxLocal (not yet implemented)"/><!-- with context:\n ${context} -->
+            <!-- TODO: implement this for Drools decision table -->
+
+            <!-- example code for a simple tax service:
+            <entity-find-one entity-name="mantle.party.contact.PostalAddress" value-field="destinationAddress">
+                <field-map field-name="contactMechId" from="destinationAddressContactMechId"/></entity-find-one>
+            <if condition="destinationAddress == null || destinationAddress.stateProvinceGeoId != 'USA_NV'"><return/></if>
+            <!- - simple 7% tax rate; lookup or calculate as needed - ->
+            <set field="taxRate" from="0.07"/>
+            <set field="taxAuthorityId" value="SETME"/>
+            <set field="taxResults" from="[]"/>
+            <iterate list="items" entry="item">
+                <if condition="item.itemTypeEnumId != 'ItemProduct'"><continue/></if>
+                <if condition="!item.unitAmount"><continue/></if>
+                <set field="taxAmount" from="taxRate * (item.quantity ?: 1.0) * item.unitAmount"/>
+                <script>taxResults.add([itemId:item.itemId, taxAmount:taxAmount, taxRate:taxRate,
+                    taxAuthorityId:taxAuthorityId, taxName:'Sales Tax'])</script>
+            </iterate>
+            -->
+        </actions>
+    </service>
+
+    <!-- ====================== -->
+    <!-- Tax Statement Services -->
+    <!-- ====================== -->
+
+    <service verb="create" noun="TaxStatement">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"/>
+            <parameter name="partyId" required="true"/>
+            <parameter name="taxAuthorityId" required="true"/>
+            <parameter name="formId" required="true"/>
+            <parameter name="formMap" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="formResponseId"/>
+            <parameter name="taxStatementId"/>
+        </out-parameters>
+        <actions>
+            <!-- if no formMap at least get payer and recipient basic info -->
+            <if condition="!formMap &amp;&amp; formId == 'UsaIrs1099Misc'">
+                <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"/>
+                <service-call name="mantle.other.TaxServices.get#UsaIrs1099MiscFormData" out-map="context"
+                        in-map="[recipientPartyId:partyId, payerPartyId:timePeriod.partyId]"/>
+            </if>
+            <!-- create FormResponse -->
+            <service-call name="org.moqui.impl.ScreenServices.create#FormResponse" out-map="context"
+                    in-map="[formId:formId, responseMap:formMap]"/>
+            <!-- create TaxStatement record -->
+            <service-call name="create#mantle.other.tax.TaxStatement" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="TaxStatement">
+        <in-parameters><parameter name="taxStatementId" required="true"/></in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.other.tax.TaxStatement" value-field="taxStatement"/>
+            <if condition="taxStatement == null"><return message="Tax Statement ${taxStatementId} not found"/></if>
+            <entity-delete value-field="taxStatement"/>
+            <service-call name="org.moqui.impl.ScreenServices.delete#FormResponse" out-map="context"
+                    in-map="[formResponseId:taxStatement.formResponseId]"/>
+        </actions>
+    </service>
+
+
+    <service verb="create" noun="AllVendor1099MiscStatements">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"/>
+            <parameter name="taxAuthorityId" default-value="UsaIrs"/>
+            <parameter name="formId" default-value="UsaIrs1099Misc"/>
+            <parameter name="amountThreshold" type="BigDecimal" default="600"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"/>
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[timePeriod:timePeriod]" out-map="periodInfo"/>
+            <set field="fromTimestamp" from="periodInfo.fromTimestamp"/>
+            <set field="thruTimestamp" from="periodInfo.thruTimestamp"/>
+
+            <entity-find entity-name="mantle.account.invoice.InvoiceSummary" list="invoiceSummaryList">
+                <econdition field-name="toPartyId" from="timePeriod.partyId"/>
+                <!-- NOTE: should ever include InvoiceBilledThrough? -->
+                <econdition field-name="statusId" operator="in" value="InvoiceApproved,InvoicePmtSent"/>
+                <!-- Payroll invoices are handled elsewhere, Tax invoices don't need 1099s -->
+                <econdition field-name="invoiceTypeEnumId" operator="not-in" value="InvoicePayroll,InvoiceTax"/>
+                <econdition field-name="invoiceDate" operator="greater-equals" from="fromTimestamp"/>
+                <econdition field-name="invoiceDate" operator="less-equals" from="thruTimestamp"/>
+                <having-econditions>
+                    <econdition field-name="grandTotal" operator="greater-equals" from="amountThreshold"/>
+                </having-econditions>
+                <select-field field-name="fromPartyId"/>
+            </entity-find>
+
+            <iterate list="invoiceSummaryList" entry="invoiceSummary">
+                <service-call name="mantle.other.TaxServices.create#Vendor1099MiscStatement"
+                        in-map="[timePeriodId:timePeriodId, partyId:invoiceSummary.fromPartyId,
+                            taxAuthorityId:taxAuthorityId, formId:formId]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="create" noun="Vendor1099MiscStatement">
+        <in-parameters>
+            <parameter name="timePeriodId" required="true"/>
+            <parameter name="partyId" required="true"><description>The vendor Party, ie matches Invoice.fromPartyId</description></parameter>
+            <parameter name="taxAuthorityId" default-value="UsaIrs"/>
+            <parameter name="formId" default-value="UsaIrs1099Misc"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="taxStatementId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"/>
+
+            <!-- split out various item types instead of all in otherIncome -->
+            <set field="rentTypes" from="['ItemExpLeaseVehicle', 'ItemExpLeaseEquip', 'ItemExpLeaseRealEst', 'ItemExpLeaseOther']"/>
+            <set field="royaltyTypes" from="['ItemExpRoyalties']"/>
+            <set field="medicalHealthTypes" from="['ItemExpMedical', 'ItemExpInsHealth']"/>
+            <set field="nonEmpCompTypes" from="['ItemExpCommissionFee', 'ItemExpServAccount', 'ItemExpServLabor']"/>
+            <set field="attorneyTypes" from="['ItemExpServLegal']"/>
+            <!-- <set field="nonOtherTypes" from="rentTypes + royaltyTypes + medicalHealthTypes + attorneyTypes + nonEmpCompTypes"/> -->
+            <!-- NOTE: consider all other types otherIncome -->
+
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[timePeriod:timePeriod]" out-map="periodInfo"/>
+            <set field="fromTimestamp" from="periodInfo.fromTimestamp"/>
+            <set field="thruTimestamp" from="periodInfo.thruTimestamp"/>
+
+            <entity-find entity-name="mantle.account.invoice.InvoiceItemSummary" list="invoiceItemSummaryList">
+                <econdition field-name="fromPartyId" from="partyId"/>
+                <econdition field-name="toPartyId" from="timePeriod.partyId"/>
+                <!-- NOTE: should ever include InvoiceBilledThrough? -->
+                <econdition field-name="statusId" operator="in" value="InvoiceApproved,InvoicePmtSent"/>
+                <!-- Payroll invoices are handled elsewhere, Tax invoices don't need 1099s -->
+                <econdition field-name="invoiceTypeEnumId" operator="not-in" value="InvoicePayroll,InvoiceTax"/>
+                <econdition field-name="invoiceDate" operator="greater-equals" from="fromTimestamp"/>
+                <econdition field-name="invoiceDate" operator="less-equals" from="thruTimestamp"/>
+                <select-field field-name="itemsTotal"/><select-field field-name="itemTypeEnumId"/>
+            </entity-find>
+
+            <if condition="!invoiceItemSummaryList"><return message="No invoices found in period ${timePeriodId} for party ${partyId}"/></if>
+
+            <set field="rents" from="0"/><set field="royalties" from="0"/>
+            <set field="medicalAndHealthCarePayments" from="0"/><set field="nonemployeeCompensation" from="0"/>
+            <set field="cropInsuranceProceeds" from="0"/><set field="grossProceedsToAttorney" from="0"/>
+            <set field="otherIncome" from="0"/>
+            <iterate list="invoiceItemSummaryList" entry="invoiceItemSummary">
+                <if condition="rentTypes.contains(invoiceItemSummary.itemTypeEnumId)">
+                    <then><set field="rents" from="rents + invoiceItemSummary.itemsTotal"/></then>
+                    <else-if condition="royaltyTypes.contains(invoiceItemSummary.itemTypeEnumId)">
+                        <set field="royalties" from="royalties + invoiceItemSummary.itemsTotal"/></else-if>
+                    <else-if condition="medicalHealthTypes.contains(invoiceItemSummary.itemTypeEnumId)">
+                        <set field="medicalAndHealthCarePayments" from="medicalAndHealthCarePayments + invoiceItemSummary.itemsTotal"/></else-if>
+                    <else-if condition="nonEmpCompTypes.contains(invoiceItemSummary.itemTypeEnumId)">
+                        <set field="nonemployeeCompensation" from="nonemployeeCompensation + invoiceItemSummary.itemsTotal"/></else-if>
+                    <else-if condition="attorneyTypes.contains(invoiceItemSummary.itemTypeEnumId)">
+                        <set field="grossProceedsToAttorney" from="grossProceedsToAttorney + invoiceItemSummary.itemsTotal"/></else-if>
+                    <else><set field="otherIncome" from="otherIncome + invoiceItemSummary.itemsTotal"/></else>
+                </if>
+            </iterate>
+
+            <service-call name="mantle.other.TaxServices.get#UsaIrs1099MiscFormData" out-map="context"
+                    in-map="context + [recipientPartyId:partyId, payerPartyId:timePeriod.partyId]"/>
+
+            <service-call name="mantle.other.TaxServices.create#TaxStatement" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="get" noun="UsaIrs1099MiscFormData">
+        <in-parameters>
+            <parameter name="payerPartyId" required="true"/>
+            <parameter name="recipientPartyId" required="true"/>
+            <parameter name="rents" type="BigDecimal"/>
+            <parameter name="royalties" type="BigDecimal"/>
+            <parameter name="otherIncome" type="BigDecimal"/>
+            <parameter name="medicalAndHealthCarePayments" type="BigDecimal"/>
+            <parameter name="nonemployeeCompensation" type="BigDecimal"/>
+            <parameter name="cropInsuranceProceeds" type="BigDecimal"/>
+            <parameter name="grossProceedsToAttorney" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="formMap" type="Map">
+                <parameter name="1099m_a"/><parameter name="1099m_b"/><parameter name="1099m_c"/>
+                <parameter name="1099m_d1"/><parameter name="1099m_d2"/><parameter name="1099m_d3"/>
+                <parameter name="1099m_01"/><parameter name="1099m_02"/><parameter name="1099m_03"/>
+                <parameter name="1099m_06"/><parameter name="1099m_07"/><parameter name="1099m_10"/>
+                <parameter name="1099m_14"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.other.TaxServices.get#PayerTaxInfo" in-map="[partyId:payerPartyId]" out-map="payer"/>
+            <service-call name="mantle.other.TaxServices.get#RecipientTaxInfo" in-map="[partyId:recipientPartyId]" out-map="recipient"/>
+
+            <set field="formMap" from="[:]"/>
+
+            <set field="formMap.'1099m_a'" value="${payer.name}\n${payer.addressString}\n${payer.phoneString}"/>
+            <set field="formMap.'1099m_b'" from="payer.ein"/>
+            <set field="formMap.'1099m_c'" from="recipient.ssn ?: recipient.ein"/>
+
+            <set field="formMap.'1099m_d1'" value="${recipient.firstName?:''} ${recipient.lastName?:''} ${recipient.suffix?:''}"/>
+            <set field="formMap.'1099m_d2'" from="recipient.homeStreetString"/>
+            <set field="formMap.'1099m_d3'" from="recipient.homeCszString"/>
+
+            <if condition="rents"><set field="formMap.'1099m_01'" from="ec.l10n.format(rents, '#,##0.00')"/></if>
+            <if condition="royalties"><set field="formMap.'1099m_02'" from="ec.l10n.format(royalties, '#,##0.00')"/></if>
+            <if condition="otherIncome"><set field="formMap.'1099m_03'" from="ec.l10n.format(otherIncome, '#,##0.00')"/></if>
+            <if condition="medicalAndHealthCarePayments"><set field="formMap.'1099m_06'" from="ec.l10n.format(medicalAndHealthCarePayments, '#,##0.00')"/></if>
+            <if condition="nonemployeeCompensation"><set field="formMap.'1099m_07'" from="ec.l10n.format(nonemployeeCompensation, '#,##0.00')"/></if>
+            <if condition="cropInsuranceProceeds"><set field="formMap.'1099m_10'" from="ec.l10n.format(cropInsuranceProceeds, '#,##0.00')"/></if>
+            <if condition="grossProceedsToAttorney"><set field="formMap.'1099m_14'" from="ec.l10n.format(grossProceedsToAttorney, '#,##0.00')"/></if>
+        </actions>
+    </service>
+    <service verb="get" noun="RecipientTaxInfo">
+        <in-parameters><parameter name="partyId"/></in-parameters>
+        <out-parameters>
+            <parameter name="firstName"/><parameter name="lastName"/><parameter name="suffix"/>
+            <parameter name="ssn"/><parameter name="ein"/>
+            <parameter name="homeContactInfo" type="Map"/>
+            <parameter name="homeStreetString"/><parameter name="homeCszString"/><parameter name="homeString"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail"/>
+            <set field="firstName" from="partyDetail.organizationName ? partyDetail.organizationName : partyDetail.firstName + (partyDetail.middleName ? ' ' + partyDetail.middleName : '')"/>
+            <set field="lastName" from="partyDetail.lastName ?: ''"/>
+            <set field="suffix" from="partyDetail.suffix"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="ssnPi">
+                <field-map field-name="partyId"/><field-map field-name="partyIdTypeEnumId" value="PtidSsn"/></entity-find-one>
+            <set field="ssn" from="ssnPi?.idValue"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="einPi">
+                <field-map field-name="partyId"/><field-map field-name="partyIdTypeEnumId" value="PtidFein"/></entity-find-one>
+            <set field="ein" from="einPi?.idValue"/>
+
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="homeContactInfo"
+                    in-map="[partyId:partyId, postalContactMechPurposeId:'PostalPayment']"/>
+            <script>homeStreetString = """${homeContactInfo?.postalAddress?.address1 ? homeContactInfo.postalAddress.address1 + (homeContactInfo.postalAddress.unitNumber ? ' #' + homeContactInfo.postalAddress.unitNumber : '') : ''}${homeContactInfo?.postalAddress?.address2 ? '\n' + homeContactInfo.postalAddress.address2 : ''}"""</script>
+            <script>homeCszString = """${homeContactInfo?.postalAddress ? (homeContactInfo.postalAddress.city ?: '') + (homeContactInfo.postalAddressStateGeo?.geoCodeAlpha2 ? ', ' + homeContactInfo.postalAddressStateGeo.geoCodeAlpha2 : '') + ' ' + (homeContactInfo.postalAddress.postalCode ?: '') + (homeContactInfo.postalAddress.postalCodeExt ? '-' + homeContactInfo.postalAddress.postalCodeExt : '') + (homeContactInfo.postalAddressCountryGeo?.geoCodeAlpha3 ? ' ' + homeContactInfo.postalAddressCountryGeo.geoCodeAlpha3 : '') : ''}"""</script>
+            <script>homeString = """${homeStreetString}\n${homeCszString}"""</script>
+        </actions>
+    </service>
+    <service verb="get" noun="PayerTaxInfo">
+        <in-parameters><parameter name="partyId"/></in-parameters>
+        <out-parameters>
+            <parameter name="name"/><parameter name="ein"/><parameter name="uid"/><parameter name="federalAgentIndicatorCode"/>
+            <parameter name="contactInfo" type="Map"/><parameter name="addressString"/><parameter name="phoneString"/><parameter name="faxString"/>
+            <parameter name="partyAcctgPreference" type="Map"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail"/>
+            <set field="name" value="${partyDetail.organizationName?:''}${partyDetail.firstName?:''}${partyDetail.lastName ? ' ' + partyDetail.lastName : ''}"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="einPi">
+                <field-map field-name="partyId"/><field-map field-name="partyIdTypeEnumId" value="PtidFein"/></entity-find-one>
+            <set field="ein" from="einPi?.idValue"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="einPi">
+                <field-map field-name="partyId"/><field-map field-name="partyIdTypeEnumId" value="PtidFuid"/></entity-find-one>
+            <set field="uid" from="einPi?.idValue"/>
+            <entity-find-one entity-name="mantle.party.PartyIdentification" value-field="einPi">
+                <field-map field-name="partyId"/><field-map field-name="partyIdTypeEnumId" value="PtidFaic"/></entity-find-one>
+            <set field="federalAgentIndicatorCode" from="einPi?.idValue"/>
+
+            <service-call name="mantle.party.ContactServices.get#PartyContactInfo" out-map="contactInfo"
+                    in-map="[partyId:partyId, postalContactMechPurposeId:'PostalTax', telecomContactMechPurposeId:'PhoneTax',
+                            emailContactMechPurposeId:'EmailPrimary']"/>
+            <script>addressString = """${contactInfo?.postalAddress?.address1 ? contactInfo.postalAddress.address1 + (contactInfo.postalAddress.unitNumber ? ' #' + contactInfo.postalAddress.unitNumber : '') + '\n' : ''}${contactInfo?.postalAddress?.address2 ? contactInfo.postalAddress.address2 + '\n' : ''}${contactInfo?.postalAddress ? (contactInfo.postalAddress.city ?: '') + (contactInfo.postalAddressStateGeo?.geoCodeAlpha2 ? ', ' + contactInfo.postalAddressStateGeo.geoCodeAlpha2 : '') + ' ' + (contactInfo.postalAddress.postalCode ?: '') + (contactInfo.postalAddress.postalCodeExt ? '-' + contactInfo.postalAddress.postalCodeExt : '') + (contactInfo.postalAddressCountryGeo?.geoCodeAlpha3 ? ' ' + contactInfo.postalAddressCountryGeo.geoCodeAlpha3 : '') : ''}"""</script>
+            <script>phoneString = """${contactInfo?.telecomNumber ? (contactInfo.telecomNumber.countryCode ? contactInfo.telecomNumber.countryCode + '-' : '') + (contactInfo.telecomNumber.areaCode ? contactInfo.telecomNumber.areaCode + '-' : '') + (contactInfo.telecomNumber.contactNumber ?: '') : ''}"""</script>
+            <script>faxString = ""</script> <!-- TODO: Fax number needs to be retrieved as well; should be 10 digits, without country code -->
+
+            <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                          in-map="[organizationPartyId:partyId]"/>
+        </actions>
+    </service>
+</services>

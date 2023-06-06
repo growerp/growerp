@@ -1,0 +1,91 @@
+<div class="">
+    <navbar sub-bar="true"/>
+    <div class="container-fluid px-lg-6 px-4 py-4 body-padding">
+        <div class="row no-gutters align-left">
+            <div class="col">
+                <a class="customer-link" :href="homePath">Home </a><i class="fas fa-angle-right mx-2 fa-line-height"></i>
+                My Orders
+            </div>
+        </div>
+        <div class="row mb-8">
+            <div class="d-lg-block col-lg-3">
+                <menu-left type="true"/>
+            </div>
+            <div class="col-lg-9 col-12">
+                <div class="row">
+                    <div class="col">
+                        <h1 class="page-heading text-uppercase"><span class="text-green">MY</span> ORDERS</h1>
+                    </div>
+                </div>
+                <router-link :to="'/orders#current'" tag="h2" id="current" class="lead">CURRENT ORDERS</router-link>
+                <div class="breakline no-gutters mb-3"></div>
+                <div v-for="(item,index) in ordersList">
+                    <div class="row" v-if="item.partStatusId == 'OrderOpen'">
+                        <div class="col-12 col-sm-5 mb-4" >
+                            <router-link class="row no-gutters text-blue pointer font-size-1" :to="'/orders/'+item.orderId" tag="h3">
+                                Order #{{item.orderId}}
+                            </router-link>
+                            <span class="font-size-09">
+                                {{formatDate(item.placedDate ? item.placedDate : item.entryDate)}}
+                            </span>
+                        </div>
+                        <div class="col-12 col-sm-5 mb-4">
+                            <h3 class="row no-gutters text-cyan font-size-1">
+                                Products
+                            </h3>
+                            <template v-for="(productList, index) in listProduct">
+                                <template v-if="productList.orderId == item.orderId && product.itemTypeEnumId=='ItemProduct'"
+                                    v-for="product in productList.listProduct">
+                                    <span class="row no-gutters mb-1 font-size-09">{{product.itemDescription}}</span>
+                                </template>
+                            </template>
+                        </div>
+                        <div class="col-12 col-sm-2 mb-4">
+                            <h3 class="row no-gutters text-cyan font-size-1">
+                                Total Value
+                            </h3>
+                            <span class="font-size-09">{{currencyFormat.format(item.grandTotal)}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <router-link :to="'/orders#order'" tag="h2" id="order" class="col-8 col-sm-10 lead">
+                    ORDER HISTORY</router-link>
+                    <span class="col-4 col-sm-2 pointer font-size-09 pt-2" @click="scrollTo()">Back to Top</span>
+                </div>
+                <div class="breakline no-gutters mb-3"></div>
+                <div v-for="(item,index) in ordersList">
+                    <div class="row" v-if="item.partStatusId != 'OrderOpen'">
+                        <div class="col-12 col-sm-5 mb-4" >
+                            <router-link class="row no-gutters text-blue pointer font-size-1" :to="'/orders/'+item.orderId" tag="h3">
+                                Order #{{item.orderId}}
+                            </router-link>
+                            <span class="font-size-09">
+                                {{formatDate(item.placedDate ? item.placedDate : item.entryDate)}}
+                            </span>
+                        </div>
+                        <div class="col-12 col-sm-5 mb-4">
+                            <h3 class="row no-gutters text-cyan font-size-1">
+                                Products
+                            </h3>
+                            <template v-for="(productList, index) in listProduct">
+                                <template v-if="productList.orderId == item.orderId && product.itemTypeEnumId=='ItemProduct'"
+                                    v-for="product in productList.listProduct">
+                                    <span class="row no-gutters mb-1 font-size-09">{{product.itemDescription}}</span>
+                                </template>
+                            </template>
+                            <!-- <p class="order-product-status">{{item.partStatusId}}</p> -->
+                        </div>
+                        <div class="col-12 col-sm-2 mb-4">
+                            <h3 class="row no-gutters text-cyan font-size-1">
+                                Total Value
+                            </h3>
+                            <span class="font-size-09">{{currencyFormat.format(item.grandTotal)}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer-page class="footer-relative" :infoLink="false" />
+</div>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <view-entity entity-name="FacilityAndOwnerDetail" package="mantle.facility">
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="FAC"/>
+        <alias-all entity-alias="PTY"><exclude field="pseudoId"/><exclude field="ownerPartyId"/><exclude field="externalId"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias name="partyPseudoId" entity-alias="PTY" field="pseudoId"/>
+    </view-entity>
+    <view-entity entity-name="FacilityAndOwnerRoleDetail" package="mantle.facility">
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PTRL" entity-name="mantle.party.PartyRole" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="FAC"/>
+        <alias-all entity-alias="PTY"><exclude field="pseudoId"/><exclude field="ownerPartyId"/><exclude field="externalId"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias name="partyPseudoId" entity-alias="PTY" field="pseudoId"/>
+        <alias name="roleTypeId" entity-alias="PTRL"/>
+    </view-entity>
+    <view-entity entity-name="FacilityAndGlAppl" package="mantle.facility">
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="FGLA" entity-name="mantle.facility.FacilityGlAppl" join-from-alias="FAC">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="FPTY" entity-name="mantle.facility.FacilityParty" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="facilityId"/></member-entity>
+        <alias-all entity-alias="FAC"/>
+        <alias-all entity-alias="FGLA"/>
+        <alias-all entity-alias="FPTY"/>
+    </view-entity>
+    <view-entity entity-name="FacilityGlApplAccountOrg" package="mantle.facility">
+        <member-entity entity-alias="GLACT" entity-name="mantle.ledger.account.GlAccount"/>
+        <member-entity entity-alias="GLAO" entity-name="mantle.ledger.account.GlAccountOrganization" join-from-alias="GLACT">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="FGLA" entity-name="mantle.facility.FacilityGlAppl" join-from-alias="GLACT" join-optional="true">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="GLEA" entity-name="mantle.ledger.account.GlAccountEnumAppl" join-from-alias="GLACT" join-optional="true">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="FGLA">
+            <entity-condition><econditions combine="or">
+                <econdition entity-alias="FGLA" field-name="facilityId" to-entity-alias="FAC" to-field-name="facilityId"/>
+                <econdition entity-alias="GLEA" field-name="enumId" to-entity-alias="FAC" to-field-name="facilityTypeEnumId"/>
+            </econditions></entity-condition>
+        </member-entity>
+        <member-entity entity-alias="FPTY" entity-name="mantle.facility.FacilityParty" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="facilityId"/></member-entity>
+        <alias-all entity-alias="GLACT"><exclude field="description"/></alias-all>
+        <alias-all entity-alias="GLAO"/>
+        <alias-all entity-alias="FAC"><exclude field="externalId"/></alias-all>
+        <alias name="joinFacilityId" entity-alias="FGLA" field="facilityId"/>
+        <alias name="joinEnumId" entity-alias="GLEA" field="enumId"/>
+        <alias name="facilityPartyId" entity-alias="FPTY" field="partyId"/>
+        <alias name="facilityRoleTypeId" entity-alias="FPTY" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="FacilityAndParty" package="mantle.facility">
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="FPTY" entity-name="mantle.facility.FacilityParty" join-from-alias="FAC" join-optional="true">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="FPTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="FAC"/>
+        <alias-all entity-alias="FPTY"/>
+        <alias entity-alias="ORG" name="organizationName"/>
+    </view-entity>
+    <view-entity entity-name="FacilityAndPartyDetail" package="mantle.facility">
+        <description>Joins against Facility and Facility Party (Excludes Owner Party).</description>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="FPTY" entity-name="mantle.facility.FacilityParty" join-from-alias="FAC">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="FPTY">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PTRL" entity-name="mantle.party.PartyRole" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="FAC"/>
+        <alias-all entity-alias="FPTY" prefix="facilityParty">
+            <exclude field="partyId"/>
+            <exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="PTY"><exclude field="pseudoId"/><exclude field="ownerPartyId"/><exclude field="externalId"/></alias-all>
+        <alias entity-alias="FPTY" name="facilityPartyId" field="partyId"/>
+        <alias entity-alias="PTY" name="partyPseudoId" field="pseudoId"/>
+        <alias entity-alias="PTRL" name="roleTypeId"/>
+        <alias entity-alias="PER" name="firstName"/>
+        <alias entity-alias="PER" name="middleName"/>
+        <alias entity-alias="PER" name="lastName"/>
+        <alias entity-alias="PER" name="suffix"/>
+        <alias entity-alias="ORG" name="organizationName"/>
+    </view-entity>
+
+    <view-entity entity-name="FacilityBoxTypeDetail" package="mantle.facility">
+        <member-entity entity-alias="FABT" entity-name="mantle.facility.FacilityBoxType"/>
+        <member-relationship entity-alias="SBT" join-from-alias="FABT" relationship="boxType"/>
+        <alias-all entity-alias="FABT"/>
+        <alias-all entity-alias="SBT"/>
+    </view-entity>
+    <view-entity entity-name="FacilityPrinterDetail" package="mantle.facility">
+        <member-entity entity-alias="FACP" entity-name="mantle.facility.FacilityPrinter"/>
+        <member-entity entity-alias="NPTR" entity-name="moqui.basic.print.NetworkPrinter" join-from-alias="FACP">
+            <key-map field-name="networkPrinterId"/></member-entity>
+        <alias-all entity-alias="FACP"/>
+        <alias-all entity-alias="NPTR"/>
+    </view-entity>
+    <view-entity entity-name="FacilityLocationDetail" package="mantle.facility">
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility"/>
+        <member-entity entity-alias="FLOC" entity-name="mantle.facility.FacilityLocation" join-from-alias="FAC">
+            <key-map field-name="facilityId"/>
+        </member-entity>
+        <alias-all entity-alias="FAC">
+            <exclude field="description"/>
+            <exclude field="geoPointId"/>
+        </alias-all>
+        <alias-all entity-alias="FLOC"/>
+        <alias name="facilityDescription" entity-alias="FAC" field="description"/>
+        <alias name="facilityGeoPointId" entity-alias="FAC" field="geoPointId"/>
+    </view-entity>
+    <view-entity entity-name="ProductFacilityLocationDetail" package="mantle.facility">
+        <member-entity entity-alias="PFL" entity-name="mantle.facility.ProductFacilityLocation"/>
+        <member-entity entity-alias="FLOC" entity-name="mantle.facility.FacilityLocation" join-from-alias="PFL">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <alias-all entity-alias="PFL"/>
+        <alias-all entity-alias="FLOC"/>
+    </view-entity>
+
+    <view-entity entity-name="FacilityContactMechInfo" package="mantle.facility">
+        <member-entity entity-alias="FCM" entity-name="mantle.facility.FacilityContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="FCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="FCM"/>
+        <alias-all entity-alias="CM"/>
+    </view-entity>
+    <view-entity entity-name="FacilityContactMechPostalAddress" package="mantle.facility">
+        <member-entity entity-alias="FCM" entity-name="mantle.facility.FacilityContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="FCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="PA" entity-name="mantle.party.contact.PostalAddress" join-from-alias="FCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="STG" entity-name="moqui.basic.Geo" join-from-alias="PA" join-optional="true">
+            <key-map field-name="stateProvinceGeoId" related="geoId"/></member-entity>
+        <alias-all entity-alias="FCM"/>
+        <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="PA"/>
+        <alias entity-alias="STG" name="stateGeoName" field="geoName"/>
+        <alias entity-alias="STG" name="stateGeoCodeAlpha2" field="geoCodeAlpha2"/>
+        <alias entity-alias="STG" name="stateGeoCodeAlpha3" field="geoCodeAlpha3"/>
+    </view-entity>
+    <view-entity entity-name="FacilityContactMechTelecomNumber" package="mantle.facility">
+        <member-entity entity-alias="FCM" entity-name="mantle.facility.FacilityContactMech"/>
+        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech" join-from-alias="FCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <member-entity entity-alias="TN" entity-name="mantle.party.contact.TelecomNumber" join-from-alias="FCM">
+            <key-map field-name="contactMechId"/></member-entity>
+        <alias-all entity-alias="FCM"/>
+        <alias-all entity-alias="CM"/>
+        <alias-all entity-alias="TN"/>
+    </view-entity>
+
+    <view-entity entity-name="FacilityShippingSummary" package="mantle.facility">
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart"/>
+        <member-entity entity-alias="VNDRL" entity-name="mantle.party.PartyRole" join-from-alias="OPRT">
+            <key-map field-name="vendorPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="OPRT">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-relationship entity-alias="SMEN" join-from-alias="OPRT" relationship="shipmentMethod" join-optional="true"/>
+        <member-relationship entity-alias="OITM" join-from-alias="OPRT" relationship="items"/>
+        <alias-all entity-alias="FAC"/>
+        <alias name="shipmentMethodEnumId" entity-alias="OPRT"/>
+        <alias name="shipmentMethodSequenceNum" entity-alias="SMEN" field="sequenceNum"/>
+        <alias name="carrierPartyId" entity-alias="OPRT"/>
+        <alias name="vendorPartyId" entity-alias="OPRT"/>
+        <alias name="customerPartyId" entity-alias="OPRT"/>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="vendorRoleTypeId" entity-alias="VNDRL" field="roleTypeId"/>
+        <alias name="itemTypeEnumId" entity-alias="OITM"/>
+        <alias name="quantityTotal" entity-alias="OITM" field="quantity" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="FacilityShippingReservationSummary" package="mantle.facility">
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart"/>
+        <member-relationship entity-alias="SMEN" join-from-alias="OPRT" relationship="shipmentMethod" join-optional="true"/>
+        <member-relationship entity-alias="OITM" join-from-alias="OPRT" relationship="items"/>
+        <member-relationship entity-alias="ASR" join-from-alias="OITM" relationship="reservations"/>
+        <member-relationship entity-alias="AST" join-from-alias="ASR" relationship="asset"/>
+        <member-relationship entity-alias="FLOC" join-from-alias="AST" relationship="location" join-optional="true"/>
+        <alias name="facilityId" entity-alias="OPRT"/>
+        <alias name="shipmentMethodEnumId" entity-alias="OPRT"/>
+        <alias name="shipmentMethodSequenceNum" entity-alias="SMEN" field="sequenceNum"/>
+        <alias name="carrierPartyId" entity-alias="OPRT"/>
+        <alias name="vendorPartyId" entity-alias="OPRT"/>
+        <alias name="customerPartyId" entity-alias="OPRT"/>
+        <alias name="partStatusId" entity-alias="OPRT" field="statusId"/>
+        <alias name="locationTypeEnumId" entity-alias="FLOC"/>
+        <alias name="quantity" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotAvailable" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotIssued" entity-alias="ASR" function="sum"/>
+    </view-entity>
+</entities>

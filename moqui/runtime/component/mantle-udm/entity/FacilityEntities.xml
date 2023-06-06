@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.facility -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="Facility" package="mantle.facility" short-alias="facilities">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="pseudoId" type="text-short" default="facilityId"/>
+        <field name="facilityTypeEnumId" type="id"/>
+        <field name="parentFacilityId" type="id"/>
+        <field name="statusId" type="id"/>
+        <field name="ownerPartyId" type="id" enable-audit-log="update"/>
+        <field name="facilityName" type="text-medium"/>
+        <field name="facilitySize" type="number-decimal"/>
+        <field name="facilitySizeUomId" type="id"/>
+        <field name="openedDate" type="date-time"/>
+        <field name="closedDate" type="date-time"/>
+        <field name="description" type="text-medium"/>
+        <field name="geoId" type="id"><description>A geographic boundary describing the area of the facility (not a geographic boundary like a state that the facility is in).</description></field>
+        <field name="geoPointId" type="id"/>
+        <field name="countyGeoId" type="id"/>
+        <field name="stateGeoId" type="id"/>
+        <field name="assetAllowOtherOwner" type="text-indicator"/>
+        <field name="assetAllowIssueOverQoh" type="text-indicator"/>
+        <field name="assetInventoryLocRequire" type="text-indicator"/>
+        <field name="defaultDaysToShip" type="number-integer"/>
+        <field name="externalId" type="text-short"><description>ID for the Facility in the direct upstream system it came from if it came from an external system</description></field>
+        <field name="originId" type="text-short"><description>ID for the Facility in the original system it came from (system of record) if not the direct upstream system</description></field>
+
+        <relationship type="one" title="FacilityType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="facilityTypeEnumId"/></relationship>
+        <relationship type="one" title="Parent" related="mantle.facility.Facility" short-alias="parent">
+            <key-map field-name="parentFacilityId" related="facilityId"/></relationship>
+        <relationship type="one" title="Facility" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId"/></relationship>
+        <relationship type="one-nofk" title="Owner" related="mantle.party.Organization" short-alias="ownerOrganization">
+            <key-map field-name="ownerPartyId"/></relationship>
+        <relationship type="one-nofk" title="Owner" related="mantle.party.Person" short-alias="ownerPerson">
+            <key-map field-name="ownerPartyId"/></relationship>
+        <relationship type="one" title="FacilitySize" related="moqui.basic.Uom" short-alias="sizeUom">
+            <key-map field-name="facilitySizeUomId"/></relationship>
+        <relationship type="one" related="moqui.basic.Geo" short-alias="geo"/>
+        <relationship type="one" related="moqui.basic.GeoPoint" short-alias="geoPoint"/>
+        <relationship type="one" title="County" related="moqui.basic.Geo" short-alias="countyGeo">
+            <key-map field-name="countyGeoId"/></relationship>
+        <relationship type="one" title="State" related="moqui.basic.Geo" short-alias="stateGeo">
+            <key-map field-name="stateGeoId"/></relationship>
+
+        <relationship type="many" related="mantle.facility.FacilityCertification" short-alias="certifications">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityContactMech" short-alias="contactMechs">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityContent" short-alias="contents">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityGlAppl" short-alias="glAppls">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityGroupMember" short-alias="groups">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityLocation" short-alias="locations">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityLocationType" short-alias="locationTypes">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityNote" short-alias="notes">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityParty" short-alias="parties">
+            <key-map field-name="facilityId"/></relationship>
+        <relationship type="many" related="mantle.facility.FacilityPrinter" short-alias="printers">
+            <key-map field-name="facilityId"/></relationship>
+
+        <index name="FACILITY_ID_PSEUDO" unique="true"><index-field name="pseudoId"/></index>
+
+        <seed-data>
+            <!-- Facility Type -->
+            <moqui.basic.EnumerationType description="Facility Type" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Block" enumId="FcTpBlock" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Block Group" enumId="FcTpBlockGroup" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Building" enumId="FcTpBuilding" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Land" enumId="FcTpLand" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Floor" enumId="FcTpFloor" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Office" enumId="FcTpOffice" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Call Center" enumId="FcTpCallCenter" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Data Center" enumId="FcTpDataCenter" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Plant" enumId="FcTpPlant" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Room" enumId="FcTpRoom" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Retail Store" enumId="FcTpRetailStore" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Warehouse" enumId="FcTpWarehouse" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Dock" enumId="FcTpDock" enumTypeId="FacilityType"/>
+            <moqui.basic.Enumeration description="Production Line" enumId="FcTpLine" enumTypeId="FacilityType"/>
+
+            <!-- Facility Status -->
+            <moqui.basic.StatusType description="Facility" statusTypeId="Facility"/>
+        </seed-data>
+        <master>
+            <detail relationship="type"/><detail relationship="parent"/><detail relationship="status"/>
+            <detail relationship="owner" use-master="basic"/>
+            <detail relationship="sizeUom"/><detail relationship="geo"/><detail relationship="geoPoint"/>
+
+            <detail relationship="certifications"/>
+            <detail relationship="contactMechs">
+                <detail relationship="contactMech" use-master="default"/>
+                <detail relationship="purpose"/>
+            </detail>
+            <detail relationship="contents"/>
+            <detail relationship="groups"><detail relationship="group"/></detail>
+            <!-- NOTE: could be lots of these, leave out to get separately: <detail relationship="locations"/> -->
+            <detail relationship="notes"/>
+            <detail relationship="parties">
+                <detail relationship="party" use-master="basic"/>
+                <detail relationship="role"/>
+            </detail>
+            <detail relationship="printers"><detail relationship="printer"/></detail>
+        </master>
+    </entity>
+
+    <entity entity-name="FacilityBoxType" package="mantle.facility" cache="true">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="shipmentBoxTypeId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.shipment.ShipmentBoxType" short-alias="boxType"/>
+    </entity>
+    <entity entity-name="FacilityCertification" package="mantle.facility" cache="never">
+        <field name="facilityCertificationId" type="id" is-pk="true"/>
+        <field name="facilityId" type="id"/>
+        <field name="certificationTypeEnumId" type="id"/>
+        <field name="fromDate" type="date"/>
+        <field name="thruDate" type="date"/>
+        <field name="contactPartyId" type="id"/>
+        <field name="auditorPartyId" type="id"/>
+        <field name="auditorOrgPartyId" type="id"/>
+        <field name="auditStartDate" type="date-time"/>
+        <field name="auditEndDate" type="date-time"/>
+        <field name="auditScore" type="text-short"/>
+        <field name="certRegistrationId" type="text-short"/>
+        <field name="otherCertId" type="text-short"/>
+        <field name="documentLocation" type="text-medium"/>
+
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" title="FacilityCertificationType" related="moqui.basic.Enumeration">
+            <key-map field-name="certificationTypeEnumId"/></relationship>
+        <relationship type="one" title="Contact" related="mantle.party.Party">
+            <key-map field-name="contactPartyId"/></relationship>
+        <relationship type="one" title="Auditor" related="mantle.party.Party">
+            <key-map field-name="auditorPartyId"/></relationship>
+        <relationship type="one" title="AuditorOrg" related="mantle.party.Party">
+            <key-map field-name="auditorOrgPartyId"/></relationship>
+
+        <seed-data>
+            <moqui.basic.EnumerationType description="Facility Certification Type" enumTypeId="FacilityCertificationType"/>
+        </seed-data>
+    </entity>
+
+    <entity entity-name="FacilityContactMech" package="mantle.facility" cache="never">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="contactMechId" type="id" is-pk="true"/>
+        <field name="contactMechPurposeId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="extension" type="text-short"/>
+        <field name="comments" type="text-medium"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.party.contact.ContactMech" short-alias="contactMech"/>
+        <relationship type="one" related="mantle.party.contact.ContactMechPurpose" short-alias="purpose"/>
+        <relationship type="one-nofk" related="mantle.party.contact.PostalAddress" short-alias="postalAddress"/>
+        <relationship type="one-nofk" related="mantle.party.contact.TelecomNumber" short-alias="telecomNumber"/>
+    </entity>
+    <entity entity-name="FacilityContent" package="mantle.facility" cache="never">
+        <field name="facilityContentId" type="id" is-pk="true"/>
+        <field name="facilityId" type="id"/>
+        <field name="contentLocation" type="text-medium"/>
+        <field name="facilityContentTypeEnumId" type="id"/>
+        <field name="contentDate" type="date-time" default="ec.user.nowTimestamp"/>
+        <relationship type="one" related="mantle.facility.Facility"/>
+        <relationship type="one" title="FacilityContentType" related="moqui.basic.Enumeration">
+            <key-map field-name="facilityContentTypeEnumId"/></relationship>
+        <seed-data>
+            <!-- Facility Content Type -->
+            <moqui.basic.EnumerationType description="Facility Content Type" enumTypeId="FacilityContentType"/>
+            <moqui.basic.Enumeration description="Internal Content" enumId="FcntInternal" enumTypeId="FacilityContentType"/>
+            <moqui.basic.Enumeration description="User Defined Content"  enumId="FcntUserDefined" enumTypeId="FacilityContentType"/>
+            <moqui.basic.Enumeration description="Image URL"  enumId="FcntImageUrl" enumTypeId="FacilityContentType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="FacilityGlAppl" package="mantle.facility" cache="never">
+        <description>Used to specify relevant GL Accounts for a Facility (expense, revenue, etc); not related to posting conf</description>
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="glAccountId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.ledger.account.GlAccount" short-alias="glAccount"/>
+    </entity>
+
+    <entity entity-name="FacilityGroup" package="mantle.facility" short-alias="facilityGroups">
+        <field name="facilityGroupId" type="id" is-pk="true"/>
+        <field name="parentGroupId" type="id"/>
+        <field name="facilityGroupTypeEnumId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <relationship type="one" title="Parent" related="mantle.facility.FacilityGroup">
+            <key-map field-name="parentGroupId" related="facilityGroupId"/></relationship>
+        <relationship type="one" title="FacilityGroupType" related="moqui.basic.Enumeration">
+            <key-map field-name="facilityGroupTypeEnumId"/></relationship>
+        <seed-data>
+            <!-- Facility Group Type -->
+            <moqui.basic.EnumerationType description="Facility Group Type" enumTypeId="FacilityGroupType"/>
+            <moqui.basic.Enumeration description="Management Structure" enumId="MGMT_STRUCTURE" enumTypeId="FacilityGroupType"/>
+            <moqui.basic.Enumeration description="Pricing Group" enumId="PRICING_GROUP" enumTypeId="FacilityGroupType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="FacilityGroupMember" package="mantle.facility">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="facilityGroupId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="sequenceNum" type="number-integer"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.facility.FacilityGroup" short-alias="group"/>
+    </entity>
+    <entity entity-name="FacilityGroupParty" package="mantle.facility">
+        <field name="facilityGroupId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.facility.FacilityGroup" short-alias="group"/>
+        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
+        <relationship type="one" related="mantle.party.RoleType" short-alias="role"/>
+    </entity>
+    <entity entity-name="FacilityLocation" package="mantle.facility">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="locationSeqId" type="id" is-pk="true"/>
+        <field name="locationTypeEnumId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <field name="areaId" type="id"/>
+        <field name="aisleId" type="id"/>
+        <field name="sectionId" type="id"/>
+        <field name="levelId" type="id"/>
+        <field name="positionId" type="id"/>
+        <field name="geoPointId" type="id" enable-audit-log="true"/>
+        <field name="capacity" type="number-decimal"/>
+        <field name="capacityUomId" type="id"/>
+        <field name="sequenceNum" type="number-integer">
+            <description>For pick, etc sort by this then by area, aisle, section, level, position</description></field>
+        <relationship type="one" related="mantle.facility.Facility"/>
+        <relationship type="one" title="FacilityLocationType" related="moqui.basic.Enumeration" short-alias="type">
+            <key-map field-name="locationTypeEnumId"/></relationship>
+        <relationship type="one" related="moqui.basic.GeoPoint" short-alias="geoPoint"/>
+        <relationship type="one" title="Capacity" related="moqui.basic.Uom" short-alias="capacityUom">
+            <key-map field-name="capacityUomId"/></relationship>
+        <relationship type="many" related="mantle.product.asset.Asset" short-alias="AssetLocation">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/>
+            </relationship>
+        <seed-data>
+            <!-- Facility Location Type -->
+            <moqui.basic.EnumerationType description="Facility Location Type" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Pick" enumId="FltPick" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Bulk" enumId="FltBulk" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Receiving" enumId="FltReceiving" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Staging" enumId="FltStaging" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Quarantine" enumId="FltQuarantine" enumTypeId="FacilityLocationType"/>
+            <moqui.basic.Enumeration description="Morgue" enumId="FltMorgue" enumTypeId="FacilityLocationType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="FacilityLocationType" package="mantle.facility">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="locationTypeEnumId" type="id" is-pk="true"/>
+        <field name="autoStatusId" type="id" enable-audit-log="update"/>
+        <relationship type="one" related="mantle.facility.Facility"/>
+        <relationship type="one" title="FacilityLocationType" related="moqui.basic.Enumeration" short-alias="locationTypeEnum">
+            <key-map field-name="locationTypeEnumId"/></relationship>
+        <relationship type="one" title="Asset" related="moqui.basic.StatusItem" short-alias="autoStatusItem">
+            <key-map field-name="autoStatusId"/></relationship>
+    </entity>
+    <entity entity-name="FacilityNote" package="mantle.facility" cache="never">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="noteDate" type="date-time" is-pk="true"/>
+        <field name="userId" type="id"/>
+        <field name="noteText" type="text-very-long"/>
+        <relationship type="one" related="mantle.facility.Facility"/>
+        <relationship type="one" related="moqui.security.UserAccount"/>
+    </entity>
+    <entity entity-name="FacilityParty" package="mantle.facility" cache="never">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
+        <relationship type="one" related="mantle.party.RoleType" short-alias="role"/>
+    </entity>
+    <entity entity-name="FacilityPrinter" package="mantle.facility">
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="printerPurposeEnumId" type="id" is-pk="true"/>
+        <field name="networkPrinterId" type="id"/>
+        <relationship type="one" related="mantle.facility.Facility"/>
+        <relationship type="one" title="PrinterPurpose" related="moqui.basic.Enumeration" short-alias="purpose">
+            <key-map field-name="printerPurposeEnumId"/></relationship>
+        <relationship type="one" related="moqui.basic.print.NetworkPrinter" short-alias="printer"/>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Printer Purpose" enumTypeId="PrinterPurpose"/>
+            <moqui.basic.Enumeration description="Container Label" enumId="PtpContainerLabel" enumTypeId="PrinterPurpose"/>
+            <moqui.basic.Enumeration description="Package Label" enumId="PtpPackageLabel" enumTypeId="PrinterPurpose"/>
+            <moqui.basic.Enumeration description="Picking Documents" enumId="PtpPickingDocuments" enumTypeId="PrinterPurpose"/>
+            <moqui.basic.Enumeration description="Packing Documents" enumId="PtpPackingDocuments" enumTypeId="PrinterPurpose"/>
+            <moqui.basic.Enumeration description="Shipment Documents" enumId="PtpShipmentDocuments" enumTypeId="PrinterPurpose"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="ProductFacility" package="mantle.facility" cache="never">
+        <field name="productId" type="id" is-pk="true"/>
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="minimumStock" type="number-decimal"/>
+        <field name="reorderQuantity" type="number-decimal"/>
+        <field name="daysToShip" type="number-integer"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+    </entity>
+    <entity entity-name="ProductFacilityLocation" package="mantle.facility" cache="never">
+        <field name="productId" type="id" is-pk="true"/>
+        <field name="facilityId" type="id" is-pk="true"/>
+        <field name="locationSeqId" type="id" is-pk="true"/>
+        <field name="minimumStock" type="number-decimal"/>
+        <field name="moveQuantity" type="number-decimal"/>
+        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
+        <relationship type="one" related="mantle.facility.FacilityLocation" short-alias="location">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></relationship>
+    </entity>
+</entities>

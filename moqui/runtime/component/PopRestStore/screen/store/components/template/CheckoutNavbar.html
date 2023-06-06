@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-md navbar-dark order-navbar bg-dark">
+    <div class="d-flex flex-column moqui-navbar order-navbar">
+  	    <div class="container d-flex flex-row main-navbar">
+            <a class="navbar-brand" href="/">
+                <img class="moqui-logo" src="/getLogo" alt="">
+                <span class="font-italic order-navbar-title">Checkout</span>
+            </a>
+            <div class="navbar-collapse collapse" id="nav_collapse">
+                <ul class="navbar-nav ml-auto">
+                    <span class="order-navbar-circle" :class="{ 'order-navbar-circle-red': isCurrentStep(STEP_ADDRESS), 'order-navbar-circle-blue': isCompleteStep(STEP_ADDRESS) }">
+                         <span v-if="isIncompleteStep(STEP_ADDRESS)">1</span>
+                         <span v-if="isCompleteStep(STEP_ADDRESS)"><i class="fa fa-check"></i></span>
+                         <span class="order-navbar-text" :class="{ 'order-navbar-text-red': isCurrentStep(STEP_ADDRESS), 'order-navbar-text-blue': isCompleteStep(STEP_ADDRESS) }">Address</span>
+                    </span>
+                    <hr width="100px" class="order-navbar-hr align-middle">
+                    <span class="order-navbar-circle" :class="{ 'order-navbar-circle-red': isCurrentStep(STEP_SHIPPING), 'order-navbar-circle-blue': isCompleteStep(STEP_SHIPPING) }">
+                        <span v-if="isIncompleteStep(STEP_SHIPPING)">2</span>
+                        <span v-if="isCompleteStep(STEP_SHIPPING)"><i class="fa fa-check"></i></span>
+                        <span class="order-navbar-text" :class="{ 'order-navbar-text-red': isCurrentStep(STEP_SHIPPING), 'order-navbar-text-blue': isCompleteStep(STEP_SHIPPING) }">Shipping</span>
+                    </span> 
+                    <hr width="100px" class="order-navbar-hr">
+                    <span class="order-navbar-circle" :class="{ 'order-navbar-circle-red': isCurrentStep(STEP_BILLING), 'order-navbar-circle-blue': isCompleteStep(STEP_BILLING) }">
+                        <span v-if="isIncompleteStep(STEP_BILLING)">3</span>
+                        <span v-if="isCompleteStep(STEP_BILLING)"><i class="fa fa-check"></i></span>
+                        <span class="order-navbar-text" :class="{ 'order-navbar-text-red': isCurrentStep(STEP_BILLING), 'order-navbar-text-blue': isCompleteStep(STEP_BILLING) }">Payment</span>
+                    </span>
+                    <hr width="100px" class="order-navbar-hr">
+                    <span class="order-navbar-circle" :class="{ 'order-navbar-circle-red': isCurrentStep(STEP_REVIEW), 'order-navbar-circle-blue': isCompleteStep(STEP_REVIEW) }">
+                        <span v-if="isIncompleteStep(STEP_REVIEW)">4</span>
+                        <span v-if="isCompleteStep(STEP_REVIEW)"><i class="fa fa-check"></i></span>
+                        <span class="order-navbar-text" :class="{ 'order-navbar-text-red': isCurrentStep(STEP_REVIEW), 'order-navbar-text-blue': isCompleteStep(STEP_REVIEW) }">Complete</span>
+                    </span>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

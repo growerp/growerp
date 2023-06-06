@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any 
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="RelatedCompanyAndOwner"><!-- internal use only -->
+        <in-parameters>
+            <parameter name="userPartyId"/><!-- of this particular user, optional -->
+        </in-parameters>
+        <out-parameters>            
+            <parameter name="userPartyId"/><!-- logged in user -->
+            <parameter name="ownerPartyId"/><!-- the ownerPartyId of the CompanyPartyId party record -->
+            <parameter name="companyPartyId"/><!-- the company of the user (when part of the ownercompany, the same) -->
+        </out-parameters>
+        <actions>
+            <if condition="!userPartyId">
+                <if condition="ec.user &amp;&amp; ec.user?.userAccount?.partyId">
+                    <set field="userPartyId" from="ec.user.userAccount.partyId" />
+                    <else>
+                        <return message="No user Provided and not logged in"/>
+                    </else>
+                </if>
+            </if>
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                    list="relList" limit="1">
+                <econdition field-name="userPartyId"/>
+                <select-field field-name="companyPartyId,ownerPartyId"/></entity-find>
+            <if condition="relList">
+                <set field="companyPartyId" from="relList[0].companyPartyId" />
+                <set field="ownerPartyId" from="relList[0].ownerPartyId"/>
+            <else>
+                <return message="User $userPartyId not found!"/></else></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="Stats">
+        <description>get statistics</description>
+        <out-parameters><parameter name="stats"/></out-parameters>
+        <actions>
+            <service-call 
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context"/>
+            <if condition="!ownerPartyId">
+                <set field="ownerPartyId" from="companyPartyId"/></if>
+            <entity-find-one entity-name="growerp.general.Statistics" value-field="st">
+                <field-map field-name="ownerPartyId"/></entity-find-one>
+            <entity-find-count count-field="myOpportunities"
+                entity-name="mantle.sales.opportunity.SalesOpportunity">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="opportunityStageId"
+                    operator="not-equals" value="Deleted"/>
+                <econdition field-name="accountPartyId"
+                    from="ec.user.userAccount.partyId"/>
+            </entity-find-count>
+
+            <if condition="st">
+            <set field="stats" from="[
+                admins: st.admins,
+                employees: st.employees,
+                suppliers: st.suppliers,
+                leads: st.leads,
+                customers: st.customers,
+                openSlsOrders: st.openSlsOrders,
+                openPurOrders: st.openPurOrders,
+                opportunities: st.opportunities,
+                myOpportunities: myOpportunities,
+                categories: st.categories,
+                products: st.products,
+                assets: st.assets,
+                salesInvoicesNotPaidCount:  st.salesInvoicesNotPaidCount,
+                salesInvoicesNotPaidAmount: st.salesInvoicesNotPaidAmount?.toString(),
+                purchInvoicesNotPaidCount:  st.purchInvoicesNotPaidCount,
+                purchInvoicesNotPaidAmount: st.purchInvoicesNotPaidAmount?.toString(),
+                allTasks: st.allTasks,
+                notInvoicedHours: st.notInvoicedHours,
+                outgoingShipments: outgoingShipments,
+                incomngShipments: incomingShipments,
+                whLocations: whLocations
+                ]"/>
+            </if>
+        </actions>
+    </service>
+
+
+    <service verb="get" noun="Statistics" authenticate="false">
+        <description>Job run by the job sheduler do not make pubic.</description>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="parties">
+                    <econdition field-name="roleTypeId" value="OrgInternal"/>
+                    <econdition field-name="disabled" value="N" or-null="true"/>
+            </entity-find>
+            <iterate list="parties" entry="party">
+                <set field="ownerPartyId" from="party.partyId"/>
+                <entity-find-count count-field="employees"
+                    entity-name="growerp.party.OwnerPersonDetailAndCompany">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="userDisabled" value="N" or-null="true"/>
+                    <econdition field-name="ownerDisabled" value="N" or-null="true"/>
+                    <econdition field-name="companyRole" value="OrgInternal"/>
+                </entity-find-count>
+                <entity-find-count count-field="leads"
+                    entity-name="mantle.party.PartyDetailAndRole">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="disabled" value="N" or-null="true"/>
+                    <econdition field-name="roleTypeId" value="Customer"/>
+                    <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED"/>
+                    <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
+                </entity-find-count>
+                <entity-find-count count-field="customers"
+                    entity-name="mantle.party.PartyDetailAndRole">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="disabled" value="N" or-null="true"/>
+                    <econdition field-name="roleTypeId" value="Customer"/>
+                    <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED"/>
+                    <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
+                </entity-find-count>
+                <entity-find-count count-field="suppliers"
+                    entity-name="mantle.party.PartyDetailAndRole">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="disabled" value="N" or-null="true"/>
+                    <econdition field-name="roleTypeId" value="Supplier"/>
+                    <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
+                </entity-find-count>
+
+                <entity-find-count entity-name="mantle.product.Product"
+                    count-field="products">
+                    <econditions combine="or">
+                        <econdition field-name="salesDiscontinuationDate"
+                            operator="is-null"/>
+                        <econdition field-name="salesDiscontinuationDate"
+                            operator="greater" from="ec.user.nowTimestamp"/>
+                    </econditions>
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find-count>
+                <entity-find-count entity-name="mantle.product.asset.Asset"
+                        count-field="assets">
+                    <econdition field-name="statusId"
+                        operator="not-equals" value="AstDeactivated"/>
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find-count>
+                <entity-find-count count-field="categories"
+                    entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
+                    <econdition field-name="ownerPartyId"/>
+                    <date-filter/>
+                </entity-find-count>
+                <entity-find-count count-field="opportunities"
+                    entity-name="mantle.sales.opportunity.SalesOpportunity">
+                    <econdition field-name="opportunityStageId"
+                        operator="not-equals" value="Deleted"/>
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find-count>
+                <entity-find-count entity-name="mantle.order.OrderPart"
+                    count-field="openSlsOrders">
+                    <econdition field-name="vendorPartyId" from="ownerPartyId"/>
+                </entity-find-count>
+                <entity-find-count entity-name="mantle.order.OrderPart"
+                    count-field="openPurOrders">
+                    <econdition field-name="customerPartyId" from="ownerPartyId"/>
+                </entity-find-count>
+                <entity-find entity-name="mantle.account.invoice.InvoiceSummary" list="allRecInvList" use-clone="true">
+                    <econdition field-name="fromPartyId" from="ownerPartyId"/>
+                    <econdition field-name="statusId" operator="in" value="InvoiceFinalized,InvoiceSent,InvoiceAcked"/>
+                    <select-field field-name="fromPartyId,invoiceCount,unpaidTotal,currencyUomId"/>
+                </entity-find>
+                <entity-find entity-name="mantle.account.invoice.InvoiceSummary" list="allPblInvList" use-clone="true">
+                    <econdition field-name="toPartyId" from="ownerPartyId"/>
+                    <econdition field-name="statusId" operator="in" value="InvoiceReceived,InvoiceApproved"/>
+                    <select-field field-name="toPartyId,invoiceCount,unpaidTotal,currencyUomId"/>
+                </entity-find>
+                <entity-find-count entity-name="growerp.task.TaskAndParties" count-field="allTasks">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                    <econdition field-name="statusId" operator="in"
+                        from="['WeApproved','WeInPlanning','WeInProgress']"/>
+                </entity-find-count>
+                <entity-find entity-name="mantle.work.time.TimeEntryAndWorkEffort" list="hours">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="invoiceId" operator="is-null"/>
+                    <select-field field-name="hours"/>
+                </entity-find>
+                <set field="notInvoicedHours" type="Integer" value="0"/>
+                <iterate list="hours" entry="hour">
+                    <set field="notInvoicedHours" from="notInvoicedHours + hour.hours"/>
+                </iterate>
+                <entity-find-count entity-name="mantle.shipment.ShipmentAndItemSource"
+                        count-field="outgoingShipments">
+                    <econdition field-name="fromPartyId" from="ownerPartyId"/>
+                    <econdition field-name="statusId" operator="in"
+                        from="['ShipInput','ShipScheduled','ShipPicked',
+                            'ShipPacked','Ship','Shipped']"/>
+                </entity-find-count>
+                <entity-find-count entity-name="mantle.shipment.ShipmentAndItemSource"
+                        count-field="incomingShipments">
+                    <econdition field-name="toPartyId" from="ownerPartyId"/>
+                    <econdition field-name="statusId" operator="in"
+                        from="['ShipInput','ShipScheduled','ShipPicked',
+                            'ShipPacked','Ship','Shipped']"/>
+                </entity-find-count>
+                <entity-find-count entity-name="mantle.product.asset.AssetLocationDetail"
+                        count-field="whLocations">
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find-count>
+                <service-call name="delete#growerp.general.Statistics">
+                    <field-map field-name="ownerPartyId"/></service-call>
+                <service-call name="create#growerp.general.Statistics"
+                    in-map="[
+                        ownerPartyId: ownerPartyId,
+                        admins: admins,
+                        employees: employees,
+                        suppliers: suppliers,
+                        leads: leads,
+                        customers: customers,
+                        openSlsOrders: openSlsOrders,
+                        openPurOrders: openPurOrders,
+                        opportunities: opportunities,
+                        categories: categories,
+                        products: products,
+                        assets: assets,
+                        salesInvoicesNotPaidCount:  allRecInvList
+                            ? allRecInvList[0].invoiceCount : '0',
+                        salesInvoicesNotPaidAmount: allRecInvList
+                            ? allRecInvList[0].unpaidTotal : '0.00',
+                        purchInvoicesNotPaidCount:  allPblInvList
+                            ? allPblInvList[0].invoiceCount : '0',
+                        purchInvoicesNotPaidAmount: allPblInvList
+                            ? allPblInvList[0].unpaidTotal : '0.00',
+                        allTasks: allTasks,
+                        notInvoicedHours: notInvoicedHours,
+                        incomingShipments: incomingShipments, 
+                        outgoingShipments: outgoingShipments,
+                        whLocations: whLocations
+                    ]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="check" noun="Ping" authenticate="anonymous-all" displayName="General Ping" >
+        <description>This service will return &quot;ok&quot; when the system is running, no login required</description>
+        <out-parameters>
+            <parameter name="ok"/>
+        </out-parameters>
+        <actions><set field="ok" value="ok"/></actions>
+    </service>
+
+    <service verb="get" noun="Authenticate">
+        <description>Get userlogin information when a proper Apikey is provided in the header</description>
+        <out-parameters>
+            <parameter name="authenticate" type="Map">
+                <parameter name="user" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="email"/>
+                    <parameter name="firstName"/>
+                    <parameter name="lastName"/>
+                    <parameter name="loginDisabled" type="bool"/>
+                    <parameter name="loginName"/>
+                    <parameter name="userGroupId"/>
+                    <parameter name="groupDescription"/>
+                    <parameter name="language"/>
+                    <parameter name="image"/>
+                    <parameter name="userId"/>
+                    <parameter name="locale"/>
+                    <parameter name="telephoneNr"/>
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId"/>
+                        <parameter name="name"/>
+                        <parameter name="email"/>
+                        <parameter name="role"/>
+                    </parameter>
+                </parameter>
+                <parameter name="company" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="name"/>
+                    <parameter name="role"/>
+                    <parameter name="email"/>
+                    <parameter name="currency" type="Map">
+                        <parameter name="currencyId"/>
+                        <parameter name="description"/>
+                    </parameter>
+                    <parameter name="vatPerc">
+                        <description>Percentage used for VAT if applicable</description></parameter>
+                    <parameter name="salesPerc">
+                        <description>Percentage used for sales tax</description></parameter>
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId"/>
+                        <parameter name="address1"/>
+                        <parameter name="address2"/>
+                        <parameter name="city"/>
+                        <parameter name="postalCode"/>
+                        <parameter name="province"/>
+                        <parameter name="provinceId"/>
+                        <parameter name="country"/>
+                        <parameter name="countryId"/>
+                    </parameter>
+                    <parameter name="image"/>
+                    <parameter name="paymentMethod">
+                        <parameter name="ccPaymentMethodId"/>
+                        <parameter name="ccDescription"/>
+                    </parameter>
+                    <parameter name="telephoneNr"/>
+                    <parameter name="employees" type="List">
+                        <parameter name="employee" type="Map">
+                            <parameter name="partyId"/>
+                            <parameter name="email"/>
+                            <parameter name="firstName"/>
+                            <parameter name="lastName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="apiKey"/>
+                <parameter name="sessionToken"/>
+                <parameter name="statistics" type="Map">
+                    <parameter name="admins"/>
+                    <parameter name="employees"/>
+                    <parameter name="suppliers"/>
+                    <parameter name="leads"/>
+                    <parameter name="customers"/>
+                    <parameter name="openSlsOrders"/>
+                    <parameter name="openPurOrders"/>
+                    <parameter name="opportunities"/>
+                    <parameter name="myOpportunities"/>
+                    <parameter name="categories"/>
+                    <parameter name="products"/>
+                    <parameter name="assets"/>
+                    <parameter name="salesInvoicesNotPaidCount"/>
+                    <parameter name="salesInvoicesNotPaidAmount"/>
+                    <parameter name="purchInvoicesNotPaidCount"/>
+                    <parameter name="purchInvoicesNotPaidAmount"/>
+                    <parameter name="allTasks"/>
+                    <parameter name="notInvoicedHours"/>
+                    <parameter name="outgoingShipments"/>
+                    <parameter name="incomngShipments"/>
+                    <parameter name="whLocations"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="authenticate" from="[:]"/>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="growerp.100.PartyServices100.get#User"
+                in-map="[userPartyId: userPartyId]" out-map="userInfo"/>
+            <set field="authenticate.user" from="userInfo.users[0]"/>
+            <service-call name="growerp.100.PartyServices100.get#Company" 
+                in-map="companyPartyId: companyPartyId" out-map="companyInfo"/>
+            <if condition="companyInfo.companies">
+                <set field="authenticate.company" from="companyInfo.companies[0]"/>
+            </if>
+            <set field="authenticate.apiKey" from="ec.user.getLoginKey()"/>
+            <set field="authenticate.moquiSessionToken" from="ec.web.sessionToken"/>
+            <service-call name="growerp.100.GeneralServices100.get#Stats"
+                out-map="authenticate"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CurrencyList" authenticate="anonymous-all">
+        <description>
+            Get currency list for registration.
+        </description>
+        <out-parameters>
+            <parameter name="currencyList" type="List">
+                <parameter name="description"/>
+                <parameter name="abbreviation"></parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.Uom" list="allCurrencyList">
+                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE"/><order-by field-name="description"/>
+            </entity-find>
+            <set field="currencyList" from="[]"/>
+            <iterate entry="currency" list="allCurrencyList">
+                <script>currencyList.add("${currency.description} [${currency.abbreviation}]")</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CountryList" authenticate="anonymous-all">
+        <description>
+            Get country list for registration.
+        </description>
+        <out-parameters>
+            <parameter name="countryList" type="List">
+                <parameter name="geoId"/>
+                <parameter name="geoName"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.Geo" list="allCountryList">
+                <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY"/><order-by field-name="description"/>
+            </entity-find>
+            <set field="countryList" from="[]"/>
+            <iterate entry="country" list="allCountryList">
+                <script>countryList.add("${country.geoName} [${country.geoId}]")</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="logout" noun="User" authenticate="anonymous-all">
+        <description>logout of the system</description>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="growerp.100.PartyServices100.get#User"
+                in-map="[userPartyId: userPartyId]" out-map="userInfo"/>
+                <if condition="userInfo.users"><set field="user" from="userInfo.users[0]"/></if>
+                <script>
+                    if (ec.user.username) { ec.user.logoutUser(); ec.web.sendTextResponse("successful") }
+                    else { ec.web.sendTextResponse("no_user") }
+                </script>
+        </actions>
+    </service>
+
+    <service verb="login" noun="User" authenticate="anonymous-all">
+        <description>service to return an apikey and user information if user/password ok, when not check for a reset password</description>
+        <in-parameters>
+            <parameter name="username" required="true">
+                <description>any name, can also be the entered email address</description></parameter>
+            <parameter name="password" required="true">
+                <description>A password which contains at least a numeric and special character</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="authenticate" type="Map">
+                <parameter name="user" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="email"/>
+                    <parameter name="firstName"/>
+                    <parameter name="lastName"/>
+                    <parameter name="loginDisabled" type="bool"/>
+                    <parameter name="loginName"/>
+                    <parameter name="userGroupId"/>
+                    <parameter name="groupDescription"/>
+                    <parameter name="language"/>
+                    <parameter name="image"/>
+                    <parameter name="userId"/>
+                    <parameter name="locale"/>
+                    <parameter name="telephoneNr"/>
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId"/>
+                        <parameter name="name"/>
+                        <parameter name="email"/>
+                        <parameter name="role"/>
+                    </parameter>
+                </parameter>
+                <parameter name="company" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="name"/>
+                    <parameter name="role"/>
+                    <parameter name="email"/>
+                    <parameter name="currency" type="Map">
+                        <parameter name="currencyId"/>
+                        <parameter name="description"/>
+                    </parameter>
+                    <parameter name="vatPerc">
+                        <description>Percentage used for VAT if applicable</description></parameter>
+                    <parameter name="salesPerc">
+                        <description>Percentage used for sales tax</description></parameter>
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId"/>
+                        <parameter name="address1"/>
+                        <parameter name="address2"/>
+                        <parameter name="city"/>
+                        <parameter name="postalCode"/>
+                        <parameter name="province"/>
+                        <parameter name="provinceId"/>
+                        <parameter name="country"/>
+                        <parameter name="countryId"/>
+                    </parameter>
+                    <parameter name="image"/>
+                    <parameter name="paymentMethod">
+                        <parameter name="ccPaymentMethodId"/>
+                        <parameter name="ccDescription"/>
+                    </parameter>
+                    <parameter name="telephoneNr"/>
+                </parameter>
+                <parameter name="apiKey"/>
+                <parameter name="sessionToken"/>
+                <parameter name="statistics" type="Map">
+                    <parameter name="admins"/>
+                    <parameter name="employees"/>
+                    <parameter name="suppliers"/>
+                    <parameter name="leads"/>
+                    <parameter name="customers"/>
+                    <parameter name="openSlsOrders"/>
+                    <parameter name="openPurOrders"/>
+                    <parameter name="opportunities"/>
+                    <parameter name="myOpportunities"/>
+                    <parameter name="categories"/>
+                    <parameter name="products"/>
+                    <parameter name="assets"/>
+                    <parameter name="salesInvoicesNotPaidCount"/>
+                    <parameter name="salesInvoicesNotPaidAmount"/>
+                    <parameter name="purchInvoicesNotPaidCount"/>
+                    <parameter name="purchInvoicesNotPaidAmount"/>
+                    <parameter name="allTasks"/>
+                    <parameter name="notInvoicedHours"/>
+                    <parameter name="outgoingShipments"/>
+                    <parameter name="incomngShipments"/>
+                    <parameter name="whLocations"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.security.UserAccount" 
+                    value-field="userAccount" cache="false">
+                <field-map field-name="username"/></entity-find-one>
+            <set field="oldPassword" from="password"/>
+            <if condition="!userAccount"><return error="true" 
+                    message="cannot find username: ${username}" public="true"/></if>
+            <script>
+                def token = new org.apache.shiro.authc.UsernamePasswordToken(
+                    (String) userAccount.username, (String) oldPassword)
+                def info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
+                    userAccount.username, userAccount.currentPassword,
+                    userAccount.passwordSalt ? new org.apache.shiro.util.SimpleByteSource(
+                        (String) userAccount.passwordSalt) : null, "moquiRealm")
+            </script>
+            <if condition="!userAccount.currentPassword || 
+                    !ec.ecfi.getCredentialsMatcher(userAccount.passwordHashType, 
+                    'Y'.equals(userAccount.passwordBase64)).doCredentialsMatch(token, info)">
+                <if condition="userAccount.resetPassword">
+                    <!-- try the resetPassword -->
+                    <script>
+                        info = new org.apache.shiro.authc.SimpleAuthenticationInfo(
+                            userAccount.username, userAccount.resetPassword,
+                            userAccount.passwordSalt 
+                                ? new org.apache.shiro.util.SimpleByteSource(
+                                        (String) userAccount.passwordSalt) 
+                                : null, "moquiRealm")
+                    </script>
+                    <if condition="ec.ecfi.getCredentialsMatcher(userAccount.passwordHashType,
+                         'Y'.equals(userAccount.passwordBase64)).doCredentialsMatch(token, info)">
+                        <set field="passwordChange" value="true"/>
+                    </if>
+                </if>
+            </if>
+
+            <if condition="passwordChange">
+                <set field="authenticate" from="[apiKey: 'passwordChange']"/>
+              <else>
+                <script>ec.user.loginUser(username, password)</script>
+                <service-call name="growerp.100.GeneralServices100.get#Authenticate"
+                     out-map="context"/>
+              </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="reset" noun="Password" authenticate="anonymous-all">
+        <description>will send a new password by email and will initiate a change password at login time</description>
+        <in-parameters>
+            <parameter name="username"/>
+        </in-parameters>
+        <actions>
+            <service-call name="org.moqui.impl.UserServices.reset#Password"
+                in-map="[username: username]"/>
+        </actions>
+    </service>
+
+     <service verb="update" noun="Password">
+         <description>Change the password of an account and re-enable also used with reset password logged off</description>
+        <in-parameters>
+            <parameter name="username" required="true"/>
+            <parameter name="newPassword" required="true"/>
+            <parameter name="oldPassword"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="authenticate" type="Map">
+                <parameter name="user" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="email"/>
+                    <parameter name="firstName"/>
+                    <parameter name="lastName"/>
+                    <parameter name="loginDisabled" type="bool"/>
+                    <parameter name="loginName"/>
+                    <parameter name="userGroupId"/>
+                    <parameter name="groupDescription"/>
+                    <parameter name="language"/>
+                    <parameter name="image"/>
+                    <parameter name="userId"/>
+                    <parameter name="locale"/>
+                    <parameter name="telephoneNr"/>
+                    <parameter name="company" type="Map">
+                        <parameter name="partyId"/>
+                        <parameter name="name"/>
+                        <parameter name="email"/>
+                        <parameter name="role"/>
+                    </parameter>
+                </parameter>
+                <parameter name="company" type="Map">
+                    <parameter name="partyId"/>
+                    <parameter name="name"/>
+                    <parameter name="role"/>
+                    <parameter name="email"/>
+                    <parameter name="currency" type="Map">
+                        <parameter name="currencyId"/>
+                        <parameter name="description"/>
+                    </parameter>
+                    <parameter name="vatPerc">
+                        <description>Percentage used for VAT if applicable</description></parameter>
+                    <parameter name="salesPerc">
+                        <description>Percentage used for sales tax</description></parameter>
+                    <parameter name="address" type="Map">
+                        <parameter name="addressId"/>
+                        <parameter name="address1"/>
+                        <parameter name="address2"/>
+                        <parameter name="city"/>
+                        <parameter name="postalCode"/>
+                        <parameter name="province"/>
+                        <parameter name="provinceId"/>
+                        <parameter name="country"/>
+                        <parameter name="countryId"/>
+                    </parameter>
+                    <parameter name="image"/>
+                    <parameter name="paymentMethod">
+                        <parameter name="ccPaymentMethodId"/>
+                        <parameter name="ccDescription"/>
+                    </parameter>
+                    <parameter name="telephoneNr"/>
+                    <parameter name="employees" type="List">
+                        <parameter name="employee" type="Map">
+                            <parameter name="partyId"/>
+                            <parameter name="email"/>
+                            <parameter name="firstName"/>
+                            <parameter name="lastName"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="apiKey"/>
+                <parameter name="sessionToken"/>
+                <parameter name="statistics" type="Map">
+                    <parameter name="admins"/>
+                    <parameter name="employees"/>
+                    <parameter name="suppliers"/>
+                    <parameter name="leads"/>
+                    <parameter name="customers"/>
+                    <parameter name="openSlsOrders"/>
+                    <parameter name="openPurOrders"/>
+                    <parameter name="opportunities"/>
+                    <parameter name="myOpportunities"/>
+                    <parameter name="categories"/>
+                    <parameter name="products"/>
+                    <parameter name="assets"/>
+                    <parameter name="salesInvoicesNotPaidCount"/>
+                    <parameter name="salesInvoicesNotPaidAmount"/>
+                    <parameter name="purchInvoicesNotPaidCount"/>
+                    <parameter name="purchInvoicesNotPaidAmount"/>
+                    <parameter name="allTasks"/>
+                    <parameter name="notInvoicedHours"/>
+                    <parameter name="outgoingShipments"/>
+                    <parameter name="incomngShipments"/>
+                    <parameter name="whLocations"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <if condition="ec.user.userAccount"><!-- only possible with a loggedin user -->
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                <!-- make sure that username is only searched for in the logged in user own company -->
+                <entity-find entity-name="growerp.mobile.CompanyPersonAndLogin" list="accounts">
+                    <econdition field-name="username"/>
+                    <econdition field-name="toPartyId" from="companyPartyId"/></entity-find>
+                <if condition="!accounts"><return error="true"
+                    message="cannot find username: ${username}" public="true"/></if>
+            </if>
+            <service-call name="org.moqui.impl.UserServices.update#Password"
+                 in-map="[username: username, oldPassword: oldPassword,
+                    newPassword: newPassword, newPasswordVerify: newPassword]"/>
+            <!-- enable useraccount -->
+            <service-call name="update#moqui.security.UserAccount"
+                    in-map="[username:username, disabled:'N', disabledDateTime:null,
+                    successiveFailedLogins:0]"/>
+            <script>ec.user.loginUser(username, newPassword)</script>
+            <service-call name="growerp.100.GeneralServices100.get#Authenticate"
+                    out-map="context"/>
+        </actions>
+    </service>
+
+</services>

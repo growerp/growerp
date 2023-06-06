@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-include="false" standalone="true">
+
+    <parameter name="userId" required="true"/>
+    <parameter name="factorId" required="true"/>
+
+    <transition name="verifyUserAuthcFactor">
+        <service-call name="org.moqui.impl.UserServices.validate#UserAuthcFactorCode"/>
+        <actions><if condition="!verified"><message type="danger">Authentication code is not valid</message></if></actions>
+        <default-response url=".."/>
+    </transition>
+    <!-- NOTE: use send#AuthcCodeEmail directly to skip username validation for admin use -->
+    <transition name="sendAuthcCodeEmail"><service-call name="org.moqui.impl.UserServices.send#AuthcCodeEmail" in-map="[factorId:factorId]"/>
+        <default-response url=".."/></transition>
+
+    <actions>
+        <entity-find-one entity-name="moqui.security.UserAuthcFactor" value-field="userAuthcFactor"/>
+    </actions>
+    <widgets>
+        <label text="Follow the Steps Below to Verify" type="h5"/>
+        <container type="ol">
+            <container type="li"><label text="Click on the button below to send a new code."/></container>
+            <container type="li"><label text="Check your email account for the message with the code. Don't forget to check spam, archive, trash, etc."/></container>
+            <container type="li"><label text="Come back to this dialog and input the code into the box below."/></container>
+        </container>
+        <form-single name="VerifyUserAuthcFactor" transition="verifyUserAuthcFactor">
+            <field name="userId" from="userId"><default-field><hidden/></default-field></field>
+            <field name="code" from="null"><default-field title="Single Use Code"><text-line size="10"/></default-field></field>
+            <field name="submit"><default-field><submit/></default-field></field>
+            <field-layout><field-row-big><field-ref name="code"/><field-ref name="submit"/></field-row-big></field-layout>
+        </form-single>
+
+        <link url="sendAuthcCodeEmail" text="Send new code to ${userAuthcFactor?.factorOption}"/>
+    </widgets>
+</screen>

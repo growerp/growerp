@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="clone" noun="Project">
+        <description>Meant for copying projects setup as template for copy then use, but can be used for any project</description>
+        <in-parameters>
+            <parameter name="baseWorkEffortId" required="true"/>
+            <parameter name="workEffortId" required="true"><matches regexp="[A-Za-z0-9]{1,8}"
+                    message="Project ID must be only letters and digits and between 1 and 8 characters long"/></parameter>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetProject"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="priority" type="Long"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+
+            <parameter name="deepClone" type="Boolean" default="true"/>
+            <parameter name="deepIdIsPrefix" type="Boolean" default="true"/>
+            <parameter name="clearDates" type="Boolean" default="true"/>
+            <parameter name="copyAssetAssign" type="Boolean" default="false"/>
+            <parameter name="copyAssetNeeded" type="Boolean" default="true"/>
+            <parameter name="copyAssoc" type="Boolean" default="false"/>
+            <parameter name="copyCommEvent" type="Boolean" default="false"/>
+            <parameter name="copyContactMech" type="Boolean" default="true"/>
+            <parameter name="copyContent" type="Boolean" default="true"/>
+            <parameter name="copyNote" type="Boolean" default="true"/>
+            <parameter name="copyParty" type="Boolean" default="true"/>
+            <parameter name="copyProduct" type="Boolean" default="true"/>
+            <parameter name="copySkillStandard" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <service-call name="mantle.work.WorkEffortServices.clone#WorkEffort" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Project">
+        <in-parameters>
+            <parameter name="workEffortId"><matches regexp="[A-Za-z0-9]{1,8}"
+                    message="Project ID must be only letters and digits and between 1 and 8 characters long"/></parameter>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetProject"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+
+            <parameter name="clientPartyId"/>
+            <parameter name="clientBillingPartyId"/>
+            <parameter name="clientManagerPartyId"/>
+            <parameter name="vendorPartyId"/>
+            <parameter name="vendorManagerPartyId"/>
+
+            <parameter name="assignToPartyId"/>
+            <parameter name="assignRoleTypeId" default-value="Assignee"/>
+            <parameter name="assignStatusId" default-value="WeptAssigned"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <if condition="estimatedStartDate != null &amp;&amp; estimatedCompletionDate != null &amp;&amp;
+                           estimatedCompletionDate &lt; estimatedStartDate">
+                <return error="true" message="Project date range is not valid."/>
+            </if>
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context" in-map="context"/>
+
+            <!-- always assign the user who creates the project as a manager -->
+            <if condition="!vendorManagerPartyId &amp;&amp; ec.user.userAccount?.partyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, partyId:ec.user.userAccount.partyId,
+                            roleTypeId:'Manager', fromDate:ec.user.nowTimestamp, statusId:'WeptAssigned']"/>
+            </if>
+
+            <if condition="clientPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId,
+                        partyId:clientPartyId, roleTypeId:'Customer', fromDate:ec.user.nowTimestamp]"/>
+            </if>
+            <if condition="clientBillingPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:clientBillingPartyId,
+                        roleTypeId:'ClientBilling', fromDate:ec.user.nowTimestamp, statusId:'WeptAssigned']"/>
+            </if>
+            <if condition="clientManagerPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:clientManagerPartyId,
+                        roleTypeId:'ClientManager', fromDate:ec.user.nowTimestamp, statusId:'WeptAssigned']"/>
+            </if>
+
+            <if condition="vendorPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:vendorPartyId,
+                        roleTypeId:'Vendor', fromDate:ec.user.nowTimestamp]"/>
+            </if>
+            <if condition="vendorManagerPartyId &amp;&amp; vendorManagerPartyId != ec.user.userAccount.partyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:vendorManagerPartyId,
+                        roleTypeId:'Manager', fromDate:ec.user.nowTimestamp, statusId:'WeptAssigned']"/>
+            </if>
+
+            <if condition="assignToPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:assignToPartyId,
+                        roleTypeId:assignRoleTypeId, fromDate:ec.user.nowTimestamp, statusId:assignStatusId]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="update" noun="Project">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk">
+                <exclude field-name="rootWorkEffortId"/></auto-parameters>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+
+            <parameter name="clientPartyId"/>
+            <parameter name="clientBillingPartyId"/>
+            <parameter name="clientManagerPartyId"/>
+            <parameter name="vendorPartyId"/>
+            <parameter name="managerPartyId"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="tasksList">
+                <econdition field-name="rootWorkEffortId" from="workEffortId"/>
+            </entity-find>
+            <if condition="estimatedStartDate != null &amp;&amp; estimatedCompletionDate != null &amp;&amp;
+                           estimatedCompletionDate &lt; estimatedStartDate">
+                <return error="true" message="Project date range is not valid."/>
+            </if>
+            <iterate list="tasksList" entry="task">
+                <if condition="estimatedStartDate &amp;&amp; task.actualStartDate &amp;&amp; estimatedStartDate &gt; task.actualStartDate">
+                    <return error="true" message="Project's new start date puts one or more tasks out of date range."/>
+                </if>
+                <if condition="estimatedCompletionDate &amp;&amp; task.actualStartDate &amp;&amp; estimatedCompletionDate &lt; task.actualStartDate">
+                    <return error="true" message="Project's new end date puts one or more tasks out of date range."/>
+                </if>
+            </iterate>
+            <if condition="!taskList">
+                <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntryList">
+                    <econdition field-name="workEffortId"/>
+                </entity-find>
+                <iterate list="timeEntryList" entry="timeEntry">
+                    <if condition="estimatedStartDate &amp;&amp; timeEntry.fromDate &amp;&amp; estimatedStartDate &gt; timeEntry.fromDate">
+                        <return error="true" message="Project's new start date puts one or more time entries out of date range."/>
+                    </if>
+                    <if condition="estimatedCompletionDate &amp;&amp; timeEntry.fromDate &amp;&amp; estimatedCompletionDate &lt; timeEntry.fromDate">
+                        <return error="true" message="Project's new end date puts one or more time entries out of date range."/>
+                    </if>
+                </iterate>
+            </if>
+            <service-call name="update#mantle.work.effort.WorkEffort" out-map="context" in-map="context"/>
+
+            <if condition="clientPartyId">
+                <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, roleTypeId:'Customer', newPartyId:clientPartyId]"/>
+            </if>
+            <if condition="clientBillingPartyId">
+                <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, roleTypeId:'ClientBilling',newPartyId:clientBillingPartyId, statusId:'WeptAssigned']"/>
+            </if>
+            <if condition="clientManagerPartyId">
+                <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, roleTypeId:'ClientManager', newPartyId:clientManagerPartyId, statusId:'WeptAssigned']"/>
+            </if>
+            <if condition="vendorPartyId">
+                <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, roleTypeId:'Vendor', newPartyId:vendorPartyId, statusId:'WeptAssigned']"/>
+            </if>
+            <if condition="managerPartyId">
+                <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                        in-map="[workEffortId:workEffortId, roleTypeId:'Manager', newPartyId:managerPartyId, statusId:'WeptAssigned']"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProjectStats">
+        <in-parameters>
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="workEffortId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="actualProfit" type="BigDecimal"/>
+            <parameter name="clientBudgetRemaining" type="BigDecimal"/>
+            <parameter name="clientBudgetUsedPercent" type="BigDecimal"/>
+            <parameter name="clientActualOverBudget" type="Boolean"/>
+
+            <parameter name="actualPlusRemainingTime" type="BigDecimal"/>
+            <parameter name="bestTimeEstimate" type="BigDecimal"/>
+            <parameter name="estimatedCompletePercent" type="BigDecimal"/>
+            <parameter name="estimatedRemainingPercent" type="BigDecimal"/>
+            <parameter name="estimatedActualPlusRemainingDiff" type="BigDecimal"/>
+            <parameter name="actualPlusRemainingOverEstimated" type="Boolean"/>
+
+            <parameter name="timeBudgetCompletePercent" type="BigDecimal"/>
+            <parameter name="timeBudgetRemainingPercent" type="BigDecimal"/>
+            <parameter name="timeBudgetActualPlusRemainingDiff" type="BigDecimal"/>
+            <parameter name="actualPlusRemainingOverTimeBudget" type="Boolean"/>
+
+            <parameter name="clientAverageHourCost" type="BigDecimal"/>
+            <parameter name="clientEstimatedCost" type="BigDecimal"/>
+            <parameter name="clientBudgetEstimateDiff" type="BigDecimal"/>
+
+            <parameter name="estimatedCompleteBudgetPercentGap" type="BigDecimal"/>
+            <parameter name="estimatedCompleteOverBudget" type="Boolean"/>
+
+            <parameter name="projectWarning" type="Boolean"/>
+            <parameter name="projectDanger" type="Boolean"/>
+
+            <parameter name="taskCount" type="Long"/>
+            <parameter name="taskCountByStatusMap" type="Map"/>
+        </out-parameters>
+        <actions>
+            <if condition="workEffort == null">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/></if>
+
+            <set field="actualProfit" from="(workEffort.actualClientCost ?: 0) - (workEffort.actualCost ?: 0)"/>
+            <set field="clientBudgetRemaining" from="(workEffort.totalClientCostAllowed ?: 0) - (workEffort.actualClientCost ?: 0)"/>
+            <set field="clientBudgetUsedPercent" from="workEffort.totalClientCostAllowed ? ((workEffort.actualClientCost ?: 0) / workEffort.totalClientCostAllowed) * 100 : 0"/>
+            <set field="clientActualOverBudget" from="workEffort.actualClientCost &gt; workEffort.totalClientCostAllowed &amp;&amp; workEffort.totalClientCostAllowed"/>
+
+            <set field="actualPlusRemainingTime" from="(workEffort.actualWorkTime ?: 0) + (workEffort.remainingWorkTime ?: 0)"/>
+            <set field="bestTimeEstimate" from="actualPlusRemainingTime &gt; workEffort.estimatedWorkTime ? actualPlusRemainingTime : workEffort.estimatedWorkTime "/>
+            <set field="estimatedCompletePercent" from="workEffort.estimatedWorkTime ? ((workEffort.actualWorkTime ?: 0) / workEffort.estimatedWorkTime) * 100 : 0"/>
+            <set field="estimatedRemainingPercent" from="workEffort.estimatedWorkTime ? ((workEffort.remainingWorkTime ?: 0) / workEffort.estimatedWorkTime) * 100 : 0"/>
+            <set field="estimatedActualPlusRemainingDiff" from="(workEffort.estimatedWorkTime ?: 0) - actualPlusRemainingTime"/>
+            <set field="actualPlusRemainingOverEstimated" from="actualPlusRemainingTime &gt; (workEffort.estimatedWorkTime ?: 0)"/>
+
+            <set field="timeBudgetCompletePercent" from="workEffort.totalTimeAllowed ? ((workEffort.actualWorkTime ?: 0) / workEffort.totalTimeAllowed) * 100 : 0"/>
+            <set field="timeBudgetRemainingPercent" from="workEffort.totalTimeAllowed ? ((workEffort.remainingWorkTime ?: 0) / workEffort.totalTimeAllowed) * 100 : 0"/>
+            <set field="timeBudgetActualPlusRemainingDiff" from="(workEffort.totalTimeAllowed ?: 0) - actualPlusRemainingTime"/>
+            <set field="actualPlusRemainingOverTimeBudget" from="actualPlusRemainingTime &gt; (workEffort.totalTimeAllowed ?: 0)"/>
+
+            <set field="clientAverageHourCost" from="workEffort.actualWorkTime ? ((workEffort.actualClientCost ?: 0) / workEffort.actualWorkTime) : 0"/>
+            <set field="clientEstimatedCost" from="clientAverageHourCost * bestTimeEstimate"/>
+            <set field="clientBudgetEstimateDiff" from="(workEffort.totalClientCostAllowed ?: 0) - clientEstimatedCost"/>
+
+            <set field="estimatedCompleteBudgetPercentGap" from="(estimatedCompletePercent ?: 0) - clientBudgetUsedPercent"/>
+            <set field="estimatedCompleteOverBudget" from="estimatedCompletePercent &lt; clientBudgetUsedPercent"/>
+
+            <set field="projectDanger" from="clientActualOverBudget | actualPlusRemainingOverEstimated"/>
+            <set field="projectWarning" from="estimatedCompleteOverBudget"/>
+
+            <entity-find-count entity-name="mantle.work.effort.WorkEffort" count-field="taskCount">
+                <econdition field-name="rootWorkEffortId" from="workEffort.workEffortId"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
+            </entity-find-count>
+            <entity-find entity-name="mantle.work.effort.ProjectTaskCounts" list="taskStatusCountList">
+                <econdition field-name="rootWorkEffortId" from="workEffort.workEffortId"/>
+                <select-field field-name="statusId"/><select-field field-name="taskCount"/>
+            </entity-find>
+            <set field="taskCountByStatusMap" from="[:]"/>
+            <iterate list="taskStatusCountList" entry="taskStatusCount">
+                <script>taskCountByStatusMap.put(taskStatusCount.statusId, taskStatusCount.taskCount)</script></iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProjectMilestoneSummary">
+        <description>Gets statistics for project milestones</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"><description>Project WorkEffort ID</description></parameter>
+            <parameter name="timePerDay" type="BigDecimal" default="8"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="milestoneStatsList" type="List"><parameter name="listEntry" type="Map">
+                <parameter name="workEffortId"/>
+                <parameter name="workEffortName"/>
+                <parameter name="estimatedStartDate"/>
+
+                <parameter name="estimatedWorkTime" type="BigDecimal"/>
+                <parameter name="estimatedSetupTime" type="BigDecimal"/>
+                <parameter name="remainingWorkTime" type="BigDecimal"/>
+                <parameter name="actualWorkTime" type="BigDecimal"/>
+                <parameter name="actualSetupTime" type="BigDecimal"/>
+                <parameter name="totalTimeAllowed" type="BigDecimal"/>
+
+                <parameter name="estimatedWorkDays" type="BigDecimal"/>
+                <parameter name="remainingWorkDays" type="BigDecimal"/>
+                <parameter name="actualWorkDays" type="BigDecimal"/>
+                <parameter name="totalTimeAllowedDays" type="BigDecimal"/>
+
+                <parameter name="workTimePercentComplete" type="BigDecimal"><description>(estimatedWorkTime-remainingWorkTime)/estimatedWorkTime</description></parameter>
+                <parameter name="workRemainingPercent" type="BigDecimal"><description>remainingWorkTime/estimatedWorkTime</description></parameter>
+                <parameter name="workActualPercent" type="BigDecimal"><description>actualWorkTime/estimatedWorkTime</description></parameter>
+                <parameter name="workActRemPercent" type="BigDecimal"><description>(actualWorkTime+remainingWorkTime)/estimatedWorkTime</description></parameter>
+
+                <parameter name="actualCost" type="BigDecimal"/>
+                <parameter name="actualClientCost" type="BigDecimal"/>
+                <parameter name="totalClientCostAllowed" type="BigDecimal"/>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <set field="statsFields" from="['estimatedWorkTime', 'estimatedSetupTime', 'remainingWorkTime',
+                    'actualWorkTime', 'actualSetupTime', 'totalTimeAllowed', 'actualCost', 'actualClientCost',
+                    'totalClientCostAllowed']"/>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="milestoneList">
+                <econdition field-name="rootWorkEffortId" from="workEffortId"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetMilestone"/>
+                <order-by field-name="estimatedStartDate,workEffortName"/>
+            </entity-find>
+
+            <set field="milestoneStatsTotals" from="[workEffortId: 'Total', workEffortName: '', estimatedStartDate: '']"/>
+            <script>for (String statsField in statsFields) milestoneStatsTotals.put(statsField, 0.0)</script>
+
+            <set field="milestoneStatsList" from="[]"/>
+            <iterate list="milestoneList" entry="milestone">
+                <set field="milestoneStats" from="[workEffortId:milestone.workEffortId, workEffortName:milestone.workEffortName,
+                                                   estimatedStartDate:milestone.estimatedStartDate]"/>
+                <entity-find entity-name="mantle.work.effort.MilestoneSummary" list="msSummaryList">
+                    <date-filter/><econdition field-name="workEffortId" from="milestone.workEffortId"/>
+                    <select-field field-name="estimatedWorkTime,estimatedSetupTime,remainingWorkTime,actualWorkTime,actualSetupTime,totalTimeAllowed,actualCost,actualClientCost,totalClientCostAllowed"/>
+                </entity-find>
+                <if condition="msSummaryList"><script>
+                    Map msSummary = msSummaryList.get(0)
+                    for (String statsField in statsFields) milestoneStats.put(statsField, msSummary.get(statsField) ?: 0.0)
+
+                    milestoneStats.estimatedWorkDays = milestoneStats.estimatedWorkTime / timePerDay
+                    milestoneStats.remainingWorkDays = milestoneStats.remainingWorkTime / timePerDay
+                    milestoneStats.actualWorkDays = milestoneStats.actualWorkTime / timePerDay
+                    milestoneStats.totalTimeAllowedDays = milestoneStats.totalTimeAllowed / timePerDay
+                    milestoneStats.workTimePercentComplete = milestoneStats.estimatedWorkTime ? ((milestoneStats.estimatedWorkTime - milestoneStats.remainingWorkTime) / milestoneStats.estimatedWorkTime) * 100 : 0.0
+                    milestoneStats.workRemainingPercent = milestoneStats.estimatedWorkTime ? (milestoneStats.remainingWorkTime / milestoneStats.estimatedWorkTime) * 100 : 0.0
+                    milestoneStats.workActualPercent = milestoneStats.estimatedWorkTime ? (milestoneStats.actualWorkTime / milestoneStats.estimatedWorkTime) * 100 : 0.0
+                    milestoneStats.workActRemPercent = milestoneStats.estimatedWorkTime ? ((milestoneStats.actualWorkTime + milestoneStats.remainingWorkTime) / milestoneStats.estimatedWorkTime) * 100 : 0.0
+
+                    milestoneStatsList.add(milestoneStats)
+
+                    // add current values to stats totals
+                    for (String statsField in statsFields) milestoneStatsTotals[statsField] += milestoneStats[statsField]
+                </script></if>
+            </iterate>
+            <script>
+                // add the totals Map to the end of the list
+                milestoneStatsTotals.estimatedWorkDays = milestoneStatsTotals.estimatedWorkTime / timePerDay
+                milestoneStatsTotals.remainingWorkDays = milestoneStatsTotals.remainingWorkTime / timePerDay
+                milestoneStatsTotals.actualWorkDays = milestoneStatsTotals.actualWorkTime / timePerDay
+                milestoneStatsTotals.totalTimeAllowedDays = milestoneStatsTotals.totalTimeAllowed / timePerDay
+                milestoneStatsTotals.workTimePercentComplete = milestoneStatsTotals.estimatedWorkTime ? ((milestoneStatsTotals.estimatedWorkTime - milestoneStatsTotals.remainingWorkTime) / milestoneStatsTotals.estimatedWorkTime) * 100 : 0.0
+                milestoneStatsTotals.workRemainingPercent = milestoneStatsTotals.estimatedWorkTime ? (milestoneStatsTotals.remainingWorkTime / milestoneStatsTotals.estimatedWorkTime) * 100 : 0.0
+                milestoneStatsTotals.workActualPercent = milestoneStatsTotals.estimatedWorkTime ? (milestoneStatsTotals.actualWorkTime / milestoneStatsTotals.estimatedWorkTime) * 100 : 0.0
+                milestoneStatsTotals.workActRemPercent = milestoneStatsTotals.estimatedWorkTime ? ((milestoneStatsTotals.actualWorkTime + milestoneStatsTotals.remainingWorkTime) / milestoneStatsTotals.estimatedWorkTime) * 100 : 0.0
+                milestoneStatsList.add(milestoneStatsTotals)
+            </script>
+        </actions>
+    </service>
+    <service verb="get" noun="WorkEffortChildStats">
+        <description>Gets statistics for direct children WorkEfforts plus their descendants</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="timePerDay" type="BigDecimal" default="8"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="childStatsList" type="List"><parameter name="listEntry" type="Map">
+                <parameter name="workEffortId"/>
+                <parameter name="workEffortName"/>
+                <parameter name="priority"/>
+
+                <parameter name="estimatedWorkTime" type="BigDecimal"/>
+                <parameter name="estimatedSetupTime" type="BigDecimal"/>
+                <parameter name="remainingWorkTime" type="BigDecimal"/>
+                <parameter name="actualWorkTime" type="BigDecimal"/>
+                <parameter name="actualSetupTime" type="BigDecimal"/>
+                <parameter name="totalTimeAllowed" type="BigDecimal"/>
+
+                <parameter name="estimatedWorkDays" type="BigDecimal"/>
+                <parameter name="remainingWorkDays" type="BigDecimal"/>
+                <parameter name="actualWorkDays" type="BigDecimal"/>
+                <parameter name="totalTimeAllowedDays" type="BigDecimal"/>
+
+                <parameter name="workTimePercentComplete" type="BigDecimal"><description>(estimatedWorkTime-remainingWorkTime)/estimatedWorkTime</description></parameter>
+                <parameter name="workRemainingPercent" type="BigDecimal"><description>remainingWorkTime/estimatedWorkTime</description></parameter>
+                <parameter name="workActualPercent" type="BigDecimal"><description>actualWorkTime/estimatedWorkTime</description></parameter>
+                <parameter name="workActRemPercent" type="BigDecimal"><description>(actualWorkTime+remainingWorkTime)/estimatedWorkTime</description></parameter>
+
+                <parameter name="budgetTimePercentComplete" type="BigDecimal"><description>(totalTimeAllowed-remainingWorkTime)/totalTimeAllowed</description></parameter>
+                <parameter name="budgetRemainingPercent" type="BigDecimal"><description>remainingWorkTime/totalTimeAllowed</description></parameter>
+                <parameter name="budgetActualPercent" type="BigDecimal"><description>actualWorkTime/totalTimeAllowed</description></parameter>
+                <parameter name="budgetActRemPercent" type="BigDecimal"><description>(actualWorkTime+remainingWorkTime)/totalTimeAllowed</description></parameter>
+
+                <parameter name="actualCost" type="BigDecimal"/>
+                <parameter name="actualClientCost" type="BigDecimal"/>
+                <parameter name="totalClientCostAllowed" type="BigDecimal"/>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <set field="statsFields" from="['estimatedWorkTime', 'estimatedSetupTime', 'remainingWorkTime',
+                    'actualWorkTime', 'actualSetupTime', 'totalTimeAllowed', 'actualCost', 'actualClientCost',
+                    'totalClientCostAllowed']"/>
+
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="mainWorkEffort"/>
+            <if condition="!mainWorkEffort"><return error="true" message="Could not find WorkEffort with ID ${workEffortId}"/></if>
+            <!-- Direct children -->
+            <if condition="mainWorkEffort.workEffortTypeEnumId == 'WetProject'"><then>
+                <set field="rootWorkEffortId" from="mainWorkEffort.workEffortId"/>
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="directChildren">
+                    <econdition field-name="rootWorkEffortId" from="workEffortId"/>
+                    <econdition field-name="parentWorkEffortId" operator="is-null"/>
+                    <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
+                    <econdition field-name="statusId" operator="not-equals" value="WeCancelled"/>
+                    <order-by field-name="priority,workEffortName"/>
+                </entity-find>
+            </then><else>
+                <set field="rootWorkEffortId" from="mainWorkEffort.rootWorkEffortId"/>
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="directChildren">
+                    <econdition field-name="parentWorkEffortId" from="workEffortId"/>
+                    <econdition field-name="statusId" operator="not-equals" value="WeCancelled"/>
+                    <order-by field-name="priority,workEffortName"/>
+                </entity-find>
+            </else></if>
+            <!-- To speed things up a little find all tasks used as a parent -->
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="allUsedAsParent" distinct="true">
+                <econdition field-name="rootWorkEffortId"/>
+                <econdition field-name="parentWorkEffortId" operator="is-not-null"/>
+                <select-field field-name="parentWorkEffortId"/>
+            </entity-find>
+            <set field="withChildrenIdSet" from="new HashSet(allUsedAsParent.parentWorkEffortId)"/>
+            <!-- <log message="========= withChildrenIdSet: ${withChildrenIdSet}"/> -->
+
+            <script><![CDATA[
+                import org.moqui.entity.EntityList
+                import org.moqui.entity.EntityValue
+                import org.moqui.impl.context.ExecutionContextImpl
+
+                Map childStatsTotals = [workEffortId: 'Total', workEffortName: '', priority: '']
+                for (String statsField in statsFields) childStatsTotals.put(statsField, 0.0)
+
+                childStatsList = new ArrayList<>(directChildren.size())
+                for (EntityValue directChild in directChildren) {
+                    Map topLevelStats = [workEffortId: directChild.workEffortId, workEffortName: directChild.workEffortName,
+                            priority: directChild.priority]
+                    for (String statsField in statsFields) topLevelStats.put(statsField, 0.0)
+                    addChildStats(directChild, topLevelStats, ec)
+
+                    // calc derived values
+                    topLevelStats.estimatedWorkDays = topLevelStats.estimatedWorkTime / timePerDay
+                    topLevelStats.remainingWorkDays = topLevelStats.remainingWorkTime / timePerDay
+                    topLevelStats.actualWorkDays = topLevelStats.actualWorkTime / timePerDay
+                    topLevelStats.totalTimeAllowedDays = topLevelStats.totalTimeAllowed / timePerDay
+
+                    topLevelStats.workTimePercentComplete = topLevelStats.estimatedWorkTime ? ((topLevelStats.estimatedWorkTime - topLevelStats.remainingWorkTime) / topLevelStats.estimatedWorkTime) * 100 : 0.0
+                    topLevelStats.workRemainingPercent = topLevelStats.estimatedWorkTime ? (topLevelStats.remainingWorkTime / topLevelStats.estimatedWorkTime) * 100 : 0.0
+                    topLevelStats.workActualPercent = topLevelStats.estimatedWorkTime ? (topLevelStats.actualWorkTime / topLevelStats.estimatedWorkTime) * 100 : 0.0
+                    topLevelStats.workActRemPercent = topLevelStats.estimatedWorkTime ? ((topLevelStats.actualWorkTime + topLevelStats.remainingWorkTime) / topLevelStats.estimatedWorkTime) * 100 : 0.0
+
+                    topLevelStats.budgetTimePercentComplete = topLevelStats.totalTimeAllowed ? ((topLevelStats.totalTimeAllowed - topLevelStats.remainingWorkTime) / topLevelStats.totalTimeAllowed) * 100 : 0.0
+                    topLevelStats.budgetRemainingPercent = topLevelStats.totalTimeAllowed ? (topLevelStats.remainingWorkTime / topLevelStats.totalTimeAllowed) * 100 : 0.0
+                    topLevelStats.budgetActualPercent = topLevelStats.totalTimeAllowed ? (topLevelStats.actualWorkTime / topLevelStats.totalTimeAllowed) * 100 : 0.0
+                    topLevelStats.budgetActRemPercent = topLevelStats.totalTimeAllowed ? ((topLevelStats.actualWorkTime + topLevelStats.remainingWorkTime) / topLevelStats.totalTimeAllowed) * 100 : 0.0
+
+                    // add current values to stats totals
+                    for (String statsField in statsFields) childStatsTotals[statsField] += topLevelStats[statsField]
+
+                    // all done, add to the list
+                    childStatsList.add(topLevelStats)
+                }
+
+                // add the totals Map to the end of the list
+                childStatsTotals.estimatedWorkDays = childStatsTotals.estimatedWorkTime / timePerDay
+                childStatsTotals.remainingWorkDays = childStatsTotals.remainingWorkTime / timePerDay
+                childStatsTotals.actualWorkDays = childStatsTotals.actualWorkTime / timePerDay
+                childStatsTotals.totalTimeAllowedDays = childStatsTotals.totalTimeAllowed / timePerDay
+
+                childStatsTotals.workTimePercentComplete = childStatsTotals.estimatedWorkTime ? ((childStatsTotals.estimatedWorkTime - childStatsTotals.remainingWorkTime) / childStatsTotals.estimatedWorkTime) * 100 : 0.0
+                childStatsTotals.workRemainingPercent = childStatsTotals.estimatedWorkTime ? (childStatsTotals.remainingWorkTime / childStatsTotals.estimatedWorkTime) * 100 : 0.0
+                childStatsTotals.workActualPercent = childStatsTotals.estimatedWorkTime ? (childStatsTotals.actualWorkTime / childStatsTotals.estimatedWorkTime) * 100 : 0.0
+                childStatsTotals.workActRemPercent = childStatsTotals.estimatedWorkTime ? ((childStatsTotals.actualWorkTime + childStatsTotals.remainingWorkTime) / childStatsTotals.estimatedWorkTime) * 100 : 0.0
+
+                childStatsTotals.budgetTimePercentComplete = childStatsTotals.totalTimeAllowed ? ((childStatsTotals.totalTimeAllowed - childStatsTotals.remainingWorkTime) / childStatsTotals.totalTimeAllowed) * 100 : 0.0
+                childStatsTotals.budgetRemainingPercent = childStatsTotals.totalTimeAllowed ? (childStatsTotals.remainingWorkTime / childStatsTotals.totalTimeAllowed) * 100 : 0.0
+                childStatsTotals.budgetActualPercent = childStatsTotals.totalTimeAllowed ? (childStatsTotals.actualWorkTime / childStatsTotals.totalTimeAllowed) * 100 : 0.0
+                childStatsTotals.budgetActRemPercent = childStatsTotals.totalTimeAllowed ? ((childStatsTotals.actualWorkTime + childStatsTotals.remainingWorkTime) / childStatsTotals.totalTimeAllowed) * 100 : 0.0
+
+                childStatsList.add(childStatsTotals)
+
+                void addChildStats(EntityValue current, Map stats, ExecutionContextImpl ec) {
+                    if (current == null || current.statusId == "WeCancelled") return
+                    // add current values
+                    for (String statsField in statsFields) if (current[statsField]) stats[statsField] += current[statsField]
+
+                    // recurse for each child
+                    if (!withChildrenIdSet.contains(current.workEffortId)) return
+                    EntityList childList = ec.entity.find("mantle.work.effort.WorkEffort")
+                            .condition("parentWorkEffortId", current.workEffortId).list()
+                    if (childList) for (EntityValue child in childList) addChildStats(child, stats, ec)
+                }
+                ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProjectParties">
+        <in-parameters>
+            <parameter name="rootWorkEffortId" default="workEffortId"/>
+            <parameter name="workEffortId"/>
+            <parameter name="term"/>
+            <parameter name="roleTypeId"/>
+            <parameter name="searchIndexName" default-value="mantle"/>
+            <parameter name="searchPartyDocType" default-value="MantleParty"/>
+            <parameter name="pageIndex" type="Integer" default="0"/>
+            <parameter name="pageSize" type="Integer" default="20"/>
+            <parameter name="addOptional" type="Boolean" default="true"/>
+            <parameter name="onlyAssignable" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"><parameter name="result" type="Map"/></parameter></out-parameters>
+        <actions>
+            <if condition="onlyAssignable &amp;&amp; !roleTypeId">
+                <entity-find entity-name="mantle.party.RoleGroupMember" list="projectRoleList" cache="true">
+                    <econdition field-name="roleGroupEnumId" operator="in" value="RgpTask,RgpProject"/>
+                    <order-by field-name="roleTypeId"/>
+                </entity-find>
+                <set field="roleTypeId" from="projectRoleList*.roleTypeId.join(',')"/>
+            </if>
+            <if condition="rootWorkEffortId"><then>
+                <entity-find entity-name="mantle.work.effort.WorkEffortAndPartyDetail" list="partyList" limit="20">
+                    <date-filter/>
+                    <econdition field-name="workEffortId" from="rootWorkEffortId"/>
+                    <econdition field-name="roleTypeId" operator="in" ignore-if-empty="true"/>
+                    <econditions combine="or">
+                        <econdition field-name="firstName" operator="like" value="${term}%" ignore-case="true" ignore="!term"/>
+                        <econdition field-name="lastName" operator="like" value="${term}%" ignore-case="true" ignore="!term"/>
+                        <econdition field-name="organizationName" operator="like" value="${term}%" ignore-case="true" ignore="!term"/>
+                        <econdition field-name="pseudoId" operator="like" value="${term}%" ignore-case="true" ignore="!term"/>
+                    </econditions>
+                    <order-by field-name="^firstName,^lastName,^organizationName"/>
+                </entity-find>
+                <script>
+                    resultList = []
+                    if (addOptional) resultList.add([partyId:"", name:"None"])
+                    for (party in partyList) resultList.add([partyId:party.partyId, name:ec.resource.expand('PartyNameTemplate', '', party)])
+                </script>
+            </then><else>
+                <set field="term" from="term ?: '*'"/>
+
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="partyDetail">
+                    <field-map field-name="partyId" from="term"/></entity-find-one>
+                <if condition="partyDetail != null"><then>
+                    <script>
+                        def outList = [[partyId:partyDetail.partyId, name:ec.resource.expand("PartyNameTemplate", "", partyDetail)]]
+                        ec.web.sendJsonResponse(outList)
+                    </script>
+                </then><else>
+                    <!-- NOTE: this code is very similar to the actions in the PartyForms.xml#searchPartyList transition -->
+                    <!-- if we have activeOrgId or filterOrgIds see if user has active org or user org filters -->
+                    <set field="activeOrgId" from="ec.user.context?.activeOrgId"/>
+                    <set field="filterOrgIds" from="ec.user.context?.filterOrgIds"/>
+                    <set field="findFilters" from="ec.artifactExecution.getFindFiltersForUser('mantle.party.Party')"/>
+                    <if condition="findFilters"><set field="entityFilterSetId" from="findFilters[0].entityFilterSetId"/></if>
+                    <!-- <log level="warn" message="Doing party search with activeOrgId ${activeOrgId} filterOrgIds ${filterOrgIds} entityFilterSetId ${entityFilterSetId}"/> -->
+
+                    <script><![CDATA[
+                        StringBuilder termSb = new StringBuilder('(')
+                        if (term.contains('*')) termSb.append(term)
+                        else term.split(' ').each({ termSb.append(it).append('* ') })
+                        termSb.append(')')
+
+                        if (roleTypeId) termSb.append(' AND roles.roleTypeId:(').append(roleTypeId.replaceAll(/,/, ' OR ')).append(')')
+                        termSb.append(' AND (NOT disabled:Y)')
+
+                        if ('MANTLE_USER_ORG'.equals(entityFilterSetId)) {
+                            termSb.append(' AND ownerPartyId:(' + (filterOrgIds ? filterOrgIds.join(' OR ') + ' OR ' : '') + '_NA_)')
+                        } else if ('MANTLE_ACTIVE_ORG'.equals(entityFilterSetId) && activeOrgId) {
+                            termSb.append(' AND ownerPartyId:(' + activeOrgId + ' OR _NA_)')
+                        }
+                    ]]></script>
+                    <!-- <log level="warn" message="Doing party search with queryString [${termSb.toString()}], indexName:${indexName}, documentType:${documentType}"/> -->
+                    <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="context"
+                            in-map="[queryString:termSb.toString(), indexName:searchIndexName, documentType:searchPartyDocType]"/>
+                    <!-- <log level="warn" message="Got party search results: ${documentList}"/> -->
+                    <script>
+                        def outList = []
+                        for (document in documentList) outList.add([partyId:document._id, name:ec.resource.expand("PartyNameTemplate", "", document)])
+                        ec.web.sendJsonResponse(outList)
+                    </script>
+                    <!-- <log level="warn" message="Got party search outList: ${outList}"/> -->
+                </else></if>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="get" noun="ProjectTeams">
+        <in-parameters>
+            <parameter name="rootWorkEffortId" default="workEffortId"/>
+            <parameter name="workEffortId"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"><parameter name="result" type="Map"/></parameter></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffortAndPartyDetail" list="weapdList">
+                <date-filter/>
+                <econdition field-name="workEffortId" from="rootWorkEffortId"/>
+                <econdition field-name="roleTypeId" value="OrgTeam"/>
+                <order-by field-name="organizationName,^firstName,^lastName"/>
+            </entity-find>
+            <script>
+                resultList = [[partyId:"", name:"None"]]
+                for (weapd in weapdList) resultList.add([partyId:weapd.partyId, name:ec.resource.expand('PartyNameTemplate', '', weapd)])
+            </script>
+        </actions>
+    </service>
+    <service verb="get" noun="ProjectTasks">
+        <in-parameters>
+            <parameter name="rootWorkEffortId" default="workEffortId"/>
+            <parameter name="workEffortId"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"><parameter name="result" type="Map"/></parameter></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="taskList">
+                <econdition field-name="rootWorkEffortId"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
+                <econdition field-name="statusId" operator="not-in" value="WeClosed,WeCancelled"/>
+                <order-by field-name="workEffortId"/>
+            </entity-find>
+            <script>
+                resultList = []
+                for (task in taskList) resultList.add([workEffortId:task.workEffortId, taskLabel:ec.resource.expand('WorkEffortNameTemplate', '', task)])
+            </script>
+        </actions>
+    </service>
+    <service verb="get" noun="ProjectMilestones">
+        <in-parameters>
+            <parameter name="rootWorkEffortId" default="workEffortId"/>
+            <parameter name="workEffortId"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"><parameter name="result" type="Map"/></parameter></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="milestoneList">
+                <econdition field-name="rootWorkEffortId"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetMilestone"/>
+                <order-by field-name="estimatedStartDate"/>
+            </entity-find>
+            <script>
+                resultList = []
+                for (milestone in milestoneList) resultList.add([workEffortId:milestone.workEffortId, milestoneLabel:ec.resource.expand('WorkEffortNameTemplate', '', milestone)])
+            </script>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Milestone">
+        <in-parameters>
+            <parameter name="rootWorkEffortId" required="true"/>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <!-- decided to go with manual ID instead of auto <set field="seqName" value="Project_MS_${rootWorkEffortId}"/>
+            <set field="workEffortId" value="${rootWorkEffortId}-MS-${ec.entity.sequencedIdPrimary(seqName, null, null)}"/> -->
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context" in-map="context + [workEffortTypeEnumId:'WetMilestone']"/>
+        </actions>
+    </service>
+    <service verb="update" noun="Milestone">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="workEffortName"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="statusId"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.work.effort.WorkEffort" out-map="context" in-map="context"/>
+        </actions>
+    </service>
+</services>

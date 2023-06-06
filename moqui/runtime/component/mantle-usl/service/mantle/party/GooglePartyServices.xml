@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!--
+        For all Google Maps web services:
+        https://developers.google.com/maps/web-services/client-library
+    -->
+
+    <service verb="get" noun="MapsGeoCodeResults">
+        <!-- for documentation see:
+            https://developers.google.com/maps/documentation/geocoding/start
+            https://developers.google.com/maps/documentation/geocoding/faq
+            Response specs for 'results' list that this returns: https://developers.google.com/maps/documentation/geocoding/overview#results
+        -->
+        <description>Use the address parameter for general search, country and postalCode are passed as 'components' if specified</description>
+        <in-parameters>
+            <parameter name="address" required="true"/>
+            <parameter name="postalCode"/>
+            <parameter name="country"><description>Two character ISO 3166-1 country code (matches Geo.geoCodeAlpha2)</description></parameter>
+            <parameter name="resultType" default-value="street_address"/>
+            <parameter name="googleCloudKey" default="ec.user.getPreference('google.cloud.api.key')"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultList" type="List"><parameter name="resultMap" type="Map">
+                <parameter name="address_components" type="List"><parameter name="addressComponent" type="Map"/></parameter>
+                <parameter name="formatted_address"/>
+                <parameter name="geometry" type="Map"/>
+                <parameter name="place_id"/>
+                <parameter name="types" type="List"><parameter name="type"/></parameter>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <if condition="!googleCloudKey">
+                <log level="warn" message="In get#MapsGeoCodeResults no API key found, returning no results"/>
+                <return/>
+            </if>
+            <set field="address" from="address?.trim()"/>
+            <if condition="!address">
+                <set field="resultList" from="[]"/>
+                <return/>
+            </if>
+
+            <script><![CDATA[
+                org.moqui.util.RestClient restClient = ec.service.rest()  // .method(org.moqui.util.RestClient.POST)
+                def uriBuilder = restClient.uri().protocol("https").port(443).host("maps.googleapis.com")
+                        .path("/maps/api/geocode/json")
+                        .parameter("key", (String) googleCloudKey)
+                        .parameter("address", (String) address)
+                if (postalCode || country) uriBuilder.parameter("components", (postalCode ? "postal_code:" + postalCode : "") + (postalCode && country ? "|" : "") +  (country ? "country:" + country : ""))
+                if (resultType) uriBuilder.parameter("result_type", (String) resultType.trim())
+                uriBuilder.build()
+                // ec.logger.warn("getUriString ${restClient.getUriString()}")
+
+                org.moqui.util.RestClient.RestResponse restResponse = restClient.call()
+                responseMap = (Map) restResponse.jsonObject()
+                if (responseMap?.status == 'ZERO_RESULTS') {
+                    resultList = []
+                    return
+                }
+                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 || responseMap?.status != 'OK') {
+                    ec.logger.warn("Unsuccessful geocode response for address ${address} postalCode ${postalCode} country ${country} resultType ${resultType} http status ${restResponse.statusCode}: ${responseMap}")
+                    ec.message.addPublic("Could not find address", "warning")
+                    resultList = []
+                    return
+                }
+
+                // ec.logger.info("Successful geocode location: ${responseMap}")
+                resultList = responseMap.results
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="get" noun="MapsPlaceSearchText">
+        <description>Uses Google Maps Places API 'Place Search' 'Text Search'</description>
+        <!-- https://developers.google.com/maps/documentation/places/web-service/search-text -->
+        <in-parameters>
+            <parameter name="query" required="true"/>
+            <parameter name="placeType"/>
+            <parameter name="location"/>
+            <parameter name="radius"/>
+            <parameter name="region"><description>for region options see: https://en.wikipedia.org/wiki/Country_code_top-level_domain</description></parameter>
+            <parameter name="googleCloudKey" default="ec.user.getPreference('google.cloud.api.key')"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultList" type="List"><parameter name="resultMap" type="Map">
+                <parameter name="formatted_address"/>
+                <parameter name="geometry" type="Map"/>
+                <parameter name="place_id"/>
+                <parameter name="types" type="List"><parameter name="type"/></parameter>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <if condition="!googleCloudKey">
+                <log level="warn" message="In get#MapsPlacesResults no API key found, returning no results"/>
+                <return/>
+            </if>
+            <set field="query" from="query?.trim()"/>
+            <if condition="!query">
+                <set field="resultList" from="[]"/>
+                <return/>
+            </if>
+
+            <script><![CDATA[
+                org.moqui.util.RestClient restClient = ec.service.rest()  // .method(org.moqui.util.RestClient.POST)
+                def uriBuilder = restClient.uri().protocol("https").port(443).host("maps.googleapis.com")
+                        .path("/maps/api/place/textsearch/json")
+                        .parameter("key", (String) googleCloudKey)
+                        .parameter("query", (String) query)
+                if (placeType) uriBuilder.parameter("type", (String) placeType.trim())
+                if (location) uriBuilder.parameter("location", (String) location.trim())
+                if (radius) uriBuilder.parameter("radius", (String) radius.trim())
+                if (region) uriBuilder.parameter("region", (String) region.trim())
+                // if (postalCode || country) uriBuilder.parameter("components", (postalCode ? "postal_code:" + postalCode : "") + (postalCode && country ? "|" : "") +  (country ? "country:" + country : ""))
+                uriBuilder.build()
+                ec.logger.warn("getUriString ${restClient.getUriString()}")
+
+                org.moqui.util.RestClient.RestResponse restResponse = restClient.call()
+                responseMap = (Map) restResponse.jsonObject()
+                // ec.logger.warn("responseMap: ${responseMap}")
+                if (responseMap?.status == 'ZERO_RESULTS') {
+                    resultList = []
+                    return
+                }
+                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 || responseMap?.status != 'OK') {
+                    ec.logger.warn("Unsuccessful Place Search response for input ${input} http status ${restResponse.statusCode}: ${responseMap}")
+                    ec.message.addPublic("Could not find address", "warning")
+                    resultList = []
+                    return
+                }
+
+                resultList = responseMap.results
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="get" noun="MapsPlaceDetails">
+        <description>Uses Google Maps Places API 'Place Details'</description>
+        <!-- https://developers.google.com/maps/documentation/places/web-service/details -->
+        <in-parameters>
+            <parameter name="placeId" required="true"/>
+            <parameter name="fields" default-value="formatted_address,address_component,geometry,place_id,plus_code,type"/>
+            <parameter name="googleCloudKey" default="ec.user.getPreference('google.cloud.api.key')"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Map">
+                <parameter name="address_components" type="List"><parameter name="addressComponent" type="Map"/></parameter>
+                <parameter name="formatted_address"/>
+                <parameter name="geometry" type="Map"/>
+                <parameter name="place_id"/>
+                <parameter name="plus_code"/>
+                <parameter name="types" type="List"><parameter name="type"/></parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <if condition="!googleCloudKey">
+                <log level="warn" message="In get#MapsPlacesResults no API key found, returning no results"/>
+                <return/>
+            </if>
+
+            <script><![CDATA[
+                org.moqui.util.RestClient restClient = ec.service.rest()  // .method(org.moqui.util.RestClient.POST)
+                def uriBuilder = restClient.uri().protocol("https").port(443).host("maps.googleapis.com")
+                        .path("/maps/api/place/details/json")
+                        .parameter("key", (String) googleCloudKey)
+                        .parameter("place_id", (String) placeId)
+                        .parameter("fields", (String) fields)
+                uriBuilder.build()
+                // ec.logger.warn("getUriString ${restClient.getUriString()}")
+
+                org.moqui.util.RestClient.RestResponse restResponse = restClient.call()
+                responseMap = (Map) restResponse.jsonObject()
+                // ec.logger.warn("responseMap: ${responseMap}")
+                if (responseMap?.status == 'ZERO_RESULTS') {
+                    resultList = []
+                    return
+                }
+                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300 || responseMap?.status != 'OK') {
+                    ec.logger.warn("Unsuccessful Place Details response for placeId ${placeId} http status ${restResponse.statusCode}: ${responseMap}")
+                    ec.message.addPublic("Could not find address", "warning")
+                    resultList = []
+                    return
+                }
+
+                result = responseMap.result
+                ]]></script>
+        </actions>
+    </service>
+</services>

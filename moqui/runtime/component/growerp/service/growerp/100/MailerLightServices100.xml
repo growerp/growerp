@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="registerAdd" noun="UserToGroup">
+        <in-parameters>
+            <parameter name="email" required="true"/>
+            <parameter name="firstName"/>
+            <parameter name="lastName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="resultMessage"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.Interface" value-field="interfaceValue">
+                <field-map field-name="interfaceId" value="mailerLight"/>
+            </entity-find-one>
+            <set field="mailerLightApiKey" from="interfaceValue?.apiKey"/>
+            <set field="baseUrl" from="interfaceValue?.baseUrl"/>
+            <set field="groupName" from="interfaceValue?.value1"/>
+            <if condition="!interfaceValue || !baseUrl || !mailerLightApiKey || !groupName">
+                <return error="false" message="mailerLight not configured: missing parameters in table interfaceValue"/>
+            </if>
+            <!-- add user -->
+            <script><![CDATA[
+                import org.moqui.util.RestClient
+                import org.moqui.util.RestClient.Method
+
+                Map fields = [name: firstName, last_name: lastName];
+                String subscriberId = restPost("api/subscribers", 
+                    [email: email])?.data?.id
+                String groupId = restGet("api/groups", [filter: groupName, limit: "1"])?.data[0]?.id
+                if (groupId == null) // create group if not found
+                    groupId = restPost("api/groups", [name: groupName])?.data?.id
+                restAssignToGroup(subscriberId, groupId)
+                resultMessage = "Subscriber assigned to group"
+
+                //============ closures =============
+                def Map restPost(String path, Map parameters) {
+                    RestClient restClient = ec.service.rest().method(RestClient.POST)
+                            .uri("$baseUrl/$path").addHeader("Content-Type", "application/json")
+                            .addHeader("Authorization","Bearer ${mailerLightApiKey}").addBodyParameters(parameters)
+                    RestClient.RestResponse restResponse = restClient.call()
+                    Map respMap = (Map) restResponse.jsonObject()
+                    if (restResponse.statusCode < 200 || restResponse.statusCode >= 300) {
+                        ec.logger.warn("Unsuccessful register ${restResponse.statusCode}: ${respMap}")
+                        return
+                    }
+                    ec.logger.info("Successful : ${respMap}")
+                    return respMap
+                }
+                // cannot use other post closure because of strange parameter passing.....
+                def Map restAssignToGroup(String subscriberId, String groupId) {
+                    RestClient restClient = ec.service.rest().method(RestClient.POST)
+                        .uri("$baseUrl/api/subscribers/$subscriberId/groups/$groupId")
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Authorization","Bearer ${mailerLightApiKey}")
+                    RestClient.RestResponse restResponse = restClient.call()
+                    Map respMap = (Map) restResponse.jsonObject()
+                    if (restResponse.statusCode < 200 || restResponse.statusCode >= 300) {
+                        ec.logger.warn("Unsuccessful register ${restResponse.statusCode}: ${respMap}")
+                        return
+                    }
+                    ec.logger.info("Successful : ${respMap}")
+                    return respMap
+                }
+
+                def Map restGet(String path, Map parameters) { // maximum 2
+                List pList = new ArrayList(parameters.entrySet());
+                RestClient restClient = ec.service.rest().method(RestClient.GET)
+                restClient.addHeader("Authorization","Bearer ${mailerLightApiKey}")
+                restClient.uri().protocol("https")
+                    .host("connect.mailerlite.com").port(443)
+                    .path("api/groups")
+                    .parameter(pList[0]?.getKey(), pList[0]?.getValue()).parameter(pList[1]?.getKey(), pList[1]?.getValue())
+                    .build()
+                RestClient.RestResponse restResponse = restClient.call()
+                Map respMap = (Map) restResponse.jsonObject()
+                if (restResponse.statusCode < 200 || restResponse.statusCode >= 300) {
+                    ec.logger.warn("Unsuccessful register ${restResponse.statusCode}: ${respMap}")
+                    return
+                }
+                ec.logger.info("Successful : ${respMap}")
+                return respMap
+            }
+            ]]></script>
+        </actions>
+    </service>
+</services>

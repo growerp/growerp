@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/kie/6.0.0/kmodule">
+
+    <kbase name="ProductPriceKB" packages="mantle.product.price">
+        <ksession name="ProductPriceKS" type="stateless"/>
+    </kbase>
+
+    <!-- nothing in this yet
+    <kbase name="TaxCalcKB" packages="mantle.other.tax">
+        <ksession name="TaxCalcKS" type="stateless"/>
+    </kbase>
+    -->
+
+    <kbase name="OrderShippingRateKB" packages="mantle.shipment.orderrate">
+        <ksession name="OrderShippingRateKS" type="stateless"/>
+    </kbase>
+</kmodule>

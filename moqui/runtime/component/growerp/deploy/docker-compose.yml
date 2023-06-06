@@ -1,0 +1,29 @@
+growerp:
+    image: growerpsupport/growerp
+    container_name: growerp
+#    command: conf=conf/MoquiProductionConf.xml
+    restart: unless-stopped
+    volumes:
+     - /home/jenkins/growerp/mobile:/opt/moqui/runtime/mobile
+    environment:
+     - instance_purpose=production
+     - entity_ds_db_conf=postgres
+     - entity_ds_host=xxxxxxxxxxxxxxxx
+     - entity_ds_port=5432
+     - entity_ds_database=prod-growerpbackend-mobile
+     - entity_ds_schema=public
+     - entity_ds_user=growerpprod
+     - entity_ds_password=xxxxxxxxxx
+     - entity_ds_crypt_pass='MoquiDefaultPassword:CHANGEME'
+     # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
+     # this can be a comma separate list of hosts like 'example.com,www.example.com'
+     - VIRTUAL_HOST=mobile.growerp.com
+     # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
+     - webapp_http_host=mobile.growerp.com
+     - webapp_http_port=80
+     - webapp_https_port=443
+     - webapp_https_enabled=true
+     - default_locale=en_US
+     - default_time_zone=US/Pacific
+     # DB_DATA - For load data (Ex: SEED, SEED-INITIAL or DEMO)
+     - DB_DATA=SEED

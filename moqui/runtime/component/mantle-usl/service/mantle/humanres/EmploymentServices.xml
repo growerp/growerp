@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="Employment">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.PartyRelationship" include="nonpk"/>
+            <auto-parameters entity-name="mantle.humanres.employment.Employment" include="nonpk"/>
+            <parameter name="fromPartyId" required="true"/>
+            <parameter name="toPartyId" required="true"/>
+            <parameter name="fromRoleTypeId" default-value="Employee"/>
+            <parameter name="relationshipTypeEnumId" default-value="PrtEmployee"/>
+            <parameter name="toRoleTypeId" default-value="OrgEmployer"/>
+            <parameter name="fromDate" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="partyRelationshipId"/></out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyRelationship" list="partyRelList">
+                <econdition field-name="fromPartyId" from="fromPartyId"/>
+                <econdition field-name="toPartyId" from="toPartyId"/>
+                <econditions combine="or">
+                    <econdition field-name="fromDate" operator="greater-equals" from="fromDate"/>
+                    <econdition field-name="thruDate" operator="greater" from="fromDate"/>
+                    <econditions>
+                        <econdition field-name="fromDate" operator="less" from="fromDate"/>
+                        <econdition field-name="thruDate" operator="is-null"/>
+                    </econditions>
+                </econditions>
+            </entity-find>
+
+            <if condition="partyRelList">
+                <return error="true" message="Cannot have overlapping employments."/>
+            </if>
+
+            <if condition="emplPositionId">
+                <!-- If a position is specified, make sure it is valid for the toPartyId -->
+                <entity-find-one entity-name="mantle.humanres.position.EmplPosition" value-field="emplPosition">
+                    <field-map field-name="emplPositionId"/>
+                </entity-find-one>
+                <if condition="!emplPosition || (emplPosition.organizationPartyId &amp;&amp; toPartyId != emplPosition.organizationPartyId)">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="toParty">
+                        <field-map field-name="partyId" from="toPartyId"/>
+                    </entity-find-one>
+                    <set field="orgName" from="ec.resource.expand('PartyNameTemplate','',toParty)"/>
+                    <return error="true" message="Position ${emplPosition.description} is not valid for ${orgName}"/>
+                </if>
+            </if>
+            <service-call name="create#mantle.party.PartyRelationship" in-map="context" out-map="context"/>
+            <service-call name="create#mantle.humanres.employment.Employment" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="Employment">
+        <in-parameters>
+            <parameter name="partyRelationshipId" required="true"/>
+            <auto-parameters entity-name="mantle.party.PartyRelationship" include="nonpk"/>
+            <auto-parameters entity-name="mantle.humanres.employment.Employment" include="nonpk"/>
+            <!-- use PartyContent instead
+            <parameter name="identityDocumentFile" type="org.apache.commons.fileupload.FileItem"/>
+            <parameter name="emplAuthzDocumentFile" type="org.apache.commons.fileupload.FileItem"/>
+            -->
+        </in-parameters>
+        <actions>
+            <!-- use PartyContent instead
+            <if condition="identityDocumentFile != null &amp;&amp; identityDocumentFile.size &gt; 0">
+                <if condition="!identityLocation">
+                    <set field="filename" from="identityDocumentFile.getName()"/>
+                    <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+                    <set field="identityLocation" value="${contentRoot}/employment/${partyRelationshipId}/identity/${filename}"/>
+                </if>
+                <set field="docRr" from="ec.resource.getLocationReference(identityLocation)"/>
+                <script>
+                    fileStream = identityDocumentFile.getInputStream()
+                    try { docRr.putStream(fileStream) } finally { fileStream.close() }
+                </script>
+            </if>
+            <if condition="emplAuthzDocumentFile != null &amp;&amp; emplAuthzDocumentFile.size &gt; 0">
+                <if condition="!emplAuthzLocation">
+                    <set field="filename" from="emplAuthzDocumentFile.getName()"/>
+                    <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+                    <set field="emplAuthzLocation" value="${contentRoot}/employment/${partyRelationshipId}/emplAuthz/${filename}"/>
+                </if>
+                <set field="docRr" from="ec.resource.getLocationReference(emplAuthzLocation)"/>
+                <script>
+                    fileStream = emplAuthzDocumentFile.getInputStream()
+                    try { docRr.putStream(fileStream) } finally { fileStream.close() }
+                </script>
+            </if>
+            -->
+
+            <entity-find entity-name="mantle.party.PartyRelationship" list="partyRelList">
+                <econdition field-name="partyRelationshipId" operator="not-equals" from="partyRelationshipId"/>
+                <econdition field-name="fromPartyId" from="fromPartyId"/>
+                <econdition field-name="toPartyId" from="toPartyId"/>
+                <econditions combine="or">
+                    <econdition field-name="fromDate" operator="greater-equals" from="fromDate"/>
+                    <econdition field-name="thruDate" operator="greater" from="fromDate"/>
+                    <econditions>
+                        <econdition field-name="fromDate" operator="less" from="fromDate"/>
+                        <econdition field-name="thruDate" operator="is-null"/>
+                    </econditions>
+                </econditions>
+            </entity-find>
+
+            <if condition="partyRelList">
+                <return error="true" message="Cannot have overlapping employments."/>
+            </if>
+
+            <if condition="emplPositionId">
+                <!-- If a position is specified, make sure it is valid for the toPartyId -->
+                <entity-find-one entity-name="mantle.humanres.position.EmplPosition" value-field="emplPosition">
+                    <field-map field-name="emplPositionId"/>
+                </entity-find-one>
+                <if condition="!emplPosition || (emplPosition.organizationPartyId &amp;&amp; toPartyId != emplPosition.organizationPartyId)">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="toParty">
+                        <field-map field-name="partyId" from="toPartyId"/>
+                    </entity-find-one>
+                    <set field="orgName" from="ec.resource.expand('PartyNameTemplate','',toParty)"/>
+                    <return error="true" message="Position ${emplPosition.description} is not valid for ${orgName}"/>
+                </if>
+            </if>
+            <service-call name="update#mantle.party.PartyRelationship" in-map="context"/>
+            <service-call name="store#mantle.humanres.employment.Employment" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="Employment">
+        <in-parameters>
+            <parameter name="partyRelationshipId" required="true"/>
+            <parameter name="fromRoleTypeId" default-value="Employee"/>
+            <parameter name="relationshipTypeEnumId" default-value="PrtEmployee"/>
+            <parameter name="toRoleTypeId" default-value="OrgEmployer"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.PartyRelationship" value-field="ptyRel"/>
+            <entity-find-one entity-name="mantle.humanres.employment.Employment" value-field="employment"/>
+            <if condition="ptyRel &amp;&amp; employment &amp;&amp; (ptyRel.fromRoleTypeId == fromRoleTypeId) &amp;&amp;
+                    (ptyRel.relationshipTypeEnumId == relationshipTypeEnumId) &amp;&amp;
+                    (ptyRel.toRoleTypeId == toRoleTypeId)"><then>
+                <set field="relatedEmpls" from="employment.findRelatedFk(new HashSet(['mantle.party.PartyRelationship']))"/>
+                <!-- TODO: Ignore 'mantle.party.PartyRelationship' below and do a deleteWithCascade since party settings probalby shouldn't stop deletion -->
+                <set field="relatedPtyRels" from="ptyRel.findRelatedFk(new HashSet(['mantle.humanres.employment.Employment']))"/>
+                <iterate list="(relatedEmpls + relatedPtyRels)" entry="relatedValue">
+                    <message error="true">Found ${relatedValue.getEntityNamePretty()}. Cannot delete employment.</message>
+                </iterate>
+                <check-errors/>
+                <service-call name="delete#mantle.humanres.employment.Employment" in-map="context"/>
+                <service-call name="delete#mantle.party.PartyRelationship" in-map="context"/>
+            </then><else>
+                <return error="true" message="Cannot find employment relationship"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="create" noun="EmploymentSalary">
+        <description>Create an EmploymentSalary record, getting defaults and checking against min/max amounts on
+            PayGrade record from EmplPosition for Employment.</description>
+        <in-parameters>
+            <parameter name="partyRelationshipId" required="true"/>
+            <auto-parameters entity-name="mantle.humanres.employment.EmploymentSalary" include="nonpk"/>
+            <parameter name="fromDate" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="fromDate"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.humanres.employment.Employment" value-field="employment"/>
+            <if condition="!timePeriodTypeId"><set field="timePeriodTypeId" from="employment.timePeriodTypeId"/></if>
+            <if condition="!payGradeId">
+                <entity-find-related-one value-field="employment" relationship-name="mantle.humanres.position.EmplPosition"
+                        to-value-field="emplPosition"/>
+                <set field="payGradeId" from="emplPosition.payGradeId"/>
+            </if>
+            <if condition="payGradeId">
+                <entity-find entity-name="mantle.humanres.rate.PayGradeSalary" list="payGradeSalaryList">
+                    <date-filter/><econdition field-name="payGradeId"/>
+                    <econdition field-name="timePeriodTypeId" ignore-if-empty="true"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-find>
+                <if condition="payGradeSalaryList">
+                    <set field="payGradeSalary" from="payGradeSalaryList[0]"/>
+                    <if condition="!timePeriodTypeId"><set field="timePeriodTypeId" from="payGradeSalary.timePeriodTypeId"/></if>
+                    <if condition="!currencyUomId"><set field="currencyUomId" from="payGradeSalary.currencyUomId"/></if>
+                    <if condition="!amount"><set field="amount" from="payGradeSalary.amount"/></if>
+                    <if condition="payGradeSalary.minAmount &amp;&amp; amount &lt; payGradeSalary.minAmount">
+                        <message>Warning: salary amount ${amount} is less than pay grade minimum amount (${payGradeSalary.minAmount})</message></if>
+                    <if condition="payGradeSalary.maxAmount &amp;&amp; amount &gt; payGradeSalary.maxAmount">
+                        <message>Warning: salary amount ${amount} is greater than pay grade maximum amount (${payGradeSalary.maxAmount})</message></if>
+                </if>
+            </if>
+
+            <service-call name="create#mantle.humanres.employment.EmploymentSalary" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+
+    <!-- Payroll TimePeriod services -->
+    <!-- TODO: change to handle PayrollWeek, PayrollBiWeek, etc based on some configuration of what the org will actually use; or this may not be needed at all and TimePeriod records can be created as needed for payroll processing -->
+    <service verb="check" noun="NextPayrollTimePeriods">
+        <description>
+            Ensure that at least current and next TimePeriods exist for PayrollMonth, PayrollQuarter (3 months), PayrollYear.
+            If no time periods exist creates fiscal time periods based on calendar (ie fiscal year matches calendar year).
+            If time periods do exist but not next time periods, adds next time period starting next day after current.
+            This should be run once per month to ensure the next time period exists.
+        </description>
+        <in-parameters>
+            <parameter name="organizationPartyId"/>
+            <parameter name="basisDate" type="java.sql.Date" default="new java.sql.Date(ec.user.nowTimestamp.time)"/>
+        </in-parameters>
+        <actions>
+            <script>basisCal = ec.user.getCalendarSafe(); basisCal.setTime(basisDate)</script>
+            <entity-find-one entity-name="mantle.party.Organization" value-field="organization">
+                <field-map field-name="partyId" from="organizationPartyId"/></entity-find-one>
+
+            <!-- start with PayrollYear and go down so we have parentPeriodId -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="currentYearList"><date-filter valid-date="new Timestamp(basisDate.time)"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollYear"/></entity-find>
+            <if condition="!currentYearList">
+                <!-- no current year... assume fiscal year is calendar year and create one automatically -->
+                <script>yearFromCal = basisCal.clone(); yearFromCal.set(Calendar.DAY_OF_YEAR, 1)</script>
+                <script>yearThruCal = basisCal.clone(); yearThruCal.set(Calendar.DAY_OF_YEAR, yearThruCal.getActualMaximum(Calendar.DAY_OF_YEAR))</script>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[timePeriodTypeId:'PayrollYear', partyId:organizationPartyId,
+                            periodNum:yearFromCal.get(Calendar.YEAR), beginningBalance:0, endingBalance:0,
+                            periodName:(organization.organizationName + ' ' + yearFromCal.get(Calendar.YEAR)),
+                            fromDate:new java.sql.Date(yearFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(yearThruCal.getTimeInMillis()), isClosed:'N']"/>
+                <set field="yearPeriodId" from="createTpOut.timePeriodId"/>
+
+                <else>
+                    <script>yearFromCal = ec.user.getCalendarSafe(); yearFromCal.setTime(currentYearList.first.fromDate)</script>
+                    <script>yearThruCal = ec.user.getCalendarSafe(); yearThruCal.setTime(currentYearList.first.thruDate)</script>
+                    <set field="yearPeriodId" from="currentYearList.first.timePeriodId"/>
+                </else>
+            </if>
+
+            <!-- current quarter -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="currentQuarterList"><date-filter valid-date="new Timestamp(basisDate.time)"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollQuarter"/></entity-find>
+            <if condition="!currentQuarterList">
+                <!-- no current quarter... assume fiscal year is calendar year with 4 3-month quarters and create one automatically -->
+                <script>quarterNumber = (int) (basisCal.get(Calendar.MONTH)/3)</script>
+                <script>quarterFromCal = basisCal.clone(); quarterFromCal.set(Calendar.MONTH, (quarterNumber * 3)); quarterFromCal.set(Calendar.DAY_OF_MONTH, 1)</script>
+                <script>quarterThruCal = basisCal.clone(); quarterThruCal.set(Calendar.MONTH, ((quarterNumber + 1) * 3)); quarterThruCal.set(Calendar.DAY_OF_MONTH, 1); quarterThruCal.add(Calendar.DAY_OF_YEAR, -1)</script>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[parentPeriodId:yearPeriodId, timePeriodTypeId:'PayrollQuarter', partyId:organizationPartyId,
+                            periodNum:(quarterNumber + 1), beginningBalance:0, endingBalance:0,
+                            periodName:(organization.organizationName + ' ' + quarterFromCal.get(Calendar.YEAR) + 'Q' + (quarterNumber + 1)),
+                            fromDate:new java.sql.Date(quarterFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(quarterThruCal.getTimeInMillis()), isClosed:'N']"/>
+                <set field="quarterPeriodId" from="createTpOut.timePeriodId"/>
+
+                <else>
+                    <script>quarterFromCal = ec.user.getCalendarSafe(); quarterFromCal.setTime(currentQuarterList.first.fromDate)</script>
+                    <script>quarterThruCal = ec.user.getCalendarSafe(); quarterThruCal.setTime(currentQuarterList.first.thruDate)</script>
+                    <set field="quarterPeriodId" from="currentQuarterList.first.timePeriodId"/>
+                </else>
+            </if>
+
+            <!-- current month -->
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="currentMonthList"><date-filter valid-date="new Timestamp(basisDate.time)"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollMonth"/></entity-find>
+            <if condition="!currentMonthList">
+                <!-- no current quarter... assume fiscal year is calendar year with 4 3-month quarters and create one automatically -->
+                <script>monthNumber = basisCal.get(Calendar.MONTH)</script>
+                <script>monthFromCal = basisCal.clone(); monthFromCal.set(Calendar.DAY_OF_MONTH, 1)</script>
+                <script>monthThruCal = basisCal.clone(); monthThruCal.set(Calendar.DAY_OF_MONTH, basisCal.getActualMaximum(Calendar.DAY_OF_MONTH))</script>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[parentPeriodId:quarterPeriodId, timePeriodTypeId:'PayrollMonth', partyId:organizationPartyId,
+                            periodNum:monthNumber+1, beginningBalance:0, endingBalance:0,
+                            periodName:(organization.organizationName + ' ' + monthFromCal.get(Calendar.YEAR) + '-' + (monthNumber + 1)),
+                            fromDate:new java.sql.Date(monthFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(monthThruCal.getTimeInMillis()), isClosed:'N']"/>
+                <set field="monthPeriodId" from="createTpOut.timePeriodId"/>
+
+                <else>
+                    <script>monthFromCal = ec.user.getCalendarSafe(); monthFromCal.setTime(currentMonthList.first.fromDate)</script>
+                    <script>monthThruCal = ec.user.getCalendarSafe(); monthThruCal.setTime(currentMonthList.first.thruDate)</script>
+                    <set field="monthPeriodId" from="currentMonthList.first.timePeriodId"/>
+                </else>
+            </if>
+
+            <!-- next year -->
+            <!-- based on current year see if next exists and if not add one starting the day after and one year long -->
+            <script>nextYearFromCal = yearFromCal.clone(); nextYearFromCal.add(Calendar.YEAR, 1); nextYearFromCal.getTimeInMillis()</script>
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="nextYearList"><date-filter valid-date="new Timestamp(nextYearFromCal.getTimeInMillis())"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollYear"/></entity-find>
+            <if condition="!nextYearList">
+                <script>nextYearThruCal = yearThruCal.clone(); nextYearThruCal.add(Calendar.YEAR, 1); nextYearThruCal.add(Calendar.DAY_OF_MONTH, 5); nextYearThruCal.set(Calendar.DAY_OF_MONTH, 1); nextYearThruCal.add(Calendar.DAY_OF_MONTH, -1); nextYearThruCal.getTimeInMillis()</script>
+                <set field="nextYearPeriodName" value="${organization.organizationName} ${nextYearFromCal.get(Calendar.YEAR)}"/>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[previousPeriodId:yearPeriodId, timePeriodTypeId:'PayrollYear', partyId:organizationPartyId,
+                            beginningBalance:0, endingBalance:0, periodNum:nextYearFromCal.get(Calendar.YEAR),
+                            periodName:nextYearPeriodName, fromDate:new java.sql.Date(nextYearFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(nextYearThruCal.getTimeInMillis()), isClosed:'N']"/>
+                <set field="nextYearPeriodId" from="createTpOut.timePeriodId"/>
+
+                <else>
+                    <script>nextYearFromCal = ec.user.getCalendarSafe(); nextYearFromCal.setTime(nextYearList.first.fromDate)</script>
+                    <script>nextYearThruCal = ec.user.getCalendarSafe(); nextYearThruCal.setTime(nextYearList.first.thruDate)</script>
+                    <set field="nextYearPeriodId" from="nextYearList.first.timePeriodId"/>
+                </else>
+            </if>
+
+            <!-- next quarter, may be in current or next year -->
+            <script>nextQuarterFromCal = quarterFromCal.clone(); nextQuarterFromCal.add(Calendar.MONTH, 3); nextQuarterFromCal.add(Calendar.DAY_OF_MONTH, 5); nextQuarterFromCal.set(Calendar.DAY_OF_MONTH, 1); nextQuarterFromCal.getTimeInMillis()</script>
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="nextQuarterList"><date-filter valid-date="new Timestamp(nextQuarterFromCal.getTimeInMillis())"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollQuarter"/></entity-find>
+            <if condition="!nextQuarterList">
+                <set field="parentPeriodId" from="(nextQuarterFromCal.getTimeInMillis() &lt; yearThruCal.getTimeInMillis()) ? yearPeriodId : nextYearPeriodId"/>
+                <script>nextQuarterThruCal = quarterThruCal.clone(); nextQuarterThruCal.add(Calendar.MONTH, 3); nextQuarterThruCal.add(Calendar.DAY_OF_MONTH, 5); nextQuarterThruCal.set(Calendar.DAY_OF_MONTH, 1); nextQuarterThruCal.add(Calendar.DAY_OF_MONTH, -1); nextQuarterThruCal.getTimeInMillis()</script>
+                <script>nextQuarterNumber = (int) (nextQuarterFromCal.get(Calendar.MONTH)/3)</script>
+                <set field="nextQuarterPeriodName" value="${organization.organizationName} ${nextQuarterFromCal.get(Calendar.YEAR)}Q${nextQuarterNumber + 1}"/>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[parentPeriodId:parentPeriodId, previousPeriodId:quarterPeriodId,
+                            timePeriodTypeId:'PayrollQuarter', partyId:organizationPartyId, beginningBalance:0,
+                            endingBalance:0, periodNum:nextQuarterNumber+1, periodName:nextQuarterPeriodName,
+                            fromDate:new java.sql.Date(nextQuarterFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(nextQuarterThruCal.getTimeInMillis()), isClosed:'N']"/>
+                <set field="nextQuarterPeriodId" from="createTpOut.timePeriodId"/>
+
+                <else>
+                    <script>nextQuarterFromCal = ec.user.getCalendarSafe(); nextQuarterFromCal.setTime(nextQuarterList.first.fromDate)</script>
+                    <script>nextQuarterThruCal = ec.user.getCalendarSafe(); nextQuarterThruCal.setTime(nextQuarterList.first.thruDate)</script>
+                    <set field="nextQuarterPeriodId" from="nextQuarterList.first.timePeriodId"/>
+                </else>
+            </if>
+
+            <!-- next month, may be in current or next quarter -->
+            <script>nextMonthFromCal = monthFromCal.clone(); nextMonthFromCal.add(Calendar.MONTH, 1); nextMonthFromCal.add(Calendar.DAY_OF_MONTH, 5); nextMonthFromCal.set(Calendar.DAY_OF_MONTH, 1); nextMonthFromCal.getTimeInMillis()</script>
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="nextMonthList"><date-filter valid-date="new Timestamp(nextMonthFromCal.getTimeInMillis())"/>
+                <econdition field-name="partyId" from="organizationPartyId"/><econdition field-name="timePeriodTypeId" value="PayrollMonth"/></entity-find>
+            <if condition="!nextMonthList">
+                <set field="parentPeriodId" from="(nextMonthFromCal.getTimeInMillis() &lt; quarterThruCal.getTimeInMillis()) ? quarterPeriodId : nextQuarterPeriodId"/>
+                <script>nextMonthNumber = nextMonthFromCal.get(Calendar.MONTH)</script>
+                <script>nextMonthThruCal = monthThruCal.clone(); nextMonthThruCal.add(Calendar.MONTH, 1); nextMonthThruCal.add(Calendar.DAY_OF_MONTH, 5); nextMonthThruCal.set(Calendar.DAY_OF_MONTH, 1); nextMonthThruCal.add(Calendar.DAY_OF_MONTH, -1); nextMonthThruCal.getTimeInMillis()</script>
+                <set field="nextMonthPeriodName" value="${organization.organizationName} ${nextMonthFromCal.get(Calendar.YEAR)}-${nextMonthNumber + 1}"/>
+                <service-call name="create#mantle.party.time.TimePeriod" out-map="createTpOut"
+                        in-map="[parentPeriodId:parentPeriodId, previousPeriodId:monthPeriodId,
+                            timePeriodTypeId:'PayrollMonth', partyId:organizationPartyId, beginningBalance:0,
+                            endingBalance:0, periodNum:nextMonthNumber+1, periodName:nextMonthPeriodName,
+                            fromDate:new java.sql.Date(nextMonthFromCal.getTimeInMillis()),
+                            thruDate:new java.sql.Date(nextMonthThruCal.getTimeInMillis()), isClosed:'N']"/>
+
+                <else>
+                    <!-- this the last set, nothing will use these but leaving as a placeholder in case this is expanded:
+                    <script>nextMonthFromCal = ec.user.getCalendarSafe(); nextMonthFromCal.setTime(nextMonthList.first.fromDate)</script>
+                    <script>nextMonthThruCal = ec.user.getCalendarSafe(); nextQuarterThruCal.setTime(nextQuarterList.first.thruDate)</script>
+                    -->
+                </else>
+            </if>
+        </actions>
+    </service>
+</services>

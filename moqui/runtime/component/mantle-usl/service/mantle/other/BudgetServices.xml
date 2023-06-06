@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="get" noun="GlAccountAppls">
+        <in-parameters>
+            <parameter name="glAccountId" required="true"/>
+            <parameter name="ownerPartyIds" type="Set"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assetIdSet" type="Set"><parameter name="assetId"/></parameter>
+            <parameter name="facilityIdSet" type="Set"><parameter name="facilityId"/></parameter>
+        </out-parameters>
+        <actions>
+            <!-- Asset direct (AssetGlAppl), Asset by Product (ProductGlAppl) -->
+            <entity-find entity-name="mantle.product.asset.AssetAndGlAppl" list="assetGlApplList">
+                <econdition field-name="glAccountId"/>
+                <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                <select-field field-name="assetId"/>
+            </entity-find>
+            <set field="assetIdSet" from="new HashSet(assetGlApplList*.assetId)"/>
+
+            <entity-find entity-name="mantle.product.ProductGlAppl" list="productGlApplList">
+                <econdition field-name="glAccountId"/></entity-find>
+            <set field="productIdSet" from="new HashSet(productGlApplList*.productId)"/>
+            <if condition="productIdSet">
+                <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                    <econdition field-name="productId" operator="in" from="productIdSet"/>
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                    <select-field field-name="assetId"/>
+                </entity-find>
+                <script>assetIdSet.addAll(assetList*.assetId)</script>
+            </if>
+
+            <!-- Facility direct (FacilityGlAppl), Facility by facilityTypeEnumId (GlAccountEnumAppl) -->
+            <entity-find entity-name="mantle.facility.FacilityAndGlAppl" list="facilityGlApplList">
+                <econdition field-name="glAccountId"/>
+                <econditions combine="or">
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                    <econdition field-name="partyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                </econditions>
+                <select-field field-name="facilityId"/>
+            </entity-find>
+            <set field="facilityIdSet" from="new HashSet(facilityGlApplList*.facilityId)"/>
+
+            <entity-find entity-name="mantle.ledger.account.GlAccountEnumAppl" list="glAccountEnumApplList">
+                <econdition field-name="glAccountId"/></entity-find>
+            <if condition="glAccountEnumApplList">
+                <set field="enumIdSet" from="new HashSet(glAccountEnumApplList*.enumId)"/>
+                <entity-find entity-name="mantle.facility.FacilityAndParty" list="facilityList">
+                    <econdition field-name="facilityTypeEnumId" operator="in" from="enumIdSet"/>
+                    <econditions combine="or">
+                        <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                        <econdition field-name="partyId" operator="in" from="ownerPartyIds" ignore-if-empty="true"/>
+                    </econditions>
+                    <select-field field-name="facilityId"/>
+                </entity-find>
+                <script>facilityIdSet.addAll(facilityList*.facilityId)</script>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="AssetGlAppls">
+        <in-parameters><parameter name="assetId" required="true"/></in-parameters>
+        <out-parameters><parameter name="glAccountIdSet" type="Set"><parameter name="glAccountId"/></parameter></out-parameters>
+        <actions>
+            <!-- GlAccount direct (AssetGlAppl), GlAccount by Product (ProductGlAppl) -->
+            <entity-find entity-name="mantle.product.asset.AssetGlAppl" list="assetGlApplList">
+                <econdition field-name="assetId"/></entity-find>
+            <set field="glAccountIdSet" from="new HashSet(assetGlApplList*.glAccountId)"/>
+
+            <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset"/>
+            <if condition="asset.productId">
+                <entity-find entity-name="mantle.product.ProductGlAppl" list="productGlApplList">
+                    <econdition field-name="productId" from="asset.productId"/></entity-find>
+                <script>glAccountIdSet.addAll(productGlApplList*.glAccountId)</script>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="FacilityGlAppls">
+        <in-parameters><parameter name="facilityId" required="true"/></in-parameters>
+        <out-parameters><parameter name="glAccountIdSet" type="Set"><parameter name="glAccountId"/></parameter></out-parameters>
+        <actions>
+            <!-- GlAccount direct (FacilityGlAppl), GlAccount by facilityTypeEnumId (GlAccountEnumAppl) -->
+            <entity-find entity-name="mantle.facility.FacilityGlAppl" list="facilityGlApplList">
+                <econdition field-name="facilityId"/></entity-find>
+            <set field="glAccountIdSet" from="new HashSet(facilityGlApplList*.glAccountId)"/>
+
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/>
+            <if condition="facility.facilityTypeEnumId">
+                <entity-find entity-name="mantle.ledger.account.GlAccountEnumAppl" list="glAccountEnumApplList">
+                    <econdition field-name="enumId" from="facility.facilityTypeEnumId"/></entity-find>
+                <script>glAccountIdSet.addAll(glAccountEnumApplList*.glAccountId)</script>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Budget">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.other.budget.Budget" include="nonpk"/>
+            <parameter name="timePeriodId" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="budgetId"/></out-parameters>
+        <actions>
+            <if condition="!currencyUomId">
+                <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod"/>
+                <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                              in-map="[organizationPartyId:timePeriod.partyId]"/>
+                <set field="currencyUomId" from="partyAcctgPreference?.baseCurrencyUomId"/>
+            </if>
+            <if condition="!currencyUomId"><set field="currencyUomId" value="USD"/></if>
+
+            <service-call name="create#mantle.other.budget.Budget" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="store" noun="BudgetItem">
+        <in-parameters>
+            <parameter name="budgetId" required="true"/>
+            <parameter name="budgetItemSeqId"/>
+            <auto-parameters entity-name="mantle.other.budget.BudgetItem" include="nonpk"/>
+        </in-parameters>
+        <out-parameters><parameter name="budgetItemSeqId"/></out-parameters>
+        <actions>
+            <if condition="amount != null"><then>
+                <service-call name="store#mantle.other.budget.BudgetItem" in-map="context" out-map="context"/>
+            </then><else-if condition="budgetItemSeqId">
+                <service-call name="delete#mantle.other.budget.BudgetItem" in-map="context" out-map="context"/>
+            </else-if></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="BudgetItemsAccountsSubPeriods">
+        <in-parameters>
+            <parameter name="budgetId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="budget" type="Map"/>
+            <parameter name="timePeriod" type="Map"/>
+            <parameter name="partyAcctgPreference" type="Map"/>
+            <parameter name="accountCodeFormatter" type="javax.swing.text.MaskFormatter"/>
+            <parameter name="budgetItemList" type="List"><parameter name="budgetItem" type="Map"/></parameter>
+            <parameter name="budgetItemsByGlId" type="Map"/>
+            <parameter name="subTimePeriodList" type="List"><parameter name="subTimePeriod" type="Map"/></parameter>
+            <parameter name="subTimePeriodSize" type="Integer"/>
+            <parameter name="expenseClassEnumIds" type="Set"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>
+            <set field="timePeriod" from="budget.timePeriod"/>
+
+            <if condition="timePeriod?.partyId">
+                <service-call name="mantle.ledger.LedgerServices.find#PartyAcctgPreference" out-map="context"
+                        in-map="[organizationPartyId:timePeriod.partyId]"/>
+                <if condition="partyAcctgPreference?.glAccountCodeMask">
+                    <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
+                    <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/><!-- will be null if no mask -->
+                </if>
+            </if>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItem" list="budgetItemList">
+                <econdition field-name="budgetId"/></entity-find>
+
+            <if condition="budget.timePeriodId &amp;&amp; budget.subTimePeriodTypeId">
+                <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
+                        in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+                <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
+                <set field="subTimePeriodIds" from="new ArrayList(subTimePeriodList*.timePeriodId)"/>
+            </if>
+            <set field="subTimePeriodSize" from="subTimePeriodList?.size() ?: 0"/>
+
+            <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent" out-map="expenseClassOut"
+                    in-map="[parentEnumId:'EXPENSE', includeNested:true]"/>
+            <set field="expenseClassEnumIds" from="expenseClassOut.enumIdSet"/>
+
+            <script><![CDATA[
+                budgetItemsByGlId = new HashMap<String, ArrayList>()
+                for (Map curBi in budgetItemList) {
+                    String glAccountId = curBi.glAccountId
+                    ArrayList curBiList = budgetItemsByGlId.get(glAccountId)
+                    if (curBiList == null) {
+                        curBiList = new ArrayList([null, null, null, null, null, null, null, null, null, null, null, null, null]) // 13 null entries
+                        budgetItemsByGlId.put(glAccountId, curBiList)
+                    }
+
+                    String subTimePeriodId = (String) curBi.subTimePeriodId
+                    if (subTimePeriodId == null) {
+                        curBiList.set(0, curBi)
+                    } else {
+                        int subPeriodIndex = subTimePeriodIds.indexOf(subTimePeriodId)
+                        if (subPeriodIndex >= 0) curBiList.set(subPeriodIndex + 1, curBi)
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="store" noun="BudgetItemsSubPeriods">
+        <in-parameters>
+            <parameter name="budgetId" required="true"/>
+            <parameter name="glAccountId" required="true"/>
+            <parameter name="amountMain" type="BigDecimal"/>
+            <parameter name="amountPer1" type="BigDecimal"/><parameter name="amountPer2" type="BigDecimal"/><parameter name="amountPer3" type="BigDecimal"/>
+            <parameter name="amountPer4" type="BigDecimal"/><parameter name="amountPer5" type="BigDecimal"/><parameter name="amountPer6" type="BigDecimal"/>
+            <parameter name="amountPer7" type="BigDecimal"/><parameter name="amountPer8" type="BigDecimal"/><parameter name="amountPer9" type="BigDecimal"/>
+            <parameter name="amountPer10" type="BigDecimal"/><parameter name="amountPer11" type="BigDecimal"/><parameter name="amountPer12" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>
+            <if condition="!budget.timePeriodId || !budget.subTimePeriodTypeId">
+                <return error="true" message="Budget must have a Time Period and a Sub-Period Type"/></if>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItem" list="budgetItemList">
+                <econdition field-name="budgetId"/><econdition field-name="glAccountId"/></entity-find>
+
+            <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
+                          in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+            <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
+            <set field="subTimePeriodIds" from="new ArrayList(subTimePeriodList*.timePeriodId)"/>
+
+            <set field="specifiedPerTotal" from="0.0"/>
+            <set field="specifiedPerCount" from="0"/>
+            <iterate list="subTimePeriodIds" entry="subTimePeriodId">
+                <set field="amount" from="context.get('amountPer' + (subTimePeriodId_index + 1))"/>
+                <if condition="amount">
+                    <set field="specifiedPerTotal" from="specifiedPerTotal + amount"/>
+                    <set field="specifiedPerCount" from="specifiedPerCount + 1"/>
+                </if>
+            </iterate>
+
+            <set field="subAmountTotal" from="0.0"/>
+            <iterate list="subTimePeriodIds" entry="subTimePeriodId">
+                <set field="budgetItems" from="budgetItemList.findAll({ it.subTimePeriodId == subTimePeriodId })"/>
+                <while condition="budgetItems.size() &gt; 1">
+                    <set field="delBudgetItem" from="budgetItems.remove(0)"/>
+                    <entity-delete value-field="delBudgetItem"/>
+                </while>
+                <set field="budgetItem" from="budgetItems ? budgetItems.get(0) : null"/>
+                <set field="budgetItemSeqId" from="budgetItem?.budgetItemSeqId"/>
+                <set field="amount" from="context.get('amountPer' + (subTimePeriodId_index + 1))"/>
+                <if condition="amount == null &amp;&amp; amountMain &amp;&amp; amountMain &gt; specifiedPerTotal">
+                    <set field="amount" from="(amountMain - specifiedPerTotal) / (subTimePeriodIds.size() - specifiedPerCount)"/></if>
+                <if condition="amount != null"><then>
+                    <set field="subAmountTotal" from="subAmountTotal + amount"/>
+                    <if condition="budgetItem != null"><then>
+                        <set field="budgetItem.amount" from="amount"/>
+                        <entity-update value-field="budgetItem"/>
+                    </then><else>
+                        <service-call name="create#mantle.other.budget.BudgetItem" in-map="context"/>
+                    </else></if>
+                </then><else-if condition="budgetItemSeqId">
+                    <service-call name="delete#mantle.other.budget.BudgetItem" in-map="context"/>
+                </else-if></if>
+            </iterate>
+
+            <set field="subTimePeriodId" from="null"/>
+            <set field="budgetItems" from="budgetItemList.findAll({ it.subTimePeriodId == null })"/>
+            <while condition="budgetItems.size() &gt; 1">
+                <set field="delBudgetItem" from="budgetItems.remove(0)"/>
+                <entity-delete value-field="delBudgetItem"/>
+            </while>
+            <set field="budgetItem" from="budgetItems ? budgetItems.get(0) : null"/>
+            <set field="budgetItemSeqId" from="budgetItem?.budgetItemSeqId"/>
+            <set field="amountMain" from="amountMain ?: subAmountTotal ?: null"/>
+            <if condition="amountMain != null"><then>
+                <set field="amount" from="amountMain"/>
+                <if condition="budgetItem != null"><then>
+                    <set field="budgetItem.amount" from="amount"/>
+                    <entity-update value-field="budgetItem"/>
+                </then><else>
+                    <service-call name="create#mantle.other.budget.BudgetItem" in-map="context"/>
+                </else></if>
+            </then><else-if condition="budgetItemSeqId">
+                <service-call name="delete#mantle.other.budget.BudgetItem" in-map="context"/>
+            </else-if></if>
+        </actions>
+    </service>
+
+    <service verb="store" noun="BudgetItemDetail">
+        <in-parameters>
+            <parameter name="budgetItemDetailId"/>
+            <auto-parameters entity-name="mantle.other.budget.BudgetItemDetail" include="nonpk"/>
+            <parameter name="budgetId" required="true"/>
+            <parameter name="budgetItemSeqId" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="budgetItemDetailId"/></out-parameters>
+        <actions>
+            <if condition="amount != null"><then>
+                <service-call name="store#mantle.other.budget.BudgetItemDetail" in-map="context" out-map="context"/>
+            </then><else-if condition="budgetItemDetailId">
+                <service-call name="delete#mantle.other.budget.BudgetItemDetail" in-map="context" out-map="context"/>
+            </else-if></if>
+        </actions>
+    </service>
+    <service verb="store" noun="BudgetItemDetailsSubPeriods">
+        <in-parameters>
+            <parameter name="budgetId" required="true"/>
+            <parameter name="glAccountId" required="true"/>
+            <parameter name="assetId"><description>Must pass assetId or facilityId</description></parameter>
+            <parameter name="facilityId"/>
+            <parameter name="amountMain" type="BigDecimal"/>
+            <parameter name="amountPer1" type="BigDecimal"/><parameter name="amountPer2" type="BigDecimal"/><parameter name="amountPer3" type="BigDecimal"/>
+            <parameter name="amountPer4" type="BigDecimal"/><parameter name="amountPer5" type="BigDecimal"/><parameter name="amountPer6" type="BigDecimal"/>
+            <parameter name="amountPer7" type="BigDecimal"/><parameter name="amountPer8" type="BigDecimal"/><parameter name="amountPer9" type="BigDecimal"/>
+            <parameter name="amountPer10" type="BigDecimal"/><parameter name="amountPer11" type="BigDecimal"/><parameter name="amountPer12" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <if condition="!assetId &amp;&amp; !facilityId"><return message="Not storing budget item details, no assetId or facilityId specified"/></if>
+
+            <entity-find-one entity-name="mantle.other.budget.Budget" value-field="budget"/>
+            <if condition="!budget.timePeriodId || !budget.subTimePeriodTypeId">
+                <return error="true" message="Budget must have a Time Period and a Sub-Period Type"/></if>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItem" list="budgetItemList">
+                <econdition field-name="budgetId"/><econdition field-name="glAccountId"/></entity-find>
+            <set field="budgetItemSeqIds" from="budgetItemList*.budgetItemSeqId"/>
+
+            <entity-find entity-name="mantle.other.budget.BudgetItemDetail" list="budgetItemDetailList">
+                <econdition field-name="budgetId"/><econdition field-name="budgetItemSeqId" operator="in" from="budgetItemSeqIds"/>
+                <econdition field-name="assetId" ignore-if-empty="true"/>
+                <econdition field-name="facilityId" ignore-if-empty="true"/>
+            </entity-find>
+
+            <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="subPeriodOut"
+                          in-map="[parentPeriodId:budget.timePeriodId, timePeriodTypeId:budget.subTimePeriodTypeId, createMissing:true]"/>
+            <set field="subTimePeriodList" from="subPeriodOut.timePeriodList"/>
+            <set field="subTimePeriodIds" from="new ArrayList(subTimePeriodList*.timePeriodId)"/>
+
+            <set field="subAmountTotal" from="0.0"/>
+            <iterate list="subTimePeriodIds" entry="subTimePeriodId">
+                <set field="budgetItem" from="budgetItemList.find({ it.subTimePeriodId == subTimePeriodId })"/>
+                <set field="budgetItemSeqId" from="budgetItem?.budgetItemSeqId"/>
+                <set field="amount" from="context.get('amountPer' + (subTimePeriodId_index + 1))"/>
+
+                <if condition="budgetItemSeqId"><then>
+                    <set field="budgetItemDetail" from="budgetItemDetailList.find({ it.budgetItemSeqId == budgetItemSeqId })"/>
+                    <set field="budgetItemDetailId" from="budgetItemDetail?.budgetItemDetailId"/>
+
+                    <if condition="amount != null"><then>
+                        <set field="subAmountTotal" from="subAmountTotal + amount"/>
+                        <if condition="budgetItemDetail != null"><then>
+                            <set field="budgetItemDetail.amount" from="amount"/>
+                            <entity-update value-field="budgetItemDetail"/>
+                        </then><else>
+                            <service-call name="create#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+                        </else></if>
+                    </then><else-if condition="budgetItemDetailId">
+                        <service-call name="delete#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+                    </else-if></if>
+                </then><else-if condition="amount != null">
+                    <service-call name="create#mantle.other.budget.BudgetItem" out-map="budgetItemOut" out-map-add-to-existing="false"
+                                  in-map="[budgetId:budgetId, glAccountId:glAccountId, subTimePeriodId:subTimePeriodId, amount:amount]"/>
+                    <set field="budgetItemSeqId" from="budgetItemOut.budgetItemSeqId"/>
+                    <set field="budgetItemDetailId" from="null"/>
+                    <service-call name="create#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+                </else-if></if>
+            </iterate>
+
+            <set field="subTimePeriodId" from="null"/>
+            <set field="budgetItems" from="budgetItemList.findAll({ it.subTimePeriodId == null })"/>
+            <while condition="budgetItems.size() &gt; 1">
+                <set field="delBudgetItem" from="budgetItems.remove(0)"/>
+                <entity-delete value-field="delBudgetItem"/>
+            </while>
+            <set field="budgetItem" from="budgetItems ? budgetItems.get(0) : null"/>
+            <set field="budgetItemSeqId" from="budgetItem?.budgetItemSeqId"/>
+            <set field="amount" from="amountMain ?: subAmountTotal ?: null"/>
+
+            <if condition="budgetItemSeqId"><then>
+                <set field="budgetItemDetail" from="budgetItemDetailList.find({ it.budgetItemSeqId == budgetItemSeqId })"/>
+                <set field="budgetItemDetailId" from="budgetItemDetail?.budgetItemDetailId"/>
+
+                <if condition="amount != null"><then>
+                    <set field="subAmountTotal" from="subAmountTotal + amount"/>
+                    <if condition="budgetItemDetail != null"><then>
+                        <set field="budgetItemDetail.amount" from="amount"/>
+                        <entity-update value-field="budgetItemDetail"/>
+                    </then><else>
+                        <service-call name="create#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+                    </else></if>
+                </then><else-if condition="budgetItemDetailId">
+                    <service-call name="delete#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+                </else-if></if>
+            </then><else-if condition="amount != null">
+                <service-call name="create#mantle.other.budget.BudgetItem" out-map="budgetItemOut" out-map-add-to-existing="false"
+                              in-map="[budgetId:budgetId, glAccountId:glAccountId, subTimePeriodId:subTimePeriodId]"/>
+                <set field="budgetItemSeqId" from="budgetItemOut.budgetItemSeqId"/>
+                <set field="budgetItemDetailId" from="null"/>
+                <service-call name="create#mantle.other.budget.BudgetItemDetail" in-map="context"/>
+            </else-if></if>
+        </actions>
+    </service>
+</services>

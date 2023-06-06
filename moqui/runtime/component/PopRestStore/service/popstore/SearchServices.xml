@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="search" noun="All">
+        <in-parameters>
+            <parameter name="searchParameter"/>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="productCategoryId"/>
+            <parameter name="locale"/>
+            <parameter name="pageIndex" type="Integer" default="0"/>
+            <parameter name="pageSize" type="Integer" default="20"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="searchParameter"/>
+            <parameter name="productSearchResults"/>
+            <parameter name="contentSearchResults"/>
+            <parameter name="blogSearchResults"/>
+        </out-parameters>
+        <actions>
+            <if condition="productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
+                <set field="productDataDocumentId" from="productStore?.productDataDocumentId"/>
+                <set field="contentDataDocumentId" from="productStore?.contentDataDocumentId"/>
+                <set field="blogDataDocumentId" from="productStore?.blogDataDocumentId"/>
+            </if>
+            <if condition="productDataDocumentId">
+                <service-call name="popstore.SearchServices.search#Products" out-map="productSearchResults"
+                        in-map="[searchParameter:searchParameter, productDataDocumentId:productDataDocumentId, pageIndex:pageIndex, pageSize:pageSize, productStoreId: productStoreId]"/>
+            </if>
+            <if condition="contentDataDocumentId">
+                <service-call name="popstore.SearchServices.search#Content" out-map="contentSearchResults"
+                          in-map="[searchParameter:searchParameter, contentDataDocumentId:productStore.contentDataDocumentId, pageIndex:pageIndex, pageSize:pageSize]"/>
+            </if>
+            <if condition="blogDataDocumentId">
+                <service-call name="popstore.SearchServices.search#Blog" out-map="blogSearchResults"
+                          in-map="[searchParameter:searchParameter, blogDataDocumentId:productStore.blogDataDocumentId, pageIndex:pageIndex, pageSize:pageSize]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="search" noun="Products">
+        <in-parameters>
+            <parameter name="searchParameter"/>
+            <parameter name="productDataDocumentId"/>
+            <parameter name="productCategoryId"/>
+            <parameter name="productStoreId"/>
+            <parameter name="productFeatureIds" type="List"><parameter name="productFeatureId"/></parameter>
+            <parameter name="priceUomId"/>
+            <parameter name="locale"/>
+            <parameter name="orderByFields" type="List"><parameter name="orderByField"/></parameter>
+            <parameter name="pageIndex" type="Integer" default="0"/>
+            <parameter name="pageSize" type="Integer" default="20"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productList" type="List"><parameter name="productInfo" type="Map"/></parameter>
+            <parameter name="productListCount" type="Integer"><description>The total count of hits, not just the limited number returned.</description></parameter>
+            <parameter name="productListPageIndex" type="Integer"/>
+            <parameter name="productListPageSize" type="Integer"/>
+            <parameter name="productListPageMaxIndex" type="Integer"/>
+            <parameter name="productListPageRangeLow" type="Integer"/>
+            <parameter name="productListPageRangeHigh" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <if condition="productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
+                <if condition="!priceUomId"><set field="priceUomId" from="productStore?.defaultCurrencyUomId"/></if>
+                <set field="vendorPartyId" from="productStore?.organizationPartyId"/>
+            </if>
+
+            <if condition="!productCategoryId &amp;&amp; productStoreId">
+                <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="searchPscList" cache="true">
+                    <date-filter/><econdition field-name="productStoreId"/>
+                    <econdition field-name="storeCategoryTypeEnumId" value="PsctSearch"/>
+                </entity-find>
+                <set field="productCategoryId" from="searchPscList?.first()?.productCategoryId"/>
+                <if condition="!productCategoryId">
+                    <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="searchPscList" cache="true">
+                        <date-filter/><econdition field-name="productStoreId"/>
+                        <econdition field-name="storeCategoryTypeEnumId" value="PsctViewAllow"/>
+                    </entity-find>
+                    <set field="productCategoryId" from="searchPscList?.first()?.PsctSearch"/>
+                </if>
+            </if>
+            <if condition="!productCategoryId"><return type="danger" message="No search category found for store ${productStoreId}"/></if>
+
+            <!-- TODO/FUTURE: better handling of search input for more natural results -->
+            <set field="queryString" from="searchParameter ? searchParameter.split(' ').collect({ (!it || it in ['AND', 'OR', 'NOT'] || it.contains('*')) ? it : it + '*' }).join(' ') : ''"/>
+            <!-- NOTE: with ElasticSearch and a date range query like this there is a time zone issue, reliable by date but not exact time -->
+            <set field="nowTimeLong" from="ec.user.nowTimestamp.time"/>
+            <script><![CDATA[
+                nestedQueryMap = [categories:"""{"bool":{"must":[ {"match":{"categories.productCategoryId":"${productCategoryId}"}},
+                        {"range":{"categories.categoryFromDate":{"lte":${nowTimeLong}}}},
+                        {"bool":{"should":[{"range":{"categories.categoryThruDate":{"gte":${nowTimeLong}}}}, {"bool":{"must_not":{"exists":{"field":"categories.categoryThruDate"}}}}]}}
+                    ]}}"""]
+            ]]></script>
+            <log level="warn" message="productDataDocumentId: ${productDataDocumentId}\n queryString: ${queryString}\n nestedQueryMap: ${nestedQueryMap}"/>
+
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="productDataDocument" cache="true">
+                <field-map field-name="dataDocumentId" from="productDataDocumentId"/></entity-find-one>
+            <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="productSearchOut"
+                    in-map="[queryString:queryString, nestedQueryMap:nestedQueryMap, indexName:productDataDocument.indexName,
+                        documentType:productDataDocument.dataDocumentId, pageIndex:pageIndex, pageSize:pageSize]"/>
+            <set field="productList" from="productSearchOut.documentList"/>
+            <set field="productListCount" from="productSearchOut.documentListCount"/>
+            <set field="productListPageIndex" from="productSearchOut.documentListPageIndex"/>
+            <set field="productListPageSize" from="productSearchOut.documentListPageSize"/>
+            <set field="productListPageMaxIndex" from="productSearchOut.documentListPageMaxIndex"/>
+            <set field="productListPageRangeLow" from="productSearchOut.documentListPageRangeLow"/>
+            <set field="productListPageRangeHigh" from="productSearchOut.documentListPageRangeHigh"/>
+
+            <!-- get prices, small/medium image info for products -->
+            <iterate list="productList" entry="productInfo">
+                <set field="productInfo.productName" from="productInfo.name"/>
+
+                <!-- TODO: would be more efficient to pull prices from the doc, filter by date, store, etc, etc, like: "prices": [ { "price": 11119.99, "priceTypeEnumId": "PptCurrent", "pricePurposeEnumId": "PppPurchase", "priceFromDate": 1265184000000, "priceUomId": "USD" } ] -->
+                <service-call name="mantle.product.PriceServices.get#ProductPrice" out-map="priceMap" out-map-add-to-existing="false"
+                              in-map="[productId:productInfo.productId, priceUomId:priceUomId, productStoreId:productStoreId,
+                                vendorPartyId:vendorPartyId, customerPartyId:customerPartyId]"/>
+                <set field="productInfo.price" from="priceMap.price"/>
+                <set field="productInfo.listPrice" from="priceMap.listPrice"/>
+                <set field="productInfo.priceUomId" from="priceMap.priceUomId"/>
+
+                <set field="smallImageInfo" from="null"/>
+                <set field="mediumImageInfo" from="null"/>
+                <entity-find entity-name="mantle.product.ProductContent" list="productContentList" cache="true">
+                    <date-filter/><econdition field-name="productId" from="productInfo.productId"/>
+                    <order-by field-name="sequenceNum,-fromDate"/>
+                </entity-find>
+                <if condition="locale">
+                    <!-- filter after by locale to streamline cached find -->
+                    <set field="langLocale" from="locale.contains('_') ? locale.substring(locale.indexOf('_')) : null"/>
+                    <set field="productContentList" from="productContentList.findAll({ it.locale == null || it.locale == locale || it.locale == langLocale })"/>
+                </if>
+                <if condition="productContentList">
+                    <!-- medium can be PcntImageMedium or PcntImageLarge -->
+                    <set field="mediumImageInfo" from="productContentList.find({ 'PcntImageMedium'.equals(it.productContentTypeEnumId) })"/>
+                    <if condition="mediumImageInfo == null">
+                        <set field="mediumImageInfo" from="productContentList.find({ 'PcntImageLarge'.equals(it.productContentTypeEnumId) })"/></if>
+                    <!-- small can be PcntImageSmall or from medium we just looked up -->
+                    <set field="smallImageInfo" from="productContentList.find({ 'PcntImageSmall'.equals(it.productContentTypeEnumId) })"/>
+                    <if condition="smallImageInfo == null"><set field="smallImageInfo" from="mediumImageInfo"/></if>
+                </if>
+
+                <if condition="smallImageInfo != null"><set field="productInfo.smallImageInfo" from="smallImageInfo"/></if>
+                <if condition="mediumImageInfo != null"><set field="productInfo.mediumImageInfo" from="mediumImageInfo"/></if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="search" noun="Content">
+        <in-parameters>
+            <parameter name="searchParameter"/>
+            <parameter name="contentDataDocumentId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentDocumentList"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="contentDataDocument" cache="true">
+                <field-map field-name="dataDocumentId" from="contentDataDocumentId"/></entity-find-one>
+            <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="contentSearchOut"
+                          in-map="[queryString:searchParameter, indexName:contentDataDocument.indexName, documentType:contentDataDocument.dataDocumentId]"/>
+            <set field="contentDocumentList" from="contentSearchOut.documentList"/>
+        </actions>
+    </service>
+
+    <service verb="search" noun="Blog">
+        <in-parameters>
+            <parameter name="searchParameter"/>
+            <parameter name="blogDataDocumentId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="blogDocumentList"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="blogDataDocument" cache="true">
+                <field-map field-name="dataDocumentId" from="blogDataDocumentId"/></entity-find-one>
+            <service-call name="org.moqui.search.SearchServices.search#DataDocuments" out-map="blogSearchOut"
+                          in-map="[queryString:searchParameter, indexName:blogDataDocument.indexName, documentType:blogDataDocument.dataDocumentId]"/>
+            <set field="blogDocumentList" from="blogSearchOut.documentList"/>
+        </actions>
+    </service>
+
+</services>

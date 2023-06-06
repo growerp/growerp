@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="AgreementContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.agreement.AgreementContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="agreementId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="agreementContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.agreement.AgreementContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.party.AgreementServices.save#AgreementContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="AgreementContent">
+        <in-parameters>
+            <parameter name="agreementContentId" required="true"/>
+            <auto-parameters entity-name="mantle.party.agreement.AgreementContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.party.agreement.AgreementContent" value-field="agreementContent"/>
+                <service-call name="mantle.party.AgreementServices.save#AgreementContentFile" out-map="context"
+                        in-map="context + [agreementId:agreementContent.agreementId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.party.agreement.AgreementContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="AgreementContentFile">
+        <in-parameters>
+            <parameter name="agreementContentId" required="true"/>
+            <parameter name="agreementId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/agreement/${agreementId}/content_${agreementContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.party.agreement.AgreementContent"
+                    in-map="[agreementContentId:agreementContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+</services>

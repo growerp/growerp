@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Table Stats">
+
+    <transition name="entityDetail"><default-response url="../DataEdit/EntityDetail"/></transition>
+
+    <actions>
+        <set field="orderByField" from="orderByField ?: ('empty' == viewOption ? 'tableName' : '-rowCount')"/>
+
+        <set field="entityListOrig" from="ec.entity.getAllEntitiesInfo(orderByField, filterRegexp, false, true)"/>
+        <set field="entityInfoList" from="[]"/>
+        <iterate list="entityListOrig" entry="entityInfo">
+            <script><![CDATA[
+                long rowCount = ec.entity.find(entityInfo.fullEntityName).count()
+                entityInfo.put("rowCount", rowCount)
+                if ('empty' == viewOption) {
+                    if (rowCount == 0) entityInfoList.add(entityInfo)
+                } else if ('non-empty' == viewOption) {
+                    if (rowCount > 0) entityInfoList.add(entityInfo)
+                } else {
+                    entityInfoList.add(entityInfo)
+                }
+            ]]></script>
+        </iterate>
+        <if condition="orderByField &amp;&amp; orderByField.contains('rowCount')">
+            <script>orderMapList(entityInfoList, [orderByField])</script>
+        </if>
+    </actions>
+    <widgets>
+        <form-single name="FilterForm" transition=".">
+            <field name="filterRegexp"><default-field><text-line/></default-field></field>
+            <field name="viewOption"><default-field title="View Option">
+                <radio>
+                    <option key="all" text="All Entities"/>
+                    <option key="empty" text="Empty Tables"/>
+                    <option key="non-empty" text="Non-Empty Tables"/>
+                </radio>
+            </default-field></field>
+            <field name="submitButton"><default-field title="View"><submit/></default-field></field>
+            <field-layout><field-row-big><field-ref name="filterRegexp"/><field-ref name="viewOption"/>
+                <field-ref name="submitButton"/></field-row-big></field-layout>
+        </form-single>
+        <form-list name="EntityInfoList" list="entityInfoList" skip-form="true">
+            <field name="fullEntityName">
+                <header-field show-order-by="true"/>
+                <default-field><link text="${fullEntityName}" link-type="anchor"
+                        url="entityDetail" parameter-map="[selectedEntity:fullEntityName]"/></default-field>
+            </field>
+            <field name="tableName">
+                <header-field show-order-by="true"/>
+                <default-field><display/></default-field>
+            </field>
+            <field name="rowCount">
+                <header-field show-order-by="true"/>
+                <default-field><display/></default-field>
+            </field>
+        </form-list>
+    </widgets>
+</screen>

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="service-definition-3.xsd">
+
+    <!-- ==================================================== -->
+    <!-- ========== DataDocument and Feed Services ========== -->
+    <!-- ==================================================== -->
+
+    <!-- org.moqui.impl.EntityServices.index#DataDocuments moved to org.moqui.search.SearchServices.index#DataDocuments -->
+    <!-- org.moqui.impl.EntityServices.put#DataDocumentMappings moved to org.moqui.search.SearchServices.put#DataDocumentMappings -->
+    <!-- org.moqui.impl.EntityServices.index#DataFeedDocuments moved to org.moqui.search.SearchServices.index#DataFeedDocuments -->
+    <!-- org.moqui.impl.EntityServices.search#DataDocuments moved to org.moqui.search.SearchServices.search#DataDocuments -->
+    <!-- org.moqui.impl.EntityServices.search#CountBySource moved to org.moqui.search.SearchServices.search#CountBySource -->
+
+    <service verb="get" noun="DataFeedDocuments">
+        <in-parameters>
+            <parameter name="dataFeedId" required="true"/>
+            <parameter name="fromUpdateStamp" type="Timestamp"/>
+            <parameter name="thruUpdateStamp" type="Timestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="documentList" type="List"><parameter name="document" type="Map"/></parameter></out-parameters>
+        <actions>
+            <set field="documentList" from="ec.entity.getEntityDataFeed().getFeedDocuments(dataFeedId, fromUpdateStamp, thruUpdatedStamp)"/>
+        </actions>
+    </service>
+    <service verb="get" noun="DataFeedLatestDocuments">
+        <description>This service gets the latest documents for a DataFeed based on DataFeed.lastFeedStamp, and updates
+            lastFeedStamp to the current time.</description>
+        <in-parameters><parameter name="dataFeedId" required="true"/></in-parameters>
+        <out-parameters><parameter name="documentList" type="List"><parameter name="document" type="Map"/></parameter></out-parameters>
+        <actions>
+            <set field="documentList" from="ec.entity.getEntityDataFeed().getFeedLatestDocuments(dataFeedId)"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="DataDocument">
+        <in-parameters>
+            <auto-parameters include="nonpk"/>
+            <parameter name="dataDocumentId" required="true"><matches regexp="[A-Z]\w*" message="Must start with a upper case letter and contain only letters and digits"/></parameter>
+            <parameter name="indexName"><matches regexp="[a-z][a-z0-9_]*" message="Must contain only lower case letters, digits, and underscore"/></parameter>
+            <parameter name="userGroupId"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="existing"/>
+            <if condition="existing != null || ec.entity.isEntityDefined(dataDocumentId)"><return error="true" message="ID '${dataDocumentId}' already in use"/></if>
+
+            <service-call name="create#moqui.entity.document.DataDocument" in-map="context" out-map="context"/>
+            <if condition="userGroupId"><service-call name="create#moqui.entity.document.DataDocumentUserGroup"
+                    in-map="[dataDocumentId:dataDocumentId, userGroupId:userGroupId]"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="DataDocument">
+        <implements service="org.moqui.impl.EntityServices.create#DataDocument"/>
+        <actions>
+            <service-call name="update#moqui.entity.document.DataDocument" in-map="context" out-map="context"/>
+            <if condition="userGroupId">
+                <entity-find entity-name="moqui.entity.document.DataDocumentUserGroup" list="ddugList">
+                    <econdition field-name="dataDocumentId"/></entity-find>
+                <if condition="ddugList.size() == 1 &amp;&amp; ddugList[0].userGroupId != userGroupId">
+                    <service-call name="delete#moqui.entity.document.DataDocumentUserGroup"
+                            in-map="[dataDocumentId:dataDocumentId, userGroupId:ddugList[0].userGroupId]"/>
+                    <service-call name="create#moqui.entity.document.DataDocumentUserGroup"
+                            in-map="[dataDocumentId:dataDocumentId, userGroupId:userGroupId]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="clone" noun="DataDocument">
+        <in-parameters>
+            <parameter name="dataDocumentId" required="true"/>
+            <parameter name="newDataDocumentId" required="true"><matches regexp="[A-Z]\w*" message="Must start with a upper case letter and contain only letters and digits"/></parameter>
+            <parameter name="newIndexName"><matches regexp="[a-z][a-z0-9_]*" message="Must contain only lower case letters, digits, and underscore"/></parameter>
+            <parameter name="copyConditions" default="false" type="Boolean"/>
+            <parameter name="copyLinks" default="false" type="Boolean"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="newDataDocument" cache="false">
+                <field-map field-name="dataDocumentId" from="newDataDocumentId"/></entity-find-one>
+            <if condition="newDataDocument">
+                <log level="info" message="Not cloning DataDocument with ID [${dataDocumentId}] to new ID [${newDataDocumentId}], already exists"/>
+                <return/>
+            </if>
+
+            <entity-find-one entity-name="moqui.entity.document.DataDocument" value-field="dataDocument" cache="false"/>
+            <set field="dataDocument.dataDocumentId" from="newDataDocumentId"/>
+            <if condition="newIndexName"><set field="dataDocument.indexName" from="newIndexName"/></if>
+            <entity-create value-field="dataDocument"/>
+
+            <entity-find entity-name="moqui.entity.document.DataDocumentField" list="ddfList">
+                <econdition field-name="dataDocumentId"/></entity-find>
+            <iterate list="ddfList" entry="ddf">
+                <set field="ddf.dataDocumentId" from="newDataDocumentId"/>
+                <entity-create value-field="ddf"/>
+            </iterate>
+
+            <entity-find entity-name="moqui.entity.document.DataDocumentRelAlias" list="ddraList">
+                <econdition field-name="dataDocumentId"/></entity-find>
+            <iterate list="ddraList" entry="ddra">
+                <set field="ddra.dataDocumentId" from="newDataDocumentId"/>
+                <entity-create value-field="ddra"/>
+            </iterate>
+
+            <if condition="copyConditions">
+                <entity-find entity-name="moqui.entity.document.DataDocumentCondition" list="ddcList">
+                    <econdition field-name="dataDocumentId"/></entity-find>
+                <iterate list="ddcList" entry="ddc">
+                    <set field="ddc.dataDocumentId" from="newDataDocumentId"/>
+                    <entity-create value-field="ddc"/>
+                </iterate>
+            </if>
+
+            <if condition="copyLinks">
+                <entity-find entity-name="moqui.entity.document.DataDocumentLink" list="ddlList">
+                    <econdition field-name="dataDocumentId"/></entity-find>
+                <iterate list="ddlList" entry="ddl">
+                    <set field="ddl.dataDocumentId" from="newDataDocumentId"/>
+                    <entity-create value-field="ddl"/>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+    <service verb="create" noun="DataDocumentField">
+        <in-parameters>
+            <parameter name="dataDocumentId" required="true"/>
+            <parameter name="fieldPath" required="true"/>
+            <auto-parameters entity-name="moqui.entity.document.DataDocumentField" include="nonpk"/>
+        </in-parameters>
+        <actions>
+            <if condition="fieldNameAlias"><set field="fieldNameAlias" from="prettyToCamelCase(fieldNameAlias, false)"/></if>
+            <service-call name="create#moqui.entity.document.DataDocumentField" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="DataDocumentField">
+        <in-parameters>
+            <parameter name="dataDocumentId" required="true"/>
+            <parameter name="fieldSeqId"/>
+            <parameter name="fieldPath" required="true"/>
+            <auto-parameters entity-name="moqui.entity.document.DataDocumentField" include="nonpk"/>
+        </in-parameters>
+        <actions>
+            <if condition="fieldNameAlias"><set field="fieldNameAlias" from="prettyToCamelCase(fieldNameAlias, false)"/></if>
+            <if condition="!fieldSeqId">
+                <entity-find entity-name="moqui.entity.document.DataDocumentField" list="ddfList">
+                    <econdition field-name="dataDocumentId"/><econdition field-name="fieldPath"/></entity-find>
+                <set field="fieldSeqId" from="ddfList ? ddfList[0].fieldSeqId : null"/>
+            </if>
+            <service-call name="update#moqui.entity.document.DataDocumentField" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="send" noun="DataDocumentNotifications" authenticate="false">
+        <description>
+            Send a NotificationMessage for each in documentList. Finds all userId fields nested somewhere in
+            the document. Only sent to users where a userId is found, and only sent if userId values are found.
+
+            The topic will be the dataDocumentId (document._type). If no NotificationTopic record is found for the topic
+            will set the NotificationMessage title to DataDocument.documentTitle and will find the first DataDocumentLink
+            and set NotificationMessage link to its linkUrl.
+        </description>
+        <implements service="org.moqui.EntityServices.receive#DataFeed"/>
+        <actions>
+            <iterate list="documentList" entry="document">
+                <set field="userIdSet" from="new HashSet()"/>
+                <script>findAllFieldsNestedMap("userId", document, userIdSet)</script>
+                <script>findAllFieldsNestedMap("fromUserId", document, userIdSet)</script>
+                <script>findAllFieldsNestedMap("toUserId", document, userIdSet)</script>
+                <if condition="!userIdSet">
+                    <log level="info" message="Not sending ${document._type} DataDocument notification, no userIds found"/>
+                    <continue/>
+                </if>
+
+                <script><![CDATA[
+                    def nm = ec.makeNotificationMessage()
+                    nm.topic((String) document._type).message((Map<String, Object>) document).userIds((Set) userIdSet)
+                    def notificationTopic = nm.getNotificationTopic()
+                    if (notificationTopic == null && document._type) {
+                        def dataDocument = ec.entity.find("moqui.entity.document.DataDocument").condition("dataDocumentId", document._type).useCache(true).one()
+                        if (dataDocument.documentTitle) nm.title(dataDocument.documentTitle)
+                        def dataDocumentLinks = dataDocument.findRelated("links", null, null, true, false)
+                        if (dataDocumentLinks) nm.link(dataDocumentLinks[0].linkUrl)
+                    }
+                    nm.send()
+                ]]></script>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- 2017-06: clean out DataDocument and DataFeed tables for update/recreate:
+        - DROP TABLE DATA_FEED_DOCUMENT
+        - DROP TABLE DATA_FEED
+
+        - DROP TABLE DATA_DOCUMENT_LINK
+        - DROP TABLE DATA_DOCUMENT_CONDITION
+        - DROP TABLE DATA_DOCUMENT_REL_ALIAS
+        - DROP TABLE DATA_DOCUMENT_FIELD
+        - DROP TABLE DATA_DOCUMENT_USER_GROUP
+        - DROP TABLE DATA_DOCUMENT
+        - restart, load seed, index feeds
+    -->
+    <service verb="delete" noun="AllDataDocumentsAndFeeds">
+        <description>To fully update data documents and feeds from seed data: run this, import 'seed' data, run feed indexes.
+            If any custom data documents (not in seed data) are in place they will be lost.</description>
+        <actions>
+            <entity-delete-by-condition entity-name="moqui.entity.feed.DataFeedDocument"/>
+            <entity-delete-by-condition entity-name="moqui.entity.feed.DataFeed"/>
+
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocumentUserGroup"/>
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocumentLink"/>
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocumentCondition"/>
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocumentRelAlias"/>
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocumentField"/>
+            <entity-delete-by-condition entity-name="moqui.entity.document.DataDocument"/>
+        </actions>
+    </service>
+
+    <!-- =========================================== -->
+    <!-- ========== DbViewEntity Services ========== -->
+    <!-- =========================================== -->
+
+    <service verb="create" noun="DbViewEntity">
+        <in-parameters>
+            <auto-parameters include="nonpk"/>
+            <parameter name="dbViewEntityName" required="true"><matches regexp="[A-Z]\w*" message="Must start with a upper case letter and contain only letters and digits"/></parameter>
+            <parameter name="packageName"><matches regexp="[a-z][a-z0-9\.]*" message="Must start with a lower case letter and contain only lower case letters, digits, and dot/period"/></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.entity.view.DbViewEntity" value-field="existing"/>
+            <if condition="existing || ec.entity.isEntityDefined(dbViewEntityName)"><return error="true" message="Name '${dbViewEntityName}' already in use"/></if>
+
+            <service-call name="create#moqui.entity.view.DbViewEntity" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <!-- ==================================================== -->
+    <!-- ========== Entity Data Snapshots Services ========== -->
+    <!-- ==================================================== -->
+
+    <service verb="export" noun="EntityDataSnapshot" transaction-timeout="3600">
+        <in-parameters>
+            <parameter name="fromDate" type="Timestamp"/>
+            <parameter name="thruDate" type="Timestamp"/>
+            <parameter name="entitiesToInclude" type="List"><parameter name="entityName"/></parameter>
+            <parameter name="entitiesToSkip" type="List"><parameter name="entityName"/></parameter>
+            <parameter name="baseFilename"/>
+            <parameter name="fileType" default-value="XML"/>
+            <parameter name="filePerEntity" type="Boolean" default="true"/>
+            <parameter name="isoDateTime" type="Boolean" default="false"/>
+            <parameter name="tableColumnNames" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters><parameter name="recordsWritten" type="Integer"/></out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.entity.EntityDataWriter
+                import org.moqui.context.ExecutionContext
+                ExecutionContext ec = context.ec
+                EntityDataWriter edw = ec.entity.makeDataWriter()
+
+                if (fromDate) edw.fromDate(ec.l10n.parseTimestamp(fromDate, null))
+                if (thruDate) edw.thruDate(ec.l10n.parseTimestamp(thruDate, null))
+                if (entitiesToInclude) {
+                    edw.entityNames(entitiesToInclude)
+                } else {
+                    edw.allEntities()
+                }
+                if (entitiesToSkip) edw.skipEntityNames(entitiesToSkip)
+
+                edw.fileType((String) fileType)
+                edw.isoDateTime(isoDateTime)
+                edw.tableColumnNames(tableColumnNames)
+
+                String baseName = baseFilename
+                if (!baseName) baseName = "MoquiSnapshot-${ec.l10n.format(ec.user.nowTimestamp, 'yyyyMMdd-HHmm')}"
+
+                if ("CSV".equals(fileType)) filePerEntity = true
+
+                if (filePerEntity) {
+                    recordsWritten = edw.zipDirectory(baseName, ec.factory.getRuntimePath() + "/db/snapshot/" + baseName + ".zip")
+                } else {
+                    recordsWritten = edw.zipFile(baseName + "." + fileType.toLowerCase(), ec.factory.getRuntimePath() + "/db/snapshot/" + baseName + ".zip")
+                }
+            ]]></script>
+        </actions>
+    </service>
+    <service verb="import" noun="EntityDataSnapshot" transaction-timeout="3600">
+        <in-parameters>
+            <parameter name="zipFilename" required="true"/>
+            <parameter name="dummyFks" type="Boolean" default="false"/>
+            <parameter name="useTryInsert" type="Boolean" default="false"/>
+            <parameter name="disableEntityEca" type="Boolean" default="true"/>
+            <parameter name="disableAuditLog" type="Boolean" default="true"/>
+            <parameter name="disableFkCreate" type="Boolean" default="true"/>
+            <parameter name="disableDataFeed" type="Boolean" default="true"/>
+            <parameter name="transactionTimeout" type="Integer" default="3600"/>
+        </in-parameters>
+        <out-parameters><parameter name="recordsLoaded" type="Long"/></out-parameters>
+        <actions>
+            <script><![CDATA[
+                import org.moqui.entity.EntityDataLoader
+                import org.moqui.context.ExecutionContext
+                ExecutionContext ec = context.ec
+                EntityDataLoader edl = ec.entity.makeDataLoader().dummyFks(dummyFks).useTryInsert(useTryInsert)
+                        .disableEntityEca(disableEntityEca).disableAuditLog(disableAuditLog)
+                        .disableFkCreate(disableFkCreate).disableDataFeed(disableDataFeed)
+                        .transactionTimeout(transactionTimeout)
+                edl.location(ec.factory.getRuntimePath() + "/db/snapshot/" + (String) zipFilename)
+                recordsLoaded = edl.load()
+                ec.cache.getCache("entity.sequence.bank")?.clear()
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ================================================ -->
+    <!-- ========== Entity Re-Encrypt Services ========== -->
+    <!-- ================================================ -->
+
+    <service verb="rewrite" noun="EntityEncryptedFieldsAll" authenticate="false" transaction="ignore">
+        <in-parameters>
+            <parameter name="entityNameRegex"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="entitiesUpdated" type="Long"/>
+            <parameter name="recordsUpdated" type="Long"/>
+        </out-parameters>
+        <actions>
+            <set field="entityNamePattern" from="entityNameRegex ? java.util.regex.Pattern.compile(entityNameRegex, (java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL)) : null"/>
+            <set field="entitiesUpdated" from="0L"/>
+            <set field="recordsUpdated" from="0L"/>
+            <iterate list="ec.entity.getAllEntityNames()" entry="entityName">
+                <if condition="entityNamePattern != null &amp;&amp; !entityNamePattern.matcher(entityName).matches()"><continue/></if>
+
+                <set field="entityDef" from="ec.entity.getEntityDefinition(entityName)"/>
+                <if condition="entityDef.isViewEntity"><continue/></if>
+                <if condition="entityDef.entityInfo.needsEncrypt">
+                    <log message="Starting encrypted fields rewrite for entity ${entityName}"/>
+                    <service-call name="org.moqui.impl.EntityServices.rewrite#EntityEncryptedFields" transaction="force-new"
+                            out-map="rewriteOut" out-map-add-to-existing="false" in-map="[entityName:entityName]"/>
+                    <log message="Finished encrypted fields rewrite for entity ${entityName}, updated ${rewriteOut.recordsUpdated} records"/>
+                    <set field="entitiesUpdated" from="entitiesUpdated + 1L"/>
+                    <set field="recordsUpdated" from="recordsUpdated + (rewriteOut.recordsUpdated ?: 0L)"/>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="rewrite" noun="EntityEncryptedFields" authenticate="anonymous-all" transaction-timeout="900">
+        <in-parameters>
+            <parameter name="entityName" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="recordsUpdated" type="Long"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            import org.moqui.context.ExecutionContext
+            import org.moqui.entity.EntityCondition
+            import org.moqui.entity.EntityValue
+            import org.moqui.impl.entity.EntityDefinition
+            import java.sql.ResultSet
+
+            ExecutionContext ec = context.ec
+            EntityDefinition entityDef = ec.entity.getEntityDefinition(entityName)
+            def pkFieldNames = entityDef.getPkFieldNames()
+            def encryptFieldNames = entityDef.allFieldInfoList.findAll({ it.encrypt }).collect({ it.name })
+            def encryptFieldNamesSize = encryptFieldNames.size()
+
+            if (encryptFieldNamesSize == 0) {
+                ec.logger.warn("Not rewriting encrypted fields for entity ${entityName}, has no encrypted fields")
+                return
+            }
+
+            def condFactory = ec.entity.getConditionFactory()
+            def notNullCondList = new ArrayList(encryptFieldNames.size())
+            for (String fieldName in encryptFieldNames) notNullCondList.add(condFactory.makeCondition(fieldName, EntityCondition.IS_NOT_NULL, null))
+
+            recordsUpdated = 0L
+            def recordIterator = ec.entity.find(entityDef.fullEntityName).selectFields(pkFieldNames).selectFields(encryptFieldNames)
+                    .condition(condFactory.makeCondition(notNullCondList, EntityCondition.OR))
+                    .resultSetConcurrency(ResultSet.CONCUR_UPDATABLE).iterator()
+            try {
+                EntityValue curValue
+                while ((curValue = recordIterator.next()) != null) {
+                    boolean foundFail = false
+                    boolean foundNonNull = false
+                    for (int i = 0; i < encryptFieldNamesSize; i++) {
+                        def fieldName = encryptFieldNames.get(i)
+                        def fieldValue = curValue.get(fieldName)
+                        if (fieldValue == null) continue
+
+                        if (org.moqui.impl.entity.FieldInfo.decryptFailedMagicString.equals(fieldValue)) {
+                            ec.logger.error("rewrite#EntityEncryptedFields decrypt failed for ${entityName} pk ${curValue.getPrimaryKeysString()} field ${fieldName}, skipping record")
+                            foundFail = true
+                            break
+                        }
+                        foundNonNull = true
+                        curValue.touchField(fieldName)
+                    }
+                    if (foundNonNull && !foundFail) {
+                        // ec.logger.info("Rewriting encrypted fields for entity ${entityName} PK ${curValue.getPrimaryKeysString()}")
+                        curValue.update()
+                        recordsUpdated += 1L
+                    }
+                }
+            } finally {
+                recordIterator.close()
+            }
+        ]]></script></actions>
+    </service>
+</services>

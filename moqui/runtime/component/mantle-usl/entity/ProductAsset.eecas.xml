@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+    <!-- AssetDetail should never be updated or deleted, but handle those just in case -->
+    <eeca id="AssetDetailUpdateAsset" entity="mantle.product.asset.AssetDetail" on-create="true">
+        <!-- NOTE: only runs on-create, AssetDetail records should not be updated or deleted, if they are needs to be supported somehow -->
+        <actions><service-call name="mantle.product.AssetServices.update#AssetFromDetail" in-map="context"/></actions>
+    </eeca>
+
+    <!-- on set Asset.containerId set facilityId and locationSeqId from Container -->
+    <eeca id="AssetLocationFromContainer" entity="mantle.product.asset.Asset"
+            on-create="true" on-update="true" run-before="true" set-results="true">
+        <condition><expression>containerId</expression></condition>
+        <actions>
+            <entity-find-one entity-name="mantle.product.asset.Container" value-field="container"/>
+            <set field="facilityId" from="container.facilityId"/>
+            <set field="locationSeqId" from="container.locationSeqId"/>
+        </actions>
+    </eeca>
+    <!-- on update Container facilityId or locationSeqId update on all Asset records with containerId -->
+    <eeca id="ContainerAssetLocation" entity="mantle.product.asset.Container" on-update="true" get-entire-entity="true">
+        <actions>
+            <entity-find entity-name="mantle.product.asset.Asset" list="assetList">
+                <econdition field-name="containerId"/></entity-find>
+            <iterate list="assetList" entry="asset">
+                <set field="asset.facilityId" from="facilityId"/>
+                <set field="asset.locationSeqId" from="locationSeqId"/>
+                <entity-update value-field="asset"/>
+            </iterate>
+        </actions>
+    </eeca>
+</eecas>

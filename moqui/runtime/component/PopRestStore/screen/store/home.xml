@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="anonymous-view">
+    <pre-actions>
+         <set field="star" from="5"/>
+         <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
+                requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]"
+            out-map="productStoreIdContext"/>
+        <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
+        <set field="currencyUomId" from="productStoreIdContext.defaultCurrencyUomId"/>
+    </pre-actions>
+   
+    <actions>
+        <!-- single products from those that has current price bellow then list price -->
+        <service-call name="popstore.ProductServices.find#CurrentPromoProduct"
+            in-map="[productStoreId: productStoreId]" out-map="promoResult"/>
+        <set field="promoProduct" from="promoResult.product"/>
+        <if condition="promoProduct">
+            <!-- If the product with discount is a product variant then we have to use variant product id to get prices
+             but corresponding virtual productId to get content. -->
+            <service-call name="popstore.ProductServices.get#CatalogProductId" out-map="promoProductIdRes"
+                    in-map="[productId:promoProduct.productId]"/>
+            <set field="promoProductId" from="promoProductIdRes.productId"/>
+            <service-call name="mantle.product.PriceServices.get#ProductPrice" out-map="priceMap"
+                    in-map="[productId:promoProduct.productId, priceUomId:currencyUomId, productStoreId:productStoreId]"/>
+            <set field="promoPrice" from="priceMap?.price"/>
+            <set field="promoListPrice" from="priceMap?.listPrice"/>
+            <entity-find entity-name="mantle.product.ProductContent" list="contentList" cache="true">
+                <econdition field-name="productId" from="promoProductId"/>
+                <date-filter/>
+                <order-by field-name="sequenceNum,-fromDate"/>
+            </entity-find>
+            <set field="descriptionLocation" from="contentList.find({'PcntDescription' == it.productContentTypeEnumId})?.contentLocation"/>
+            <if condition="descriptionLocation">
+                <set field="promoDescription" from="ec.resource.getLocationText(descriptionLocation, true)" default-value="No description"/>
+            </if>
+            <set field="promoImageDetail" from="contentList.find({'PcntImageDetail' == it.productContentTypeEnumId})"/>
+        </if>
+
+        <!-- Deals (Promotions) Category -->
+        <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="promoPscList" cache="true">
+            <date-filter/><econdition field-name="productStoreId"/>
+            <econdition field-name="storeCategoryTypeEnumId" value="PsctPromotions"/>
+        </entity-find>
+        <if condition="promoPscList">
+            <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="promoCatProdOut"
+                    in-map="[productStoreId: productStoreId, productCategoryId:promoPscList[0].productCategoryId]"/>
+            <set field="promoProductList" from="promoCatProdOut.productList"/>
+        </if>
+       
+        <!-- Best Selling (Featured) Category -->
+        <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="featPscList" cache="true">
+            <date-filter/><econdition field-name="productStoreId"/>
+            <econdition field-name="storeCategoryTypeEnumId" value="PsctFeatured"/>
+        </entity-find>
+        <if condition="featPscList">
+            <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="featCatProdOut"
+                    in-map="[productStoreId: productStoreId, productCategoryId:featPscList[0].productCategoryId]"/>
+            <set field="featureProductList" from="featCatProdOut.productList"/>
+        </if>
+
+        <!-- find New products from corresponding categories -->
+        <service-call name="popstore.ProductServices.get#RandomCategoryProduct" out-map="npResult"
+            in-map="[productCategoryTypeEnumId:'PctNew']"/>
+        <set field="newProduct" from="npResult.product"/>
+        <if condition="newProduct">
+            <service-call name="popstore.ProductServices.get#ProductInfo" out-map="product" in-map="[productId:newProduct.productId]"/>
+            <set field="specialInstrLocation" from="product.contentList.find({'PcntMetaDescription' == it.productContentTypeEnumId})?.contentLocation"/>
+        </if>
+        <if condition="specialInstrLocation">
+            <set field="specialInstructions" from="ec.resource.getLocationText(specialInstrLocation, true)"/>
+        </if>
+        <set field="path" from="storeInfo.menu.find{ it.title?.toLowerCase()?.startsWith('home')}?.path"/>
+        <if condition="!path">
+            <set field="path" from="storeInfo.menu[0].path"/>
+        </if>
+        <set field="homeLocation" value="${storeInfo.settings.PsstContentLocation}/content/${path}.md.ftl"/>
+        <!-- create content menu -->
+        <set field="docRr" from="ec.resource.getLocationReference(homeLocation)"/>
+        <if condition="docRr != null">
+            <set field="lines" from="docRr.getText()"/>
+            <if condition="lines">
+                <script>
+                    storeInfo.menu1 = [];
+                    List items = [];
+                    String title;
+                    boolean first = true;
+                    lines.eachLine {
+                        if (it.startsWith('# ')) {
+                            if (first == false) {
+                                storeInfo.menu1.add([path: path,
+                                    title: title, items: items,
+                                    anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                                items = [];
+                            }
+                            title = it.substring(it.indexOf(' ') + 1);
+                            first = false;
+                        }
+                        if (it.startsWith('## ')) {
+                            Map item = [text: it.substring(it.indexOf(' ') + 1),
+                                        anchor: it.substring(it.indexOf(' ') + 1)
+                                            .replace(' ','-').replace('.','').toLowerCase()];
+                            items.add(item);
+                        }
+                    }
+                    if (first == false) storeInfo.menu1.add([path: path,
+                        title: title, items: items,
+                        anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                    </script>
+            </if>
+        </if>
+    </actions>
+
+    <widgets>
+        <section name="home" condition="homeLocation">
+            <widgets>
+                <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="${homeLocation}"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="${template_server_home}"/></render-mode>
+                <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+            </widgets>
+            <fail-widgets>
+                <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+                <render-mode><text type="html" location="${template_server_home}"/></render-mode>
+                <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+            </fail-widgets>
+        </section>
+    </widgets>
+</screen>

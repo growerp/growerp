@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="store" noun="TimeEntry">
+        <in-parameters>
+            <parameter name="timeEntryId"><description>If specified updates the record, if not creates a new one</description></parameter>
+            <auto-parameters entity-name="mantle.work.time.TimeEntry" include="nonpk"/>
+            <parameter name="partyId" default="(!timeEntryId &amp;&amp; !partyId)?ec.user.userAccount.partyId:null"/>
+            <parameter name="rateTypeEnumId" default-value="RatpStandard"/>
+            <!-- If specified, add these to the calculated/provided rate -->
+            <parameter name="vendorHourRateIncrement" type="BigDecimal"/>
+            <parameter name="vendorPieceRateIncrement" type="BigDecimal"/>
+            <parameter name="clientHourRateIncrement" type="BigDecimal"/>
+            <parameter name="clientPieceRateIncrement" type="BigDecimal"/>
+            <!-- If workEffortId use to update WorkEffort -->
+            <parameter name="remainingWorkTime" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntryId"/>
+        </out-parameters>
+        <actions>
+            <if condition="partyId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="party"/>
+                <if condition="party.disabled == 'Y'"><return error="true" message="Time Entry not created, ${party.pseudoId} is not active."/></if>
+            </if>
+            <set field="entryHasHours" from="false"/>
+            <if condition="timeEntryId">
+                <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry" for-update="true"/>
+                <if condition="timeEntry != null">
+                    <set field="entryHasHours" from="timeEntry.hours != null &amp;&amp; timeEntry.hours != 0.0"/>
+                    <!-- fill in field values not passed into this service so that calcs can run -->
+                    <iterate list="timeEntry" entry="fieldValue" key="fieldName">
+                        <if condition="fieldValue != null &amp;&amp; !context.containsKey(fieldName)">
+                            <script>context.put(fieldName, fieldValue)</script></if>
+                    </iterate>
+                </if>
+            </if>
+            <if condition="teamPartyId">
+                <entity-find-one entity-name="mantle.party.PartyDetailAndRole" value-field="teamPartyDetail">
+                    <field-map field-name="partyId" from="teamPartyId"/>
+                    <field-map field-name="roleTypeId" value="OrgTeam"/>
+                </entity-find-one>
+                <if condition="teamPartyDetail == null"><then>
+                    <return error="true" message="Team ${teamPartyId} not found or is not in the Team role"/>
+                </then><else-if condition="teamPartyDetail.disabled == 'Y'">
+                    <return error="true" message="Team ${ec.resource.expand('PartyNameTemplate', '', teamPartyDetail)} is disabled."/>
+                </else-if></if>
+            </if>
+
+            <!-- TODO Should we allow negative numbers? -->
+
+            <!-- calculate thruDate based from fromDate/hours/breakHours -->
+            <if condition="hours &amp;&amp; fromDate &amp;&amp; !thruDate">
+                <set field="thruDate" from="new Timestamp((Long) (fromDate.time + (hours*60*60*1000) + (breakHours ? (breakHours*60*60*1000) : 0)))"/>
+            </if>
+            <!-- at this point if there is no thruDate default to now -->
+            <if condition="thruDate == null"><set field="thruDate" from="ec.user.nowTimestamp"/></if>
+
+            <!-- calculate fromDate based on thruDate/hours/breakHours -->
+            <if condition="hours &amp;&amp; !fromDate &amp;&amp; thruDate">
+                <set field="fromDate" from="new Timestamp((Long) (thruDate.time - (hours*60*60*1000) - (breakHours ? (breakHours*60*60*1000) : 0)))"/>
+            </if>
+
+            <if condition="fromDate &amp;&amp; thruDate &amp;&amp; fromDate &gt; thruDate">
+                <return error="true" message="From date ${fromDate} is after thru date ${thruDate}"/></if>
+
+            <!-- calculate hours using fromDate/thruDate/breakHours -->
+            <if condition="hours == null &amp;&amp; fromDate &amp;&amp; thruDate">
+                <set field="hours" from="((thruDate.time - fromDate.time)/(60*60*1000)) - (breakHours ?: 0)"/>
+            </if>
+
+            <!-- what is the party's emplPositionClassId? try WorkEffortParty with task first, then root/project, then try EmplPositionClassParty -->
+            <if condition="workEffortId">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="taskWorkEffort">
+                    <field-map field-name="workEffortId"/></entity-find-one>
+            </if>
+            <if condition="!emplPositionClassId &amp;&amp; taskWorkEffort != null">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="taskWorkEffortPartyList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="partyId"/><econdition field-name="workEffortId"/>
+                    <order-by field-name="fromDate"/>
+                </entity-find>
+                <iterate list="taskWorkEffortPartyList" entry="taskWorkEffortParty">
+                    <if condition="taskWorkEffortParty.emplPositionClassId">
+                        <set field="emplPositionClassId" from="taskWorkEffortParty.emplPositionClassId"/></if>
+                </iterate>
+                <if condition="!emplPositionClassId">
+                    <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectWorkEffortPartyList">
+                        <date-filter valid-date="fromDate"/><econdition field-name="partyId"/>
+                        <econdition field-name="workEffortId" from="taskWorkEffort.rootWorkEffortId"/>
+                        <order-by field-name="fromDate"/>
+                    </entity-find>
+                    <iterate list="projectWorkEffortPartyList" entry="projectWorkEffortParty">
+                        <if condition="projectWorkEffortParty.emplPositionClassId">
+                            <set field="emplPositionClassId" from="projectWorkEffortParty.emplPositionClassId"/></if>
+                    </iterate>
+                </if>
+            </if>
+            <if condition="!emplPositionClassId">
+                <!-- look at Employment/EmplPosition for the emplPositionClassId -->
+                <entity-find entity-name="mantle.party.PartyRelationship" list="employRelList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="fromPartyId" from="partyId"/>
+                    <econdition field-name="toPartyId" from="partyId"/>
+                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
+                </entity-find>
+                <if condition="employRelList">
+                    <entity-find-one entity-name="mantle.humanres.employment.Employment" value-field="employment">
+                        <field-map field-name="partyRelationshipId" from="employRelList[0].partyRelationshipId"/></entity-find-one>
+                    <if condition="employment">
+                        <set field="emplPosition" from="employment.'mantle.humanres.position.EmplPosition'"/>
+                        <set field="emplPositionClassId" from="emplPosition?.emplPositionClassId"/>
+                    </if>
+                </if>
+            </if>
+            <!-- look at EmplPositionClassParty for the emplPositionClassId? maybe too generic, better to not filter by
+            <if condition="!emplPositionClassId">
+                <entity-find entity-name="mantle.humanres.position.EmplPositionClassParty" list="emplPositionClassPartyList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="partyId" from="timeEntry.partyId"/>
+                    <order-by field-name="fromDate"/></entity-find>
+                <if condition="emplPositionClassPartyList">
+                    <set field="emplPositionClassId" from="emplPositionClassPartyList[0].emplPositionClassId"/></if>
+            </if>
+             -->
+            <!-- at this point if there is no emplPositionClassId we'll consider it null and not applicable -->
+
+            <!-- if no workTypeEnumId lookup from WorkEffortParty -->
+            <if condition="!workTypeEnumId &amp;&amp; taskWorkEffort != null">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="taskWorkEffortPartyList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="partyId"/><econdition field-name="workEffortId"/>
+                    <order-by field-name="fromDate"/>
+                </entity-find>
+                <iterate list="taskWorkEffortPartyList" entry="taskWorkEffortParty">
+                    <if condition="taskWorkEffortParty.workTypeEnumId">
+                        <set field="workTypeEnumId" from="taskWorkEffortParty.workTypeEnumId"/></if>
+                </iterate>
+                <if condition="!workTypeEnumId">
+                    <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="projectWorkEffortPartyList">
+                        <date-filter valid-date="fromDate"/><econdition field-name="partyId"/>
+                        <econdition field-name="workEffortId" from="taskWorkEffort.rootWorkEffortId"/>
+                        <order-by field-name="fromDate"/>
+                    </entity-find>
+                    <iterate list="projectWorkEffortPartyList" entry="projectWorkEffortParty">
+                        <if condition="projectWorkEffortParty.workTypeEnumId">
+                            <set field="workTypeEnumId" from="projectWorkEffortParty.workTypeEnumId"/></if>
+                    </iterate>
+                </if>
+            </if>
+
+            <!-- if clientPartyId not set find from timesheetId, workEffortId, or facilityId -->
+            <if condition="!clientPartyId &amp;&amp; timesheetId">
+                <entity-find-one entity-name="mantle.work.time.Timesheet" value-field="timesheet"/>
+                <set field="clientPartyId" from="timesheet.clientPartyId"/>
+            </if>
+            <if condition="!clientPartyId &amp;&amp; workEffortId">
+                <!-- see if there is a Customer associated with the WorkEffort (task or project) -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="billToList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="workEffortId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
+                </entity-find>
+                <if condition="billToList"><then>
+                    <set field="clientPartyId" from="billToList[0].partyId"/>
+                </then><else>
+                    <!-- see if there is a CustomerBillTo associated with the root (project) -->
+                    <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+                    <if condition="workEffort?.rootWorkEffortId">
+                        <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="rootBillToList">
+                            <date-filter valid-date="fromDate"/>
+                            <econdition field-name="workEffortId" from="workEffort.rootWorkEffortId"/>
+                            <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
+                        </entity-find>
+                        <if condition="rootBillToList"><set field="clientPartyId" from="rootBillToList[0].partyId"/></if>
+                    </if>
+                </else></if>
+            </if>
+            <if condition="!clientPartyId &amp;&amp; facilityId">
+                <!-- set vendorPartyId to facility Customer -->
+                <entity-find entity-name="mantle.facility.FacilityParty" list="customerList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="facilityId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
+                </entity-find>
+                <if condition="customerList"><then>
+                    <set field="clientPartyId" from="customerList[0].partyId"/>
+                </then><else>
+                    <!-- set clientPartyId to facility owner -->
+                    <entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/>
+                    <set field="clientPartyId" from="facility?.ownerPartyId"/>
+                </else></if>
+            </if>
+
+            <!-- if vendorPartyId not set find from workEffortId or facilityId -->
+            <if condition="!vendorPartyId &amp;&amp; workEffortId">
+                <!-- see if there is a Vendor associated with the WorkEffort (task or project) -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="billFromList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="workEffortId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Vendor,VendorBillFrom"/>
+                </entity-find>
+                <if condition="billFromList"><then>
+                    <set field="vendorPartyId" from="billFromList[0].partyId"/>
+                </then><else>
+                    <!-- see if there is a Vendor associated with the root (project) -->
+                    <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+                    <if condition="workEffort?.rootWorkEffortId">
+                        <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="rootBillFromList">
+                            <date-filter valid-date="fromDate"/>
+                            <econdition field-name="workEffortId" from="workEffort.rootWorkEffortId"/>
+                            <econdition field-name="roleTypeId" operator="in" value="Vendor,VendorBillFrom"/>
+                        </entity-find>
+                        <if condition="rootBillFromList"><set field="vendorPartyId" from="rootBillFromList[0].partyId"/></if>
+                    </if>
+                </else></if>
+            </if>
+            <if condition="!vendorPartyId &amp;&amp; facilityId">
+                <!-- set vendorPartyId to facility Manager or Vendor -->
+                <entity-find entity-name="mantle.facility.FacilityParty" list="vendorList">
+                    <date-filter valid-date="fromDate"/><econdition field-name="facilityId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Manager,Vendor,VendorBillFrom"/>
+                </entity-find>
+                <if condition="vendorList"><then>
+                    <set field="vendorPartyId" from="vendorList[0].partyId"/>
+                </then><else>
+                    <!-- set vendorPartyId to facility owner -->
+                    <entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/>
+                    <set field="clientPartyId" from="facility?.ownerPartyId"/>
+                </else></if>
+            </if>
+
+            <!-- if there is a pieceCount but no pieceRateTypeEnumId lookup by related or set to RatpPieceOrHour -->
+            <!-- NOTE: don't do this, better to leave it null so pieces can be record without pay (ie if no pieceRateTypeEnumId specified:
+            <if condition="pieceCount &amp;&amp; !pieceRateTypeEnumId">
+                <entity-find entity-name="moqui.basic.Enumeration" list="relatedEnumList">
+                    <econdition field-name="enumTypeId" value="PieceRateType"/>
+                    <econdition field-name="relatedEnumId" from="rateTypeEnumId"/>
+                </entity-find>
+                <if condition="relatedEnumList"><set field="pieceRateTypeEnumId" from="relatedEnumList[0].enumId"/>
+                    <else><set field="pieceRateTypeEnumId" value="RatpPieceOrHour"/></else></if>
+            </if>
+             -->
+
+            <set field="hasModifiedRates" value="N"/>
+            <if condition="ec.user.hasPermission('TIME_ENTRY_RATE')"><then>
+                <if condition="(clientHourRate &amp;&amp; (timeEntry?.hasModifiedRates || clientHourRate != timeEntry?.clientHourRate)) ||
+                        (vendorHourRate &amp;&amp; (timeEntry?.hasModifiedRates || vendorHourRate != timeEntry?.vendorHourRate)) ||
+                        (clientPieceRate &amp;&amp; (timeEntry?.hasModifiedRates || clientPieceRate != timeEntry?.clientPieceRate)) ||
+                        (vendorPieceRate &amp;&amp; (timeEntry?.hasModifiedRates || vendorPieceRate != timeEntry?.vendorPieceRate))">
+                    <set field="hasModifiedRates" value="Y"/>
+                </if>
+            </then><else>
+                <!-- will be set in TimeServices.get#TimeEntryRate -->
+                <set field="clientHourRate" from="null"/><set field="vendorHourRate" from="null"/>
+                <set field="clientPieceRate" from="null"/><set field="vendorPieceRate" from="null"/>
+                <set field="hasModifiedRates" value="N"/>
+            </else></if>
+
+            <service-call name="store#mantle.work.time.TimeEntry" out-map="context" in-map="context"/>
+            <service-call name="mantle.work.TimeServices.get#TimeEntryRate" out-map="context" in-map="context"/>
+
+            <!-- If any rate increments were provided, add them to the Time Entry -->
+            <if condition="vendorHourRateIncrement || vendorPieceRateIncrement || clientHourRateIncrement || clientPieceRateIncrement">
+                <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry" for-update="true"/>
+                <if condition="vendorHourRateIncrement">
+                    <set field="timeEntry.vendorHourRate" from="(timeEntry.vendorHourRate?:0.0)+vendorHourRateIncrement"/>
+                </if>
+                <if condition="vendorPieceRateIncrement">
+                    <set field="timeEntry.vendorPieceRate" from="(timeEntry.vendorPieceRate?:0.0)+vendorPieceRateIncrement"/>
+                </if>
+                <if condition="clientHourRateIncrement">
+                    <set field="timeEntry.clientHourRate" from="(timeEntry.clientHourRate?:0.0)+clientHourRateIncrement"/>
+                </if>
+                <if condition="clientPieceRateIncrement">
+                    <set field="timeEntry.clientPieceRate" from="(timeEntry.clientPieceRate?:0.0)+clientPieceRateIncrement"/>
+                </if>
+                <set field="timeEntry.hasModifiedRates" value="Y"/>
+                <entity-update value-field="timeEntry"/>
+            </if>
+
+            <if condition="workEffortId">
+                <!-- WorkEffort specific: handle remainingWorkTime -->
+                <if condition="remainingWorkTime != null"><then>
+                    <service-call name="update#mantle.work.effort.WorkEffort"
+                            in-map="[workEffortId:workEffortId, remainingWorkTime:remainingWorkTime]"/>
+                </then><else-if condition="hours &amp;&amp; !entryHasHours">
+                    <!-- auto deduct from remainingWorkTime -->
+                    <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="task"/>
+                    <if condition="task?.remainingWorkTime">
+                        <set field="task.remainingWorkTime" from="task.remainingWorkTime - hours"/>
+                        <if condition="task.remainingWorkTime &lt; 0.0"><set field="task.remainingWorkTime" from="0.0"/></if>
+                        <entity-update value-field="task"/>
+                    </if>
+                </else-if></if>
+            </if>
+        </actions>
+    </service>
+    <service verb="create" noun="TimeEntryClockIn">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.time.TimeEntry" include="nonpk">
+                <exclude field-name="hours"/><exclude field-name="breakHours"/><exclude field-name="thruDate"/>
+                <exclude field-name="pieceCount"/></auto-parameters>
+            <parameter name="partyId" default="ec.user.userAccount.partyId"/>
+            <parameter name="rateTypeEnumId" default-value="RatpStandard"/>
+            <parameter name="fromDate" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="timeEntryId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.work.time.TimeEntry" out-map="context" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="TimeEntry">
+        <in-parameters>
+            <parameter name="timeEntryId" required="true"/>
+            <parameter name="deleteChildTimeEntries" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry"/>
+            <if condition="!timeEntry"><return/></if>
+
+            <if condition="timeEntry.invoiceId || timeEntry.vendorInvoiceId">
+                <return error="true" message="Cannot delete time entry ${timeEntryId}. It has already been invoiced."/></if>
+
+            <entity-find entity-name="mantle.work.time.TimeEntry" list="childTimeEntries">
+                <econdition field-name="parentEntryId" from="timeEntry.timeEntryId"/></entity-find>
+            <iterate list="childTimeEntries" entry="childTimeEntry">
+                <if condition="deleteChildTimeEntries">
+                    <then>
+                        <service-call name="mantle.work.TimeServices.delete#TimeEntry"
+                                        in-map="context + [timeEntryId:childTimeEntry.timeEntryId]"/></then>
+                    <else>
+                        <return error="true" message="Cannot delete time entry ${timeEntryId}. Found child Time Entry."/></else></if>
+            </iterate>
+            <service-call name="delete#mantle.work.time.TimeEntry" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="TimeEntries">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="deleteChildTimeEntries" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntryList">
+                <econdition field-name="workEffortId"/>
+            </entity-find>
+            <if condition="!timeEntryList"><return/></if>
+
+            <iterate list="timeEntryList" entry="timeEntry">
+                <service-call name="mantle.work.TimeServices.delete#TimeEntry"
+                              in-map="context + [timeEntryId:timeEntry.timeEntryId]"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========== Bulk Time Entry WorkEffort Services ========== -->
+    <service verb="store" noun="TimeEntryWorkEffort">
+        <description>Store a WorkEffort record used for bulk time entry, has the required fields for the time entries</description>
+        <in-parameters>
+            <parameter name="workEffortId"/>
+            <parameter name="childWorkEffortId"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="workEffortTypeEnumId" default-value="WetEvent"/>
+            <parameter name="actualStartDate" required="true"/>
+            <parameter name="actualWorkDuration" required="true"/>
+            <parameter name="statusId" default-value="WeComplete"/>
+            <parameter name="resolutionEnumId" default-value="WerUnresolved"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="actualPaidBreakDuration" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="rootWorkEffort">
+                <field-map field-name="workEffortId" from="rootWorkEffortId"/>
+            </entity-find-one>
+            <if condition="rootWorkEffort">
+                <if condition="rootWorkEffort.estimatedStartDate &gt; actualStartDate">
+                    <return error="true" message="Task start date outside of project's start date."/>
+                </if>
+                <if condition="rootWorkEffort.estimatedCompletionDate &amp;&amp; actualStartDate &amp;&amp; rootWorkEffort.estimatedCompletionDate &lt; actualStartDate">
+                    <return error="true" message="Task end date out side of project's end date."/>
+                </if>
+            </if>
+            <service-call name="store#mantle.work.effort.WorkEffort" in-map="context" out-map="context"/>
+            <service-call name="mantle.work.WorkEffortServices.replace#WorkEffortParty"
+                          in-map="[workEffortId:workEffortId, roleTypeId:'Customer', newPartyId:clientPartyId]"/>
+            <if condition="actualPaidBreakDuration"><then>
+                <service-call name="store#mantle.work.effort.WorkEffort"
+                              in-map="context + [workEffortId:childWorkEffortId,actualWorkDuration:actualPaidBreakDuration,actualBreakDuration:null,parentWorkEffortId:workEffortId,workTypeEnumId:'WktpPaidBreak']"/>
+            </then></if>
+        </actions>
+    </service>
+    <service verb="store" noun="WorkEffortPartyTime">
+        <description>Create a TimeEntry for a WorkEffort with various fields defaulting to values from the WorkEffort.
+            Call the store#TimeEntryWorkEffort service first to make sure needed values are in place.</description>
+        <in-parameters>
+            <parameter name="timeEntryId"><description>If specified updates, if not creates</description></parameter>
+            <parameter name="childTimeEntryId"/>
+            <auto-parameters entity-name="mantle.work.time.TimeEntry" include="nonpk"/>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="partyId"><description>For convenience (for multi forms with some rows blank) not set as
+                required, but if not passed no TimeEntry will be created.</description></parameter>
+            <parameter name="moveToTeam"><description>If Y and a teamPartyId is specified add partyId Party to the team and
+                remove from all other teams</description></parameter>
+            <parameter name="paidBreakHours" type="BigDecimal"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <if condition="!partyId"><return/></if>
+
+            <!-- TODO Should we allow negative numbers? -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="party"/>
+            <if condition="party.disabled == 'Y'"><return error="true" message="Time Entry not created, ${party.pseudoId} is not active."/></if>
+
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/>
+
+            <if condition="workEffort.estimatedStartDate &gt; fromDate">
+                <return error="true" message="Task start date outside of project's start date."/>
+            </if>
+            <if condition="workEffort.estimatedCompletionDate &amp;&amp; fromDate &amp;&amp; workEffort.estimatedCompletionDate &lt; fromDate">
+                <return error="true" message="Task end date out side of project's end date."/>
+            </if>
+
+            <if condition="workEffort.workEffortTypeEnumId != 'WetProject'">
+                <set field="facilityId" from="null"/>
+            </if>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="wepList">
+                <econdition field-name="workEffortId"/><econdition field-name="partyId"/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <if condition="wepList"><set field="workEffortParty" from="wepList[0]"/></if>
+
+            <if condition="!workTypeEnumId">
+                <set field="workTypeEnumId" from="workEffortParty?.workTypeEnumId ?: workEffort.workTypeEnumId"/></if>
+            <if condition="!fromDate"><set field="fromDate" from="workEffort.actualStartDate ?: workEffort.estimatedStartDate"/></if>
+            <if condition="!hours &amp;&amp; hours != 0"><set field="hours" from="workEffort.actualWorkDuration"/></if>
+            <if condition="!breakHours &amp;&amp; hours != 0"><set field="breakHours" from="workEffort.actualBreakDuration"/></if>
+            <if condition="!clientPartyId">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="clientWepList">
+                    <econdition field-name="workEffortId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-find>
+                <if condition="clientWepList"><set field="clientPartyId" from="clientWepList[0].partyId"/></if>
+            </if>
+
+            <service-call name="mantle.work.TimeServices.store#TimeEntry" in-map="context" out-map="context"/>
+            <if condition="paidBreakHours"><then>
+                <service-call name="mantle.work.TimeServices.store#TimeEntry"
+                              in-map="context + [timeEntryId:childTimeEntryId,parentEntryId:timeEntryId,hours:paidBreakHours,breakHours:null,workTypeEnumId:'WktpPaidBreak']"/>
+                <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry">
+                    <field-map field-name="timeEntryId"/></entity-find-one>
+                <service-call name="mantle.work.TimeServices.store#TimeEntry"
+                              in-map="context + [thruDate: new Timestamp((Long) (timeEntry.thruDate.time + (paidBreakHours*60*60*1000)))]" out-map="context"/>
+            </then></if>
+
+            <if condition="teamPartyId &amp;&amp; moveToTeam == 'Y'">
+                <set field="effectiveThruDate" from="workEffort.actualStartDate ?: ec.user.nowTimestamp"/>
+                <!-- remove from any existing teams -->
+                <entity-find entity-name="mantle.party.PartyRelationship" list="existingRelList">
+                    <date-filter valid-date="effectiveThruDate"/><econdition field-name="relationshipTypeEnumId" value="PrtMember"/>
+                    <econdition field-name="fromPartyId" from="partyId"/><econdition field-name="toRoleTypeId" value="OrgTeam"/>
+                </entity-find>
+                <iterate list="existingRelList" entry="existingRel">
+                    <set field="existingRel.thruDate" from="effectiveThruDate"/>
+                    <entity-update value-field="existingRel"/>
+                </iterate>
+                <!-- add to current team -->
+                <service-call name="create#mantle.party.PartyRelationship" in-map="[fromPartyId:partyId, fromRoleTypeId:'Worker',
+                        relationshipTypeEnumId:'PrtMember', toPartyId:teamPartyId, toRoleTypeId:'OrgTeam', fromDate:effectiveThruDate]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="TeamTimesheetInfo">
+        <in-parameters>
+            <parameter name="partyId" required="true"><description>The team partyId</description></parameter>
+            <parameter name="workEffortId"><description>Optional, used when the timesheet is for a particular WorkEffort</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="teamDetail" type="Map"/>
+            <parameter name="teamMemberInfoList" type="List"><parameter name="teamMemberInfo" type="Map"/></parameter>
+            <!-- the following are only returned if a workEffortId is specified -->
+            <parameter name="workEffort" type="Map"/>
+            <parameter name="childWorkEffort" type="Map"/>
+            <parameter name="clientDetail" type="Map"/>
+            <parameter name="facility" type="Map"/>
+            <parameter name="workTypeEnum" type="Map"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="teamDetail"/>
+            <if condition="workEffortId"><entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"/></if>
+            <if condition="workEffort != null">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="clientWepList">
+                    <date-filter/><econdition field-name="workEffortId"/>
+                    <econdition field-name="roleTypeId" operator="in" value="Customer,CustomerBillTo"/>
+                    <order-by field-name="-fromDate"/>
+                </entity-find>
+                <if condition="clientWepList">
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="clientDetail">
+                        <field-map field-name="partyId" from="clientWepList[0].partyId"/></entity-find-one>
+                </if>
+
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="childWorkEffort">
+                    <field-map field-name="parentWorkEffortId" from="workEffortId"/>
+                </entity-find-one>
+
+                <set field="workTypeEnum" from="workEffort.workType"/>
+                <set field="facility" from="workEffort.facility"/>
+            </if>
+
+            <set field="teamMemberInfoList" from="[]"/>
+
+            <!-- get all TimeEntry records for this team and WorkEffort; this will include temporary team members with a TimeEntry but no PartyRelationship to the team -->
+            <set field="memberIds" from="new HashSet()"/>
+            <if condition="workEffort != null">
+                <entity-find entity-name="mantle.work.time.TimeEntry" list="teamTimeEntryList">
+                    <econdition field-name="teamPartyId" from="partyId"/>
+                    <econdition field-name="workEffortId"/>
+                    <econdition field-name="parentEntryId" operator="is-null"/>
+                </entity-find>
+                <iterate list="teamTimeEntryList" entry="timeEntry">
+                    <script>memberIds.add(timeEntry.partyId)</script>
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="memberDetail">
+                        <field-map field-name="partyId" from="timeEntry.partyId"/></entity-find-one>
+                    <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="childTimeEntry">
+                        <field-map field-name="parentEntryId" from="timeEntry.timeEntryId"/></entity-find-one>
+                    <set field="teamMemberInfo" from="memberDetail.getMap()"/>
+                    <set field="teamMemberInfo.fromPartyId" from="timeEntry.partyId"/><!-- so fits with direct team members -->
+                    <set field="teamMemberInfo.timeEntry" from="timeEntry"/>
+                    <set field="teamMemberInfo.childTimeEntry" from="childTimeEntry"/>
+                    <set field="teamMemberInfo.teWorkTypeEnum" from="timeEntry.workType"/>
+
+                    <entity-find-count entity-name="mantle.party.PartyRelationship" count-field="memberRelCount">
+                        <date-filter valid-date="workEffort?.actualStartDate"/>
+                        <econdition field-name="fromPartyId" from="timeEntry.partyId"/>
+                        <econdition field-name="toPartyId" from="partyId"/>
+                        <econdition field-name="toRoleTypeId" value="OrgTeam"/>
+                        <econdition field-name="relationshipTypeEnumId" value="PrtMember"/>
+                    </entity-find-count>
+                    <set field="teamMemberInfo.teamMember" from="memberRelCount ? 'Y' : 'N'"/>
+                    <script>teamMemberInfoList.add(teamMemberInfo)</script>
+                </iterate>
+            </if>
+
+            <!-- now get team members excluding those with time entries -->
+            <entity-find entity-name="mantle.party.PartyFromAndRelationship" list="teamMemberList">
+                <date-filter valid-date="workEffort?.actualStartDate"/>
+                <econdition field-name="fromPartyId" operator="not-in" from="memberIds" ignore-if-empty="true"/>
+                <econdition field-name="toPartyId" from="partyId"/>
+                <econdition field-name="toRoleTypeId" value="OrgTeam"/>
+                <econdition field-name="relationshipTypeEnumId" value="PrtMember"/>
+            </entity-find>
+            <iterate list="teamMemberList" entry="teamMember">
+                <set field="teamMemberInfo" from="teamMember.getMap()"/>
+                <set field="teamMemberInfo.teamMember" value="Y"/>
+                <script>teamMemberInfoList.add(teamMemberInfo)</script>
+            </iterate>
+
+            <order-map-list list="teamMemberInfoList"><order-by field-name="firstName,lastName,organizationName"/></order-map-list>
+        </actions>
+    </service>
+
+    <!-- ========== Time Entry Rate and Amount Services ========== -->
+    <service verb="get" noun="TimeEntryAmount">
+        <description>Calculate the amount for a time entry (for worker/vendor or client).</description>
+        <in-parameters>
+            <parameter name="timeEntryId" required="true"/>
+            <parameter name="timeEntry" type="Map"/>
+            <parameter name="ratePurposeEnumId" default-value="RaprVendor"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="amountTotal" type="BigDecimal"/>
+            <parameter name="amount" type="BigDecimal"/>
+            <parameter name="quantity" type="BigDecimal"/>
+            <parameter name="currencyUomId"/>
+
+            <parameter name="hourlyAmountTotal" type="BigDecimal"/>
+            <parameter name="pieceAmountTotal" type="BigDecimal"/>
+            <parameter name="hourlyAmount" type="BigDecimal"/>
+            <parameter name="pieceAmount" type="BigDecimal"/>
+            <parameter name="hours" type="BigDecimal"/>
+            <parameter name="pieceCount" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <if condition="timeEntry == null"><entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry"/></if>
+
+            <set field="hours" from="timeEntry.hours ?: 0.0"/>
+            <set field="pieceCount" from="timeEntry.pieceCount ?: 0.0"/>
+
+            <if condition="hours"><then>
+                <set field="hourlyAmount" from="ratePurposeEnumId == 'RaprVendor' ? timeEntry.vendorHourRate : timeEntry.clientHourRate"/>
+                <if condition="hourlyAmount == null"><then>
+                    <set field="rateAmountId" from="ratePurposeEnumId == 'RaprVendor' ? timeEntry.vendorRateAmountId : timeEntry.rateAmountId"/>
+                    <if condition="rateAmountId"><then>
+                        <entity-find-one entity-name="mantle.humanres.rate.RateAmount" value-field="rateAmount" cache="true">
+                            <field-map field-name="rateAmountId"/></entity-find-one>
+                    </then><else>
+                        <service-call name="mantle.work.TimeServices.get#TimeEntryRate" out-map="getTerOut" in-map="[timeEntryId:timeEntryId]"/>
+                        <!-- set the values in the timeEntry record for use below since the service updates the DB record and we don't want to re-query to get it -->
+                        <set field="timeEntry.rateAmountId" from="getTerOut.rateAmountId"/>
+                        <set field="timeEntry.vendorRateAmountId" from="getTerOut.vendorRateAmountId"/>
+
+                        <set field="rateAmountId" from="ratePurposeEnumId == 'RaprVendor' ? getTerOut.vendorRateAmountId : getTerOut.rateAmountId"/>
+                        <entity-find-one entity-name="mantle.humanres.rate.RateAmount" value-field="rateAmount" cache="true">
+                            <field-map field-name="rateAmountId"/></entity-find-one>
+                    </else></if>
+                    <if condition="rateAmount"><then>
+                        <set field="hourlyAmount" from="rateAmount.rateAmount"/>
+                        <set field="hourlyAmountTotal" from="hours * hourlyAmount"/>
+                        <set field="currencyUomId" from="rateAmount.rateCurrencyUomId"/>
+                    </then><else>
+                        <set field="purposeDesc" from="ec.entity.find('enums').condition('enumId', ratePurposeEnumId).one()?.description"/>
+                        <entity-find-one entity-name="mantle.party.PartyDetail" value-field="workerParty">
+                            <field-map field-name="partyId" from="timeEntry.partyId"/></entity-find-one>
+                        <message error="true">No hourly ${purposeDesc} rate amount found for time entry ${timeEntryId} for worker ${ec.resource.expand('PartyNameTemplate','',workerParty)}</message>
+                    </else></if>
+                </then><else>
+                    <set field="hourlyAmountTotal" from="hours * hourlyAmount"/>
+                </else></if>
+            </then><else>
+                <set field="hourlyAmount" from="0.0"/>
+                <set field="hourlyAmountTotal" from="0.0"/>
+            </else></if>
+            <if condition="pieceCount"><then>
+                <set field="pieceAmount" from="ratePurposeEnumId == 'RaprVendor' ? timeEntry.vendorPieceRate : timeEntry.clientPieceRate"/>
+                <if condition="pieceAmount == null"><then>
+                    <set field="pieceRateAmountId" from="ratePurposeEnumId == 'RaprVendor' ? timeEntry.vendorPieceRateAmountId : timeEntry.pieceRateAmountId"/>
+                    <if condition="pieceRateAmountId"><then>
+                        <entity-find-one entity-name="mantle.humanres.rate.RateAmount" value-field="pieceRateAmount" cache="true">
+                            <field-map field-name="rateAmountId" from="pieceRateAmountId"/></entity-find-one>
+                    </then><else>
+                        <service-call name="mantle.work.TimeServices.get#TimeEntryRate" out-map="getTerOut" in-map="[timeEntryId:timeEntryId]"/>
+                        <!-- set the values in the timeEntry record for use below since the service updates the DB record and we don't want to re-query to get it -->
+                        <set field="timeEntry.pieceRateAmountId" from="getTerOut.pieceRateAmountId"/>
+                        <set field="timeEntry.vendorPieceRateAmountId" from="getTerOut.vendorPieceRateAmountId"/>
+
+                        <set field="pieceRateAmountId" from="ratePurposeEnumId == 'RaprVendor' ? getTerOut.vendorPieceRateAmountId : getTerOut.pieceRateAmountId"/>
+                        <entity-find-one entity-name="mantle.humanres.rate.RateAmount" value-field="pieceRateAmount" cache="true">
+                            <field-map field-name="rateAmountId" from="pieceRateAmountId"/></entity-find-one>
+                    </else></if>
+                    <if condition="pieceRateAmount"><then>
+                        <set field="pieceAmount" from="pieceRateAmount.rateAmount"/>
+                        <set field="pieceAmountTotal" from="pieceCount * pieceAmount"/>
+                        <set field="currencyUomId" from="rateAmount.rateCurrencyUomId"/>
+                    </then><else>
+                        <set field="purposeDesc" from="ec.entity.find('enums').condition('enumId', ratePurposeEnumId).one()?.description"/>
+                        <message>No ${purposeDesc} piece rate amount found for time entry ${timeEntryId}</message>
+                    </else></if>
+                </then><else>
+                    <set field="pieceAmountTotal" from="pieceCount * pieceAmount"/>
+                </else></if>
+            </then><else>
+                <set field="pieceAmount" from="0.0"/>
+                <set field="pieceAmountTotal" from="0.0"/>
+            </else></if>
+
+            <check-errors/>
+
+            <if condition="pieceAmountTotal"><then>
+                <if condition="pieceRateAmount?.rateTypeEnumId == 'RatpPiecePlusHour'"><then>
+                    <set field="amountTotal" from="(hourlyAmountTotal ?: 0.0) + pieceAmountTotal"/>
+                    <set field="amount" from="amountTotal"/>
+                    <set field="quantity" from="1.0"/>
+                </then><else>
+                    <if condition="hourlyAmountTotal &gt; pieceAmountTotal"><then>
+                        <set field="amountTotal" from="hourlyAmountTotal"/>
+                        <set field="amount" from="hourlyAmount"/>
+                        <set field="quantity" from="hours"/>
+                    </then><else>
+                        <set field="amountTotal" from="pieceAmountTotal"/>
+                        <set field="amount" from="pieceAmount"/>
+                        <set field="quantity" from="pieceCount"/>
+                    </else></if>
+                </else></if>
+            </then><else>
+                <set field="amountTotal" from="hourlyAmountTotal"/>
+                <set field="amount" from="hourlyAmount"/>
+                <set field="quantity" from="hours"/>
+            </else></if>
+        </actions>
+    </service>
+
+    <service verb="resetAndGet" noun="TimeEntryRates">
+        <description>Reset and get the various RateAmount fields for TimeEntry records matching constraints and with no invoiceId and no vendorInvoiceId.</description>
+        <in-parameters>
+            <parameter name="timePeriodId"/>
+            <parameter name="workEffortId"/>
+            <parameter name="partyId"/>
+            <parameter name="clientPartyId"/>
+            <parameter name="fromTimestamp" type="Timestamp"/>
+            <parameter name="thruTimestamp" type="Timestamp"/>
+        </in-parameters>
+        <actions>
+            <if condition="timePeriodId">
+                <service-call name="mantle.party.TimeServices.get#TimePeriodInfo" in-map="[timePeriodId:timePeriodId]" out-map="periodInfo"/>
+                <set field="fromTimestamp" from="periodInfo.fromTimestamp"/>
+                <set field="thruTimestamp" from="periodInfo.thruTimestamp"/>
+                <set field="clientPartyId" from="clientPartyId ?: periodInfo.timePeriod.partyId"/>
+            </if>
+            <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntryList">
+                <econdition field-name="workEffortId" ignore-if-empty="true"/>
+                <econdition field-name="partyId" ignore-if-empty="true"/>
+                <econdition field-name="clientPartyId" ignore-if-empty="true"/>
+                <econdition field-name="thruDate" operator="greater-equals" from="fromTimestamp" ignore-if-empty="true"/>
+                <econdition field-name="thruDate" operator="less-equals" from="thruTimestamp" ignore-if-empty="true"/>
+                <econdition field-name="invoiceId" from="null"/>
+                <econdition field-name="vendorInvoiceId" from="null"/>
+                <select-field field-name="timeEntryId"/>
+            </entity-find>
+            <iterate list="timeEntryList" entry="timeEntry">
+                <service-call name="mantle.work.TimeServices.get#TimeEntryRate" in-map="[timeEntryId:timeEntry.timeEntryId, resetRates:true]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="resetAndGet" noun="ProjectTimeEntryRates">
+        <description>Reset and get the various RateAmount fields for TimeEntry records matching constraints and with no invoiceId and no vendorInvoiceId.</description>
+        <in-parameters>
+            <parameter name="rootWorkEffortId"/>
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.time.TimeEntryAndWorkEffort" list="timeEntryList">
+                <econdition field-name="rootWorkEffortId"/>
+                <econdition field-name="invoiceId" from="null"/>
+                <econdition field-name="vendorInvoiceId" from="null"/>
+                <select-field field-name="timeEntryId"/>
+            </entity-find>
+            <iterate list="timeEntryList" entry="timeEntry">
+                <service-call name="mantle.work.TimeServices.get#TimeEntryRate" in-map="[timeEntryId:timeEntry.timeEntryId, resetRates:true]"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="get" noun="TimeEntryRate">
+        <description>Find the RateAmount records for a TimeEntry and if not set already then set TimeEntry hour and piece rates from these.</description>
+        <in-parameters>
+            <parameter name="timeEntryId" required="true"/>
+            <!-- TODO: where to get currency... project setting? client or internal org setting? -->
+            <parameter name="rateCurrencyUomId" default-value="${ec.user.getPreference('CurrencyDefault') ?: 'USD'}"/>
+            <parameter name="resetRates" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rateAmountId"/>
+            <parameter name="rateAmount"/>
+            <parameter name="vendorRateAmountId"/>
+            <parameter name="vendorRateAmount"/>
+            <parameter name="pieceRateAmountId"/>
+            <parameter name="pieceRateAmount"/>
+            <parameter name="vendorPieceRateAmountId"/>
+            <parameter name="vendorPieceRateAmount"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry" for-update="true"/>
+
+            <if condition="resetRates">
+                <set field="timeEntry.rateAmountId" from="null"/>
+                <set field="timeEntry.vendorRateAmountId" from="null"/>
+                <set field="timeEntry.pieceRateAmountId" from="null"/>
+                <set field="timeEntry.vendorPieceRateAmountId" from="null"/>
+            </if>
+
+            <if condition="!timeEntry.rateAmountId &amp;&amp; timeEntry.rateTypeEnumId"><then>
+                <service-call name="mantle.work.TimeServices.find#TimeEntryRateAmount" out-map="clientRate"
+                        in-map="[timeEntry:timeEntry, ratePurposeEnumId:'RaprClient',
+                            rateTypeEnumId:timeEntry.rateTypeEnumId, rateCurrencyUomId:rateCurrencyUomId]"/>
+                <if condition="clientRate.rateAmountId">
+                    <set field="timeEntry.rateAmountId" from="clientRate.rateAmountId"/>
+                    <!--<if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.clientHourRate" from="clientRate.rateAmount"/></if>-->
+                    <set field="rateAmountId" from="clientRate.rateAmountId"/>
+                    <set field="rateAmount" from="clientRate.rateAmount"/>
+                </if>
+            </then><else>
+                <set field="rateAmountId" from="timeEntry.rateAmountId"/>
+                <set field="rateAmount" from="timeEntry.'mantle.humanres.rate.RateAmount'?.rateAmount"/>
+                <if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.clientHourRate" from="rateAmount"/></if>
+            </else></if>
+            <if condition="!timeEntry.vendorRateAmountId &amp;&amp; timeEntry.rateTypeEnumId"><then>
+                <service-call name="mantle.work.TimeServices.find#TimeEntryRateAmount" out-map="vendorRate"
+                        in-map="[timeEntry:timeEntry, ratePurposeEnumId:'RaprVendor',
+                            rateTypeEnumId:timeEntry.rateTypeEnumId, rateCurrencyUomId:rateCurrencyUomId]"/>
+                <if condition="vendorRate.rateAmountId">
+                    <set field="timeEntry.vendorRateAmountId" from="vendorRate.rateAmountId"/>
+                    <!--<if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.vendorHourRate" from="vendorRate.rateAmount"/></if>-->
+                    <set field="vendorRateAmountId" from="vendorRate.rateAmountId"/>
+                    <set field="vendorRateAmount" from="vendorRate.rateAmount"/>
+                </if>
+            </then><else>
+                <set field="vendorRateAmountId" from="timeEntry.vendorRateAmountId"/>
+                <set field="vendorRateAmount" from="timeEntry.'Vendor#mantle.humanres.rate.RateAmount'?.rateAmount"/>
+                <if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.vendorHourRate" from="vendorRateAmount"/></if>
+            </else></if>
+
+            <if condition="!timeEntry.pieceRateAmountId &amp;&amp; timeEntry.pieceRateTypeEnumId"><then>
+                <service-call name="mantle.work.TimeServices.find#TimeEntryRateAmount" out-map="pieceRate"
+                        in-map="[timeEntry:timeEntry, ratePurposeEnumId:'RaprClient', timePeriodUomId:'OTH_ea',
+                            rateTypeEnumId:timeEntry.pieceRateTypeEnumId, rateCurrencyUomId:rateCurrencyUomId]"/>
+                <if condition="pieceRate.rateAmountId">
+                    <set field="timeEntry.pieceRateAmountId" from="pieceRate.rateAmountId"/>
+                    <!--<if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.pieceRate" from="pieceRate.rateAmount"/></if>-->
+                    <set field="pieceRateAmountId" from="pieceRate.rateAmountId"/>
+                    <set field="pieceRateAmount" from="pieceRate.rateAmount"/>
+                </if>
+            </then><else>
+                <set field="pieceRateAmountId" from="timeEntry.pieceRateAmountId"/>
+                <set field="pieceRateAmount" from="timeEntry.'Piece#mantle.humanres.rate.RateAmount'?.rateAmount"/>
+                <if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.clientPieceRate" from="pieceRateAmount"/></if>
+            </else></if>
+            <if condition="!timeEntry.vendorPieceRateAmountId &amp;&amp; timeEntry.pieceRateTypeEnumId"><then>
+                <service-call name="mantle.work.TimeServices.find#TimeEntryRateAmount" out-map="vendorPieceRate"
+                        in-map="[timeEntry:timeEntry, ratePurposeEnumId:'RaprVendor', timePeriodUomId:'OTH_ea',
+                            rateTypeEnumId:timeEntry.pieceRateTypeEnumId, rateCurrencyUomId:rateCurrencyUomId]"/>
+                <if condition="vendorPieceRate.rateAmountId">
+                    <set field="timeEntry.vendorPieceRateAmountId" from="vendorPieceRate.rateAmountId"/>
+                    <!--<if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.vendorPieceRate" from="vendorPieceRate.rateAmount"/></if>-->
+                    <set field="vendorPieceRateAmountId" from="vendorPieceRate.rateAmountId"/>
+                    <set field="vendorPieceRateAmount" from="vendorPieceRate.rateAmount"/>
+                </if>
+            </then><else>
+                <set field="vendorPieceRateAmountId" from="timeEntry.vendorPieceRateAmountId"/>
+                <set field="vendorPieceRateAmount" from="timeEntry.'VendorPiece#mantle.humanres.rate.RateAmount'?.rateAmount"/>
+                <if condition="timeEntry.hasModifiedRates != 'Y'"><set field="timeEntry.vendorPieceRate" from="vendorPieceRateAmount"/></if>
+            </else></if>
+
+            <entity-update value-field="timeEntry"/>
+            <!-- <log level="warn" message="=============== rateAmountId=${rateAmountId}, rateAmount=${rateAmount}, vendorRateAmountId=${vendorRateAmountId}, vendorRateAmount=${vendorRateAmount}, pieceRateAmountId=${pieceRateAmountId}, pieceRateAmount=${pieceRateAmount}, vendorPieceRateAmountId=${vendorPieceRateAmountId}, vendorPieceRateAmount=${vendorPieceRateAmount}"/> -->
+        </actions>
+    </service>
+
+    <service verb="get" noun="TimeEntryFacility">
+        <in-parameters>
+            <parameter name="timeEntryId"/>
+            <parameter name="timeEntry" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntryId"/>
+            <parameter name="timeEntry" type="Map"/>
+            <parameter name="facilityId"/>
+            <parameter name="facility" type="Map"/>
+        </out-parameters>
+        <actions>
+            <if condition="timeEntry == null">
+                <if condition="!timeEntryId"><return error="true" message="Time Entry or ID required"/></if>
+                <entity-find-one entity-name="mantle.work.time.TimeEntry" value-field="timeEntry"/>
+                <if condition="timeEntry == null"><return error="true" message="Time Entry ${timeEntryId} not found"/></if>
+            </if>
+            <set field="timeEntryId" from="timeEntry.timeEntryId"/>
+
+            <if condition="timeEntry.facilityId"><then>
+                <set field="facilityId" from="timeEntry.facilityId"/>
+                <set field="facility" from="timeEntry.facility"/>
+            </then><else-if condition="timeEntry.workEffortId">
+                <set field="facilityId"/>
+                <set field="facility" from="timeEntry.workEffort.facility"/>
+            </else-if></if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="TimeEntryRiskClassInfo">
+        <in-parameters>
+            <parameter name="timeEntryId"/>                   <!-- timeEntryId or timeEntry is required -->
+            <parameter name="timeEntry" type="Map"/>
+            <parameter name="employment" type="Map"/> <!-- optional mantle.humanres.employment.EmploymentAndRelationship -->
+            <parameter name="employee" type="Map"/>   <!-- optional mantle.humanres.employment.Employee -->
+
+            <parameter name="dftRiskClassEnumId"/>
+            <parameter name="dftRiskClassOverride" type="Boolean"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timeEntryId"/>
+            <parameter name="timeEntry" type="Map"/>
+            <parameter name="facilityId"/> <!-- facility on time entry or work effort -->
+            <parameter name="facility"/>
+            <parameter name="rateTypeEnumId"/>
+            <parameter name="workTypeEnumId"/> <!-- work type on time entry or work effort -->
+            <parameter name="riskClassEnumId"/>
+            <parameter name="stateGeoId"/>
+            <parameter name="dftRiskClassEnumId"/>
+            <parameter name="dftRiskClassOverride" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <!-- get time entry and facility -->
+            <service-call name="mantle.work.TimeServices.get#TimeEntryFacility" in-map="context" out-map="context"/>
+
+            <if condition="!dftRiskClassEnumId">
+                <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="getPsvOut"
+                              in-map="[partySettingTypeId:'PayrollWcRiskClass',partyId:partyId,partyRelationshipId:partyRelationshipId]"/>
+                <set field="dftRiskClassEnumId" from="getPsvOut.settingValue"/>
+
+                <service-call name="mantle.party.PartyServices.get#PartySettingValue" out-map="getPsvOut"
+                              in-map="[partySettingTypeId:'PayrollWcDftOvrWrkTp',partyId:partyId,partyRelationshipId:partyRelationshipId]"/>
+                <set field="dftRiskClassOverride" from="getPsvOut.settingValue=='BlY'" type="Boolean"/>
+            </if>
+
+            <set field="rateTypeEnumId" from="timeEntry.rateTypeEnumId?:'RatpStandard'"/>
+            <set field="workTypeEnumId" from="timeEntry.workTypeEnumId?:(timeEntry.workEffort?.workTypeEnumId)"/>
+
+            <!-- Make sure all rate types have been accounted for in case any need special treatment -->
+            <if condition="rateTypeEnumId in ['RatpVacation', 'RatpHoliday', 'RatpSick', 'RatpPtoOther']"><then>
+                <!-- TODO: Are there any circumstances where vacation/etc. are subject to workers' comp? -->
+                <return/>
+            </then><else-if condition="rateTypeEnumId in ['RatpPaidBreakStd', 'RatpPaidBreakRrp']">
+                <!-- For breaks, use the parent's work type if available -->
+                <if condition="timeEntry.parentEntryId">
+                    <set field="workTypeEnumId" from="timeEntry.parentEntry.workTypeEnumId?:workTypeEnumId"/>
+                </if>
+            </else-if><else-if condition="!(rateTypeEnumId in ['RatpStandard',
+                                                               'RatpPieceMinWageAdj',
+                                                               'RatpPaidNptStd',
+                                                               'RatpPaidNptRrp',
+                                                               'RatpEvening',
+                                                               'RatpNight',
+                                                               'RatpWeekend',
+                                                               'RatpShHoliday'])">
+                <log level="warn" message="Unhandled rate type '${rateTypeEnumId}' in get#TimeEntryInfo"/>
+                <return/>
+            </else-if></if>
+
+            <set field="stateGeoId" from="facility?.stateGeoId"/>
+            <if condition="!stateGeoId">
+                <if condition="employment?.taxWorkContactMechId">
+                    <entity-find-one entity-name="mantle.party.contact.PostalAddress" value-field="taxWorkContactMech">
+                        <field-map field-name="contactMechId" from="employment.taxWorkContactMechId"/>
+                    </entity-find-one>
+                    <set field="stateGeoId" from="taxWorkContactMech?.stateProvinceGeoId"/>
+                </if>
+
+                <if condition="!stateGeoId"> <!-- TODO: Does the relationship exist if employee is a map? -->
+                    <set field="stateGeoId" from="employee?:taxHomeContectMech?.stateProvinceGeoId"/>
+                </if>
+            </if>
+
+            <!-- Determine this workers' comp risk class and return -->
+            <if condition="!workTypeEnumId ||
+                           (dftRiskClassOverride &amp;&amp; dftRiskClassEnumId)">
+                <set field="riskClassEnumId" from="dftRiskClassEnumId"/>
+                <return/>
+            </if>
+
+            <entity-find-one entity-name="mantle.humanres.employment.WorkTypeRiskClass"
+                             value-field="riskClass">
+                <field-map field-name="geoId" from="stateGeoId"/>
+                <field-map field-name="workTypeEnumId"/>
+                <select-field field-name="riskClassEnumId"/>
+            </entity-find-one>
+
+            <set field="riskClassEnumId" from="riskClass?.riskClassEnumId"/>
+
+        </actions>
+    </service>
+
+    <service verb="find" noun="RateAmount">
+        <description>
+            Internal service used by get#TimeEntryRate. Find a RateAmount record based on fields.
+
+            If there are rates associated with the workEffortId (generally task), or its corresponding rootWorkEffortId
+            (generally project) consider those rates.
+
+            If a partyId is passed, take the greater of the rates with and without the party to match on as many as
+            possible of: emplPositionClassId, workTypeEnumId, payGradeId (from Employment if there is one for the partyId).
+        </description>
+        <in-parameters>
+            <parameter name="fromDate" type="Timestamp"/>
+            <parameter name="thruDate" type="Timestamp"/>
+            <!-- must match -->
+            <parameter name="rateTypeEnumId" required="true"/>
+            <parameter name="ratePurposeEnumId" required="true"/>
+            <parameter name="rateCurrencyUomId" required="true"/>
+            <parameter name="timePeriodUomId" default-value="TF_hr"/>
+            <!-- filter by if any records have these not null -->
+            <parameter name="workEffortId"/>
+            <parameter name="partyId"/>
+            <!-- check for relevant employments -->
+            <parameter name="partyRelationshipId"/>
+            <parameter name="employerPartyId"/>
+            <!-- must match or null; match as many as possible (to allow for nulls) with this priority if more than one match with same number of fields -->
+            <parameter name="workTypeEnumId"/>
+            <parameter name="payGradeId"/>
+            <parameter name="emplPositionClassId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rateAmountId"/>
+            <parameter name="rateAmount" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <if condition="workEffortId">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="taskWorkEffort">
+                    <field-map field-name="workEffortId"/></entity-find-one>
+            </if>
+
+            <!-- get all possible rates in one query, then do maximal match -->
+            <entity-find entity-name="mantle.humanres.rate.RateAmount" list="rateAmountList">
+                <date-filter valid-date="fromDate ?: ec.user.nowTimestamp"/>
+                <econdition field-name="partyId" from="partyId" or-null="true"/>
+                <econditions combine="or">
+                    <econdition field-name="workEffortId" from="taskWorkEffort?.workEffortId" ignore-if-empty="true"/>
+                    <econdition field-name="workEffortId" from="taskWorkEffort?.rootWorkEffortId" ignore-if-empty="true"/>
+                    <econdition field-name="workEffortId" from="null"/>
+                </econditions>
+                <econdition field-name="emplPositionClassId" from="emplPositionClassId" or-null="true" ignore-if-empty="true"/>
+                <econdition field-name="workTypeEnumId" from="workTypeEnumId" or-null="true" ignore-if-empty="true"/>
+                <econdition field-name="ratePurposeEnumId"/>
+                <econdition field-name="rateTypeEnumId"/>
+                <econdition field-name="rateCurrencyUomId" or-null="true"/>
+                <econdition field-name="timePeriodUomId"/>
+            </entity-find>
+
+            <!--<log level="warn" message="=============== ratePurposeEnumId=${ratePurposeEnumId}, rateTypeEnumId=${rateTypeEnumId}\nrateAmountList=${rateAmountList}"/>-->
+            <set field="fullRateAmountList" from="rateAmountList"/>
+
+            <!-- if there is a taskWorkEffort and rates are associated with it or the project only use those -->
+            <if condition="taskWorkEffort != null">
+                <set field="taskRaList" from="rateAmountList.findAll({ it.workEffortId == taskWorkEffort.workEffortId })"/>
+                <if condition="taskRaList"><then>
+                    <set field="rateAmountList" from="taskRaList"/>
+                </then><else-if condition="taskWorkEffort.rootWorkEffortId">
+                    <set field="rootWeRaList" from="rateAmountList.findAll({ it.workEffortId == taskWorkEffort.rootWorkEffortId })"/>
+                    <if condition="rootWeRaList"><set field="rateAmountList" from="rootWeRaList"/></if>
+                </else-if></if>
+            </if>
+            <set field="workTypeEnumId" from="workTypeEnumId ?: taskWorkEffort?.workTypeEnumId"/>
+
+            <!-- If there is a party or employment, find the employment and attempt to define the payGrade and positionClass.
+                 If there are any party specific rates, do a maximal match against them. -->
+            <if condition="partyId || partyRelationshipId">
+                <!-- find relevant Employment record -->
+                <if condition="partyRelationshipId"><then>
+                    <entity-find entity-name="mantle.humanres.employment.EmploymentAndRelationship" list="employmentList">
+                        <date-filter valid-date="thruDate"/>
+                        <econdition field-name="partyRelationshipId"/>
+                        <econdition field-name="fromPartyId" from="partyId" ignore-if-empty="true"/>
+                        <econdition field-name="toPartyId" from="employerPartyId" ignore-if-empty="true"/>
+                    </entity-find>
+                    <set field="employment" from="employmentList ? employmentList[0] : null"/>
+                    <set field="partyId" from="partyId ?: employment?.fromPartyId ?: null"/> <!-- Need party from employment if not set -->
+                </then><else-if condition="partyId &amp;&amp; employerPartyId">
+                    <entity-find entity-name="mantle.humanres.employment.EmploymentAndRelationship" list="employmentList">
+                        <date-filter valid-date="thruDate"/>
+                        <econdition field-name="fromPartyId" from="partyId"/>
+                        <econdition field-name="toPartyId" from="employerPartyId"/>
+                    </entity-find>
+                    <set field="employment" from="employmentList ? employmentList[0] : null"/>
+                </else-if></if>
+
+                <if condition="employment?.emplPositionId">
+                    <entity-find-one entity-name="mantle.humanres.position.EmplPosition" value-field="emplPosition">
+                        <field-map field-name="emplPositionId" from="employment.emplPositionId"/></entity-find-one>
+                </if>
+
+                <set field="payGradeId" from="payGradeId ?: emplPosition?.payGradeId"/>
+                <set field="emplPositionClassId" from="emplPositionClassId ?: emplPosition?.emplPositionClassId"/>
+
+                <set field="partyRaList" from="rateAmountList.findAll({ it.partyId == partyId })"/>
+                <if condition="partyRaList">
+                    <set field="partyRateAmountToUse" from="findMaximalMatch(partyRaList,
+                        [workTypeEnumId:workTypeEnumId, payGradeId:payGradeId, emplPositionClassId:emplPositionClassId])"/>
+
+                </if>
+            </if>
+            <!--<log level="warn" message="=============== partyRaList=${partyRaList}"/>-->
+
+            <!-- Do a maximal match on the rates that do not have a partyId. -->
+            <set field="nonPartyRaList" from="rateAmountList.findAll({it.partyId == null })"/>
+            <set field="nonPartyRateAmountToUse" from="findMaximalMatch(nonPartyRaList,
+                    [workTypeEnumId:workTypeEnumId, payGradeId:payGradeId, emplPositionClassId:emplPositionClassId])"/>
+            <!--<log level="warn" message="=============== nonPartyRaList=${nonPartyRaList}"/>-->
+
+            <!-- Take the greater of the matched rates. This allows one to set a base rate for an employee, but allow
+                 specific rates to exceed the employee rate.  This does preclude paying less than the employee rate. -->
+            <if condition="partyRateAmountToUse"><then>
+                <if condition="nonPartyRateAmountToUse &amp;&amp;
+                               (nonPartyRateAmountToUse.rateAmount &gt; partyRateAmountToUse.rateAmount)"><then>
+                    <set field="rateAmountId" from="nonPartyRateAmountToUse.rateAmountId"/>
+                    <set field="rateAmount" from="nonPartyRateAmountToUse.rateAmount"/>
+                </then><else>
+                    <set field="rateAmountId" from="partyRateAmountToUse.rateAmountId"/>
+                    <set field="rateAmount" from="partyRateAmountToUse.rateAmount"/>
+                </else></if>
+            </then><else>
+                <set field="rateAmountId" from="nonPartyRateAmountToUse?.rateAmountId"/>
+                <set field="rateAmount" from="nonPartyRateAmountToUse?.rateAmount"/>
+            </else></if>
+
+        </actions>
+    </service>
+
+    <service verb="find" noun="TimeEntryRateAmount">
+        <description>
+            Internal service used by get#TimeEntryRate. Find a RateAmount record based on fields populated in TimeEntry.
+        </description>
+        <in-parameters>
+            <parameter name="timeEntry" type="EntityValue" required="true"/>
+            <parameter name="ratePurposeEnumId" required="true"/>
+            <parameter name="rateTypeEnumId" required="true"/>
+            <parameter name="rateCurrencyUomId" required="true"/>
+            <parameter name="timePeriodUomId" default-value="TF_hr"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rateAmountId"/>
+            <parameter name="rateAmount" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.work.TimeServices.find#RateAmount"
+                          in-map="[fromDate:timeEntry.fromDate, thruDate:timeEntry.thruDate,
+                                   ratePurposeEnumId:ratePurposeEnumId,rateTypeEnumId:rateTypeEnumId,
+                                   rateCurrencyUomId:rateCurrencyUomId,timePeriodUomId:timePeriodUomId,
+                                   workEffortId:timeEntry.workEffortId, partyId:timeEntry.partyId,
+                                   employerPartyId:timeEntry.clientPartyId, workTypeEnumId:timeEntry.workTypeEnumId,
+                                   emplPositionClassId:timeEntry.emplPositionClassId]"
+                          out-map="context"/>
+        </actions>
+    </service>
+
+    <!-- ===================================== -->
+    <!-- ========== Import Services ========== -->
+    <!-- ===================================== -->
+
+    <service verb="upload" noun="TimeSummaryFile">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="effectiveDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="timeFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+        </in-parameters>
+        <actions>
+            <set field="fileText" from="timeFile.getString('UTF-8')"/>
+            <service-call name="mantle.work.TimeServices.import#TimeSummaryFile" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="import" noun="TimeSummaryFile">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="effectiveDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="fileText" required="true"/>
+        </in-parameters>
+        <actions>
+            <script>
+            org.moqui.context.ExecutionContext ec = context.ec
+            recordsLoaded = ec.entity.makeDataLoader().csvText(fileText)
+                    .csvEntityName("mantle.work.TimeServices.import#TimeSummaryRecord")
+                    .csvFieldNames(['employeeId', 'emplPositionClassId', 'standardHours', 'overtimeHours',
+                                    'doubleTimeHours', 'standardPieces', 'overtimePieces', 'doubleTimePieces'])
+                    .defaultValues([clientPartyId:clientPartyId, effectiveDate:effectiveDate])
+                    .load()
+            </script>
+            <message>Loaded ${recordsLoaded} time summary records</message>
+        </actions>
+    </service>
+    <service verb="import" noun="TimeSummaryRecord">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="effectiveDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <!-- here down from file -->
+            <parameter name="employeeId" required="true"/>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="standardHours" type="BigDecimal"/>
+            <parameter name="overtimeHours" type="BigDecimal"/>
+            <parameter name="doubleTimeHours" type="BigDecimal"/>
+            <parameter name="standardPieces" type="BigDecimal"/>
+            <parameter name="overtimePieces" type="BigDecimal"/>
+            <parameter name="doubleTimePieces" type="BigDecimal"/>
+        </in-parameters>
+        <actions>
+            <!-- find the party, will be partyId or pseudoId (FUTURE: look by some sort of PartyIdentification too) -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" from="employeeId"/></entity-find-one>
+            <if condition="!party"><entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="pseudoId" from="employeeId"/></entity-find-one></if>
+            <if condition="!party"><return error="true" message="Could not find employee with ID ${employeeId}"/></if>
+
+            <if condition="standardHours || standardPieces"><service-call name="mantle.work.TimeServices.store#TimeEntry"
+                    in-map="[partyId:party.partyId, rateTypeEnumId:'RatpStandard', rateModifierEnumId:'RatmRegular', emplPositionClassId:emplPositionClassId,
+                        clientPartyId:clientPartyId, thruDate:effectiveDate, hours:standardHours, pieceCount:standardPieces]"/></if>
+            <if condition="overtimeHours || overtimePieces"><service-call name="mantle.work.TimeServices.store#TimeEntry"
+                    in-map="[partyId:party.partyId, rateTypeEnumId:'RatpStandard', rateModifierEnumId:'RatmOvertime', emplPositionClassId:emplPositionClassId,
+                        clientPartyId:clientPartyId, thruDate:effectiveDate, hours:overtimeHours, pieceCount:overtimePieces]"/></if>
+            <if condition="doubleTimeHours || doubleTimePieces"><service-call name="mantle.work.TimeServices.store#TimeEntry"
+                    in-map="[partyId:party.partyId, rateTypeEnumId:'RatpStandard', rateModifierEnumId:'RatmDouble', emplPositionClassId:emplPositionClassId,
+                        clientPartyId:clientPartyId, thruDate:effectiveDate, hours:doubleTimeHours, pieceCount:doubleTimePieces]"/></if>
+        </actions>
+    </service>
+
+    <service verb="upload" noun="TimeDetailFile">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="defaultDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="timeFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+        </in-parameters>
+        <actions>
+            <set field="fileText" from="timeFile.getString('UTF-8')"/>
+            <service-call name="mantle.work.TimeServices.import#TimeDetailFile" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="import" noun="TimeDetailFile">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="defaultDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="fileText" required="true"/>
+        </in-parameters>
+        <actions>
+            <script>
+            org.moqui.context.ExecutionContext ec = context.ec
+            recordsLoaded = ec.entity.makeDataLoader().csvText(fileText)
+                    .csvEntityName("mantle.work.TimeServices.import#TimeDetailRecord")
+                    .csvFieldNames(['employeeId', 'emplPositionClassId', 'rateType', 'startDateTime',
+                                    'endDateTime', 'hours', 'pieceCount'])
+                    .defaultValues([clientPartyId:clientPartyId, defaultDate:defaultDate])
+                    .load()
+            </script>
+            <message>Loaded ${recordsLoaded} time detail records</message>
+        </actions>
+    </service>
+    <service verb="import" noun="TimeDetailRecord">
+        <in-parameters>
+            <parameter name="clientPartyId" required="true"/>
+            <parameter name="defaultDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <!-- here down from file -->
+            <parameter name="employeeId" required="true"/>
+            <parameter name="emplPositionClassId"/>
+            <parameter name="rateType" default-value="Standard"/>
+            <parameter name="startDateTime"/>
+            <parameter name="endDateTime"/>
+            <parameter name="hours" type="BigDecimal"/>
+            <parameter name="pieceCount" type="BigDecimal"/>
+            <parameter name="dateTimeFormat" default-value="MM/dd/yyyy HH:mm:ss"/>
+        </in-parameters>
+        <actions>
+            <!-- find the party, will be partyId or pseudoId (FUTURE: look by some sort of PartyIdentification too) -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" from="employeeId"/></entity-find-one>
+            <if condition="!party"><entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="pseudoId" from="employeeId"/></entity-find-one></if>
+            <if condition="!party"><return error="true" message="Could not find employee with ID ${employeeId}"/></if>
+
+            <if condition="startDateTime"><set field="fromDate" from="ec.l10n.parseTimestamp(startDateTime, dateTimeFormat)"/></if>
+            <if condition="endDateTime"><set field="thruDate" from="ec.l10n.parseTimestamp(endDateTime, dateTimeFormat)"/></if>
+            <if condition="!fromDate &amp;&amp; !thruDate"><set field="thruDate" from="defaultDate"/></if>
+
+            <set field="rateTypeEnumId" value="Ratp${rateType}"/>
+
+            <service-call name="mantle.work.TimeServices.store#TimeEntry"
+                    in-map="[partyId:party.partyId, rateTypeEnumId:rateTypeEnumId, emplPositionClassId:emplPositionClassId,
+                        clientPartyId:clientPartyId, fromDate:fromDate, thruDate:thruDate,
+                        hours:hours, pieceCount:pieceCount]"/>
+        </actions>
+    </service>
+</services>

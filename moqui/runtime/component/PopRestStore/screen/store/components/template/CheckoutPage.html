@@ -1,0 +1,362 @@
+<div>
+    <checkout-navbar />
+    <div class="container">
+        <div class="loader" v-if="isCurrentStep(STEP_PENDING)"></div>
+        <div class="row">
+            <!-- Panel item list-->
+            <div class="col col-lg-6 col-sm-12 col-12 loader-wrapper">
+                <div class="loader" v-if="loading">
+                        <div class="ball-spin-fade-loader"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                </div>
+                <p class="row title-cart-item">
+                    <span class="col col-6 col-sm-2">Item</span>
+                    <span class="col d-none d-sm-block col-sm-5"></span>
+                    <span class="col col-3 col-sm-2">Quantity</span>
+                    <span class="col col-3 col-sm-3 text-center">Price</span>
+                </p>
+                <hr class="hr">
+                <div class="row" v-for="(item, i) in productsInCart.orderItemList" :key="item.itemTypeEnumId + '' + item.productId" v-if="item.itemTypeEnumId != 'ItemShipping'">
+                    <div class="col col-sm-2 d-none d-sm-block">
+                        <product-image :productId="item.productId" v-if="item.itemTypeEnumId=='ItemProduct'"
+                           class="mb-1"/>
+                    </div>
+                    <div class="col col-6 col-sm-5">
+                        <p class="item-text-desc">
+                            <a class="item-text-desc" :href="'product/' + item.productId" v-if="item.itemTypeEnumId == 'ItemProduct'">
+                                {{item.itemDescription}}
+                            </a>
+                            <a class="item-text-desc" v-else>
+                                {{item.promoCodeText ? item.promoCodeText : item.itemDescription}}
+                            </a>
+                        </p>
+                        <p v-if="item.unitListPrice && ((item.unitListPrice - item.unitAmount) != 0)" class="last-price">
+                            <del>{{currencyFormat.format(item.unitListPrice)}}</del>
+                            {{currencyFormat.format(item.unitAmount)}}
+                            <span class="place-order-total"> Save {{currencyFormat.format(item.unitListPrice - item.unitAmount)}}</span>
+                        </p>
+                    </div>
+                    <div class="col col-3 col-sm-2">
+                        <input class="input-quantity form-control" id="quantity" @change="updateProductQuantity(item)"
+                            type="text" v-model.lazy="item.quantity" v-show="item.itemTypeEnumId == 'ItemProduct'"/>
+                    </div>
+                    <div class="col col-3 col-sm-3 text-right">
+                        <div class="place-order-total pr-4" v-if="item.itemTypeEnumId == 'ItemProduct'">{{currencyFormat.format(item.unitAmount)}}</div>
+                        <div class="place-order-total pr-4" v-else>{{currencyFormat.format(item.quantity*item.unitAmount)}}</div>
+                        <div v-if="item.itemTypeEnumId=='ItemProduct'" class="item-actions pr-4" @click="deleteOrderProduct(item)">
+                            <span>Delete</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optional Item Messages -->
+                <template v-if="showCheckoutMessages && !loading">
+                    <checkout-messages :product-total="productTotal" :promo-discount="promoDiscount" :item-list="productsInCart.orderItemList" :address="shippingAddressSelect"/>
+                </template>
+                <hr>
+                <div class="row div-total">
+                    <span class="col col-9 col-lg-9">Products</span>
+                    <span class="col col-3 col-lg-3 text-right place-order-total" v-if="productsInCart.orderPart">
+                        <span class="pr-4">{{currencyFormat.format(productTotal)}}</span>
+                    </span>
+                </div>
+                <hr>
+
+                <div class="popover fade bs-popover-top p-2" id="popup"
+                     @mouseleave="hidePopover('popup', 'popover')" @mouseenter="mouseInPopover = true">
+                    <div class="row" v-for="promo in appliedPromoCodes">
+                        <div class="col pr-1">{{promo}}</div>
+                        <div class="col pl-1">
+                            <i class="fa fa-trash-alt pointer" @click="deletePromoCode(promo)"></i>
+                        </div>
+                    </div>
+                    <div class="arrow"></div>
+                </div>
+
+                <hr v-show="promoDiscount < 0">
+                <div class="row div-total" v-show="promoDiscount < 0">
+                    <span class="col col-9 col-lg-9">
+                        Promotions
+                        <i id="promoInfo" class="fa fa-info-circle pointer" @mouseenter="showPopover('promoInfo','popup')" v-show="appliedPromoCodes.length>0"
+                        @mouseleave="hidePopover('popup','element')"></i>
+                    </span>
+                    <span class="col col-3 col-lg-3 text-right place-order-total">
+                        <span class="pr-4">{{promoDiscount.toFixed(2)}}</span>
+                    </span>
+                </div>
+
+                <div class="row div-total">
+                    <span class="col col-9 col-lg-9 mt-4">Shipping</span>
+                    <span class="col col-3 col-lg-3 mt-4 text-right place-order-total">
+                        <span class="pr-4">
+                            {{ shippingPrice !== 0 ? "$" + shippingPrice.toFixed(2) : "FREE" }}
+                        </span>
+                    </span>
+                    <hr style="width: 96%;">
+                    <span class="col col-9 col-lg-9 mt-3 mb-5">Total</span>
+                    <span class="col col-3 col-lg-3 mt-3 text-right" v-if="productsInCart.orderHeader">
+                        <span class="pr-4">{{currencyFormat.format(productsInCart.orderHeader.grandTotal)}}</span>
+                    </span>
+                </div>
+
+                <div class="row">
+                    <p class="col">Do you have a Promotion Code?</p>
+                </div>
+                <div class="row">
+                    <div class="input-group col">
+                        <input type="text" class="col-lg-9 form-control" placeholder="Enter it here..." aria-label="Input group promotion" aria-describedby="btnGroupAddon" name="promoCode" id="promoCode" v-model="promoCode">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-info" @click="applyPromotionCode">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <span v-if="promoError" class="col text-danger">{{promoError}}</span>
+                    <span v-else class="col text-green">{{promoSuccess}}</span>
+                </div>
+                <div class="row mt-5">
+                    <contact-info/>
+                </div>
+            </div>
+
+            <!-- The whole checkout stage column -->
+            <div class="col col-lg-5 offset-lg-1 col-sm-12 col-12 loader-wrapper">
+                <div class="loader" v-if="loading">
+                    <div class="ball-spin-fade-loader"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                </div>
+                <!-- Shipping Address section title and change button -->
+                <p class="title-check-text" :class="{'step-active':isCurrentStep(STEP_ADDRESS), 'step-complete':isCompleteStep(STEP_ADDRESS)}">
+                    <span v-if="isIncompleteStep(STEP_ADDRESS)" class="circle">1</span>
+                    <span v-if="isCompleteStep(STEP_ADDRESS)" class="circle"><i class="fa fa-check"></i></span>
+                    <span class="text-address">SHIPPING ADDRESS</span>
+                    <span
+                        v-if="isCompleteStep(STEP_ADDRESS)"
+                        class="text-address change-info float-right"
+                        @click="setCurrentStep(STEP_ADDRESS)">
+                        Change
+                    </span>
+                </p>
+                <!-- Horizontal dividing line -->
+                <hr class="hr" :class="{ 'hr-active': isCurrentStep(STEP_ADDRESS), 'hr-complete':isCompleteStep(STEP_ADDRESS)}">
+                <!-- The selected shipping address -->
+                <div v-if="isCompleteStep(STEP_ADDRESS)" class="div-total">
+                    <span class="span-description">{{shippingAddressSelect.toName}}</span>
+                    <span class="span-description">
+                        {{shippingAddressSelect.address1}} {{shippingAddressSelect.address2}}
+                    </span>
+                    <span class="span-description">{{shippingAddressSelect.city}}</span>
+                    <span v-if="postalAddressStateGeoSelected" class="span-description">{{postalAddressStateGeoSelected.geoName}}</span>
+                    <span class="span-description">
+                        <i class="fa fa-phone phone-icon"></i>
+                        {{shippingAddressSelect.contactNumber}}
+                    </span>
+                </div>
+                <!-- The address collapses -->
+                <div v-if="isCurrentStep(STEP_ADDRESS)" id="shippingAddressCollapse">
+                    <div v-for="(option, index) in listShippingAddress">
+                        <div :class="{ 'div-checkmark': addressOption == option.postalContactMechId + ':' +
+                            option.telecomContactMechId }">
+                            <label :for="index + 'r1'" class="container-input">
+                                <input :id="index + 'r1'" type="radio" :value="option.postalContactMechId + ':' +
+                                    option.telecomContactMechId" v-model="addressOption"
+                                    @click="changeShippingAddress(option)"/>
+                                <span class="checkmark"></span>
+                                <span class="span-description">{{option.postalAddress.toName}}</span>
+                                <span class="span-description">
+                                    {{option.postalAddress.address1}} {{option.postalAddress.address2}}
+                                </span>
+                                <span class="span-description">{{option.postalAddress.city}}</span>
+                                <span v-if="option.postalAddressStateGeo" class="span-description">
+                                    {{option.postalAddressStateGeo.geoName}}
+                                </span>
+                                <span class="span-description">
+                                    <i class="fa fa-phone phone-icon"></i>
+                                    {{option.telecomNumber ? option.telecomNumber.contactNumber : ''}}
+                                </span>
+                            </label>
+                            <!-- Update and delete address icons -->
+                            <span data-toggle="modal" data-target="#addressFormModal"
+                                @click="selectAddress(option),isUpdate = true" class="edit-icon">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                            <span @click="deleteShippingAddress(option.postalContactMechId,option.postalContactMechPurposeId)"
+                                class="delete-icon">
+                                <i class="fas fa-trash-alt"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- In the addressOption string we search that the telecomContactMechId exist using split() function -->
+                    <div v-if="addressOption && addressOption.split(':')[1] == 'undefined'" class="alert alert-danger font-size-09">
+                        Your Shipping Addres must have a phone number to continue.
+                    </div>
+                    <br>
+                    <!-- Buttons    -->
+                    <button
+                        @click="addressContinue()" class="btn btn-continue float-right"
+                        :disabled="addressOption == null || addressOption == ''
+                        || listShippingAddress == null || listShippingAddress.length == 0 || (addressOption && addressOption.split(':')[1] == 'undefined')">
+                        Continue
+                    </button>
+                    <a data-toggle="modal" data-target="#addressFormModal" class="text-add" @click="resetData()">
+                        Add a New Address
+                    </a>
+                </div>
+                <br />
+
+                <!-- Shipping method section title-->
+                <p class="title-check-text"  :class="{'step-active':isCurrentStep(STEP_SHIPPING), 'step-complete':isCompleteStep(STEP_SHIPPING)}">
+                    <span v-if="isIncompleteStep(STEP_SHIPPING)" class="circle">2</span>
+                    <span v-if="isCompleteStep(STEP_SHIPPING)" class="circle"> <i class="fa fa-check"></i></span>
+                    <span class="text-address">SHIPPING METHOD</span>
+                    <span v-if="isCompleteStep(STEP_SHIPPING)"
+                        class="text-address change-info float-right"
+                        @click="setCurrentStep(STEP_SHIPPING)">
+                        Change
+                    </span>
+                </p>
+                <!-- The selected shipping method -->
+                <hr class="hr" :class="{ 'hr-active':isCurrentStep(STEP_SHIPPING), 'hr-complete':isCompleteStep(STEP_SHIPPING) }">
+                <div v-if="isCompleteStep(STEP_SHIPPING)" class="div-total">
+                    <span class="span-description">
+                    {{shippingMethod.shipmentMethodDescription}}
+                    <span class="float-right" v-if="shippingMethod.shippingTotal">{{currencyFormat.format(shippingMethod.shippingTotal)}}</span>
+                    </span>
+                </div>
+
+                <!-- Shipping method collapses -->
+                <div v-if="isCurrentStep(STEP_SHIPPING)" id="shippingMethodCollapse">
+                    <div v-for="(option, index) in listShippingOptions">
+                        <div :class="{ 'div-checkmark': shippingOption == option.carrierPartyId + ':' + option.shipmentMethodEnumId }">
+                            <label :for="index + 'r2'" class="container-input">
+                            <input :id="index + 'r2'" type="radio" :value="option.carrierPartyId + ':' + option.shipmentMethodEnumId" v-model="shippingOption" @click="shippingMethod = option" />
+                            <span class="checkmark"></span>
+                            {{option.carrierPartyId == '_NA_' ? '' : (option.carrierName + ' - ')}}
+                            {{option.shipmentMethodDescription}}
+                            <span class="float-right">{{ option.shippingTotal == undefined ? "FREE" : "$" + option.shippingTotal}}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <br>
+                    <button
+                        @click="shippingContinue()" class="btn btn-continue float-right"
+                        :disabled="shippingOption == null || shippingOption == '' ||  listShippingOptions == null || listShippingOptions.length == 0"
+                        style="margin-top: -15px;"><!-- Style needed to keep button away from next section -->
+                        Continue
+                    </button>
+                </div>
+                <br>
+
+                <!-- Payment method section -->
+                <p class="title-check-text" :class="{'step-active':isCurrentStep(STEP_BILLING), 'step-complete':isCompleteStep(STEP_BILLING)}">
+                    <span v-if="isIncompleteStep(STEP_BILLING)" class="circle">3</span>
+                    <span v-if="isCompleteStep(STEP_BILLING)" class="circle"><i class="fa fa-check"></i></span>
+                    <span class="text-address">PAYMENT METHODS</span>
+                    <span
+                        v-if="isCompleteStep(STEP_BILLING)"
+                        class="text-address change-info float-right"
+                        @click="setCurrentStep(STEP_BILLING)">
+                            Change
+                    </span>
+                </p>
+                <hr class="hr" :class="{'hr-active': isCurrentStep(STEP_BILLING), 'hr-complete':isCompleteStep(STEP_BILLING)}">
+                <div v-if="isCompleteStep(STEP_BILLING)" class="div-total">
+                    <span class="span-description">{{paymentMethod.description}}</span>
+                    <span class="span-description">{{paymentMethod.titleOnAccount}}</span>
+                    <span class="span-description">{{paymentMethod.expireMonth}}/{{paymentMethod.expireYear}}</span>
+                    <br>
+                    <template v-if="isCompleteStep(STEP_BILLING)">
+                        <span>Billing address:</span>
+                        <br>
+                        <span class="span-description">{{paymentMethod.toName}}</span>
+                        <span class="span-description">{{paymentMethod.address1}} {{paymentMethod.address2}}</span>
+                        <span class="span-description">{{paymentMethod.city}}</span>
+                        <span class="span-description"><i class="fa fa-phone phone-icon"></i>{{paymentMethod.contactNumber}}</span>
+                    </template>
+                </div>
+                <div v-if="isCurrentStep(STEP_BILLING)" id="paymentMethodCollapse" class="checkout-payment-methods-list">
+                    <div class="col" v-for="(item,index) in listPaymentMethods">
+                        <div class="row" :class="{ 'div-checkmark': paymentOption == item.paymentMethodId }">
+                            <label  :for="index + 'r3'" class="container-input col-11">
+                                <input :id="index + 'r3'"  type="radio" :value="item.paymentMethodId" v-model="paymentOption"
+                                    @click="selectPaymentMethod(item), clearCvv()"/>
+                                <span class="checkmark"></span>
+                                <span class="span-description">{{item.paymentMethod.description}}</span>
+                                <span class="span-description">{{item.paymentMethod.titleOnAccount}}</span>
+                                <span class="span-description">Expires on {{item.creditCard.expireDate}}</span>
+                                <div v-if="paymentOption == item.paymentMethodId" class="input-group selected-card-cvv">
+                                    <input id="cvv" type="text" class="form-control col-4" v-model="cvv" placeholder="CVV" />
+                                    <div v-if="showCvvError" class="text-danger">Card security code must be either 3 or 4 numeric characters</div>
+                                </div>
+                            </label>
+                            <div @click="deletePaymentMethod(item.paymentMethodId)"
+                                class="delete-icon margin-top--10px col-1">
+                                <i class="fas fa-trash-alt"></i>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                    <br />
+                    <a data-toggle="modal" data-target="#creditCardModal" class="text-add" @click="resetData()">
+                        Add a Credit Card
+                    </a>
+                    <button class="btn btn-continue float-right"
+                        @click="validateCvv()"
+                        :disabled="paymentOption == null || paymentOption == '' || listPaymentMethods == null ||
+                        listPaymentMethods.length == 0">
+                        Continue
+                    </button>
+                </div>
+                <br>
+                <p class="title-check-text" :class="{'step-active':isCurrentStep(STEP_REVIEW), 'step-complete':isCompleteStep(STEP_REVIEW)}">
+                    <span v-if="isIncompleteStep(STEP_REVIEW)" class="circle">4</span>
+                    <span v-if="isCompleteStep(STEP_REVIEW)" class="circle"><i class="fa fa-check"></i></span>
+                    <span class="text-address">COMPLETE PURCHASE</span>
+                </p>
+                <hr class="hr" :class="{ 'hr-active':isCurrentStep(STEP_REVIEW), 'hr-complete':isCompleteStep(STEP_REVIEW) }">
+                <div v-if="isCurrentStep(STEP_REVIEW)" id="placeOrderCollapse">
+                    <div class="div-place-order">
+                        <p class="text-center">YOUR TOTAL IS:
+                            <span class="place-order-total" v-if="productsInCart.orderHeader">
+                                {{currencyFormat.format(productsInCart.orderHeader.grandTotal)}}
+                            </span>
+                        </p>
+                        <p class="text-center place-order-text">Place order below to complete your purchase</p>
+                    </div>
+                    <button class="btn btn-place-order col col-lg-12" @click="placeCartOrder()">Place Order</button>
+                </div>
+                <div class="text-center" v-if="!isCurrentStep(STEP_PENDING)"> 
+                    <a :href="storePath" class="btn text-add">Keep Shopping</a>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="modal fade" id="modal-error">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">An error occurred</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-center">{{responseMessage}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="addressFormModal">
+                <div class="modal-dialog" role="document">
+                    <modal-address :shippingAddress="shippingAddress" :isUpdate="isUpdate" :cancelCallback="onAddressCancel" :completeCallback="onAddressUpserted" />
+                 </div>
+            </div>
+
+            <div class="modal fade" id="creditCardModal"><!-- Credit Card Modal -->
+                <div class="modal-dialog" role="document">
+                    <modal-credit-card :paymentMethod="paymentMethod" :isUpdate="isUpdate" :addressList="listShippingAddress" :cancelCallback="onCreditCardCancel" :completeCallback="onCreditCardSet" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer-page :infoLink="false" />
+</div>

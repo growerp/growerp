@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-include="false" standalone="true">
+
+    <parameter name="factorId"/>
+    <parameter name="userId" required="true"/>
+
+    <transition name="verifyUserAuthcFactor">
+        <service-call name="org.moqui.impl.UserServices.validate#UserAuthcFactorCode" in-map="context" out-map="context"/>
+        <actions><if condition="!verified"><message type="danger">Authentication code is not valid</message></if></actions>
+        <default-response url=".."/>
+    </transition>
+
+    <actions>
+        <service-call name="org.moqui.impl.UserServices.setup#UserAuthcFactorTotp" in-map="[userId:userId, factorId:factorId]" out-map="context"/>
+    </actions>
+
+    <widgets>
+        <label text="Follow the Steps below to Complete Verification" type="h5"  condition="needsValidation == 'Y'"/>
+        <label text="View the Authenticator App Information" type="h5" condition="needsValidation == 'N'"/>
+        <container type="ol">
+            <container type="li"><label text="Open Authenticator App on device such as Google Authenticator, Authy, or Lastpass Authenticator"/></container>
+            <container type="li"><label text="Choose Either of the Options Below"/></container>
+            <container type="ul">
+                <container type="li"><label text="Scan this QR Code"/></container>
+                <text>&lt;img src="${dataUri}"/&gt;</text>
+                <container type="li"><label text="Enter the Data Below Manually"/></container>
+                <container type="ul">
+                    <container type="li"><label  text="Label: ${qrLabel}"/></container>
+                    <container type="li"><label text="Issuer: ${qrIssuer}"/></container>
+                    <container type="li"><label text="Secret: ${qrSecret}"/></container>
+                </container>
+            </container>
+            <container type="li"><label text="Verify by Entering the Generated Code into the Text Box below" condition="needsValidation == 'Y'"/><label text="You're Already Verified that's It!" condition="needsValidation == 'N'"/></container>
+            <form-single name="VerifyUserAuthcFactor" transition="verifyUserAuthcFactor">
+                <field name="userId" from="userId"><conditional-field condition="needsValidation == 'Y'"><hidden/></conditional-field></field>
+                <field name="factorTypeEnumId"><conditional-field condition="needsValidation == 'Y'"><hidden default-value="UafTotp"/></conditional-field></field>
+                <field name="code"><conditional-field condition="needsValidation == 'Y'"><text-line size="30"/></conditional-field></field>
+                <field name="submit"><conditional-field condition="needsValidation == 'Y'"><submit/></conditional-field></field>
+            </form-single>
+        </container>
+    </widgets>
+</screen>

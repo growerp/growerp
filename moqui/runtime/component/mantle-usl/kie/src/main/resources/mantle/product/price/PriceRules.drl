@@ -1,0 +1,16 @@
+package mantle.product.price;
+dialect "mvel"
+import org.moqui.util.ContextStack
+import java.math.BigDecimal
+global org.moqui.context.ExecutionContext ec
+
+rule "Demo Product One-Two 10% Off"
+when
+    $context : ContextStack(productId == "DEMO_1_2", price > 0) from ec.context
+    // some examples of other useful expressions, though not useful for this particular rule:
+    // $product : org.moqui.entity.EntityValue(getEntityName() == "mantle.product.Product", get("productId") == "DEMO_1_2")
+then
+    // NOTE: don't call modify or update, results in some sort of crazy recursion or something and fails
+    // MVEL doesn't do convenient things like BigDecimal math by default, does double math instead, so this is much more verbose
+    $context.put("price", ((BigDecimal) $context.get("price")).multiply(new BigDecimal(0.9)).setScale(2, BigDecimal.ROUND_HALF_UP));
+end

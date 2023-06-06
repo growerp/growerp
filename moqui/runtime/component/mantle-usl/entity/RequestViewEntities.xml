@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.request -->
+    <!--  - mantle.request.requirement -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.request -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="RequestAndFacilityAndStatus" package="mantle.request">
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request"/>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="REQ">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="STTS" entity-name="moqui.basic.StatusItem" join-from-alias="REQ">
+            <key-map field-name="statusId"/></member-entity>
+        <alias-all entity-alias="REQ"/>
+        <alias entity-alias="FAC" name="facilityName"/>
+        <alias entity-alias="STTS" name="statusDescription" field="description"/>
+    </view-entity>
+    <view-entity entity-name="RequestItemAndProduct" package="mantle.request">
+        <member-entity entity-alias="RQIT" entity-name="mantle.request.RequestItem"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="RQIT">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="RQIT"/>
+        <alias entity-alias="PROD" name="productName"/>
+    </view-entity>
+
+    <view-entity entity-name="RequestAndParty" package="mantle.request">
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request"/>
+        <member-entity entity-alias="RQP" entity-name="mantle.request.RequestParty" join-from-alias="REQ" join-optional="true">
+            <key-map field-name="requestId"/></member-entity>
+        <alias-all entity-alias="REQ"/>
+        <alias-all entity-alias="RQP"/>
+    </view-entity>
+    <view-entity entity-name="RequestPartyAndPerson" package="mantle.request">
+        <member-entity entity-alias="RQP" entity-name="mantle.request.RequestParty"/>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="RQP">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="RQP"/>
+        <alias-all entity-alias="PER"><exclude field="partyId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="RequestAndPartyDetail" package="mantle.request">
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request"/>
+        <member-entity entity-alias="RQP" entity-name="mantle.request.RequestParty" join-from-alias="REQ">
+            <key-map field-name="requestId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="RQP">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="RQP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="RQP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="USRACT" entity-name="moqui.security.UserAccount" join-from-alias="RQP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="RQP"/>
+        <alias-all entity-alias="REQ"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias name="username" entity-alias="USRACT"/>
+    </view-entity>
+
+    <view-entity entity-name="RequestCommEventDetail" package="mantle.request">
+        <member-entity entity-alias="RCE" entity-name="mantle.request.RequestCommEvent"/>
+        <member-entity entity-alias="CEV" entity-name="mantle.party.communication.CommunicationEvent" join-from-alias="RCE">
+            <key-map field-name="communicationEventId"/></member-entity>
+        <alias-all entity-alias="RCE"/>
+        <alias-all entity-alias="CEV"/>
+    </view-entity>
+    <view-entity entity-name="RequestWorkEffortDetail" package="mantle.request">
+        <member-entity entity-alias="RWE" entity-name="mantle.request.RequestWorkEffort"/>
+        <member-entity entity-alias="WEF" entity-name="mantle.work.effort.WorkEffort" join-from-alias="RWE">
+            <key-map field-name="workEffortId"/></member-entity>
+        <alias-all entity-alias="RWE"/>
+        <alias-all entity-alias="WEF"><exclude field="workEffortId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="WorkEffortRequestDetail" package="mantle.request">
+        <member-entity entity-alias="RWE" entity-name="mantle.request.RequestWorkEffort"/>
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request" join-from-alias="RWE">
+            <key-map field-name="requestId"/></member-entity>
+        <alias-all entity-alias="RWE"/>
+        <alias-all entity-alias="REQ"><exclude field="requestId"/></alias-all>
+    </view-entity>
+
+    <view-entity entity-name="WikiPageAndRequest" package="mantle.request">
+        <member-entity entity-alias="WPR" entity-name="mantle.request.WikiPageRequest"/>
+        <member-entity entity-alias="WKP" entity-name="moqui.resource.wiki.WikiPage" join-from-alias="WPR">
+            <key-map field-name="wikiPageId"/></member-entity>
+        <member-entity entity-alias="REQ" entity-name="mantle.request.Request" join-from-alias="WPR">
+            <key-map field-name="requestId"/></member-entity>
+        <alias-all entity-alias="WPR"/>
+        <alias-all entity-alias="WKP"/>
+        <alias-all entity-alias="REQ"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.request.requirement -->
+    <!-- ========================================================= -->
+
+</entities>

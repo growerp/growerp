@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="service-definition-3.xsd">
+
+    <service verb="get" noun="ServerPrinters">
+        <!-- org.moqui.impl.PrintServices.get#ServerPrinters -->
+        <description>Get printers from print server and create a moqui.basic.print.NetworkPrinter record for each.</description>
+        <in-parameters>
+            <parameter name="serverHost" required="true"/>
+            <parameter name="serverPort" type="Integer" default="631"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="networkPrinterIdList" type="List"><parameter name="networkPrinterId"/></parameter>
+        </out-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+    <service verb="print" noun="DocumentInterface">
+        <in-parameters>
+            <parameter name="networkPrinterId" required="true"/>
+            <parameter name="createdDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+            <parameter name="username"/>
+            <parameter name="jobName"/>
+            <parameter name="copies" type="Integer" default="1"/>
+            <parameter name="duplex" default-value="N"/>
+            <parameter name="pageRanges"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="printJobId"/>
+            <parameter name="jobId" type="Integer"/>
+        </out-parameters>
+    </service>
+    <service verb="print" noun="Document">
+        <description>Create a moqui.basic.print.PrintJob record and send it to the specified NetworkPrinter</description>
+        <implements service="org.moqui.impl.PrintServices.print#DocumentInterface"/>
+        <in-parameters>
+            <parameter name="storeDocument" type="Boolean" default="true"/>
+            <parameter name="contentType"/>
+
+            <parameter name="inputStream" type="java.io.InputStream"><description>The document may be passed in this
+                parameter as an InputStream or in the serialBlob field as a wrapped byte[].</description></parameter>
+            <parameter name="serialBlob" type="javax.sql.rowset.serial.SerialBlob">
+                <description>Use SerialBlob as a wrapper for byte[].</description></parameter>
+        </in-parameters>
+        <actions>
+            <if condition="serialBlob == null &amp;&amp; inputStream == null">
+                <return error="true" message="Both inputStream and serialBlob are null, must specify one or the other"/></if>
+
+            <!-- for storing the document we'll always use a byte[] (not SerialBlob, so can be used below too) -->
+            <if condition="serialBlob != null"><then>
+                <set field="docBytes" from="serialBlob.getBytes(1, (int) serialBlob.length())"/>
+            </then><else>
+                <set field="docBytes" from="org.apache.commons.io.IOUtils.toByteArray(inputStream)"/>
+            </else></if>
+            <if condition="storeDocument"><set field="document" from="docBytes"/></if>
+
+            <set field="statusId" value="PtjNotSent"/>
+            <service-call name="create#moqui.basic.print.PrintJob" in-map="context" out-map="context" transaction="force-new"/>
+
+            <if condition="!storeDocument"><set field="document" from="docBytes"/></if>
+            <service-call name="org.moqui.impl.PrintServices.send#PrintJobInternal"
+                    in-map="[printJob:new HashMap(context)]" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="print" noun="ResourceDocument">
+        <!-- org.moqui.impl.PrintServices.print#ResourceDocument -->
+        <implements service="org.moqui.impl.PrintServices.print#DocumentInterface"/>
+        <in-parameters>
+            <parameter name="resourceLocation" required="true"/>
+        </in-parameters>
+        <actions>
+            <set field="resourceReference" from="ec.resource.getLocationReference(resourceLocation)"/>
+            <if condition="resourceReference == null || !resourceReference.getExists()">
+                <return error="true" message="Could not find resource at [${resourceLocation}]"/></if>
+            <set field="inputStream" from="resourceReference.openStream()"/>
+            <service-call name="org.moqui.impl.PrintServices.print#Document" out-map="context"
+                    in-map="context + [inputStream:inputStream, contentType:resourceReference.getContentType(), storeDocument:false]"/>
+        </actions>
+    </service>
+    <service verb="print" noun="ScreenDocument">
+        <!-- org.moqui.impl.PrintServices.print#ScreenDocument -->
+        <implements service="org.moqui.impl.PrintServices.print#DocumentInterface"/>
+        <in-parameters>
+            <parameter name="screenLocation" required="true"/>
+            <parameter name="screenParameters" type="Map"/>
+            <parameter name="screenParametersStr"><description>Groovy expression that evaluates to a Map</description></parameter>
+            <parameter name="contentType" default-value="application/pdf"/>
+            <parameter name="webappName" default-value="webroot"/>
+            <parameter name="storeDocument" type="Boolean" default="true"/>
+        </in-parameters>
+        <actions>
+            <script>
+                import org.moqui.context.ExecutionContext
+                import org.moqui.impl.screen.ScreenDefinition
+                import javax.sql.rowset.serial.SerialBlob
+                import javax.xml.transform.stream.StreamSource
+
+                ExecutionContext ec = context.ec
+                ScreenDefinition screedDef = ec.getScreen().getScreenDefinition(screenLocation)
+                if (screedDef == null) {
+                    ec.message.addError(ec.resource.expand('Screen not found at [${screenLocation}]',''))
+                    return
+                }
+                Map parmMap = [:]
+                if (screenParameters) parmMap.putAll(screenParameters)
+                if (screenParametersStr) parmMap.putAll(ec.resource.expression(screenParametersStr, ""))
+                context.putAll(parmMap)
+                String xslFoText = ec.screen.makeRender().rootScreen(screenLocation).webappName(webappName).renderMode("xsl-fo").render()
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()
+                ec.resource.xslFoTransform(new StreamSource(new StringReader(xslFoText)), null, baos, contentType)
+                serialBlob = new SerialBlob(baos.toByteArray())
+
+                if (!jobName) {
+                    StringBuilder jobNameSb = new StringBuilder()
+                    jobNameSb.append(screedDef.getScreenName())
+                    for (Map.Entry entry in parmMap) jobNameSb.append(" ").append(entry.getValue())
+                    jobName = jobNameSb.toString()
+                }
+
+                /* some test code to write a PDF to a file
+                File testFile = new File('test.pdf')
+                testFile.createNewFile()
+                FileOutputStream fos = new FileOutputStream(testFile)
+                org.apache.commons.io.IOUtils.write(baos.toByteArray(), fos)
+                */
+            </script>
+            <service-call name="org.moqui.impl.PrintServices.print#Document" out-map="context" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="send" noun="PrintJob">
+        <in-parameters><parameter name="printJobId" required="true"/></in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.basic.print.PrintJob" value-field="printJob"/>
+            <service-call name="org.moqui.impl.PrintServices.send#PrintJobInternal"
+                    in-map="[printJob:printJob]" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="send" noun="PrintJobInternal">
+        <in-parameters><parameter name="printJob" type="EntityValue" required="true"/></in-parameters>
+        <out-parameters>
+            <parameter name="jobId" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PrintJobDetailsFromServer">
+        <!-- org.moqui.impl.PrintServices.get#PrintJobDetailsFromServer -->
+        <description>Gets known local job details (from PrintJob record) job details/attributes from the print server,
+            updating PrintJob record for status and just returning the rest.</description>
+        <in-parameters><parameter name="printJobId"/></in-parameters>
+        <out-parameters>
+            <auto-parameters entity-name="moqui.basic.print.PrintJob" include="nonpk"/>
+
+            <parameter name="completeTime" type="Timestamp"/>
+            <parameter name="createTime" type="Timestamp"/>
+            <parameter name="jobUrl"/>
+            <parameter name="pagesPrinted" type="Integer"/>
+            <parameter name="printerUrl"/>
+            <parameter name="size" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+
+    <service verb="hold" noun="PrintJob">
+        <!-- org.moqui.impl.PrintServices.hold#PrintJob -->
+        <in-parameters><parameter name="printJobId"/></in-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+    <service verb="release" noun="PrintJob">
+        <!-- org.moqui.impl.PrintServices.release#PrintJob -->
+        <in-parameters><parameter name="printJobId"/></in-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+    <service verb="cancel" noun="PrintJob">
+        <!-- org.moqui.impl.PrintServices.cancel#PrintJob -->
+        <in-parameters><parameter name="printJobId"/></in-parameters>
+        <actions>
+            <return error="true" message="Network printing support not installed (add moqui-cups component)"/>
+        </actions>
+    </service>
+</services>

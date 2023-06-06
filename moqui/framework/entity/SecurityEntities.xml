@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- moqui.security -->
+    <!-- moqui.security.user -->
+    <!-- ========================================================= -->
+
+    <!-- ========== Artifact Group ========== -->
+    <entity entity-name="ArtifactGroup" package="moqui.security" use="configuration" short-alias="artifactGroups">
+        <field name="artifactGroupId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <relationship type="many" related="moqui.security.ArtifactGroupMember" short-alias="artifacts">
+            <key-map field-name="artifactGroupId"/></relationship>
+        <relationship type="many" related="moqui.security.ArtifactAuthz" short-alias="authz">
+            <key-map field-name="artifactGroupId"/></relationship>
+    </entity>
+    <entity entity-name="ArtifactGroupMember" package="moqui.security" use="configuration">
+        <field name="artifactGroupId" type="id" is-pk="true"/>
+        <field name="artifactName" type="text-medium" is-pk="true">
+            <description>Full artifact location/name, or a pattern if nameIsPattern=Y.</description></field>
+        <field name="artifactTypeEnumId" type="id" is-pk="true"/>
+        <field name="nameIsPattern" type="text-indicator"/>
+        <field name="inheritAuthz" type="text-indicator">
+            <description>If Y then the user will have authorization for anything called by the artifact.
+                If N user will need to have authorization for anything else called by the artifact.
+
+                Note that in some cases (like in screen-sets) inheritance in the other direction is on by default, or
+                in other words permission to access an artifact implies permission to access everything needed to get
+                to that artifact.
+
+                Defaults to Y.
+            </description>
+        </field>
+        <field name="filterMap" type="text-long"><description>A Groovy expression that evaluates to a Map that
+            will be used to constrain if the member is part of the group based on fields/parameters for Entity
+            operations and Service calls.</description></field>
+        <relationship type="one" related="moqui.security.ArtifactGroup"/>
+        <relationship type="one" title="ArtifactType" related="moqui.basic.Enumeration">
+            <key-map field-name="artifactTypeEnumId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Artifact Types" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Screen" enumId="AT_XML_SCREEN" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Screen Transition" enumId="AT_XML_SCREEN_TRANS" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Screen Content" enumId="AT_XML_SCREEN_CONTENT" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Service" enumId="AT_SERVICE" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Entity" enumId="AT_ENTITY" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="REST API Path" enumId="AT_REST_PATH" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Other" enumId="AT_OTHER" enumTypeId="ArtifactType"/>
+            <!-- not yet pushed/tracked/checked types below here
+                some of these are experimental ideas and may not ever be implemented, or useful
+            <moqui.basic.Enumeration description="Component" enumId="AT_COMPONENT" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="WebApp" enumId="AT_WEB_APP" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Screen Section" enumId="AT_XML_SCREEN_SECTN" enumTypeId="ArtifactType"/><!- - if no permission don't throw error, just don't display - ->
+            <moqui.basic.Enumeration description="Screen Form" enumId="AT_XML_SCREEN_FORM" enumTypeId="ArtifactType"/><!- - if no permission don't throw error, just don't display - ->
+            <moqui.basic.Enumeration description="Screen Form Field" enumId="AT_XML_SCREEN_FFLD" enumTypeId="ArtifactType"/><!- - if no permission don't throw error, just don't display - ->
+            <moqui.basic.Enumeration description="Template" enumId="AT_TEMPLATE" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="Script" enumId="AT_SCRIPT" enumTypeId="ArtifactType"/>
+            <moqui.basic.Enumeration description="EntityField" enumId="AT_ENTITY_FIELD" enumTypeId="ArtifactType"/>
+            -->
+        </seed-data>
+    </entity>
+
+    <!-- ========== Artifact Authz ========== -->
+
+    <entity entity-name="ArtifactAuthz" package="moqui.security" use="configuration">
+        <description>If an artifact in the group specified is accessed by any user in the AuthzGroup maxHitsCount
+            times in maxHitsDuration seconds then the user/artifact will be blocked fir tarputDuration seconds.
+        </description>
+        <field name="artifactAuthzId" type="id" is-pk="true"/>
+        <field name="userGroupId" type="id"/>
+        <field name="artifactGroupId" type="id"/>
+        <field name="authzTypeEnumId" type="id"/>
+        <field name="authzActionEnumId" type="id"/>
+        <field name="authzServiceName" type="text-medium">
+            <description>If specified this service will be called and it should return a authzTypeEnumId with the
+                result of the authorization.
+                Will try to pass the following fields to this service: userId, authzActionEnumId,  artifactTypeEnumId,
+                and artifactName. The service will also have access to the ArtifactExecutionFacade (ec.artifactExecution)
+                which you can use to get the current artifact stack, etc.
+                The service must return an authzTypeEnumId (AUTHZT_ALLOW, AUTHZT_ALWAYS, or AUTHZT_DENY).
+            </description>
+        </field>
+        <relationship type="one" related="moqui.security.UserGroup"/>
+        <relationship type="one" related="moqui.security.ArtifactGroup"/>
+        <relationship type="one" title="AuthzType" related="moqui.basic.Enumeration">
+            <key-map field-name="authzTypeEnumId"/></relationship>
+        <relationship type="one" title="AuthzAction" related="moqui.basic.Enumeration">
+            <key-map field-name="authzActionEnumId"/></relationship>
+        <relationship type="many" related="moqui.security.ArtifactAuthzFilter" short-alias="filters">
+            <key-map field-name="artifactAuthzId"/></relationship>
+        <relationship type="many" related="moqui.security.ArtifactGroupMember" short-alias="groupMembers">
+            <key-map field-name="artifactGroupId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="Authorization Type" enumTypeId="AuthzType"/>
+            <moqui.basic.Enumeration description="Allow" enumId="AUTHZT_ALLOW" enumTypeId="AuthzType"/>
+            <moqui.basic.Enumeration description="Deny (overrides Allow)" enumId="AUTHZT_DENY" enumTypeId="AuthzType"/>
+            <moqui.basic.Enumeration description="Always Allow (overrides Deny)" enumId="AUTHZT_ALWAYS" enumTypeId="AuthzType"/>
+            <!-- needed? <moqui.basic.Enumeration description="Not Applicable" enumId="AUTHZT_NA" enumTypeId="AuthzType"/> -->
+
+            <moqui.basic.EnumerationType description="Authorization Action" enumTypeId="AuthzAction"/>
+            <moqui.basic.Enumeration description="View" enumCode="VIEW" enumId="AUTHZA_VIEW" enumTypeId="AuthzAction"/>
+            <moqui.basic.Enumeration description="Create" enumCode="CREATE" enumId="AUTHZA_CREATE" enumTypeId="AuthzAction"/>
+            <moqui.basic.Enumeration description="Update" enumCode="UPDATE" enumId="AUTHZA_UPDATE" enumTypeId="AuthzAction"/>
+            <moqui.basic.Enumeration description="Delete" enumCode="DELETE" enumId="AUTHZA_DELETE" enumTypeId="AuthzAction"/>
+            <moqui.basic.Enumeration description="All" enumCode="ALL" enumId="AUTHZA_ALL" enumTypeId="AuthzAction"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="ArtifactAuthzFailure" package="moqui.security" use="nontransactional" cache="never">
+        <field name="failureId" type="text-medium" is-pk="true"/>
+        <field name="artifactName" type="text-medium"/>
+        <field name="artifactTypeEnumId" type="id"/>
+        <field name="authzActionEnumId" type="id"/>
+        <field name="userId" type="id"/>
+        <field name="failureDate" type="date-time"/>
+        <field name="isDeny" type="text-indicator"/>
+        <relationship type="one" title="ArtifactType" related="moqui.basic.Enumeration">
+            <key-map field-name="artifactTypeEnumId"/></relationship>
+        <relationship type="one" title="AuthzAction" related="moqui.basic.Enumeration">
+            <key-map field-name="authzActionEnumId"/></relationship>
+        <relationship type="one-nofk" related="moqui.security.UserAccount">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+    </entity>
+    <view-entity entity-name="ArtifactAuthzCheckView" package="moqui.security">
+        <member-entity entity-alias="AAZ" entity-name="moqui.security.ArtifactAuthz"/>
+        <member-relationship entity-alias="AGM" join-from-alias="AAZ" relationship="groupMembers"/>
+        <alias entity-alias="AAZ" name="userGroupId"/>
+        <alias entity-alias="AAZ" name="artifactAuthzId"/>
+        <alias entity-alias="AAZ" name="authzActionEnumId"/>
+        <alias entity-alias="AAZ" name="authzTypeEnumId"/>
+        <alias entity-alias="AAZ" name="authzServiceName"/>
+        <alias entity-alias="AGM" name="artifactGroupId"/>
+        <alias entity-alias="AGM" name="artifactName"/>
+        <alias entity-alias="AGM" name="artifactTypeEnumId"/>
+        <alias entity-alias="AGM" name="nameIsPattern"/>
+        <alias entity-alias="AGM" name="inheritAuthz"/>
+        <alias entity-alias="AGM" name="filterMap"/>
+    </view-entity>
+
+    <entity entity-name="ArtifactAuthzFilter" package="moqui.security" use="configuration">
+        <field name="artifactAuthzId" type="id" is-pk="true"/>
+        <field name="entityFilterSetId" type="id" is-pk="true"/>
+        <field name="applyCond" type="text-medium">
+            <description>Groovy boolean (if) expression, if specified checked before applying filters in the set</description></field>
+        <relationship type="one" related="moqui.security.ArtifactAuthz" short-alias="authz"/>
+        <relationship type="one" related="moqui.security.EntityFilterSet" short-alias="filterSet"/>
+    </entity>
+    <entity entity-name="EntityFilterSet" package="moqui.security" use="configuration">
+        <field name="entityFilterSetId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="applyCond" type="text-medium">
+            <description>Groovy boolean (if) expression, if specified checked before applying filters in the set</description></field>
+        <field name="allowMissingAlias" type="text-indicator">
+            <description>By default if a filterMap refers to a field not aliased in a view-entity there will be an error, set this to Y to do the query anyway</description></field>
+        <relationship type="many" related="moqui.security.EntityFilter" short-alias="filters">
+            <key-map field-name="entityFilterSetId"/></relationship>
+    </entity>
+    <entity entity-name="EntityFilter" package="moqui.security" use="configuration">
+        <field name="entityFilterId" type="id" is-pk="true"/>
+        <field name="entityFilterSetId" type="id"/>
+        <field name="entityName" type="text-medium"><description>The name of the entity to filter when queried. May be
+            queried directly or as part of a view-entity.</description></field>
+        <field name="filterMap" type="text-long"><description>
+            A Groovy expression that evaluates to a Map that will be added to queries to filter/constrain visible data.
+            Values can be constants or variables that come from user context (ec.user.context) or execution context
+            (ec.context). It is up to code to set values for use by these filters.
+
+            If the value evaluates to a Collection the default comparison operator is IN, otherwise default is EQUALS.
+            If a Collection is empty results in a false constraint, unless using a NOT* comparison operator.
+        </description></field>
+        <field name="comparisonEnumId" type="id"/>
+        <field name="joinOr" type="text-indicator"><description>If Y then OR filterMap entries, default AND.</description></field>
+        <!-- FUTURE: EntityFilterField with field path like DataDocument to join other entities/fields into queries for filtering -->
+
+        <relationship type="one" related="moqui.security.EntityFilterSet" short-alias="filterSet"/>
+        <relationship type="one" title="ComparisonOperator" related="moqui.basic.Enumeration" short-alias="comparison">
+            <key-map field-name="comparisonEnumId"/></relationship>
+    </entity>
+    <view-entity entity-name="ArtifactAuthzFilterAndSet" package="moqui.security">
+        <member-entity entity-alias="AAF" entity-name="moqui.security.ArtifactAuthzFilter"/>
+        <member-entity entity-alias="EFS" entity-name="moqui.security.EntityFilterSet" join-from-alias="AAF">
+            <key-map field-name="entityFilterSetId"/></member-entity>
+        <alias-all entity-alias="AAF"><exclude field="applyCond"/></alias-all>
+        <alias-all entity-alias="EFS"/>
+        <alias entity-alias="AAF" name="authzApplyCond" field="applyCond"/>
+    </view-entity>
+
+    <!-- ========== Artifact Tarpit ========== -->
+
+    <entity entity-name="ArtifactTarpit" package="moqui.security" use="configuration">
+        <description>If an artifact in the group specified is accessed by any user in the UserGroup maxHitsCount
+            times in maxHitsDuration seconds then the user/artifact will be blocked for tarpitDuration seconds.
+        </description>
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="artifactGroupId" type="id" is-pk="true"/>
+        <field name="maxHitsCount" type="number-integer"/>
+        <field name="maxHitsDuration" type="number-integer"/>
+        <field name="tarpitDuration" type="number-integer"/>
+        <relationship type="one" related="moqui.security.UserGroup"/>
+        <relationship type="one" related="moqui.security.ArtifactGroup"/>
+    </entity>
+    <view-entity entity-name="ArtifactTarpitCheckView" package="moqui.security">
+        <member-entity entity-alias="ATP" entity-name="moqui.security.ArtifactTarpit"/>
+        <member-entity entity-alias="AGM" entity-name="moqui.security.ArtifactGroupMember" join-from-alias="ATP">
+            <key-map field-name="artifactGroupId"/></member-entity>
+        <alias entity-alias="ATP" name="userGroupId"/>
+        <alias entity-alias="ATP" name="artifactGroupId"/>
+        <alias entity-alias="ATP" name="maxHitsCount"/>
+        <alias entity-alias="ATP" name="maxHitsDuration"/>
+        <alias entity-alias="ATP" name="tarpitDuration"/>
+        <alias entity-alias="AGM" name="artifactName"/>
+        <alias entity-alias="AGM" name="artifactTypeEnumId"/>
+        <alias entity-alias="AGM" name="nameIsPattern"/>
+    </view-entity>
+    <entity entity-name="ArtifactTarpitLock" package="moqui.security" use="transactional" cache="never">
+        <description>Deny access to the artifact for the user until releaseDateTime is reached.</description>
+        <field name="artifactTarpitLockId" type="id" is-pk="true"/>
+        <field name="userId" type="id"/>
+        <field name="artifactName" type="text-medium"/>
+        <field name="artifactTypeEnumId" type="id"/>
+        <field name="releaseDateTime" type="date-time"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one" title="ArtifactType" related="moqui.basic.Enumeration">
+            <key-map field-name="artifactTypeEnumId"/></relationship>
+    </entity>
+
+    <!-- ========== User ========== -->
+
+    <entity entity-name="UserAccount" package="moqui.security" use="transactional" short-alias="users">
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="username" type="text-medium" enable-audit-log="true">
+            <description>The username used along with the password to login</description></field>
+        <field name="userFullName" type="text-medium" enable-audit-log="update">
+            <description>User's first, middle, last, etc name</description></field>
+        <field name="currentPassword" type="text-medium">
+            <description>NOTE: not an encrypted field because one way hash encryption used for it</description></field>
+        <field name="resetPassword" type="text-medium">
+            <description>Set to random password for password reset, can be used only to update password</description></field>
+        <field name="passwordSalt" type="text-medium"/>
+        <field name="passwordHashType" type="text-short"/>
+        <field name="passwordBase64" type="text-indicator">
+            <description>Set to Y is currentPassword Base64 encoded, defaults to Hex encoded</description></field>
+        <field name="passwordSetDate" type="date-time"/>
+        <field name="passwordHint" type="text-medium"/>
+        <field name="publicKey" type="text-long"><description>RSA public key for key based authentication</description></field>
+        <field name="hasLoggedOut" type="text-indicator"><description>Set to Y when user logs out and to N when user logs in.
+            If user is session authenticated on request and this is Y then treat as if user not authenticated.</description></field>
+        <field name="disabled" type="text-indicator" default="'N'" enable-audit-log="update"/>
+        <field name="disabledDateTime" type="date-time"/>
+        <field name="terminateDate" type="date-time" enable-audit-log="true">
+            <description>If set then user may not login after this date, and no notifications will be sent after this date.</description></field>
+        <field name="successiveFailedLogins" type="number-integer"/>
+        <field name="requirePasswordChange" type="text-indicator"/>
+        <field name="currencyUomId" type="id"/>
+        <field name="locale" type="text-short"/>
+        <field name="timeZone" type="text-short"/>
+        <field name="externalUserId" type="text-medium"/>
+        <field name="emailAddress" type="text-medium" enable-audit-log="update">
+            <description>The email address to use for forgot password emails and other system messages.</description></field>
+        <field name="ipAllowed" type="text-medium">
+            <description>If specified only allow login from matching IP4 address. Comma separated patterns where each pattern has 4
+                dot separated segments each segment may be number, '*' for wildcard, or '-' separate number range (like '0-31').</description>
+        </field>
+        <relationship type="one" title="Currency" related="moqui.basic.Uom" short-alias="currencyUom">
+            <key-map field-name="currencyUomId"/></relationship>
+        <relationship type="many" related="moqui.security.UserGroupMember" short-alias="groups">
+            <key-map field-name="userId"/></relationship>
+        <relationship type="many" related="moqui.security.UserLoginKey" short-alias="loginKeys">
+            <key-map field-name="userId"/></relationship>
+        <relationship type="many" related="moqui.security.UserLoginHistory" short-alias="loginHistories">
+            <key-map field-name="userId"/></relationship>
+        <relationship type="many" related="moqui.security.UserPreference" short-alias="preferences">
+            <key-map field-name="userId"/></relationship>
+        <relationship type="many" related="moqui.security.user.NotificationTopicUser" short-alias="notificationTopics">
+            <key-map field-name="userId"/></relationship>
+
+        <!-- NOTE: both username and emailAddress must be unique -->
+        <index name="USERACCT_USERNAME" unique="true"><index-field name="username"/></index>
+        <index name="USERACCT_EMAILADDR" unique="true"><index-field name="emailAddress"/></index>
+        <seed-data>
+            <moqui.security.UserAccount userId="_NA_" username="_NA_" userFullName="Not Applicable" currentPassword="" disabled="Y"/>
+        </seed-data>
+    </entity>
+    <view-entity entity-name="UserAccountAndGroup" package="moqui.security">
+        <member-entity entity-alias="UAC" entity-name="moqui.security.UserAccount"/>
+        <member-relationship entity-alias="UGM" join-from-alias="UAC" relationship="groups" join-optional="true"/>
+        <member-relationship entity-alias="ULH" join-from-alias="UAC" relationship="loginHistories" join-optional="true"/>
+        <member-relationship entity-alias="NTU" join-from-alias="UAC" relationship="notificationTopics" join-optional="true"/>
+        <alias-all entity-alias="UAC"/>
+        <alias-all entity-alias="UGM"/>
+        <alias name="loginFromDate" entity-alias="ULH" field="fromDate"/>
+        <alias name="topic" entity-alias="NTU"/>
+        <alias name="receiveNotifications" entity-alias="NTU"/>
+        <alias name="emailNotifications" entity-alias="NTU"/>
+    </view-entity>
+    <entity entity-name="UserAuthcFactor" package="moqui.security" use="configuration">
+        <description>This entity is for recording User Authentication Factors.</description>
+        <field name="factorId" type="id" is-pk="true"/>
+        <field name="userId" type="id" not-null="true"/>
+        <field name="fromFactorId" type="id"/>
+        <field name="factorTypeEnumId" type="id"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="factorOption" type="text-medium" encrypt="true">
+            <description>Use varies based on factor type: TOTP is shared secret, Single Use is the code, Email Code is email address</description></field>
+        <field name="needsValidation" type="text-indicator"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one" title="UserAuthcFactorType" related="moqui.basic.Enumeration" short-alias="factorTypeEnum">
+            <key-map field-name="factorTypeEnumId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="User Authentication Factor Type" enumTypeId="UserAuthcFactorType"/>
+            <moqui.basic.Enumeration description="Authenticator App (TOTP)" enumId="UafTotp" enumTypeId="UserAuthcFactorType"/>
+            <moqui.basic.Enumeration description="Single Use Code" enumId="UafSingleUse" enumTypeId="UserAuthcFactorType"/>
+            <moqui.basic.Enumeration description="Email Code" enumId="UafEmail" enumTypeId="UserAuthcFactorType"/>
+            <moqui.basic.Enumeration description="SMS Code" enumId="UafSms" enumTypeId="UserAuthcFactorType"/>
+            <!-- <moqui.basic.Enumeration description="Authenticator App (HMAC OTP)" enumId="UafHotp" enumTypeId="UserAuthcFactorType"/> -->
+
+            <!-- generic factor record for UserAccount.emailAddress as an authc factor -->
+            <moqui.security.UserAuthcFactor factorId="UserAccountEmail" userId="_NA_" factorTypeEnumId="UafEmail" fromDate="0" thruDate="0"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="UserGroup" package="moqui.security" use="configuration" short-alias="userGroups">
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="groupTypeEnumId" type="id"/>
+        <field name="ipAllowed" type="text-medium"><description>See UserAccout.ipAllowed</description></field>
+        <field name="requireAuthcFactor" type="text-indicator"/>
+        <relationship type="one" title="UserGroupType" related="moqui.basic.Enumeration" short-alias="groupTypeEnum">
+            <key-map field-name="groupTypeEnumId"/></relationship>
+        <relationship type="many" related="moqui.security.UserGroupPermission" short-alias="permissions">
+            <key-map field-name="userGroupId"/></relationship>
+        <relationship type="many" related="moqui.security.UserGroupPreference" short-alias="preferences">
+            <key-map field-name="userGroupId"/></relationship>
+        <relationship type="many" related="moqui.security.ArtifactAuthz" short-alias="authz">
+            <key-map field-name="userGroupId"/></relationship>
+        <seed-data>
+            <moqui.basic.EnumerationType description="User Group Type" enumTypeId="UserGroupType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="UserGroupMember" package="moqui.security" use="configuration" cache="true">
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="moqui.security.UserGroup" short-alias="group"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="many" related="moqui.security.UserGroupPermission" short-alias="permissions">
+            <key-map field-name="userGroupId"/></relationship>
+    </entity>
+    <view-entity entity-name="UserGroupMemberUser" package="moqui.security">
+        <member-entity entity-alias="UGM" entity-name="moqui.security.UserGroupMember"/>
+        <member-relationship entity-alias="UAC" join-from-alias="UGM" relationship="user"/>
+        <alias-all entity-alias="UGM"/>
+        <alias-all entity-alias="UAC"/>
+    </view-entity>
+    <view-entity entity-name="UserGroupAndMember" package="moqui.security">
+        <member-entity entity-alias="UGM" entity-name="moqui.security.UserGroupMember"/>
+        <member-relationship entity-alias="UG" join-from-alias="UGM" relationship="group"/>
+        <alias-all entity-alias="UGM"/>
+        <alias-all entity-alias="UG"/>
+    </view-entity>
+    <entity entity-name="UserGroupPermission" package="moqui.security" use="configuration" cache="true" short-alias="userGroupPermissions">
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="userPermissionId" type="id-long" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="moqui.security.UserGroup" short-alias="group"/>
+        <relationship type="one-nofk" related="moqui.security.UserPermission" short-alias="permission">
+            <description>No FK in order to allow arbitrary permissions (ie not pre-configured).</description></relationship>
+    </entity>
+    <view-entity entity-name="UserPermissionCheck" package="moqui.security">
+        <member-entity entity-alias="UGM" entity-name="moqui.security.UserGroupMember"/>
+        <member-relationship entity-alias="UGP" join-from-alias="UGM" relationship="permissions"/>
+        <alias name="userGroupId" entity-alias="UGM"/>
+        <alias name="userId" entity-alias="UGM"/>
+        <alias name="userPermissionId" entity-alias="UGP"/>
+        <alias name="groupFromDate" entity-alias="UGM" field="fromDate"/>
+        <alias name="groupThruDate" entity-alias="UGM" field="thruDate"/>
+        <alias name="permissionFromDate" entity-alias="UGP" field="fromDate"/>
+        <alias name="permissionThruDate" entity-alias="UGP" field="thruDate"/>
+    </view-entity>
+
+    <entity entity-name="UserLoginKey" package="moqui.security" use="transactional" cache="never">
+        <description>A login key is an alternate way to authenticate a user, generally issued for temporary use sort of
+            like a session.</description>
+        <field name="loginKey" type="text-medium" is-pk="true"><description>NOTE: not an encrypted field because one way
+            hash encryption used for it (uses login-key.@encrypt-hash-type, no salt, hash before lookup on verify)</description></field>
+        <field name="userId" type="id"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="description" type="text-medium"/>
+        <relationship type="one" related="moqui.security.UserAccount" short-alias="user"/>
+    </entity>
+    <entity entity-name="UserLoginHistory" package="moqui.security" use="nontransactional" cache="never">
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="visitId" type="id"/>
+        <field name="passwordUsed" type="text-medium" encrypt="true"/>
+        <field name="successfulLogin" type="text-indicator"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one" related="moqui.server.Visit" short-alias="visit"/>
+    </entity>
+    <entity entity-name="UserPasswordHistory" package="moqui.security" use="nontransactional" cache="never">
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="password" type="text-medium"/>
+        <field name="passwordSalt" type="text-medium"/>
+        <field name="passwordHashType" type="text-short"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+    </entity>
+    <entity entity-name="UserPermission" package="moqui.security" use="configuration" short-alias="userPermissions">
+        <field name="userPermissionId" type="id-long" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+    </entity>
+    <entity entity-name="UserPreference" package="moqui.security" use="configuration">
+        <description>Use this entity for user-specific preferences (or properties). For default preferences use userId="_NA_".</description>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="preferenceKey" type="text-medium" is-pk="true"/>
+        <field name="preferenceValue" type="text-long"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one-nofk" title="UserPreferenceKey" related="moqui.basic.Enumeration" short-alias="keyEnum">
+            <description>No FK because any key can be used whether or not there is an Enumeration record for it.</description>
+            <key-map field-name="preferenceKey"/></relationship>
+        <seed-data>
+            <!-- User Preference Keys can be declared in Enumeration records, but they don't have to be -->
+            <moqui.basic.EnumerationType description="User Preference Key (optional)" enumTypeId="UserPreferenceKey"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="UserGroupPreference" package="moqui.security" use="configuration">
+        <description>Use this entity for user group preferences (or properties). For all users use userGroupId="ALL_USERS".</description>
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="preferenceKey" type="text-medium" is-pk="true"/>
+        <field name="preferenceValue" type="text-long"/>
+        <field name="groupPriority" type="number-integer">
+            <description>For deciding which value to use when a user is a member of multiple groups with preferences with the same key.</description></field>
+        <relationship type="one-nofk" related="moqui.security.UserGroup" short-alias="group">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one-nofk" title="UserPreferenceKey" related="moqui.basic.Enumeration" short-alias="keyEnum">
+            <description>No FK because any key can be used whether or not there is an Enumeration record for it.</description>
+            <key-map field-name="preferenceKey"/></relationship>
+    </entity>
+    <entity entity-name="UserScreenTheme" package="moqui.security" use="configuration" cache="true">
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="screenThemeTypeEnumId" type="id" is-pk="true"/>
+        <field name="screenThemeId" type="id"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one" title="ScreenThemeType" related="moqui.basic.Enumeration">
+            <key-map field-name="screenThemeTypeEnumId"/></relationship>
+        <relationship type="one" related="moqui.screen.ScreenTheme"/>
+    </entity>
+    <entity entity-name="UserGroupScreenTheme" package="moqui.security" use="configuration" cache="true">
+        <field name="userGroupId" type="id" is-pk="true"/>
+        <field name="screenThemeTypeEnumId" type="id" is-pk="true"/>
+        <field name="screenThemeId" type="id"/>
+        <field name="sequenceNum" type="number-integer"/>
+        <relationship type="one-nofk" related="moqui.security.UserGroup" short-alias="group">
+            <description>No FK in order to allow externally authenticated users.</description></relationship>
+        <relationship type="one" title="ScreenThemeType" related="moqui.basic.Enumeration">
+            <key-map field-name="screenThemeTypeEnumId"/></relationship>
+        <relationship type="one" related="moqui.screen.ScreenTheme"/>
+    </entity>
+
+    <!-- ========== User Notifications ========== -->
+
+    <entity entity-name="NotificationTopic" package="moqui.security.user" use="configuration" cache="true">
+        <field name="topic" type="text-medium" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="titleTemplate" type="text-long"/>
+        <field name="errorTitleTemplate" type="text-long"><description>If populated used when type=danger</description></field>
+        <field name="linkTemplate" type="text-long"/>
+        <field name="typeString" type="text-short"><description>One of: info, success, warning, danger</description></field>
+        <field name="showAlert" type="text-indicator"/>
+        <field name="alertNoAutoHide" type="text-indicator"/>
+        <field name="persistOnSend" type="text-indicator"/>
+        <field name="isPrivate" type="text-indicator"><description>If Y user must be associated to see it or receive notifications.</description></field>
+        <field name="receiveNotifications" type="text-indicator"><description>For each User if there is no NotificationTopicUser.receiveNotifications value then use this as the default, this defaults to N.</description></field>
+        <field name="emailNotifications" type="text-indicator"><description>For each User if there is no NotificationTopicUser.emailNotifications value then use this as the default, this defaults to N.</description></field>
+        <field name="emailTemplateId" type="id"><description>If is specified use this template to send a notification email to each user with emailNotifications=Y</description></field>
+        <field name="emailMessageSave" type="text-indicator"/>
+        <relationship type="one" related="moqui.basic.email.EmailTemplate"/>
+    </entity>
+    <entity entity-name="NotificationTopicUser" package="moqui.security.user" use="configuration" cache="true">
+        <field name="topic" type="text-medium" is-pk="true"/>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="receiveNotifications" type="text-indicator"><description>If notification sent to user only actually notify if this is Y</description></field>
+        <field name="allNotifications" type="text-indicator"><description>If Y user receives all notifications on topic even if not sent directly</description></field>
+        <field name="emailNotifications" type="text-indicator"><description>If Y sends an email to user using UserAccount.emailAddress</description></field>
+        <relationship type="one-nofk" related="moqui.security.user.NotificationTopic" short-alias="notificationTopic"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user"/>
+    </entity>
+
+    <entity entity-name="NotificationMessage" package="moqui.security.user" use="nontransactional" cache="never">
+        <field name="notificationMessageId" type="id" is-pk="true"/>
+        <field name="topic" type="text-medium"/>
+        <field name="userGroupId" type="id"/>
+        <field name="sentDate" type="date-time"/>
+        <field name="messageJson" type="text-very-long"/>
+        <field name="titleText" type="text-long"/>
+        <field name="linkText" type="text-long"/>
+        <field name="typeString" type="text-short"/>
+        <field name="showAlert" type="text-indicator"/>
+        <relationship type="one-nofk" related="moqui.security.user.NotificationTopic" short-alias="notificationTopic"/>
+        <relationship type="one" related="moqui.security.UserGroup" short-alias="userGroup"/>
+        <relationship type="many" related="moqui.security.user.NotificationMessageUser" short-alias="users">
+            <key-map field-name="notificationMessageId"/></relationship>
+    </entity>
+    <entity entity-name="NotificationMessageUser" package="moqui.security.user" use="nontransactional" cache="never">
+        <field name="notificationMessageId" type="id" is-pk="true"/>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="sentDate" type="date-time"/>
+        <field name="viewedDate" type="date-time"/>
+        <field name="emailMessageId" type="id"/>
+        <relationship type="one" related="moqui.security.user.NotificationMessage" short-alias="notification"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount" short-alias="user"/>
+        <relationship type="one" related="moqui.basic.email.EmailMessage" short-alias="emailMessage"/>
+        <index name="NOTMSGUSR_UID_VD" unique="false"><index-field name="userId"/><index-field name="viewedDate"/></index>
+    </entity>
+    <view-entity entity-name="NotificationMessageByUser" package="moqui.security.user" cache="never">
+        <member-entity entity-alias="NMSG" entity-name="moqui.security.user.NotificationMessage"/>
+        <member-relationship entity-alias="NMU" join-from-alias="NMSG" relationship="users"/>
+        <alias-all entity-alias="NMSG"/>
+        <alias entity-alias="NMU" name="userId"/>
+        <alias entity-alias="NMU" name="userSentDate" field="sentDate"/>
+        <alias entity-alias="NMU" name="viewedDate"/>
+    </view-entity>
+</entities>

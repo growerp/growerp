@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- see https://www.iso.org/obp/ui/#iso:code:3166:IT  Provinces below - regions can be added later if needed  -->
+    <Geo geoId="ITA_AG" geoCodeAlpha2="AG" geoName="Agrigento" geoNameLocal="Agrigento" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AL" geoCodeAlpha2="AL" geoName="Alessandria" geoNameLocal="Alessandria" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AN" geoCodeAlpha2="AN" geoName="Ancona" geoNameLocal="Ancona" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AO" geoCodeAlpha2="AO" geoName="Aosta" geoNameLocal="Aosta" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AO" geoCodeAlpha2="AO" geoName="Aoste" geoNameLocal="Aoste" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AR" geoCodeAlpha2="AR" geoName="Arezzo" geoNameLocal="Arezzo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AP" geoCodeAlpha2="AP" geoName="Ascoli Piceno" geoNameLocal="Ascoli Piceno" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AT" geoCodeAlpha2="AT" geoName="Asti" geoNameLocal="Asti" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AV" geoCodeAlpha2="AV" geoName="Avellino" geoNameLocal="Avellino" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BA" geoCodeAlpha2="BA" geoName="Bari" geoNameLocal="Bari" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BT" geoCodeAlpha2="BT" geoName="Barletta-Andria-Trani" geoNameLocal="Barletta-Andria-Trani" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BL" geoCodeAlpha2="BL" geoName="Belluno" geoNameLocal="Belluno" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BN" geoCodeAlpha2="BN" geoName="Benevento" geoNameLocal="Benevento" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BG" geoCodeAlpha2="BG" geoName="Bergamo" geoNameLocal="Bergamo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BI" geoCodeAlpha2="BI" geoName="Biella" geoNameLocal="Biella" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BO" geoCodeAlpha2="BO" geoName="Bologna" geoNameLocal="Bologna" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BZ" geoCodeAlpha2="BZ" geoName="Bolzano" geoNameLocal="Bolzano" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BZ" geoCodeAlpha2="BZ" geoName="Bozen" geoNameLocal="Bozen" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BS" geoCodeAlpha2="BS" geoName="Brescia" geoNameLocal="Brescia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_BR" geoCodeAlpha2="BR" geoName="Brindisi" geoNameLocal="Brindisi" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CA" geoCodeAlpha2="CA" geoName="Cagliari" geoNameLocal="Cagliari" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CL" geoCodeAlpha2="CL" geoName="Caltanissetta" geoNameLocal="Caltanissetta" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CB" geoCodeAlpha2="CB" geoName="Campobasso" geoNameLocal="Campobasso" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CI" geoCodeAlpha2="CI" geoName="Carbonia-Iglesias" geoNameLocal="Carbonia-Iglesias" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CE" geoCodeAlpha2="CE" geoName="Caserta" geoNameLocal="Caserta" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CT" geoCodeAlpha2="CT" geoName="Catania" geoNameLocal="Catania" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CZ" geoCodeAlpha2="CZ" geoName="Catanzaro" geoNameLocal="Catanzaro" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CH" geoCodeAlpha2="CH" geoName="Chieti" geoNameLocal="Chieti" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CO" geoCodeAlpha2="CO" geoName="Como" geoNameLocal="Como" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CS" geoCodeAlpha2="CS" geoName="Cosenza" geoNameLocal="Cosenza" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CR" geoCodeAlpha2="CR" geoName="Cremona" geoNameLocal="Cremona" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_KR" geoCodeAlpha2="KR" geoName="Crotone" geoNameLocal="Crotone" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_CN" geoCodeAlpha2="CN" geoName="Cuneo" geoNameLocal="Cuneo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_EN" geoCodeAlpha2="EN" geoName="Enna" geoNameLocal="Enna" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FM" geoCodeAlpha2="FM" geoName="Fermo" geoNameLocal="Fermo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FE" geoCodeAlpha2="FE" geoName="Ferrara" geoNameLocal="Ferrara" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FI" geoCodeAlpha2="FI" geoName="Firenze" geoNameLocal="Firenze" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FG" geoCodeAlpha2="FG" geoName="Foggia" geoNameLocal="Foggia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FC" geoCodeAlpha2="FC" geoName="Forlì-Cesena" geoNameLocal="Forlì-Cesena" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_FR" geoCodeAlpha2="FR" geoName="Frosinone" geoNameLocal="Frosinone" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_GE" geoCodeAlpha2="GE" geoName="Genova" geoNameLocal="Genova" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_GO" geoCodeAlpha2="GO" geoName="Gorizia" geoNameLocal="Gorizia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_GR" geoCodeAlpha2="GR" geoName="Grosseto" geoNameLocal="Grosseto" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_IM" geoCodeAlpha2="IM" geoName="Imperia" geoNameLocal="Imperia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_IS" geoCodeAlpha2="IS" geoName="Isernia" geoNameLocal="Isernia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_AQ" geoCodeAlpha2="AQ" geoName="L'Aquila" geoNameLocal="L'Aquila" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SP" geoCodeAlpha2="SP" geoName="La Spezia" geoNameLocal="La Spezia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LT" geoCodeAlpha2="LT" geoName="Latina" geoNameLocal="Latina" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LE" geoCodeAlpha2="LE" geoName="Lecce" geoNameLocal="Lecce" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LC" geoCodeAlpha2="LC" geoName="Lecco" geoNameLocal="Lecco" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LI" geoCodeAlpha2="LI" geoName="Livorno" geoNameLocal="Livorno" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LO" geoCodeAlpha2="LO" geoName="Lodi" geoNameLocal="Lodi" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_LU" geoCodeAlpha2="LU" geoName="Lucca" geoNameLocal="Lucca" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MC" geoCodeAlpha2="MC" geoName="Macerata" geoNameLocal="Macerata" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MN" geoCodeAlpha2="MN" geoName="Mantova" geoNameLocal="Mantova" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MS" geoCodeAlpha2="MS" geoName="Massa-Carrara" geoNameLocal="Massa-Carrara" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MT" geoCodeAlpha2="MT" geoName="Matera" geoNameLocal="Matera" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VS" geoCodeAlpha2="VS" geoName="Medio Campidano" geoNameLocal="Medio Campidano" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_ME" geoCodeAlpha2="ME" geoName="Messina" geoNameLocal="Messina" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MI" geoCodeAlpha2="MI" geoName="Milano" geoNameLocal="Milano" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MO" geoCodeAlpha2="MO" geoName="Modena" geoNameLocal="Modena" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_MB" geoCodeAlpha2="MB" geoName="Monza e Brianza" geoNameLocal="Monza e Brianza" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_NA" geoCodeAlpha2="NA" geoName="Napoli" geoNameLocal="Napoli" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_NO" geoCodeAlpha2="NO" geoName="Novara" geoNameLocal="Novara" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_NU" geoCodeAlpha2="NU" geoName="Nuoro" geoNameLocal="Nuoro" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_OG" geoCodeAlpha2="OG" geoName="Ogliastra" geoNameLocal="Ogliastra" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_OT" geoCodeAlpha2="OT" geoName="Olbia-Tempio" geoNameLocal="Olbia-Tempio" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_OR" geoCodeAlpha2="OR" geoName="Oristano" geoNameLocal="Oristano" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PD" geoCodeAlpha2="PD" geoName="Padova" geoNameLocal="Padova" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PA" geoCodeAlpha2="PA" geoName="Palermo" geoNameLocal="Palermo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PR" geoCodeAlpha2="PR" geoName="Parma" geoNameLocal="Parma" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PV" geoCodeAlpha2="PV" geoName="Pavia" geoNameLocal="Pavia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PG" geoCodeAlpha2="PG" geoName="Perugia" geoNameLocal="Perugia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PU" geoCodeAlpha2="PU" geoName="Pesaro e Urbino" geoNameLocal="Pesaro e Urbino" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PE" geoCodeAlpha2="PE" geoName="Pescara" geoNameLocal="Pescara" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PC" geoCodeAlpha2="PC" geoName="Piacenza" geoNameLocal="Piacenza" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PI" geoCodeAlpha2="PI" geoName="Pisa" geoNameLocal="Pisa" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PT" geoCodeAlpha2="PT" geoName="Pistoia" geoNameLocal="Pistoia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PN" geoCodeAlpha2="PN" geoName="Pordenone" geoNameLocal="Pordenone" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PZ" geoCodeAlpha2="PZ" geoName="Potenza" geoNameLocal="Potenza" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_PO" geoCodeAlpha2="PO" geoName="Prato" geoNameLocal="Prato" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RG" geoCodeAlpha2="RG" geoName="Ragusa" geoNameLocal="Ragusa" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RA" geoCodeAlpha2="RA" geoName="Ravenna" geoNameLocal="Ravenna" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RC" geoCodeAlpha2="RC" geoName="Reggio Calabria" geoNameLocal="Reggio Calabria" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RE" geoCodeAlpha2="RE" geoName="Reggio Emilia" geoNameLocal="Reggio Emilia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RI" geoCodeAlpha2="RI" geoName="Rieti" geoNameLocal="Rieti" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RN" geoCodeAlpha2="RN" geoName="Rimini" geoNameLocal="Rimini" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RM" geoCodeAlpha2="RM" geoName="Roma" geoNameLocal="Roma" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_RO" geoCodeAlpha2="RO" geoName="Rovigo" geoNameLocal="Rovigo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SA" geoCodeAlpha2="SA" geoName="Salerno" geoNameLocal="Salerno" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SS" geoCodeAlpha2="SS" geoName="Sassari" geoNameLocal="Sassari" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SV" geoCodeAlpha2="SV" geoName="Savona" geoNameLocal="Savona" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SI" geoCodeAlpha2="SI" geoName="Siena" geoNameLocal="Siena" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SR" geoCodeAlpha2="SR" geoName="Siracusa" geoNameLocal="Siracusa" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_SO" geoCodeAlpha2="SO" geoName="Sondrio" geoNameLocal="Sondrio" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TA" geoCodeAlpha2="TA" geoName="Taranto" geoNameLocal="Taranto" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TE" geoCodeAlpha2="TE" geoName="Teramo" geoNameLocal="Teramo" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TR" geoCodeAlpha2="TR" geoName="Terni" geoNameLocal="Terni" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TO" geoCodeAlpha2="TO" geoName="Torino" geoNameLocal="Torino" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TP" geoCodeAlpha2="TP" geoName="Trapani" geoNameLocal="Trapani" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TN" geoCodeAlpha2="TN" geoName="Trento" geoNameLocal="Trento" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TV" geoCodeAlpha2="TV" geoName="Treviso" geoNameLocal="Treviso" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_TS" geoCodeAlpha2="TS" geoName="Trieste" geoNameLocal="Trieste" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_UD" geoCodeAlpha2="UD" geoName="Udine" geoNameLocal="Udine" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VA" geoCodeAlpha2="VA" geoName="Varese" geoNameLocal="Varese" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VE" geoCodeAlpha2="VE" geoName="Venezia" geoNameLocal="Venezia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VB" geoCodeAlpha2="VB" geoName="Verbano-Cusio-Ossola" geoNameLocal="Verbano-Cusio-Ossola" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VC" geoCodeAlpha2="VC" geoName="Vercelli" geoNameLocal="Vercelli" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VR" geoCodeAlpha2="VR" geoName="Verona" geoNameLocal="Verona" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VV" geoCodeAlpha2="VV" geoName="Vibo Valentia" geoNameLocal="Vibo Valentia" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VI" geoCodeAlpha2="VI" geoName="Vicenza" geoNameLocal="Vicenza" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="ITA_VT" geoCodeAlpha2="VT" geoName="Viterbo" geoNameLocal="Viterbo" geoTypeEnumId="GEOT_PROVINCE"/>
+
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AP" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BZ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BZ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_BR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CL" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CB" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CZ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CH" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_KR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_CN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_EN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_FR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_GE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_GO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_GR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_IM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_IS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_AQ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SP" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_LU" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_ME" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_MB" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_NA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_NO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_NU" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_OG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_OT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_OR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PD" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PU" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PT" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PZ" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_PO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RG" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RM" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_RO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_SO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TO" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TP" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TN" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_TS" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_UD" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VA" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VE" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VB" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VC" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VR" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VV" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VI" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="ITA" toGeoId="ITA_VT" geoAssocTypeEnumId="GAT_REGIONS"/>
+</entity-facade-xml>

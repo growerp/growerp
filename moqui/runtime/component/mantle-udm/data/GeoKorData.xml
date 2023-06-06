@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- see http://en.wikipedia.org/wiki/ISO_3166-2:KR -->
+    <Geo geoId="KR-11" geoCodeNumeric="11" geoName="Seoul" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-26" geoCodeNumeric="26" geoName="Busan" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-27" geoCodeNumeric="27" geoName="Daegu" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-30" geoCodeNumeric="30" geoName="Daejeon" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-29" geoCodeNumeric="29" geoName="Gwangju" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-28" geoCodeNumeric="28" geoName="Incheon" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-31" geoCodeNumeric="31" geoName="Ulsan" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-43" geoCodeNumeric="43" geoName="North Chungcheong" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-44" geoCodeNumeric="44" geoName="South Chungcheong" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-42" geoCodeNumeric="42" geoName="Gangwon" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-41" geoCodeNumeric="41" geoName="Gyeonggi" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-47" geoCodeNumeric="47" geoName="North Gyeongsang" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-48" geoCodeNumeric="48" geoName="South Gyeongsang" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-45" geoCodeNumeric="45" geoName="North Jeolla" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-46" geoCodeNumeric="46" geoName="South Jeolla" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-49" geoCodeNumeric="49" geoName="Jeju" geoTypeEnumId="GEOT_PROVINCE"/>
+    <Geo geoId="KR-50" geoCodeNumeric="50" geoName="Sejong" geoTypeEnumId="GEOT_PROVINCE"/>
+
+    <GeoAssoc geoId="KOR" toGeoId="KR-11" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-26" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-27" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-30" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-29" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-28" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-31" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-43" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-44" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-42" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-41" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-47" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-48" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-45" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-46" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-49" geoAssocTypeEnumId="GAT_REGIONS"/>
+    <GeoAssoc geoId="KOR" toGeoId="KR-50" geoAssocTypeEnumId="GAT_REGIONS"/>
+</entity-facade-xml>

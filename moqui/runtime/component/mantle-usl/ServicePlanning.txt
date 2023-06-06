@@ -1,0 +1,105 @@
+
+Accounting - Ledger
+
+* Low-level GL posting
+** X mantle.ledger.LedgerServices.calculate#AcctgTransTrialBalance (calculateAcctgTransTrialBalance)
+** X mantle.ledger.LedgerServices.post#AcctgTrans (postAcctgTrans)
+** X get#InvoiceItemGlAccount, get#InvoiceBalanceGlAccount, will be others (no single service like OFBiz completeAcctgTransEntries, unless needed at some point for more general retry or something...)
+** X mantle.ledger.LedgerServices.close#FinancialTimePeriod (closeFinancialTimePeriod)
+** X mantle.ledger.LedgerServices.post#ReverseAcctgTrans (for the various revert/cancel services)
+* Journal Posting
+** X mantle.ledger.LedgerServices.calculate#GlJournalTrialBalance (calculateGlJournalTrialBalance)
+** X mantle.ledger.LedgerServices.post#GlJournal (postGlJournal)
+* High-level Automated GL posting
+** Invoice
+*** X mantle.ledger.InvoiceAutoPostServices.post#Invoice (createAcctgTransForSalesInvoice, createAcctgTransForPurchaseInvoice, createAcctgTransForCustomerReturnInvoice)
+*** X mantle.ledger.InvoiceAutoPostServices.revert#InvoicePost (revertAcctgTransOnCancelInvoice)
+** Payment
+*** X mantle.ledger.PaymentAutoPostServices.post#Payment (createAcctgTransAndEntriesForIncomingPayment, createAcctgTransAndEntriesForOutgoingPayment)
+*** X mantle.ledger.PaymentAutoPostServices.revert#PaymentPost
+*** X mantle.ledger.PaymentAutoPostServices.post#PaymentApplication (createAcctgTransAndEntriesForPaymentApplication, createAcctgTransAndEntriesForCustomerRefundPaymentApplication)
+*** X mantle.ledger.PaymentAutoPostServices.revert#PaymentApplicationPost (revertAcctgTransOnRemovePaymentApplications)
+** Inventory
+*** X mantle.ledger.AssetAutoPostServices.post#AssetReceipt (createAcctgTransForShipmentReceipt)
+*** X mantle.ledger.AssetAutoPostServices.post#AssetIssuance (createAcctgTransForSalesShipmentIssuance)
+*** X mantle.ledger.AssetAutoPostServices.revert#AssetIssuanceOnCancel (createAcctgTransForCanceledSalesShipmentIssuance)
+*** X mantle.ledger.AssetAutoPostServices.post#PhysicalInventoryVariance (createAcctgTransForPhysicalInventoryVariance)
+** Other
+*** mantle.ledger.OtherAutoPostServices.post#WorkEffortCost (createAcctgTransForWorkEffortCost)
+*** X mantle.ledger.OtherAutoPostServices.post#FinancialAccountTrans (postFinAccountTransToGl)
+* Report view-entities and/or data prep
+** X Income Statement (P&L, prepareIncomeStatement)
+** X Balance Sheet
+** X Cash Flow Statement
+** X Retained Earnings Statement
+** X Financial Ratios (Liquidity, Activity, Leverage, and Profitability) Report
+** X Posted Balance (calculateGlAccountTrialBalance)
+
+Billing Account
+
+* calcBillingAccountBalance
+
+Invoice
+
+* X mantle.account.InvoiceServices.create#EntireOrderPartInvoice (createInvoiceFromOrder, createInvoiceForOrder (based on ItemIssuance records), createInvoiceForOrderAllItems)
+* X mantle.account.InvoiceServices.create#SalesShipmentInvoices (createInvoicesFromShipment)
+* X mantle.account.InvoiceServices.create#PurchaseShipmentInvoices (createInvoicesFromShipment)
+* X mantle.account.InvoiceServices.create#TimeEntryInvoiceItems (addTimesheetToInvoice, addWorkEffortTimeToInvoice)
+* X mantle.account.InvoiceServices.create#ProjectInvoice
+* X mantle.account.InvoiceServices.cancel#Invoice
+* X mantle.account.InvoiceServices.unpay#Invoice
+* mantle.account.InvoiceServices.autoApplyTo#Invoice (createMatchingPaymentApplication)
+
+* X mantle.account.PaymentServices.capture#InvoicePayments (capturePaymentsByInvoice) - replaced with capture#AppliedPayment
+* X mantle.account.PaymentServices.capture#AppliedPayment
+
+Payment
+
+* Basic Payment
+** X mantle.account.PaymentServices.void#Payment (voidPayment)
+** X mantle.account.PaymentServices.apply#InvoicePayment, mantle.account.PaymentServices.apply#PaymentToPayment (createPaymentApplication?)
+** mantle.account.PaymentServices.autoApply#Payment (createMatchingPaymentApplication)
+* Payment Processing
+** X mantle.account.PaymentServices.authorize#Payment (Interface) (ccAuthInterface, paymentProcessInterface, payPalProcessInterface, eftProcessInterface)
+** X mantle.account.PaymentServices.capture#Payment (Interface) (ccCaptureInterface)
+** X mantle.account.PaymentServices.release#Payment (Interface) (paymentReleaseInterface)
+** X mantle.account.PaymentServices.refund#Payment (Interface) (paymentRefundInterface)
+* Higher-level Payment Processing
+** X mantle.account.PaymentServices.authorize#OrderPayments (authOrderPayments)
+** X mantle.account.PaymentServices.capture#InvoicePayments (capturePaymentsByInvoice)
+** X captureOrderPayments (needed, commonly used? mostly goes through invoices...)
+** X releaseOrderPayments
+** X refundOrderPayment (refundPayment)
+* Payment Processing Test Services
+** X mantle.account.PaymentTestServices.alwaysApprove#PaymentAuthorize (alwaysApproveCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysDecline#PaymentAuthorization (alwaysDeclineCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysFail#PaymentAuthorization (alwaysFailCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysBadCardNumber#PaymentAuthorization (alwaysBadCardNumberCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysBadExpire#PaymentAuthorization (alwaysBadExpireCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysNsf#PaymentAuthorization (alwaysNsfCCProcessor)
+** X mantle.account.PaymentTestServices.alwaysApprove#PaymentCapture (testCCCapture, testCCCaptureWithReAuth)
+** X mantle.account.PaymentTestServices.alwaysDecline#PaymentCapture (testCCProcessorCaptureAlwaysDecline)
+** X mantle.account.PaymentTestServices.alwaysApprove#PaymentRelease (testCCRelease)
+** X mantle.account.PaymentTestServices.alwaysApprove#PaymentRefund (testCCRefund)
+
+Financial Account
+
+* Transactions
+** X mantle.account.FinancialAccountServices.deposit#FinancialAccount (finAccountDeposit)
+** X mantle.account.FinancialAccountServices.withdraw#FinancialAccount (finAccountWithdraw)
+** X refund#FinancialAccount needed? (finAccountRefund)
+** X createFinAccountTrans (does more than just CrUD stuff)
+** X updateFinAccountBalancesFromTrans
+** updatePaymentOnFinAccTransStatusSetToCancel
+* Authorization
+** X mantle.account.FinancialAccountServices.authorize#FinancialAccount (createFinAccountAuth)
+** X mantle.account.FinancialAccountServices.expire#FinancialAccountAuth (expireFinAccountAuth)
+** X updateFinAccountBalancesFromAuth
+* Payment Processing
+** X mantle.account.FinancialAccountServices.authorize#FinancialAccountPayment (ofbFaAuthorize)
+** X mantle.account.FinancialAccountServices.capture#FinancialAccountPayment (ofbFaCapture)
+** X mantle.account.FinancialAccountServices.release#FinancialAccountPayment (ofbFaRelease)
+** X mantle.account.FinancialAccountServices.refund#FinancialAccountPayment (ofbFaRefund)
+* reconciliation? (reconcileFinAccountTrans, etc; autoFinAccountReconciliation, etc)
+* X mantle.account.FinancialAccountServices.disburse#FinancialAccount (createPaymentAndFinAccountTrans)
+* expirePaymentAssociationsOnFinAccountTransCancel?

@@ -1,0 +1,173 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <!-- Title -->
+        <h5 class="modal-title" id="exampleModalLongTitle">
+            <span v-if="isUpdate"><span class="text-green">UPDATE</span> CREDIT CARD</span>
+            <span v-else><span class="text-green">ADD</span> A CREDIT CARD</span>
+        </h5>
+        <button type="button" class="close text-cyan" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form id="modal-card-content" class="modal-body" @submit.prevent="addCustomerPaymentMethod" method="post"
+            novalidate="true">
+            <div v-if="responseMessage != null && responseMessage != ''" class="alert alert-primary" role="alert"
+                v-html="responseMessage">
+            </div>
+            <div class="form-group row justify-content-between">
+                <label for="nameCard" class="col col-form-label modal-text">
+                    Name on Card*
+                </label>
+                <div class="col-12 col-sm-8">
+                    <input class="form-control" id="nameCard" type="text" required
+                        v-model="paymentMethod.titleOnAccount" />
+                    <div v-if="!paymentMethod.titleOnAccount && titleOnAccountErrorMessage != ''">
+                        <small class="input-text form-text text-danger">{{titleOnAccountErrorMessage}}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row justify-content-between">
+                <label for="card" class="col col-form-label modal-text">
+                    Card Number*
+                </label>
+                <div class="col-12 col-sm-8">
+                    <input class="form-control" id="card" type="text" v-model="paymentMethod.cardNumber"
+                        placeholder="13 to 16 digits Spaces are optional" required :disabled="isUpdate" />
+                    <div v-if="(!paymentMethod.cardNumber || cardNumberIsInvalid) && cardNumberErrorMessage != ''">
+                        <small class="input-text form-text text-danger">{{cardNumberErrorMessage}}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row justify-content-between">
+                <label class="col-form-label ml-3">
+                    Expiration Date*
+                </label>
+                <div class="col-sm-8 col-xs-12 d-inline-flex flex-wrap">
+                    <div class="d-flex">
+                        <select v-model="paymentMethod.expireMonth" class="form-control" required>
+                            <option value="" disabled selected>Month</option>
+                            <option v-for="n in 12" :value="(n < 10) ? '0'+n : ''+n">
+                                {{(n < 10) ? '0'+n : n}}</option>
+                        </select>
+                        <select v-model="paymentMethod.expireYear" class="form-control ml-3" required>
+                            <option value="" disabled selected>Year</option>
+                            <option v-for="n in 10" :value="(2018 + n)">{{2018 + n}}</option>
+                        </select>
+                    </div>
+
+                    <div calss="w-100"
+                        v-if="(!paymentMethod.expireMonth || !paymentMethod.expireYear) && expirationDateErrorMessage != ''">
+                        <small class="input-text form-text text-danger">{{expirationDateErrorMessage}}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row justify-content-between" v-if="!isUpdate">
+                <label class="col col-form-label">Select Billing Address*</label>
+                <div class="col-12 col-sm-8">
+                    <select v-model="paymentAddressOption" class="form-control"
+                        @change="selectBillingAddress(paymentAddressOption)">
+                        <option value="NEW_ADDRESS">New Address</option>
+                        <option v-for="item in addressList" :value="item">
+                            {{item.postalAddress.toName}}, {{item.postalAddress.address1}},
+                            {{item.postalAddress.city}}
+                        </option>
+                    </select>
+                    <div v-if="!paymentAddressOption && selectAddressErrorMessage != ''">
+                        <small class="input-text form-text text-danger">{{selectAddressErrorMessage}}</small>
+                    </div>
+                </div>
+            </div>
+            <template v-if="isUpdate || paymentAddressOption == 'NEW_ADDRESS'">
+                <div class="form-group row justify-content-between">
+                    <label for="cc-country" class="col-form-label modal-text ml-3">
+                        Country<span>&nbsp;*</span>
+                    </label>
+                    <div class="col-sm-8 col-xs-12">
+                        <select id="cc-country" v-model="paymentMethod.countryGeoId" class="form-control">
+                            <option v-for="country in countriesList" :value="country.geoId">{{country.geoName}}</option>
+                        </select>
+                        <div v-if="!paymentMethod.countryGeoId && countryErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{countryErrorMessage}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-address1" class="col-form-label modal-text ml-3">
+                        Address<span>&nbsp;*</span>
+                    </label>
+                    <div class="col-sm-8 col-xs-12">
+                        <input class="form-control" id="cc-address1" type="text" placeholder="Line 1"
+                            v-model="paymentMethod.address1" required />
+                        <div v-if="!paymentMethod.address1 && addressErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{addressErrorMessage}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-address2" class="col-form-label"></label>
+                    <div class="col-sm-8 col-xs-12">
+                        <input class="form-control" id="cc-address2" type="text" placeholder="Line 2 (Optional)"
+                            v-model="paymentMethod.address2" />
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-city" class="col-form-label modal-text ml-3">
+                        City / Town<span>&nbsp;*</span>
+                    </label>
+                    <div class="col-sm-8 col-xs-12">
+                        <input class="form-control" id="cc-city" type="text" v-model="paymentMethod.city" required />
+                        <div v-if="!paymentMethod.city && cityErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{cityErrorMessage}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-state" class="col-form-label modal-text ml-3">
+                        State<span>&nbsp;*</span>
+                    </label>
+                    <div class="col-sm-8 col-xs-12">
+                        <select id="cc-state" v-model="paymentMethod.stateProvinceGeoId" class="form-control">
+                            <option v-for="region in regionsList" :value="region.geoId">{{region.geoName}}</option>
+                        </select>
+                        <div v-if="!paymentMethod.stateProvinceGeoId && stateErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{stateErrorMessage}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-postalcode"
+                        class="col-form-label modal-text ml-3">{{paymentMethod.countryGeoId == 'USA' ? 'Zip Code' : 'Postal Code'}}<span>&nbsp;*</span></label>
+                    <div class="col-sm-8 col-xs-12">
+                        <input class="form-control" id="cc-postalcode" type="text" v-model="paymentMethod.postalCode"
+                            required />
+                        <div v-if="!paymentMethod.postalCode && postalCodeErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{postalCodeErrorMessage}}
+                                {{paymentMethod.postalCode}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row justify-content-between">
+                    <label for="cc-contactnumber" class="col-form-label modal-text ml-3">Phone
+                        Number<span>&nbsp;*</span></label>
+                    <div class="col-sm-8 col-xs-12">
+                        <input class="form-control" id="cc-contactnumber" type="text"
+                            v-model="paymentMethod.contactNumber" required />
+                        <div v-if="!paymentMethod.contactNumber && contactNumberErrorMessage != ''">
+                            <small class="input-text form-text text-danger">{{contactNumberErrorMessage}}</small>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <div class="container">
+                <div class="row justify-content-center button-spacing">
+                    <button type="submit" class="btn btn-info col-sm-6" :disabled='isDisabled'>
+                        <span v-if="isUpdate">Update Card</span>
+                        <span v-else>Add Card</span>
+                    </button>
+                    <a data-dismiss="modal" class="btn btn-link text-add col-sm-6">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

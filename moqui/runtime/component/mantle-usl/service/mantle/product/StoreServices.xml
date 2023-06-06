@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="create" noun="StoreShippingOption">
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="carrierPartyId"/>
+            <parameter name="shipmentMethodEnumId"/>
+            <parameter name="carrierAndShipmentMethod"/>
+            <parameter name="sequenceNum"/>
+        </in-parameters>
+        <actions>
+            <if condition="carrierAndShipmentMethod">
+                <set field="carrierPartyId" from="carrierAndShipmentMethod.split(':')[0]"/>
+                <set field="shipmentMethodEnumId" from="carrierAndShipmentMethod.split(':')[1]"/>
+            </if>
+            <service-call name="create#mantle.product.store.ProductStoreShipOption" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="StoreShippingOptions" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="productStoreId"><description>If not specified returns list all ShipmentMethod type Enumeration values with _NA_ carrier</description></parameter>
+            <parameter name="orderId"/><parameter name="orderPartSeqId"/>
+            <parameter name="postalContactMechId"><description>Overrides the OrderPart.postalContactMechId if specified.</description></parameter>
+            <parameter name="getRates" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shippingOptions" type="List"><parameter name="option" type="Map">
+                <parameter name="carrierPartyId"/><parameter name="carrierName"/>
+                <parameter name="shipmentMethodEnumId"/><parameter name="shipmentMethodDescription"/>
+                <parameter name="shippingTotal" type="BigDecimal"/>
+            </parameter></parameter>
+            <parameter name="postalContactMechId"><description>Return if address was validated and replaced</description></parameter>
+        </out-parameters>
+        <actions>
+            <set field="shippingOptions" from="[]"/>
+            <if condition="productStoreId">
+                <set field="shipOptionList" from="[]"/>
+                <!-- main source of store options -->
+                <entity-find entity-name="mantle.product.store.ProductStoreShipOption" list="shipOptionList" cache="true">
+                    <econdition field-name="productStoreId"/><order-by field-name="sequenceNum"/></entity-find>
+                <!-- default to all CarrierShipmentMethod records for each carrier in a gateway associated with the store -->
+                <if condition="!shipOptionList">
+                    <set field="shipOptionList" from="[]"/>
+                    <entity-find entity-name="mantle.product.store.ProductStoreShippingGateway" list="pssgList" cache="true">
+                        <econdition field-name="productStoreId"/></entity-find>
+                    <iterate list="pssgList" entry="pssg">
+                        <entity-find entity-name="mantle.shipment.carrier.CarrierShipmentMethod" list="csmList" cache="true">
+                            <econdition field-name="carrierPartyId" from="pssg.carrierPartyId"/>
+                            <order-by field-name="sequenceNum"/></entity-find>
+                        <script>shipOptionList.addAll(csmList)</script>
+                    </iterate>
+                </if>
+                <!-- get rates -->
+                <if condition="getRates &amp;&amp; shipOptionList &amp;&amp; orderId &amp;&amp; orderPartSeqId">
+                    <service-call name="mantle.shipment.CarrierServices.get#OrderShippingRatesBulk" out-map="ratesBulkOut"
+                            in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId, postalContactMechId:postalContactMechId,
+                            carrierShipmentMethodList:shipOptionList]"/>
+                    <set field="postalContactMechId" from="ratesBulkOut.postalContactMechId"/>
+
+                    <!-- make sure there is a return value for each in carrierShipmentMethodList -->
+                    <set field="newShipOptionList" from="[]"/>
+                    <set field="shippingRateInfoList" from="ratesBulkOut.shippingRateInfoList"/>
+                    <if condition="shippingRateInfoList">
+                        <iterate list="shipOptionList" entry="shipOption">
+                            <set field="shippingRateInfo" from="shippingRateInfoList.find({ it.carrierPartyId == shipOption.carrierPartyId &amp;&amp; it.shipmentMethodEnumId == shipOption.shipmentMethodEnumId })"/>
+                            <if condition="shippingRateInfo != null"><then><script>newShipOptionList.add(shippingRateInfo)</script></then>
+                                <else><script>newShipOptionList.add(shipOption)</script></else></if>
+                        </iterate>
+                        <set field="shipOptionList" from="newShipOptionList"/>
+                    </if>
+                </if>
+                <!-- make output list -->
+                <iterate list="shipOptionList" entry="shipOption">
+                    <set field="shippingOption" from="new HashMap(shipOption)"/>
+                    <entity-find-one entity-name="mantle.shipment.carrier.CarrierShipmentMethod" value-field="carrierShipmentMethod">
+                        <field-map field-name="carrierPartyId" from="shipOption.carrierPartyId"/>
+                        <field-map field-name="shipmentMethodEnumId" from="shipOption.shipmentMethodEnumId"/>
+                    </entity-find-one>
+                    <if condition="!carrierShipmentMethod">
+                        <return error="true" message="No matching Carrier Shipment Method found for Carrier ${shipOption.carrierPartyId} and Shipment Method ${shipOption.shipmentMethodEnumId}"/>
+                    </if>
+                    <set field="shippingOption.description" from="shippingOption.description ?: carrierShipmentMethod.description"/>
+                    <entity-find-one entity-name="mantle.party.PartyDetail" value-field="carrierDetail" cache="true">
+                        <field-map field-name="partyId" from="shipOption.carrierPartyId"/></entity-find-one>
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="shipmentMethodEnum">
+                        <field-map field-name="enumId" from="shipOption.shipmentMethodEnumId"/></entity-find-one>
+                    <set field="shippingOption.carrierName" from="carrierDetail.pseudoId"/><!-- ec.resource.expand('PartyNameTemplate','',carrierDetail) -->
+                    <set field="shippingOption.shipmentMethodDescription" from="shipmentMethodEnum.description"/>
+                    <script>shippingOptions.add(shippingOption)</script>
+                </iterate>
+            </if>
+            <!-- default to all ShipmentMethod records with _NA_ as the carrier -->
+            <if condition="!shippingOptions">
+                <entity-find entity-name="moqui.basic.Enumeration" list="methodEnumList">
+                    <econdition field-name="enumTypeId" value="ShipmentMethod"/><order-by field-name="sequenceNum,description"/></entity-find>
+                <iterate list="methodEnumList" entry="methodEnum">
+                    <script>shippingOptions.add([carrierPartyId:'_NA_', carrierName:'',
+                            shipmentMethodEnumId:methodEnum.enumId, shipmentMethodDescription:methodEnum.description])</script>
+                </iterate>
+            </if>
+
+            <!-- old approach using one calc/estimate call per option:
+            <iterate list="shipOptionList" entry="shipOption">
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="carrierDetail" cache="true">
+                    <field-map field-name="partyId" from="shipOption.carrierPartyId"/></entity-find-one>
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="shipmentMethodEnum">
+                    <field-map field-name="enumId" from="shipOption.shipmentMethodEnumId"/></entity-find-one>
+                <if condition="orderId &amp;&amp; orderPartSeqId">
+                    <service-call name="mantle.shipment.CarrierServices.calculate#OrderShipping" out-map="shippingOut"
+                            in-map="[orderId:orderId, createOrderItem:false, carrierPartyId:shipOption.carrierPartyId,
+                                    shipmentMethodEnumId:shipOption.shipmentMethodEnumId, postalContactMechId:postalContactMechId]"/>
+                </if>
+                <script>shippingOptions.add([carrierPartyId:shipOption.carrierPartyId,
+                            carrierName:ec.resource.expand('PartyNameTemplate','',carrierDetail),
+                            shippingTotal:shippingOut?.shippingTotal, shipmentMethodEnumId:shipOption.shipmentMethodEnumId,
+                            shipmentMethodDescription:shipmentMethodEnum.description])</script>
+            </iterate>
+            -->
+        </actions>
+    </service>
+
+    <service verb="clone" noun="ProductStore">
+        <in-parameters>
+            <parameter name="baseProductStoreId" required="true"/>
+            <parameter name="productStoreId"/>
+            <auto-parameters entity-name="mantle.product.store.ProductStore" include="nonpk"/>
+
+            <parameter name="copyCategories" type="Boolean" default="true"/>
+            <!-- TODO: <parameter name="deepCopyCategories" type="Boolean" default="false"/> -->
+
+            <parameter name="copyEmails" type="Boolean" default="true"/>
+            <parameter name="copyFacilities" type="Boolean" default="true"/>
+            <parameter name="copyParties" type="Boolean" default="true"/>
+            <parameter name="copyProducts" type="Boolean" default="true"/>
+            <parameter name="copySettings" type="Boolean" default="true"/>
+            <!-- FUTURE:
+            <parameter name="copyPromotions" type="Boolean" default="false"/>
+            <parameter name="copyShipGateways" type="Boolean" default="true"/>
+            <parameter name="copyShipOptions" type="Boolean" default="true"/>
+            <parameter name="copyWikiSpaces" type="Boolean" default="true"/>
+            <parameter name="copyWikiContents" type="Boolean" default="true"/>
+            <parameter name="copyStoreGroupMembers" type="Boolean" default="true"/>
+            -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="productStoreId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="false">
+                <field-map field-name="productStoreId" from="baseProductStoreId"/></entity-find-one>
+
+            <entity-set value-field="productStore" include="nonpk"/>
+
+            <if condition="productStoreId &amp;&amp; productStoreId != baseProductStoreId"><then>
+                <set field="productStore.productStoreId" from="productStoreId"/>
+            </then><else>
+                <set field="productStore.productStoreId" from="null"/>
+                <entity-sequenced-id-primary value-field="productStore"/>
+            </else></if>
+
+            <entity-create value-field="productStore"/>
+            <set field="productStoreId" from="productStore.productStoreId"/>
+
+            <if condition="deepCopyCategories"><set field="copyCategories" from="true"/></if>
+            <if condition="copyCategories">
+                <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="pscList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/>
+                    <!-- use condition on thruDate instead of date-filter so that only past/expired excluded, include future -->
+                    <econdition field-name="thruDate" operator="greater-equals" from="ec.user.nowTimestamp" or-null="true"/>
+                </entity-find>
+                <iterate list="pscList" entry="psc"><set field="psc.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="psc"/></iterate>
+            </if>
+            <if condition="deepCopyCategories">
+                <!-- TODO deepCopyCategories -->
+            </if>
+
+            <if condition="copyEmails">
+                <entity-find entity-name="mantle.product.store.ProductStoreEmail" list="pseList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/>
+                    <econdition field-name="thruDate" operator="greater-equals" from="ec.user.nowTimestamp" or-null="true"/>
+                </entity-find>
+                <iterate list="pseList" entry="pse"><set field="pse.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="pse"/></iterate>
+            </if>
+            <if condition="copyFacilities">
+                <entity-find entity-name="mantle.product.store.ProductStoreFacility" list="psfList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/>
+                    <econdition field-name="thruDate" operator="greater-equals" from="ec.user.nowTimestamp" or-null="true"/>
+                </entity-find>
+                <iterate list="psfList" entry="psf"><set field="psf.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="psf"/></iterate>
+            </if>
+            <if condition="copyParties">
+                <entity-find entity-name="mantle.product.store.ProductStoreParty" list="pspList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/>
+                    <econdition field-name="thruDate" operator="greater-equals" from="ec.user.nowTimestamp" or-null="true"/>
+                </entity-find>
+                <iterate list="pspList" entry="psp"><set field="psp.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="psp"/></iterate>
+            </if>
+            <if condition="copyProducts">
+                <entity-find entity-name="mantle.product.store.ProductStoreProduct" list="pspList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/></entity-find>
+                <iterate list="pspList" entry="psp"><set field="psp.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="psp"/></iterate>
+            </if>
+            <if condition="copySettings">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="pssList" cache="false">
+                    <econdition field-name="productStoreId" from="baseProductStoreId"/>
+                    <econdition field-name="thruDate" operator="greater-equals" from="ec.user.nowTimestamp" or-null="true"/>
+                </entity-find>
+                <iterate list="pssList" entry="pss"><set field="pss.productStoreId" from="productStoreId"/>
+                    <entity-create value-field="pss"/></iterate>
+            </if>
+        </actions>
+    </service>
+</services>

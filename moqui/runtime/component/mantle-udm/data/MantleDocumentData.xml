@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!-- NOTE: these documents are meant for cloning; they have no DataFeed/DataFeedDocument records to trigger search
+         indexing or anything else, so don't do anything unless used explicitly -->
+
+    <!-- NOTE: when updating these it's best to delete the indexes through ElasticSearch, then reindex the MantleSales feed:
+
+        curl http://localhost:9200/_cat/indices?v
+
+        curl -X DELETE http://localhost:9200/mantle_party?pretty
+        curl -X DELETE http://localhost:9200/mantle_product?pretty
+        curl -X DELETE http://localhost:9200/mantle_facility?pretty
+        curl -X DELETE http://localhost:9200/mantle_communication_event?pretty
+        curl -X DELETE http://localhost:9200/mantle_wiki_page?pretty
+    -->
+
+    <!-- ========== Party ========== -->
+    <dataDocuments dataDocumentId="MantleParty" indexName="mantle" documentName="Party"
+            primaryEntityName="mantle.party.Party" documentTitle="PartyNameTemplate">
+        <fields fieldSeqId="01" fieldPath="partyId"/>
+        <fields fieldSeqId="02" fieldPath="pseudoId"/>
+        <fields fieldSeqId="03" fieldPath="disabled"/>
+        <fields fieldSeqId="04" fieldPath="externalId"/>
+        <fields fieldSeqId="05" fieldPath="gatewayCimId"/>
+        <fields fieldSeqId="06" fieldPath="comments"/>
+        <fields fieldSeqId="07" fieldPath="hasDuplicates"/>
+
+        <fields fieldSeqId="08" fieldPath="partyTypeEnumId"/>
+        <fields fieldSeqId="09" fieldPath="type:description" fieldNameAlias="type"/>
+    
+        <fields fieldSeqId="10" fieldPath="organization:organizationName"/>
+        <fields fieldSeqId="11" fieldPath="person:firstName"/>
+        <fields fieldSeqId="12" fieldPath="person:middleName"/>
+        <fields fieldSeqId="13" fieldPath="person:lastName"/>
+        <fields fieldSeqId="14" fieldPath="(&quot;${organizationName?:''}${firstName?:''}${middleName ? ' ' + middleName : ''}${lastName ? ' ' + lastName : ''}&quot;)"
+                fieldNameAlias="combinedName" fieldType="text" sortable="Y"/>
+
+        <fields fieldSeqId="15" fieldPath="roles:roleTypeId"/>
+        <fields fieldSeqId="16" fieldPath="roles:role:description" fieldNameAlias="role"/>
+    
+        <fields fieldSeqId="17" fieldPath="identifications:partyIdTypeEnumId"/>
+        <fields fieldSeqId="18" fieldPath="identifications:idValue"/>
+
+        <fields fieldSeqId="20" fieldPath="contactMechs:contactMechId"/>
+        <fields fieldSeqId="21" fieldPath="contactMechs:contactMechPurposeId"/>
+        <fields fieldSeqId="22" fieldPath="contactMechs:contactMech:contactMechTypeEnumId"/>
+        <fields fieldSeqId="23" fieldPath="contactMechs:contactMech:infoString"/>
+
+        <fields fieldSeqId="24" fieldPath="contactMechs:contactMech:postalAddress:address1"/>
+        <fields fieldSeqId="25" fieldPath="contactMechs:contactMech:postalAddress:address2"/>
+        <fields fieldSeqId="26" fieldPath="contactMechs:contactMech:postalAddress:unitNumber"/>
+        <fields fieldSeqId="27" fieldPath="contactMechs:contactMech:postalAddress:city"/>
+        <fields fieldSeqId="28" fieldPath="contactMechs:contactMech:postalAddress:postalCode"/>
+        <fields fieldSeqId="29" fieldPath="contactMechs:contactMech:postalAddress:postalCodeExt"/>
+        <fields fieldSeqId="30" fieldPath="contactMechs:contactMech:postalAddress:stateProvinceGeo:geoName" fieldNameAlias="state"/>
+        <fields fieldSeqId="31" fieldPath="contactMechs:contactMech:postalAddress:stateProvinceGeo:geoCodeAlpha2" fieldNameAlias="stateCode"/>
+        <fields fieldSeqId="32" fieldPath="contactMechs:contactMech:postalAddress:stateProvinceGeoId"/>
+        <fields fieldSeqId="33" fieldPath="contactMechs:contactMech:postalAddress:countryGeoId"/>
+
+        <fields fieldSeqId="36" fieldPath="contactMechs:contactMech:telecomNumber:countryCode"/>
+        <fields fieldSeqId="37" fieldPath="contactMechs:contactMech:telecomNumber:areaCode"/>
+        <fields fieldSeqId="38" fieldPath="contactMechs:contactMech:telecomNumber:contactNumber"/>
+
+        <fields fieldSeqId="40" fieldPath="userAccounts:userId"/>
+        <fields fieldSeqId="41" fieldPath="userAccounts:username" sortable="Y"/>
+        <fields fieldSeqId="42" fieldPath="userAccounts:userFullName"/>
+        <fields fieldSeqId="43" fieldPath="userAccounts:emailAddress"/>
+        <fields fieldSeqId="44" fieldPath="userAccounts:disabled" fieldNameAlias="userDisabled"/>
+        <fields fieldSeqId="45" fieldPath="userAccounts:disabledDateTime" fieldNameAlias="userDisabledDateTime"/>
+        <fields fieldSeqId="46" fieldPath="userAccounts:terminateDate" fieldNameAlias="userTerminateDate"/>
+
+        <fields fieldSeqId="50" fieldPath="classifications:partyClassificationId"/>
+        <fields fieldSeqId="51" fieldPath="classifications:fromDate" fieldNameAlias="classFromDate"/>
+        <fields fieldSeqId="52" fieldPath="classifications:thruDate" fieldNameAlias="classThruDate"/>
+        <fields fieldSeqId="53" fieldPath="classifications:classification:description" fieldNameAlias="class"/>
+        <fields fieldSeqId="54" fieldPath="classifications:classification:classificationTypeEnumId"/>
+
+        <fields fieldSeqId="55" fieldPath="settings:partySettingTypeId"/>
+        <fields fieldSeqId="56" fieldPath="settings:settingValue"/>
+
+        <fields fieldSeqId="60" fieldPath="shippingInstructions"/>
+        <fields fieldSeqId="61" fieldPath="notes:noteDate"/>
+        <fields fieldSeqId="62" fieldPath="notes:noteText"/>
+        <fields fieldSeqId="63" fieldPath="notes:internalNote"/>
+        <fields fieldSeqId="64" fieldPath="notes:userId" fieldNameAlias="noteUserId"/>
+        <!-- other Party fields, included here because no seq room lower -->
+        <fields fieldSeqId="90" fieldPath="ownerPartyId"/>
+        <fields fieldSeqId="91" fieldPath="dataSourceId"/>
+        <fields fieldSeqId="92" fieldPath="customerStatusId"/>
+    </dataDocuments>
+    <dataDocuments dataDocumentId="MantleCommunicationEvent" indexName="mantle" documentName="Communication Event"
+            primaryEntityName="mantle.party.communication.CommunicationEvent" documentTitle="${subject}">
+        <fields fieldSeqId="01" fieldPath="communicationEventId"/>
+        <fields fieldSeqId="02" fieldPath="communicationEventTypeId"/>
+        <fields fieldSeqId="03" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="04" fieldPath="statusId"/>
+        <fields fieldSeqId="05" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="06" fieldPath="parentCommEventId"/>
+        <fields fieldSeqId="07" fieldPath="rootCommEventId"/>
+        <fields fieldSeqId="10" fieldPath="fromPartyId"/>
+        <fields fieldSeqId="11" fieldPath="fromUserAccounts:userId" fieldNameAlias="fromUserId"/>
+        <fields fieldSeqId="12" fieldPath="toPartyId"/>
+        <fields fieldSeqId="13" fieldPath="toUserAccounts:userId" fieldNameAlias="toUserId"/>
+
+        <fields fieldSeqId="20" fieldPath="entryDate"/>
+        <fields fieldSeqId="21" fieldPath="datetimeStarted"/>
+        <fields fieldSeqId="22" fieldPath="datetimeEnded"/>
+        <fields fieldSeqId="23" fieldPath="subject"/>
+        <fields fieldSeqId="24" fieldPath="contentType"/>
+        <fields fieldSeqId="25" fieldPath="body"/>
+        <fields fieldSeqId="26" fieldPath="note"/>
+        <fields fieldSeqId="27" fieldPath="reasonEnumId"/>
+        <fields fieldSeqId="28" fieldPath="contactListId"/>
+        <fields fieldSeqId="29" fieldPath="emailMessageId"/>
+
+        <fields fieldSeqId="30" fieldPath="parties:partyId"/>
+        <fields fieldSeqId="31" fieldPath="parties:roleTypeId"/>
+        <fields fieldSeqId="32" fieldPath="parties:role:description" fieldNameAlias="role"/>
+        <fields fieldSeqId="33" fieldPath="parties:person:firstName"/>
+        <fields fieldSeqId="34" fieldPath="parties:person:lastName"/>
+        <fields fieldSeqId="35" fieldPath="parties:userAccounts:userId"/>
+
+        <fields fieldSeqId="40" fieldPath="purposes:purposeEnumId"/>
+        <fields fieldSeqId="41" fieldPath="purposes:description" fieldNameAlias="purpose"/>
+    </dataDocuments>
+
+    <!-- ========== Product ========== -->
+    <dataDocuments dataDocumentId="MantleProduct" indexName="mantle" documentName="Product"
+            primaryEntityName="mantle.product.Product" documentTitle="ProductNameTemplate"
+            manualDataServiceName="mantle.product.ProductServices.get#ProductManualDocumentData">
+        <fields fieldSeqId="01" fieldPath="productId"/>
+        <fields fieldSeqId="02" fieldPath="pseudoId"/>
+        <fields fieldSeqId="03" fieldPath="productName" fieldNameAlias="name"/>
+        <fields fieldSeqId="04" fieldPath="description"/>
+        <fields fieldSeqId="05" fieldPath="salesIntroductionDate"/>
+        <fields fieldSeqId="06" fieldPath="salesDiscontinuationDate"/>
+        <fields fieldSeqId="07" fieldPath="supportDiscontinuationDate"/>
+        <fields fieldSeqId="08" fieldPath="ownerPartyId"/>
+
+        <fields fieldSeqId="10" fieldPath="productTypeEnumId"/>
+        <fields fieldSeqId="11" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="12" fieldPath="productClassEnumId"/>
+        <fields fieldSeqId="13" fieldPath="class:description" fieldNameAlias="class"/>
+        <fields fieldSeqId="14" fieldPath="assetTypeEnumId"/>
+        <fields fieldSeqId="15" fieldPath="assetType:description" fieldNameAlias="assetType"/>
+        <fields fieldSeqId="16" fieldPath="assetClassEnumId"/>
+        <fields fieldSeqId="17" fieldPath="assetClass:description" fieldNameAlias="assetClass"/>
+    
+        <fields fieldSeqId="20" fieldPath="amountFixed"/>
+        <fields fieldSeqId="21" fieldPath="amountUomId"/>
+        <fields fieldSeqId="22" fieldPath="amountUom:description" fieldNameAlias="amountUom"/>
+    
+        <fields fieldSeqId="30" fieldPath="categories:productCategoryId"/>
+        <!-- TODO: way to automatically filter by from/thru dates without requiring them (make sure condition generated allows nulls...)? -->
+        <fields fieldSeqId="31" fieldPath="categories:fromDate" fieldNameAlias="categoryFromDate"/>
+        <fields fieldSeqId="32" fieldPath="categories:thruDate" fieldNameAlias="categoryThruDate"/>
+        <fields fieldSeqId="33" fieldPath="categories:category:categoryName" fieldNameAlias="category"/>
+        <fields fieldSeqId="34" fieldPath="categories:category:pseudoId" fieldNameAlias="categoryPseudoId"/>
+        <fields fieldSeqId="35" fieldPath="categories:category:productCategoryTypeEnumId"/>
+        <fields fieldSeqId="36" fieldPath="categories:stores:productStoreId"/>
+    
+        <fields fieldSeqId="40" fieldPath="features:productFeatureId"/>
+        <fields fieldSeqId="41" fieldPath="features:fromDate" fieldNameAlias="featureFromDate"/>
+        <fields fieldSeqId="42" fieldPath="features:thruDate" fieldNameAlias="featureThruDate"/>
+        <fields fieldSeqId="43" fieldPath="features:applTypeEnumId"/>
+        <fields fieldSeqId="44" fieldPath="features:feature:description" fieldNameAlias="feature"/>
+    
+        <fields fieldSeqId="50" fieldPath="dimensions:dimensionTypeId"/>
+        <fields fieldSeqId="51" fieldPath="dimensions:type:description" fieldNameAlias="dimensionTypeDescription"/>
+        <fields fieldSeqId="52" fieldPath="dimensions:value" fieldNameAlias="dimensionValue"/>
+        <fields fieldSeqId="53" fieldPath="dimensions:valueUomId" fieldNameAlias="dimensionUomId"/>
+        <fields fieldSeqId="54" fieldPath="dimensions:valueUom:description" fieldNameAlias="dimensionUomDescription"/>
+    
+        <fields fieldSeqId="60" fieldPath="identifications:idValue"/>
+        <fields fieldSeqId="61" fieldPath="identifications:productIdTypeEnumId"/>
+    
+        <fields fieldSeqId="70" fieldPath="prices:price"/>
+        <fields fieldSeqId="71" fieldPath="prices:productStoreId" fieldNameAlias="priceProductStoreId"/>
+        <fields fieldSeqId="72" fieldPath="prices:priceTypeEnumId"/>
+        <fields fieldSeqId="73" fieldPath="prices:pricePurposeEnumId"/>
+        <fields fieldSeqId="74" fieldPath="prices:fromDate" fieldNameAlias="priceFromDate"/>
+        <fields fieldSeqId="75" fieldPath="prices:thruDate" fieldNameAlias="priceThruDate"/>
+        <fields fieldSeqId="76" fieldPath="prices:priceUomId"/>
+    
+        <fields fieldSeqId="80" fieldPath="assocs:toProductId" fieldNameAlias="assocToId"/>
+        <fields fieldSeqId="81" fieldPath="assocs:productAssocTypeEnumId"/>
+        <fields fieldSeqId="82" fieldPath="assocs:type:description" fieldNameAlias="assocType"/>
+        <fields fieldSeqId="83" fieldPath="toAssocs:productId" fieldNameAlias="assocFromId"/>
+        <fields fieldSeqId="84" fieldPath="toAssocs:productAssocTypeEnumId" fieldNameAlias="toProductAssocTypeEnumId"/>
+        <fields fieldSeqId="85" fieldPath="toAssocs:type:description" fieldNameAlias="assocTypeTo"/>
+    </dataDocuments>
+
+    <!-- ========== Facility ========== -->
+    <dataDocuments dataDocumentId="MantleFacility" indexName="mantle" documentName="Facility"
+            primaryEntityName="mantle.facility.Facility" documentTitle="FacilityNameTemplate">
+        <fields fieldSeqId="01" fieldPath="facilityId"/>
+        <fields fieldSeqId="02" fieldPath="pseudoId"/>
+        <fields fieldSeqId="03" fieldPath="facilityName" fieldNameAlias="name"/>
+        <fields fieldSeqId="04" fieldPath="description"/>
+    
+        <fields fieldSeqId="05" fieldPath="facilityTypeEnumId"/>
+        <fields fieldSeqId="06" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="07" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="08" fieldPath="ownerOrganization:organizationName" fieldNameAlias="ownerName"/>
+        <fields fieldSeqId="09" fieldPath="ownerPartyId"/>
+
+        <fields fieldSeqId="20" fieldPath="contactMechs:postalAddress:contactMechId"/>
+        <fields fieldSeqId="21" fieldPath="contactMechs:postalAddress:address1"/>
+        <fields fieldSeqId="22" fieldPath="contactMechs:postalAddress:city"/>
+        <fields fieldSeqId="23" fieldPath="contactMechs:postalAddress:postalCode"/>
+        <fields fieldSeqId="24" fieldPath="contactMechs:postalAddress:stateProvinceGeo:geoName" fieldNameAlias="state"/>
+    </dataDocuments>
+
+    <!-- ========== Wiki Page ========== -->
+    <dataDocuments dataDocumentId="MantleWikiPage" indexName="mantle" documentName="Wiki Page"
+            primaryEntityName="moqui.resource.wiki.WikiPage" documentTitle="${wikiSpaceId}/${pagePath?:''}"
+            manualDataServiceName="org.moqui.impl.WikiServices.get#WikiPageManualDocumentData">
+        <!-- NOTE: service purpose is to get wiki page contents from the file (resource) -->
+        <fields fieldSeqId="01" fieldPath="wikiPageId"/>
+        <fields fieldSeqId="02" fieldPath="wikiSpaceId"/>
+        <fields fieldSeqId="03" fieldPath="pagePath"/>
+        <fields fieldSeqId="04" fieldPath="space:description" fieldNameAlias="space"/>
+        <fields fieldSeqId="05" fieldPath="publishedVersionName"/>
+        <!-- the history fields are useful for update history and search by users who have updated a page, but also trigger indexing on page update -->
+        <fields fieldSeqId="10" fieldPath="histories:historySeqId"/>
+        <fields fieldSeqId="11" fieldPath="histories:changeDateTime"/>
+        <fields fieldSeqId="12" fieldPath="histories:userId"/>
+        <!-- causing issues with false update notice for other fields on UserAccount like during login: <fields fieldSeqId="01" fieldPath="histories:user:username"/> -->
+    </dataDocuments>
+
+    <!-- ================ -->
+    <!-- Search Data Feed -->
+    <moqui.entity.feed.DataFeed dataFeedId="MantleSearch" dataFeedTypeEnumId="DTFDTP_RT_PUSH" indexOnStartEmpty="Y"
+            feedName="Mantle General Search" feedReceiveServiceName="org.moqui.search.SearchServices.index#DataDocuments"
+            feedDeleteServiceName="org.moqui.search.SearchServices.delete#DataDocument">
+        <documents dataDocumentId="MantleParty"/>
+        <documents dataDocumentId="MantleCommunicationEvent"/>
+        <documents dataDocumentId="MantleProduct"/>
+        <documents dataDocumentId="MantleFacility"/>
+        <documents dataDocumentId="MantleWikiPage"/>
+    </moqui.entity.feed.DataFeed>
+</entity-facade-xml>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="find" noun="PartyCommunicationEvents">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <auto-parameters entity-name="mantle.party.communication.CommunicationEventAndPurpose" include="all"/>
+            <parameter name="communicationEventTypeId" default-value="Email,Message,Comment"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="commEventList" type="List"><parameter name="commEvent" type="Map">
+                <parameter name="communicationEventId"/><parameter name="entryDate"/>
+                <parameter name="statusId"/><parameter name="fromPartyId"/><parameter name="toPartyId"/>
+                <parameter name="subject"/><parameter name="communicationEventTypeId"/>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.communication.CommunicationEventAndPurpose" list="commEventList">
+                <search-form-inputs default-order-by="-entryDate"/>
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" from="partyId"/>
+                    <econdition field-name="toPartyId" from="partyId"/>
+                </econditions>
+                <econdition field-name="communicationEventTypeId" operator="in"/>
+                <select-field field-name="communicationEventId"/><select-field field-name="entryDate"/>
+                <select-field field-name="statusId"/><select-field field-name="fromPartyId"/><select-field field-name="toPartyId"/>
+                <select-field field-name="subject"/><select-field field-name="communicationEventTypeId"/>
+            </entity-find>
+        </actions>
+    </service>
+    <service verb="create" noun="Message">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.communication.CommunicationEvent" include="nonpk"/>
+            <parameter name="fromPartyId" default="ec.user.userAccount.partyId"/>
+            <parameter name="communicationEventTypeId" default-value="Message"/>
+            <parameter name="statusId" default-value="CeReceived"/>
+            <parameter name="entryDate" default="ec.user.nowTimestamp"/>
+
+            <parameter name="purposeEnumId"/>
+        </in-parameters>
+        <out-parameters><parameter name="communicationEventId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.communication.CommunicationEvent" in-map="context" out-map="context"/>
+            <if condition="purposeEnumId">
+                <service-call name="create#mantle.party.communication.CommunicationEventPurpose" in-map="context"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="reply" noun="CommunicationEvent">
+        <in-parameters>
+            <parameter name="parentCommEventId" required="true" default="communicationEventId"/>
+            <parameter name="communicationEventId"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+            <parameter name="fromPartyId" default="ec.user.userAccount.partyId"/>
+            <parameter name="statusId" default-value="CeReceived"/>
+        </in-parameters>
+        <out-parameters><parameter name="communicationEventId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.communication.CommunicationEvent" value-field="parentCe">
+                <field-map field-name="communicationEventId" from="parentCommEventId"/>
+            </entity-find-one>
+            <set field="rootCommEventId" from="parentCe?.rootCommEventId ?: parentCommEventId"/>
+            <!-- if the from Party for this reply is the from Party on this message, send it to the to Party instead -->
+            <set field="toPartyId" from="parentCe.fromPartyId == fromPartyId ? parentCe.toPartyId : parentCe.fromPartyId"/>
+            <service-call name="create#mantle.party.communication.CommunicationEvent" out-map="context"
+                    in-map="[communicationEventTypeId:'Comment', contactMechTypeEnumId:'CmtWebForm', statusId:statusId,
+                        parentCommEventId:parentCommEventId, rootCommEventId:rootCommEventId,
+                        fromPartyId:fromPartyId, toPartyId:toPartyId, entryDate:ec.user.nowTimestamp,
+                        contentType:contentType, subject:subject, body:body]"/>
+        </actions>
+    </service>
+
+    <service verb="add" noun="WikiPageComment">
+        <in-parameters>
+            <parameter name="wikiPageId" required="true"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+        </in-parameters>
+        <actions>
+            <service-call name="create#mantle.party.communication.CommunicationEvent" out-map="context"
+                    in-map="[communicationEventTypeId:'Comment', contactMechTypeEnumId:'CmtWebForm', statusId:'CeSent',
+                        fromPartyId:ec.user.userAccount.partyId, entryDate:ec.user.nowTimestamp,
+                        contentType:contentType, subject:subject, body:body]"/>
+            <service-call name="create#mantle.party.communication.WikiPageCommunicationEvent"
+                    in-map="[wikiPageId:wikiPageId, communicationEventId:communicationEventId]"/>
+        </actions>
+    </service>
+
+    <!-- ================================================ -->
+    <!-- ========== CommunicationEventContent Services ========== -->
+    <!-- ================================================ -->
+
+    <service verb="get" noun="CommunicationEventContentLocation">
+        <in-parameters>
+            <parameter name="communicationEventId" required="true"/>
+            <parameter name="contentTypeEnumIdList" type="List" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentLocation"/>
+            <parameter name="communicationEventContent"/>
+        </out-parameters>
+        <actions>
+            <iterate list="contentTypeEnumIdList" entry="contentTypeEnumId">
+                <entity-find entity-name="mantle.party.communication.CommunicationEventContent" list="commEventContentList">
+                    <econdition field-name="communicationEventId"/><econdition field-name="contentTypeEnumId"/>
+                    <order-by field-name="-contentDate"/></entity-find>
+                <if condition="commEventContentList">
+                    <set field="communicationEventContent" from="commEventContentList[0]"/>
+                    <break/>
+                </if>
+            </iterate>
+            <set field="contentLocation" from="communicationEventContent ? communicationEventContent.contentLocation : null"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="CommunicationEventContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.party.communication.CommunicationEventContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="communicationEventId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="communicationEventContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.party.communication.CommunicationEventContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.party.CommunicationServices.save#CommunicationEventContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="CommunicationEventContent">
+        <in-parameters>
+            <parameter name="communicationEventContentId" required="true"/>
+            <auto-parameters entity-name="mantle.party.communication.CommunicationEventContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.party.communication.CommunicationEventContent" value-field="communicationEventContent"/>
+                <service-call name="mantle.party.CommunicationServices.save#CommunicationEventContentFile" out-map="context"
+                              in-map="context + [communicationEventId:communicationEventContent.communicationEventId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.party.communication.CommunicationEventContent" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="save" noun="CommunicationEventContentFile">
+        <in-parameters>
+            <parameter name="communicationEventContentId" required="true"/>
+            <parameter name="communicationEventId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/CommunicationEvent/${communicationEventId}/content_${communicationEventContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.party.communication.CommunicationEventContent"
+                                                              in-map="[communicationEventContentId:communicationEventContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
+</services>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+ 
+        <!--transition name="uploadImage" method="post">
+            <service-call name="growerp.100.ImageServices100.upload#Image"/>
+            <default-response type="none"/>
+        </transition-->
+
+        <transition name="api_key" begin-transaction="false">
+            <actions><script>
+                try { ec.web.sendTextResponse(ec.user.getLoginKey()) }
+                catch (org.moqui.context.AuthenticationRequiredException are) { ec.web.sendError(401, are.message, are) }
+            </script></actions>
+            <default-response type="none"/>
+        </transition>
+        <!-- Get a session token for clients that are not authenticated (no api_key) to use for all request methods other than GET -->
+        <transition name="moquiSessionToken" begin-transaction="false">
+            <actions><script>ec.web.sendTextResponse(ec.web.sessionToken)</script></actions>
+            <default-response type="none"/>
+        </transition>
+        <!-- REST API calls from a browser or session aware client will have an active session, use this for explicit logout and terminate session -->
+        <transition name="logout" begin-transaction="false">
+            <actions><script>
+                if (ec.user.username) { ec.user.logoutUser(); ec.web.sendTextResponse("successful") }
+                else { ec.web.sendTextResponse("no_user") }
+            </script></actions>
+            <default-response type="none"/>
+        </transition>
+    
+        <widgets><!-- this should never be viewed... --></widgets>
+</screen>

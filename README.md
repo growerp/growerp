@@ -19,21 +19,21 @@ We also created a first vertical app for Hotel owners which will be released lat
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1531267095
 
 ### Install flutter admin app locally
-to install when using local packages only( use 'path' instead of pub.dev versions)
-```
-git clone https://github.com/growerp/growerp.git 
-cd growerp/packages/core ; flutter pub get ; flutter pub run build_runner build
-cd growerp/packages/inventory ; flutter pub get ; flutter pub run build_runner build
-cd growerp/packages/marketing ;  flutter pub get ; flutter pub run build_runner build
-cd growerp/packages/website ; flutter pub get ; flutter pub run build_runner build
-cd ../admin 
-```
-if you use the versions from pub.dev, no pub build required.
 
-### Prepare for backend
-OR:  install backend according: https://github.com/growerp/growerp-moqui.git
-     install chat according: https://github.com/growerp/growerp-chat.git
+### start the chat server
+```sh
+cd growerp/chat
+.gradlew/apprun
+```
 
+### start backend in separate terminal
+```sh
+    ./gradlew downloadel #only first time
+    ./gradlew cleanall
+    ./gradlew build
+    java -jar moqui.war load types=seed,seed-initial,install
+    java -jar moqui.war
+```
 OR: use our test backend:  
 change file packages/admin/assets/cfg/app_settings.json:
 ```
@@ -43,11 +43,12 @@ change file packages/admin/assets/cfg/app_settings.json:
 - from:   "chatUrlDebug":  "",
 - to:     "chatUrlDebug": "wss://chat.growerp.org",  
 ```  
+
 start emulator or use browser and start app in directory: packages/admin:
-```
+```sh
+cd flutter/packages/admin
 flutter run
 ```
-### install the chatserver
 
 ### Some phone screen shots:
 <div style="text-align: center">

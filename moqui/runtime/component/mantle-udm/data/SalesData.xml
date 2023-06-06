@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!-- Misc data for sales force automation -->
+
+    <!-- Lead Status -->
+    <moqui.basic.StatusType statusTypeId="LeadStatus" description="Lead Status"/>
+    <moqui.basic.StatusItem description="Assigned" sequenceNum="1" statusId="LEAD_ASSIGNED" statusTypeId="LeadStatus"/>
+    <moqui.basic.StatusItem description="Converted" sequenceNum="2" statusId="LEAD_CONVERTED" statusTypeId="LeadStatus"/>
+    <moqui.basic.StatusItem description="Qualified" sequenceNum="3" statusId="LEAD_QUALIFIED" statusTypeId="LeadStatus"/>
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="LEAD_ASSIGNED" toStatusId="LEAD_CONVERTED" transitionName="Converted"/>
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="LEAD_ASSIGNED" toStatusId="LEAD_QUALIFIED" transitionName="Qualified"/>
+
+    <!-- Lead Sources (DataSourceType) -->
+    <moqui.basic.Enumeration description="Lead Source" enumId="LEAD_SOURCE" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="OTHER" description="Other" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="COLD_CALL" description="Cold Call" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="EXISTING_CUSTOMER" description="Existing Customer" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="SELF_GENERATED" description="Self Generated" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="EMPLOYEE" description="Employee" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="PARTNER" description="Partner" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="PUBLIC_RELATIONS" description="Public Relations" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="DIRECT_MAIL" description="Direct Mail" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="CONFERENCE" description="Conference" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="TRADE_SHOW" description="Trade Show" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="WEB_SITE" description="Web Site" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="WORD_OF_MOUTH" description="Word of Mouth" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="EMAIL" description="Email" enumTypeId="DataSourceType"/>
+    <moqui.basic.Enumeration parentEnumId="LEAD_SOURCE" enumId="CAMPAIGN" description="Campaign" enumTypeId="DataSourceType"/>
+</entity-facade-xml>

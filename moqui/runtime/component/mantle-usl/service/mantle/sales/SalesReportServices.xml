@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+    <service verb="get" noun="SalesOrderSummary">
+        <in-parameters>
+            <parameter name="interval" default-value="M"/><!-- day = d, week = w, month = M, quarter = q, year = y -->
+            <parameter name="intervalCount" type="Integer" default="13"/>
+            <parameter name="thruDate" type="Date" default="new java.sql.Date(ec.user.nowTimestamp.time)"/>
+            <parameter name="offset"/>
+            <parameter name="maPeriods" type="Integer" default="0"/>
+            <parameter name="vendorPartyIds" type="List"><parameter name="vendorPartyId"/></parameter>
+            <parameter name="customerPartyIds" type="List"><parameter name="customerPartyId"/></parameter>
+            <parameter name="productStoreIds" type="List"><parameter name="productStoreId"/></parameter>
+            <parameter name="customerClassificationIds" type="List"><parameter name="customerClassificationId"/></parameter>
+            <parameter name="productIds" type="List"><parameter name="productId"/></parameter>
+            <parameter name="dateFormat" default-value="dd MMM yyyy"/>
+            <parameter name="indexName" default-value="mantle_sales"/>
+            <parameter name="documentType" default-value="MantleSalesOrderItem"/>
+            <parameter name="dateField" default-value="placedDate"/>
+            <parameter name="clusterName" default-value="default"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="salesOrderSummaryList" type="List"><parameter name="result" type="Map"/></parameter>
+            <parameter name="ordersThis" type="Map"/>
+            <parameter name="ordersLast" type="Map"/>
+            <parameter name="ordersPrior" type="Map"/>
+            <parameter name="ordersAverage" type="Map"/>
+            <parameter name="ordersTotal" type="Map"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            import groovy.json.JsonOutput
+            import java.time.temporal.ChronoUnit
+            import java.time.temporal.TemporalUnit
+            import org.moqui.context.ExecutionContext
+            ExecutionContext ec = context.ec
+
+            def elasticClient = ec.factory.elastic.getClient((String) clusterName)
+            if (elasticClient == null) { ec.message.addMessage("No ElasticClient found for cluster ${clusterName}", "danger"); return }
+            String intervalName = elasticClient.isEsVersionUnder7() ? "interval" : "calendar_interval"
+
+            int maInt = maPeriods
+            if (maInt < 0) maInt = 0
+            int displayIntervalCount = interval == 'q' ? (intervalCount * 3) : intervalCount
+            int searchIntervalCount = displayIntervalCount + maInt
+
+            Map<String, TemporalUnit> tempUnits = [d:ChronoUnit.DAYS, w:ChronoUnit.WEEKS, M:ChronoUnit.MONTHS, q:ChronoUnit.MONTHS, y:ChronoUnit.YEARS]
+            Map<String, String> perMap = [d:'day', w:'week', M:'month', q:'quarter', y:'year']
+            ArrayList<Timestamp> curPer = ec.user.getPeriodRange(perMap.get(interval), 0, thruDate)
+            Timestamp thruTimestamp = curPer.get(1)
+            def fromDateDt = java.time.ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(curPer[0].time), TimeZone.getDefault().toZoneId())
+            fromDateDt = fromDateDt.minus(searchIntervalCount, tempUnits.get(interval))
+            // ec.logger.warn("from ${fromDateDt} thru ${thruTimestamp}")
+
+            List filterList = [
+                    [range: [(dateField): [gte:(fromDateDt.toInstant().toEpochMilli() as String), lt:(thruTimestamp.time as String), format: 'epoch_millis']]],
+                    [terms: [partStatusId: ['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']]],
+                    [terms: [statusId: ['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']]]
+            ]
+            if (vendorPartyIds) filterList.add([terms: [vendorPartyId: vendorPartyIds]])
+            if (customerPartyIds) filterList.add([terms: [customerPartyId: customerPartyIds]])
+            if (productStoreIds) filterList.add([terms: [productStoreId: productStoreIds]])
+            if (customerClassificationIds) filterList.add([terms: [customerClassId: customerClassificationIds]])
+            if (productIds) filterList.add([terms: [productId: productIds]])
+            Map queryMap = [bool: [filter: filterList]]
+
+            if (!offset && interval == 'w') {
+                // default to offset based on user's firstDayOfWeek relative to the ElasticSearch default of Monday for weekly date histogram
+                int userFirstDay = ec.user.getCalendarSafe().getFirstDayOfWeek()
+                int userMondayOffset = userFirstDay - Calendar.MONDAY
+                offset = (userMondayOffset < 0 ? '-' : '+') + Math.abs(userMondayOffset) + 'd'
+            }
+
+            // AggregationBuilder aggBuilder = AggregationBuilders.dateHistogram("DateOuter").field((String) dateField)
+            //         .order(BucketOrder.key(false)).timeZone(DateTimeZone.forTimeZone(TimeZone.getDefault()))
+            //         .dateHistogramInterval(new DateHistogramInterval("1" + (String) interval)).format((String) dateFormat)
+            // if (offset) aggBuilder.offset((String) offset)
+            Map histoMap = [field:dateField, (intervalName):("1" + (String) interval), time_zone:TimeZone.default.getID(),
+                    format:dateFormat, order:[_key:"desc"]]
+            if (offset) histoMap.offset = offset
+
+            Map subAggsMap = [:]
+            Map aggsMap = [DateOuter:[date_histogram:histoMap, aggs:subAggsMap]]
+
+
+            // order count
+            // aggBuilder.subAggregation(AggregationBuilders.cardinality("orderCount").field("orderId"))
+            subAggsMap.orderCount = [cardinality:[field:'orderId', precision_threshold:40000]]
+
+            // total sales (itemSaleTotal, no item type restriction)
+            // aggBuilder.subAggregation(AggregationBuilders.sum("totalSales").field("itemSaleTotal"))
+            subAggsMap.totalSales = [sum:[field:'itemSaleTotal']]
+
+            // product only sums
+            // AggregationBuilder itemProductFilter = AggregationBuilders.filter("ItemProduct",
+            //         QueryBuilders.wrapperQuery(JsonOutput.toJson([term:[itemTypeEnumId:"ItemProduct"]])))
+            // aggBuilder.subAggregation(itemProductFilter)
+            Map itemProductSubAggs = [:]
+            subAggsMap.ItemProduct = [filter:[term:[itemTypeEnumId:'ItemProduct']], aggs:itemProductSubAggs]
+
+            // total product sales (itemSaleTotal; itemTypeEnumId = ItemProduct)
+            // itemProductFilter.subAggregation(AggregationBuilders.sum("productSaleTotal").field("itemSaleTotal"))
+            itemProductSubAggs.productSaleTotal = [sum:[field:'itemSaleTotal']]
+            // total product shipped (issuedSaleTotal; itemTypeEnumId = ItemProduct)
+            //itemProductFilter.subAggregation(AggregationBuilders.sum("productIssuedTotal").field("issuances.issuedSaleTotal"))
+            itemProductSubAggs.productIssuedTotal = [sum:[field:'issuances.issuedSaleTotal']]
+            // product cost total (issuedCostTotal)
+            // itemProductFilter.subAggregation(AggregationBuilders.sum("productCostTotal").field("issuances.issuedCostTotal"))
+            itemProductSubAggs.productCostTotal = [sum:[field:'issuances.issuedCostTotal']]
+            // product quantity total
+            // itemProductFilter.subAggregation(AggregationBuilders.sum("productQuantityTotal").field("orderQuantity"))
+            itemProductSubAggs.productQuantityTotal = [sum:[field:'orderQuantity']]
+
+            // total discounts (itemSaleTotal for discount itemTypeEnumId)
+            List discountTypes = ['ItemDiscount', 'ItemPromptDiscount', 'ItemCouponCredit', 'ItemPromoDiscount', 'ItemFreeFills', 'ItemSlottingFees', 'ItemAdjAdvertising', 'ItemAdjJointAdv']
+            // AggregationBuilder itemDiscountFilter = AggregationBuilders.filter("ItemDiscount",
+            //         QueryBuilders.wrapperQuery(JsonOutput.toJson([terms:[itemTypeEnumId:discountTypes]])))
+            // itemDiscountFilter.subAggregation(AggregationBuilders.sum("discountTotal").field("itemSaleTotal"))
+            // aggBuilder.subAggregation(itemDiscountFilter)
+            subAggsMap.ItemDiscount = [filter:[terms:[itemTypeEnumId:discountTypes]], aggs:[discountTotal:[sum:[field:'itemSaleTotal']]]]
+
+            // new customer order count
+            // AggregationBuilder newCustFilter = AggregationBuilders.filter("NewCustomer",
+            //         QueryBuilders.wrapperQuery(JsonOutput.toJson([term:[isNewCustomer:'Y']])))
+            // newCustFilter.subAggregation(AggregationBuilders.cardinality("newCustomerOrderCount").field("orderId"))
+            // aggBuilder.subAggregation(newCustFilter)
+            subAggsMap.NewCustomer = [filter:[term:[isNewCustomer:'Y']], aggs:[newCustomerOrderCount:[cardinality:[field:'orderId', precision_threshold:40000]]]]
+
+            // do the search
+            // SearchResponse sr = ElasticSearchUtil.aggregationSearch(indexName, [documentType], null, queryMap, aggBuilder, ec)
+            String orderIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) documentType)
+            Map resultMap = elasticClient.search(orderIdx, [query:queryMap, aggs:aggsMap])
+
+            Map aggregationsMap = (Map) resultMap.aggregations
+            // ec.logger.error("aggregationsMap:\n${JsonOutput.prettyPrint(JsonOutput.toJson(aggregationsMap))}")
+
+            salesOrderSummaryList = []
+            ordersTotal = [dateKey:"Prior Total"]
+            for (Map dateBucket in (List<Map>) aggregationsMap.DateOuter.buckets) {
+                Map prodAgg = (Map) dateBucket.ItemProduct
+                Map discAgg = (Map) dateBucket.ItemDiscount
+                Map newCustAgg = (Map) dateBucket.NewCustomer
+                BigDecimal orderCount = dateBucket.orderCount?.value as BigDecimal
+                BigDecimal newCustomerOrderCount = newCustAgg.newCustomerOrderCount?.value as BigDecimal
+                BigDecimal productSaleTotal = prodAgg.productSaleTotal?.value as BigDecimal
+                BigDecimal productIssuedTotal = prodAgg.productIssuedTotal?.value as BigDecimal
+                BigDecimal productCostTotal = prodAgg.productCostTotal?.value as BigDecimal
+                BigDecimal discountTotal = discAgg.discountTotal?.value as BigDecimal
+                Map curLine = [dateKey:dateBucket.key_as_string,
+                        orderCount:orderCount, newCustomerOrderCount:newCustomerOrderCount,
+                        newCustomerPercent:(orderCount ? (newCustomerOrderCount/orderCount) : 0.0),
+                        totalSales:dateBucket.totalSales.value as BigDecimal,
+                        productSaleTotal:productSaleTotal, productIssuedTotal:productIssuedTotal, productCostTotal:productCostTotal,
+                        productQuantityTotal:prodAgg.productQuantityTotal?.value as BigDecimal,
+                        discountTotal:discountTotal, netSales:(productSaleTotal + discountTotal),
+                        discountPercent:(productSaleTotal ? (-discountTotal/productSaleTotal) : 0.0),
+                        costPercent:(productIssuedTotal ? (productCostTotal/productIssuedTotal) : 0.0),
+                        orderCountMa:0.0, newCustomerOrderCountMa:0.0, newCustomerPercentMa:0.0, productQuantityTotalMa:0.0,
+                        productSaleTotalMa:0.0, discountPercentMa:0.0, netSalesMa:0.0]
+                salesOrderSummaryList.add(curLine)
+                // don't include the first (most recent) period in the total and average
+                if (salesOrderSummaryList.size() > 1) addBigDecimalsInMap(ordersTotal, curLine)
+            }
+
+            // get the this, last, prior periods before reversing list
+            ordersThis = salesOrderSummaryList.size() > 0 ? salesOrderSummaryList[0] : null
+            ordersLast = salesOrderSummaryList.size() > 1 ? salesOrderSummaryList[1] : null
+            ordersPrior = salesOrderSummaryList.size() > 2 ? salesOrderSummaryList[2] : null
+
+            // reverse the list (comes back from ES newest first)
+            salesOrderSummaryList.reverse(true)
+
+            // calculate moving averages
+            if (maInt > 0 && salesOrderSummaryList.size() > maInt) {
+                BigDecimal maBd = new BigDecimal(maInt)
+                // NOTE: buckets originally come back newest to oldest so for MA reverse, then reverse after
+                List originalList = new ArrayList(salesOrderSummaryList)
+                // trim list for maInt so it has only display periods
+                salesOrderSummaryList = new ArrayList(originalList.subList(maInt, originalList.size()))
+                for (int idx = 0; idx < salesOrderSummaryList.size(); idx++) {
+                    Map curLine = (Map) salesOrderSummaryList.get(idx)
+                    List lookbackList = originalList.subList(idx, idx + maInt)
+                    curLine.orderCountMa = lookbackList*.orderCount.sum() / maBd
+                    curLine.newCustomerOrderCountMa = lookbackList*.newCustomerOrderCount.sum() / maBd
+                    curLine.newCustomerPercentMa = lookbackList*.newCustomerPercent.sum() / maBd
+                    curLine.productQuantityTotalMa = lookbackList*.productQuantityTotal.sum() / maBd
+                    curLine.productSaleTotalMa = lookbackList*.productSaleTotal.sum() / maBd
+                    curLine.discountPercentMa = lookbackList*.discountPercent.sum() / maBd
+                    curLine.netSalesMa = lookbackList*.netSales.sum() / maBd
+                }
+            }
+
+            ordersTotal.newCustomerPercent = null
+            ordersTotal.discountPercent = null
+            ordersTotal.costPercent = null
+
+            BigDecimal avgCount = new BigDecimal(salesOrderSummaryList.size())
+            ordersAverage = new LinkedHashMap(ordersTotal)
+            divideBigDecimalsInMap(ordersAverage, avgCount)
+            ordersAverage.dateKey = "Prior Average"
+            ordersAverage.newCustomerPercent = (ordersAverage.orderCount ? (ordersAverage.newCustomerOrderCount/ordersAverage.orderCount) : 0.0)
+            ordersAverage.discountPercent = (ordersAverage.productSaleTotal ? (-ordersAverage.discountTotal/ordersAverage.productSaleTotal) : 0.0)
+            ordersAverage.costPercent = (ordersAverage.productIssuedTotal ? (ordersAverage.productCostTotal/ordersAverage.productIssuedTotal) : 0.0)
+
+            salesOrderSummaryList.add(ordersAverage)
+            salesOrderSummaryList.add(ordersTotal)
+        ]]></script></actions>
+    </service>
+
+    <service verb="get" noun="SalesInvoiceSummary">
+        <in-parameters>
+            <parameter name="interval" default-value="M"/><!-- day = d, week = w, month = M, quarter = q, year = y -->
+            <parameter name="intervalCount" type="Integer" default="13"/>
+            <parameter name="thruDate" type="Date" default="new java.sql.Date(ec.user.nowTimestamp.time)"/>
+            <parameter name="offset"/>
+            <parameter name="maPeriods" type="Integer" default="0"/>
+            <parameter name="fromPartyIds" type="List"><parameter name="fromPartyId"/></parameter>
+            <parameter name="toPartyIds" type="List"><parameter name="toPartyId"/></parameter>
+            <parameter name="productStoreIds" type="List"><parameter name="productStoreId"/></parameter>
+            <parameter name="customerClassificationIds" type="List"><parameter name="customerClassificationId"/></parameter>
+            <parameter name="productIds" type="List"><parameter name="productId"/></parameter>
+            <parameter name="dateFormat" default-value="dd MMM yyyy"/>
+            <parameter name="indexName" default-value="mantle_sales"/>
+            <parameter name="invoiceDocumentType" default-value="MantleSalesInvoice"/>
+            <parameter name="itemDocumentType" default-value="MantleSalesInvoiceItem"/>
+            <parameter name="dateField" default-value="invoiceDate"/>
+            <parameter name="clusterName" default-value="default"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="salesInvoiceSummaryList" type="List"><parameter name="result" type="Map"/></parameter>
+            <parameter name="invoicesThis" type="Map"/>
+            <parameter name="invoicesLast" type="Map"/>
+            <parameter name="invoicesPrior" type="Map"/>
+            <parameter name="invoicesAverage" type="Map"/>
+            <parameter name="invoicesTotal" type="Map"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            import groovy.json.JsonOutput
+            import java.time.temporal.ChronoUnit
+            import java.time.temporal.TemporalUnit
+            import org.moqui.context.ExecutionContext
+            ExecutionContext ec = context.ec
+
+            def elasticClient = ec.factory.elastic.getClient((String) clusterName)
+            if (elasticClient == null) { ec.message.addMessage("No ElasticClient found for cluster ${clusterName}", "danger"); return }
+            String intervalName = elasticClient.isEsVersionUnder7() ? "interval" : "calendar_interval"
+
+            int maInt = maPeriods
+            if (maInt < 0) maInt = 0
+            int displayIntervalCount = interval == 'q' ? (intervalCount * 3) : intervalCount
+            int searchIntervalCount = displayIntervalCount + maInt
+
+            Map<String, TemporalUnit> tempUnits = [d:ChronoUnit.DAYS, w:ChronoUnit.WEEKS, M:ChronoUnit.MONTHS, q:ChronoUnit.MONTHS, y:ChronoUnit.YEARS]
+            Map<String, String> perMap = [d:'day', w:'week', M:'month', q:'quarter', y:'year']
+            ArrayList<Timestamp> curPer = ec.user.getPeriodRange(perMap.get(interval), 0, thruDate)
+            Timestamp thruTimestamp = curPer.get(1)
+            def fromDateDt = java.time.ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(curPer[0].time), TimeZone.getDefault().toZoneId())
+            fromDateDt = fromDateDt.minus(searchIntervalCount, tempUnits.get(interval))
+            // ec.logger.warn("from ${fromDateDt} thru ${thruTimestamp}")
+
+            List filterList = [
+                    [range: [(dateField): [gte:(fromDateDt.toInstant().toEpochMilli() as String), lt:(thruTimestamp.time as String), format: 'epoch_millis']]],
+                    [terms: [statusId: ['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoicePmtRecvd']]]
+            ]
+            if (fromPartyIds) filterList.add([terms: [fromPartyId: fromPartyIds]])
+            if (toPartyIds) filterList.add([terms: [toPartyId: toPartyIds]])
+            if (productStoreIds) filterList.add([terms: [productStoreId: productStoreIds]])
+            if (customerClassificationIds) filterList.add([terms: [customerClassId: customerClassificationIds]])
+            if (productIds) filterList.add([terms: [productId: productIds]])
+            Map queryMap = [bool: [filter: filterList]]
+
+            if (!offset && interval == 'w') {
+                // default to offset based on user's firstDayOfWeek relative to the ElasticSearch default of Monday for weekly date histogram
+                int userFirstDay = ec.user.getCalendarSafe().getFirstDayOfWeek()
+                int userMondayOffset = userFirstDay - Calendar.MONDAY
+                offset = (userMondayOffset < 0 ? '-' : '+') + Math.abs(userMondayOffset) + 'd'
+            }
+
+            // prep the invoice level search
+            Map invHistoMap = [field:dateField, (intervalName):("1" + (String) interval), time_zone:TimeZone.default.getID(),
+                    format:dateFormat, order:[_key:"desc"], min_doc_count:1]
+            if (offset) invHistoMap.offset = offset
+
+            Map invSubAggsMap = [:]
+            Map invAggsMap = [DateOuter:[date_histogram:invHistoMap, aggs:invSubAggsMap]]
+
+            // total sales
+            invSubAggsMap.invoiceTotal = [sum:[field:'invoiceTotal']]
+            // total paid
+            // NOTE: may want this to behave differently, somehow do a nested aggregation for only applications with appliedDate less than the end date of the current date range
+            invSubAggsMap.invoicePaymentsApplied = [sum:[field:'appliedPaymentsTotal']]
+            // total pre-paid
+            invSubAggsMap.prePaymentsTotal = [sum:[field:'prePaymentsTotal']]
+
+            // do the invoice search
+            String invoiceIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) invoiceDocumentType)
+            Map invResultMap = elasticClient.search(invoiceIdx, [query:queryMap, aggs:invAggsMap])
+            Map invAggregationsMap = (Map) invResultMap.aggregations
+
+            // prep the invoice item search
+            Map itemHistoMap = [field:dateField, (intervalName):("1" + (String) interval), time_zone:TimeZone.default.getID(),
+                    format:dateFormat, order:[_key:"desc"]]
+            if (offset) itemHistoMap.offset = offset
+
+            Map itemSubAggsMap = [:]
+            Map itemAggsMap = [DateOuter:[date_histogram:itemHistoMap, aggs:itemSubAggsMap]]
+
+            // invoice count
+            itemSubAggsMap.invoiceIdCount = [cardinality:[field:'invoiceId', precision_threshold:40000]]
+            // total sales (itemSaleTotal, no item type restriction)
+            itemSubAggsMap.totalSales = [sum:[field:'itemSaleTotal']]
+
+            // product only counts
+            Map itemProductSubAggs = [:]
+            itemSubAggsMap.ItemProduct = [filter:[term:[itemTypeEnumId:'ItemProduct']], aggs:itemProductSubAggs]
+            // total product sales (itemSaleTotal; itemTypeEnumId = ItemProduct)
+            itemProductSubAggs.productSaleTotal = [sum:[field:'itemSaleTotal']]
+            // total product shipped (issuedSaleTotal; itemTypeEnumId = ItemProduct)
+            itemProductSubAggs.productIssuedTotal = [sum:[field:'issuances.issuedSaleTotal']]
+            // product cost total (issuedCostTotal)
+            itemProductSubAggs.productCostTotal = [sum:[field:'issuances.issuedCostTotal']]
+            // product quantity total
+            itemProductSubAggs.productQuantityTotal = [sum:[field:'quantity']]
+
+            // total discounts (itemSaleTotal for discount itemTypeEnumId)
+            List discountTypes = ['ItemDiscount', 'ItemPromptDiscount', 'ItemCouponCredit', 'ItemPromoDiscount', 'ItemFreeFills', 'ItemSlottingFees', 'ItemAdjAdvertising', 'ItemAdjJointAdv']
+            itemSubAggsMap.ItemDiscount = [filter:[terms:[itemTypeEnumId:discountTypes]], aggs:[discountTotal:[sum:[field:'itemSaleTotal']]]]
+
+            // do the invoice item search
+            String itemIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) itemDocumentType)
+            Map itemResultMap = elasticClient.search(itemIdx, [query:queryMap, aggs:itemAggsMap])
+            Map itemAggregationsMap = (Map) itemResultMap.aggregations
+            // ec.logger.warn(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([query:queryMap, aggs:itemAggsMap])))
+
+            // make list for invoice details
+            Map<String, Map> invoiceTempMap = [:]
+            for (Map dateBucket in (List<Map>) invAggregationsMap.DateOuter.buckets) {
+                BigDecimal invoiceTotal = dateBucket.invoiceTotal?.value as BigDecimal
+                BigDecimal invoicePaymentsApplied = dateBucket.invoicePaymentsApplied?.value as BigDecimal
+                BigDecimal prePaymentsTotal = dateBucket.prePaymentsTotal?.value as BigDecimal
+                invoiceTempMap.put((String) dateBucket.key_as_string,
+                        [dateKey:dateBucket.key_as_string, invoiceCount:dateBucket.doc_count as BigDecimal,
+                         invoiceTotal:invoiceTotal, invoicePaymentsApplied:invoicePaymentsApplied, prePaymentsTotal:prePaymentsTotal,
+                         paidPercent:(invoiceTotal ? (invoicePaymentsApplied/invoiceTotal) : 0.0),
+                         prePaidPercent:(invoiceTotal ? (prePaymentsTotal/invoiceTotal) : 0.0)])
+            }
+
+            // prep the list from items first
+            salesInvoiceSummaryList = []
+            invoicesTotal = [dateKey:"Prior Total"]
+            for (Map dateBucket in (List<Map>) itemAggregationsMap.DateOuter.buckets) {
+                String keyAsString = (String) dateBucket.key_as_string
+                Map invoiceTemp = invoiceTempMap.remove(keyAsString)
+                if (!invoiceTemp) ec.logger.warn("In SalesInvoiceSummary no invoice summary for ${keyAsString}")
+                def prodAgg = dateBucket.ItemProduct
+                def discAgg = dateBucket.ItemDiscount
+                BigDecimal invoiceIdCount = dateBucket.invoiceIdCount?.value as BigDecimal
+                BigDecimal invoiceCount = invoiceTemp?.invoiceCount as BigDecimal ?: invoiceIdCount
+                BigDecimal productSaleTotal = prodAgg.productSaleTotal?.value as BigDecimal
+                BigDecimal productIssuedTotal = prodAgg.productIssuedTotal?.value as BigDecimal
+                BigDecimal productCostTotal = prodAgg.productCostTotal?.value as BigDecimal
+                BigDecimal discountTotal = discAgg.discountTotal?.value as BigDecimal
+                Map curLine = [invoiceCount:invoiceCount, invoiceIdCount:invoiceIdCount,
+                        totalSales:dateBucket.totalSales?.value as BigDecimal,
+                        productSaleTotal:productSaleTotal, productIssuedTotal:productIssuedTotal, productCostTotal:productCostTotal,
+                        productQuantityTotal:prodAgg.productQuantityTotal?.value as BigDecimal,
+                        discountTotal:discountTotal, netSales:(productSaleTotal + discountTotal),
+                        discountPercent:(productSaleTotal ? (-discountTotal/productSaleTotal) : 0.0),
+                        costPercent:(productIssuedTotal ? (productCostTotal/productIssuedTotal) : 0.0),
+                        invoiceCountMa:0.0, productQuantityTotalMa:0.0, invoiceTotalMa:0.0, paidPercentMa:0.0,
+                        prePaidPercentMa:0.0, costPercentMa:0.0, discountPercentMa:0.0] as Map
+                if (invoiceTemp) {
+                    curLine.putAll(invoiceTemp)
+                } else {
+                    curLine.putAll([dateKey:keyAsString, invoiceTotal:0.0,
+                            invoicePaymentsApplied:0.0, prePaymentsTotal:0.0, paidPercent:0.0, prePaidPercent:0.0])
+                }
+                salesInvoiceSummaryList.add(curLine)
+                // don't include the first (most recent) period in the total and average
+                if (salesInvoiceSummaryList.size() > 1) addBigDecimalsInMap(invoicesTotal, curLine)
+            }
+            ec.logger.info("In SalesInvoiceSummary invoiceTempMap remaining: ${invoiceTempMap}")
+
+            // get the this, last, prior periods before reversing list
+            invoicesThis = salesInvoiceSummaryList.size() > 0 ? salesInvoiceSummaryList[0] : null
+            invoicesLast = salesInvoiceSummaryList.size() > 1 ? salesInvoiceSummaryList[1] : null
+            invoicesPrior = salesInvoiceSummaryList.size() > 2 ? salesInvoiceSummaryList[2] : null
+
+            // reverse the list (comes back from ES newest first)
+            salesInvoiceSummaryList.reverse(true)
+
+            // calculate moving averages
+            if (maInt > 0 && salesInvoiceSummaryList.size() > maInt) {
+                BigDecimal maBd = new BigDecimal(maInt)
+                // NOTE: buckets originally come back newest to oldest so for MA reverse, then reverse after
+                List originalList = new ArrayList(salesInvoiceSummaryList)
+                // trim list for maInt so it has only display periods
+                salesInvoiceSummaryList = new ArrayList(originalList.subList(maInt, originalList.size()))
+                for (int idx = 0; idx < salesInvoiceSummaryList.size(); idx++) {
+                    Map curLine = (Map) salesInvoiceSummaryList.get(idx)
+                    List lookbackList = originalList.subList(idx, idx + maInt)
+                    curLine.invoiceCountMa = lookbackList*.invoiceCount.sum() / maBd
+                    curLine.productQuantityTotalMa = lookbackList*.productQuantityTotal.sum() / maBd
+                    curLine.invoiceTotalMa = lookbackList*.invoiceTotal.sum() / maBd
+                    curLine.paidPercentMa = lookbackList*.paidPercent.sum() / maBd
+                    curLine.prePaidPercentMa = lookbackList*.prePaidPercent.sum() / maBd
+                    curLine.costPercentMa = lookbackList*.costPercent.sum() / maBd
+                    curLine.discountPercentMa = lookbackList*.discountPercent.sum() / maBd
+                }
+            }
+
+            invoicesTotal.paidPercent = null
+            invoicesTotal.prePaidPercent = null
+            invoicesTotal.discountPercent = null
+            invoicesTotal.costPercent = null
+
+            BigDecimal avgCount = new BigDecimal(salesInvoiceSummaryList.size())
+            invoicesAverage = new LinkedHashMap(invoicesTotal)
+            divideBigDecimalsInMap(invoicesAverage, avgCount)
+            invoicesAverage.dateKey = "Prior Average"
+            invoicesAverage.paidPercent = (invoicesAverage.invoiceTotal ? (invoicesAverage.invoicePaymentsApplied/invoicesAverage.invoiceTotal) : 0.0)
+            invoicesAverage.prePaidPercent = (invoicesAverage.invoiceTotal ? (invoicesAverage.prePaymentsTotal/invoicesAverage.invoiceTotal) : 0.0)
+            invoicesAverage.discountPercent = (invoicesAverage.productSaleTotal ? (-invoicesAverage.discountTotal/invoicesAverage.productSaleTotal) : 0.0)
+            invoicesAverage.costPercent = (invoicesAverage.productIssuedTotal ? (invoicesAverage.productCostTotal/invoicesAverage.productIssuedTotal) : 0.0)
+
+            salesInvoiceSummaryList.add(invoicesAverage)
+            salesInvoiceSummaryList.add(invoicesTotal)
+        ]]></script></actions>
+    </service>
+
+    <service verb="get" noun="SalesTopProduct">
+        <in-parameters>
+            <parameter name="interval" default-value="M"/><!-- day = d, week = w, month = M, quarter = q, year = y -->
+            <parameter name="thruDate" type="Date" default="new java.sql.Date(ec.user.nowTimestamp.time)"/>
+            <parameter name="indexName" default-value="mantle_sales"/>
+            <parameter name="documentType" default-value="MantleSalesOrderItem"/>
+            <parameter name="topLimit" type="Integer" default="10"/>
+            <parameter name="poffset" type="Integer" default="-1"/>
+            <parameter name="dateField" default-value="placedDate"/>
+            <parameter name="orderByField" default-value="totalSales"/>
+            <parameter name="clusterName" default-value="default"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="topProductList" type="List"><parameter name="result" type="Map"/></parameter>
+            <parameter name="topProductStart" type="Timestamp"/>
+            <parameter name="topProductEnd" type="Timestamp"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            import groovy.json.JsonOutput
+            import org.moqui.context.ExecutionContext
+            ExecutionContext ec = context.ec
+
+            def elasticClient = ec.factory.elastic.getClient((String) clusterName)
+            if (elasticClient == null) { ec.message.addMessage("No ElasticClient found for cluster ${clusterName}", "danger"); return }
+
+            Map<String, String> perMap = [d:'day', w:'week', M:'month', q:'quarter', y:'year']
+            ArrayList<Timestamp> curPer = ec.user.getPeriodRange(perMap.get(interval), poffset, thruDate)
+            /* no longer do this, other aggregations now use an offset to match the Java week definition for user's Locale:
+            // for weeks shift by one to start on Monday (like ES does for aggregations) instead of Sunday
+            if (interval == 'w') { curPer[0] = curPer[0] + 1; curPer[1] = curPer[1] + 1 }
+            */
+            topProductStart = curPer.get(0)
+            topProductEnd = curPer.get(1)
+
+            Map queryMap = [bool: [filter: [
+                    [range: [(dateField): [gte:(topProductStart.time as String), lt:(topProductEnd.time as String), format: 'epoch_millis']]],
+                    [terms: [partStatusId: ['OrderPlaced', 'OrderProcessing', 'OrderApproved', 'OrderSent', 'OrderCompleted', 'OrderHold']]]
+            ]]]
+
+            // By Product Term
+            Map subAggsMap = [:]
+            Map aggsMap = [TopTerms:[terms:[field:'productId', size:topLimit, order:[(orderByField):"desc"]], aggs:subAggsMap]]
+
+            subAggsMap.totalQuantity = [sum:[field:'orderQuantity']]
+            subAggsMap.totalSales = [sum:[field:'itemSaleTotal']]
+            // total product shipped (issuedSaleTotal; itemTypeEnumId = ItemProduct)
+            subAggsMap.productIssuedTotal = [sum:[field:'issuances.issuedSaleTotal']]
+            // product cost total (issuedCostTotal)
+            subAggsMap.productCostTotal = [sum:[field:'issuances.issuedCostTotal']]
+
+            String orderIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) documentType)
+            Map resultMap = elasticClient.search(orderIdx, [query:queryMap, aggs:aggsMap])
+            Map aggregationsMap = (Map) resultMap.aggregations
+
+            topProductList = new ArrayList(topLimit)
+            for (Map bucket in (List<Map>) aggregationsMap.TopTerms.buckets) {
+                BigDecimal productIssuedTotal = bucket.productIssuedTotal?.value as BigDecimal
+                BigDecimal productCostTotal = bucket.productCostTotal?.value as BigDecimal
+                Map curLine = [productId:bucket.key,
+                        totalQuantity:bucket.totalQuantity?.value as BigDecimal,
+                        totalSales:bucket.totalSales?.value as BigDecimal,
+                        productIssuedTotal:productIssuedTotal, productCostTotal:productCostTotal,
+                        costPercent:(productIssuedTotal ? (productCostTotal/productIssuedTotal) : 0.0)]
+                topProductList.add(curLine)
+            }
+        ]]></script></actions>
+    </service>
+    <service verb="get" noun="InvoicesByCustomerClass">
+        <in-parameters>
+            <parameter name="interval" default-value="M"/><!-- day = d, week = w, month = M, quarter = q, year = y -->
+            <parameter name="thruDate" type="Date" default="new java.sql.Date(ec.user.nowTimestamp.time)"/>
+            <parameter name="indexName" default-value="mantle_sales"/>
+            <parameter name="invoiceDocumentType" default-value="MantleSalesInvoice"/>
+            <parameter name="itemDocumentType" default-value="MantleSalesInvoiceItem"/>
+            <parameter name="topLimit" type="Integer" default="100"/><!-- high limit to show all customer classes -->
+            <parameter name="poffset" type="Integer" default="-1"/>
+            <parameter name="dateField" default-value="invoiceDate"/>
+            <parameter name="orderByField" default-value="-invoiceTotal"/>
+            <parameter name="clusterName" default-value="default"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="topCustomerClassList" type="List"><parameter name="result" type="Map"/></parameter>
+            <parameter name="topCustomerClassStart" type="Timestamp"/>
+            <parameter name="topCustomerClassEnd" type="Timestamp"/>
+        </out-parameters>
+        <actions><script><![CDATA[
+            import groovy.json.JsonOutput
+            import org.moqui.context.ExecutionContext
+            ExecutionContext ec = context.ec
+
+            def elasticClient = ec.factory.elastic.getClient((String) clusterName)
+            if (elasticClient == null) { ec.message.addMessage("No ElasticClient found for cluster ${clusterName}", "danger"); return }
+
+            Map<String, String> perMap = [d:'day', w:'week', M:'month', q:'quarter', y:'year']
+            ArrayList<Timestamp> curPer = ec.user.getPeriodRange(perMap.get(interval), poffset, thruDate)
+            /* no longer do this, other aggregations now use an offset to match the Java week definition for user's Locale:
+            // for weeks shift by one to start on Monday (like ES does for aggregations) instead of Sunday
+            if (interval == 'w') { curPer[0] = curPer[0] + 1; curPer[1] = curPer[1] + 1 }
+            */
+            topCustomerClassStart = curPer.get(0)
+            topCustomerClassEnd = curPer.get(1)
+
+            Map queryMap = [bool: [filter: [
+                    [range: [(dateField): [gte:(topCustomerClassStart.time as String), lt:(topCustomerClassEnd.time as String), format: 'epoch_millis']]],
+                    [terms: [statusId: ['InvoiceFinalized', 'InvoiceSent', 'InvoiceAcked', 'InvoicePmtRecvd']]]
+            ]]]
+
+            // prep the invoice level search
+            Map invSubAggsMap = [:]
+            Map invAggsMap = [TopTerms:[terms:[field:'customerClassId', size:topLimit], aggs:invSubAggsMap]]
+
+            // total sales
+            invSubAggsMap.invoiceTotal = [sum:[field:'invoiceTotal']]
+            // total paid
+            // NOTE: may want this to behave differently, somehow do a nested aggregation for only applications with appliedDate less than the end date of the current date range
+            invSubAggsMap.invoicePaymentsApplied = [sum:[field:'appliedPaymentsTotal']]
+            // do the invoice search
+            String invoiceIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) invoiceDocumentType)
+            Map invResultMap = elasticClient.search(invoiceIdx, [query:queryMap, aggs:invAggsMap])
+            Map invAggregationsMap = (Map) invResultMap.aggregations
+
+            // prep the invoice item search
+            Map itemSubAggsMap = [:]
+            Map itemAggsMap = [TopTerms:[terms:[field:'customerClassId', size:topLimit], aggs:itemSubAggsMap]]
+
+            // invoice count
+            itemSubAggsMap.invoiceIdCount = [cardinality:[field:'invoiceId', precision_threshold:40000]]
+            // total sales (itemSaleTotal, no item type restriction)
+            itemSubAggsMap.totalSales = [sum:[field:'itemSaleTotal']]
+
+            // product only counts
+            Map itemProductSubAggs = [:]
+            itemSubAggsMap.ItemProduct = [filter:[term:[itemTypeEnumId:'ItemProduct']], aggs:itemProductSubAggs]
+
+            // total product sales (itemSaleTotal; itemTypeEnumId = ItemProduct)
+            itemProductSubAggs.productSaleTotal = [sum:[field:'itemSaleTotal']]
+            // total product shipped (issuedSaleTotal; itemTypeEnumId = ItemProduct)
+            itemProductSubAggs.productIssuedTotal = [sum:[field:'issuances.issuedSaleTotal']]
+            // product cost total (issuedCostTotal)
+            itemProductSubAggs.productCostTotal = [sum:[field:'issuances.issuedCostTotal']]
+            // product quantity total
+            itemProductSubAggs.productQuantityTotal = [sum:[field:'quantity']]
+
+            // total discounts (itemSaleTotal for discount itemTypeEnumId)
+            List discountTypes = ['ItemDiscount', 'ItemPromptDiscount', 'ItemCouponCredit', 'ItemPromoDiscount', 'ItemFreeFills', 'ItemSlottingFees', 'ItemAdjAdvertising', 'ItemAdjJointAdv']
+            itemSubAggsMap.ItemDiscount = [filter:[terms:[itemTypeEnumId:discountTypes]], aggs:[discountTotal:[sum:[field:'itemSaleTotal']]]]
+
+            // do the invoice item search
+            String itemIdx = org.moqui.impl.context.ElasticFacadeImpl.ddIdToEsIndex((String) itemDocumentType)
+            Map itemResultMap = elasticClient.search(itemIdx, [query:queryMap, aggs:itemAggsMap])
+            Map itemAggregationsMap = (Map) itemResultMap.aggregations
+
+            // make list for invoice details
+            Map<String, Map> invoiceTempMap = [:]
+            for (Map bucket in (List<Map>) invAggregationsMap.TopTerms.buckets) {
+                String customerClassId = (String) bucket.key
+                BigDecimal invoiceTotal = bucket.invoiceTotal?.value as BigDecimal
+                BigDecimal invoicePaymentsApplied = bucket.invoicePaymentsApplied?.value as BigDecimal
+                invoiceTempMap.put(customerClassId, [customerClassId:customerClassId, invoiceCount:bucket.doc_count as BigDecimal,
+                        invoiceTotal:invoiceTotal, invoicePaymentsApplied:invoicePaymentsApplied,
+                        paidPercent:(invoiceTotal ? (invoicePaymentsApplied/invoiceTotal) : 0.0)])
+            }
+
+            // prep the list from items first
+            invoicesTotal = [classDescription:"Total"]
+            for (Map bucket in (List<Map>) itemAggregationsMap.TopTerms.buckets) {
+                String customerClassId = (String) bucket.key
+                Map invoiceTemp = invoiceTempMap.get(customerClassId)
+                if (!invoiceTemp) { invoiceTemp = [customerClassId:customerClassId]; invoiceTempMap.put(customerClassId, invoiceTemp) }
+                def prodAgg = bucket.ItemProduct
+                def discAgg = bucket.ItemDiscount
+                BigDecimal invoiceIdCount = bucket.invoiceIdCount?.value as BigDecimal
+                BigDecimal invoiceCount = (BigDecimal) invoiceTemp?.invoiceCount ?: invoiceIdCount
+                BigDecimal productSaleTotal = prodAgg.productSaleTotal?.value as BigDecimal
+                BigDecimal productIssuedTotal = prodAgg.productIssuedTotal?.value as BigDecimal
+                BigDecimal productCostTotal = prodAgg.productCostTotal?.value as BigDecimal
+                BigDecimal discountTotal = discAgg.discountTotal?.value as BigDecimal
+                Map curLine = [invoiceCount:invoiceCount, invoiceIdCount:invoiceIdCount,
+                        totalSales:bucket.totalSales?.value as BigDecimal,
+                        productSaleTotal:productSaleTotal, productIssuedTotal:productIssuedTotal, productCostTotal:productCostTotal,
+                        productQuantityTotal:prodAgg.productQuantityTotal?.value as BigDecimal,
+                        discountTotal:discountTotal, netSales:(productSaleTotal + discountTotal),
+                        discountPercent:(productSaleTotal ? (-discountTotal/productSaleTotal) : 0.0),
+                        costPercent:(productIssuedTotal ? (productCostTotal/productIssuedTotal) : 0.0)]
+                invoiceTemp.putAll(curLine)
+                addBigDecimalsInMap(invoicesTotal, invoiceTemp)
+            }
+
+            topCustomerClassList = new ArrayList(invoiceTempMap.values())
+            orderMapList(topCustomerClassList, [orderByField])
+            for (Map classLine in topCustomerClassList) {
+                String customerClassId = classLine.customerClassId
+                classLine.classDescription = ec.entity.find("mantle.party.PartyClassification").condition("partyClassificationId", customerClassId)
+                        .one()?.get("description")
+            }
+
+            invoicesTotal.paidPercent = null
+            invoicesTotal.discountPercent = null
+            invoicesTotal.costPercent = null
+
+            topCustomerClassList.add(invoicesTotal)
+        ]]></script></actions>
+    </service>
+</services>

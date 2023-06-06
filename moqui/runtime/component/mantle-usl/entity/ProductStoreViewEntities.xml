@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.product.store -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="ProductStoreShipOptionDetail" package="mantle.product.store">
+        <member-entity entity-alias="PSSO" entity-name="mantle.product.store.ProductStoreShipOption"/>
+        <member-entity entity-alias="CSM" entity-name="mantle.shipment.carrier.CarrierShipmentMethod" join-from-alias="PSSO">
+            <key-map field-name="carrierPartyId"/><key-map field-name="shipmentMethodEnumId"/></member-entity>
+        <member-relationship entity-alias="CPTY" join-from-alias="CSM" relationship="carrierParty"/>
+        <member-relationship entity-alias="SME" join-from-alias="CSM" relationship="shipmentMethodEnum"/>
+        <alias-all entity-alias="PSSO"/>
+        <alias-all entity-alias="CSM"><exclude field="sequenceNum"/></alias-all>
+        <alias name="carrierPartyPartyId" entity-alias="CPTY" field="partyId"/>
+        <alias name="carrierPseudoId" entity-alias="CPTY" field="pseudoId"/>
+        <alias name="carrierOwnerPartyId" entity-alias="CPTY" field="ownerPartyId"/>
+        <alias name="shipmentMethodEnumEnumId" entity-alias="SME" field="enumId"/>
+        <alias name="shipmentMethodDescription" entity-alias="SME" field="description"/>
+    </view-entity>
+    <view-entity entity-name="ProductStoreSettingLookup" package="mantle.product.store">
+        <member-entity entity-alias="PSS" entity-name="mantle.product.store.ProductStoreSetting"/>
+        <member-entity entity-alias="OHDR" entity-name="mantle.order.OrderHeader" join-from-alias="PSS" join-optional="true">
+            <key-map field-name="productStoreId"/></member-entity>
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource" join-from-alias="OHDR" join-optional="true">
+            <key-map field-name="orderId"/></member-entity>
+        <alias-all entity-alias="PSS"/>
+        <alias name="orderId" entity-alias="OHDR"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+    </view-entity>
+
+    <view-entity entity-name="ProductStorePromoProductDetail" package="mantle.product.store">
+        <member-entity entity-alias="PSPP" entity-name="mantle.product.store.ProductStorePromoProduct"/>
+        <member-relationship entity-alias="PROD" join-from-alias="PSPP" relationship="product"/>
+        <alias-all entity-alias="PSPP"/>
+        <alias-all entity-alias="PROD"/>
+    </view-entity>
+
+    <view-entity entity-name="OrderPromoCodeDetail" package="mantle.product.store">
+        <member-entity entity-alias="OPC" entity-name="mantle.order.OrderPromoCode"/>
+        <member-relationship entity-alias="PSPC" join-from-alias="OPC" relationship="storePromoCode"/>
+        <member-relationship entity-alias="PSP" join-from-alias="PSPC" relationship="storePromotion"/>
+        <alias name="orderId" entity-alias="OPC"/>
+        <alias name="promoCodeId" entity-alias="OPC"/>
+        <alias name="promoCode" entity-alias="PSPC"/>
+        <alias name="storePromotionId" entity-alias="PSPC"/>
+        <alias name="fromDate" entity-alias="PSPC"/>
+        <alias name="thruDate" entity-alias="PSPC"/>
+        <alias name="promoFromDate" field="fromDate" entity-alias="PSP"/>
+        <alias name="promoThruDate" field="thruDate" entity-alias="PSP"/>
+        <alias name="itemDescription" entity-alias="PSP"/>
+        <alias name="productStoreId" entity-alias="PSP"/>
+    </view-entity>
+    <view-entity entity-name="PartyPromoCodeDetail" package="mantle.product.store">
+        <member-entity entity-alias="PSPCP" entity-name="mantle.product.store.ProductStorePromoCodeParty"/>
+        <member-relationship entity-alias="PSPC" join-from-alias="PSPCP" relationship="storePromoCode"/>
+        <member-relationship entity-alias="PSP" join-from-alias="PSPC" relationship="storePromotion"/>
+        <alias name="partyId" entity-alias="PSPCP"/>
+        <alias name="promoCodeId" entity-alias="PSPCP"/>
+        <alias name="promoCode" entity-alias="PSPC"/>
+        <alias name="storePromotionId" entity-alias="PSPC"/>
+        <alias name="fromDate" entity-alias="PSPC"/>
+        <alias name="thruDate" entity-alias="PSPC"/>
+        <alias name="promoFromDate" field="fromDate" entity-alias="PSP"/>
+        <alias name="promoThruDate" field="thruDate" entity-alias="PSP"/>
+        <alias name="itemDescription" entity-alias="PSP"/>
+        <alias name="productStoreId" entity-alias="PSP"/>
+    </view-entity>
+</entities>

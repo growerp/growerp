@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.product.asset -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="AssetAndDetail" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASD"><exclude field="productId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetAndDetailSummary" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="availableToPromiseTotal"/><exclude field="quantityOnHandTotal"/></alias-all>
+        <alias-all entity-alias="ASD"><exclude field="productId"/></alias-all>
+        <alias entity-alias="ASD" name="availableToPromiseTotal" field="availableToPromiseDiff" function="sum"/>
+        <alias entity-alias="ASD" name="quantityOnHandTotal" field="quantityOnHandDiff" function="sum"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+    </view-entity>
+    <view-entity entity-name="AssetDetailSummary" package="mantle.product.asset">
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail"/>
+        <alias entity-alias="ASD" name="assetId"/>
+        <alias entity-alias="ASD" name="effectiveDate"/>
+        <alias entity-alias="ASD" name="availableToPromiseTotal" field="availableToPromiseDiff" function="sum"/>
+        <alias entity-alias="ASD" name="quantityOnHandTotal" field="quantityOnHandDiff" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="AssetValuationSummary" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PRD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASD"><exclude field="productId"/><exclude field="availableToPromiseDiff"/>
+            <exclude field="quantityOnHandDiff"/></alias-all>
+        <alias entity-alias="ASD" name="availableToPromiseDiff" function="sum"/>
+        <alias entity-alias="ASD" name="quantityOnHandDiff" function="sum"/>
+        <alias entity-alias="PRD" name="pseudoId"/>
+        <alias entity-alias="PRD" name="productName"/>
+        <alias entity-alias="ALOT" name="mfgPartyId"/>
+        <alias entity-alias="ALOT" name="lotNumber"/>
+        <alias name="totalCost" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASD" field="quantityOnHandDiff"/>
+            <complex-alias-field entity-alias="AST" field="acquireCost"/>
+        </complex-alias></alias>
+        <alias name="minAcquireCost" entity-alias="AST" field="acquireCost" function="min"/>
+        <alias name="maxAcquireCost" entity-alias="AST" field="acquireCost" function="max"/>
+    </view-entity>
+    <view-entity entity-name="AssetOnHandSummary" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PRD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASD"><exclude field="productId"/><exclude field="availableToPromiseDiff"/></alias-all>
+        <alias entity-alias="PRD" name="pseudoId"/>
+        <alias entity-alias="PRD" name="productName"/>
+        <alias name="startingOnHand" function="sum">
+            <!-- use DB time zone instead of default (current user) -->
+            <case><when expression="ASD.EFFECTIVE_DATE &lt; '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="onHandChange" function="sum">
+            <case><when expression="ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="receiptsReturns" function="sum">
+            <case><when expression="ASD.ASSET_RECEIPT_ID IS NOT NULL AND ASD.RETURN_ID IS NOT NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="receiptsShipmentNotReturn" function="sum">
+            <case><when expression="ASD.ASSET_RECEIPT_ID IS NOT NULL AND ASD.SHIPMENT_ID IS NOT NULL AND ASD.RETURN_ID IS NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="receiptsWorkEffort" function="sum">
+            <case><when expression="ASD.ASSET_RECEIPT_ID IS NOT NULL AND ASD.WORK_EFFORT_ID IS NOT NULL AND ASD.SHIPMENT_ID IS NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="receiptsOther" function="sum">
+            <case><when expression="ASD.ASSET_RECEIPT_ID IS NOT NULL AND ASD.RETURN_ID IS NULL AND ASD.SHIPMENT_ID IS NULL AND ASD.WORK_EFFORT_ID IS NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="receiptsAll" function="sum">
+            <case><when expression="ASD.ASSET_RECEIPT_ID IS NOT NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="issuancesShipments" function="sum">
+            <case><when expression="ASD.ASSET_ISSUANCE_ID IS NOT NULL AND ASD.SHIPMENT_ID IS NOT NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="issuancesWorkEffort" function="sum">
+            <case><when expression="ASD.ASSET_ISSUANCE_ID IS NOT NULL AND ASD.WORK_EFFORT_ID IS NOT NULL AND ASD.SHIPMENT_ID IS NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="issuancesOther" function="sum">
+            <case><when expression="ASD.ASSET_ISSUANCE_ID IS NOT NULL AND ASD.SHIPMENT_ID IS NULL AND ASD.WORK_EFFORT_ID IS NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="issuancesAll" function="sum">
+            <case><when expression="ASD.ASSET_ISSUANCE_ID IS NOT NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="physicalAdjustments" function="sum">
+            <case><when expression="ASD.PHYSICAL_INVENTORY_ID IS NOT NULL AND ASD.EFFECTIVE_DATE BETWEEN '${ec.l10n.format(fromDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}' AND '${ec.l10n.format(thruDate, 'yyyy-MM-dd HH:mm:ss', null, ec.entity.databaseTimeZone)}'">
+                <complex-alias expression="ASD.QUANTITY_ON_HAND_DIFF"/></when><else><complex-alias expression="0"/></else></case>
+        </alias>
+    </view-entity>
+    <view-entity entity-name="AssetOnHandDetail" package="mantle.product.asset">
+        <member-entity entity-alias="ASD" entity-name="mantle.product.asset.AssetDetail"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASD">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="AISS" entity-name="mantle.product.issuance.AssetIssuance" join-from-alias="ASD" join-optional="true">
+            <key-map field-name="assetIssuanceId"/></member-entity>
+        <member-entity entity-alias="AREC" entity-name="mantle.product.receipt.AssetReceipt" join-from-alias="ASD" join-optional="true">
+            <key-map field-name="assetReceiptId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASD"><exclude field="productId"/></alias-all>
+        <alias entity-alias="AISS" name="issOrderId" field="orderId"/>
+        <alias entity-alias="AISS" name="issInvoiceId" field="invoiceId"/>
+        <alias entity-alias="AREC" name="recOrderId" field="orderId"/>
+        <alias entity-alias="AREC" name="recInvoiceId" field="invoiceId"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetAndProduct" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="productClassEnumId"/>
+    </view-entity>
+    <view-entity entity-name="AssetFindView" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FAC" entity-name="mantle.facility.Facility" join-from-alias="AST">
+            <key-map field-name="facilityId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ORFAC" entity-name="mantle.facility.Facility" join-from-alias="AST" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <member-relationship entity-alias="AOITM" join-from-alias="AST" relationship="acquireOrderItem" join-optional="true"/>
+        <alias-all entity-alias="AST"/>
+        <alias entity-alias="FAC" name="facilityName"/>
+        <alias entity-alias="FAC" name="facilityOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="productOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="ORFAC" name="originFacilityName" field="facilityName"/>
+        <alias entity-alias="ORFAC" name="originOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="ALOT" name="mfgPartyId"/>
+        <alias entity-alias="ALOT" name="lotNumber"/>
+        <alias entity-alias="ALOT" name="expirationDate"/>
+        <alias entity-alias="AOITM" name="acquireUnitAmount" field="unitAmount"/>
+    </view-entity>
+    <view-entity entity-name="AssetLocationDetail" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FCL" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="FCL"><exclude field="geoPointId"/><exclude field="capacity"/><exclude field="capacityUomId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetLocationSummary" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FCL" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="availableToPromiseTotal"/><exclude field="quantityOnHandTotal"/></alias-all>
+        <alias-all entity-alias="FCL"><exclude field="geoPointId"/><exclude field="capacity"/><exclude field="capacityUomId"/></alias-all>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="AssetLocationProductUomDetail" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FCL" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom" join-from-alias="PROD" join-optional="true">
+            <key-map field-name="amountUomId" related="uomId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="FCL"><exclude field="geoPointId"/><exclude field="capacity"/>
+            <exclude field="capacityUomId"/></alias-all>
+        <alias name="pseudoId" entity-alias="PROD"/>
+        <alias name="productName" entity-alias="PROD"/>
+        <alias name="productTypeEnumId" entity-alias="PROD"/>
+        <alias name="productClassEnumId" entity-alias="PROD"/>
+        <alias name="amountUomId" entity-alias="PROD"/>
+        <alias name="amountFixed" entity-alias="PROD"/>
+        <alias name="uomTypeEnumId" entity-alias="UOM"/>
+        <alias name="uomAbbreviation" field="abbreviation" entity-alias="UOM"/>
+        <alias name="uomDescription" field="description" entity-alias="UOM"/>
+    </view-entity>
+    <view-entity entity-name="AssetLocationOriginDetail" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FCL" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <member-entity entity-alias="ORFAC" entity-name="mantle.facility.Facility" join-from-alias="AST" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="OOPTY" entity-name="mantle.party.Party" join-from-alias="ORFAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="FCL"><exclude field="geoPointId"/><exclude field="capacity"/>
+            <exclude field="capacityUomId"/></alias-all>
+        <alias entity-alias="ORFAC" name="originFacilityName" field="facilityName"/>
+        <alias entity-alias="ORFAC" name="originOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="OOPTY" name="originOwnerPseudoId" field="pseudoId"/>
+    </view-entity>
+    <view-entity entity-name="AssetLocationOriginProductUomDetail" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="FCL" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <member-entity entity-alias="ORFAC" entity-name="mantle.facility.Facility" join-from-alias="AST" join-optional="true">
+            <key-map field-name="originFacilityId" related="facilityId"/></member-entity>
+        <member-entity entity-alias="OOPTY" entity-name="mantle.party.Party" join-from-alias="ORFAC" join-optional="true">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom" join-from-alias="PROD" join-optional="true">
+            <key-map field-name="amountUomId" related="uomId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="FCL"><exclude field="geoPointId"/><exclude field="capacity"/>
+            <exclude field="capacityUomId"/></alias-all>
+        <alias entity-alias="ORFAC" name="originFacilityName" field="facilityName"/>
+        <alias entity-alias="ORFAC" name="originOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="OOPTY" name="originOwnerPseudoId" field="pseudoId"/>
+        <alias name="pseudoId" entity-alias="PROD"/>
+        <alias name="productName" entity-alias="PROD"/>
+        <alias name="productTypeEnumId" entity-alias="PROD"/>
+        <alias name="productClassEnumId" entity-alias="PROD"/>
+        <alias name="amountUomId" entity-alias="PROD"/>
+        <alias name="amountFixed" entity-alias="PROD"/>
+        <alias name="uomTypeEnumId" entity-alias="UOM"/>
+        <alias name="uomAbbreviation" field="abbreviation" entity-alias="UOM"/>
+        <alias name="uomDescription" field="description" entity-alias="UOM"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetSummaryView" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="originalQuantity"/><exclude field="receivedDate"/><exclude field="manufacturedDate"/>
+            <exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="originalQuantity" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="prodOwnerPartyId" field="ownerPartyId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="productAssetTypeEnumId" field="assetTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetClassEnumId"/>
+    </view-entity>
+    <view-entity entity-name="AssetQuantitySummary" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="originalQuantity"/></alias-all>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="originalQuantity" entity-alias="AST" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="AssetLotSummary" package="mantle.product.asset">
+        <description>Used to find total ATP/QOH by lotId with various Asset and Lot based constraints, etc</description>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST">
+            <key-map field-name="lotId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="originalQuantity"/><exclude field="receivedDate"/><exclude field="manufacturedDate"/>
+            <exclude field="expectedEndOfLife"/></alias-all>
+        <alias-all entity-alias="ALOT"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="originalQuantity" entity-alias="AST" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="AssetLotAndMfgParty" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <member-entity entity-alias="MFGP" entity-name="mantle.party.Party" join-from-alias="ALOT" join-optional="true">
+            <key-map field-name="mfgPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="manufacturedDate"/></alias-all>
+        <alias-all entity-alias="ALOT"><exclude field="mfgPartyId"/></alias-all>
+        <alias name="pseudoId" entity-alias="MFGP"/>
+        <alias name="mfgPartyId" entity-alias="MFGP" field="partyId"/>
+        <alias name="mfgOwnerPartyId" entity-alias="MFGP" field="ownerPartyId"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetSummaryCategoryFeatureView" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PCM" entity-name="mantle.product.category.ProductCategoryMember" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA1" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA2" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA3" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="receivedDate"/><exclude field="manufacturedDate"/><exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PCM" name="productCategoryId"/>
+        <alias entity-alias="PFA1" name="productFeatureId1" field="productFeatureId"/>
+        <alias entity-alias="PFA2" name="productFeatureId2" field="productFeatureId"/>
+        <alias entity-alias="PFA3" name="productFeatureId3" field="productFeatureId"/>
+    </view-entity>
+    <view-entity entity-name="AssetReceiptSummaryCategoryFeatureView" package="mantle.product.asset">
+        <member-entity entity-alias="ASRCT" entity-name="mantle.product.receipt.AssetReceipt"/>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="ASRCT">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PCM" entity-name="mantle.product.category.ProductCategoryMember" join-from-alias="ASRCT">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA1" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="ASRCT">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA2" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="ASRCT">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="PFA3" entity-name="mantle.product.feature.ProductFeatureAppl" join-from-alias="ASRCT">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASRCT">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="ASRCT"><exclude field="quantityAccepted"/></alias-all>
+        <alias name="quantityAccepted" entity-alias="ASRCT" function="sum"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetClassEnumId"/>
+        <alias entity-alias="PCM" name="productCategoryId"/>
+        <alias entity-alias="PFA1" name="productFeatureId1" field="productFeatureId"/>
+        <alias entity-alias="PFA2" name="productFeatureId2" field="productFeatureId"/>
+        <alias entity-alias="PFA3" name="productFeatureId3" field="productFeatureId"/>
+        <alias entity-alias="AST" name="ownerPartyId"/>
+        <alias entity-alias="AST" name="facilityId"/>
+    </view-entity>
+    <view-entity entity-name="ContainerAndAsset" package="mantle.product.asset">
+        <member-entity entity-alias="CNTR" entity-name="mantle.product.asset.Container"/>
+        <member-entity entity-alias="ASST" entity-name="mantle.product.asset.Asset" join-from-alias="CNTR" join-optional="true">
+            <key-map field-name="containerId"/></member-entity>
+        <alias-all entity-alias="CNTR"/>
+        <alias entity-alias="ASST" name="assetId"/>
+        <alias entity-alias="ASST" name="assetTypeEnumId"/>
+        <alias entity-alias="ASST" name="statusId"/>
+        <alias entity-alias="ASST" name="productId"/>
+        <alias entity-alias="ASST" name="availableToPromiseTotal"/>
+        <alias entity-alias="ASST" name="quantityOnHandTotal"/>
+    </view-entity>
+    <view-entity entity-name="LotAndMfgParty" package="mantle.product.asset">
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot"/>
+        <member-entity entity-alias="MFGP" entity-name="mantle.party.Party" join-from-alias="ALOT" join-optional="true">
+            <key-map field-name="mfgPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="ALOT"/>
+        <alias name="pseudoId" entity-alias="MFGP"/>
+        <alias name="mfgOwnerPartyId" entity-alias="MFGP" field="ownerPartyId"/>
+    </view-entity>
+    <view-entity entity-name="AssetAndGlAppl" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="AGLA" entity-name="mantle.product.asset.AssetGlAppl" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="AGLA"/>
+    </view-entity>
+    <view-entity entity-name="AssetGlApplAccountOrg" package="mantle.product.asset">
+        <member-entity entity-alias="GLACT" entity-name="mantle.ledger.account.GlAccount"/>
+        <member-entity entity-alias="GLAO" entity-name="mantle.ledger.account.GlAccountOrganization" join-from-alias="GLACT">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="AGLA" entity-name="mantle.product.asset.AssetGlAppl" join-from-alias="GLACT" join-optional="true">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="PGLA" entity-name="mantle.product.ProductGlAppl" join-from-alias="GLACT" join-optional="true">
+            <key-map field-name="glAccountId"/></member-entity>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="AGLA">
+            <entity-condition><econditions combine="or">
+                <econdition entity-alias="AGLA" field-name="assetId" to-entity-alias="AST" to-field-name="assetId"/>
+                <econdition entity-alias="PGLA" field-name="productId" to-entity-alias="AST" to-field-name="productId"/>
+            </econditions></entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST" join-optional="true">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="GLACT"><exclude field="productId"/></alias-all>
+        <alias-all entity-alias="GLAO"/>
+        <alias-all entity-alias="AST"/>
+        <alias entity-alias="AGLA" name="joinAssetId" field="assetId"/>
+        <alias entity-alias="PGLA" name="joinProductId" field="productId"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetAndPool" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-relationship entity-alias="ASP" join-from-alias="AST" relationship="pool"/>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASP"><exclude field="ownerPartyId"/></alias-all>
+        <alias name="poolOwnerPartyId" entity-alias="ASP" field="ownerPartyId"/>
+    </view-entity>
+    <view-entity entity-name="AssetPoolDetail" package="mantle.product.asset">
+        <member-entity entity-alias="ASP" entity-name="mantle.product.asset.AssetPool"/>
+        <member-relationship entity-alias="ASPP" join-from-alias="ASP" relationship="poolParties"/>
+        <member-relationship entity-alias="ASPS" join-from-alias="ASP" relationship="poolStores"/>
+        <alias-all entity-alias="ASP"/>
+        <alias-all entity-alias="ASPP"/>
+        <alias-all entity-alias="ASPS"/>
+    </view-entity>
+    <view-entity entity-name="AssetPoolPartyDetail" package="mantle.product.asset">
+        <member-entity entity-alias="ASPP" entity-name="mantle.product.asset.AssetPoolParty"/>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="ASPP">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="RTP" entity-name="mantle.party.RoleType" join-from-alias="ASPP" join-optional="true">
+            <key-map field-name="roleTypeId"/></member-entity>
+        <alias-all entity-alias="ASPP"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias name="roleDescription" entity-alias="RTP" field="description"/>
+    </view-entity>
+    <view-entity entity-name="AssetPoolStoreDetail" package="mantle.product.asset">
+        <member-entity entity-alias="ASPS" entity-name="mantle.product.asset.AssetPoolStore"/>
+        <member-entity entity-alias="PDST" entity-name="mantle.product.store.ProductStore" join-from-alias="ASPS">
+            <key-map field-name="productStoreId"/></member-entity>
+        <alias-all entity-alias="ASPS"/>
+        <alias-all entity-alias="PDST"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.product.issuance -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="AssetIssuanceSummary" package="mantle.product.issuance">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <alias-all entity-alias="ASI"><exclude field="quantity"/><exclude field="quantityCancelled"/>
+            <exclude field="issuedDate"/><exclude field="facilityId"/></alias-all>
+        <alias name="quantity" entity-alias="ASI" function="sum"/>
+        <alias name="quantityCancelled" entity-alias="ASI" function="sum"/>
+        <alias name="issuedDate" entity-alias="ASI" function="max"/>
+    </view-entity>
+    <view-entity entity-name="AssetAndIssuance" package="mantle.product.issuance">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="facilityId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetAndIssuanceCost" package="mantle.product.issuance">
+        <description>This is used as a sub-select as a member of the OrderItemSalesSummary and InvoiceItemSalesSummary view entities, may be useful for other finds as well</description>
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="ASI"><exclude field="quantity"/><exclude field="productId"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"/>
+        <alias name="quantity" entity-alias="ASI" function="sum"/>
+        <alias name="averageCost" entity-alias="AST" field="acquireCost" function="avg"/>
+        <alias name="issuanceCost" function="sum" type="number-decimal"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASI" field="quantity"/>
+            <complex-alias-field entity-alias="AST" field="acquireCost"/>
+        </complex-alias></alias>
+    </view-entity>
+    <view-entity entity-name="AssetIssuanceDetail" package="mantle.product.issuance">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="PROD"><exclude field="statusId"/><exclude field="comments"/>
+            <exclude field="assetTypeEnumId"/><exclude field="ownerPartyId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetIssuanceOriginFacilityAndOwnerDetail" package="mantle.product.issuance">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="OFAC" entity-name="mantle.facility.Facility" join-from-alias="AST" join-optional="true">
+            <key-map field-name="originFacilityId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="OFAC" join-optional="true">
+            <key-map field-name="ownerPartyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="PROD"><exclude field="statusId"/><exclude field="comments"/>
+            <exclude field="assetTypeEnumId"/><exclude field="ownerPartyId"/></alias-all>
+        <alias-all entity-alias="OFAC" prefix="originFacility"/>
+        <alias-all entity-alias="PTY" prefix="originFacilityOwner"/>
+        <alias-all entity-alias="PER" prefix="originFacilityOwner"/>
+        <alias-all entity-alias="ORG" prefix="originFacilityOwner"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetAndIssuanceSummary" package="mantle.product.issuance">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem" join-from-alias="ASI" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="quantity"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="receivedDate"/><exclude field="manufacturedDate"/><exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantity" entity-alias="ASI" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+    </view-entity>
+    <view-entity entity-name="AssetIssuanceOriginSummary" package="mantle.product.issuance">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="OFAC" entity-name="mantle.facility.Facility" join-from-alias="AST" join-optional="true">
+            <key-map field-name="originFacilityId"/></member-entity>
+        <alias-all entity-alias="ASI"><exclude field="quantity"/><exclude field="quantityCancelled"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="availableToPromiseTotal"/><exclude field="quantityOnHandTotal"/>
+            <exclude field="originalQuantity"/></alias-all>
+        <alias-all entity-alias="PROD"><exclude field="statusId"/><exclude field="comments"/>
+            <exclude field="originGeoId"/><exclude field="assetTypeEnumId"/><exclude field="ownerPartyId"/></alias-all>
+        <alias-all entity-alias="OFAC" prefix="origin"><exclude field="facilityId"/></alias-all>
+        <alias entity-alias="ASI" name="quantity" function="sum"/>
+        <alias entity-alias="ASI" name="quantityCancelled" function="sum"/>
+        <alias entity-alias="AST" name="availableToPromiseTotal" function="sum"/>
+        <alias entity-alias="AST" name="quantityOnHandTotal" function="sum"/>
+        <alias entity-alias="AST" name="originalQuantity" function="sum"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetAndReservation" package="mantle.product.issuance">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.issuance.AssetReservation"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASR">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="ASR"/>
+        <alias-all entity-alias="AST"><exclude field="productId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetAndReservationSummary" package="mantle.product.issuance">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.issuance.AssetReservation"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASR">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="FLOC" entity-name="mantle.facility.FacilityLocation" join-from-alias="AST" join-optional="true">
+            <key-map field-name="facilityId"/><key-map field-name="locationSeqId"/></member-entity>
+        <member-entity entity-alias="OITM" entity-name="mantle.order.OrderItem" join-from-alias="ASR" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <member-entity entity-alias="SIS" entity-name="mantle.shipment.ShipmentItemSource" join-from-alias="ASR" join-optional="true">
+            <key-map field-name="orderId"/><key-map field-name="orderItemSeqId"/></member-entity>
+        <alias-all entity-alias="ASR"><exclude field="productId"/><exclude field="quantity"/>
+            <exclude field="quantityNotAvailable"/><exclude field="quantityNotIssued"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="availableToPromiseTotal"/><exclude field="quantityOnHandTotal"/></alias-all>
+        <alias-all entity-alias="FLOC"><exclude field="geoPointId"/><exclude field="capacity"/><exclude field="capacityUomId"/>
+            <exclude field="sequenceNum"/></alias-all>
+        <alias name="orderPartSeqId" entity-alias="OITM"/>
+        <alias name="shipmentId" entity-alias="SIS"/>
+        <alias name="quantity" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotAvailable" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotIssued" entity-alias="ASR" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="reservationCount" entity-alias="ASR" field="assetReservationId" function="count" type="number-integer"/>
+    </view-entity>
+    <view-entity entity-name="AssetReservationSummary" package="mantle.product.issuance">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.issuance.AssetReservation"/>
+        <alias-all entity-alias="ASR"><exclude field="quantity"/><exclude field="quantityNotAvailable"/>
+            <exclude field="quantityNotIssued"/></alias-all>
+        <alias name="quantity" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotAvailable" entity-alias="ASR" function="sum"/>
+        <alias name="quantityNotIssued" entity-alias="ASR" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="AssetIssuanceLotSummary" package="mantle.product.issuance">
+        <description>Find AssetIssuance with Lot and Shipment fields available for constraints/etc, such as finding lot dates on
+            most recent shipment for a customer.</description>
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="SHP" entity-name="mantle.shipment.Shipment" join-from-alias="ASI">
+            <key-map field-name="shipmentId"/></member-entity>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <alias-all entity-alias="ALOT"/>
+        <alias name="productId" entity-alias="ASI"/>
+        <alias name="issuedDate" entity-alias="ASI"/>
+        <alias name="expectedEndOfLife" entity-alias="AST"/>
+        <alias name="fromPartyId" entity-alias="SHP"/>
+        <alias name="toPartyId" entity-alias="SHP"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.product.receipt -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="AssetReceiptSummary" package="mantle.product.receipt">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.receipt.AssetReceipt"/>
+        <alias-all entity-alias="ASR"><exclude field="quantityAccepted"/><exclude field="quantityRejected"/>
+            <exclude field="receivedDate"/></alias-all>
+        <alias name="quantityAccepted" entity-alias="ASR" function="sum"/>
+        <alias name="quantityRejected" entity-alias="ASR" function="sum"/>
+        <alias name="receivedDate" entity-alias="ASR" function="max"/>
+    </view-entity>
+    <view-entity entity-name="AssetAndReceipt" package="mantle.product.asset">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASR" entity-name="mantle.product.receipt.AssetReceipt" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <alias-all entity-alias="AST"/>
+        <alias-all entity-alias="ASR"><exclude field="productId"/><exclude field="receivedDate"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetReceiptDetail" package="mantle.product.receipt">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.receipt.AssetReceipt"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASR">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="ASR">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="ASR"><exclude field="productId"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="receivedDate"/></alias-all>
+        <alias-all entity-alias="PROD"><exclude field="statusId"/><exclude field="comments"/>
+            <exclude field="assetTypeEnumId"/><exclude field="ownerPartyId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="AssetAndReceiptSummary" package="mantle.product.receipt">
+        <member-entity entity-alias="ASR" entity-name="mantle.product.receipt.AssetReceipt"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASR">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="ASR">
+            <key-map field-name="productId"/></member-entity>
+        <alias-all entity-alias="ASR"><exclude field="productId"/><exclude field="quantityAccepted"/>
+            <exclude field="quantityRejected"/><exclude field="receivedDate"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="originalQuantity"/>
+            <exclude field="receivedDate"/><exclude field="manufacturedDate"/><exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantityAccepted" entity-alias="ASR" function="sum"/>
+        <alias name="quantityRejected" entity-alias="ASR" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="originalQuantity" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.product.maintenance -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="ProductMaintenanceDetail" package="mantle.product.maintenance">
+        <member-entity entity-alias="PDM" entity-name="mantle.product.maintenance.ProductMaintenance"/>
+        <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom" join-from-alias="PDM">
+            <key-map field-name="intervalUomId"/></member-entity>
+        <member-entity entity-alias="PMTR" entity-name="mantle.product.maintenance.ProductMeter" join-from-alias="PDM">
+            <key-map field-name="intervalProductMeterId"/></member-entity>
+        <member-entity entity-alias="PMUOM" entity-name="moqui.basic.Uom" join-from-alias="PMTR">
+            <key-map field-name="meterUomId"/></member-entity>
+        <member-entity entity-alias="MTENM" entity-name="moqui.basic.Enumeration" join-from-alias="PDM">
+            <key-map field-name="maintenanceTypeEnumId"/></member-entity>
+        <alias-all entity-alias="PDM"/>
+        <alias name="uomDescription" entity-alias="UOM" field="description"/>
+        <alias name="meterUomDescription" entity-alias="PMUOM" field="description"/>
+        <alias name="maintTypeDescription" entity-alias="MTENM" field="description"/>
+    </view-entity>
+    <view-entity entity-name="ProductMeterAndUom" package="mantle.product.maintenance">
+        <member-entity entity-alias="PDM" entity-name="mantle.product.maintenance.ProductMeter"/>
+        <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom" join-from-alias="PDM">
+            <key-map field-name="meterUomId"/></member-entity>
+        <alias-all entity-alias="PDM"/>
+        <alias-all entity-alias="UOM"/>
+    </view-entity>
+
+    <view-entity entity-name="AssetAndPartyDetail" package="mantle.product.maintenance">
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"/>
+        <member-entity entity-alias="ASTP" entity-name="mantle.product.asset.AssetPartyAssignment" join-from-alias="AST">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="ASTP">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="ASTP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="ASTP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <member-entity entity-alias="USRACT" entity-name="moqui.security.UserAccount" join-from-alias="ASTP" join-optional="true">
+            <key-map field-name="partyId"/></member-entity>
+        <alias-all entity-alias="ASTP"/>
+        <alias-all entity-alias="AST"><exclude field="statusId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PTY"><exclude field="statusId"/><exclude field="ownerPartyId"/><exclude field="comments"/></alias-all>
+        <alias-all entity-alias="PER"/>
+        <alias-all entity-alias="ORG"/>
+        <alias name="username" entity-alias="USRACT"/>
+        <alias name="partyOwnerPartyId" entity-alias="PTY" field="ownerPartyId"/>
+    </view-entity>
+</entities>

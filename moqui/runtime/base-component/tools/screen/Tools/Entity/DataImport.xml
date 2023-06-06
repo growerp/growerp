@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-title="Import">
+
+    <transition name="load">
+        <actions><script><![CDATA[
+            org.moqui.entity.EntityDataLoader edl = ec.entity.makeDataLoader()
+            String source = ""
+            if (types || components) {
+                if (types) edl.dataTypes(new HashSet(Arrays.asList(types.split(","))))
+                if (components) edl.componentNameList(Arrays.asList(components.split(",")))
+                source = "Types: ${types?:'N/A'}, Components: ${components?:'N/A'}"
+            } else if (location) {
+                edl.location(location)
+                source = location
+            } else if (csvText) {
+                edl.csvText(csvText)
+                source = "CSV Text Box"
+            } else if (jsonText) {
+                edl.jsonText(jsonText)
+                source = "JSON Text Box"
+            } else if (xmlText) {
+                edl.xmlText(xmlText)
+                source = "XML Text Box"
+            } else {
+                ec.message.addMessage(ec.l10n.localize("No parameters specified, not loading data"))
+                return
+            }
+            if (timeout) edl.transactionTimeout(timeout as Integer)
+            if (dummyFks) edl.dummyFks(true)
+            if (useTryInsert) edl.useTryInsert(true)
+            if (hideNoActionFiles) edl.messageNoActionFiles(false)
+
+            if (checkOnly) {
+                // do nothing, checkOnly handled in screen actions before render
+            } else if (onlyCreate) {
+                edl.onlyCreate(true)
+                List<String> messages = new LinkedList<>()
+                long recordsLoaded = edl.load(messages)
+                ec.message.addMessage("Loaded ${recordsLoaded} records from [${source}]")
+                ec.web.session.setAttribute("DataImport.messages", messages)
+            } else {
+                List<String> messages = new LinkedList<>()
+                long recordsLoaded = edl.load(messages)
+                ec.message.addMessage("Loaded ${recordsLoaded} records from [${source}]")
+                ec.web.session.setAttribute("DataImport.messages", messages)
+            }
+        ]]></script></actions>
+        <conditional-response url="." save-parameters="true">
+            <condition><expression>checkOnly</expression></condition>
+            <parameter name="runCheck" value="true"/>
+        </conditional-response>
+        <default-response url="."/>
+    </transition>
+
+    <transition name="storeSelected">
+        <actions>
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                ExecutionContext ec = context.ec
+
+                int fieldsUpdated = 0
+                List rowOpList = rowOps?.split(',')
+                for (String rowOp in rowOpList) {
+                    byte[] rowOpBytes = Base64.getUrlDecoder().decode((String) rowOp)
+                    String rowOpJson = new String(rowOpBytes, 'UTF-8')
+                    Map rowOpMap = org.moqui.impl.context.ContextJavaUtil.jacksonMapper.readValue((String) rowOpJson, Map.class)
+                    if (!rowOpMap.pk) { ec.message.addMessage("No PK in row: ${rowOpJson}"); continue }
+
+                    def ed = ec.entityFacade.getEntityDefinition(rowOpMap.entity)
+                    if (ed == null) { ec.message.addMessage("Entity ${rowOpMap.entity} not found for row: ${rowOpJson}"); continue }
+
+                    if (rowOpMap.field) {
+                        Map valueMap = rowOpMap.pk + [(rowOpMap.field):rowOpMap.value]
+                        org.moqui.impl.service.runner.EntityAutoServiceRunner.storeEntity(ec, ed, valueMap, null, null)
+                        fieldsUpdated++
+                    } else if (rowOpMap.createValues) {
+                        Map valueMap = rowOpMap.createValues + rowOpMap.pk
+                        Map results = new HashMap()
+                        org.moqui.impl.service.runner.EntityAutoServiceRunner.createEntity(ec, ed, valueMap, results, null)
+                        if (results.size() > 0) ec.message.addMessage("Create entity ${rowOpMap.entity} PK ${rowOpMap.pk} was not complete, filled in values: ${results}", "warning")
+                        fieldsUpdated += (valueMap.size() - rowOpMap.pk.size())
+                    } else {
+                        // TODO: support create (at least for fields with complete PK)
+                        ec.message.addMessage("Row has no field or create values, not updating: ${rowOpJson}")
+                    }
+                }
+
+                ec.message.addMessage("Updated ${fieldsUpdated} fields")
+            ]]></script>
+        </actions>
+        <default-response url="." save-parameters="true">
+            <parameter name="rowOps" from="null"/></default-response>
+    </transition>
+
+    <actions>
+        <set field="pageSize" from="pageSize ?: '100'"/>
+        <script><![CDATA[
+            messages = ec.web.session.getAttribute('DataImport.messages')
+            if (messages) ec.web.session.removeAttribute('DataImport.messages')
+        ]]></script>
+    </actions>
+    <widgets>
+        <form-single name="ImportData" transition="load">
+            <field name="timeout"><default-field title="Timeout Seconds"><text-line size="5" default-value="60"/></default-field></field>
+            <field name="dummyFks"><default-field title=""><check><option key="true" text="Dummy FKs?"/></check></default-field></field>
+            <field name="useTryInsert"><default-field title=""><check><option key="true" text="Use Try Insert?"/></check></default-field></field>
+            <field name="hideNoActionFiles"><default-field title=""><check><option key="true" text="Hide No Action Files?"/></check></default-field></field>
+
+            <field name="types"><default-field tooltip="Comma Separated (from entity-facade-xml.@type)">
+                <text-line size="60"/></default-field></field>
+            <field name="components"><default-field tooltip="Component Names, Comma Separated">
+                <text-line size="60"/></default-field></field>
+
+            <field name="location"><default-field><text-line size="80"/></default-field></field>
+            <field name="xmlText"><default-field title="Text">
+                <text-area rows="5" cols="120" default-value="&lt;entity-facade-xml&gt;&lt;/entity-facade-xml&gt;"/>
+            </default-field></field>
+            <field name="jsonText"><default-field title="Text">
+                <text-area rows="5" cols="120" default-value=""/>
+            </default-field></field>
+            <field name="csvText"><default-field title="Text">
+                <text-area rows="5" cols="120" default-value=""/>
+            </default-field></field>
+
+            <field name="checkOnly"><default-field title="Check Data"><submit/></default-field></field>
+            <field name="onlyCreate"><default-field title="Import Data - Create Only">
+                <submit confirmation="Are you sure you want to load data, only creating missing records?"/></default-field></field>
+            <field name="importButton"><default-field title="Import Data - Create or Update">
+                <submit confirmation="Are you sure you want to load data, creating new and updating existing records? If in doubt, cancel this and double check."/></default-field></field>
+
+            <field-layout>
+                <field-ref name="timeout"/>
+                <field-row-big><field-ref name="dummyFks"/><field-ref name="useTryInsert"/><field-ref name="hideNoActionFiles"/></field-row-big>
+                <field-accordion>
+                    <field-group title="By Data Types"><field-ref name="types"/><field-ref name="components"/></field-group>
+                    <field-group title="Resource Location"><field-ref name="location"/></field-group>
+                    <field-group title="XML Text"><field-ref name="xmlText"/></field-group>
+                    <field-group title="JSON Text"><field-ref name="jsonText"/></field-group>
+                    <field-group title="CSV Text"><field-ref name="csvText"/></field-group>
+                </field-accordion>
+                <field-col-row><field-col md="4">
+                    <field-ref name="checkOnly"/>
+                </field-col><field-col md="4">
+                    <field-ref name="onlyCreate"/>
+                </field-col><field-col md="4">
+                    <field-ref name="importButton"/>
+                </field-col></field-col-row>
+            </field-layout>
+        </form-single>
+
+        <section-iterate name="MessageList" list="messages" entry="message"><widgets>
+            <label text="${(message_index+1).toString().padLeft(3,'0')}: ${message}" type="div"/>
+        </widgets></section-iterate>
+
+        <section name="CheckDiffSection" condition="runCheck == 'true'"><actions>
+            <script><![CDATA[
+                org.moqui.entity.EntityDataLoader edl = ec.entity.makeDataLoader()
+                String source = ""
+                if (types || components) {
+                    if (types) edl.dataTypes(new HashSet(Arrays.asList(types.split(","))))
+                    if (components) edl.componentNameList(Arrays.asList(components.split(",")))
+                    source = "Types: ${types?:'N/A'}, Components: ${components?:'N/A'}"
+                } else if (location) {
+                    edl.location(location)
+                    source = location
+                } else if (csvText) {
+                    edl.csvText(csvText)
+                    source = "CSV Text Box"
+                } else if (jsonText) {
+                    edl.jsonText(jsonText)
+                    source = "JSON Text Box"
+                } else if (xmlText) {
+                    edl.xmlText(xmlText)
+                    source = "XML Text Box"
+                } else {
+                    ec.message.addMessage(ec.l10n.localize("No parameters specified, not loading data"))
+                    return
+                }
+                if (hideNoActionFiles) edl.messageNoActionFiles(false)
+
+                messageList = new LinkedList<String>()
+                diffInfoList = new LinkedList<Map<String, Object>>()
+                fieldsChecked = edl.checkInfo(diffInfoList, messages)
+
+                orderMapList(diffInfoList, ['entity', 'pk', 'field'])
+                paginateList("diffInfoList", null, ec.context)
+            ]]></script>
+        </actions><widgets>
+            <section-iterate name="MessageList" list="messages" entry="message"><widgets>
+                <label text="${(message_index+1).toString().padLeft(3,'0')}: ${message}" type="div"/>
+            </widgets></section-iterate>
+
+            <form-list name="CheckDiffInfoList" list="diffInfoList" skip-form="true" show-page-size="true">
+                <row-actions>
+                    <if condition="notFound"><then>
+                        <!-- TODO: different handling when !pkComplete? creating records in that case will create duplicates, likely not desired! -->
+                        <set field="rowOpMap" from="[entity:entity, pk:pk, createValues:createValues]"/>
+                    </then><else>
+                        <set field="rowOpMap" from="[entity:entity, pk:pk, field:field, value:value]"/>
+                    </else></if>
+                    <set field="rowOpJson" from="org.moqui.impl.context.ContextJavaUtil.jacksonMapper.writeValueAsString(rowOpMap)"/>
+                    <set field="rowOp" from="Base64.getUrlEncoder().encodeToString(((String) rowOpJson).getBytes())"/>
+                </row-actions>
+                <row-selection id-field="rowOp" list-mode="true" parameter="rowOps">
+                    <action>
+                        <form-single name="CheckDiffStoreSelected" transition="storeSelected" pass-through-parameters="true">
+                            <field name="submitBtn"><default-field title="Update Fields to Check/File Value and Create Missing Records"><submit/></default-field></field>
+                            <field-layout><field-row-big><field-ref name="submitBtn"/></field-row-big></field-layout>
+                        </form-single>
+                    </action>
+                </row-selection>
+
+                <field name="entity"><default-field><display style="text-strong"/></default-field></field>
+                <field name="pk"><default-field title="Primary Key"><display style="${pkComplete ? '' : 'text-danger'}"/></default-field></field>
+                <field name="field"><default-field><display style="text-strong"/></default-field></field>
+                <field name="value"><default-field title="Check/File Value"><display/></default-field></field>
+                <field name="dbValue"><default-field><display/></default-field></field>
+                <field name="notFound"><default-field><display/></default-field></field>
+                <field name="pkComplete"><default-field><display style="${pkComplete ? '' : 'text-danger'}"/></default-field></field>
+                <field name="location"><default-field>
+                    <display text="${location.contains('/component/') ? location.substring(location.indexOf('/component/') + 11) : location}"/></default-field></field>
+                <columns>
+                    <column><field-ref name="entity"/><field-ref name="pk"/></column>
+                    <column><field-ref name="notFound"/><field-ref name="pkComplete"/></column>
+                    <column><field-ref name="field"/></column>
+                    <column><field-ref name="value"/><field-ref name="dbValue"/></column>
+                    <column><field-ref name="location"/></column>
+                </columns>
+            </form-list>
+        </widgets></section>
+    </widgets>
+</screen>

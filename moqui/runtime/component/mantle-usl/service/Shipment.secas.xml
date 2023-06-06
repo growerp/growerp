@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<secas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-eca-3.xsd">
+    <!-- Shipment Notices -->
+    <seca id="ShipmentShippedSendEmail" service="update#mantle.shipment.Shipment" when="tx-commit">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ShipShipped'</expression></condition>
+        <actions><service-call name="mantle.shipment.ShipmentServices.send#ShipmentStoreEmail"
+                in-map="[shipmentId:shipmentId, emailTypeEnumId:'PsetShipmentShipped']"/></actions>
+    </seca>
+    <seca id="ShipmentDeliveredSentEmail" service="update#mantle.shipment.Shipment" when="tx-commit">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'ShipDelivered'</expression></condition>
+        <actions><service-call name="mantle.shipment.ShipmentServices.send#ShipmentStoreEmail"
+                in-map="[shipmentId:shipmentId, emailTypeEnumId:'PsetShipmentDelivered']"/></actions>
+    </seca>
+
+    <!-- If all packages delivered set Shipment to delivered -->
+    <seca id="ShipmentPackageDeliveredCheckShipment" service="update#mantle.shipment.ShipmentPackageRouteSeg" when="post-service">
+        <condition><expression>trackingStatusEnumId == 'ShTsDelivered'</expression></condition>
+        <actions><service-call name="mantle.shipment.ShipmentServices.checkSet#ShipmentDeliveredByPackages"
+                in-map="[shipmentId:shipmentId]"/></actions>
+    </seca>
+</secas>

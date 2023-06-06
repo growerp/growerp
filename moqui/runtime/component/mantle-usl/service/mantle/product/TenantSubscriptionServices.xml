@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+
+<!--
+====================================================================================================================================
+====================================================================================================================================
+
+NOTE: these services are deprecated along with the multi-tenant functionality in Moqui,
+    left as a reference for future instance subscription services
+
+====================================================================================================================================
+====================================================================================================================================
+-->
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="init" noun="Tenant">
+        <implements service="mantle.product.SubscriptionServices.init#SubscriptionResource"/>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription" value-field="subscription" for-update="true"/>
+            <if condition="subscription.resourceInstanceId">
+                <return error="true" message="Subscription already associated with tenant ${subscription.resourceInstanceId}, cannot initialize"/></if>
+
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="sua">
+                <field-map field-name="partyId" from="subscription.subscriberPartyId"/></entity-find-one>
+
+            <!-- NOTE: use customer partyId for tenant ID, create account just like customer account for admin user -->
+            <set field="tenantId" from="subscription.subscriberPartyId"/>
+
+            <set field="curHost" from="ec.web?.getHostName(false) ?: 'localhost'"/>
+            <set field="hostName" from="tenantId + '.' + (curHost.contains('.') ? curHost.substring(0, curHost.indexOf('.')) : curHost)"/>
+            <set field="tenantMap" from="[tenantId:tenantId, hostName:hostName, tenantName:sua.userFullName]"/>
+            <set field="randomPassword" from="getRandomString(10) + 'a1!'"/>
+            <set field="userMap" from="[username:sua.username, userFullName:sua.userFullName,
+                    newPassword:randomPassword, newPasswordVerify:randomPassword,
+                    emailAddress:sua.emailAddress, currencyUomId:sua.currencyUomId, locale:sua.locale, timeZone:sua.timeZone]"/>
+
+            <service-call name="org.moqui.impl.TenantServices.provision#TenantDatabase" in-map="tenantMap + userMap + [waitForSetup:true]"/>
+
+            <log level="warn" message="TenantSubscriptionServices.init#Tenant after provision#TenantDatabase cur tenant ${ec.tenantId}, tx cache active ${ec.transaction.isTransactionCacheActive()}, tx ${ec.transaction.getTransactionManager().getTransaction()}"/>
+            <set field="subscription.resourceInstanceId" from="tenantId"/>
+            <entity-update value-field="subscription"/>
+            <!-- <log message="========== Init tenant ID ${provisionResult.tenantId}"/> -->
+        </actions>
+    </service>
+    <service verb="revoke" noun="TenantAccess">
+        <implements service="mantle.product.SubscriptionServices.revoke#SubscriptionResourceAccess"/>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription" value-field="subscription"/>
+            <if condition="!subscription.resourceInstanceId">
+                <return error="true" message="Cannot revoke tenant access, no Tenant ID set in resourceInstanceId"/></if>
+            <service-call name="org.moqui.impl.TenantServices.disable#Tenant" in-map="[tenantId:subscription.resourceInstanceId]"/>
+        </actions>
+    </service>
+    <service verb="restore" noun="TenantAccess">
+        <implements service="mantle.product.SubscriptionServices.restore#SubscriptionResourceAccess"/>
+        <actions>
+            <entity-find-one entity-name="mantle.product.subscription.Subscription" value-field="subscription"/>
+            <if condition="!subscription.resourceInstanceId">
+                <return error="true" message="Cannot restore tenant access, no Tenant ID set in resourceInstanceId"/></if>
+            <service-call name="org.moqui.impl.TenantServices.enable#Tenant" in-map="[tenantId:subscription.resourceInstanceId]"/>
+        </actions>
+    </service>
+    <service verb="destroy" noun="Tenant">
+        <implements service="mantle.product.SubscriptionServices.destroy#SubscriptionResource"/>
+        <actions>
+            <!-- TODO: implement this -->
+        </actions>
+    </service>
+</services>

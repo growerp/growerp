@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="Facility">
+        <in-parameters><parameter name="facilityId" required="true"/></in-parameters>
+        <out-parameters>
+            <auto-parameters entity-name="mantle.facility.Facility" include="nonpk"/>
+
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="longitude" type="BigDecimal"/>
+            <parameter name="latitude" type="BigDecimal"/>
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
+            <parameter name="emailAddress"/>
+
+            <parameter name="contactInfo" type="Map"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.facility.Facility" value-field="facility"/>
+            <service-call name="mantle.facility.ContactServices.get#FacilityContactInfo" out-map="contactInfo"
+                    in-map="[facilityId:facilityId, postalContactMechPurposeId:'PostalPrimary',
+                        telecomContactMechPurposeId:'PhonePrimary', emailContactMechPurposeId:'EmailPrimary',
+                        otherContactMechPurposeId:'WebUrlPrimary']"/>
+            <service-call name="mantle.facility.ContactServices.get#FacilityContactInfo" out-map="contactFaxOut"
+                    in-map="[facilityId:facilityId, telecomContactMechPurposeId:'PhoneFax']"/>
+            <script>
+                context.putAll(facility)
+                Map contactInfoMap = flattenNestedMap(contactInfo)
+                contactInfoMap.remove('description')
+                context.putAll(contactInfoMap)
+            </script>
+            <set field="emailAddress" from="contactInfo.emailAddress"/>
+        </actions>
+    </service>
+    <service verb="get" noun="FacilitiesByOwner">
+        <in-parameters>
+            <parameter name="ownerPartyId"/>
+            <parameter name="productStoreId"/>
+            <parameter name="facilityTypeEnumId"/>
+        </in-parameters>
+        <out-parameters><parameter name="resultList" type="List"/></out-parameters>
+        <actions>
+            <set field="resultList" from="[]"/>
+            <if condition="productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore"/>
+                <if condition="productStore?.inventoryFacilityId">
+                    <entity-find-one entity-name="mantle.facility.Facility" value-field="fac" cache="true">
+                        <field-map field-name="facilityId" from="productStore?.inventoryFacilityId"/></entity-find-one>
+                    <if condition="fac != null">
+                        <script>resultList.add([facilityId:fac.facilityId, label:ec.resource.expand('FacilityNameTemplate', '', fac)])</script>
+                    </if>
+                </if>
+            </if>
+            <if condition="ownerPartyId">
+                <set field="ownerPartyIdSet" from="new HashSet()"/>
+                <script>ownerPartyIdSet.add(ownerPartyId)</script>
+                <!-- look for parent org(s) if any, include facilities from parent org too -->
+                <entity-find entity-name="mantle.party.PartyRelationship" list="parentRelList" cache="true">
+                    <date-filter/>
+                    <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup"/>
+                    <econdition field-name="fromPartyId" from="ownerPartyId"/>
+                    <econdition field-name="toPartyId" operator="is-not-null"/>
+                </entity-find>
+                <script>if (parentRelList) ownerPartyIdSet.addAll(parentRelList*.toPartyId)</script>
+
+                <entity-find entity-name="mantle.facility.Facility" list="facList" cache="true">
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerPartyIdSet"/>
+                    <econdition field-name="facilityTypeEnumId" ignore-if-empty="true"/>
+                    <order-by field-name="facilityName"/>
+                </entity-find>
+            </if>
+            <script>
+                for (def fac in facList) resultList.add([facilityId:fac.facilityId, label:ec.resource.expand('FacilityNameTemplate', '', fac)])
+            </script>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Facility">
+        <in-parameters>
+            <parameter name="facilityId"/>
+            <auto-parameters entity-name="mantle.facility.Facility" include="nonpk"/>
+            <parameter name="facilityName" required="true"/>
+
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="longitude" type="BigDecimal"/>
+            <parameter name="latitude" type="BigDecimal"/>
+
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
+            <parameter name="areaCode"><text-digits/></parameter>
+            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
+            <parameter name="emailAddress"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="facilityId" required="true"/>
+        </out-parameters>
+        <actions>
+            <service-call name="create#mantle.facility.Facility" out-map="context" in-map="context"/>
+
+            <if condition="address1 || city || postalCode">
+                <service-call name="mantle.party.ContactServices.create#PostalAddress" out-map="paOut"
+                        in-map="context + [contactMechPurposeId:'PostalPrimary']"/></if>
+            <if condition="contactNumber">
+                <service-call name="mantle.party.ContactServices.create#TelecomNumber" out-map="phoneOut"
+                        in-map="context + [contactMechPurposeId:'PhonePrimary']"/></if>
+            <if condition="emailAddress">
+                <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emOut"
+                        in-map="[facilityId:facilityId, emailAddress:emailAddress, contactMechPurposeId:'EmailPrimary']"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="Facility">
+        <in-parameters>
+            <parameter name="facilityId" required="true"/>
+            <auto-parameters entity-name="mantle.facility.Facility" include="nonpk"/>
+
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="longitude" type="BigDecimal"/>
+            <parameter name="latitude" type="BigDecimal"/>
+
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
+            <parameter name="areaCode"><text-digits/></parameter>
+            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
+            <parameter name="emailAddress"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.facility.Facility" in-map="context" out-map="context"/>
+
+            <if condition="contactNumber">
+                <entity-find entity-name="mantle.facility.FacilityContactMech" list="phoneFcmList"><date-filter/>
+                    <econdition field-name="facilityId"/><econdition field-name="contactMechPurposeId" value="PhonePrimary"/>
+                </entity-find>
+                <if condition="phoneFcmList"><then>
+                    <service-call name="mantle.facility.ContactServices.update#FacilityTelecomNumber" out-map="phoneOut"
+                            in-map="context + [contactMechId:phoneFcmList[0].contactMechId, contactMechPurposeId:'PhonePrimary']"/>
+                </then><else>
+                    <service-call name="mantle.party.ContactServices.create#TelecomNumber" out-map="phoneOut"
+                            in-map="context + [contactMechPurposeId:'PhonePrimary']"/>
+                </else></if>
+                <set field="telecomContactMechId" from="phoneOut.contactMechId"/>
+            </if>
+            <if condition="emailAddress">
+                <entity-find entity-name="mantle.facility.FacilityContactMech" list="emailFcmList"><date-filter/>
+                    <econdition field-name="facilityId"/><econdition field-name="contactMechPurposeId" value="EmailPrimary"/>
+                </entity-find>
+                <if condition="emailFcmList"><then>
+                    <service-call name="mantle.facility.ContactServices.update#FacilityContactOther" out-map="emOut"
+                            in-map="[facilityId:facilityId, contactMechId:emailFcmList[0].contactMechId, infoString:emailAddress, contactMechPurposeId:'EmailPrimary']"/>
+                </then><else>
+                    <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emOut"
+                            in-map="[facilityId:facilityId, emailAddress:emailAddress, contactMechPurposeId:'EmailPrimary']"/>
+                </else></if>
+                <set field="emailContactMechId" from="emOut.contactMechId"/>
+            </if>
+
+            <!-- update PostalAddress and GeoPoint last to get telecomContactMechId and emailContactMechId -->
+            <if condition="address1 || city || postalCode">
+                <entity-find entity-name="mantle.facility.FacilityContactMech" list="addressFcmList"><date-filter/>
+                    <econdition field-name="facilityId"/><econdition field-name="contactMechPurposeId" value="PostalPrimary"/>
+                </entity-find>
+                <if condition="addressFcmList"><then>
+                    <service-call name="mantle.facility.ContactServices.update#FacilityPostalAddress" out-map="paOut"
+                            in-map="context + [contactMechId:addressFcmList[0].contactMechId, contactMechPurposeId:'PostalPrimary']"/>
+                </then><else>
+                    <service-call name="mantle.party.ContactServices.create#PostalAddress" out-map="paOut"
+                            in-map="context + [contactMechPurposeId:'PostalPrimary']"/>
+                </else></if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="FacilityCertification">
+        <in-parameters>
+            <parameter name="facilityCertificationId" required="true"/>
+            <auto-parameters entity-name="mantle.facility.FacilityCertification" include="nonpk"/>
+            <parameter name="documentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.facility.FacilityCertification" value-field="facilityCertification"/>
+            <set field="facilityId" from="facilityCertification.facilityId"/>
+            <if condition="documentFile != null &amp;&amp; documentFile.size &gt; 0">
+                <if condition="!documentLocation">
+                    <set field="filename" from="documentFile.getName()"/>
+                    <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                        <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+                    </then><else>
+                        <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+                    </else></if>
+                    <set field="documentLocation" value="${contentRoot}/facility/${facilityId?:'_NA_'}/certification/${facilityCertificationId}/${filename}"/>
+                </if>
+                <set field="docRr" from="ec.resource.getLocationReference(documentLocation)"/>
+                <script>
+                    fileStream = documentFile.getInputStream()
+                    try { docRr.putStream(fileStream) } finally { fileStream.close() }
+                </script>
+            </if>
+
+            <service-call name="update#mantle.facility.FacilityCertification" in-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="FacilityLocation">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.facility.FacilityLocation"/>
+            <parameter name="facilityId" required="true"/>
+            <parameter name="locationSeqId" default-value="${areaId?:''}${aisleId?:''}${sectionId?:''}${levelId?:''}${positionId?:''}"/>
+        </in-parameters>
+        <out-parameters><parameter name="locationSeqId"/></out-parameters>
+        <actions>
+            <if condition="!locationSeqId"><return error="true" message="No location ID specified, and no area, aisle, section, level, or position to generate it"/></if>
+            <entity-find-one entity-name="mantle.facility.FacilityLocation" value-field="existingLoc"/>
+            <if condition="existingLoc != null"><return error="true" message="Location with ID ${locationSeqId} already exists in facility ${facilityId}"/></if>
+            <service-call name="create#mantle.facility.FacilityLocation" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="FacilityNote">
+        <in-parameters>
+            <parameter name="facilityId" required="true"/>
+            <parameter name="userId" default="ec.user.userId"/>
+            <parameter name="noteDate" default="ec.user.nowTimestamp"/>
+            <parameter name="noteText" required="true"/>
+        </in-parameters>
+        <actions><service-call name="create#mantle.facility.FacilityNote" in-map="context"/></actions>
+    </service>
+
+    <service verb="get" noun="ScannedIdGeneral">
+        <description>For a given scanId (barcode scanner, etc input) see if it can be resolved to assetId, containerId, locationSeqId, or productId</description>
+        <in-parameters>
+            <parameter name="facilityId"/>
+            <parameter name="scanId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="facilityId"/>
+            <parameter name="assetId"/>
+            <parameter name="containerId"/>
+            <parameter name="locationSeqId"/>
+            <parameter name="productId"/>
+        </out-parameters>
+        <actions>
+            <set field="facilityId" from="facilityId ?: ec.user.getPreference('FacilityActive') ?: ec.user.getPreference('FacilityGeneralDefault')"/>
+            <if condition="scanId">
+                <!-- see if scanId is a assetId -->
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="assetId" from="scanId"/></entity-find-one>
+                <if condition="asset != null"><set field="assetId" from="asset.assetId"/></if>
+                <!-- see if scanId is a containerId -->
+                <entity-find-one entity-name="mantle.product.asset.Container" value-field="container">
+                    <field-map field-name="containerId" from="scanId"/></entity-find-one>
+                <if condition="container != null"><then>
+                    <set field="containerId" from="container.containerId"/>
+                </then><else>
+                    <!-- see if scanId is a Container.serialNumber -->
+                    <entity-find-one entity-name="mantle.product.asset.Container" value-field="container">
+                        <field-map field-name="serialNumber" from="scanId"/></entity-find-one>
+                    <if condition="container != null"><set field="containerId" from="container.containerId"/></if>
+                </else></if>
+                <if condition="facilityId">
+                    <!-- if we have a facilityId see if scanId is a locationSeqId -->
+                    <entity-find-one entity-name="mantle.facility.FacilityLocation" value-field="facilityLocation">
+                        <field-map field-name="facilityId"/><field-map field-name="locationSeqId" from="scanId"/></entity-find-one>
+                    <if condition="facilityLocation != null"><set field="locationSeqId" from="facilityLocation.locationSeqId"/></if>
+                </if>
+                <!-- see if scanId matches Product.pseudoId, ProductIdentification.idValue, or Product.productId -->
+                <!-- TODO: who would the Product.ownerPartyId be for an incoming shipment, Shipment.toPartyId or let user specify somehow? -->
+                <service-call name="mantle.product.ProductServices.find#ProductByIdValue" out-map="productByIdOut"
+                        in-map="[idValue:scanId]"/>
+                <set field="productId" from="productByIdOut.productId"/>
+            </if>
+            <if condition="!assetId &amp;&amp; !containerId &amp;&amp; !locationSeqId &amp;&amp; !productId">
+                <message>No Asset, Container, Location, or Product found with ID ${scanId}</message></if>
+        </actions>
+    </service>
+</services>

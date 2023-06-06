@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!--
+        These DataDocuments are for inventory reporting and analysis, both current inventory and future projected inventory.
+
+        All documents have a facilityId to filter by and a productId to use as a term for buckets.
+
+        Quantity fields across the documents include: availableToPromiseTotal, quantityOnHandTotal,
+            orderQuantity, quantityReservedSum, quantityNotAvailableSum, quantityNotIssuedSum,
+            estimatedConsumeQuantity, consumeQuantity, estimatedProduceQuantity, produceQuantity, and prodEstQuantity
+
+        There are various dates available for buckets by date for more detailed results for things like graphs.
+
+        For current inventory:
+         - statusId (from MantleInventoryAsset) = AstAvailable
+         - partStatusId (from MantleInventoryOrderItem) NOT IN OrderCompleted,OrderRejected,OrderCancelled
+         - statusId  (from MantleInventoryRunConsume,MantleInventoryRunProduce) NOT IN WeComplete,WeClosed,WeCancelled
+         - readyDate >= now (or beginning of current day)
+
+         These can be queried using the mantle.product.InventoryReportServices.get#InventoryProjectedInfo service.
+    -->
+
+    <!-- NOTE: when updating these it's best to delete the indexes through ElasticSearch, then reindex the MantleSales feed:
+
+        curl http://localhost:9200/_cat/indices?v
+
+        curl -X DELETE http://localhost:9200/mantle_inventory_asset?pretty
+        curl -X DELETE http://localhost:9200/mantle_inventory_order_item?pretty
+        curl -X DELETE http://localhost:9200/mantle_inventory_run_consume?pretty
+        curl -X DELETE http://localhost:9200/mantle_inventory_run_produce?pretty
+        curl -X DELETE http://localhost:9200/mantle_inventory_prod_estimate?pretty
+    -->
+
+    <!-- Inventory Asset -->
+
+    <!-- TODO: somehow handle old Asset records (with QOH=0)? If we set a condition we'll just end up with stale documents with a false positive QOH -->
+    <dataDocuments dataDocumentId="MantleInventoryAsset" indexName="mantle_inventory" documentName="InventoryAsset"
+            primaryEntityName="mantle.product.asset.Asset" documentTitle="${assetId}:${productId}:${facilityId}">
+        <fields fieldSeqId="01" fieldPath="assetId"/>
+        <fields fieldSeqId="02" fieldPath="assetTypeEnumId"/>
+        <fields fieldSeqId="03" fieldPath="statusId"/>
+        <fields fieldSeqId="04" fieldPath="ownerPartyId"/>
+        <fields fieldSeqId="05" fieldPath="productId"/>
+        <fields fieldSeqId="06" fieldPath="facilityId"/>
+        <fields fieldSeqId="07" fieldPath="locationSeqId"/>
+        <fields fieldSeqId="08" fieldPath="availableToPromiseTotal"/>
+        <fields fieldSeqId="09" fieldPath="quantityOnHandTotal"/>
+        <fields fieldSeqId="10" fieldPath="receivedDate"/>
+        <fields fieldSeqId="11" fieldPath="expectedEndOfLife"/>
+        <conditions conditionSeqId="01" fieldNameAlias="assetTypeEnumId" fieldValue="AstTpInventory"/>
+    </dataDocuments>
+
+    <!-- Sales OrderItem -->
+
+    <dataDocuments dataDocumentId="MantleInventoryOrderItem" indexName="mantle_inventory" documentName="OrderItem"
+            primaryEntityName="mantle.order.OrderItem" documentTitle="${orderId}:${orderItemSeqId}">
+        <fields fieldSeqId="01" fieldPath="orderId"/>
+        <fields fieldSeqId="02" fieldPath="orderItemSeqId"/>
+        <fields fieldSeqId="03" fieldPath="orderPartSeqId"/>
+        <fields fieldSeqId="04" fieldPath="productId"/>
+        <fields fieldSeqId="05" fieldPath="quantity" fieldNameAlias="orderQuantity"/>
+        <fields fieldSeqId="06" fieldPath="selectedAmount"/>
+        <fields fieldSeqId="07" fieldPath="unitAmount"/>
+        <fields fieldSeqId="08" fieldPath="requiredByDate"/>
+        <fields fieldSeqId="09" fieldPath="((orderQuantity ?: 1.0) * (unitAmount ?: 0.0))" fieldNameAlias="orderItemTotal" fieldType="double"/>
+
+        <fields fieldSeqId="10" fieldPath="part:statusId" fieldNameAlias="partStatusId"/>
+        <fields fieldSeqId="11" fieldPath="part:facilityId" fieldNameAlias="facilityId"/>
+        <fields fieldSeqId="12" fieldPath="part:vendorPartyId" fieldNameAlias="vendorPartyId"/>
+        <fields fieldSeqId="13" fieldPath="part:vendorRoles:roleTypeId" fieldNameAlias="vendorRoleTypeId"/>
+        <fields fieldSeqId="14" fieldPath="part:customerPartyId" fieldNameAlias="customerPartyId"/>
+
+        <fields fieldSeqId="20" fieldPath="reservations:assetId" fieldNameAlias="assetId"/>
+        <fields fieldSeqId="21" fieldPath="reservations:quantity" fieldNameAlias="quantityReserved"/>
+        <fields fieldSeqId="22" fieldPath="reservations:quantityNotAvailable" fieldNameAlias="quantityNotAvailable"/>
+        <fields fieldSeqId="23" fieldPath="reservations:quantityNotIssued" fieldNameAlias="quantityNotIssued"/>
+        <fields fieldSeqId="24" fieldPath="reservations:reservedDate" fieldNameAlias="reservedDate"/>
+        <fields fieldSeqId="25" fieldPath="reservations:currentPromisedDate" fieldNameAlias="currentPromisedDate"/>
+    
+        <fields fieldSeqId="30" fieldPath="header:placedDate"/>
+    
+        <conditions conditionSeqId="01" fieldNameAlias="productId" operator="is-not-null" fieldValue=""/>
+    </dataDocuments>
+
+    <!-- Production Run Estimate - Consume -->
+
+    <dataDocuments dataDocumentId="MantleInventoryRunConsume" indexName="mantle_inventory" documentName="RunConsume"
+            primaryEntityName="mantle.work.effort.WorkEffortProduct" documentTitle="${workEffortId}:${productId}">
+        <fields fieldSeqId="01" fieldPath="workEffortId"/>
+        <fields fieldSeqId="02" fieldPath="productId"/>
+        <fields fieldSeqId="03" fieldPath="estimatedQuantity" fieldNameAlias="estimatedConsumeQuantity"/>
+        <fields fieldSeqId="04" fieldPath="fromDate"/>
+        <fields fieldSeqId="05" fieldPath="thruDate"/>
+        <fields fieldSeqId="06" fieldPath="typeEnumId"/>
+    
+        <fields fieldSeqId="10" fieldPath="issuances:assetId" fieldNameAlias="assetId"/>
+        <fields fieldSeqId="11" fieldPath="issuances:issuedDate" fieldNameAlias="consumeDate"/>
+        <fields fieldSeqId="12" fieldPath="issuances:quantity" fieldNameAlias="consumeQuantity"/>
+    
+        <fields fieldSeqId="20" fieldPath="workEffort:statusId"/>
+        <fields fieldSeqId="21" fieldPath="workEffort:estimatedStartDate"/>
+        <fields fieldSeqId="22" fieldPath="workEffort:facilityId" fieldNameAlias="lineFacilityId"/>
+        <!-- the line's parent facility, the warehouse, is the main Facility we would filter/etc by -->
+        <fields fieldSeqId="23" fieldPath="workEffort:facility:parentFacilityId" fieldNameAlias="facilityId"/>
+    
+        <conditions conditionSeqId="01" fieldNameAlias="typeEnumId" fieldValue="WeptConsume"/>
+    </dataDocuments>
+
+    <!-- Production Run Estimate - Produce -->
+
+    <dataDocuments dataDocumentId="MantleInventoryRunProduce" indexName="mantle_inventory" documentName="RunProduce"
+            primaryEntityName="mantle.work.effort.WorkEffortProduct" documentTitle="${workEffortId}:${productId}">
+        <fields fieldSeqId="01" fieldPath="workEffortId"/>
+        <fields fieldSeqId="02" fieldPath="productId"/>
+        <fields fieldSeqId="03" fieldPath="estimatedQuantity" fieldNameAlias="estimatedProduceQuantity"/>
+        <fields fieldSeqId="04" fieldPath="fromDate"/>
+        <fields fieldSeqId="05" fieldPath="thruDate"/>
+        <fields fieldSeqId="06" fieldPath="typeEnumId"/>
+    
+        <fields fieldSeqId="10" fieldPath="receipts:assetId" fieldNameAlias="assetId"/>
+        <fields fieldSeqId="11" fieldPath="receipts:receivedDate" fieldNameAlias="produceDate"/>
+        <fields fieldSeqId="12" fieldPath="receipts:quantityAccepted" fieldNameAlias="produceQuantity"/>
+    
+        <fields fieldSeqId="20" fieldPath="workEffort:statusId"/>
+        <fields fieldSeqId="21" fieldPath="workEffort:estimatedStartDate"/>
+        <fields fieldSeqId="22" fieldPath="workEffort:facilityId" fieldNameAlias="lineFacilityId"/>
+        <!-- the line's parent facility, the warehouse, is the main Facility we would filter/etc by -->
+        <fields fieldSeqId="23" fieldPath="workEffort:facility:parentFacilityId" fieldNameAlias="facilityId"/>
+    
+        <conditions conditionSeqId="01" fieldNameAlias="typeEnumId" fieldValue="WeptProduce"/>
+    </dataDocuments>
+
+    <!-- Production Estimate -->
+
+    <dataDocuments dataDocumentId="MantleInventoryProdEstimate" indexName="mantle_inventory" documentName="ProductionEstimate"
+            primaryEntityName="mantle.work.estimate.ProductionEstimate" documentTitle="${productId}:${facilityId}:${readyDate}">
+        <fields fieldSeqId="01" fieldPath="productionEstimateId"/>
+        <fields fieldSeqId="02" fieldPath="productId"/>
+        <!-- use facilityId for the destination to match the field name used in other inventory documents, for filtering/etc -->
+        <fields fieldSeqId="03" fieldPath="destinationFacilityId" fieldNameAlias="facilityId"/>
+        <fields fieldSeqId="04" fieldPath="quantity" fieldNameAlias="prodEstQuantity"/>
+        <fields fieldSeqId="05" fieldPath="readyDate"/>
+    </dataDocuments>
+
+    <!-- DataFeed -->
+    <moqui.entity.feed.DataFeed dataFeedId="MantleInventoryData" dataFeedTypeEnumId="DTFDTP_RT_PUSH"
+            feedName="Mantle Inventory Data" feedReceiveServiceName="org.moqui.search.SearchServices.index#DataDocuments"
+            feedDeleteServiceName="org.moqui.search.SearchServices.delete#DataDocument">
+        <documents dataDocumentId="MantleInventoryAsset"/>
+        <documents dataDocumentId="MantleInventoryOrderItem"/>
+        <documents dataDocumentId="MantleInventoryRunConsume"/>
+        <documents dataDocumentId="MantleInventoryRunProduce"/>
+        <documents dataDocumentId="MantleInventoryProdEstimate"/>
+    </moqui.entity.feed.DataFeed>
+</entity-facade-xml>

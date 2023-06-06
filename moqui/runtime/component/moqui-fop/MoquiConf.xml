@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- No copyright or license for configuration file, details here are not considered a creative work. -->
+<moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-3.xsd">
+
+    <tools>
+        <tool-factory class="org.moqui.fop.FopToolFactory" init-priority="20" disabled="false"/>
+    </tools>
+    <webapp-list>
+        <webapp name="webroot">
+            <servlet name="HtmlRenderServlet" class="org.moqui.fop.HtmlRenderServlet" load-on-startup="1">
+                <url-pattern>/htmlr/*</url-pattern></servlet>
+        </webapp>
+    </webapp-list>
+    <resource-facade xsl-fo-handler-factory="FOP"/>
+</moqui-conf>

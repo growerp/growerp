@@ -1,0 +1,267 @@
+<div>
+    <navbar sub-bar="true"/>
+    <div class="container-fluid px-lg-6 px-4 py-4 body-padding">
+        <div class="row no-gutters align-left">
+            <div class="col">
+                <a class="customer-link" :href="homePath">Home </a><i class="fas fa-angle-right mx-2 fa-line-height"></i>
+                Account
+            </div>
+        </div>
+        <div class="row mb-8">
+            <div class="d-lg-block col-lg-3">
+                <menu-left type="true"/>
+            </div>
+            <div class="col-lg-9 col-12">
+                <div class="row">
+                    <div class="col">
+                        <h1 class="page-heading text-uppercase"><span class="text-green">ACCOUNT </span>SETTINGS</h1>
+                    </div>
+                </div>
+                <div v-if="message.state != '' " :class="{ 'alert-primary': message.state == 1, 'alert-danger': message.state == 2}" class="alert" role="alert">
+                    {{message.message}}
+                </div>
+
+                <!-- profile section -->
+                <router-link :to="'/account#profile'" tag="div" id="profile" class="lead">PROFILE</router-link>
+                <div class="breakline no-gutters mb-3"></div>
+                <div class="form-group row">
+                    <label for="username" class="col-sm-3 col-form-label modal-text left-menu-heading">Username</label>
+                    <div class="col-12 col-sm-6 mt-2 pl-4">
+                        <label id="username">{{customerInfo.username}}</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="firstname" class="col-sm-3 col-form-label modal-text left-menu-heading">First Name</label>
+                    <div class="col-12 col-sm-6">
+                        <input class="form-control" id="firstname" type="text" v-model="customerInfo.firstName" required/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="lastName" class="col-sm-3 col-form-label modal-text left-menu-heading">Last Name</label>
+                    <div class="col-12 col-sm-6">
+                        <input class="form-control" id="lastName" type="text" v-model="customerInfo.lastName" required/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="emailAddress" class="col-sm-3 col-form-label modal-text left-menu-heading">Email</label>
+                    <div class="col-12 col-sm-6">
+                        <input class="form-control" id="emailAddress" type="email" v-model="customerInfo.emailAddress" required/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="phone" class="col-sm-3 col-form-label modal-text left-menu-heading">Phone</label>
+                    <div class="col-12 col-sm-6">
+                        <input class="form-control" id="contactNumber" type="text" v-model="customerInfo.contactNumber" required/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="phone" class="col-sm-3 col-form-label modal-text left-menu-heading">Company Name</label>
+                    <div class="col-12 col-sm-6">
+                        <input class="form-control" id="companyName" type="text" v-model="customerInfo.companyName" required/>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-12 col-sm-6 offset-sm-3">
+                        <button @click="updateCustomerInfo" class="btn btn-info account-btn col-sm-6 col-md-6 col-lg-4">Save</button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-12 col-sm-6 offset-sm-3">
+                        <a data-toggle="modal" data-target="#changePasswordModal" class="pointer text-cyan">Change Password</a>
+                    </div>
+                </div>
+
+                <!-- shipping addresses -->
+                <div class="d-flex justify-content-between mt-5">
+                    <router-link :to="'/account#shipping'" tag="span" id="shipping" class="lead">
+                    SHIPPING ADDRESSES</router-link>
+                    <span class="pointer text-cyan" @click="scrollTo()">Back to Top</span>
+                </div>
+                <div class="breakline no-gutters mb-3"></div>
+                <div class="row">
+                    <template v-for="(address, index) in shippingAddressList">
+                        <div class="col-12 col-sm-6">
+                            <div class="row mx-auto mt-3">
+                                <div class="col d-flex flex-column">
+                                    <div class="row">
+                                        {{address.postalAddress.address1}} {{address.postalAddress.address2}}<br>
+                                        {{address.postalAddress.city}}, {{address.postalAddress.stateName}} 
+                                        {{address.postalAddress.postalCode}}
+                                    </div>
+                                    <div class="row mt-2 text-cyan">
+                                        <span data-toggle="modal" data-target="#addressModal" 
+                                            @click="selectAddress(address),isUpdate = true" class="pointer">
+                                            Update &nbsp;
+                                        </span>
+                                        <span>| &nbsp;</span>
+                                        <span data-toggle="modal" data-target="#deleteAddressModal" @click="selectAddress(address)" 
+                                            class="pointer">
+                                            Delete
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <br>
+                <div>
+                    <button data-toggle="modal" data-target="#addressModal" 
+                        class="btn btn-info col col-lg-6 account-btn" @click="resetData()">
+                        Add an Address
+                    </button>
+                </div>
+
+                <!-- payment methods -->
+                <div class="d-flex justify-content-between mt-5">
+                    <router-link :to="'/account#payment'" tag="span" id="payment" class="lead">
+                    PAYMENT METHODS</router-link>
+                    <span class="text-cyan pointer" @click="scrollTo()">Back to Top</span>
+                </div>
+                <div class="breakline no-gutters mb-3"></div>
+                <div class="row">
+                    <template v-for="(item, index) in customerPaymentMethods">
+                        <div class="col-12 col-sm-6">
+                            <div class="row mx-auto mt-3">
+                                <div class="col d-flex flex-column">
+                                    <div class="row">
+                                        {{item.paymentMethod.titleOnAccount}}
+                                        <br>
+                                        {{item.paymentMethod.description}}
+                                        <br>
+                                        Expires on {{item.creditCard.expireDate}}
+                                    </div>
+                                    <div class="row mt-2 text-cyan">
+                                        <span @click="selectPaymentMethod(item),isUpdate = true" 
+                                            data-toggle="modal" data-target="#creditCardModal" class="pointer">
+                                            Update &nbsp;
+                                        </span>
+                                        <span>| &nbsp;</span>
+                                        <span @click="selectPaymentMethod(item)" data-toggle="modal" 
+                                            data-target="#deletePaymentMethodModal" class="pointer">
+                                            Delete
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <br>
+                <div>
+                    <button @click="resetData()" data-toggle="modal" data-target="#creditCardModal" 
+                        class="btn btn-info col col-lg-6 account-btn">
+                        Add a Credit Card
+                    </button>
+                </div>
+                <!-- <div class="breakline no-gutters my-3"></div> -->
+            </div> 
+        </div>
+    </div>
+    <footer-page class="footer-relative" :infoLink="false" />
+
+        <div class="modal fade" id="changePasswordModal"> <!-- Change Password Modal -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="title" id="exampleModalLongTitle">Change Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form class="modal-body" @submit.prevent="updateCustomerPassword" method="post">
+                        <div v-if="responseMessage != null && responseMessage != ''" class="alert alert-primary" role="alert">
+                            {{responseMessage}}
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label modal-text">Old Password *</label>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="password" v-model="passwordInfo.oldPassword" required/>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label modal-text">New Password *</label>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="password" v-model="passwordInfo.newPassword" required/>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label modal-text">Confirm New Password *</label>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="password" v-model="passwordInfo.newPasswordVerify" 
+                                    required/>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <!-- <div class="col-sm-7 offset-sm-4"> -->
+                                <button type="submit" class="btn btn-info col-sm-6">Change Password</button>
+                                <br>
+                                <a data-dismiss="modal" class="btn btn-link text-add col-sm-6">Cancel</a>
+                            <!-- </div> -->
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="addressModal">
+            <div class="modal-dialog" role="document">
+                <modal-address :shippingAddress="shippingAddress" :isUpdate="isUpdate" :cancelCallback="onAddressCancel" :completeCallback="onAddressUpserted" />
+             </div>
+        </div>
+        <div class="modal fade" id="creditCardModal"><!-- Credit Card Modal -->
+            <div class="modal-dialog" role="document">
+                <modal-credit-card :paymentMethod="paymentMethod" :isUpdate="isUpdate" :addressList="shippingAddressList" :cancelCallback="onCreditCardCancel" :completeCallback="onCreditCardSet" />
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteAddressModal"><!-- Confirm Delete -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="title" id="exampleModalLabel">CONFIRM</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <p class="col-12 text-center">Are you sure to delete this record?</p>
+                            <div class="d-flex mt-4">
+                                <a data-dismiss="modal" class="btn btn-outline-info btn-lg flex-fill mr-3">Cancel</a>
+                                <button data-dismiss="modal" class="btn btn-info col col-sm-6 col-lg-6 col-12 offset-sm-1 
+                                offset-lg-1 offset-md-1" @click="deleteShippingAddress(shippingAddress.postalContactMechId,shippingAddress.postalContactMechPurposeId)">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deletePaymentMethodModal"><!-- Confirm Delete -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="title" id="exampleModalLabel">CONFIRM</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <p class="col-12 text-center">Are you sure to delete this record?</p>
+                            <div class="d-flex mt-4">
+                                <a data-dismiss="modal" class="btn btn-outline-info btn-lg flex-fill mr-3">Cancel</a>
+                                <button data-dismiss="modal" class="btn btn-info col col-sm-6 col-lg-6 col-12 offset-sm-1 
+                                offset-lg-1 offset-md-1" @click="deletePaymentMethod(paymentMethod.paymentMethodId)">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+    </div>
+</div>

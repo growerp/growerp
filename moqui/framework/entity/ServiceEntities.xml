@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="entity-definition-3.xsd">
+
+    <entity entity-name="ServiceRegister" package="moqui.service" use="configuration" cache="true">
+        <field name="serviceRegisterId" type="id" is-pk="true"/>
+        <field name="serviceTypeEnumId" type="id"/>
+        <field name="description" type="text-medium"/>
+        <field name="serviceName" type="text-medium"/>
+        <field name="configParameters" type="text-medium"/>
+        <relationship type="one" title="ServiceRegisterType" related="moqui.basic.Enumeration" short-alias="serviceTypeEnum">
+            <key-map field-name="serviceTypeEnumId"/></relationship>
+        <seed-data><moqui.basic.EnumerationType description="Service Register Type" enumTypeId="ServiceRegisterType"/></seed-data>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- moqui.service.job -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="ServiceJob" package="moqui.service.job" use="configuration" cache="true">
+        <description>For ad-hoc (explicitly run) or scheduled service jobs. If cronExpression is null the job will only
+            be run ad-hoc, when explicitly called using ServiceCallJob. If a topic is specified results will be sent to
+            the topic (can be configured using a NotificationTopic record) as a NotificationMessage to the user that
+            called the job explicitly (if applicable) and to users associated with ServiceJobUser records.</description>
+        <field name="jobName" type="text-short" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="serviceName" type="text-medium"/>
+        <field name="transactionTimeout" type="number-integer"/>
+        <field name="topic" type="text-medium"><description>On completion send a notification to this topic</description></field>
+        <field name="localOnly" type="text-indicator"><description>If Y this will be run local only. By default runs on any
+            server in a cluster listening for async distributed services (if an async distributed executor is configured).</description></field>
+
+        <field name="cronExpression" type="text-short"><description>
+            An extended cron expression like Unix crontab but with extended syntax options (L, W, etc) similar to Quartz Scheduler. See:
+
+            http://cron-parser.com
+            http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06.html
+        </description></field>
+        <field name="fromDate" type="date-time"><description>Only run scheduled after this date/time. Ignored for ad-hoc/explicit runs.</description></field>
+        <field name="thruDate" type="date-time"><description>Only run scheduled before this date/time. Ignored for ad-hoc/explicit runs.</description></field>
+        <field name="repeatCount" type="number-integer"><description>If specified only run this many times. Must specify
+            a cronExpression for the job to repeat. When this count is reached thruDate will be set to now and paused set to Y.
+            Ignored for ad-hoc/explicit runs.</description></field>
+        <field name="paused" type="text-indicator" enable-audit-log="update"><description>If Y this job is inactive and won't be
+            run on a schedule even if cronExpression is not null. Ignored for ad-hoc/explicit runs.</description></field>
+        <field name="expireLockTime" type="number-integer"><description>Ignore lock and run anyway after this many
+            minutes. This should generally be much greater than the longest time the service is expected to run. This is
+            the mechanism for recovering jobs after a run failed in a way that did not clean up the ServiceJobRunLock
+            record. Defaults to 24 hours (1440 minutes) to make sure jobs get recovered.</description></field>
+        <field name="minRetryTime" type="number-integer">
+            <description>Minimum time between retries after an error (based on most recent ServiceJobRun record), in minutes</description></field>
+
+        <relationship type="one-nofk" related="moqui.security.user.NotificationTopic"/>
+        <relationship type="many" related="moqui.service.job.ServiceJobParameter" short-alias="parameters"/>
+        <relationship type="many" related="moqui.service.job.ServiceJobUser" short-alias="users"/>
+    </entity>
+    <entity entity-name="ServiceJobParameter" package="moqui.service.job" use="configuration" cache="true">
+        <description>Parameters automatically added when the job service is called. Always stored as a String and will
+            be converted based on the corresponding service in-parameter.parameter.@type attribute (just as with any
+            service call).</description>
+        <field name="jobName" type="text-short" is-pk="true"/>
+        <field name="parameterName" type="text-short" is-pk="true"/>
+        <field name="parameterValue" type="text-medium"/>
+        <relationship type="one" related="moqui.service.job.ServiceJob"/>
+    </entity>
+    <entity entity-name="ServiceJobUser" package="moqui.service.job" use="configuration" cache="true">
+        <field name="jobName" type="text-short" is-pk="true"/>
+        <field name="userId" type="id" is-pk="true"/>
+        <field name="receiveNotifications" type="text-indicator"/>
+        <relationship type="one" related="moqui.service.job.ServiceJob"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount"/>
+    </entity>
+    <view-entity entity-name="ServiceJobUserDetail" package="moqui.service.job">
+        <member-entity entity-alias="SJU" entity-name="moqui.service.job.ServiceJobUser"/>
+        <member-entity entity-alias="UAC" entity-name="moqui.security.UserAccount" join-from-alias="SJU">
+            <key-map field-name="userId"/></member-entity>
+        <alias-all entity-alias="SJU"/>
+        <alias name="username" entity-alias="UAC"/>
+        <alias name="userFullName" entity-alias="UAC"/>
+        <alias name="emailAddress" entity-alias="UAC"/>
+    </view-entity>
+    <entity entity-name="ServiceJobRun" package="moqui.service.job" use="transactional" cache="never">
+        <field name="jobRunId" type="id" is-pk="true"/>
+        <field name="jobName" type="text-short"/>
+        <field name="userId" type="id"><description>The user that initiated the job run</description></field>
+        <field name="parameters" type="text-long"/>
+        <field name="results" type="text-very-long"/>
+        <field name="messages" type="text-long"/>
+        <field name="hasError" type="text-indicator"/>
+        <field name="errors" type="text-long"/>
+        <field name="hostAddress" type="text-short"/>
+        <field name="hostName" type="text-medium"/>
+        <field name="runThread" type="text-medium"/>
+        <field name="startTime" type="date-time"/>
+        <field name="endTime" type="date-time"/>
+        <relationship type="one" related="moqui.service.job.ServiceJob"/>
+        <relationship type="one-nofk" related="moqui.security.UserAccount"/>
+        <index name="SVC_JOBRUN_NAME" unique="false"><index-field name="jobName"/></index>
+    </entity>
+    <entity entity-name="ServiceJobRunLock" package="moqui.service.job" use="transactional" cache="never">
+        <description>Runtime data for a scheduled ServiceJob (with a cronExpression), managed automatically by the service job runner.</description>
+        <field name="jobName" type="text-short" is-pk="true"/>
+        <field name="jobRunId" type="id"><description>If not null this is the currently running job instance.</description></field>
+        <field name="lastRunTime" type="date-time"/>
+        <relationship type="one" related="moqui.service.job.ServiceJob"/>
+        <relationship type="one" related="moqui.service.job.ServiceJobRun"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- moqui.service.semaphore -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="ServiceParameterSemaphore" package="moqui.service.semaphore" use="transactional" cache="never">
+        <field name="serviceName" type="text-medium" is-pk="true">
+            <description>May be semaphore-name if that attribute is used, otherwise is service name</description></field>
+        <field name="parameterValue" type="text-medium" is-pk="true"/>
+        <field name="lockThread" type="text-medium"/>
+        <field name="lockTime" type="date-time"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- moqui.service.message -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="SystemMessage" package="moqui.service.message" short-alias="systemMessages"
+            use="transactional" cache="never">
+        <field name="systemMessageId" type="id" is-pk="true"/>
+        <field name="systemMessageTypeId" type="id"/>
+        <field name="systemMessageRemoteId" type="id"><description>Reference to the SystemMessageRemote record for the remote system
+            this message came from for incoming messages or should be sent to for outgoing messages.</description></field>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="isOutgoing" type="text-indicator"/>
+        <field name="initDate" type="date-time"><description>For incoming the received date, for outgoing the produced date</description></field>
+        <field name="processedDate" type="date-time"><description>For incoming the consumed date, for outgoing the sent date</description></field>
+        <field name="lastAttemptDate" type="date-time"/>
+        <field name="failCount" type="number-integer"/>
+        <field name="parentMessageId" type="id"><description>If a received message is split this is the original message</description></field>
+        <field name="ackMessageId" type="id"><description>The message received or sent to acknowledge this message</description></field>
+        <field name="remoteMessageId" type="text-medium"><description>For messages to/from another Moqui system, the
+            systemMessageId on the remote system; may also be used for other system level message IDs (as opposed to
+            messageId which is for the ID in the envelope of the message)</description></field>
+        <field name="messageText" type="text-very-long"/>
+
+        <!-- these fields are from the message envelope, populated by receive or consume service (after initial parse) -->
+        <field name="senderId" type="text-short"><description>ID of the sender (for OAGIS may be broken down into
+            logicalId, component, task, referenceId; for EDI X12 this is ISA06)</description></field>
+        <field name="receiverId" type="text-short"><description>ID of the receiver (for OAGIS may also be broken down;
+            for EDI X12 this is ISA08)</description></field>
+        <field name="messageId" type="text-short"><description>ID of the message; this may be globally unique (like
+            the OAGIS BODID, a GUID) or only unique relative to the senderId and the receiverId (like EDI X12 ISA13 in
+            the context of ISA06, ISA08), and may only be unique within a certain time period (ID may be reused since in
+            EDI X12 limited to 9 digits)</description></field>
+        <field name="messageDate" type="date-time"><description>Date/time from message (for EDI X12 this is GS04 (date)
+            and GS05 (time))</description></field>
+        <field name="docType" type="text-short"><description>For OAGIS the BSR Noun; For X12 GS01 (functional ID code)</description></field>
+        <field name="docSubType" type="text-short"><description>For OAGIS the BSR Verb; For X12 ST01 (tx set ID code)</description></field>
+        <field name="docControl" type="text-short"><description>Control number of the message when applicable (such as
+            GS06 in EDI X12 messages)</description></field>
+        <field name="docSubControl" type="text-short"><description>Sub-Control number of the message when applicable (such as
+            ST02 in EDI X12 messages)</description></field>
+        <field name="docVersion" type="text-short"><description>The document version (for OAGIS BSR Revision, for X12
+            GS08 (version/revision))</description></field>
+
+        <field name="triggerVisitId" type="id"><description>Active visit when SystemMessage triggered (mainly produced) to track
+            the user who did so; independent of the message transport which could have separate remote system and other Visit-like data.</description></field>
+
+        <!-- the follow may be useful for other types of messages, but come specifically from the OAGIS specification;
+            leave out for now, senderId and messageId with combined fields may be adequate and are more generic
+        <field name="logicalId" type="text-medium"/>
+        <field name="component" type="text-medium"/>
+        <field name="task" type="text-medium"/>
+        <field name="referenceId" type="text-medium"/>
+        <field name="authId" type="text-medium"/>
+        -->
+
+        <relationship type="one" related="moqui.service.message.SystemMessageType" short-alias="type"/>
+        <relationship type="one" related="moqui.service.message.SystemMessageRemote" short-alias="remote"/>
+        <relationship type="one" title="SystemMessage" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" title="Parent" related="moqui.service.message.SystemMessage" short-alias="parent">
+            <key-map field-name="parentMessageId" related="systemMessageId"/></relationship>
+        <relationship type="one" title="Ack" related="moqui.service.message.SystemMessage" short-alias="ackMessage">
+            <key-map field-name="ackMessageId" related="systemMessageId"/></relationship>
+        <relationship type="one" title="Trigger" related="moqui.server.Visit" short-alias="triggerVisit">
+            <key-map field-name="triggerVisitId"/></relationship>
+
+        <relationship type="many" related="moqui.service.message.SystemMessageError" short-alias="errors">
+            <key-map field-name="systemMessageId"/></relationship>
+
+        <index name="SYS_MSG_MSGID"><index-field name="messageId"/></index>
+        <index name="SYS_MSG_RMSGID"><index-field name="remoteMessageId"/></index>
+
+        <seed-data>
+            <moqui.basic.StatusType description="System Message" statusTypeId="SystemMessage"/>
+            <!-- Is this needed? <moqui.basic.StatusItem description="Triggered" sequenceNum="1" statusId="SmsgTriggered" statusTypeId="SystemMessage"/> -->
+
+            <moqui.basic.StatusItem description="Produced" sequenceNum="10" statusId="SmsgProduced" statusTypeId="SystemMessage"/>
+            <moqui.basic.StatusItem description="Sending" sequenceNum="11" statusId="SmsgSending" statusTypeId="SystemMessage"/>
+            <moqui.basic.StatusItem description="Sent" sequenceNum="12" statusId="SmsgSent" statusTypeId="SystemMessage"/>
+
+            <moqui.basic.StatusItem description="Received" sequenceNum="20" statusId="SmsgReceived" statusTypeId="SystemMessage"/>
+            <moqui.basic.StatusItem description="Consuming" sequenceNum="21" statusId="SmsgConsuming" statusTypeId="SystemMessage"/>
+            <moqui.basic.StatusItem description="Consumed" sequenceNum="22" statusId="SmsgConsumed" statusTypeId="SystemMessage"/>
+
+            <!-- Confirmation sent/received -->
+            <moqui.basic.StatusItem description="Confirmed" sequenceNum="90" statusId="SmsgConfirmed" statusTypeId="SystemMessage"/>
+            <!-- Rejected by receiver (functional reject, ie syntax/etc errors) -->
+            <moqui.basic.StatusItem description="Rejected" sequenceNum="97" statusId="SmsgRejected" statusTypeId="SystemMessage"/>
+            <!-- Cancelled by sender -->
+            <moqui.basic.StatusItem description="Cancelled" sequenceNum="98" statusId="SmsgCancelled" statusTypeId="SystemMessage"/>
+            <!-- Error, generally after retry limit -->
+            <moqui.basic.StatusItem description="Error" sequenceNum="99" statusId="SmsgError" statusTypeId="SystemMessage"/>
+
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgProduced" toStatusId="SmsgSending" transitionName="Sending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSending" toStatusId="SmsgSent" transitionName="Send"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSending" toStatusId="SmsgProduced" transitionName="Back to Produced"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgProduced" toStatusId="SmsgSent" transitionName="Send"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSent" toStatusId="SmsgConfirmed" transitionName="Confirm"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSent" toStatusId="SmsgRejected" transitionName="Reject"/>
+
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgReceived" toStatusId="SmsgConsuming" transitionName="Consuming"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsuming" toStatusId="SmsgConsumed" transitionName="Consume"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsuming" toStatusId="SmsgReceived" transitionName="Back to Received"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgReceived" toStatusId="SmsgConsumed" transitionName="Consume"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsumed" toStatusId="SmsgConfirmed" transitionName="Confirm"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsumed" toStatusId="SmsgRejected" transitionName="Reject"/>
+
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsuming" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgProduced" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgProduced" transitionName="Back to Produced"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgSending" transitionName="Sending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgSent" transitionName="Send"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSent" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgReceived" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgReceived" transitionName="Back to Received"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgConsuming" transitionName="Consuming"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgConsumed" transitionName="Consume"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsumed" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConfirmed" toStatusId="SmsgError" transitionName="Error"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgError" transitionName="Error"/>
+
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgProduced" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSending" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgSent" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgReceived" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsuming" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgConsumed" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgError" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgRejected" toStatusId="SmsgCancelled" transitionName="Cancel"/>
+
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgCancelled" toStatusId="SmsgProduced" transitionName="Back to Produced"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="SmsgCancelled" toStatusId="SmsgReceived" transitionName="Back to Received"/>
+        </seed-data>
+        <master>
+            <detail relationship="type"/><detail relationship="status"/><detail relationship="parent"/>
+            <detail relationship="remote"/><detail relationship="errors"/>
+        </master>
+    </entity>
+    <entity entity-name="SystemMessageType" package="moqui.service.message" use="configuration" cache="true">
+        <field name="systemMessageTypeId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="produceServiceName" type="text-medium"><description>Not used in automated processing, but useful
+            for documentation and tools in some cases.</description></field>
+        <field name="consumeServiceName" type="text-medium"><description>The service to call after a message is
+            received to consume it. Should implement the org.moqui.impl.SystemMessageServices.consume#SystemMessage
+            interface (just a systemMessageId in-parameter). Used by the consume#ReceivedSystemMessage service.</description></field>
+        <field name="produceAckServiceName" type="text-medium"><description>The service to call to produce an async
+            acknowledgement of a message. Should implement the org.moqui.impl.SystemMessageServices.produce#AckSystemMessage.
+            Once the message is produced should call the org.moqui.impl.SystemMessageServices.queue#SystemMessage service.</description></field>
+        <field name="produceAckOnConsumed" type="text-indicator"/>
+        <field name="sendServiceName" type="text-medium"><description>The service to call to send queued messages.
+            Should implement the org.moqui.impl.SystemMessageServices.send#SystemMessage interface (just a
+            systemMessageId in-parameter and remoteMessageId out-parameter). Used by the send#ProducedSystemMessage service,
+            and for that service must be specified or will result in an error.</description></field>
+        <field name="receiveServiceName" type="text-medium"><description>The service to call to save a received message.
+            Should implement the org.moqui.impl.SystemMessageServices.receive#SystemMessage interface.
+            If not specified receive#IncomingSystemMessage just saves the message directly.
+            When applicable, used by the send service as the service on the remote server to call to receive the message.</description></field>
+        <field name="contentType" type="text-short"/>
+        <field name="receivePath" type="text-medium"><description>Where to look for files on a remote server, syntax is implementation specific</description></field>
+        <field name="receiveFilePattern" type="text-medium"><description>Regular expression to match filenames in receivePath (optional)</description></field>
+        <field name="receiveResponseEnumId" type="id"/>
+        <field name="receiveMovePath" type="text-medium"><description>After successful receive move file to this path if receiveResponseEnumId = MsgRrMove</description></field>
+        <field name="sendPath" type="text-medium"><description>Where to put files on a remote server, syntax is implementation
+            specific and may include both path and a filename pattern</description></field>
+
+        <relationship type="one" title="MessageReceiveResponse" related="moqui.basic.Enumeration" short-alias="receiveResponseEnum">
+            <key-map field-name="receiveResponseEnumId"/></relationship>
+
+        <seed-data>
+            <moqui.basic.EnumerationType description="Message Receive Response" enumTypeId="MessageReceiveResponse"/>
+            <moqui.basic.Enumeration enumId="MsgRrNone" description="None" enumTypeId="MessageReceiveResponse"/>
+            <moqui.basic.Enumeration enumId="MsgRrDelete" description="Delete" enumTypeId="MessageReceiveResponse"/>
+            <moqui.basic.Enumeration enumId="MsgRrMove" description="Move" enumTypeId="MessageReceiveResponse"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="SystemMessageRemote" package="moqui.service.message" use="configuration" cache="true">
+        <field name="systemMessageRemoteId" type="id" is-pk="true"/>
+        <field name="description" type="text-medium"/>
+        <field name="sendUrl" type="text-medium" enable-audit-log="update"/>
+        <field name="receiveUrl" type="text-medium" enable-audit-log="update"/>
+        <field name="remoteCharset" type="text-short"/>
+        <field name="remoteAttributes" type="text-indicator"><description>May be useful for other transports, for SFTP servers
+            that do not support setting file attributes after put/upload set to N</description></field>
+        <field name="sendServiceName" type="text-medium"><description>Override for SystemMessageType.sendServiceName</description></field>
+        <field name="username" type="text-medium" enable-audit-log="update"><description>
+            Username for basic auth when sending to the remote system.
+            This user needs permission to run the remote service or whatever on the remote system receives the message.
+
+            Note: For a Moqui remote server the user needs authz for the org.moqui.impl.SystemMessageServices.receive#IncomingSystemMessage
+            service, ie the user should be in a group that has authz for the SystemMessageServices ArtifactGroup such as the
+            SYSMSG_RECEIVE user group (see SecurityTypeData.xml).
+        </description></field>
+        <field name="password" type="text-medium" encrypt="true" enable-audit-log="update">
+            <description>Username for basic auth when sending to the remote system.</description></field>
+        <field name="publicKey" type="text-long" enable-audit-log="update">
+            <description>Public Key for key based authentication, generally RSA PEM format</description></field>
+        <field name="privateKey" type="text-long" encrypt="true" enable-audit-log="update">
+            <description>Private Key for key based authentication, generally RSA PEM PKCS #8 format like OpenSSH</description></field>
+        <field name="remotePublicKey" type="text-long" enable-audit-log="update">
+            <description>Remote System's Public Key for decryption, signature validation, etc; generally RSA PEM or X.509 Certificate format</description></field>
+        <!-- potential future use, restrict receive message: <field name="authorizedIpAddresses" type="text-medium"/> -->
+        <field name="sharedSecret" type="text-medium" encrypt="true" enable-audit-log="update">
+            <description>Shared secret for auth on receive and/or sign on send.</description></field>
+        <field name="sendSharedSecret" type="text-medium" encrypt="true" enable-audit-log="update">
+            <description>Shared secret for auth on send if different from secret used to authorize on receive.</description></field>
+        <field name="authHeaderName" type="text-medium"/>
+        <field name="messageAuthEnumId" type="id"/>
+        <field name="sendAuthEnumId" type="id"><description>If send and receive auth mechanisms are different specify send auth method here</description></field>
+
+        <field name="systemMessageTypeId" type="id"><description>Optional. May be used when this remote is for one
+            type of message.</description></field>
+        <!-- for incoming message internal is the receiver, remote the sender; for outgoing messages internal is the sender, remote the receiver -->
+        <field name="internalId" type="text-short" enable-audit-log="update">
+            <description>Sender (outgoing) or receiver (incoming) ID (EDI: in ISA06/08; OAGIS in ApplicationArea.Sender/Receiver.ID)</description></field>
+        <field name="internalIdType" type="text-short"/>
+        <field name="internalAppCode" type="text-medium"><description>Application code (EDI: in GS02/03; OAGIS: in
+            ApplicationArea.Sender/Receiver elements, split among sub-elements)</description></field>
+        <field name="remoteId" type="text-short" enable-audit-log="update">
+            <description>Sender (incoming) or receiver (outgoing) ID (EDI: in ISA06/08; OAGIS in ApplicationArea.Sender/Receiver.ID)</description></field>
+        <field name="remoteIdType" type="text-short"/>
+        <field name="remoteAppCode" type="text-medium"><description>Application code (EDI: in GS02/03; OAGIS: in
+            ApplicationArea.Sender/Receiver elements, split among sub-elements)</description></field>
+
+        <field name="ackRequested" type="text-short"><description>Request acknowledgement? Possible values dependent on
+            message standard.</description></field>
+        <field name="usageCode" type="text-short"><description>Used for production versus test/etc. Possible values
+            dependent on message standard.</description></field>
+
+        <!-- for formatting EDI and other character delimited files -->
+        <field name="segmentTerminator" type="text-indicator"/>
+        <field name="elementSeparator" type="text-indicator"/>
+        <field name="componentDelimiter" type="text-indicator"/>
+        <field name="escapeCharacter" type="text-indicator"/>
+
+        <field name="preAuthMessageRemoteId" type="id">
+            <description>Remote system related to this remote system but for pre-auth purposes, like a separate single sign on server</description></field>
+
+        <relationship type="one" title="SystemMessageAuthType" related="moqui.basic.Enumeration" short-alias="messageAuthEnum">
+            <key-map field-name="messageAuthEnumId"/></relationship>
+        <relationship type="one" title="SendMessageAuthType" related="moqui.basic.Enumeration" short-alias="sendAuthEnum">
+            <key-map field-name="sendAuthEnumId"/></relationship>
+
+        <relationship type="one" related="moqui.service.message.SystemMessageType" short-alias="systemMessageType"/>
+        <relationship type="one" title="PreAuth" related="moqui.service.message.SystemMessageRemote" short-alias="preAuthMessageRemote">
+            <key-map field-name="preAuthMessageRemoteId"/></relationship>
+
+        <seed-data>
+            <moqui.basic.EnumerationType description="System Message Auth Type" enumTypeId="SystemMessageAuthType"/>
+            <moqui.basic.Enumeration enumId="SmatNone" description="No Auth" enumTypeId="SystemMessageAuthType"/>
+            <moqui.basic.Enumeration enumId="SmatLogin" description="User Login (basic, api_key, etc)" enumTypeId="SystemMessageAuthType"/>
+            <moqui.basic.Enumeration enumId="SmatHmacSha256" description="HMAC SHA-256" enumTypeId="SystemMessageAuthType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="SystemMessageEnumMap" package="moqui.service.message" use="configuration">
+        <description>For runtime configurable enum mappings for a particular remote system. For bi-directional
+            integrations enumerated value mappings should be one to one or round trip results will be inconsistent.
+            The PK structure forces one mapped value for each enumId.</description>
+        <field name="systemMessageRemoteId" type="id" is-pk="true"/>
+        <field name="enumId" type="id" is-pk="true"/>
+        <field name="mappedValue" type="text-short"/>
+        <relationship type="one" related="moqui.service.message.SystemMessageRemote" short-alias="remote"/>
+        <relationship type="one" related="moqui.basic.Enumeration" short-alias="remote"/>
+    </entity>
+    <entity entity-name="SystemMessageError" package="moqui.service.message" use="transactional" cache="never">
+        <field name="systemMessageId" type="id" is-pk="true"/>
+        <field name="errorDate" type="date-time" is-pk="true"/>
+        <field name="attemptedStatusId" type="id"/>
+        <!-- maybe for future use: <field name="reasonCode" type="text-short"/> -->
+        <field name="errorText" type="text-very-long"/>
+        <relationship type="one" related="moqui.service.message.SystemMessage"/>
+    </entity>
+    <!--
+        one possible approach for web/etc hooks: trigger send to potentially multiple SystemMessageRemote based on change to status for a certain message type
+        need more flexible configuration for web hooks for general system events, not just on generate SystemMessage meant to be sent to a different SystemMessageRemote?
+    <entity entity-name="SystemMessageHook" package="moqui.service.message">
+        <field name="systemMessageHookId" type="id" is-pk="true"/>
+        <field name="systemMessageTypeId" type="id"/>
+        <field name="statusId" type="id"/>
+        <field name="isOutgoing" type="text-indicator"/>
+        <field name="systemMessageRemoteId" type="id"/>
+        <relationship type="one" related="moqui.service.message.SystemMessageType" short-alias="type"/>
+        <relationship type="one" title="SystemMessage" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" related="moqui.service.message.SystemMessageRemote" short-alias="remote"/>
+    </entity>
+    <entity entity-name="SystemMessageHookStatus" package="moqui.service.message">
+        <field name="systemMessageHookId" type="id" is-pk="true"/>
+        <field name="systemMessageId" type="id" is-pk="true"/>
+        <field name="sentDate" type="text-indicator"><description>null until successfully sent</description></field>
+        <relationship type="one" related="moqui.service.message.SystemMessageHook" short-alias="hook"/>
+        <relationship type="one" related="moqui.service.message.SystemMessage" short-alias="message"/>
+    </entity>
+    -->
+</entities>

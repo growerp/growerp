@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="PartyPaymentMethodInfo">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="paymentMethodId"/>
+            <parameter name="paymentMethodTypeEnumId" default-value="PmtCreditCard"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentMethodId"/>
+            <parameter name="paymentMethodTypeEnumId"/>
+            <parameter name="paymentMethod" type="Map"/>
+
+            <parameter name="bankAccount" type="Map"/>
+            <parameter name="bankAccountTypeEnum" type="Map"/>
+            <parameter name="isBankAccount" type="Boolean"/>
+
+            <parameter name="creditCard" type="Map"/>
+            <parameter name="creditCardTypeEnum" type="Map"/>
+            <parameter name="expireMonth"/><parameter name="expireYear"/>
+            <parameter name="maskedCardNumber"/>
+            <parameter name="isCreditCard" type="Boolean"/>
+
+            <parameter name="postalContactMechId"/>
+            <parameter name="postalAddress" type="Map"/>
+            <parameter name="postalAddressStateGeo" type="Map"/>
+            <parameter name="telecomContactMechId"/>
+            <parameter name="telecomNumber" type="Map"/>
+            <parameter name="emailContactMechId"/>
+            <parameter name="emailAddress"/>
+        </out-parameters>
+        <actions>
+            <if condition="paymentMethodId">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/></if>
+
+            <if condition="paymentMethod"><set field="paymentMethodTypeEnumId" from="paymentMethod.paymentMethodTypeEnumId"/></if>
+            <set field="isBankAccount" from="paymentMethodTypeEnumId == 'PmtBankAccount'"/>
+            <set field="isCreditCard" from="paymentMethodTypeEnumId == 'PmtCreditCard'"/>
+
+            <if condition="paymentMethod">
+                <set field="bankAccount" from="paymentMethod.'mantle.account.method.BankAccount'"/>
+                <set field="bankAccountTypeEnum" from="bankAccount?.'BankAccountType#moqui.basic.Enumeration'"/>
+
+                <set field="creditCard" from="paymentMethod.'mantle.account.method.CreditCard'"/>
+                <set field="creditCardTypeEnum" from="creditCard?.'CreditCardType#moqui.basic.Enumeration'"/>
+                <set field="expireMonth" from="creditCard?.expireDate ? creditCard.expireDate.substring(0, creditCard.expireDate.indexOf('/')) : null"/>
+                <set field="expireYear" from="creditCard?.expireDate ? creditCard.expireDate.substring(creditCard.expireDate.indexOf('/')+1) : null"/>
+                <set field="cardNumber" from="creditCard?.cardNumber"/>
+                <set field="maskedCardNumber" from="cardNumber ? '*'.padRight(cardNumber.length() - 4, '*') + cardNumber.substring(cardNumber.length() - 4, cardNumber.length()) : ''"/>
+
+                <!-- TODO: support other payment method types -->
+
+                <set field="postalAddress" from="paymentMethod.'mantle.party.contact.PostalAddress'"/>
+                <set field="postalAddressStateGeo" from="postalAddress?.'StateProvince#moqui.basic.Geo'"/>
+                <set field="postalContactMechId" from="paymentMethod.postalContactMechId"/>
+
+                <set field="telecomNumber" from="paymentMethod.'mantle.party.contact.TelecomNumber'"/>
+                <set field="telecomContactMechId" from="paymentMethod.telecomContactMechId"/>
+                <set field="emailContactMech" from="paymentMethod.'Email#mantle.party.contact.ContactMech'"/>
+                <set field="emailContactMechId" from="paymentMethod.emailContactMechId"/>
+                <set field="emailAddress" from="emailContactMech?.infoString"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="get" noun="PartyPaymentMethodInfoList">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+            <parameter name="paymentMethodTypeEnumId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="methodInfoList" type="List"><parameter name="infoMap" type="Map">
+                <parameter name="paymentMethodId"/>
+                <parameter name="paymentMethodTypeEnumId"/>
+                <parameter name="paymentMethod" type="Map"/>
+
+                <parameter name="bankAccount" type="Map"/>
+                <parameter name="bankAccountTypeEnum" type="Map"/>
+                <parameter name="isBankAccount" type="Boolean"/>
+
+                <parameter name="creditCard" type="Map"/>
+                <parameter name="creditCardTypeEnum" type="Map"/>
+                <parameter name="expireMonth"/><parameter name="expireYear"/>
+                <parameter name="maskedCardNumber"/>
+                <parameter name="isCreditCard" type="Boolean"/>
+
+                <parameter name="postalContactMechId"/>
+                <parameter name="postalAddress" type="Map"/>
+                <parameter name="postalAddressStateGeo" type="Map"/>
+                <parameter name="telecomContactMechId"/>
+                <parameter name="telecomNumber" type="Map"/>
+                <parameter name="emailContactMechId"/>
+                <parameter name="emailAddress"/>
+            </parameter></parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="PaymentMethod" list="paymentMethodList">
+                <date-filter/>
+                <econdition field-name="ownerPartyId" from="partyId"/>
+                <econdition field-name="paymentMethodTypeEnumId" ignore-if-empty="true"/>
+                <order-by field-name="-fromDate"/><!-- get the most recent one if there is more than one -->
+            </entity-find>
+
+            <set field="methodInfoList" from="[]"/>
+            <iterate list="paymentMethodList" entry="paymentMethod">
+                <set field="infoMap" from="[paymentMethodId:paymentMethod.paymentMethodId, paymentMethod:paymentMethod,
+                        paymentMethodTypeEnumId:paymentMethod.paymentMethodTypeEnumId]"/>
+
+                <set field="infoMap.bankAccount" from="paymentMethod.'mantle.account.method.BankAccount'"/>
+                <set field="infoMap.bankAccountTypeEnum" from="infoMap.bankAccount?.'BankAccountType#moqui.basic.Enumeration'"/>
+                <set field="infoMap.isBankAccount" from="paymentMethod.paymentMethodTypeEnumId == 'PmtBankAccount'"/>
+
+                <set field="creditCard" from="paymentMethod.'mantle.account.method.CreditCard'"/>
+                <set field="infoMap.creditCard" from="creditCard"/>
+                <set field="infoMap.creditCardTypeEnum" from="creditCard?.'CreditCardType#moqui.basic.Enumeration'"/>
+                <set field="infoMap.expireMonth" from="creditCard?.expireDate ? creditCard.expireDate.substring(0, creditCard.expireDate.indexOf('/')) : null"/>
+                <set field="infoMap.expireYear" from="creditCard?.expireDate ? creditCard.expireDate.substring(creditCard.expireDate.indexOf('/')+1) : null"/>
+                <set field="cardNumber" from="creditCard?.cardNumber"/>
+                <set field="infoMap.maskedCardNumber" from="cardNumber ? '*'.padRight(cardNumber.length() - 4, '*') + cardNumber.substring(cardNumber.length() - 4, cardNumber.length()) : ''"/>
+                <set field="infoMap.isCreditCard" from="paymentMethod.paymentMethodTypeEnumId == 'PmtCreditCard'"/>
+
+                <!-- TODO: support other payment method types -->
+
+                <set field="infoMap.postalAddress" from="paymentMethod.'mantle.party.contact.PostalAddress'"/>
+                <set field="infoMap.postalAddressStateGeo" from="infoMap.postalAddress?.'StateProvince#moqui.basic.Geo'"/>
+                <set field="infoMap.postalContactMechId" from="paymentMethod.postalContactMechId"/>
+
+                <set field="infoMap.telecomNumber" from="paymentMethod.'mantle.party.contact.TelecomNumber'"/>
+                <set field="infoMap.telecomContactMechId" from="paymentMethod.telecomContactMechId"/>
+                <set field="infoMap.emailContactMech" from="paymentMethod.'Email#mantle.party.contact.ContactMech'"/>
+                <set field="infoMap.emailContactMechId" from="paymentMethod.emailContactMechId"/>
+                <set field="infoMap.emailAddress" from="infoMap.emailContactMech?.infoString"/>
+
+                <script>methodInfoList.add(infoMap)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="store" noun="PaymentMethodInfo">
+        <in-parameters>
+            <parameter name="partyId" required="true"/>
+
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
+            <parameter name="paymentMethodId"/>
+            <parameter name="paymentMethodTypeEnumId" default-value="PmtCreditCard"/>
+
+            <auto-parameters entity-name="mantle.account.method.BankAccount" include="nonpk">
+                <exclude field-name="lastCheckNumber"/><exclude field-name="ledgerBalance"/>
+                <exclude field-name="availableBalance"/><exclude field-name="balanceDate"/>
+            </auto-parameters>
+            <parameter name="typeEnumId" default-value="BatChecking"/>
+
+            <auto-parameters entity-name="mantle.account.method.CreditCard" include="nonpk">
+                <exclude field-name="cardNumberLookupHash"/><exclude field-name="consecutiveFailedAuths"/>
+                <exclude field-name="lastFailedAuthDate"/><exclude field-name="consecutiveFailedNsf"/>
+                <exclude field-name="lastFailedNsfDate"/>
+            </auto-parameters>
+            <parameter name="cardNumber"><credit-card/></parameter><!-- not required because often empty on update, ie for public facing masked cards -->
+            <parameter name="validateSecurityCode"><description>Not persisted, just passed through so available to SECA rules for validation by gateway, etc</description></parameter>
+            <parameter name="expireMonth"/>
+            <parameter name="expireYear"/>
+            <parameter name="expireDate" default-value="${expireMonth?:''}/${expireYear?:''}">
+                <time-range after="now" format="MM/yyyy"/></parameter>
+
+            <parameter name="postalContactMechId"/>
+            <parameter name="postalContactMechPurposeId" default-value="PostalBilling"/>
+            <auto-parameters entity-name="mantle.party.contact.PostalAddress" include="nonpk"/>
+            <parameter name="toName" default="companyNameOnAccount ?: (firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null)"/>
+            <parameter name="attnName" default="companyNameOnAccount &amp;&amp; firstNameOnAccount ? firstNameOnAccount + ' ' + lastNameOnAccount : null"/>
+
+            <parameter name="telecomContactMechId"/>
+            <parameter name="telecomContactMechPurposeId" default-value="PhoneBilling"/>
+            <auto-parameters entity-name="mantle.party.contact.TelecomNumber" include="nonpk"/>
+            <parameter name="areaCode"><text-digits/></parameter>
+            <parameter name="contactNumber"><matches regexp="^\d\d[-\. \d]*\d\d$" message="Please enter a valid phone number"/></parameter>
+
+            <parameter name="emailContactMechId"/>
+            <parameter name="emailContactMechPurposeId" default-value="EmailBilling"/>
+            <parameter name="emailAddress"><text-email/></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentMethodId"/>
+            <parameter name="postalContactMechId"/>
+            <parameter name="telecomContactMechId"/>
+            <parameter name="emailContactMechId"/>
+        </out-parameters>
+        <actions>
+            <set field="origPaymentMethodId" from="paymentMethodId"/>
+            <if condition="paymentMethodId">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+                <set field="paymentMethodTypeEnumId" from="paymentMethod.paymentMethodTypeEnumId"/>
+                <if condition="!postalContactMechId"><set field="postalContactMechId" from="paymentMethod.postalContactMechId"/></if>
+                <if condition="!telecomContactMechId"><set field="telecomContactMechId" from="paymentMethod.telecomContactMechId"/></if>
+                <if condition="!emailContactMechId"><set field="emailContactMechId" from="paymentMethod.emailContactMechId"/></if>
+            </if>
+
+            <if condition="paymentMethodId"><then>
+                <!-- if update (paymentMethodId) and main field for type specified then update it -->
+                <service-call name="mantle.party.ContactServices.store#PartyContactInfo" in-map="context" out-map="context"/>
+            </then><else>
+                <!-- if create (!paymentMethodId) and *ContactMechId just use it, otherwise create contact mech -->
+                <if condition="!postalContactMechId &amp;&amp; address1">
+                    <service-call name="mantle.party.ContactServices.create#PostalAddress" out-map="paOut"
+                            in-map="context + [contactMechPurposeId:postalContactMechPurposeId]"/>
+                    <set field="postalContactMechId" from="paOut.contactMechId"/>
+                </if>
+                <if condition="!telecomContactMechId &amp;&amp; contactNumber">
+                    <service-call name="mantle.party.ContactServices.create#TelecomNumber" out-map="tnOut"
+                            in-map="context + [contactMechPurposeId:telecomContactMechPurposeId]"/>
+                    <set field="telecomContactMechId" from="tnOut.contactMechId"/>
+                </if>
+                <if condition="!emailContactMechId &amp;&amp; emailAddress">
+                    <service-call name="mantle.party.ContactServices.create#EmailAddress" out-map="emOut"
+                            in-map="context + [contactMechPurposeId:emailContactMechPurposeId]"/>
+                    <set field="emailContactMechId" from="emOut.contactMechId"/>
+                </if>
+            </else></if>
+
+            <!-- update PaymentMethod last so we know new postalContactMechId and telecomContactMechId updates (if applicable) -->
+            <!-- TODO: support other payment method types -->
+            <if condition="paymentMethodId"><then>
+                <if condition="paymentMethodTypeEnumId == 'PmtCreditCard'"><then>
+                    <service-call name="mantle.account.PaymentMethodServices.update#CreditCard" in-map="context" out-map="context"/>
+                </then><else-if condition="paymentMethodTypeEnumId == 'PmtBankAccount'">
+                    <service-call name="mantle.account.PaymentMethodServices.update#BankAccount" in-map="context" out-map="context"/>
+                </else-if></if>
+            </then><else>
+                <if condition="paymentMethodTypeEnumId == 'PmtCreditCard'"><then>
+                    <service-call name="mantle.account.PaymentMethodServices.create#CreditCard" out-map="context"
+                            in-map="context + [ownerPartyId:partyId]"/>
+                </then><else-if condition="paymentMethodTypeEnumId == 'PmtBankAccount'">
+                    <service-call name="mantle.account.PaymentMethodServices.create#BankAccount" out-map="context"
+                            in-map="context + [ownerPartyId:partyId]"/>
+                </else-if></if>
+            </else></if>
+            <!-- NOTE: out paymentMethodId set from service-call.@out-map=context -->
+
+            <if condition="origPaymentMethodId &amp;&amp; origPaymentMethodId != paymentMethodId">
+                <!-- update Payment.paymentMethodId and .toPaymentMethodId on open Payment records -->
+                <entity-find entity-name="mantle.account.payment.Payment" list="paymentList">
+                    <econdition field-name="paymentMethodId" from="origPaymentMethodId"/>
+                    <econdition field-name="statusId" operator="in" value="PmntProposed,PmntPromised,PmntAuthorized,PmntDeclined"/>
+                    <econdition field-name="paymentAuthCode" operator="is-null"/>
+                </entity-find>
+                <iterate list="paymentList" entry="payment">
+                    <set field="payment.paymentMethodId" from="paymentMethodId"/>
+                    <entity-update value-field="payment"/>
+                    <message>Updated Payment Method on Payment ${payment.paymentId}</message>
+                </iterate>
+                <entity-find entity-name="mantle.account.payment.Payment" list="toPaymentList">
+                    <econdition field-name="toPaymentMethodId" from="origPaymentMethodId"/>
+                    <econdition field-name="statusId" operator="in" value="PmntProposed,PmntPromised,PmntAuthorized,PmntDeclined"/>
+                </entity-find>
+                <iterate list="toPaymentList" entry="toPayment">
+                    <set field="toPayment.toPaymentMethodId" from="paymentMethodId"/>
+                    <entity-update value-field="toPayment"/>
+                    <message>Updated To Payment Method on Payment ${toPayment.paymentId}</message>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="PaymentMethodMutable">
+        <description>Update limited fields a PaymentMethod record without cloning it (as store#PaymentMethodInfo does on update)</description>
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="description"/>
+            <parameter name="purposeEnumId"/>
+            <parameter name="trustLevelEnumId"/>
+            <parameter name="paymentFraudEvidenceId"/>
+            <parameter name="glAccountId"/>
+            <parameter name="gatewayCimId"/>
+            <parameter name="thruDate" type="Timestamp"/>
+            <parameter name="openedDate" type="Timestamp"/>
+            <parameter name="ledgerBalance" type="BigDecimal"/>
+            <parameter name="availableBalance" type="BigDecimal"/>
+            <parameter name="balanceDate" type="Timestamp"/>
+            <parameter name="thruDateSetAuto"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.account.method.PaymentMethod" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="PaymentMethod">
+        <description>Expire the PaymentMethod, effectively deleting it without an actual delete.</description>
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="thruDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <actions>
+            <entity-find-count entity-name="mantle.account.payment.Payment" count-field="paymentCount">
+                <econditions combine="or">
+                    <econdition field-name="paymentMethodId"/>
+                    <econdition field-name="toPaymentMethodId" from="paymentMethodId"/>
+                </econditions>
+                <econdition field-name="statusId" operator="in" value="PmntProposed,PmntPromised,PmntAuthorized,PmntDeclined"/>
+            </entity-find-count>
+            <if condition="paymentCount &gt; 0">
+                <service-call name="update#mantle.account.method.PaymentMethod" in-map="[paymentMethodId:paymentMethodId, thruDateSetAuto:'Y']"/>
+                <return type="danger" message="Payment method ${paymentMethodId} has active payments and will be deleted once completed"/>
+            </if>
+            
+            <service-call name="update#mantle.account.method.PaymentMethod" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="checkDelete" noun="PaymentPaymentMethods">
+        <description>Check PaymentMethod records associated with Payment, if thruDateSetAuto is Y then call delete#PaymentMethod to expire</description>
+        <in-parameters><parameter name="paymentId" required="true"/></in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment"/>
+            <if condition="payment?.statusId in ['PmntProposed', 'PmntPromised', 'PmntAuthorized', 'PmntDeclined']"><return/></if>
+            <if condition="payment?.paymentMethodId">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod">
+                    <field-map field-name="paymentMethodId" from="payment.paymentMethodId"/></entity-find-one>
+                <if condition="paymentMethod.thruDateSetAuto == 'Y'">
+                    <service-call name="mantle.account.PaymentMethodServices.delete#PaymentMethod"
+                            in-map="[paymentMethodId:paymentMethod.paymentMethodId]"/>
+                </if>
+            </if>
+            <if condition="payment?.toPaymentMethodId">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod">
+                    <field-map field-name="paymentMethodId" from="payment.toPaymentMethodId"/></entity-find-one>
+                <if condition="paymentMethod.thruDateSetAuto == 'Y'">
+                    <service-call name="mantle.account.PaymentMethodServices.delete#PaymentMethod"
+                            in-map="[paymentMethodId:paymentMethod.paymentMethodId]"/>
+                </if>
+            </if>
+        </actions>
+    </service>
+    <service verb="expunge" noun="PaymentMethod">
+        <description>This does an actual delete to remove payment method information from the system. It will delete the
+            record with the specified ID and all cloned records back to the original (because of the clone on update
+            to make immutable). This should only be used when total removal of data is needed.</description>
+        <in-parameters><parameter name="paymentMethodId"/></in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+
+            <if condition="paymentMethod.originalPaymentMethodId != null"><then>
+                <entity-find entity-name="mantle.account.method.PaymentMethod" list="pmList">
+                    <econdition field-name="originalPaymentMethodId" from="paymentMethod.originalPaymentMethodId"/>
+                </entity-find>
+
+                <iterate list="pmList" entry="pmValue">
+                    <!-- TODO: clear paymentMethodId references for FK error on delete -->
+                    <service-call name="delete#mantle.account.method.BankAccount" in-map="[paymentMethodId:pmValue.paymentMethodId]"/>
+                    <service-call name="delete#mantle.account.method.CreditCard" in-map="[paymentMethodId:pmValue.paymentMethodId]"/>
+                    <service-call name="delete#mantle.account.method.PaymentMethod" in-map="[paymentMethodId:pmValue.paymentMethodId]"/>
+                </iterate>
+
+                <!-- if the original record doesn't have originalPaymentMethodId populated it won't have been deleted above -->
+                <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="origPm">
+                    <field-map field-name="paymentMethodId" from="paymentMethod.originalPaymentMethodId"/></entity-find-one>
+                <if condition="origPm">
+                    <service-call name="delete#mantle.account.method.BankAccount" in-map="[paymentMethodId:origPm.paymentMethodId]"/>
+                    <service-call name="delete#mantle.account.method.CreditCard" in-map="[paymentMethodId:origPm.paymentMethodId]"/>
+                    <service-call name="delete#mantle.account.method.PaymentMethod" in-map="[paymentMethodId:origPm.paymentMethodId]"/>
+                </if>
+            </then><else>
+                <!-- TODO: clear paymentMethodId references for FK error on delete -->
+                <service-call name="delete#mantle.account.method.BankAccount" in-map="[paymentMethodId:paymentMethodId]"/>
+                <service-call name="delete#mantle.account.method.CreditCard" in-map="[paymentMethodId:paymentMethodId]"/>
+                <service-call name="delete#mantle.account.method.PaymentMethod" in-map="[paymentMethodId:paymentMethodId]"/>
+            </else></if>
+        </actions>
+    </service>
+
+    <!-- ========================================= -->
+    <!-- ========== CreditCard Services ========== -->
+    <!-- ========================================= -->
+
+    <service verb="create" noun="CreditCard">
+        <description>Create a Credit Card (and the corresponding PaymentMethod record)</description>
+        <in-parameters>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
+            <parameter name="ownerPartyId" default="ec.user.userAccount.partyId"/>
+            <auto-parameters entity-name="mantle.account.method.CreditCard" include="nonpk"/>
+            <parameter name="expireDate" required="true">
+                <time-range after="now" format="MM/yyyy"/>
+                <!-- additional check for expireDate, may come through as only a '/' and still pass the parameter required validation,
+                    time-range validation doesn't fail because not a valid date so can't compare;
+                    require at least 6 characters (1 for month, 1 for slash, 4 for year -->
+                <text-length min="6"/>
+            </parameter>
+            <parameter name="cardNumber" required="true"><credit-card/></parameter>
+            <parameter name="validateSecurityCode"><description>Not persisted, just passed through so available to SECA rules for validation by gateway, etc</description></parameter>
+
+            <parameter name="paymentMethodTypeEnumId" default-value="PmtCreditCard"/>
+            <parameter name="fromDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="paymentMethodId" required="true"/></out-parameters>
+        <actions>
+            <if condition="!description">
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="creditCardTypeEnum">
+                    <field-map field-name="enumId" from="creditCardTypeEnumId"/>
+                </entity-find-one>
+                <set field="cardNumberDisplay" from="cardNumber ? '*'.padRight(cardNumber.length() - 4, '*') + cardNumber.substring(cardNumber.length() - 4, cardNumber.length()) : ''"/>
+                <set field="description" from="(creditCardTypeEnum?.description ?: 'Credit Card') + ' ' + cardNumberDisplay"/>
+            </if>
+            <entity-make-value entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+            <entity-set value-field="paymentMethod" include="nonpk"/>
+            <entity-sequenced-id-primary value-field="paymentMethod"/>
+            <set field="paymentMethod.fromDate" from="fromDate"/>
+            <set field="paymentMethod.paymentMethodTypeEnumId" from="paymentMethodTypeEnumId"/>
+            <entity-create value-field="paymentMethod"/>
+
+            <entity-make-value entity-name="mantle.account.method.CreditCard" value-field="creditCard"/>
+            <set field="creditCard.paymentMethodId" from="paymentMethod.paymentMethodId"/>
+            <entity-set value-field="creditCard" include="nonpk"/>
+            <entity-create value-field="creditCard"/>
+
+            <set field="paymentMethodId" from="paymentMethod.paymentMethodId"/>
+        </actions>
+    </service>
+    <service verb="update" noun="CreditCard">
+        <description>
+            Update a Credit Card for a Party. CreditCard is immutable, so this creates a new one and associates
+            it with the Party, expiring the old one (if there are any changes).
+
+            NOTE: if you want to update the PaymentMethod.paymentFraudEvidenceId or .trustLevelEnumId fields, do so
+            directly on the PaymentMethod entity (do not use this service).
+        </description>
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk">
+                <exclude field-name="ownerPartyId"/></auto-parameters>
+            <auto-parameters entity-name="mantle.account.method.CreditCard" include="nonpk"/>
+            <parameter name="validateSecurityCode"><description>Not persisted, just passed through so available to SECA rules for validation by gateway, etc</description></parameter>
+        </in-parameters>
+        <out-parameters><parameter name="paymentMethodId" required="true"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.CreditCard" value-field="origCreditCard"/>
+            <!-- don't allow clearing cardNumber even if null passed to service, needed for admin UI so can be left empty to retain masked number -->
+            <if condition="!cardNumber"><set field="cardNumber" from="origCreditCard.cardNumber"/></if>
+            <set field="newCreditCard" from="origCreditCard.cloneValue()"/>
+            <entity-set value-field="newCreditCard" include="nonpk"/>
+
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="origPaymentMethod"/>
+            <set field="newPaymentMethod" from="origPaymentMethod.cloneValue()"/>
+            <entity-set value-field="newPaymentMethod" include="nonpk"/>
+
+            <if condition="newCreditCard == origCreditCard &amp;&amp; newPaymentMethod == origPaymentMethod">
+                <log message="No fields were different for Credit Card with ID ${paymentMethodId}, not updating"/>
+                <return/>
+            </if>
+
+            <!-- see if owner is OrgInternal, if is then update in place (for configuration, files, transactions, etc maintenance) -->
+            <entity-find-one entity-name="mantle.party.PartyRole" value-field="ownerOrgRole">
+                <field-map field-name="partyId" from="origPaymentMethod.ownerPartyId"/>
+                <field-map field-name="roleTypeId" value="OrgInternal"/>
+            </entity-find-one>
+            <if condition="ownerOrgRole != null"><then>
+                <entity-update value-field="newPaymentMethod"/>
+                <entity-update value-field="newCreditCard"/>
+            </then><else>
+                <!-- expire the old record -->
+                <set field="origPaymentMethod.thruDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="origPaymentMethod"/>
+
+                <!-- create the new records -->
+                <set field="newPaymentMethod.paymentMethodId" from="null"/>
+                <entity-sequenced-id-primary value-field="newPaymentMethod"/>
+                <set field="newPaymentMethod.fromDate" from="ec.user.nowTimestamp"/>
+                <set field="newPaymentMethod.originalPaymentMethodId" from="origPaymentMethod.originalPaymentMethodId ?: origPaymentMethod.paymentMethodId"/>
+                <if condition="!newPaymentMethod.description">
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="creditCardTypeEnum">
+                        <field-map field-name="enumId" from="newCreditCard.creditCardTypeEnumId"/></entity-find-one>
+                    <set field="cardNumberDisplay" from="cardNumber ? '*'.padRight(cardNumber.length() - 4, '*') + cardNumber.substring(cardNumber.length() - 4, cardNumber.length()) : ''"/>
+                    <set field="newPaymentMethod.description" from="(creditCardTypeEnum?.description ?: 'Credit Card') + ' ' + cardNumberDisplay"/>
+                </if>
+                <entity-create value-field="newPaymentMethod"/>
+
+                <set field="newCreditCard.paymentMethodId" from="newPaymentMethod.paymentMethodId"/>
+                <entity-create value-field="newCreditCard"/>
+
+                <set field="paymentMethodId" from="newPaymentMethod.paymentMethodId"/>
+            </else></if>
+        </actions>
+    </service>
+
+    <!-- ========================================== -->
+    <!-- ========== BankAccount Services ========== -->
+    <!-- ========================================== -->
+
+    <service verb="create" noun="BankAccount">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
+            <parameter name="ownerPartyId" default="ec.user.userAccount.partyId"/>
+            <auto-parameters entity-name="mantle.account.method.BankAccount" include="nonpk"/>
+
+            <parameter name="paymentMethodTypeEnumId" default-value="PmtBankAccount"/>
+            <parameter name="fromDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters><parameter name="paymentMethodId"/></out-parameters>
+        <actions>
+            <if condition="!description"><set field="description" value="${bankName ?: 'Bank Account'} ${accountNumber ?: ''}"/></if>
+            <service-call name="create#mantle.account.method.PaymentMethod" in-map="context" out-map="context"/>
+            <service-call name="create#mantle.account.method.BankAccount" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="BankAccount">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethod" include="nonpk"/>
+            <auto-parameters entity-name="mantle.account.method.BankAccount" include="nonpk"/>
+        </in-parameters>
+        <out-parameters><parameter name="paymentMethodId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.BankAccount" value-field="origBankAccount"/>
+            <set field="newBankAccount" from="origBankAccount.cloneValue()"/>
+            <entity-set value-field="newBankAccount" include="nonpk" set-if-empty="true"/>
+
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="origPaymentMethod"/>
+            <set field="newPaymentMethod" from="origPaymentMethod.cloneValue()"/>
+            <entity-set value-field="newPaymentMethod" include="nonpk"/>
+
+            <if condition="newBankAccount == origBankAccount &amp;&amp; newPaymentMethod == origPaymentMethod">
+                <log message="No fields were different for Bank Account with ID ${paymentMethodId}, not updating"/>
+                <return/>
+            </if>
+
+            <entity-find-one entity-name="mantle.party.PartyRole" value-field="ownerOrgRole">
+                <field-map field-name="partyId" from="origPaymentMethod.ownerPartyId"/>
+                <field-map field-name="roleTypeId" value="OrgInternal"/>
+            </entity-find-one>
+            <if condition="ownerOrgRole != null"><then>
+                <entity-update value-field="newPaymentMethod"/>
+                <entity-update value-field="newBankAccount"/>
+            </then><else>
+                <!-- expire the old record -->
+                <set field="origPaymentMethod.thruDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="origPaymentMethod"/>
+
+                <!-- create the new records -->
+                <set field="newPaymentMethod.paymentMethodId" from="null"/>
+                <entity-sequenced-id-primary value-field="newPaymentMethod"/>
+                <set field="newPaymentMethod.fromDate" from="ec.user.nowTimestamp"/>
+                <set field="newPaymentMethod.originalPaymentMethodId" from="origPaymentMethod.originalPaymentMethodId ?: origPaymentMethod.paymentMethodId"/>
+                <if condition="!newPaymentMethod.description">
+                    <entity-find-one entity-name="moqui.basic.Enumeration" value-field="typeEnum">
+                        <field-map field-name="enumId" from="newBankAccount.typeEnumId"/></entity-find-one>
+                    <set field="newPaymentMethod.description" from="(typeEnum?.description ?: 'Bank Account') + ' ' + newBankAccount.accountNumber"/>
+                </if>
+                <entity-create value-field="newPaymentMethod"/>
+
+                <set field="newBankAccount.paymentMethodId" from="newPaymentMethod.paymentMethodId"/>
+                <entity-create value-field="newBankAccount"/>
+
+                <set field="paymentMethodId" from="newPaymentMethod.paymentMethodId"/>
+            </else></if>
+        </actions>
+    </service>
+    <service verb="update" noun="BankAccountMutable">
+        <description>Update limited fields on PaymentMethod and BankAccount records without cloning (as update#BankAccount does)</description>
+        <implements service="mantle.account.PaymentMethodServices.update#PaymentMethodMutable"/>
+        <in-parameters>
+            <parameter name="lastCheckNumber" type="Long"/>
+            <!-- Parameters for NACHA fields, constraints based on spec -->
+            <parameter name="nachaImmedDest"><text-digits/><text-length min="9" max="10"/></parameter>
+            <parameter name="nachaImmedOrig"><text-digits/><text-length min="9" max="10"/></parameter>
+            <parameter name="nachaImmedDestName"><text-length max="23"/></parameter>
+            <parameter name="nachaImmedOrigName"><text-length max="23"/></parameter>
+            <parameter name="nachaCompanyName"><text-length max="16"/></parameter>
+            <parameter name="nachaDiscrData"><text-length max="20"/></parameter>
+            <parameter name="nachaCompanyId"><text-length max="10"/></parameter>
+            <parameter name="nachaOdfiId"><text-digits/><text-length max="8"/></parameter>
+            <parameter name="nachaEntryDescription"><text-length max="10"/></parameter>
+            <parameter name="nachaAddNewLine"/>
+            <parameter name="nachaAddOffsetRecord"/>
+            <parameter name="posPayBankNumber"/>
+            <parameter name="posPayFormatEnumId"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.account.method.PaymentMethod" in-map="context"/>
+            <service-call name="update#mantle.account.method.BankAccount" in-map="context"/>
+        </actions>
+    </service>
+
+    <!-- ===================================================== -->
+    <!-- ========== Payment Method Content Services ========== -->
+    <!-- ===================================================== -->
+
+    <service verb="get" noun="PaymentMethodContentLocation">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="contentTypeEnumIdList" type="List" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentLocation"/>
+            <parameter name="paymentMethodContent"/>
+        </out-parameters>
+        <actions>
+            <iterate list="contentTypeEnumIdList" entry="contentTypeEnumId">
+                <entity-find entity-name="mantle.account.method.PaymentMethodContent" list="paymentMethodContentList">
+                    <econdition field-name="paymentMethodId"/><econdition field-name="contentTypeEnumId"/>
+                    <order-by field-name="-contentDate"/></entity-find>
+                <if condition="paymentMethodContentList">
+                    <set field="paymentMethodContent" from="paymentMethodContentList[0]"/>
+                    <break/>
+                </if>
+            </iterate>
+            <set field="contentLocation" from="paymentMethodContent ? paymentMethodContent.contentLocation : null"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="PaymentMethodContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethodContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="paymentMethodContentId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.account.method.PaymentMethodContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.account.PaymentMethodServices.save#PaymentMethodContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="PaymentMethodContent">
+        <in-parameters>
+            <parameter name="paymentMethodContentId" required="true"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethodContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethodContent" value-field="paymentMethodContent"/>
+                <service-call name="mantle.account.PaymentMethodServices.save#PaymentMethodContentFile" out-map="context"
+                        in-map="context + [paymentMethodId:paymentMethodContent.paymentMethodId, saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.account.method.PaymentMethodContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="PaymentMethodContentFile">
+        <in-parameters>
+            <parameter name="paymentMethodContentId" required="true"/>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/paymentMethod/${paymentMethodId}/content_${paymentMethodContentId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.account.method.PaymentMethodContent"
+                    in-map="[paymentMethodContentId:paymentMethodContentId, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+
+    <!-- ================================================== -->
+    <!-- ========== Payment Method File Services ========== -->
+    <!-- ================================================== -->
+
+    <service verb="update" noun="PaymentMethodFileComplete">
+        <in-parameters>
+            <parameter name="paymentMethodFileId" required="true"/>
+            <auto-parameters entity-name="mantle.account.method.PaymentMethodFile" include="nonpk"/>
+            <parameter name="fileText" allow-html="any"/>
+            <parameter name="paymentList" type="List"/>
+            <parameter name="outgoingStatusId" default-value="PmntDelivered"/>
+            <parameter name="incomingStatusId" default-value="PmntDelivered"><description>Could also be PmntAuthorized</description></parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethodFile" value-field="paymentMethodFile"/>
+            <set field="paymentMethodId" from="paymentMethodFile.paymentMethodId"/>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+
+            <iterate list="paymentList" entry="payment">
+                <!-- set paymentMethodFileId and update statusId on all Payment records -->
+                <set field="outgoing" from="payment.fromPartyId == paymentMethod.ownerPartyId"/>
+                <service-call name="update#mantle.account.payment.Payment"
+                        in-map="[paymentId:payment.paymentId, paymentMethodFileId:paymentMethodFileId,
+                            statusId:(outgoing ? outgoingStatusId : incomingStatusId)]"/>
+            </iterate>
+
+            <!-- save full file text, etc to PaymentMethodFile -->
+            <service-call name="update#mantle.account.method.PaymentMethodFile" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="cancel" noun="PaymentMethodFile">
+        <description>Cancel PaymentMethodFile, makes sure no SystemMessage already sent, cancels any unsent SystemMessages,
+            clears paymentMethodFileId on all related Payment records, and if Enumeration.optionIndicator == 'Y' resets Payment
+            status from Delivered to outgoingStatusId or incomingStatusId</description>
+        <in-parameters>
+            <parameter name="paymentMethodFileId" required="true"/>
+            <parameter name="outgoingStatusId" default-value="PmntAuthorized"/>
+            <parameter name="incomingStatusId" default-value="PmntAuthorized"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethodFile" value-field="paymentMethodFile"/>
+            <if condition="paymentMethodFile.isCancelled == 'Y'">
+                <return type="danger" message="File ${paymentMethodFileId} already cancelled"/></if>
+
+            <set field="fileTypeEnum" from="paymentMethodFile.fileTypeEnum"/>
+            <set field="paymentMethodFileType" from="paymentMethodFile.paymentMethodFileType"/>
+            <if condition="paymentMethodFileType?.systemMessageTypeId &amp;&amp; paymentMethodFileType?.systemMessageRemoteId">
+                <!-- check SystemMessage, if sending or sent fail, if not cancel -->
+                <entity-find entity-name="moqui.service.message.SystemMessage" list="systemMessageList">
+                    <econdition field-name="paymentMethodFileId"/>
+                    <econdition field-name="systemMessageTypeId" from="paymentMethodFileType.systemMessageTypeId"/>
+                    <econdition field-name="systemMessageRemoteId" from="paymentMethodFileType.systemMessageRemoteId"/>
+                    <econdition field-name="statusId" operator="not-in" value="SmsgRejected,SmsgCancelled"/>
+                    <select-field field-name="systemMessageId,statusId"/>
+                    <order-by field-name="systemMessageId"/>
+                </entity-find>
+                <set field="sysMesStatusIdList" from="systemMessageList*.statusId"/>
+                <if condition="sysMesStatusIdList.contains('SmsgSending') || sysMesStatusIdList.contains('SmsgSent') || sysMesStatusIdList.contains('SmsgConfirmed')">
+                    <return type="danger" message="File ${paymentMethodFileId} already sent in SystemMessage ${systemMessageList*.systemMessageId}"/>
+                </if>
+                <iterate list="systemMessageList" entry="systemMessage">
+                    <service-call name="org.moqui.impl.SystemMessageServices.cancel#SystemMessage"
+                            in-map="[systemMessageId:systemMessage.systemMessageId]"/>
+                </iterate>
+            </if>
+
+            <!-- for all Payment with paymentMethodFileId
+            - set paymentMethodFileId to null
+            - for outgoing or incoming Payment if status Delivered set to Authorized
+            -->
+            <entity-find entity-name="mantle.account.payment.Payment" list="paymentList" for-update="true">
+                <econdition field-name="paymentMethodFileId"/>
+                <order-by field-name="paymentId"/>
+            </entity-find>
+            <iterate list="paymentList" entry="payment">
+                <set field="payment.paymentMethodFileId" from="null"/>
+                <if condition="payment.statusId == 'PmntDelivered' &amp;&amp; fileTypeEnum?.optionIndicator == 'Y'">
+                    <if condition="payment.paymentMethodId == paymentMethodFile.paymentMethodId"><then>
+                        <!-- outgoing -->
+                        <set field="payment.statusId" from="outgoingStatusId"/>
+                    </then><else>
+                        <set field="payment.statusId" from="incomingStatusId"/>
+                    </else></if>
+                </if>
+                <entity-update value-field="payment"/>
+            </iterate>
+
+            <set field="paymentMethodFile.entryCount" from="0"/>
+            <set field="paymentMethodFile.debitAmountTotal" from="0.0"/>
+            <set field="paymentMethodFile.creditAmountTotal" from="0.0"/>
+            <set field="paymentMethodFile.isCancelled" value="Y"/>
+            <entity-update value-field="paymentMethodFile"/>
+        </actions>
+    </service>
+
+    <service verb="produce" noun="PaymentMethodFileSystemMessage">
+        <description>Send PaymentMethodFile by queueing a SystemMessage</description>
+        <in-parameters>
+            <parameter name="paymentMethodFileId" required="true"/>
+            <parameter name="systemMessageTypeId"><description>If not specified looked up in PaymentMethodFileType</description></parameter>
+            <parameter name="systemMessageRemoteId"><description>If not specified looked up in PaymentMethodFileType</description></parameter>
+        </in-parameters>
+        <out-parameters><parameter name="systemMessageId"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethodFile" value-field="paymentMethodFile"/>
+            <if condition="paymentMethodFile == null"><return type="danger" message="File with ID ${paymentMethodFileId} not found"/></if>
+
+            <if condition="!systemMessageTypeId || !systemMessageRemoteId">
+                <set field="paymentMethodFileType" from="paymentMethodFile.paymentMethodFileType"/>
+                <if condition="!systemMessageTypeId"><set field="systemMessageTypeId" from="paymentMethodFileType?.systemMessageTypeId"/></if>
+                <if condition="!systemMessageRemoteId"><set field="systemMessageRemoteId" from="paymentMethodFileType?.systemMessageRemoteId"/></if>
+            </if>
+            <if condition="!systemMessageTypeId || !systemMessageRemoteId">
+                <return type="danger" message="Not sending file ${paymentMethodFileId}, no message type or remote specified or configured for payment method ${paymentMethodFile.paymentMethodId} and file type ${paymentMethodFile.fileTypeEnumId}"/>
+            </if>
+
+            <!-- is there already a SystemMessage for this (not cancelled, etc)? -->
+            <entity-find entity-name="moqui.service.message.SystemMessage" list="systemMessageList">
+                <econdition field-name="paymentMethodFileId"/>
+                <econdition field-name="systemMessageTypeId"/>
+                <econdition field-name="systemMessageRemoteId"/>
+                <econdition field-name="statusId" operator="not-in" value="SmsgRejected,SmsgCancelled,SmsgError"/>
+                <select-field field-name="systemMessageId"/>
+            </entity-find>
+            <if condition="systemMessageList">
+                <return type="warning" message="File ${paymentMethodFileId} already sent in SystemMessage ${systemMessageList*.systemMessageId}"/>
+            </if>
+
+            <!-- get the fileText and queue an outgoing SystemMessage -->
+            <service-call name="org.moqui.impl.SystemMessageServices.queue#SystemMessage" out-map="context"
+                    in-map="[systemMessageTypeId:systemMessageTypeId, systemMessageRemoteId:systemMessageRemoteId,
+                        messageText:paymentMethodFile.fileText, paymentMethodFileId:paymentMethodFileId]"/>
+            <message type="success">Queued file ${paymentMethodFileId} to send to ${systemMessageRemoteId} in message ${systemMessageId}</message>
+        </actions>
+    </service>
+</services>

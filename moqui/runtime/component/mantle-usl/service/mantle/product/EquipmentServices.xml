@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="create" noun="Equipment">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.asset.Asset" include="nonpk"/>
+            <parameter name="assetTypeEnumId" default-value="AstTpEquipment"/>
+            <parameter name="statusId" default-value="AstInUse"/>
+        </in-parameters>
+        <out-parameters><parameter name="assetId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.product.asset.Asset" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="AssetMaintenanceNeeded">
+        <in-parameters>
+            <parameter name="assetId" required="true"/>
+            <parameter name="productMaintenanceId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="lastAssetMeter" type="EntityValue"/>
+            <parameter name="lastReadingDate" type="Timestamp"/>
+            <parameter name="lastMeterValue" type="BigDecimal"/>
+
+            <parameter name="lastAssetMaintenance" type="EntityValue"/>
+            <parameter name="lastMaintenanceDate" type="Timestamp"/>
+            <parameter name="lastMaintenanceInterval" type="BigDecimal"/>
+
+            <parameter name="nextMaintenanceInterval" type="BigDecimal"/>
+            <parameter name="remainingInterval" type="BigDecimal"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.maintenance.ProductMaintenance" value-field="productMaintenance"/>
+
+            <!-- most recent meter (highest meterValue), IFF productMaintenance.intervalProductMeterId -->
+            <if condition="productMaintenance.intervalProductMeterId">
+                <entity-find entity-name="mantle.product.maintenance.AssetMeter" list="assetMeterList">
+                    <econdition field-name="assetId"/>
+                    <econdition field-name="productMeterId" from="productMaintenance.intervalProductMeterId"/>
+                    <order-by field-name="-meterValue"/>
+                </entity-find>
+                <set field="lastAssetMeter" from="assetMeterList?.getAt(0)"/>
+                <if condition="lastAssetMeter">
+                    <set field="lastReadingDate" from="lastAssetMeter.readingDate"/>
+                    <set field="lastMeterValue" from="lastAssetMeter.meterValue"/>
+                </if>
+            </if>
+
+            <!-- most recent maintenance -->
+            <entity-find entity-name="mantle.product.maintenance.AssetMaintenance" list="assetMaintenanceList">
+                <econdition field-name="assetId"/><econdition field-name="productMaintenanceId"/>
+                <order-by field-name="-maintenanceDate"/>
+            </entity-find>
+            <set field="lastAssetMaintenance" from="assetMaintenanceList?.getAt(0)"/>
+            <if condition="lastAssetMaintenance">
+                <set field="lastMaintenanceDate" from="lastAssetMaintenance.maintenanceDate"/>
+                <set field="lastMaintenanceInterval" from="lastAssetMaintenance.intervalQuantity"/>
+            </if>
+
+            <set field="nextMaintenanceInterval" from="(lastMaintenanceInterval ?: 0) + productMaintenance.intervalQuantity"/>
+            <set field="remainingInterval" from="nextMaintenanceInterval - (lastMeterValue ?: 0)"/>
+        </actions>
+    </service>
+
+    <service verb="create" noun="AssetMaintenance">
+        <description>If productMaintenanceId is specified populates maintenanceTypeEnumId, intervalUomId, and
+            intervalProductMeterId from the ProductMaintenance record. If intervalProductMeterId is available and there
+            is no intervalUomId, looks it up from the ProductMeter.meterUomId field.
+
+            Also creates an AssetMeter reading if an intervalQuantity specified (using intervalProductMeterId).
+        </description>
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.maintenance.AssetMaintenance" include="nonpk"/>
+            <parameter name="maintenanceDate" type="Timestamp" default="ec.user.nowTimestamp"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="assetMaintenanceId"/>
+            <parameter name="assetMeterId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.maintenance.ProductMaintenance" value-field="productMaintenance"/>
+            <if condition="productMaintenance">
+                <set field="maintenanceTypeEnumId" from="maintenanceTypeEnumId ?: productMaintenance.maintenanceTypeEnumId"/>
+                <set field="intervalUomId" from="intervalUomId ?: productMaintenance.intervalUomId"/>
+                <set field="intervalProductMeterId" from="intervalProductMeterId ?: productMaintenance.intervalProductMeterId"/>
+            </if>
+            <if condition="!intervalUomId &amp;&amp; intervalProductMeterId">
+                <entity-find-one entity-name="mantle.product.maintenance.ProductMeter" value-field="productMeter">
+                    <field-map field-name="productMeterId" from="intervalProductMeterId"/></entity-find-one>
+                <set field="intervalUomId" from="productMeter.meterUomId"/>
+            </if>
+            <service-call name="create#mantle.product.maintenance.AssetMaintenance" in-map="context" out-map="context"/>
+
+            <if condition="intervalQuantity">
+                <service-call name="create#mantle.product.maintenance.AssetMeter" out-map="context"
+                        in-map="[assetId:assetId, readingDate:maintenanceDate, productMeterId:intervalProductMeterId,
+                            meterValue:intervalQuantity, assetMaintenanceId:assetMaintenanceId]"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ========== AssetMaintenanceContent Services ========== -->
+    <service verb="create" noun="AssetMaintenanceContent">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.product.maintenance.AssetMaintenanceContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="assetMaintenanceId" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentDate" type="Timestamp"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.product.maintenance.AssetMaintenanceContent" in-map="context" out-map="context"/>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.product.EquipmentServices.save#AssetMaintenanceContentFile" in-map="context"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="AssetMaintenanceContent">
+        <in-parameters>
+            <parameter name="assetMaintenanceId" required="true"/>
+            <parameter name="contentDate" type="Timestamp" required="true"/>
+            <auto-parameters entity-name="mantle.product.maintenance.AssetMaintenanceContent" include="nonpk">
+                <exclude field-name="contentLocation"/></auto-parameters>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem"/>
+        </in-parameters>
+        <actions>
+            <if condition="contentFile != null &amp;&amp; contentFile.size &gt; 0">
+                <service-call name="mantle.product.EquipmentServices.save#AssetMaintenanceContentFile" out-map="context"
+                        in-map="context + [saveContentLocation:false]"/>
+            </if>
+            <service-call name="update#mantle.product.maintenance.AssetMaintenanceContent" in-map="context"/>
+        </actions>
+    </service>
+    <service verb="save" noun="AssetMaintenanceContentFile">
+        <in-parameters>
+            <parameter name="assetMaintenanceId" required="true"/>
+            <parameter name="contentDate" type="Timestamp" required="true"/>
+            <parameter name="contentFile" type="org.apache.commons.fileupload.FileItem" required="true"/>
+            <parameter name="saveContentLocation" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="contentLocation"/></out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.maintenance.AssetMaintenance" value-field="assetMaintenance"/>
+            <set field="filename" from="contentFile.getName()"/>
+            <if condition="org.moqui.resource.ResourceReference.isTextFilename(filename)"><then>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.root') ?: 'dbresource://mantle/content'"/>
+            </then><else>
+                <set field="contentRoot" from="ec.user.getPreference('mantle.content.large.root') ?: 'dbresource://mantle/content'"/>
+            </else></if>
+            <set field="contentLocation" value="${contentRoot}/asset/${assetMaintenance.assetId?:'_NA_'}/maintenance/${assetMaintenanceId}/${filename}"/>
+
+            <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
+            <script>
+                fileStream = contentFile.getInputStream()
+                try { docRr.putStream(fileStream) } finally { fileStream.close() }
+            </script>
+
+            <if condition="saveContentLocation"><service-call name="update#mantle.product.maintenance.AssetMaintenanceContent"
+                    in-map="[assetMaintenanceId:assetMaintenanceId, contentDate:contentDate, contentLocation:contentLocation]"/></if>
+        </actions>
+    </service>
+</services>

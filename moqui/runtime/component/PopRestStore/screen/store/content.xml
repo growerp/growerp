@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        require-authentication="anonymous-view" allow-extra-path="true">
+
+    <transition name="attachment" read-only="true"><actions>
+        <set field="extraPathNameList" from="new ArrayList(sri.screenUrlInfo.extraPathNameList)"/>
+        <if condition="!extraPathNameList"><script>ec.web.sendError(404, "No attachment specified", null); return;</script></if>
+        <set field="filename" from="extraPathNameList.remove(extraPathNameList.size()-1)"/>
+        <service-call name="org.moqui.impl.WikiServices.get#WikiPageAttachment" out-map="context"
+                in-map="[wikiSpaceId:wikiSpaceId, pagePath:extraPathNameList?.join('/'), filename:filename]"/>
+        <script>ec.web.sendResourceResponse(attachmentReference?.location, true)</script>
+    </actions><default-response type="none"/></transition>
+
+    <transition name="productImage" read-only="true">
+        <parameter name="productContentId"/>
+        <actions>
+            <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+            <if condition="extraPathNameList &amp;&amp; !productContentId">
+                <set field="productContentId" from="extraPathNameList[0]"/></if>
+            <entity-find-one entity-name="mantle.product.ProductContent" value-field="productContent" cache="true">
+                <field-map field-name="productContentId"/></entity-find-one>
+            <if condition="productContent == null"><then>
+                <!-- NOTE: consider returning a default image instead of 404 -->
+                <script>ec.web.sendError(404, null, null)</script>
+            </then><else>
+                <script>ec.web.sendResourceResponse(productContent.contentLocation, true)</script>
+            </else></if>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <!-- get store wiki page content based on 'store space type' (spaceTypeEnumId) and path -->
+    <transition name="sst">
+        <actions>
+            <!-- FUTURE: consider adding optional locale to path to avoid issues with browser cache and locale changes during use, see also StoreServices.get#StoreInfo service -->
+            <set field="extraPathNameList" from="new ArrayList(sri.screenUrlInfo.extraPathNameList)"/>
+            <if condition="!extraPathNameList"><script>ec.web.sendError(404, "No page specified", null)</script><return/></if>
+            <!-- is the first path element a spaceTypeEnumId? -->
+            <set field="spaceTypeEnumId" from="extraPathNameList.remove(0)"/>
+            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="spaceTypeEnum">
+                <field-map field-name="enumId" from="spaceTypeEnumId"/></entity-find-one>
+            <if condition="spaceTypeEnum == null || spaceTypeEnum.enumTypeId != 'ProductStoreWikiSpaceType'">
+                <log level="warn" message="First path segment ${spaceTypeEnumId} not a valid space type"/>
+                <script>ec.web.sendError(404, "First path segment not a valid space type", null)</script>
+                <return/>
+            </if>
+            <!-- get the wikiSpaceId for the store space type -->
+            <!-- FUTURE: pass locale here if pulled from path or somewhere -->
+            <service-call name="popstore.StoreServices.get#WikiSpaceByType" out-map="spaceOut" out-map-add-to-existing="false"
+                    in-map="[productStoreId:productStoreId, spaceTypeEnumId:spaceTypeEnumId]"/>
+            <if condition="!spaceOut.wikiSpaceId">
+                <log level="warn" message="In content/sst no wiki space found for store ${productStoreId} and space type ${spaceTypeEnumId}"/>
+                <script>ec.web.sendError(404, "No content space found for type ${spaceTypeEnumId}", null)</script>
+                <return/>
+            </if>
+            <!-- get the page content -->
+            <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageTextOut" out-map-add-to-existing="false"
+                    in-map="[wikiSpaceId:spaceOut.wikiSpaceId, pagePath:extraPathNameList?.join('/'), versionName:ver]"/>
+            <!-- NOTE: could pass filename (pageTextOut.pageReference.getFileName()) but want inline Content-Disposition -->
+            <script>ec.web.sendTextResponse(pageTextOut.pageText, pageTextOut.pageReference.getContentType(), null)</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+    <!-- FUTURE: (if needed...) get store wiki content based on store content type (contentTypeEnumId) with ProductStoreWikiContent lookup -->
+
+    <transition name="createRequest">
+        <actions>
+            <service-call name="mantle.request.RequestServices.create#ContactRequest"
+                    in-map="context + [moquiSessionToken:ec.web.sessionToken]" out-map="context"/>
+        </actions>
+        <default-response url="."/>
+    </transition>
+
+    <actions>
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="context"
+                in-map="[wikiSpaceId:wikiSpaceId, pagePath:extraPathNameList?.join('/')]"/>
+
+        <!-- create content menu -->
+        <set field="location" value="${storeInfo.settings.PsstContentLocation}${ec.web.getPathInfo()}.md"/>
+        <if condition="extraPathNameList[0] != 'obsidian' "><!-- cater for old filenames -->
+            <set field="location" from="location + '.ftl'"/></if>
+        <if condition="extraPathNameList[0] == 'obsidian' ">
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" list="obsidianList">
+                <econdition field-name="wikiSpaceId"/>
+                <econdition field-name="pagePath" operator="like" value="obsidian/%"/>
+                <select-field field-name="pagePath"/>
+                <order-by field-name="pagePath"/>
+            </entity-find>
+            <script>
+                storeInfo.menu1 = []
+                List currentList = []
+                int menuIndex = 0
+                obsidianList.each { // sequence through the pages
+                    List pathList = it.pagePath.split('/')
+
+                    // find the correct current list when not found create
+                    currentList = storeInfo.menu1
+                    for(int i in 0..pathList.size()-1) { // sequence through the levels
+                        menuIndex = currentList.findIndexOf { 
+                            it.title == pathList[i] }
+                        if (menuIndex == -1) {
+                            currentList.add([
+                                path: it.pagePath,
+                                title: pathList[i], items: []])
+                            menuIndex = currentList.size()-1;
+                        }
+                        currentList = currentList[menuIndex].items;
+                    }
+                }
+            </script>
+
+            <else>
+                <script>
+                    storeInfo.menu1 = []
+                    List items = [];
+                    String title;
+                    boolean first = true;
+                    pageText.eachLine {
+                        if (it.startsWith('# ')) {
+                            if (first == false) {
+                                storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
+                                                    title: title, items: items,
+                                                    anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                                items = [];
+                            }
+                            title = it.substring(it.indexOf(' ') + 1);
+                            first = false;
+                        }
+                        if (it.startsWith('## ')) {
+                            Map item = [text: it.substring(it.indexOf(' ') + 1),
+                                        anchor: it.substring(it.indexOf(' ') + 1)
+                                            .replace(' ','-').replace('.','').toLowerCase()];
+                            items.add(item);
+                        }
+                    }
+                    if (first == false) storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
+                        title: title, items: items, anchor: title.replace(' ','-').replace('.','').toLowerCase()]);
+                </script>
+            </else>
+        </if>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <section name="PageTextSection" condition="pageText">
+            <widgets>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/content1.html.ftl"/></render-mode>
+                <render-mode><text type="html" location="${location}"/></render-mode>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/content2.html.ftl"/></render-mode>
+            </widgets> 
+            <fail-widgets>
+                <render-mode><text type="html" location="component://PopRestStore/template/store/error.html.ftl"/></render-mode>
+            </fail-widgets>
+        </section>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="install">
+    <!-- Recommended but not required data related to Party entities -->
+
+    <!-- PartyClassification -->
+    <mantle.party.PartyClassification partyClassificationId="CustConsumer" classificationTypeEnumId="PcltCustomer"
+            description="Consumer"/>
+    <mantle.party.PartyClassification partyClassificationId="CustWholesale" classificationTypeEnumId="PcltCustomer"
+            description="Wholesale"/>
+    <mantle.party.PartyClassification partyClassificationId="CustRetailStore" classificationTypeEnumId="PcltCustomer"
+            description="Wholesale - Retail Store"/>
+    <mantle.party.PartyClassification partyClassificationId="CustProfessional" classificationTypeEnumId="PcltCustomer"
+            description="Wholesale - Professional"/>
+    <mantle.party.PartyClassification partyClassificationId="CustDistributor" classificationTypeEnumId="PcltCustomer"
+            description="Distributor"/>
+    <mantle.party.PartyClassification partyClassificationId="CustDistributorPref" classificationTypeEnumId="PcltCustomer"
+            description="Distributor Preferred"/>
+    <mantle.party.PartyClassification partyClassificationId="CustEnterprise" classificationTypeEnumId="PcltCustomer"
+            description="Enterprise"/>
+    <mantle.party.PartyClassification partyClassificationId="CustBroker" classificationTypeEnumId="PcltCustomer"
+            description="Broker"/>
+    <mantle.party.PartyClassification partyClassificationId="CustEmployee" classificationTypeEnumId="PcltCustomer"
+            description="Employee"/>
+
+    <mantle.party.PartyClassification partyClassificationId="NAICS_511210" classificationTypeEnumId="PcltNaicsCode"
+            description="Software Publishers" standardCode="511210"/>
+    <mantle.party.PartyClassification partyClassificationId="NAICS_541511" classificationTypeEnumId="PcltNaicsCode"
+            description="Custom Computer Programming Services" standardCode="541511"/>
+    <mantle.party.PartyClassification partyClassificationId="NAICS_541512" classificationTypeEnumId="PcltNaicsCode"
+            description="Computer Systems Design Services" standardCode="541512"/>
+    <mantle.party.PartyClassification partyClassificationId="NAICS_541519" classificationTypeEnumId="PcltNaicsCode"
+            description="Other Computer Related Services" standardCode="541519"/>
+    <mantle.party.PartyClassification partyClassificationId="NAICS_611420" classificationTypeEnumId="PcltNaicsCode"
+            description="Computer Training" standardCode="611420"/>
+</entity-facade-xml>

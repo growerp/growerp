@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="FullCalendarData">
+        <description>Get data to display WorkEffort tasks by due date (estimatedCompletionDate) with the FullCalender JS library (see http://fullcalendar.io/)</description>
+        <in-parameters>
+            <parameter name="partyId"/>
+            <parameter name="partyIdList" type="List"><parameter name="partyId"/></parameter>
+            <parameter name="start" required="true"/>
+            <parameter name="end" required="true"/>
+            <parameter name="titleGString" default-value="\${(workEffort.workEffortName ?: (workEffort.purposeEnumId ? workEffort.'WorkEffortPurpose#moqui.basic.Enumeration'.description : 'Event')) + ' [' + workEffort.workEffortId + ']'}"/>
+            <parameter name="urlGString"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="eventList" type="List">
+                <parameter name="eventMap" type="Map">
+                    <parameter name="id"/>
+                    <parameter name="title"/>
+                    <parameter name="start"><description>actualStartDate or estimatedStartDate as ISO8601 formatted String</description></parameter>
+                    <parameter name="end"><description>actualCompletionDate or estimatedCompletionDate (or if null start date +
+                        actualWorkDuration, estimatedWorkDuration, or estimatedWorkTime) as a ISO8601 (yyyy-MM-dd'T'HH:mm:ss) formatted String</description></parameter>
+                    <!-- NOTE: consider supporting allDay, color, etc in the future with WorkEffort fields -->
+                    <parameter name="url"><description>Only returned if urlGString is specified</description></parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <!-- start and end are ISO8601 date strings -->
+            <set field="startTs" from="ec.l10n.parseTimestamp(start.toString() + ' 00:00:00.000', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+            <set field="endTs" from="ec.l10n.parseTimestamp(end.toString() + ' 23:59:59.999', 'yyyy-MM-dd HH:mm:ss.SSS')"/>
+            <!-- <log level="warn" message="=========== Task FullCalendarData start ${start} - ${startTs} end ${end} - ${endTs}"/> -->
+
+            <set field="partyIdSet" from="new HashSet()"/>
+            <if condition="partyId"><script>partyIdSet.add(partyId)</script></if>
+            <if condition="partyIdList"><script>partyIdSet.addAll(partyIdList)</script></if>
+
+            <set field="eventList" from="[]"/>
+            <if condition="!partyIdSet"><return/></if>
+
+            <entity-find entity-name="mantle.work.effort.WorkEffortAndParty" list="workEffortList">
+                <econdition field-name="workEffortTypeEnumId" value="WetTask"/>
+                <econditions combine="or">
+                    <econdition field-name="ownerPartyId" operator="in" from="partyIdSet" ignore-if-empty="true"/>
+                    <econdition field-name="partyId" operator="in" from="partyIdSet" ignore-if-empty="true"/>
+                </econditions>
+                <!-- for tasks look for completion date within the range -->
+                <econditions combine="or">
+                    <econditions combine="and">
+                        <econdition field-name="estimatedCompletionDate" operator="greater-equals" from="startTs"/>
+                        <econdition field-name="estimatedCompletionDate" operator="less-equals" from="endTs"/>
+                    </econditions>
+                    <econditions combine="and">
+                        <econdition field-name="actualCompletionDate" operator="greater-equals" from="startTs"/>
+                        <econdition field-name="actualCompletionDate" operator="less-equals" from="endTs"/>
+                    </econditions>
+                </econditions>
+                <select-field field-name="workEffortId,purposeEnumId,workEffortName,description,location,timeUomId"/>
+                <select-field field-name="actualStartDate,actualCompletionDate,actualWorkTime,actualWorkDuration"/>
+                <select-field field-name="estimatedStartDate,estimatedCompletionDate,estimatedWorkTime,estimatedWorkDuration"/>
+            </entity-find>
+
+            <iterate list="workEffortList" entry="workEffortDef">
+                <set field="workEffort" from="workEffortDef"/><!-- put it in the context -->
+                <set field="title" from="ec.resource.expand(titleGString, '')"/>
+
+                <service-call name="mantle.work.WorkEffortServices.get#WorkEffortStartEnd" out-map="startEndOut"
+                        in-map="[workEffortId:workEffort.workEffortId, workEffort:workEffort]"/>
+                <set field="start" from="ec.l10n.format(startEndOut.startDate, 'yyyy-MM-dd\'T\'HH:mm:ss')"/>
+                <set field="end" from="ec.l10n.format(startEndOut.endDate, 'yyyy-MM-dd\'T\'HH:mm:ss')"/>
+
+                <if condition="urlGString">
+                    <set field="url" from="ec.resource.expand(urlGString, '')"/>
+                    <else><set field="url" value=""/></else>
+                </if>
+                <set field="eventMap" from="[id:workEffort.workEffortId, title:title, start:start, end:end, url:url, allDay:true]"/>
+                <script>eventList.add(eventMap)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Task">
+        <description>Create a Task in a Project.</description>
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="rootWorkEffortId"><description>The ID of the Project</description></parameter>
+            <parameter name="milestoneWorkEffortId"/>
+            <parameter name="workEffortId"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="resolutionEnumId" default-value="WerUnresolved"/>
+            <parameter name="priority" type="Long" default="5"/>
+            <parameter name="purposeEnumId" default-value="WepTask"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="remainingWorkTime" type="BigDecimal" default="estimatedWorkTime"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+
+            <parameter name="ownerPartyId" default-value="${ec.user.userAccount?.partyId}"/>
+            <parameter name="assignToPartyId"/>
+            <parameter name="assignRoleTypeId" default-value="Assignee"/>
+            <parameter name="assignStatusId" default-value="WeptAssigned"/>
+            <parameter name="requestId"/>
+            <parameter name="assetId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffortId"/>
+        </out-parameters>
+        <actions>
+            <if condition="!workEffortId &amp;&amp; rootWorkEffortId">
+                <set field="seqName" value="Project_${rootWorkEffortId}"/>
+                <set field="workEffortId" value="${rootWorkEffortId}-${ec.entity.sequencedIdPrimary(seqName, null, 10)}"/>
+            </if>
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context" in-map="context + [workEffortTypeEnumId:'WetTask']"/>
+            <if condition="assignToPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:assignToPartyId,
+                        roleTypeId:assignRoleTypeId, fromDate:ec.user.nowTimestamp, statusId:assignStatusId]"/>
+            </if>
+            <if condition="milestoneWorkEffortId"><service-call name="mantle.work.TaskServices.set#TaskMilestone" in-map="context"/></if>
+            <if condition="requestId"><service-call name="create#mantle.request.RequestWorkEffort"
+                    in-map="[workEffortId:workEffortId, requestId:requestId]"/></if>
+            <if condition="assetId"><service-call name="create#mantle.work.effort.WorkEffortAssetAssign"
+                    in-map="[workEffortId:workEffortId, assetId:assetId, fromDate:ec.user.nowTimestamp, statusId:'WeaaAssigned']"/></if>
+        </actions>
+    </service>
+    <service verb="create" noun="SimpleTask">
+        <in-parameters>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="workEffortName" required="true"/>
+            <parameter name="statusId" default-value="WeInPlanning"/>
+            <parameter name="resolutionEnumId" default-value="WerUnresolved"/>
+            <parameter name="priority" type="Long" default="5"/>
+            <parameter name="purposeEnumId" default-value="WepTask"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedWorkTime" type="BigDecimal"/>
+            <parameter name="remainingWorkTime" type="BigDecimal" default="estimatedWorkTime"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+
+            <parameter name="assignToPartyId"/>
+            <parameter name="assignRoleTypeId" default-value="Assignee"/>
+            <parameter name="assignStatusId" default-value="WeptAssigned"/>
+            <parameter name="requestId"/>
+        </in-parameters>
+        <out-parameters><parameter name="workEffortId"/></out-parameters>
+        <actions>
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="context" in-map="context + [workEffortTypeEnumId:'WetTask']"/>
+            <if condition="assignToPartyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty" in-map="[workEffortId:workEffortId, partyId:assignToPartyId,
+                        roleTypeId:assignRoleTypeId, fromDate:ec.user.nowTimestamp, statusId:assignStatusId]"/>
+            </if>
+            <if condition="requestId"><service-call name="create#mantle.request.RequestWorkEffort" in-map="[workEffortId:workEffortId, requestId:requestId]"/></if>
+        </actions>
+    </service>
+    <service verb="update" noun="Task">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <auto-parameters entity-name="mantle.work.effort.WorkEffort" include="nonpk"/>
+            <parameter name="milestoneWorkEffortId"/>
+            <parameter name="estimatedStartDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="estimatedCompletionDate" type="Timestamp" format="yyyy-MM-dd"/>
+            <parameter name="timeUomId" default-value="TF_hr"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.work.effort.WorkEffort" out-map="context" in-map="context"/>
+            <if condition="milestoneWorkEffortId">
+                <service-call name="mantle.work.TaskServices.set#TaskMilestone" in-map="context"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="set" noun="TaskMilestone">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="milestoneWorkEffortId" required="true"/>
+        </in-parameters>
+        <actions>
+            <!-- if milestoneWorkEffortId is different from currently associated milestone, expire all milestones and assoc with new one -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortAssoc" list="weaList">
+                <date-filter/>
+                <econdition field-name="toWorkEffortId" from="workEffortId"/>
+                <econdition field-name="workEffortAssocTypeEnumId" value="WeatMilestone"/>
+            </entity-find>
+            <set field="foundMilestone" from="false"/>
+            <iterate list="weaList" entry="wea"><if condition="wea.workEffortId == milestoneWorkEffortId">
+                <set field="foundMilestone" from="true"/>
+                <else><set field="wea.thruDate" from="ec.user.nowTimestamp"/><entity-update value-field="wea"/></else>
+            </if></iterate>
+            <if condition="!foundMilestone">
+                <service-call name="create#mantle.work.effort.WorkEffortAssoc"
+                    in-map="[workEffortId:milestoneWorkEffortId, toWorkEffortId:workEffortId,
+                        workEffortAssocTypeEnumId:'WeatMilestone', fromDate:ec.user.nowTimestamp]"/>
+            </if>
+        </actions>
+    </service>
+    <service verb="set" noun="TaskDefaults">
+        <description>This service runs by EECA rule before creates and updates to set some defaults.</description>
+        <in-parameters><parameter name="entityValue" type="Map"/></in-parameters>
+        <actions>
+            <set field="entityValue.actualWorkTime" from="entityValue.actualWorkTime ?: 0 as BigDecimal"/>
+            <if condition="entityValue.remainingWorkTime == null &amp;&amp; entityValue.estimatedWorkTime &amp;&amp; entityValue.estimatedWorkTime &gt; entityValue.actualWorkTime">
+                <set field="entityValue.remainingWorkTime" from="entityValue.estimatedWorkTime - entityValue.actualWorkTime"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="add" noun="TaskComment">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+        </in-parameters>
+        <actions>
+            <service-call name="create#mantle.party.communication.CommunicationEvent" out-map="context"
+                    in-map="[communicationEventTypeId:'Comment', contactMechTypeEnumId:'CmtWebForm', statusId:'CeSent',
+                        fromPartyId:ec.user.userAccount.partyId, entryDate:ec.user.nowTimestamp,
+                        contentType:contentType, subject:subject, body:body]"/>
+            <service-call name="create#mantle.work.effort.WorkEffortCommEvent"
+                    in-map="[workEffortId:workEffortId, communicationEventId:communicationEventId]"/>
+        </actions>
+    </service>
+    <service verb="update" noun="TaskComment">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="communicationEventId" required="true"/>
+            <parameter name="subject"/>
+            <parameter name="body"/>
+            <parameter name="contentType" default-value="text/plain"/>
+        </in-parameters>
+        <actions>
+            <service-call name="update#mantle.party.communication.CommunicationEvent" out-map="context"
+                  in-map="[communicationEventId:communicationEventId, fromPartyId:ec.user.userAccount.partyId,
+                        contentType:contentType, subject:subject, body:body]"/>
+        </actions>
+    </service>
+    <service verb="delete" noun="TaskComment">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="communicationEventId" required="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="delete#mantle.work.effort.WorkEffortCommEvent"
+                    in-map="[workEffortId:workEffortId, communicationEventId:communicationEventId]"/>
+            <service-call name="delete#mantle.party.communication.CommunicationEvent"
+                    in-map="communicationEventId:communicationEventId"/>
+        </actions>
+    </service>
+
+    <service verb="add" noun="TaskTime">
+        <implements service="mantle.work.TimeServices.store#TimeEntry"/>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="partyId" default="ec.user.userAccount.partyId"/>
+        </in-parameters>
+        <actions>
+            <service-call name="mantle.work.TimeServices.store#TimeEntry" in-map="context" out-map="context"/>
+        </actions>
+    </service>
+    <service verb="update" noun="TaskFromTime" authenticate="anonymous-all">
+        <in-parameters><parameter name="workEffortId" required="true"/></in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.time.TimeEntryAndRates" list="tearList">
+                <econdition field-name="workEffortId"/></entity-find>
+            <set field="actualWorkTime" from="0"/>
+            <set field="actualClientCost" from="0"/>
+            <set field="actualCost" from="0"/>
+            <iterate list="tearList" entry="tear">
+                <set field="actualWorkTime" from="actualWorkTime + (tear.hours?:0)"/>
+                <if condition="tear.clientRateAmount">
+                    <set field="actualClientCost" from="actualClientCost + (tear.hours * tear.clientRateAmount)"/></if>
+                <if condition="tear.vendorRateAmount">
+                    <set field="actualCost" from="actualCost + (tear.hours * tear.vendorRateAmount)"/></if>
+            </iterate>
+            <!-- <log level="warn" message="======== time for ${workEffortId}: ${actualWorkTime}, ${actualCost}, ${actualClientCost}\n${tearList}"/> -->
+            <service-call name="update#mantle.work.effort.WorkEffort"
+                    in-map="[workEffortId:workEffortId, actualWorkTime:actualWorkTime,
+                            actualCost:actualCost, actualClientCost:actualClientCost]"/>
+        </actions>
+    </service>
+    <service verb="update" noun="ProjectTimeFromTask" authenticate="anonymous-all">
+        <in-parameters><parameter name="rootWorkEffortId" required="true"/></in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.work.time.TaskTimeSummary" list="ttsList">
+                <econdition field-name="rootWorkEffortId"/>
+                <econdition field-name="workEffortTypeEnumId" value="WetTask"/></entity-find>
+            <if condition="ttsList">
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="rootWorkEffort">
+                    <field-map field-name="workEffortId" from="rootWorkEffortId"/>
+                </entity-find-one>
+                <set field="rootWorkEffort.actualWorkTime" from="ttsList[0].actualWorkTime"/>
+                <set field="rootWorkEffort.estimatedWorkTime" from="ttsList[0].estimatedWorkTime"/>
+                <set field="rootWorkEffort.remainingWorkTime" from="ttsList[0].remainingWorkTime"/>
+                <set field="rootWorkEffort.actualCost" from="ttsList[0].actualCost"/>
+                <set field="rootWorkEffort.actualClientCost" from="ttsList[0].actualClientCost"/>
+                <entity-update value-field="rootWorkEffort"/>
+            </if>
+        </actions>
+    </service>
+</services>

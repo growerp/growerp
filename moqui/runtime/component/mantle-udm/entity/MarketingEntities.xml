@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    <!-- ========================================================= -->
+    <!--  - mantle.marketing.campaign -->
+    <!--  - mantle.marketing.contact -->
+    <!--  - mantle.marketing.segment -->
+    <!--  - mantle.marketing.tracking -->
+    <!-- ========================================================= -->
+
+
+    <!-- ========================================================= -->
+    <!-- mantle.marketing.campaign -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="MarketingCampaign" package="mantle.marketing.campaign">
+        <field name="marketingCampaignId" type="id" is-pk="true"/>
+        <field name="parentCampaignId" type="id"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="campaignName" type="text-medium"/>
+        <field name="campaignSummary" type="text-long"/>
+        <field name="budgetedCost" type="currency-amount"/>
+        <field name="actualCost" type="currency-amount"/>
+        <field name="estimatedCost" type="currency-amount"/>
+        <field name="costUomId" type="id"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="isActive" type="text-indicator"/>
+        <field name="convertedLeads" type="id"/>
+        <field name="expectedResponsePercent" type="number-float"/>
+        <field name="expectedRevenue" type="currency-amount"/>
+        <field name="numSent" type="number-integer"/>
+        <field name="startDate" type="date-time"/>
+        <relationship type="one" title="Parent" related="mantle.marketing.campaign.MarketingCampaign">
+            <key-map field-name="parentCampaignId" related="marketingCampaignId"/></relationship>
+        <relationship type="one" title="MarketingCampaign" related="moqui.basic.StatusItem"/>
+        <relationship type="one" title="Cost" related="moqui.basic.Uom">
+            <key-map field-name="costUomId"/></relationship>
+        <seed-data>
+            <!-- Marketing Campaign Status -->
+            <moqui.basic.StatusType description="Marketing Campaign" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusItem description="Planned" sequenceNum="1" statusId="MKTG_CAMP_PLANNED" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusItem description="Approved" sequenceNum="2" statusId="MKTG_CAMP_APPROVED" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusItem description="In Progress" sequenceNum="3" statusId="MKTG_CAMP_INPROGRESS" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusItem description="Completed" sequenceNum="4" statusId="MKTG_CAMP_COMPLETED" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusItem description="Cancelled" sequenceNum="5" statusId="MKTG_CAMP_CANCELLED" statusTypeId="MarketingCampaign"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_PLANNED" toStatusId="MKTG_CAMP_APPROVED" transitionName="Approve Marketing Campaign"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_APPROVED" toStatusId="MKTG_CAMP_INPROGRESS" transitionName="Marketing Campaign In Progress"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_INPROGRESS" toStatusId="MKTG_CAMP_COMPLETED" transitionName="Complete Marketing Campaign"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_PLANNED" toStatusId="MKTG_CAMP_CANCELLED" transitionName="Cancel Marketing Campaign"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_APPROVED" toStatusId="MKTG_CAMP_CANCELLED" transitionName="Cancel Marketing Campaign"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="MKTG_CAMP_INPROGRESS" toStatusId="MKTG_CAMP_CANCELLED" transitionName="Cancel Marketing Campaign"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="MarketingCampaignNote" package="mantle.marketing.campaign">
+        <field name="marketingCampaignId" type="id" is-pk="true"/>
+        <field name="noteDate" type="date-time" is-pk="true"/>
+        <field name="noteText" type="text-very-long"/>
+        <relationship type="one" related="mantle.marketing.campaign.MarketingCampaign"/>
+    </entity>
+    <entity entity-name="MarketingCampaignParty" package="mantle.marketing.campaign">
+        <field name="marketingCampaignId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="mantle.marketing.campaign.MarketingCampaign"/>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" related="mantle.party.RoleType"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.marketing.contact -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="ContactList" package="mantle.marketing.contact">
+        <field name="contactListId" type="id" is-pk="true"/>
+        <field name="contactListTypeEnumId" type="id"/>
+        <field name="contactMechTypeEnumId" type="id"/>
+        <field name="marketingCampaignId" type="id"/>
+        <field name="contactListName" type="text-medium"/>
+        <field name="description" type="text-medium"/>
+        <field name="comments" type="text-medium"/>
+        <field name="isPublic" type="text-indicator"/>
+        <field name="singleUse" type="text-indicator">
+            <description>Parties in the list should be contacted only once.</description>
+        </field>
+        <field name="ownerPartyId" type="id"/>
+        <field name="verifyEmailFrom" type="text-medium"/>
+        <field name="verifyEmailScreen" type="text-medium"/>
+        <field name="verifyEmailSubject" type="text-long"/>
+        <field name="verifyEmailWebSiteId" type="id"/>
+        <field name="optOutScreen" type="text-medium"/>
+        <relationship type="one" related="mantle.marketing.campaign.MarketingCampaign"/>
+        <relationship type="one" title="ContactListType" related="moqui.basic.Enumeration">
+            <key-map field-name="contactListTypeEnumId"/></relationship>
+        <relationship type="one" title="ContactMechType" related="moqui.basic.Enumeration">
+            <key-map field-name="contactMechTypeEnumId"/></relationship>
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId"/></relationship>
+        <seed-data>
+            <!-- Contact List Type -->
+            <moqui.basic.EnumerationType description="Contact List Type" enumTypeId="ContactListType"/>
+            <moqui.basic.Enumeration enumId="MARKETING" description="Marketing" enumTypeId="ContactListType"/>
+            <moqui.basic.Enumeration enumId="NEWSLETTER" description="Newsletter" enumTypeId="ContactListType"/>
+            <moqui.basic.Enumeration enumId="ANNOUNCEMENT" description="Announcement" enumTypeId="ContactListType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="ContactListEmail" package="mantle.marketing.contact">
+        <field name="contactListId" type="id" is-pk="true"/>
+        <field name="emailTypeEnumId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="emailTemplateId" type="id"/>
+        <relationship type="one" related="ContactList"/>
+        <relationship type="one" title="ContactListEmailType" related="moqui.basic.Enumeration">
+            <key-map field-name="emailTypeEnumId"/></relationship>
+        <relationship type="one" related="moqui.basic.email.EmailTemplate"/>
+        <seed-data>
+            <!-- Contact List Email Type -->
+            <moqui.basic.EnumerationType description="Contact List Email Type" enumTypeId="ContactListEmailType"/>
+            <moqui.basic.Enumeration description="Subscribe Notification" enumId="CONT_SUB_NOT" enumTypeId="ContactListEmailType"/>
+            <moqui.basic.Enumeration description="Unsubscribe Verify" enumId="CONT_UNSUB_VER" enumTypeId="ContactListEmailType"/>
+            <moqui.basic.Enumeration description="Unsubscribe Notification" enumId="CONT_UNSUB_NOT" enumTypeId="ContactListEmailType"/>
+            <moqui.basic.Enumeration description="Outgoing Email" enumId="CONT_EMAIL_TEMPLATE" enumTypeId="ContactListEmailType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="ContactListCommStatus" package="mantle.marketing.contact">
+        <field name="contactListId" type="id" is-pk="true"/>
+        <field name="communicationEventId" type="id" is-pk="true"/>
+        <field name="contactMechId" type="id" is-pk="true"/>
+        <field name="partyId" type="id"/>
+        <field name="messageId" type="text-medium"/>
+        <field name="statusId" type="id"/>
+        <relationship type="one" related="mantle.marketing.contact.ContactList"/>
+        <relationship type="one" related="mantle.party.communication.CommunicationEvent"/>
+        <relationship type="one" related="mantle.party.contact.ContactMech"/>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" related="moqui.basic.StatusItem"/>
+        <index name="CNTLSTCST_MSG_ID" unique="true"><index-field name="messageId"/></index>
+    </entity>
+    <entity entity-name="ContactListParty" package="mantle.marketing.contact">
+        <field name="contactListId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="statusId" type="id" enable-audit-log="true"/>
+        <field name="preferredContactMechId" type="id"/>
+        <field name="optInVerifyCode" type="text-short"/>
+        <relationship type="one" related="mantle.marketing.contact.ContactList"/>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" title="ContactListParty" related="moqui.basic.StatusItem"/>
+        <relationship type="one" title="Preferred" related="mantle.party.contact.ContactMech">
+            <key-map field-name="preferredContactMechId"/></relationship>
+        <seed-data>
+            <!-- Contact List Party Status -->
+            <moqui.basic.StatusType description="Contact List Party" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Pending Acceptance" sequenceNum="1" statusId="CLPT_PENDING" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Accepted" sequenceNum="2" statusId="CLPT_ACCEPTED" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Rejected" sequenceNum="3" statusId="CLPT_REJECTED" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="In Use" sequenceNum="4" statusId="CLPT_IN_USE" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Invalid" sequenceNum="5" statusId="CLPT_INVALID" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Unsubscribe Pending" sequenceNum="6" statusId="CLPT_UNSUBS_PENDING" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusItem description="Unsubscribed" sequenceNum="7" statusId="CLPT_UNSUBSCRIBED" statusTypeId="ContactListParty"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_PENDING" toStatusId="CLPT_ACCEPTED" transitionName="Accept"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_PENDING" toStatusId="CLPT_REJECTED" transitionName="Reject"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_ACCEPTED" toStatusId="CLPT_REJECTED" transitionName="Reject"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_REJECTED" toStatusId="CLPT_ACCEPTED" transitionName="Accept"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_REJECTED" toStatusId="CLPT_PENDING" transitionName="Pending Accept"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_ACCEPTED" toStatusId="CLPT_IN_USE" transitionName="Locked - In Use"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_ACCEPTED" toStatusId="CLPT_INVALID" transitionName="Invalid"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_ACCEPTED" toStatusId="CLPT_UNSUBS_PENDING" transitionName="Subscription Accepted - Unsubscription Pending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_PENDING" toStatusId="CLPT_UNSUBS_PENDING" transitionName="Subscription Pending - Unsubscription Pending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_IN_USE" toStatusId="CLPT_UNSUBS_PENDING" transitionName="Subscription In Use - Unsubscription Pending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_INVALID" toStatusId="CLPT_UNSUBS_PENDING" transitionName="Subscription Invalid - Unsubscription Pending"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_ACCEPTED" toStatusId="CLPT_UNSUBSCRIBED" transitionName="Subscription Accepted - Unsubscribed"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_PENDING" toStatusId="CLPT_UNSUBSCRIBED" transitionName="Subscription Accepted - Unsubscribed"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_IN_USE" toStatusId="CLPT_UNSUBSCRIBED" transitionName="Subscription In Use - Unsubscribed"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CLPT_INVALID" toStatusId="CLPT_UNSUBSCRIBED" transitionName="Subscription Invalid - Unsubscribed"/>
+        </seed-data>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.marketing.segment -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="MarketInterest" package="mantle.marketing.segment">
+        <field name="productCategoryId" type="id" is-pk="true"/>
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="thruDate" type="date-time"/>
+        <relationship type="one" related="ProductCategory"/>
+        <relationship type="one" related="mantle.marketing.segment.MarketSegment"/>
+    </entity>
+    <entity entity-name="MarketSegment" package="mantle.marketing.segment">
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="marketSegmentTypeEnumId" type="id"/>
+        <field name="typeSequenceNum" type="number-integer"><description>
+            Intra-type Sequence Number for sets of segments that are not fully mutually exclusive.
+            When determining a MarketSegment by type, evaluate in order of this number to determine the first match.
+        </description></field>
+        <field name="parentMarketSegmentId" type="id"><description>
+            NOTE: this description is for the intended application of parentMarketSegmentId, actual behavior depends on code and could vary
+
+            A MarketSegment tree is a dependency tree with bi-directional dependencies so that any node in the tree can be
+            evaluated for membership by a Party while being able to configure segment factors at any level of the tree and have
+            them apply to all levels of a branch of the tree.
+
+            To implement this the general rule is that a Party is a member of a MarketSegment if all factors of that MarketSegment
+            match, and the factors of the parent MarketSegment match (if there is one), and the factors of at least one child
+            segment all match (if there is at least one child segment).
+
+            For example if segment A has two child segments A-1 and A-2, then a Party is in A if all factors of A match AND
+            they are a member of either sub-segment A-1 or sub-segment A-2. A Party is in A-2 if all factors of A-2 match,
+            and all factors of A match.
+        </description></field>
+        <field name="description" type="text-medium"/>
+        <field name="productStoreId" type="id"/>
+        <field name="ownerPartyId" type="id" enable-audit-log="update" default="'_NA_'"/>
+        <relationship type="one" title="MarketSegmentType" related="moqui.basic.Enumeration">
+            <key-map field-name="marketSegmentTypeEnumId"/></relationship>
+        <relationship type="one" related="mantle.product.store.ProductStore"/>
+        <relationship type="one" title="Parent" related="mantle.marketing.segment.MarketSegment" short-alias="parent">
+            <key-map field-name="parentMarketSegmentId"/></relationship>
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId"/></relationship>
+        <seed-data>
+            <!-- Market Segment Type -->
+            <moqui.basic.EnumerationType description="Market Segment Type" enumTypeId="MarketSegmentType"/>
+            <moqui.basic.Enumeration enumId="MARKET_SEGMENT" description="Market Segment" enumTypeId="MarketSegmentType"/>
+            <moqui.basic.Enumeration enumId="SALES_SEGMENT" description="Sales Segment" enumTypeId="MarketSegmentType"/>
+        </seed-data>
+    </entity>
+    <entity entity-name="MarketSegmentClassification" package="mantle.marketing.segment">
+        <description>Define the segment by PartyClassification</description>
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="partyClassificationId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.marketing.segment.MarketSegment"/>
+        <relationship type="one" related="mantle.party.PartyClassification"/>
+    </entity>
+    <entity entity-name="MarketSegmentDimension" package="mantle.marketing.segment">
+        <description>Define the segment in terms of PartyDimension values</description>
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="uomDimensionTypeId" type="id" is-pk="true"/>
+        <field name="uomId" type="id"/>
+        <field name="minValue" type="number-decimal"/>
+        <field name="maxValue" type="number-decimal"/>
+        <relationship type="one" related="mantle.marketing.segment.MarketSegment" short-alias="marketSegment"/>
+        <relationship type="one" related="moqui.basic.UomDimensionType" short-alias="type"/>
+        <relationship type="one" related="moqui.basic.Uom" short-alias="uom"/>
+    </entity>
+    <entity entity-name="MarketSegmentGeo" package="mantle.marketing.segment">
+        <description>Define the segment by geographic area</description>
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="geoId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.marketing.segment.MarketSegment"/>
+        <relationship type="one" related="moqui.basic.Geo"/>
+    </entity>
+    <entity entity-name="MarketSegmentParty" package="mantle.marketing.segment">
+        <field name="marketSegmentId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="roleTypeId" type="id" is-pk="true"/>
+        <relationship type="one" related="mantle.marketing.segment.MarketSegment"/>
+        <relationship type="one" related="mantle.party.Party"/>
+        <relationship type="one" related="mantle.party.RoleType"/>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.marketing.tracking -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="TrackingCode" package="mantle.marketing.tracking">
+        <field name="trackingCodeId" type="id" is-pk="true"/>
+        <field name="trackingCodeTypeEnumId" type="id"/>
+        <field name="marketingCampaignId" type="id"/>
+        <field name="redirectUrl" type="text-long"/>
+        <field name="comments" type="text-medium"/>
+        <field name="description" type="text-medium"/>
+        <field name="trackableLifetime" type="number-integer"/>
+        <field name="billableLifetime" type="number-integer"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <field name="groupId" type="id"/>
+        <field name="subgroupId" type="id"/>
+        <relationship type="one" related="mantle.marketing.campaign.MarketingCampaign"/>
+        <relationship type="one" title="TrackingCodeType" related="moqui.basic.Enumeration">
+            <key-map field-name="trackingCodeTypeEnumId"/></relationship>
+        <seed-data>
+            <!-- Tracking Code Type -->
+            <moqui.basic.EnumerationType description="Tracking Code Type" enumTypeId="TrackingCodeType"/>
+            <moqui.basic.Enumeration enumId="ACCESS" description="Access Code" enumTypeId="TrackingCodeType"/>
+            <moqui.basic.Enumeration enumId="INTERNAL" description="Internal" enumTypeId="TrackingCodeType"/>
+            <moqui.basic.Enumeration enumId="EXTERNAL" description="External" enumTypeId="TrackingCodeType"/>
+            <moqui.basic.Enumeration enumId="PARTNER_MGD" description="Partner Managed" enumTypeId="TrackingCodeType"/>
+        </seed-data>
+    </entity>
+    <!--
+    Tracking code events
+    - incoming link parameter
+    - automatic for path (with option to only apply if no code in URL) possibly path + parameter constraint
+    - wiki page, for full page or content snippet (also track version number...)
+    -
+    -->
+    <entity entity-name="TrackingCodeOrder" package="mantle.marketing.tracking">
+        <field name="orderId" type="id" is-pk="true"/>
+        <field name="trackingCodeTypeEnumId" type="id" is-pk="true"/>
+        <field name="trackingCodeId" type="id"/>
+        <field name="isBillable" type="text-indicator"/>
+        <field name="siteId" type="text-medium"/>
+        <field name="hasExported" type="text-indicator"/>
+        <field name="affiliateReferredTimeStamp" type="date-time"/>
+        <relationship type="one" related="mantle.order.OrderHeader"/>
+        <relationship type="one" related="mantle.marketing.tracking.TrackingCode"/>
+        <relationship type="one" title="TrackingCodeType" related="moqui.basic.Enumeration">
+            <key-map field-name="trackingCodeTypeEnumId"/></relationship>
+    </entity>
+    <entity entity-name="TrackingCodeOrderReturn" package="mantle.marketing.tracking">
+        <field name="trackingCodeTypeEnumId" type="id" is-pk="true"/>
+        <field name="returnId" type="id" is-pk="true"/>
+        <field name="orderId" type="id" is-pk="true"/>
+        <field name="orderItemSeqId" type="id"/>
+        <field name="trackingCodeId" type="id"/>
+        <field name="isBillable" type="text-indicator"/>
+        <field name="siteId" type="text-medium"/>
+        <field name="hasExported" type="text-indicator"/>
+        <field name="affiliateReferredTimeStamp" type="date-time"/>
+        <relationship type="one" title="TrackingCodeType" related="moqui.basic.Enumeration">
+            <key-map field-name="trackingCodeTypeEnumId"/></relationship>
+        <relationship type="one" related="mantle.order.return.ReturnHeader"/>
+        <relationship type="one" related="mantle.order.OrderHeader"/>
+        <relationship type="one" related="mantle.marketing.tracking.TrackingCode"/>
+    </entity>
+    <entity entity-name="TrackingCodeVisit" package="mantle.marketing.tracking">
+        <field name="trackingCodeId" type="id" is-pk="true"/>
+        <field name="visitId" type="id" is-pk="true"/>
+        <field name="fromDate" type="date-time" is-pk="true"/>
+        <field name="sourceEnumId" type="id"/>
+        <relationship type="one" related="mantle.marketing.tracking.TrackingCode"/>
+        <relationship type="one" related="moqui.server.Visit"/>
+        <relationship type="one" title="TrackingCodeSource" related="moqui.basic.Enumeration">
+            <key-map field-name="sourceEnumId"/></relationship>
+        <seed-data>
+            <!-- Tracking Code Source -->
+            <moqui.basic.EnumerationType description="Tracking Code Source" enumTypeId="TrackingCodeSource"/>
+            <moqui.basic.Enumeration description="Cookie" enumId="TKCDSRC_COOKIE" enumTypeId="TrackingCodeSource"/>
+            <moqui.basic.Enumeration description="URL Parameter" enumId="TKCDSRC_URL_PARAM" enumTypeId="TrackingCodeSource"/>
+        </seed-data>
+    </entity>
+</entities>

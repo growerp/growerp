@@ -1,0 +1,77 @@
+
+TODO:
+
+Maybe do, maybe not:
+-? Product Config to OrderItemSubItem (what about use in ShoppingList and under OrderItem?)
+-? Split OrderAdjustment into OrderTaxCharge, OrderShippingCharge, OrderAdjustment (or OrderDiscount, OrderOtherCharge like OAGIS)
+-? Change TaxAuthority to single pk for easier fks (use geo ID? no, a single geo can have more than one tax authority;
+   use party ID? no, a single authority may cover multiple jurisdictions (though not as likely...))
+
+For later, after add of more store config entities:
+- Support multiple payment processors per store (after migrate ProductStorePaymentSetting)
+- Cleanup/reorg ProductStoreShipmentMeth, ShipmentCostEstimate, etc (maybe change to the rule condition/action pattern?)
+
+- (later, once we get into some service impl for this) Redo Accommodation* entities based on travel industry model in book 2
+
+- Get rid of (and replace as needed) TemporalExpression; change to kron string
+
+==================
+
+DONE:
+
+- Move most *Type entities to Enumeration values (update seed data, referring
+  entities, remove *Type) (after this remove all remaining hasTable fields)
+- Rename *Role entities to *Party
+- Remove *Attribute and *TypeAttr entities
+- Remove view-entities (not part of base data model)
+- Remove various entities that are specific to a particular feature implementation and not a generic concept
+- Remove all status history (*Status) and just using audit on the statusId field
+- Remove all references to Survey, Content, etc (maybe point to a contentLocation)
+- Remove all createdDate, createdByUserLogin, lastModifiedDate, lastModifiedByUserLogin fields (use framework defaults, audit-log)
+- Make prefixes consistent (no suffixes), ie toPartyId instead of partyIdTo, etc
+- Change most currencyUomId fields to name that better matches related field(s)
+- ProductPrice add quantity breaks, change PK to single field sequenced
+- Get rid of QuantityBreak and use the two simple fields instead in each place used
+- Make Return more like Invoice (ie no adjustment, just use items for everything)
+- CustRequest to Request
+- PartyRelationship simplify (single sequenced ID)
+- Add PartyIdentification entity, get rid of various fields and other entities (maybe even PartyTaxAuthority...)
+- Change GoodIdentification to ProductIdentification
+- Replace CustomTimePeriod with TimePeriod
+- Combine PartyContactMechPurpose and PartyContactMech (remove, only use entity with purpose, name PartyContactMech)
+- Change PartyGroup back to Organization (more consistent with DMRB)
+- Instead of redundant fields on AgreementTerm, OrderTerm, InvoiceTerm, just refer to single SettlementTerm everywhere
+- FinAccount to FinancialAccount
+- Add Telecom ContactMech in addition to the Postal ContactMech for PaymentMethod, move IDs to PaymentMethod instead of sub-tables
+- Trim down big entities like Product, WorkEffort, etc; for groups of similar fields use a more normalized structure
+- Review all extend-entity, updates to base on Moqui framework entities
+- Agreement - make price list easier/cleaner
+- Get rid of NoteData, put directly on various *Note entities
+- Change all relationships to PartyRole to be type one-nofk (or remove); use plain one for Party and RoleType
+- Review all UserLogin, move to UserAccount or eliminate reference
+- Review all entities with large PKs (esp 4+ fields)
+
+* Payment Related Changes
+- For blacklist/fraud add evidence entity and related to blacklisted records; consider trust level on ContactMech
+  (currently on PartyContactMech where it is more difficult to query but denotes which party is blacklisted)
+
+* Product Related Changes
+- Product clean up: move dimensions to new entity, remove content fields, etc
+- Cleanup Product Config entities, small refinements
+- Get rid of ProdCatalog*, rework it to ProductStoreCategory, ie directly associate to the store
+- Get rid of optional ProductFeature concept (conf/etc products much better model)
+- Split out price details from SupplierProduct to SupplierProductPrice
+- Make ProductPrice more flexible with from/to (or vendor/customer) partyId fields, and merge/replace
+  SupplierProductPrice and AgreementItemProduct with this more flexible entity
+- Merge Asset and InventoryItem
+- Rework PhysicalInventory and InventoryVariance to simplify, reduce dependency on Asset
+
+* Order Related Changes
+- Get rid of OrderType, use status for ShoppingList and Quote (Proposed, Requested, Accepted, ...)
+- OrderHeader -> OrderPart -> OrderItem; move various things from header and item to "part" which goes between for flexibility without minimal redundancy
+- Change OrderItemShipGrpInvRes to InventoryReservation, change PK to single field sequenced
+- Change Quote to be other status of Order
+- Get rid of OrderPaymentPreference, just use expanded Payment entity
+- Merge ShoppingList into Order... kind of like quote (except doesn't usually status change into an order, often is
+  copied into order and remains, or certain items are moved to an order and rest remain)
+- Instead of OrderItemType, OrderAdjustmentType, InvoiceItemType, ReturnItemType just use Shared ItemType everywhere

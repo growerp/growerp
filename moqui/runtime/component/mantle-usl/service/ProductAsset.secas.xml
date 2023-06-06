@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<secas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-eca-3.xsd">
+    <seca id="AssetStatusAvailableReservations" service="update#mantle.product.asset.Asset" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'AstAvailable'</expression></condition>
+        <actions><service-call name="mantle.product.AssetServices.reserve#IncreasedAsset" in-map="context"/></actions>
+    </seca>
+    <seca id="AssetStatusNotAvailableReservations" service="update#mantle.product.asset.Asset" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; oldStatusId == 'AstAvailable'</expression></condition>
+        <actions><service-call name="mantle.product.AssetServices.check#AssetReservations" in-map="context"/></actions>
+    </seca>
+
+    <seca id="OrderPlacedReserveAssets" service="update#mantle.order.OrderHeader" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderPlaced'</expression></condition>
+        <actions><service-call name="mantle.product.AssetServices.reserve#AssetsForOrder" in-map="context"/></actions>
+    </seca>
+    <seca id="OrderApprovedReserveAssets" service="update#mantle.order.OrderHeader" when="post-service">
+        <condition><expression>statusChanged &amp;&amp; statusId == 'OrderApproved'</expression></condition>
+        <actions><service-call name="mantle.product.AssetServices.reserve#AssetsForOrder" in-map="context"/></actions>
+    </seca>
+
+    <seca id="OrderItemCreateCheckReserve" service="create#mantle.order.OrderItem" when="post-service">
+        <actions><service-call name="mantle.product.AssetServices.checkReserve#AssetForOrderItem" in-map="context"/></actions>
+    </seca>
+    <seca id="OrderItemUpdateCheckReserve" service="update#mantle.order.OrderItem" when="post-service">
+        <actions><service-call name="mantle.product.AssetServices.checkReserve#AssetForOrderItem" in-map="context"/></actions>
+    </seca>
+</secas>

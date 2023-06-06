@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-3.xsd"
+        default-menu-index="3">
+
+    <actions>
+        <if condition="!ec.user.hasPermission('GROOVY_SHELL_WEB')">
+            <return error="true" message="User does not have permission to use Groovy Shell"/></if>
+        <if condition="!sri.getScreenUrlInfo().isPermitted(ec, null, org.moqui.context.ArtifactExecutionInfo.AUTHZA_ALL)">
+            <return error="true" message="User must be authorized for all actions on this screen"/></if>
+    </actions>
+    <widgets>
+        <text type="html,vuet,qvt"><![CDATA[
+            <div class="text-danger">Be careful here, you can break many things. <a href="https://groovy-lang.org/groovysh.html" target="_blank">A groovysh reference is available here.</a></div>
+            <div id="terminal" style="height:100%;"></div>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js" integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css" integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+            <script>
+                // geometry calc code from xterm fit add on, which does not work with old/odd addon system in pre-4 (but xterm 4+ not available on cdnjs)
+                function proposeTerminalGeometry(term) {
+                  var parentEl = term.element.parentElement;
+                  if (!parentEl) { return null; }
+                  // console.warn(parentEl);
+                  var parentElementStyle = window.getComputedStyle(parentEl);
+                  var parentElementHeight = parseInt(parentElementStyle.getPropertyValue('height'));
+                  // console.warn("parentElementHeight " + parentElementHeight);
+                  var parentElementWidth = Math.max(0, parseInt(parentElementStyle.getPropertyValue('width')));
+                  var elementStyle = window.getComputedStyle(term.element);
+                  var elementPadding = {
+                    top: parseInt(elementStyle.getPropertyValue('padding-top')),
+                    bottom: parseInt(elementStyle.getPropertyValue('padding-bottom')),
+                    right: parseInt(elementStyle.getPropertyValue('padding-right')),
+                    left: parseInt(elementStyle.getPropertyValue('padding-left'))
+                  };
+                  var elementPaddingVer = elementPadding.top + elementPadding.bottom;
+                  var elementPaddingHor = elementPadding.right + elementPadding.left;
+                  var availableHeight = parentElementHeight - elementPaddingVer;
+                  var availableWidth = parentElementWidth - elementPaddingHor - term._core.viewport.scrollBarWidth;
+                  var geometry = {
+                    cols: Math.floor(availableWidth / term._core._renderCoordinator.dimensions.actualCellWidth),
+                    rows: Math.floor(availableHeight / term._core._renderCoordinator.dimensions.actualCellHeight)
+                  };
+                  return geometry;
+                }
+
+                var groovyshTerminal = new Terminal({
+                    cols: ${cols!"100"}, rows: ${rows!"40"}, fontSize: ${fontSize!"12"},
+                    cursorBlink: true, cursorStyle: "bar", // null | 'block' | 'underline' | 'bar'
+                    scrollback: 1000, tabStopWidth: 4, convertEol: true, screenKeys: true
+                });
+                groovyshTerminal.open(document.getElementById('terminal'));
+                groovyshTerminal.write('Connecting...\n');
+
+                var groovyshGeometry = proposeTerminalGeometry(groovyshTerminal);
+                if (groovyshGeometry && (groovyshTerminal.rows !== groovyshGeometry.rows || groovyshTerminal.cols !== groovyshGeometry.cols)) {
+                    groovyshTerminal._core._renderCoordinator.clear();
+                    groovyshTerminal.resize(groovyshGeometry.cols, groovyshGeometry.rows);
+                }
+
+                if (window.groovyshWsClient && window.groovyshWsClient.webSocket) {
+                    window.groovyshWsClient.webSocket.close(1000);
+                    window.groovyshWsClient = null;
+                }
+                window.groovyshWsClient = new moqui.BasicWebSocketClient(
+                    (location.protocol === 'https:' ? 'wss' : 'ws') + "://${ec.web.getHostName(true)}${ec.web.servletContext.contextPath}/groovysh",
+                    function(data) {
+                        // console.info("received groovysh ws data: " + data);
+                        groovyshTerminal.write(data);
+                    }
+                );
+                groovyshTerminal.on("data", function (data) {
+                    // console.info("sending groovysh ws data: " + data);
+                    groovyshWsClient.webSocket.send(data);
+                });
+
+                if (!window.groovyshOnUrlCloseWs) window.groovyshOnUrlCloseWs = function(url) {
+                    if (window.groovyshWsClient && window.groovyshWsClient.webSocket) {
+                        window.groovyshWsClient.webSocket.close(1000);
+                        window.groovyshWsClient = null;
+                    }
+                }
+                if (moqui && moqui.webrootVue) {
+                    moqui.webrootVue.addUrlListener(window.groovyshOnUrlCloseWs);
+                }
+            </script>
+        ]]></text>
+    </widgets>
+</screen>

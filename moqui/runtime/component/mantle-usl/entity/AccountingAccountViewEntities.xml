@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!-- mantle.account.financial -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="FinancialAccountAndOwner" package="mantle.account.financial">
+        <member-entity entity-alias="FACC" entity-name="mantle.account.financial.FinancialAccount"/>
+        <member-entity entity-alias="OPTY" entity-name="mantle.party.Party" join-from-alias="FACC">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="OORG" entity-name="mantle.party.Organization" join-from-alias="FACC">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="OPER" entity-name="mantle.party.Person" join-from-alias="FACC">
+            <key-map field-name="ownerPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="FACC"/>
+        <alias entity-alias="OPTY" name="pseudoId"/>
+        <alias entity-alias="OORG" name="organizationName"/>
+        <alias entity-alias="OPER" name="firstName"/>
+        <alias entity-alias="OPER" name="lastName"/>
+    </view-entity>
+    <view-entity entity-name="FinancialAccountAndTrans" package="mantle.account.financial">
+        <member-entity entity-alias="FAT" entity-name="mantle.account.financial.FinancialAccountTrans"/>
+        <member-entity entity-alias="FACC" entity-name="mantle.account.financial.FinancialAccount" join-from-alias="FAT">
+            <key-map field-name="finAccountId"/></member-entity>
+        <alias-all entity-alias="FACC"/>
+        <alias-all entity-alias="FAT"/>
+    </view-entity>
+    <view-entity entity-name="FinancialAccountTransSummary" package="mantle.account.financial">
+        <member-entity entity-alias="FAT" entity-name="mantle.account.financial.FinancialAccountTrans"/>
+        <alias entity-alias="FAT" name="finAccountId"/>
+        <alias entity-alias="FAT" name="minTransactionDate" field="transactionDate" function="min"/>
+        <alias entity-alias="FAT" name="maxTransactionDate" field="transactionDate" function="max"/>
+        <alias entity-alias="FAT" name="totalAmount" field="amount" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="FinancialAccountActualView" package="mantle.account.financial">
+        <member-entity entity-alias="FAT" entity-name="mantle.account.financial.FinancialAccountTrans"/>
+        <alias name="finAccountId" entity-alias="FAT"/>
+        <alias name="actualBalance" entity-alias="FAT" field="amount" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="FinancialAccountAuthView" package="mantle.account.financial">
+        <member-entity entity-alias="FAA" entity-name="mantle.account.financial.FinancialAccountAuth"/>
+        <alias name="finAccountId" entity-alias="FAA"/>
+        <alias name="expireDate" entity-alias="FAA"><description>Constrain the query with this but don't select it!</description></alias>
+        <alias name="authBalance" entity-alias="FAA" field="amount" function="sum"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.account.invoice -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="InvoiceFindView" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-relationship entity-alias="FPRL" join-from-alias="INV" relationship="fromRoles" join-optional="true"/>
+        <member-relationship entity-alias="TPRL" join-from-alias="INV" relationship="toRoles" join-optional="true"/>
+        <alias-all entity-alias="INV"/>
+        <alias name="fromRoleTypeId" entity-alias="FPRL" field="roleTypeId"/>
+        <alias name="toRoleTypeId" entity-alias="TPRL" field="roleTypeId"/>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <alias name="fromPartyId" entity-alias="INV"/>
+        <alias name="toPartyId" entity-alias="INV"/>
+        <alias name="invoiceTypeEnumId" entity-alias="INV"/>
+        <alias name="statusId" entity-alias="INV"/>
+        <alias name="currencyUomId" entity-alias="INV"/>
+        <alias name="invoiceDate" entity-alias="INV"><description>For summary use conditions for range, but don't select</description></alias>
+        <alias name="invoiceCount" entity-alias="INV" field="invoiceId" function="count"/>
+        <alias name="grandTotal" entity-alias="INV" field="invoiceTotal" function="sum"/>
+        <alias name="unpaidTotal" entity-alias="INV" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-relationship entity-alias="IITM" join-from-alias="INV" relationship="items"/>
+        <member-relationship entity-alias="FPRL" join-from-alias="INV" relationship="fromRoles" join-optional="true"/>
+        <member-relationship entity-alias="TPRL" join-from-alias="INV" relationship="toRoles" join-optional="true"/>
+        <alias name="invoiceId" entity-alias="INV"/>
+        <alias name="invoiceDate" entity-alias="INV"/>
+        <alias name="fromPartyId" entity-alias="INV"/>
+        <alias name="toPartyId" entity-alias="INV"/>
+        <alias name="invoiceTypeEnumId" entity-alias="INV"/>
+        <alias name="statusId" entity-alias="INV"/>
+        <alias name="productStoreId" entity-alias="INV"/>
+        <alias name="currencyUomId" entity-alias="INV"/>
+        <alias name="itemTypeEnumId" entity-alias="IITM"/>
+        <alias name="productId" entity-alias="IITM"/>
+        <alias name="overrideGlAccountId" entity-alias="IITM"/>
+        <alias name="quantityTotal" entity-alias="IITM" field="quantity" function="sum"/>
+        <alias name="itemsTotal" function="sum" type="number-decimal"><complex-alias operator="*">
+            <complex-alias-field entity-alias="IITM" field="quantity"/>
+            <complex-alias-field entity-alias="IITM" field="amount"/>
+        </complex-alias></alias>
+        <alias name="minAmount" entity-alias="IITM" field="amount" function="min"/>
+        <alias name="maxAmount" entity-alias="IITM" field="amount" function="max"/>
+        <alias name="avgAmount" entity-alias="IITM" field="amount" function="avg"/>
+        <alias name="fromRoleTypeId" entity-alias="FPRL" field="roleTypeId"/>
+        <alias name="toRoleTypeId" entity-alias="TPRL" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemDetailTotal" package="mantle.account.invoice">
+        <member-entity entity-alias="IID" entity-name="mantle.account.invoice.InvoiceItemDetail"/>
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem" join-from-alias="IID">
+            <key-map field-name="invoiceId"/><key-map field-name="invoiceItemSeqId"/></member-entity>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" join-from-alias="IID">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
+            <entity-condition>
+                <econdition entity-alias="ATX" field-name="acctgTransId" to-entity-alias="ATE" to-field-name="acctgTransId"/>
+                <econdition entity-alias="IID" field-name="invoiceItemSeqId" to-entity-alias="ATE" to-field-name="invoiceItemSeqId"/>
+            </entity-condition>
+        </member-entity>
+        <alias entity-alias="IID" name="assetId"/>
+        <alias entity-alias="IID" name="facilityId"/>
+        <alias entity-alias="ATX" name="organizationPartyId"/>
+        <alias entity-alias="ATX" name="transactionDate"/>
+        <alias entity-alias="ATX" name="isPosted"/>
+        <alias entity-alias="ATE" name="glAccountId"/>
+        <alias name="totalAmount" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="IID" field="quantity"/>
+            <complex-alias-field entity-alias="IITM" field="amount"/>
+        </complex-alias></alias>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemAndDetail" package="mantle.account.invoice">
+        <member-entity entity-alias="IID" entity-name="mantle.account.invoice.InvoiceItemDetail"/>
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem" join-from-alias="IID">
+            <key-map field-name="invoiceId"/><key-map field-name="invoiceItemSeqId"/></member-entity>
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" join-from-alias="IID">
+            <key-map field-name="invoiceId"/></member-entity>
+        <alias-all entity-alias="IID"/>
+        <alias-all entity-alias="IITM"><exclude field="quantity"/><exclude field="assetId"/></alias-all>
+        <alias-all entity-alias="INV"><exclude field="description"/></alias-all>
+        <alias name="itemQuantity" entity-alias="IITM" field="quantity"/>
+        <alias name="itemAssetId" entity-alias="IITM" field="assetId"/>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemAndType" package="mantle.account.invoice">
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem"/>
+        <member-entity entity-alias="ITEN" entity-name="moqui.basic.Enumeration" join-from-alias="IITM">
+            <key-map field-name="itemTypeEnumId" related="enumId"/></member-entity>
+        <alias-all entity-alias="IITM"/>
+        <alias name="itemTypeDescription" entity-alias="ITEN" field="description"/>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemSalesSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem"/>
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" join-from-alias="IITM">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="IITM">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ASIC" entity-name="mantle.product.issuance.AssetAndIssuanceCost" join-from-alias="IITM"
+                join-optional="true" sub-select="true"><!-- sub-select on view-entity for join in sub-select -->
+            <key-map field-name="invoiceId"/><key-map field-name="invoiceItemSeqId"/>
+        </member-entity>
+
+        <alias entity-alias="ASIC" name="issuedQuantity" field="quantity" function="sum"/>
+        <alias entity-alias="ASIC" name="totalCost" field="issuanceCost" function="sum"/>
+        <alias entity-alias="ASIC" name="averageCost" function="avg"/>
+
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetClassEnumId"/>
+        <alias entity-alias="IITM" name="invoiceId"/><!-- for a summary report this shouldn't be selected -->
+        <alias entity-alias="IITM" name="productId"/>
+        <alias entity-alias="IITM" name="itemTypeEnumId"/>
+        <alias entity-alias="IITM" name="quantity" function="sum"/>
+        <alias name="totalSales" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="IITM" field="quantity"/>
+            <complex-alias-field entity-alias="IITM" field="amount"/>
+        </complex-alias></alias>
+        <alias name="totalIssued" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASIC" field="quantity"/>
+            <complex-alias-field entity-alias="IITM" field="amount"/>
+        </complex-alias></alias>
+        <alias name="minAmount" entity-alias="IITM" field="amount" function="min"/>
+        <alias name="maxAmount" entity-alias="IITM" field="amount" function="max"/>
+        <alias name="avgAmount" entity-alias="IITM" field="amount" function="avg"/>
+        <alias name="invoiceStatusId" entity-alias="INV" field="statusId"/>
+        <alias name="invoiceDate" entity-alias="INV"/>
+        <alias name="productStoreId" entity-alias="INV"/>
+    </view-entity>
+    <view-entity entity-name="InvoiceProductSalesSummary" package="mantle.account.invoice">
+        <description>Like InvoiceItemSalesSummary but Product based instead of InvoiceItem based</description>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product"/>
+        <member-entity entity-alias="IIS" entity-name="mantle.account.invoice.InvoiceItemSummary" join-from-alias="PROD" sub-select="true">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="ASIC" entity-name="mantle.product.issuance.AssetAndIssuanceCost" join-from-alias="PROD"
+                join-optional="true" sub-select="true"><!-- sub-select on view-entity for join in sub-select -->
+            <key-map field-name="productId"/>
+        </member-entity>
+
+        <alias entity-alias="ASIC" name="issuedDate"/>
+        <alias entity-alias="ASIC" name="issuedQuantity" field="quantity"/>
+        <alias entity-alias="ASIC" name="averageCost"/>
+        <alias entity-alias="ASIC" name="totalCost" field="issuanceCost"/>
+
+        <alias entity-alias="PROD" name="productId"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetTypeEnumId"/>
+        <alias entity-alias="PROD" name="assetClassEnumId"/>
+
+        <alias entity-alias="IIS" name="itemTypeEnumId"/>
+        <alias entity-alias="IIS" name="quantity" field="quantityTotal"/>
+        <alias entity-alias="IIS" name="totalSales" field="itemsTotal"/>
+        <alias entity-alias="IIS" name="minAmount"/>
+        <alias entity-alias="IIS" name="maxAmount"/>
+        <alias entity-alias="IIS" name="avgAmount"/>
+        <alias entity-alias="IIS" name="invoiceStatusId" field="statusId"/>
+        <alias entity-alias="IIS" name="invoiceDate"/>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemIssuanceSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="ASI" entity-name="mantle.product.issuance.AssetIssuance"/>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ASI">
+            <key-map field-name="assetId"/></member-entity>
+        <member-entity entity-alias="PROD" entity-name="mantle.product.Product" join-from-alias="AST">
+            <key-map field-name="productId"/></member-entity>
+        <member-entity entity-alias="LOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId"/></member-entity>
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem" join-from-alias="ASI">
+            <key-map field-name="invoiceId"/><key-map field-name="invoiceItemSeqId"/></member-entity>
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" join-from-alias="ASI">
+            <key-map field-name="invoiceId"/></member-entity>
+
+        <alias-all entity-alias="ASI"><exclude field="productId"/><exclude field="quantity"/><exclude field="facilityId"/></alias-all>
+        <alias-all entity-alias="AST"><exclude field="quantityOnHandTotal"/><exclude field="availableToPromiseTotal"/>
+            <exclude field="receivedDate"/><exclude field="manufacturedDate"/><exclude field="expectedEndOfLife"/></alias-all>
+        <alias name="quantity" entity-alias="ASI" function="sum"/>
+        <alias name="quantityOnHandTotal" entity-alias="AST" function="sum"/>
+        <alias name="availableToPromiseTotal" entity-alias="AST" function="sum"/>
+        <alias name="receivedDate" entity-alias="AST" function="min"/>
+        <alias name="manufacturedDate" entity-alias="AST" function="min"/>
+        <alias name="expectedEndOfLife" entity-alias="AST" function="min"/>
+        <alias entity-alias="PROD" name="pseudoId"/>
+        <alias entity-alias="PROD" name="productName"/>
+        <alias entity-alias="PROD" name="amountUomId"/>
+        <alias entity-alias="PROD" name="amountFixed"/>
+        <alias entity-alias="PROD" name="productTypeEnumId"/>
+        <alias entity-alias="LOT" name="mfgPartyId"/>
+        <alias entity-alias="LOT" name="lotNumber"/>
+        <alias entity-alias="IITM" name="invoiceId"/><!-- for a summary report this shouldn't be selected -->
+        <alias name="weightedAmount" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASI" field="quantity"/>
+            <complex-alias-field entity-alias="IITM" field="amount"/>
+        </complex-alias></alias>
+        <alias name="totalCost" function="sum"><complex-alias operator="*">
+            <complex-alias-field entity-alias="ASI" field="quantity"/>
+            <complex-alias-field entity-alias="AST" field="acquireCost"/>
+        </complex-alias></alias>
+        <alias name="minUnitAmount" entity-alias="IITM" field="amount" function="min"/>
+        <alias name="maxUnitAmount" entity-alias="IITM" field="amount" function="max"/>
+        <alias name="invoiceStatusId" entity-alias="INV" field="statusId"/>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceAgingSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-relationship entity-alias="FPRL" join-from-alias="INV" relationship="fromRoles" join-optional="true"/>
+        <member-relationship entity-alias="TPRL" join-from-alias="INV" relationship="toRoles" join-optional="true"/>
+        <alias name="fromPartyId" entity-alias="INV"/>
+        <alias name="fromRoleTypeId" entity-alias="FPRL" field="roleTypeId"/>
+        <alias name="toPartyId" entity-alias="INV"/>
+        <alias name="toRoleTypeId" entity-alias="TPRL" field="roleTypeId"/>
+        <alias name="statusId" entity-alias="INV"/>
+        <alias name="invoiceTypeEnumId" entity-alias="INV"/>
+        <alias name="currencyUomId" entity-alias="INV"/>
+        <alias name="invoiceCount" entity-alias="INV" field="invoiceId" function="count-distinct" type="number-integer"/>
+        <!-- explicit period columns approach -->
+        <!-- NOTE: issue with asOfDate concept, this SQL doesn't work and needs a database-specific conversion from string to
+            timestamp or some way to pass typed PreparedStatement parameters for case.when.@expression:
+            (${asOfDate != null ? '\'' + ec.l10n.format(asOfDate, 'yyyy-MM-dd HH:mm:ss') + '\'' : 'CURRENT_TIMESTAMP'} - INV.${dateField ?: 'DUE_DATE'})
+         -->
+        <!-- NOTE: to on Postgres must do DATE math for integer compare to avoid error: operator does not exist: interval < integer -->
+        <!-- was (CURRENT_TIMESTAMP - INV.${dateField ?: 'DUE_DATE'}) for each -->
+        <!-- NOTE: on db2i, must use TIMESTAMPDIFF with 16 for to calculate the difference as days' -->
+        <alias name="currentDue" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} &lt; 0">
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="period1" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} BETWEEN 0 AND ${(periodDays?:30)}">
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="period2" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} BETWEEN ${(periodDays?:30)+1} AND ${(periodDays?:30)*2}">
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="period3" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} BETWEEN ${(periodDays?:30)*2+1} AND ${(periodDays?:30)*3}">
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="period4" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} BETWEEN ${(periodDays?:30)*3+1} AND ${(periodDays?:30)*4}">
+            <!--<case><when expression="${dbConfName=='postgres' ? '((CURRENT_DATE - DATE(' : (dbConfName=='db2i' ? 'TIMESTAMPDIFF(16, CHAR' : '') + '((CURRENT_TIMESTAMP - '}INV.${dateField ?: 'DUE_DATE'}))) BETWEEN ${(periodDays?:30)*3+1} AND ${(periodDays?:30)*4}">-->
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="periodRemaining" function="sum">
+            <case><when expression="${dbConfName=='postgres' ? '(CURRENT_DATE - DATE(INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                      dbConfName=='db2i'     ? '(TIMESTAMPDIFF(16, CHAR(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')))' :
+                                      dbConfName=='h2'       ? '(DATEDIFF(DAY, CURRENT_TIMESTAMP, INV.' + (dateField ?: 'DUE_DATE') + '))' :
+                                                               '(CURRENT_TIMESTAMP - INV.' + (dateField ?: 'DUE_DATE') + ')'} &gt; ${(periodDays?:30)*4+1}">
+                <complex-alias expression="INV.UNPAID_TOTAL"/>
+            </when><else><complex-alias expression="0"/></else></case>
+        </alias>
+        <alias name="totalDue" entity-alias="INV" field="unpaidTotal" function="sum"/>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceAndPaymentApplication" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication" join-from-alias="INV" join-optional="true">
+            <key-map field-name="invoiceId"/></member-entity>
+        <alias-all entity-alias="INV"/>
+        <alias-all entity-alias="PAPP"><exclude field="billingAccountId"/><exclude field="acctgTransResultEnumId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="InvoicePaymentApplicationSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItemOnlySummary"
+                join-from-alias="INV" join-optional="true" sub-select="true">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplicationOnlySummary"
+                join-from-alias="INV" join-optional="true" sub-select="true">
+            <key-map field-name="invoiceId"/>
+        </member-entity>
+        <member-entity entity-alias="TPAPP" entity-name="mantle.account.payment.PaymentApplicationOnlySummary"
+                join-from-alias="INV" join-optional="true" sub-select="true">
+            <key-map field-name="invoiceId" related="toInvoiceId"/>
+        </member-entity>
+        <member-relationship entity-alias="FPTY" join-from-alias="INV" relationship="fromParty" join-optional="true"/>
+        <member-relationship entity-alias="FORG" join-from-alias="INV" relationship="fromOrganization" join-optional="true"/>
+        <member-relationship entity-alias="FPER" join-from-alias="INV" relationship="fromPerson" join-optional="true"/>
+        <member-relationship entity-alias="FPRL" join-from-alias="INV" relationship="fromRoles" join-optional="true"/>
+        <member-relationship entity-alias="TPTY" join-from-alias="INV" relationship="toParty" join-optional="true"/>
+        <member-relationship entity-alias="TORG" join-from-alias="INV" relationship="toOrganization" join-optional="true"/>
+        <member-relationship entity-alias="TPER" join-from-alias="INV" relationship="toPerson" join-optional="true"/>
+        <member-relationship entity-alias="TPRL" join-from-alias="INV" relationship="toRoles" join-optional="true"/>
+
+        <alias-all entity-alias="INV"/>
+        <alias name="itemDate" entity-alias="IITM"/>
+        <alias name="itemInvoiceDate" entity-alias="IITM"/>
+        <alias name="isAdjustment" entity-alias="IITM"/>
+        <alias name="itemsTotal" entity-alias="IITM"/>
+
+        <alias name="paymentId" entity-alias="PAPP"/>
+        <alias name="appliedDate" entity-alias="PAPP"/>
+        <alias name="amountApplied" entity-alias="PAPP"/>
+        <alias name="toAppliedDate" entity-alias="TPAPP" field="appliedDate"/>
+        <alias name="toAmountApplied" entity-alias="TPAPP" field="amountApplied"/>
+        <alias name="totalAmountApplied" type="number-decimal"><complex-alias operator="+">
+            <complex-alias-field entity-alias="PAPP" field="amountApplied" default-value="0"/>
+            <complex-alias-field entity-alias="TPAPP" field="amountApplied" default-value="0"/>
+        </complex-alias></alias>
+
+        <alias name="fromPseudoId" entity-alias="FPTY" field="pseudoId"/>
+        <alias name="fromName" function="concat_ws" type="text-medium"><complex-alias operator=",">
+            <complex-alias expression="' '"/>
+            <complex-alias-field entity-alias="FORG" field="organizationName"/>
+            <complex-alias-field entity-alias="FPER" field="firstName"/>
+            <complex-alias-field entity-alias="FPER" field="lastName"/>
+        </complex-alias></alias>
+        <alias name="fromOrganizationName" entity-alias="FORG" field="organizationName"/>
+        <alias name="fromFirstName" entity-alias="FPER" field="firstName"/>
+        <alias name="fromLastName" entity-alias="FPER" field="lastName"/>
+        <alias name="fromRoleTypeId" entity-alias="FPRL" field="roleTypeId"/>
+        <alias name="toPseudoId" entity-alias="TPTY" field="pseudoId"/>
+        <alias name="toName" function="concat_ws" type="text-medium"><complex-alias operator=",">
+            <complex-alias expression="' '"/>
+            <complex-alias-field entity-alias="TORG" field="organizationName"/>
+            <complex-alias-field entity-alias="TPER" field="firstName"/>
+            <complex-alias-field entity-alias="TPER" field="lastName"/>
+        </complex-alias></alias>
+        <alias name="toOrganizationName" entity-alias="TORG" field="organizationName"/>
+        <alias name="toFirstName" entity-alias="TPER" field="firstName"/>
+        <alias name="toLastName" entity-alias="TPER" field="lastName"/>
+        <alias name="toRoleTypeId" entity-alias="TPRL" field="roleTypeId"/>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemOnlySummary" package="mantle.account.invoice">
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItem"/>
+        <member-relationship entity-alias="IVC" join-from-alias="IITM" relationship="invoice"/>
+        <alias-all entity-alias="IITM"><exclude field="quantity"/><exclude field="amount"/></alias-all>
+        <alias name="itemInvoiceDate" entity-alias="IVC" field="invoiceDate"/>
+        <alias name="quantityTotal" entity-alias="IITM" field="quantity" function="sum"/>
+        <alias name="amountAverage" entity-alias="IITM" field="amount" function="avg"/>
+        <alias name="itemsTotal" is-aggregate="true" type="number-decimal">
+            <complex-alias function="SUM">
+                <complex-alias function="ROUND">
+                    <complex-alias operator="*">
+                        <complex-alias-field entity-alias="IITM" field="quantity"/>
+                        <complex-alias-field entity-alias="IITM" field="amount"/>
+                    </complex-alias>
+                    <complex-alias expression="2"/>
+                </complex-alias>
+            </complex-alias>
+        </alias>
+    </view-entity>
+    <view-entity entity-name="InvoiceGlImpactSummary" package="mantle.account.invoice">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"/>
+        <member-entity entity-alias="IITM" entity-name="mantle.account.invoice.InvoiceItemOnlySummary" join-from-alias="INV" sub-select="true">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplicationOnlySummary" join-from-alias="INV"
+                sub-select="true" join-optional="true">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="TPAPP" entity-name="mantle.account.payment.PaymentApplicationOnlySummary" join-from-alias="INV"
+                sub-select="true" join-optional="true">
+            <key-map field-name="invoiceId" related="toInvoiceId"/>
+        </member-entity>
+        <member-entity entity-alias="ATD" entity-name="mantle.ledger.transaction.AcctgTransAndEntryGlaSummary" join-from-alias="INV"
+                sub-select="true" join-optional="true">
+            <key-map field-name="invoiceId"/></member-entity>
+        <member-entity entity-alias="ATC" entity-name="mantle.ledger.transaction.AcctgTransAndEntryGlaSummary" join-from-alias="INV"
+                sub-select="true" join-optional="true">
+            <key-map field-name="invoiceId"/></member-entity>
+
+        <alias-all entity-alias="INV"/>
+        <alias name="itemDate" entity-alias="IITM"/>
+        <alias name="itemInvoiceDate" entity-alias="IITM"/>
+        <alias name="isAdjustment" entity-alias="IITM"/>
+        <alias name="itemsTotal" entity-alias="IITM"/>
+
+        <alias name="paymentId" entity-alias="PAPP"/>
+        <alias name="appliedDate" entity-alias="PAPP"/>
+        <alias name="amountApplied" entity-alias="PAPP"/>
+        <alias name="unpaidAmount" type="number-decimal"><complex-alias operator="-">
+            <complex-alias-field entity-alias="IITM" field="itemsTotal" default-value="0"/>
+            <complex-alias-field entity-alias="PAPP" field="amountApplied" default-value="0"/>
+        </complex-alias></alias>
+        <alias name="toAppliedDate" entity-alias="TPAPP" field="appliedDate"/>
+        <alias name="toAmountApplied" entity-alias="TPAPP" field="amountApplied"/>
+        <alias name="totalAmountApplied" type="number-decimal"><complex-alias operator="+">
+            <complex-alias-field entity-alias="PAPP" field="amountApplied" default-value="0"/>
+            <complex-alias-field entity-alias="TPAPP" field="amountApplied" default-value="0"/>
+        </complex-alias></alias>
+
+        <alias name="debitGlAccountClassEnumId" entity-alias="ATD" field="glAccountClassEnumId"/>
+        <alias name="debitTransactionDate" entity-alias="ATD" field="transactionDate"/>
+        <alias name="debitDcFlag" entity-alias="ATD" field="debitCreditFlag"/>
+        <alias name="debitTotal" entity-alias="ATD" field="amount"/>
+        <alias name="creditGlAccountClassEnumId" entity-alias="ATC" field="glAccountClassEnumId"/>
+        <alias name="creditTransactionDate" entity-alias="ATC" field="transactionDate"/>
+        <alias name="creditDcFlag" entity-alias="ATC" field="debitCreditFlag"/>
+        <alias name="creditTotal" entity-alias="ATC" field="amount"/>
+        <alias name="debitMinusCredit" type="number-decimal"><complex-alias operator="-">
+            <complex-alias-field entity-alias="ATD" field="amount" default-value="0"/>
+            <complex-alias-field entity-alias="ATC" field="amount" default-value="0"/>
+        </complex-alias></alias>
+        <alias name="creditMinusDebit" type="number-decimal"><complex-alias operator="-">
+            <complex-alias-field entity-alias="ATC" field="amount" default-value="0"/>
+            <complex-alias-field entity-alias="ATD" field="amount" default-value="0"/>
+        </complex-alias></alias>
+
+        <entity-condition>
+            <econdition field-name="debitDcFlag" value="D"/>
+            <econdition field-name="creditDcFlag" value="C"/>
+        </entity-condition>
+    </view-entity>
+    <view-entity entity-name="InvoiceEmailMessageDetail" package="mantle.account.invoice">
+        <member-entity entity-alias="IEM" entity-name="mantle.account.invoice.InvoiceEmailMessage"/>
+        <member-entity entity-alias="EMSG" entity-name="moqui.basic.email.EmailMessage" join-from-alias="IEM">
+            <key-map field-name="emailMessageId"/></member-entity>
+        <alias-all entity-alias="IEM"/><alias-all entity-alias="EMSG"/>
+    </view-entity>
+
+    <view-entity entity-name="SettlementTermAndEnumMember" package="mantle.account.invoice">
+        <member-entity entity-alias="STT" entity-name="mantle.account.invoice.SettlementTerm"/>
+        <member-entity entity-alias="EGM" entity-name="moqui.basic.EnumGroupMember" join-from-alias="STT">
+            <key-map field-name="termTypeEnumId" related="enumId"/></member-entity>
+        <alias-all entity-alias="STT"/>
+        <alias-all entity-alias="EGM"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.account.method -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="PaymentMethodAndType" package="mantle.account.method">
+        <member-entity entity-alias="PMD" entity-name="mantle.account.method.PaymentMethod"/>
+        <member-relationship entity-alias="PMTE" join-from-alias="PMD" relationship="methodType"/>
+        <alias-all entity-alias="PMD"/>
+        <alias name="typeDescription" entity-alias="PMTE" field="description"/>
+    </view-entity>
+    <view-entity entity-name="PaymentMethodDetail" package="mantle.account.method">
+        <member-entity entity-alias="PMD" entity-name="mantle.account.method.PaymentMethod"/>
+        <member-relationship entity-alias="PMTE" join-from-alias="PMD" relationship="methodType"/>
+        <member-relationship entity-alias="PGC" join-from-alias="PMD" relationship="gatewayConfig" join-optional="true"/>
+        <alias-all entity-alias="PMD"/>
+        <alias name="typeDescription" entity-alias="PMTE" field="description"/>
+        <alias name="gatewayDescription" entity-alias="PGC" field="description"/>
+    </view-entity>
+    <view-entity entity-name="BankAccountCheckAndPayment" package="mantle.account.method">
+        <member-entity entity-alias="BAC" entity-name="mantle.account.method.BankAccountCheck"/>
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment" join-from-alias="BAC">
+            <key-map field-name="paymentId"/></member-entity>
+        <alias-all entity-alias="BAC"/>
+        <alias-all entity-alias="PMT"><exclude field="paymentMethodId"/></alias-all>
+        <alias entity-alias="PMT" name="pmtPaymentMethodId" field="paymentMethodId"/>
+    </view-entity>
+
+    <!-- ========================================================= -->
+    <!-- mantle.account.payment -->
+    <!-- ========================================================= -->
+
+    <view-entity entity-name="PaymentFindView" package="mantle.account.payment">
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment"/>
+        <member-entity entity-alias="FPRL" entity-name="mantle.party.PartyRole" join-from-alias="PMT" join-optional="true">
+            <key-map field-name="fromPartyId" related="partyId"/></member-entity>
+        <member-entity entity-alias="TPRL" entity-name="mantle.party.PartyRole" join-from-alias="PMT" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId"/></member-entity>
+        <alias-all entity-alias="PMT"/>
+        <alias name="fromRoleTypeId" entity-alias="FPRL" field="roleTypeId"/>
+        <alias name="toRoleTypeId" entity-alias="TPRL" field="roleTypeId"/>
+    </view-entity>
+    <view-entity entity-name="PaymentSummary" package="mantle.account.payment">
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment"/>
+        <alias name="fromPartyId" entity-alias="PMT"/>
+        <alias name="toPartyId" entity-alias="PMT"/>
+        <alias name="paymentTypeEnumId" entity-alias="PMT"/>
+        <alias name="statusId" entity-alias="PMT"/>
+        <alias name="amountUomId" entity-alias="PMT"/>
+        <alias name="timePeriodId" entity-alias="PMT"/>
+        <alias name="effectiveDate" entity-alias="PMT"><description>For summary use conditions for range, but don't select</description></alias>
+        <alias name="paymentCount" entity-alias="PMT" field="paymentId" function="count-distinct" type="number-decimal"/>
+        <alias name="amountTotal" entity-alias="PMT" field="amount" function="sum"/>
+        <alias name="appliedTotal" entity-alias="PMT" function="sum"/>
+        <alias name="unappliedTotal" entity-alias="PMT" function="sum"/>
+    </view-entity>
+
+    <view-entity entity-name="PaymentAndApplicationSummary" package="mantle.account.payment">
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment"/>
+        <member-relationship entity-alias="PAPP" join-from-alias="PMT" relationship="applications" join-optional="true" sub-select="true"/>
+        <member-relationship entity-alias="TPAPP" join-from-alias="PMT" relationship="toApplications" join-optional="true" sub-select="true"/>
+        <alias-all entity-alias="PMT"/>
+        <alias name="appliedDate" entity-alias="PAPP"/>
+        <alias name="amountApplied" entity-alias="PAPP" function="sum"/>
+        <alias name="toAppliedDate" entity-alias="TPAPP" field="appliedDate"/>
+        <alias name="toAmountApplied" entity-alias="TPAPP" field="amountApplied" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="PaymentApplicationOnlySummary" package="mantle.account.payment">
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication"/>
+        <alias-all entity-alias="PAPP"><exclude field="amountApplied"/></alias-all>
+        <alias name="amountApplied" entity-alias="PAPP" function="sum"/>
+    </view-entity>
+    <view-entity entity-name="PaymentApplicationAndPayment" package="mantle.account.payment">
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication"/>
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment" join-from-alias="PAPP">
+            <key-map field-name="paymentId"/></member-entity>
+        <alias-all entity-alias="PAPP"/>
+        <alias-all entity-alias="PMT"><exclude field="overrideGlAccountId"/><exclude field="acctgTransResultEnumId"/></alias-all>
+    </view-entity>
+    <view-entity entity-name="PaymentApplicationAndInvoice" package="mantle.account.payment">
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication"/>
+        <member-entity entity-alias="INVC" entity-name="mantle.account.invoice.Invoice" join-from-alias="PAPP">
+            <key-map field-name="invoiceId"/></member-entity>
+        <alias-all entity-alias="INVC"><exclude field="billingAccountId"/><exclude field="acctgTransResultEnumId"/></alias-all>
+        <alias-all entity-alias="PAPP"/>
+    </view-entity>
+    <view-entity entity-name="PaymentApplicationInvoiceSummary" package="mantle.account.payment">
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplication"/>
+        <member-entity entity-alias="INVC" entity-name="mantle.account.invoice.Invoice" join-from-alias="PAPP">
+            <key-map field-name="invoiceId"/></member-entity>
+        <alias-all entity-alias="INVC"/>
+        <alias entity-alias="PAPP" name="paymentId"/>
+        <alias entity-alias="PAPP" name="amountApplied" function="sum"/>
+    </view-entity>
+
+    <view-entity entity-name="PaymentGlImpactSummary" package="mantle.account.payment">
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment"/>
+        <member-entity entity-alias="PAPP" entity-name="mantle.account.payment.PaymentApplicationOnlySummary" join-from-alias="PMT"
+                sub-select="true" join-optional="true">
+            <key-map field-name="paymentId"/></member-entity>
+        <member-entity entity-alias="ATD" entity-name="mantle.ledger.transaction.AcctgTransAndEntryGlaSummary" join-from-alias="PMT"
+                sub-select="true" join-optional="true">
+            <key-map field-name="paymentId"/></member-entity>
+        <member-entity entity-alias="ATC" entity-name="mantle.ledger.transaction.AcctgTransAndEntryGlaSummary" join-from-alias="PMT"
+                sub-select="true" join-optional="true">
+            <key-map field-name="paymentId"/></member-entity>
+
+        <alias-all entity-alias="PMT"/>
+        <alias name="appliedDate" entity-alias="PAPP"/>
+        <alias name="amountApplied" type="number-decimal"><complex-alias>
+            <complex-alias-field entity-alias="PAPP" field="amountApplied" default-value="0"/></complex-alias></alias>
+
+        <alias name="debitGlAccountClassEnumId" entity-alias="ATD" field="glAccountClassEnumId"/>
+        <alias name="debitTransactionDate" entity-alias="ATD" field="transactionDate"/>
+        <alias name="debitDcFlag" entity-alias="ATD" field="debitCreditFlag"/>
+        <alias name="debitTotal" entity-alias="ATD" field="amount"/>
+        <alias name="creditGlAccountClassEnumId" entity-alias="ATC" field="glAccountClassEnumId"/>
+        <alias name="creditTransactionDate" entity-alias="ATC" field="transactionDate"/>
+        <alias name="creditDcFlag" entity-alias="ATC" field="debitCreditFlag"/>
+        <alias name="creditTotal" entity-alias="ATC" field="amount"/>
+        <alias name="debitMinusCredit" type="number-decimal"><complex-alias operator="-">
+            <complex-alias-field entity-alias="ATD" field="amount" default-value="0"/>
+            <complex-alias-field entity-alias="ATC" field="amount" default-value="0"/>
+        </complex-alias></alias>
+        <alias name="creditMinusDebit" type="number-decimal"><complex-alias operator="-">
+            <complex-alias-field entity-alias="ATC" field="amount" default-value="0"/>
+            <complex-alias-field entity-alias="ATD" field="amount" default-value="0"/>
+        </complex-alias></alias>
+
+        <entity-condition>
+            <econdition field-name="debitDcFlag" value="D"/>
+            <econdition field-name="creditDcFlag" value="C"/>
+        </entity-condition>
+    </view-entity>
+</entities>

@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Service for export of NACHA files (see https://www.nacha.org) -->
+
+    <service verb="generate" noun="NachaFile">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="fromDate" type="Timestamp"><description>If null no limit on look back</description></parameter>
+            <parameter name="thruDate" type="Timestamp" default="ec.user.nowTimestamp">
+                <description>If null look through now</description></parameter>
+            <parameter name="fileDate" type="Timestamp" default="ec.user.nowTimestamp"><description>The date/time used
+                in various fields and set on PaymentMethodFile.fileDate</description></parameter>
+            <parameter name="effectiveEntryDate" type="Date"><description>Transaction settle/post date, should be at
+                least one business day in the future and should not be a weekend day or bank holiday. If not specified
+                the next week day after fileDate is used.</description></parameter>
+            <parameter name="nachaEntryDescription"><description>Overrides BankAccount.nachaEntryDescription</description></parameter>
+            <parameter name="fileTypeEnumId" default-value="PmftNacha"/>
+            <parameter name="addNewLine" type="Boolean">
+                <description>Add a new line character (\n, hex 0A) after each record, otherwise all records on same line; defaults to BankAccount.nachaAddNewLine (Y/N) or 'true'</description>
+            </parameter>
+            <parameter name="addOffsetRecord" type="Boolean">
+                <description>Add a single offset record to create a 'balanced' NACHA file; defaults to BankAccount.nachaAddOffsetRecord (Y/N) or 'false'</description></parameter>
+            <parameter name="produceSystemMessage" type="Boolean" default="false"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentMethodFileId"/>
+            <parameter name="fileText"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.method.PaymentMethod" value-field="paymentMethod"/>
+            <entity-find-one entity-name="mantle.account.method.BankAccount" value-field="bankAccount"/>
+            <if condition="bankAccount == null"><return error="true" message="Payment method ${paymentMethodId} is not a bank account"/></if>
+
+            <if condition="addNewLine == null"><set field="addNewLine" from="!'N'.equals(bankAccount.nachaAddNewLine)"/></if>
+            <if condition="addOffsetRecord == null"><set field="addOffsetRecord" from="'Y'.equals(bankAccount.nachaAddOffsetRecord)"/></if>
+
+            <if condition="addOffsetRecord">
+                <!-- if adding offset record check bankAccount's routingNumber and accountNumber -->
+                <if condition="!bankAccount.accountNumber">
+                    <return error="true" message="Account Number is missing on internal Bank Account (ID ${paymentMethodId})"/></if>
+                <if condition="!bankAccount.routingNumber || bankAccount.routingNumber.length() != 9">
+                    <return error="true" message="Routing Number is not 9 characters on internal Bank Account (ID ${paymentMethodId})"/></if>
+            </if>
+
+            <!-- find applicable payments (match fromPartyId or toPartyId, and statusId=PmntAuthorized) -->
+            <entity-find entity-name="mantle.account.payment.Payment" list="originalPaymentList" for-update="true">
+                <econdition field-name="statusId" value="PmntAuthorized"/>
+                <econditions combine="or">
+                    <econditions combine="and">
+                        <econdition field-name="fromPartyId" from="paymentMethod.ownerPartyId"/>
+                        <econdition field-name="paymentMethodId"/>
+                        <econdition field-name="toPaymentMethodId" operator="not-equals" from="null"/>
+                    </econditions>
+                    <econditions combine="and">
+                        <econdition field-name="toPartyId" from="paymentMethod.ownerPartyId"/>
+                        <econdition field-name="toPaymentMethodId" from="paymentMethodId"/>
+                        <econdition field-name="paymentMethodId" operator="not-equals" from="null"/>
+                    </econditions>
+                </econditions>
+                <econdition field-name="paymentInstrumentEnumId" value="PiAch"/>
+                <econdition field-name="paymentMethodFileId" from="null"/>
+                <econdition field-name="effectiveDate" operator="greater-equals" from="fromDate" ignore-if-empty="true"/>
+                <econdition field-name="effectiveDate" operator="less-equals" from="thruDate"/>
+                <order-by field-name="effectiveDate"/>
+            </entity-find>
+
+            <!-- no payments? return now with a message -->
+            <if condition="!originalPaymentList"><return message="No pending ACH payments found for payment method [${paymentMethodId}]"/></if>
+
+            <!-- count of files sent today for File ID Modifier in File Header char 34 -->
+            <set field="todayRange" from="ec.user.getPeriodRange('day', '0')"/>
+            <entity-find-count entity-name="mantle.account.method.PaymentMethodFile" count-field="fileCount">
+                <econdition field-name="paymentMethodId"/>
+                <econdition field-name="fileDate" operator="greater-equals" from="todayRange[0]"/>
+                <econdition field-name="fileDate" operator="less-equals" from="todayRange[1]"/>
+            </entity-find-count>
+            <if condition="fileCount &gt; 35"><message error="true">More than 35 files not allowed in one day due to NACHA File ID Modifier limits (payment method [${paymentMethodId}]), found ${fileCount}</message></if>
+
+            <!-- set/check some configuration values -->
+
+            <!-- File Header fields -->
+            <if condition="!bankAccount.nachaImmedDest || bankAccount.nachaImmedDest.length() &lt; 9 || bankAccount.nachaImmedDest.length() &gt; 10">
+                <message error="true">NACHA Immediate Destination field (${bankAccount.nachaImmedDest}) on Bank Account must be 9 or 10 characters</message></if>
+            <if condition="!bankAccount.nachaImmedOrig || bankAccount.nachaImmedOrig.length() &lt; 9 || bankAccount.nachaImmedOrig.length() &gt; 10">
+                <message error="true">NACHA Immediate Origin field (${bankAccount.nachaImmedOrig}) on Bank Account must be 9 or 10 characters</message></if>
+            <set field="nachaImmedDestName" from="bankAccount.nachaImmedDestName ?: bankAccount.bankName"/>
+            <if condition="!nachaImmedDestName || nachaImmedDestName.length() &gt; 23">
+                <message error="true">NACHA Immediate Destination Name field (${nachaImmedDestName}) on Bank Account must be specified and not more than 23 characters</message></if>
+            <set field="nachaImmedOrigName" from="bankAccount.nachaImmedOrigName ?: paymentMethod.companyNameOnAccount"/>
+            <if condition="!nachaImmedOrigName || nachaImmedOrigName.length() &gt; 23">
+                <message error="true">NACHA Immediate Origin Name field (${nachaImmedOrigName}) on Bank Account must be specified and not more than 23 characters</message></if>
+
+            <!-- Batch Header fields -->
+            <set field="nachaCompanyName" from="bankAccount.nachaCompanyName"/>
+            <if condition="!nachaCompanyName">
+                <set field="nachaCompanyName" from="paymentMethod.companyNameOnAccount"/>
+                <if condition="nachaCompanyName?.length() > 16"><set field="nachaCompanyName" from="nachaCompanyName.substring(0, 16)"/></if>
+            </if>
+            <if condition="!nachaCompanyName || nachaCompanyName.length() &gt; 16">
+                <message error="true">NACHA Company Name field (${nachaCompanyName}) on Bank Account must be specified and not more than 16 characters</message></if>
+            <set field="nachaDiscrData" from="bankAccount.nachaDiscrData ?: ''"/>
+            <if condition="nachaDiscrData.length() &gt; 20">
+                <message error="true">NACHA Discretionary Data field (${nachaDiscrData}) on Bank Account must not be more than 20 characters</message></if>
+            <if condition="!bankAccount.nachaCompanyId || bankAccount.nachaCompanyId.length() &gt; 10">
+                <message error="true">NACHA Company ID field (${bankAccount.nachaCompanyId}) on Bank Account must be specified and not more than 10 characters</message></if>
+            <set field="nachaEntryDescription" from="nachaEntryDescription ?: bankAccount.nachaEntryDescription"/>
+            <if condition="!nachaEntryDescription || nachaEntryDescription.length() &gt; 10">
+                <message error="true">NACHA Entry Description field (${nachaEntryDescription}) on Bank Account or service parameter must be specified and not more than 10 characters</message></if>
+
+            <set field="nachaOdfiId" from="bankAccount.nachaOdfiId ?: bankAccount.nachaImmedDest.take(8)"/>
+            <if condition="nachaOdfiId.length() &gt; 8">
+                <message error="true">NACHA Originating DFI ID (${nachaOdfiId}) on Bank Account must not be more than 8 digits</message></if>
+
+            <if condition="!effectiveEntryDate">
+                <!-- FUTURE: support some sort of configuration for the holidays to skip -->
+                <service-call name="mantle.work.EventServices.get#NextBusinessDay" out-map="nextDayOut"
+                        in-map="[startDate:fileDate, workEffortCategoryIds:['HolidayUsaBank']]"/>
+                <set field="effectiveEntryDate" from="nextDayOut.nextDayDate"/>
+            </if>
+
+            <check-errors/>
+
+            <!-- create a PaymentMethodFile record, get the paymentMethodFileId (used in the file) -->
+            <service-call name="create#mantle.account.method.PaymentMethodFile" in-map="context" out-map="context"/>
+
+            <!-- generate the NACHA file -->
+            <script><![CDATA[
+                import org.moqui.context.ExecutionContext
+                import org.moqui.entity.EntityValue
+
+                static String getRoutingCheckDigit(String routingNumber) {
+                    String routingWeights = "37137137"
+                    int routingCheckSum = 0
+                    for (int i = 0; i < 8; i++) routingCheckSum += (Character.digit(routingNumber.charAt(i), 10)) * (Character.digit(routingWeights.charAt(i), 10))
+                    int routingCheckSumMod = 10 - (routingCheckSum % 10)
+                    if (routingCheckSumMod == 10) routingCheckSumMod = 0
+                    return routingCheckSumMod as String
+                }
+
+                ExecutionContext ec = context.ec
+
+                // Handy output checking lines, paste below to line up output
+                // 0        10        20        30        40        50        60        70        80        90
+                // 123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+123456789+1234
+
+                List<StringBuilder> lines = []
+
+                // File Header (1)
+                StringBuilder fileHeader = new StringBuilder(94)
+                // 01-01: Record Type Code = '1'
+                // 02-03: Priority Code = '01'
+                fileHeader.append("101")
+                // 04-13: Immediate Destination (? + 9 digits as TTTTAAAAC, really whatever bank specifies)
+                fileHeader.append(bankAccount.nachaImmedDest.padLeft(10, ' '))
+                // 14-23: Immediate Origin (? + 9 digits)
+                fileHeader.append(bankAccount.nachaImmedOrig.padLeft(10, ' '))
+                // 24-29: File Creation Date
+                fileHeader.append(ec.l10n.format(fileDate, "yyMMdd"))
+                // 30-33: File Creation Time
+                fileHeader.append(ec.l10n.format(fileDate, "HHmm"))
+                // 34-34: File ID Modifier (count of files for the day)
+                fileHeader.append(Character.toUpperCase(Character.forDigit((int) fileCount, 36)))
+                // 35-37: Record Size: '094'
+                // 38-39: Blocking Factor: '10'
+                // 40-40: Format Code: '1'
+                fileHeader.append("094101")
+                // 41-63: Immediate Destination Name
+                fileHeader.append(nachaImmedDestName.toUpperCase().padRight(23, ' '))
+                // 64-86: Immediate Origin Name
+                fileHeader.append(nachaImmedOrigName.toUpperCase().padRight(23, ' '))
+                // 87-94: Reference Code, not used, just 8 spaces
+                fileHeader.append(" ".padRight(8, ' '))
+                lines.add(fileHeader)
+
+                // Batch Header (5)
+                StringBuilder batchHeader = new StringBuilder(94)
+                // 01-01: Record Type Code = '5'
+                // 02-04: Service Class Code = '200'
+                batchHeader.append("5200")
+                // 05-20: Company Name (16 chars)
+                batchHeader.append(nachaCompanyName.toUpperCase().padRight(16, ' '))
+                // 21-40: Company discretionary data (20 chars)
+                batchHeader.append(nachaDiscrData.toUpperCase().padRight(20, ' '))
+                // 41-50: Company ID
+                batchHeader.append(bankAccount.nachaCompanyId.toUpperCase().padRight(10, ' '))
+                // 51-53: Standard Entry Class Code: always use PPD (Prearranged Payment and Deposit) for now, future consider support for CCD, TEL, WEB, etc
+                batchHeader.append("PPD")
+                // 54-63: Company Entry Description (for receiver's bank account, 10 chars)
+                batchHeader.append(nachaEntryDescription.toUpperCase().padRight(10, ' '))
+                // 64-69: Company Descriptive Date (6 chars); note that this is informational and optional
+                batchHeader.append(ec.l10n.format(fileDate, "MMM dd").toUpperCase())
+                // 70-75: Effective Entry Date (estimated settlement date, 1 business day later; 6 chars at yyMMdd)
+                batchHeader.append(ec.l10n.format(effectiveEntryDate, "yyMMdd"))
+                // 76-78: Settlement Date (leave blank, 3 spaces)
+                batchHeader.append(" ".padRight(3, ' '))
+                // 79-79: Originator Status Code = '1'
+                batchHeader.append("1")
+                // 80-87: Originating DFI Identification
+                batchHeader.append(nachaOdfiId)
+                // 88-94: Batch Number (7 chars); always "0000001" since we're doing one batch per file, future: for multiple batches increment this per batch header
+                batchHeader.append("1".padLeft(7, '0'))
+
+                lines.add(batchHeader)
+
+                // Entry Detail (6) & Addenda (7)
+                long entryCount = 0, routingNumberSum = 0
+                BigDecimal debitAmountTotal = 0.0, creditAmountTotal = 0.0
+                paymentList = []
+                for (EntityValue payment in originalPaymentList) {
+                    // add payment to context for error messages using ec.resource.expand()
+                    ec.context.put("payment", payment)
+
+                    // Get PaymentMethod and BankAccount; use toPaymentMethodId if outgoing
+                    boolean outgoing = payment.fromPartyId == paymentMethod.ownerPartyId
+                    // NOTE: no type on pmtPaymentMethodId to put in ec.context so available for ec.resource.expand()
+                    pmtPaymentMethodId = outgoing ? payment.toPaymentMethodId : payment.paymentMethodId
+                    EntityValue pmtPaymentMethod = ec.entity.find("mantle.account.method.PaymentMethod")
+                            .condition("paymentMethodId", pmtPaymentMethodId).one()
+                    EntityValue pmtBankAccount = ec.entity.find("mantle.account.method.BankAccount")
+                            .condition("paymentMethodId", pmtPaymentMethodId).one()
+                    if (pmtBankAccount == null) {
+                        ec.message.addMessage(ec.resource.expand('No Bank Account for payment method ${pmtPaymentMethodId} on payment ${payment.paymentId}',''), "danger")
+                        continue
+                    }
+                    // check the routing number
+                    String routingNumber = pmtBankAccount.routingNumber
+                    if (!routingNumber || routingNumber.length() != 9) {
+                        ec.message.addMessage(ec.resource.expand('Routing Number is not 9 characters on Bank Account for payment method ${pmtPaymentMethodId} on payment ${payment.paymentId}',''), "danger")
+                        continue
+                    }
+                    // calculate routing number check digit
+                    String routingCheckDigit = getRoutingCheckDigit(routingNumber)
+                    // add first 8 digits of routingNumber to routingNumberSum
+                    routingNumberSum += (routingNumber.substring(0, 8) as long)
+
+                    // check/trim the account number
+                    String accountNumber = pmtBankAccount.accountNumber
+                    if (!accountNumber) {
+                        ec.message.addMessage(ec.resource.expand('Account Number is missing on Bank Account for payment method ${pmtPaymentMethodId} on payment ${payment.paymentId}',''), "danger")
+                        continue
+                    }
+                    if (accountNumber.length() > 17) accountNumber = accountNumber.substring(0, 17)
+
+                    // check/format payment amount
+                    if (!payment.amount || payment.amount.scale() > 2) {
+                        ec.message.addMessage(ec.resource.expand('Amount ${payment.amount?.toPlainString()} must be specified an have no more than 2 decimal digits on payment ${payment.paymentId}',''), "danger")
+                        continue
+                    }
+                    String amountStr = payment.getBigDecimal("amount").movePointRight(2).longValueExact() as String
+                    if (amountStr.length() > 10) {
+                        ec.message.addMessage(ec.resource.expand('Amount ${payment.amount.toPlainString()} is too big for NACHA transactions on payment ${payment.paymentId}',''), "danger")
+                        continue
+                    }
+                    // add to debitAmountTotal or creditAmountTotal
+                    if (outgoing) creditAmountTotal += payment.amount else debitAmountTotal += payment.amount
+
+                    // look up other party PartyDetail
+                    String otherPartyId = payment.fromPartyId == paymentMethod.ownerPartyId ? payment.toPartyId : payment.fromPartyId
+                    EntityValue otherParty = ec.entity.find("mantle.party.PartyDetail").condition("partyId", otherPartyId).one()
+
+                    // use "X" + rightmost 14 chars if paymentId length is longer than 15 chars
+                    String individualId = payment.paymentId
+                    if (individualId.length() > 15) individualId = "X" + individualId.substring(0, 14)
+
+                    // get Individual/Company Name
+                    String indName = pmtPaymentMethod.firstNameOnAccount ?
+                            pmtPaymentMethod.firstNameOnAccount + " " + pmtPaymentMethod.lastNameOnAccount :
+                            pmtPaymentMethod.companyNameOnAccount
+                    if (!indName) indName = otherParty.firstName ? otherParty.firstName + " " + otherParty.lastName : otherParty.organizationName
+                    // TODO: better way to truncate names?
+                    if (indName.length() > 22) indName = indName.substring(0, 22)
+
+                    // done with validation/prep, increment entryCount and create the record
+                    entryCount++
+                    paymentList.add(payment)
+
+                    // ec.logger.warn("routingNumber ${routingNumber} routingCheckDigit ${routingCheckDigit} accountNumber ${accountNumber}")
+
+                    // Entry Detail (6)
+                    StringBuilder entry = new StringBuilder()
+                    // 01-01: Record Type Code = '6'
+                    entry.append("6")
+                    // 02-03: Transaction Code: checking/etc credit '22', debit '27'; savings credit '32', debit '37'
+                    if (pmtBankAccount.typeEnumId == 'BatSavings') { entry.append(outgoing ? "32" : "37") }
+                    else { entry.append(outgoing ? "22" : "27") }
+                    // 04-11: Receiving DFI R/T number (8 digits)
+                    //     First eight digits of routing/transit number of receiving financial depository institution (RDFI)
+                    //     where the transaction is to be posted. The first digit should be 0, 1, 2, or 3. An R/T number
+                    //     starting with 4-9 is usually not valid.
+                    entry.append(routingNumber.substring(0, 8))
+                    // 12-12: R/T number check digit
+                    entry.append(routingCheckDigit)
+                    // 13-29: Receiving DFI account number (last 17 digits, right space padded)
+                    entry.append(accountNumber.padRight(17, ' '))
+                    // 30-39: Amount (10 digits, no decimal point, last 2 digits are decimal values, left pad with 0)
+                    entry.append(amountStr.padLeft(10, '0'))
+                    // 40-54: Individual or Company ID for company (15 chars)
+                    entry.append(individualId.toUpperCase().padRight(15, ' '))
+                    // 55-76: Individual or Company Name (22 chars)
+                    entry.append(indName.toUpperCase().padRight(22, ' '))
+                    // 77-78: Discretionary Data (2 chars); leave blank for now, for WEB or other special transactions may need a value
+                    entry.append("  ")
+                    // 79-79: Addenda record indicator, always '0' since not using Addenda (7) records (would be '1' if there is one or more addenda records)
+                    entry.append("0")
+                    // 80-94: Trace number (15 chars); ODFI ID, plus index (entryCount zero left padded to 7 chars)
+                    entry.append(nachaOdfiId)
+                    entry.append((entryCount as String).padLeft(7, '0'))
+
+                    lines.add(entry)
+
+                    // FUTURE: Addenda (7) with ANSI ASC X12.4, X12.85, or other data
+                }
+
+                if (addOffsetRecord) {
+                    String routingNumber = bankAccount.routingNumber
+                    // calculate routing number check digit
+                    String routingCheckDigit = getRoutingCheckDigit(routingNumber)
+                    // add first 8 digits of routingNumber to routingNumberSum
+                    routingNumberSum += (routingNumber.substring(0, 8) as long)
+
+                    String accountNumber = bankAccount.accountNumber
+                    if (accountNumber.length() > 17) accountNumber = accountNumber.substring(0, 17)
+
+                    BigDecimal netCredit = creditAmountTotal - debitAmountTotal
+
+                    if (netCredit != 0.0) {
+                        // NOTE: if isNetDebit then we create a credit offset, otherwise we create a debit offset
+                        boolean isNetDebit = netCredit < 0.0
+                        BigDecimal netAmount = isNetDebit ? netCredit.negate() : netCredit
+
+                        String amountStr = netAmount.movePointRight(2).longValueExact() as String
+                        if (isNetDebit) creditAmountTotal += netAmount else debitAmountTotal += netAmount
+
+                        // get Individual/Company Name
+                        String indName = paymentMethod.companyNameOnAccount
+                        if (indName.length() > 22) indName = indName.substring(0, 22)
+
+                        entryCount++
+
+                        // Entry Detail (6)
+                        StringBuilder entry = new StringBuilder()
+                        // 01-01: Record Type Code = '6'
+                        entry.append("6")
+                        // 02-03: Transaction Code: checking/etc credit '22', debit '27'; savings credit '32', debit '37'
+                        // if this is a net debit, create a credit; otherwise create a debit
+                        entry.append(isNetDebit ? "22" : "27")
+                        // 04-11: Receiving DFI R/T number (8 digits)
+                        entry.append(routingNumber.substring(0, 8))
+                        // 12-12: R/T number check digit
+                        entry.append(routingCheckDigit)
+                        // 13-29: Receiving DFI account number (last 17 digits, right space padded)
+                        entry.append(accountNumber.padRight(17, ' '))
+                        // 30-39: Amount (10 digits, no decimal point, last 2 digits are decimal values, left pad with 0)
+                        entry.append(amountStr.padLeft(10, '0'))
+                        // 40-54: Individual or Company ID for company (15 chars)
+                        entry.append("OFFSET".padRight(15, ' '))
+                        // 55-76: Individual or Company Name (22 chars)
+                        entry.append(indName.toUpperCase().padRight(22, ' '))
+                        // 77-78: Discretionary Data (2 chars); leave blank for now, for WEB or other special transactions may need a value
+                        entry.append("  ")
+                        // 79-79: Addenda record indicator, always '0' since not using Addenda (7) records (would be '1' if there is one or more addenda records)
+                        entry.append("0")
+                        // 80-94: Trace number (15 chars); ODFI ID, plus index (entryCount zero left padded to 7 chars)
+                        entry.append(nachaOdfiId)
+                        entry.append((entryCount as String).padLeft(7, '0'))
+
+                        lines.add(entry)
+                    }
+                }
+
+                String routingNumberSumStr = routingNumberSum as String
+                if (routingNumberSumStr.length() > 10)
+                    routingNumberSumStr = routingNumberSumStr.substring(routingNumberSumStr.length() - 10, routingNumberSumStr.length())
+
+                String debitAmountTotalStr = debitAmountTotal.movePointRight(2).longValueExact() as String
+                String creditAmountTotalStr = creditAmountTotal.movePointRight(2).longValueExact() as String
+
+                // Batch Control (8)
+                StringBuilder batchControl = new StringBuilder()
+                // 01-01: Record Type Code = '8'
+                // 02-04: Service class code (same as batch header) = '200'
+                batchControl.append("8200")
+                // 05-10: Entry/addenda count (6 chars, zero left padded)
+                batchControl.append((entryCount as String).padLeft(6, '0'))
+                // 11-20: Entry hash (10 chars); sum of the 8-digit receiving DFI routing/transit numbers in entry
+                //     detail records; zero left padded, if too long trim from left
+                batchControl.append(routingNumberSumStr.padLeft(10, '0'))
+                // 21-32: Total batch debit entry dollar amount (12 digits, std number format pattern)
+                batchControl.append(debitAmountTotalStr.padLeft(12, '0'))
+                // 33-44: Total batch credit entry dollar amount (12 digits, std number format pattern)
+                batchControl.append(creditAmountTotalStr.padLeft(12, '0'))
+                // 45-54: Company ID (same as in Batch Header)
+                batchControl.append(bankAccount.nachaCompanyId.toUpperCase().padRight(10, ' '))
+                // 55-73: Message authentication code (leave blank, 19 spaces)
+                batchControl.append(" ".padRight(19, ' '))
+                // 74-79: Reserverd blank (leave blank, 6 spaces)
+                batchControl.append(" ".padRight(6, ' '))
+                // 80-87: Originating DFI ID
+                batchControl.append(nachaOdfiId)
+                // 88-94: Batch Number (7 chars); same as Batch Header; always "0000001" since we're doing one batch per file
+                batchControl.append("1".padLeft(7, '0'))
+
+                lines.add(batchControl)
+
+                // File Control (9)
+                StringBuilder fileControl = new StringBuilder()
+                // 01-01: Record Type Code = '9'
+                fileControl.append("9")
+                // 02-07: Batch count (6 chars)
+                fileControl.append("1".padLeft(6, '0'))
+                // 08-13: Block count (6 chars); count of 10-line blocks (entries plus 2 header and 2 control records, divide by 10, round up)
+                fileControl.append(((entryCount + 4) / 10).setScale(0, BigDecimal.ROUND_UP).toPlainString().padLeft(6, '0'))
+                // 14-21: Entry/addenda record count (8 chars)
+                fileControl.append((entryCount as String).padLeft(8, '0'))
+                // 22-31: Entry hash total (10 chars); since we have 1 batch same as value in Batch Control
+                fileControl.append(routingNumberSumStr.padLeft(10, '0'))
+                // 32-43: Total file debit entry amount (12 digits)
+                fileControl.append(debitAmountTotalStr.padLeft(12, '0'))
+                // 44-55: Total file credit entry amount (12 digits)
+                fileControl.append(creditAmountTotalStr.padLeft(12, '0'))
+                // 56-94: Filler (39 spaces)
+                fileControl.append(" ".padRight(39, ' '))
+
+                lines.add(fileControl)
+
+                // if not a multiple of 10 lines add lines of all 9s until it is
+                while (lines.size() % 10 != 0) {
+                    StringBuilder sb = new StringBuilder(94)
+                    for (int i = 0; i < 94; i++) sb.append('9')
+                    lines.add(sb)
+                }
+                // combines the lines
+                StringBuilder ftSb = new StringBuilder(95 * lines.size())
+                for (StringBuilder line in lines) {
+                    if (line.length() != 94) ec.message.addError(ec.resource.expand('Generated line does not have exactly 94 chars: ${line}','',[line:line]))
+                    ftSb.append(line)
+                    if (addNewLine) ftSb.append('\n')
+                }
+                // get the String value
+                fileText = ftSb.toString()
+            ]]></script>
+
+            <check-errors/>
+            <if condition="!paymentList"><return error="true" message="No valid payments found for NACHA file, not generating"/></if>
+
+            <!-- save file info on PaymentMethodFile, update statusId and set paymentMethodFileId on Payment records -->
+            <service-call name="mantle.account.PaymentMethodServices.update#PaymentMethodFileComplete"
+                    in-map="context + [entryCount:entryCount, debitAmountTotal:debitAmountTotal, creditAmountTotal:creditAmountTotal]"/>
+
+            <if condition="produceSystemMessage">
+                <entity-find-one entity-name="mantle.account.method.PaymentMethodFileType" value-field="paymentMethodFileType">
+                    <field-map field-name="paymentMethodId"/><field-map field-name="fileTypeEnumId"/></entity-find-one>
+                <if condition="paymentMethodFileType?.systemMessageTypeId &amp;&amp; paymentMethodFileType?.systemMessageRemoteId"><then>
+                    <service-call name="mantle.account.PaymentMethodServices.produce#PaymentMethodFileSystemMessage"
+                            in-map="[paymentMethodFileId:paymentMethodFileId]"/>
+                </then><else>
+                    <message type="danger">Not sending file ${paymentMethodFileId}, no message type or remote system configured for payment method ${paymentMethodId} and file type ${fileTypeEnumId}</message>
+                </else></if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="consume" noun="NachaReturnSystemMessage">
+        <implements service="org.moqui.impl.SystemMessageServices.consume#SystemMessage"/>
+        <actions>
+            <entity-find-one entity-name="moqui.service.message.SystemMessage" value-field="systemMessage"/>
+            <set field="nachaString" from="systemMessage.messageText"/>
+
+            <!-- determine paymentMethodId by PaymentMethodFileType record -->
+            <entity-find entity-name="mantle.account.method.PaymentMethodFileType" list="pmftList">
+                <econdition field-name="fileTypeEnumId" value="PmftNacha"/>
+                <econdition field-name="systemMessageTypeId" from="systemMessage.systemMessageTypeId"/>
+                <econdition field-name="systemMessageRemoteId" from="systemMessage.systemMessageRemoteId"/>
+            </entity-find>
+            <if condition="pmftList.size() == 0">
+                <return error="true" message="Could not find paymentMethodId from PaymentMethodFileType record for file type PmftNacha message type ${systemMessage.systemMessageTypeId} remote ${systemMessage.systemMessageRemoteId}"/>
+            </if>
+
+            <!-- weird but allow multiple in case transactions came from more than one BankAccount -->
+            <iterate list="pmftList" entry="pmft">
+                <set field="paymentMethodId" from="pmft.paymentMethodId"/>
+                <service-call name="mantle.account.NachaServices.import#NachaReturn" in-map="context"/>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="import" noun="NachaReturn">
+        <in-parameters>
+            <parameter name="paymentMethodId" required="true"/>
+            <parameter name="nachaString" required="true"/>
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+
+                /*
+                 * Decode the paymentId if the original value was longer then max
+                 * length of the NACHA field (15 chars)
+                 */
+                def String checkPaymentId(paymentId) {
+                    if (!paymentId) return null;
+                    if ("X" != paymentId[0]) {
+                        return paymentId
+                    } else {
+                        payment = ec.entity.find("mantle.account.payment.Payment")
+                                .condition("paymentInstrumentEnumId", "PiAch")
+                                .condition("paymentMethodId", paymentMethodId)
+                                .condition("paymentId", ComparisonOperator.LIKE, "%" + paymentId.reverse().take(14).reverse())
+                                .one()
+                        payment ? payment.paymentId : null
+                    }
+                }
+
+                def List parse(String content = nachaString) {
+                    def batch = []
+                    def achEntry
+                    content.eachLine {line ->
+                        if (line.length() != 94) {
+                            ec.message.addError("Length of the line is incorrect. Perhaps the file is damaged or improperly formatted.")
+                            return
+                        }
+
+                        type = line.take(1);
+
+                        if ("6" == type /* entry detail */) {
+                            if (achEntry != null) {
+                                batch += achEntry
+                                achEntry = null
+                            }
+                            achEntry = [
+                                recordTypeCode : line[0],
+                                transactionCode : line[1..2],
+                                dfiId : line[3..10].trim(),
+                                dfiAccount :  line[12..28].trim(),
+                                amount : new BigDecimal(line[29..38]).movePointLeft(2),
+                                paymentId : checkPaymentId(line[39..53].trim()),
+                                name : line[54-75].trim(),
+                                discretionaryData: line[76..77],
+                                addendaIndicator: line[78],
+                                traceNumber: line[79..93]
+                            ]
+
+                        } else if ("7" == type /* addenda */) {
+                            if (achEntry != null) {
+                                if (!achEntry.addendums) achEntry.addendums = []
+                                addenda = [recordTypeCode : line[0], addendaTypeCode : line[1..2]]
+                                if (addenda.addendaTypeCode == "99") {
+                                    addenda.returnReasonCode = line[3..5]
+                                    addenda.orgEntryTraceNum = line[6..20]
+                                    addenda.dateOfDeath = line[21..26]
+                                    addenda.orgDfiId = line[27..34].trim()
+                                    addenda.info = line[35..78].trim()
+                                    addenda.traceNum = line[79..93]
+                                } else if (addenda.addendaTypeCode == "98") {
+                                    addenda.changeCode = line[3..5]
+                                    addenda.orgEntryTraceNum = line[6..20]
+                                    addenda.orgDfiId = line[27..34].trim()
+                                    addenda.correctedData = line[35-63].trim()
+                                    addenda.traceNum = line[79..93]
+                                } else {
+                                    addenda.info = line[3..82].trim()
+                                    addenda.addendaSeqNum = line[83..86]
+                                    addenda.entrySeqNum = line[87..93]
+                                }
+                                achEntry.addendums += addenda;
+                            }
+
+                        } else {
+                            if (achEntry != null) {
+                                batch += achEntry
+                                achEntry = null
+                            }
+                        }
+                    }
+
+                    return batch
+                }
+
+                batch = parse()
+                if (batch) {
+                    batch.each{entry ->
+                        paymentId = entry.paymentId;
+                        addendums = entry.addendums;
+                        if (addendums) {
+                            lastAddenda = addendums.last(); // return addenda is either only or last one
+                            type = lastAddenda.addendaTypeCode
+                            if ('99' == type) {
+                                // return
+                                payment = ec.entity.find("mantle.account.payment.Payment").condition([paymentId : paymentId]).one()
+                                if (payment) {
+                                    // find description of the return reason code
+                                    returnReason = ec.entity.find("moqui.basic.Enumeration")
+                                            .condition([enumTypeId : "ACHReturnCode", enumCode : lastAddenda.returnReasonCode]).one()
+                                    ec.service.sync().name("create#mantle.account.method.PaymentGatewayResponse")
+                                            .parameters([paymentId : paymentId, paymentMethodId : paymentMethodId,
+                                            amount : entry.amount, referenceNum : lastAddenda.traceNum,
+                                            amountUomId : payment.amountUomId, reasonCode: lastAddenda.returnReasonCode,
+                                            reasonMessage : returnReason ? returnReason.description : lastAddenda.info]).call()
+                                    ec.service.sync().name("update#mantle.account.payment.Payment")
+                                            .parameters([paymentId : paymentId, statusId : "PmntDeclined"]).call()
+                                } else {
+                                    ec.message.addError(ec.resource.expand('Payment ${paymentId} not found', '', [paymentId: paymentId]))
+                                }
+
+                            } else if ('98' == type) {
+                                // notification of change
+                                payment = ec.entity.find("mantle.account.payment.Payment").condition([paymentId : paymentId]).one()
+                                if (payment) {
+                                    // find description of the change notification
+                                    changeReason = ec.entity.find("moqui.basic.Enumeration")
+                                            .condition([enumTypeId : "ACHChangeCode", enumCode : lastAddenda.changeCode]).one()
+                                    ec.service.sync().name("create#mantle.account.method.PaymentGatewayResponse")
+                                            .parameters([paymentId : paymentId, paymentMethodId : paymentMethodId,
+                                            amount : entry.amount, referenceNum : lastAddenda.traceNum,
+                                            amountUomId : payment.amountUomId, reasonCode: lastAddenda.changeCode,
+                                            reasonMessage : (changeReason ? changeReason.description : "" + " Corrected: " + lastAddenda.correctedData)]).call()
+                                    ec.service.sync().name("update#mantle.account.payment.Payment")
+                                            .parameters([paymentId : paymentId, statusId : "PmntAuthorized"]).call()
+                                } else {
+                                    ec.message.addError(ec.resource.expand('Payment ${paymentId} not found', '', [paymentId: paymentId]))
+                                }
+                            }
+                        }
+                    }
+                }
+
+            ]]></script>
+        </actions>
+    </service>
+</services>

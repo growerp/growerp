@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <!-- NOTE: when updating these it's best to delete the indexes through ElasticSearch, then reindex the MantleSales feed:
+
+        curl http://localhost:9200/_cat/indices?v
+
+        curl -X DELETE http://localhost:9200/mantle_project?pretty
+        curl -X DELETE http://localhost:9200/mantle_task?pretty
+        curl -X DELETE http://localhost:9200/mantle_event?pretty
+        curl -X DELETE http://localhost:9200/mantle_request?pretty
+    -->
+
+    <!-- Project -->
+    <dataDocuments dataDocumentId="MantleProject" indexName="mantle" documentName="Project"
+            primaryEntityName="mantle.work.effort.WorkEffort" documentTitle="${name}">
+        <fields fieldSeqId="01" fieldPath="workEffortId"/>
+        <fields fieldSeqId="02" fieldPath="workEffortName" fieldNameAlias="name"/>
+        <fields fieldSeqId="03" fieldPath="workEffortTypeEnumId"/><!-- this is aliased so we can have a condition on it -->
+        <fields fieldSeqId="04" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="05" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="06" fieldPath="purpose:description" fieldNameAlias="purpose"/>
+        <fields fieldSeqId="10" fieldPath="parties:partyId"/>
+        <fields fieldSeqId="11" fieldPath="parties:role:description" fieldNameAlias="role"/>
+        <fields fieldSeqId="12" fieldPath="parties:person:firstName"/>
+        <fields fieldSeqId="13" fieldPath="parties:person:lastName"/>
+        <fields fieldSeqId="14" fieldPath="parties:organization:organizationName"/>
+        <fields fieldSeqId="17" fieldPath="ownerPartyId"/>
+
+        <conditions conditionSeqId="01" fieldNameAlias="workEffortTypeEnumId" fieldValue="WetProject"/>
+    </dataDocuments>
+
+    <!-- Task -->
+    <dataDocuments dataDocumentId="MantleTask" indexName="mantle" documentName="Task"
+            primaryEntityName="mantle.work.effort.WorkEffort" documentTitle="${name}">
+        <fields fieldSeqId="01" fieldPath="workEffortId"/>
+        <fields fieldSeqId="02" fieldPath="rootWorkEffortId" fieldNameAlias="project"/>
+        <fields fieldSeqId="03" fieldPath="parentWorkEffortId" fieldNameAlias="parent"/>
+        <fields fieldSeqId="04" fieldPath="workEffortName" fieldNameAlias="name"/>
+        <fields fieldSeqId="05" fieldPath="workEffortTypeEnumId"/><!-- this is aliased so we can have a condition on it -->
+        <fields fieldSeqId="06" fieldPath="priority"/>
+        <fields fieldSeqId="07" fieldPath="description"/>
+        <fields fieldSeqId="08" fieldPath="location"/>
+
+        <fields fieldSeqId="10" fieldPath="statusId"/>
+        <fields fieldSeqId="11" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="12" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="13" fieldPath="purposeEnumId"/>
+        <fields fieldSeqId="14" fieldPath="purpose:description" fieldNameAlias="purpose"/>
+        <fields fieldSeqId="15" fieldPath="resolutionEnumId"/>
+        <fields fieldSeqId="16" fieldPath="resolution:description" fieldNameAlias="resolution"/>
+        <fields fieldSeqId="17" fieldPath="ownerPartyId"/>
+
+        <fields fieldSeqId="20" fieldPath="parties:partyId"/>
+        <fields fieldSeqId="21" fieldPath="parties:role:description" fieldNameAlias="role"/>
+        <fields fieldSeqId="22" fieldPath="parties:person:firstName"/>
+        <fields fieldSeqId="23" fieldPath="parties:person:lastName"/>
+        <fields fieldSeqId="24" fieldPath="parties:organization:organizationName"/>
+        <!-- no longer used for update notifications and causing issues with false update notice for other fields on UserAccount like during login: <fields fieldSeqId="25" fieldPath="parties:userAccounts:userId"/> -->
+
+        <fields fieldSeqId="30" fieldPath="assocs:toWorkEffortId" fieldNameAlias="assocToId"/>
+        <fields fieldSeqId="31" fieldPath="assocs:type:description" fieldNameAlias="assocType"/>
+        <fields fieldSeqId="32" fieldPath="toAssocs:workEffortId" fieldNameAlias="assocFromId"/>
+        <fields fieldSeqId="33" fieldPath="toAssocs:type:description" fieldNameAlias="assocTypeTo"/>
+
+        <fields fieldSeqId="40" fieldPath="facility:pseudoId" fieldNameAlias="facilityPseudoId"/>
+        <fields fieldSeqId="41" fieldPath="facility:facilityName" fieldNameAlias="facilityName"/>
+        <fields fieldSeqId="42" fieldPath="facility:ownerPartyId" fieldNameAlias="facilityOwnerPartyId"/>
+
+        <fields fieldSeqId="50" fieldPath="communicationEvents:communicationEventId"/>
+        <fields fieldSeqId="51" fieldPath="communicationEvents:communicationEvent:subject" fieldNameAlias="comSubject"/>
+        <fields fieldSeqId="52" fieldPath="communicationEvents:communicationEvent:body" fieldNameAlias="comBody"/>
+
+        <conditions conditionSeqId="01" fieldNameAlias="workEffortTypeEnumId" fieldValue="WetTask"/>
+    </dataDocuments>
+
+    <!-- Event -->
+    <dataDocuments dataDocumentId="MantleEvent" indexName="mantle" documentName="Event"
+            primaryEntityName="mantle.work.effort.WorkEffort" documentTitle="${name}">
+        <fields fieldSeqId="01" fieldPath="workEffortId"/>
+        <fields fieldSeqId="02" fieldPath="rootWorkEffortId" fieldNameAlias="project"/>
+        <fields fieldSeqId="03" fieldPath="parentWorkEffortId" fieldNameAlias="parent"/>
+        <fields fieldSeqId="04" fieldPath="workEffortName" fieldNameAlias="name"/>
+        <fields fieldSeqId="05" fieldPath="workEffortTypeEnumId"/><!-- this is aliased so we can have a condition on it -->
+        <fields fieldSeqId="06" fieldPath="priority"/>
+        <fields fieldSeqId="10" fieldPath="statusId"/>
+        <fields fieldSeqId="11" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="12" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="13" fieldPath="purposeEnumId"/>
+        <fields fieldSeqId="14" fieldPath="purpose:description" fieldNameAlias="purpose"/>
+        <fields fieldSeqId="15" fieldPath="resolutionEnumId"/>
+        <fields fieldSeqId="16" fieldPath="resolution:description" fieldNameAlias="resolution"/>
+        <fields fieldSeqId="17" fieldPath="ownerPartyId"/>
+
+        <fields fieldSeqId="20" fieldPath="parties:partyId"/>
+        <fields fieldSeqId="21" fieldPath="parties:role:description" fieldNameAlias="role"/>
+        <fields fieldSeqId="22" fieldPath="parties:person:firstName"/>
+        <fields fieldSeqId="23" fieldPath="parties:person:lastName"/>
+        <fields fieldSeqId="24" fieldPath="parties:organization:organizationName"/>
+        <!-- no longer used for update notifications and causing issues with false update notice for other fields on UserAccount like during login: <fields fieldSeqId="25" fieldPath="parties:userAccounts:userId"/> -->
+
+        <fields fieldSeqId="30" fieldPath="assocs:toWorkEffortId" fieldNameAlias="assocToId"/>
+        <fields fieldSeqId="31" fieldPath="assocs:type:description" fieldNameAlias="assocType"/>
+        <fields fieldSeqId="32" fieldPath="toAssocs:workEffortId" fieldNameAlias="assocFromId"/>
+        <fields fieldSeqId="33" fieldPath="toAssocs:type:description" fieldNameAlias="assocTypeTo"/>
+
+        <fields fieldSeqId="40" fieldPath="facility:pseudoId" fieldNameAlias="facilityPseudoId"/>
+        <fields fieldSeqId="41" fieldPath="facility:facilityName" fieldNameAlias="facilityName"/>
+        <fields fieldSeqId="42" fieldPath="facility:ownerPartyId" fieldNameAlias="facilityOwnerPartyId"/>
+
+        <conditions conditionSeqId="01" fieldNameAlias="workEffortTypeEnumId" fieldValue="WetEvent"/>
+    </dataDocuments>
+
+    <!-- Request -->
+    <dataDocuments dataDocumentId="MantleRequest" indexName="mantle" documentName="Request"
+            primaryEntityName="mantle.request.Request" documentTitle="${name}">
+        <fields fieldSeqId="01" fieldPath="requestId"/>
+        <fields fieldSeqId="02" fieldPath="requestName" fieldNameAlias="name"/>
+        <fields fieldSeqId="03" fieldPath="description"/>
+        <fields fieldSeqId="04" fieldPath="status:description" fieldNameAlias="status"/>
+        <fields fieldSeqId="05" fieldPath="type:description" fieldNameAlias="type"/>
+        <fields fieldSeqId="06" fieldPath="resolution:description" fieldNameAlias="resolution"/>
+        <fields fieldSeqId="07" fieldPath="workEfforts:workEffortId" fieldNameAlias="task"/>
+        <fields fieldSeqId="08" fieldPath="priority"/>
+
+        <fields fieldSeqId="10" fieldPath="parties:partyId"/>
+        <fields fieldSeqId="11" fieldPath="parties:role:description" fieldNameAlias="role"/>
+        <fields fieldSeqId="12" fieldPath="parties:person:firstName"/>
+        <fields fieldSeqId="13" fieldPath="parties:person:lastName"/>
+        <fields fieldSeqId="14" fieldPath="parties:organization:organizationName"/>
+
+        <fields fieldSeqId="20" fieldPath="requestDate"/>
+        <fields fieldSeqId="21" fieldPath="responseRequiredDate"/>
+        <fields fieldSeqId="22" fieldPath="requestTypeEnumId"/>
+        <fields fieldSeqId="23" fieldPath="requestCategoryId"/>
+        <fields fieldSeqId="24" fieldPath="statusId"/>
+        <fields fieldSeqId="25" fieldPath="requestResolutionEnumId"/>
+
+        <fields fieldSeqId="31" fieldPath="rootWorkEffortId"/>
+        <fields fieldSeqId="32" fieldPath="facilityId"/>
+        <fields fieldSeqId="33" fieldPath="productStoreId"/>
+        <fields fieldSeqId="34" fieldPath="salesChannelEnumId"/>
+        <fields fieldSeqId="35" fieldPath="filedByPartyId"/>
+
+        <fields fieldSeqId="40" fieldPath="facility:pseudoId" fieldNameAlias="facilityPseudoId"/>
+        <fields fieldSeqId="41" fieldPath="facility:facilityName" fieldNameAlias="facilityName"/>
+        <fields fieldSeqId="42" fieldPath="facility:ownerPartyId" fieldNameAlias="facilityOwnerPartyId"/>
+        <fields fieldSeqId="46" fieldPath="store:storeName" fieldNameAlias="storeName"/>
+        <fields fieldSeqId="47" fieldPath="store:organizationPartyId" fieldNameAlias="storeOrganizationPartyId"/>
+
+        <fields fieldSeqId="50" fieldPath="communicationEvents:communicationEventId"/>
+        <fields fieldSeqId="51" fieldPath="communicationEvents:communicationEvent:subject" fieldNameAlias="comSubject"/>
+        <fields fieldSeqId="52" fieldPath="communicationEvents:communicationEvent:body" fieldNameAlias="comBody"/>
+    </dataDocuments>
+
+    <!-- ================ -->
+    <!-- Search Data Feed -->
+    <moqui.entity.feed.DataFeed dataFeedId="MantleSearch">
+        <documents dataDocumentId="MantleProject"/>
+        <documents dataDocumentId="MantleTask"/>
+        <documents dataDocumentId="MantleEvent"/>
+        <documents dataDocumentId="MantleRequest"/>
+    </moqui.entity.feed.DataFeed>
+</entity-facade-xml>

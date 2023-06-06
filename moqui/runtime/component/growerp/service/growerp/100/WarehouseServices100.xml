@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domaicrn Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+
+    <service verb="get" noun="Location" authenticate="false">
+        <description> get a single, or all warehouse locations</description>
+        <in-parameters>
+            <parameter name="locationId"/>
+            <parameter name="facilityId"/>
+            <parameter name="start" default-value="0" type="Integer"/>
+            <parameter name="limit" default-value="20" type="Integer"/>
+            <parameter name="search" default="null"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="location" type="Map">
+                <parameter name="locationId"/>
+                <parameter name="locationName"/>
+                <parameter name="assets" type="List">
+                    <parameter name="asset" type="Map">
+                        <parameter name="assetId"/>
+                        <parameter name="statusId"/>
+                        <parameter name="assetName"/>
+                        <parameter name="product">
+                            <parameter name="productId"/>
+                            <parameter name="pseudoId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                        <parameter name="quantityOnHand"/>
+                        <parameter name="availableToPromise"/>
+                        <parameter name="acquireShipmentId"/>
+                    </parameter>
+                </parameter>
+            </parameter>
+            <parameter name="locations" type="List">
+                <parameter name="location" type="Map">
+                    <parameter name="locationId"/>
+                    <parameter name="locationName"/>
+                    <parameter name="assets" type="List">
+                        <parameter name="asset" type="Map">
+                            <parameter name="assetId"/>
+                            <parameter name="statusId"/>
+                            <parameter name="assetName"/>
+                            <parameter name="product">
+                                <parameter name="productId"/>
+                                <parameter name="pseudoId"/>
+                                <parameter name="productName"/>
+                            </parameter>
+                            <parameter name="quantityOnHand"/>
+                            <parameter name="availableToPromise"/>
+                            <parameter name="acquireShipmentId"/>
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <if condition="search != null">
+                <set field="search" value="%${search}%"/></if>
+            <service-call out-map="context" 
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find offset="start" limit="limit" list="locationsRead"
+                entity-name="growerp.warehouse.LocationAssetAndProductUomDetail">
+                <econdition field-name="locationId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="facilityId" ignore-if-empty="true"/>
+                <econditions combine="or">
+                    <econdition field-name="assetId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="assetName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="productId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="productName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="locationName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="locationId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                    <econdition field-name="acquireShipmentId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true"/>
+                </econditions>
+                <order-by field-name="locationId"/>
+                <order-by field-name="productId"/>
+                <order-by field-name="assetId"/>
+            </entity-find>
+            <set field="lastItem" from="null"/>
+            <set field="assets" from="[]"/>
+            <if condition="!locationId">
+                <set field="locations" from="[]"/></if>
+            <iterate list="locationsRead" entry="loc">
+                <if condition="lastItem  &amp;&amp; lastItem.locationId != loc.locationId">
+                    <set field="locOut.assets" from="assets"/>
+                    <script>locations.add(locOut)</script>
+                </if>
+                <if condition="!lastItem || lastItem.locationId != loc.locationId">
+                    <set field="locOut" from="[
+                        locationId: loc.locationId,
+                        locationName: loc.locationName,
+                        assets: assets]"/>
+                    <set field="assets" from="[]"/>
+                </if>
+                <set field="product" from="[productId: loc.productId,
+                            pseudoId: loc.pseudoId, productName: loc.productName]"/>
+                <set field="asset" from="[assetId: loc.assetId, statusId: loc.statusId,
+                            assetName: loc.assetName, product: product,
+                            acquireCost: acquireCost,
+                            quantityOnHand: loc.quantityOnHand?.toString(),
+                            availableToPromise: loc.availableToPromise?.toString(),
+                            acquireShipmentId: loc.acquireShipmentId]"/>
+                <script>assets.add(asset)</script>
+                <set field="lastItem" from="loc"/>
+            </iterate>
+            <if condition="lastItem">
+                <set field="locOut.assets" from="assets"/>
+                <if condition="!locationId">
+                    <script>locations.add(locOut)</script>
+                    <else>
+                        <set field="location" from="locOut"/>
+                    </else></if></if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Location" authenticate="false">
+        <description> get a single, or all warehouse locations</description>
+        <in-parameters>
+            <parameter name="location" type="Map" required="true">
+                <parameter name="locationName"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="location" type="Map">
+                <parameter name="locationId"/>
+                <parameter name="locationName"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+            </entity-find>
+            <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+            </entity-find>
+            <service-call name="create#mantle.facility.FacilityLocation"
+                in-map="[facilityId: facilities[0].facilityId,
+                    description: location.locationName]" out-map="context"/>
+            <service-call name="growerp.100.WarehouseServices100.get#Location"
+                    in-map="[facilityId: facilities[0].facilityId,
+                             locationId: locationSeqId]" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="Location" authenticate="false">
+        <description> get a single, or all warehouse locations</description>
+        <in-parameters>
+            <parameter name="location" type="Map">
+                <parameter name="locationId"/>
+                <parameter name="locationName"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="location" type="Map">
+                <parameter name="locationId"/>
+                <parameter name="locationName"/>
+                <parameter name="assets" type="List">
+                    <parameter name="asset" type="Map">
+                        <parameter name="assetId"/>
+                        <parameter name="statusId"/>
+                        <parameter name="assetName"/>
+                        <parameter name="product">
+                            <parameter name="productId"/>
+                            <parameter name="pseudoId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                        <parameter name="quantityOnHand"/>
+                        <parameter name="availableToPromise"/>
+                        <parameter name="acquireShipmentId"/>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+            </entity-find>
+            <entity-find entity-name="mantle.facility.FacilityLocation" list="locations"
+                for-update="true" limit="1">
+                <econdition field-name="facilityId" from="facilities[0].facilityId"/>
+                <econdition field-name="locationSeqId" from="location.locationId"/>
+            </entity-find>
+            <if condition="locations[0].description != location.locationName">
+                <set field="locations[0].description" from="location.locationName"/>
+                <entity-update value-field="locations[0]"/>
+            </if>
+            <service-call name="growerp.100.WarehouseServices100.get#Location"
+                    in-map="[facilityId: facilities[0].facilityId,
+                             locationId: location.locationId]" out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Location" authenticate="false">
+        <description> get a single, or all warehouse locations</description>
+        <in-parameters>
+            <parameter name="location" type="Map" required="true">
+                <parameter name="locationId"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="location" type="Map">
+                <parameter name="locationId"/>
+                <parameter name="locationName"/>
+                <parameter name="assets" type="List">
+                    <parameter name="asset" type="Map">
+                        <parameter name="assetId"/>
+                        <parameter name="statusId"/>
+                        <parameter name="assetName"/>
+                        <parameter name="product">
+                            <parameter name="productId"/>
+                            <parameter name="pseudoId"/>
+                            <parameter name="productName"/>
+                        </parameter>
+                        <parameter name="quantityOnHand"/>
+                        <parameter name="availableToPromise"/>
+                        <parameter name="acquireShipmentId"/>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="mantle.facility.Facility" list="facilities">
+                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+            </entity-find>
+            <entity-find entity-name="mantle.facility.FacilityLocation" list="locations"
+                for-update="true" limit="1">
+                <econdition field-name="facilityId" from="facilities[0].facilityId"/>
+                <econdition field-name="locationSeqId" from="location.locationId"/>
+            </entity-find>
+            <service-call name="growerp.100.WarehouseServices100.get#Location"
+                    in-map="[facilityId: facilities[0].facilityId,
+                             locationId: location.locationId]" out-map="context"/>
+            <entity-delete value-field="locations[0]"/>
+        </actions>
+    </service>
+
+</services>
