@@ -54,7 +54,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -189,7 +189,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "4a16d9bd774067e0",
+  "active": "8a13698ad07d1520",
   "lastOpenFiles": [
     "3 Technical documentation/4 Integration tests.md",
     "3 Technical documentation/10 GrowERP Flutter Application and plugins.md",

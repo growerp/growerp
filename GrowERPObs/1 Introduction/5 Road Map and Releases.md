@@ -30,13 +30,14 @@ Let us know if you have suggestions at support@growerp.com
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
-## Release May 31 2023 (V0.9.5)
+## Release June 5 2023 (V0.9.5)
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.
 2. Create account reports: balancesheet, balance posted summary.
 3. Added the global command growerp to easy install and maintain the system
-4. Language localizations, currently English and Thai, help us translate?
+4. Language localisations, currently English and Thai, help us translate?
 5. Now using [Melos](https://pub.dev/packages/melos) to maintain packages
 6. Update the hotel app to latest packages
+7. Refactoring removed not required widgets
 
 ## Release April 12 2023 (V0.9.2)
 1. Now possible to have completely different ledger organizations between companies
