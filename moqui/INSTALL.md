@@ -30,7 +30,6 @@ https://github.com/moqui/moqui-framework/releases/download/v3.0.0/MoquiDemo-3.0.
 Build moqui system:
 ```sh
     ./gradlew downloadel #only first time
-    ./gradlew cleanall
     ./gradlew build
     java -jar moqui.war load types=seed,seed-initial,install
     java -jar moqui.war

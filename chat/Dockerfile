@@ -12,6 +12,19 @@
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
 
+FROM openjdk:11-jdk as build-env
+MAINTAINER GrowERP <support@growerp.com>
+
+ARG BRANCH=development # currently either master or development we need to add existing
+
+RUN apt-get update && \
+    apt-get install -y curl git wget zip unzip apt-transport-https && \
+    apt-get clean
+
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp /root/growerp
+WORKDIR /root/growerp/chat
+RUN ./gradlew build
+
 FROM jetty
-ADD build/libs/growerp-chat-0.0.2.war /var/lib/jetty/webapps/root.war
+COPY --from=build-env /root/growerp/chat/build/libs/growerp-chat-0.0.2.war /var/lib/jetty/webapps/root.war
 EXPOSE 8080

@@ -1,36 +1,29 @@
 #stage 1 -get files and build
 FROM openjdk:11-jdk as build-env
-MAINTAINER Growerp <support@growerp.com>
+MAINTAINER GrowERP <support@growerp.com>
 
 ARG BRANCH=development # currently either master or development we need to add existing
 
 RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https && \
     apt-get clean
-#install dart
-RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/dart.gpg
-RUN echo 'deb [signed-by=/usr/share/keyrings/dart.gpg arch=amd64] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main' | tee /etc/apt/sources.list.d/dart_stable.list
-RUN apt-get update && apt-get install dart
-RUN export PATH="/usr/lib/dart/bin:$PATH"
-#install growerp backend
-RUN dart pub global activate growerp
-ENV PATH="/root/.pub-cache/bin:$PATH"
-# will install in /root/growerp/flutterDevelopment
-RUN growerp install backend -dev -noBuild
-# antwebsystems website
-WORKDIR /root/growerp/moquiDevelopment/
+
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
+WORKDIR /root/growerp/moqui
+RUN bash -c "ls /root -la"
+# antwebsystems website
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/service/growerp
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/data
+
 # local db for development but need search
-RUN echo $BRANCH
 RUN if [ "$BRANCH" = "development" ]; then ./gradlew downloadElasticsearch ; fi
 # production uses postgresql
 RUN if [ "$BRANCH" = "master" ]; then curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o /runtime/lib ; fi 
 RUN ./gradlew addRunTime
 # unzip war file
 WORKDIR /opt/moqui
-RUN unzip -q /root/growerp/moquiDevelopment/moqui-plus-runtime.war
+RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
 
 # stage 2 create image
 FROM openjdk:11-jdk

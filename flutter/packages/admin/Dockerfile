@@ -13,38 +13,41 @@
 #
 
 #Stage 1 - Install dependencies and build the app
-FROM debian:latest AS build-env
+FROM mobiledevops/flutter-sdk-image AS build-env
+MAINTAINER GrowERP <support@growerp.com>
 
-# Install flutter dependencies
+ARG BRANCH=development # currently either master or development we need to add existing
+USER root
+# Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y curl git wget zip unzip libgconf-2-4 gdb libstdc++6 \
-        libglu1-mesa fonts-droid-fallback lib32stdc++6 nano && \
+    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+        fonts-droid-fallback nano && \
     apt-get clean
 
-# Clone the flutter repo
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
-    /usr/local/flutter/bin/flutter doctor -v
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# git security
+RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
-# set flutter channel
-RUN flutter channel stable && flutter upgrade
+# activate melos
 RUN dart pub global activate melos
-ENV PATH="/root/.pub-cache/bin:${PATH}"
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
+
 # get growerp repos
-RUN git clone --depth 1 -b development https://github.com/growerp/growerp.git /usr/local/growerp
-WORKDIR /usr/local/growerp/
+USER mobiledevops
+WORKDIR /home/mobiledevops
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 #RUN dart pub global run melos:melos clean
+WORKDIR /home/mobiledevops/growerp/flutter
 RUN melos bootstrap
-RUN melos exec --file-exists="l10n.yaml" -- "flutter gen-l10n"
-# get growerp_core first, other are dependent on it
-RUN melos exec --scope="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs" 
-# build the others, no need for examples
-RUN melos exec --ignore="growerp_core" --ignore="*example" --depends-on="build_runner" -- "flutter pub run build_runner build --delete-conflicting-outputs"
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build_all --no-select
 # build flutter app
-WORKDIR /usr/local/growerp/packages/admin
+WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /usr/local/growerp/packages/admin/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/growerp/flutter/packages/admin/build/web /usr/share/nginx/html
 EXPOSE 80

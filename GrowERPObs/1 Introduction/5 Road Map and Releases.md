@@ -13,23 +13,26 @@ Let us know if you have suggestions at support@growerp.com
 	* Access to the error journal of failed postings
 	* automatically add new timeperiod in new year
 * Extend the growerp.com website
-* How about GPT4 in ERP? AI could make screen selections and entry suggestions?
 * Integration of the website and admin app (xxx.growerp.com and admin.growerp.com)
 * Update the freelancer app
 * Create a manufacturing app
 * Create a logistic app
 
 ## Technical internal requests
-* Just use official Moqui releases (just moqui.war) and patch with git patches.
-* Create a mono-repro having Flutter, Moqui, chat all in a single git repository.
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * Separate the order/accounting package
-* Move chat and tasking into their own package.
+* Move flutter chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
+
+## Release July 31 2023 (V0.9.8)
+
+* Moqui upgraded to V3.0.0
+* Flutter frontend, Moqui back-end and chat now in a single repository
+
 ## Release June 5 2023 (V0.9.5)
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.
 2. Create account reports: balancesheet, balance posted summary.
