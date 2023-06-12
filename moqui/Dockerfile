@@ -11,15 +11,10 @@ RUN apt-get update && \
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 WORKDIR /root/growerp/moqui
-RUN bash -c "ls /root -la"
 # antwebsystems website
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/service/growerp
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/data
-
-# local db for development but need search
-RUN if [ "$BRANCH" = "development" ]; then ./gradlew downloadElasticsearch ; fi
-# production uses postgresql
-RUN if [ "$BRANCH" = "master" ]; then curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o /runtime/lib ; fi 
+RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar 
 RUN ./gradlew addRunTime
 # unzip war file
 WORKDIR /opt/moqui

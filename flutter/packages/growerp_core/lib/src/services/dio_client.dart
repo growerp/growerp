@@ -44,6 +44,8 @@ class DioClient {
       _dio.interceptors.addAll(interceptors!);
     }
 
+    debugPrint('Using base moqui backend url: $baseUrl');
+
     if (kDebugMode) {
       _dio.interceptors.add(LogInterceptor(
           responseBody: true,

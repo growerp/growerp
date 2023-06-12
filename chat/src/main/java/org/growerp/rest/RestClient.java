@@ -24,8 +24,9 @@ public class RestClient {
     
     public Boolean validate(String apiKey) {
         Boolean result = false;
+        String fullUrl = urlString + "Authenticate";
         try {
-            URL url = new URL(urlString + "Authenticate");
+            URL url = new URL(fullUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json");
@@ -43,11 +44,14 @@ public class RestClient {
                       content.append(inputLine);
                   }
                   if (content.toString().contains("authenticate")) result = true;
+                  else logger.error("authenticate not found in: " + content.toString()); 
                   in.close();
+            } else {
+                logger.error("Validation request error for url: " + fullUrl + " response code: " + status);
             }
             con.disconnect();
         } catch (Exception ex) {
-            logger.info("Validation request not worked error: " + ex);
+            logger.error("Validation request failed for url: " + fullUrl + " error: " + ex);
         }
         return result;
 
@@ -56,8 +60,9 @@ public class RestClient {
     public Boolean storeMessage(String apiKey, Message message) {
         Boolean result = false;
         Logger logger = LoggerFactory.getLogger(RestClient.class);
+        String fullUrl = urlString + "ChatMessage";
         try {
-            URL url = new URL(urlString + "ChatMessage");
+            URL url = new URL(fullUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -80,7 +85,7 @@ public class RestClient {
             }
             con.disconnect();
         } catch (Exception ex) {
-            logger.info("Validation request not worked error: " + ex);
+            logger.info("Validation request not worked for url: " + fullUrl + " error: " + ex);
         }
         return result;
     }

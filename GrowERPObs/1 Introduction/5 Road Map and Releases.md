@@ -31,7 +31,10 @@ Let us know if you have suggestions at support@growerp.com
 ## Release July 31 2023 (V0.9.8)
 
 * Moqui upgraded to V3.0.0
-* Flutter frontend, Moqui back-end and chat now in a single repository
+* Monorepo: All GrowERP parts now in a single repository
+* added Dockerfile for all required images to automatically build on dockerhub.com
+* added docker-compose file to run images locally.
+* Docker Inc. now [sponsors GrowERP](https://hub.docker.com/search?q=growerp)
 
 ## Release June 5 2023 (V0.9.5)
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.

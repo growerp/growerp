@@ -12,8 +12,7 @@
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
 
-FROM openjdk:11-jdk as build-env
-MAINTAINER GrowERP <support@growerp.com>
+FROM openjdk:8-jdk as build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 
@@ -22,9 +21,15 @@ RUN apt-get update && \
     apt-get clean
 
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp /root/growerp
+#COPY . /root/growerp/chat
 WORKDIR /root/growerp/chat
 RUN ./gradlew build
 
-FROM jetty
+FROM jetty:9.4.51-jre8
+#USER root
+#RUN apt-get update && \
+#    apt-get install -y iputils-ping wget && \
+#    apt-get clean
+#USER jetty
 COPY --from=build-env /root/growerp/chat/build/libs/growerp-chat-0.0.2.war /var/lib/jetty/webapps/root.war
 EXPOSE 8080

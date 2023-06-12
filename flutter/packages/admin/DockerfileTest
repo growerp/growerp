@@ -13,31 +13,40 @@
 #
 
 #Stage 1 - Install dependencies and build the app
-FROM debian:latest AS build-env
+FROM mobiledevops/flutter-sdk-image AS build-env
+MAINTAINER GrowERP <support@growerp.com>
 
-# Install flutter dependencies
+ARG BRANCH=development # currently either master or development we need to add existing
+USER root
+# Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y curl git wget zip unzip libgconf-2-4 gdb libstdc++6 \
-        android-tools-adb libglu1-mesa fonts-droid-fallback lib32stdc++6 nano && \
+    apt-get install -y git zip libgconf-2-4 adb libstdc++6 adb \
+        fonts-droid-fallback nano && \
     apt-get clean
 
-# Clone the flutter repo
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
-    /usr/local/flutter/bin/flutter doctor -v
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# git security
+RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
-# set flutter channel
-RUN flutter channel stable && flutter upgrade
+# activate melos
 RUN dart pub global activate melos
-ENV PATH="/root/.pub-cache/bin:${PATH}"
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
+
 # get growerp repos
-RUN git clone --depth 1 -b development https://github.com/growerp/growerp.git /usr/local/growerp
-WORKDIR /usr/local/growerp/
-RUN melos clean # run clean project
-RUN melos bootstrap # run pub.get in all packages
-RUN melos l10n # run generate Language internationalization
-RUN melos build_all # run build_runner in all packages needed
-RUN adb -s 888 connect localhost:5555
-WORKDIR /usr/local/growerp/packages/admin
-ENTRYPOINT ["flutter", "test"]
-CMD ["integration_test"]
+USER mobiledevops
+WORKDIR /home/mobiledevops
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+#RUN dart pub global run melos:melos clean
+WORKDIR /home/mobiledevops/growerp/flutter
+RUN melos bootstrap
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build_all --no-select
+# build flutter app
+WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
+#RUN curl -s https://developer.android.com/studio\#command-tools | grep -Eo 'https://dl.google.com/android/repository/commandlinetools-linux-[0-9]*_latest.zip' | head -n 1 | xargs wget
+#RUN unzip commandlinetools-linux-9477386_latest.zip
+#RUN sdkmanager "build-tools;29.0.2"
+CMD ["adb", "connect". "emulator:5555" ,"&&","flutter","test"."integration_test"]
+

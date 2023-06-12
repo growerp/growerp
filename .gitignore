@@ -1,1 +1,6 @@
+docker/elasticsearch/data/nodes
+docker/elasticsearch/logs
+docker/db
+docker/runtime
+docker/logs
 

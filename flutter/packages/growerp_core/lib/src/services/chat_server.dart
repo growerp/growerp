@@ -35,14 +35,17 @@ class ChatServer {
     } else if (Platform.isAndroid) {
       chatUrl = 'ws://10.0.2.2:8081';
     }
+    debugPrint('Using base chat backend url: $chatUrl');
   }
 
   connect(String apiKey, String userId) {
+    debugPrint("WS connect url/userId/apikey: $chatUrl/$userId/$apiKey");
     channel = WebSocketChannel.connect(Uri.parse('$chatUrl/$userId/$apiKey'));
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
 
   send(String message) {
+    debugPrint("WS send message: $message");
     channel.sink.add(message);
   }
 

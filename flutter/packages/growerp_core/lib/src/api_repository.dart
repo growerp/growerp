@@ -53,10 +53,8 @@ class APIRepository {
         : databaseUrlDebug.isNotEmpty
             ? '$databaseUrlDebug/'
             : (kIsWeb || Platform.isIOS || Platform.isLinux)
-                ? 'http://localHost:8080/'
+                ? 'http://localhost:8080/'
                 : 'http://10.0.2.2:8080/';
-
-    debugPrint('Using base backend url: $_baseUrl');
 
     dioClient = DioClient(_baseUrl, dio, interceptors: []);
   }
