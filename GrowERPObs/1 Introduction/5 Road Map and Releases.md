@@ -32,8 +32,8 @@ Let us know if you have suggestions at support@growerp.com
 
 * Moqui upgraded to V3.0.0
 * Monorepo: All GrowERP parts now in a single repository
-* added Dockerfile for all required images to automatically build on dockerhub.com
-* added docker-compose file to run images locally.
+* Added Dockerfile for all required images to automatically build on dockerhub.com
+* Added docker-compose file to run images locally.
 * Docker Inc. now [sponsors GrowERP](https://hub.docker.com/search?q=growerp)
 
 ## Release June 5 2023 (V0.9.5)
@@ -119,10 +119,10 @@ First comments from end users arrived.
     -   using improved demo data
     -   multi currency
     -   multi company
-2.  Api documented and available: [[4 Integration tests]] for testing with Flutter frontend
+2.  Api documented and available: [[4 Integration tests]] for testing with Flutter front-end
     -   in/output parameters definition
     -   authorization
-    -   test/production public API sites at test.growerp.org//rest
+    -   test/production public API sites
 3.  [[Stripe]] gateway    
     -   working with E-commerce website and flutter frontend.
 4.  Flutter frontend improvements:

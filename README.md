@@ -7,6 +7,9 @@ We have now started a production version:
 - Android: https://play.google.com/store/apps/details?id=org.growerp.admin
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755
 
+The next version with limited availability you can try at:
+- Web:     https://admin.growerp.org
+
 When the application is started, create a new company, select demo data or an empty system and look around!
 
 If you like this initiative, please give a star to the project.
@@ -18,22 +21,35 @@ We also created a first vertical app for Hotel owners which will be released lat
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1531267095
 
-### Install flutter admin app locally
+The next version with limited availability you can try at:
+- Web:     https://hotel.growerp.org
+
+## Use GrowERP locally
+
+You just need this repository at https://github.com/growerp/growerp
+The next version is in the development branch
 
 ### start the chat server
 ```sh
-cd growerp/chat
-.gradlew/apprun
+cd chat
+./gradlew/apprun
 ```
 
 ### start backend in separate terminal
+Initialize:
 ```sh
+    cd moqui
     ./gradlew downloadel #only first time
     ./gradlew cleanall
     ./gradlew build
     java -jar moqui.war load types=seed,seed-initial,install
+```
+Run:
+```sh
+    cd moqui
     java -jar moqui.war
 ```
+
 OR: use our test backend:  
 change file packages/admin/assets/cfg/app_settings.json:
 ```
@@ -43,7 +59,7 @@ change file packages/admin/assets/cfg/app_settings.json:
 - from:   "chatUrlDebug":  "",
 - to:     "chatUrlDebug": "wss://chat.growerp.org",  
 ```  
-
+### emulator/browser
 start emulator or use browser and start app in directory: packages/admin:
 ```sh
 cd flutter/packages/admin

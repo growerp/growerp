@@ -369,7 +369,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="productStoreId" from="stores[0].productStoreId"/>
                         <field-map field-name="settingTypeEnumId" value="PsstContentLocation"/>
                     </entity-find-one>
-                    <set field="root" from="topResource.settingValue"/>
+                    <!-- save the colorJson file -->
+                    <set field="root" from="topResource.settingValue"/><!-- dbresource://100000-->
                     <set field="location" value="${root}/content/websiteColor.json"/>
                     <set field="docRr" from="ec.resource.getLocationReference(location)"/>
                     <script>docRr.putText(website.colorJson)</script>

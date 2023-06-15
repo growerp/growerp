@@ -13,38 +13,13 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/10 GrowERP Flutter Application and plugins.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "d7d04bb464cbedd9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "3 Technical documentation/5 Chat Server.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "8a13698ad07d1520",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
                 "file": "1 Introduction/5 Road Map and Releases.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -179,19 +154,19 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "8a13698ad07d1520",
+  "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "3 Technical documentation/10 GrowERP Flutter Application and plugins.md",
+    "3 Technical documentation/5 Chat Server.md",
+    "3 Technical documentation/4 Integration tests.md",
+    "1 Introduction/5 Road Map and Releases.md",
     "3 Technical documentation/2 Flutter frontend.md",
     "3 Technical documentation/1 Technical Introduction.md",
     "3 Technical documentation/3 Moqui Backend.md",
-    "3 Technical documentation/4 Integration tests.md",
-    "1 Introduction/5 Road Map and Releases.md",
-    "3 Technical documentation/10 GrowERP Flutter Application and plugins.md",
     "3 Technical documentation/6 HTML Website.md",
     "3 Technical documentation/9 Andriod Playstore publication.md",
     "3 Technical documentation/8 IOS AppStore publication.md",
     "3 Technical documentation/7 Stripe.md",
-    "3 Technical documentation/5 Chat Server.md",
     "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",
     "1 Introduction/3 Getting started.md",

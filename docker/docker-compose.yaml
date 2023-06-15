@@ -1,16 +1,22 @@
 version: "2"
 
+# to use this system:
+# docker compose build
+# docker compose up -d
+# go to the browser: https://admin.growerp.local
+#                    https://hotel.growerp.local
+#                    https://backend.growerp.local/vapps
+
 networks:
     my-network:
       driver: bridge
-
 
 services:
 
   nginx-proxy:
     # For documentation on SSL and other settings see:
     # https://github.com/jwilder/nginx-proxy
-    image: jwilder/nginx-proxy
+    image: nginxproxy/nginx-proxy
     container_name: nginx
     restart: always
     ports:
@@ -18,13 +24,12 @@ services:
       - 443:443
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      # note: .crt, .key, and .dhparam.pem files start with the domain name in VIRTUAL_HOST (ie 'moqui.local.*') or use CERT_NAME env var
+      # note: .crt, .key, and .dhparam.pem files start with the domain name in VIRTUAL_HOST (ie 'moqui.local.*') or use  env var
       - ./certs:/etc/nginx/certs
       - ./nginx/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf
       #- ./logs/nginx:/var/log/nginx
-    environment:
+    #environment:
       # change this for the default host to use when accessing directly by IP, etc
-      - DEFAULT_HOST=moqui.local
       # use SSL_POLICY to disable TLSv1.0, etc in nginx-proxy
       # - SSL_POLICY=AWS-TLS-1-1-2017-01
     networks:
@@ -49,6 +54,7 @@ services:
      - ./runtime/txlog:/opt/moqui/runtime/txlog
      - ./runtime/sessions:/opt/moqui/runtime/sessions
      # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
+     - ./runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
     environment:
      - instance_purpose=production
      - entity_ds_db_conf=postgres
@@ -63,10 +69,10 @@ services:
      - elasticsearch_url=http://elasticsearch:9200
      # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
      # this can be a comma separate list of hosts like 'example.com,www.example.com'
-     - VIRTUAL_HOST=moqui.local
+     - VIRTUAL_HOST=*.growerp.local
      - webapp_allow_origins=*
      # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
-     - webapp_http_host=moqui.local
+     - webapp_http_host=backend.growerp.local
      - webapp_http_port=80
      - webapp_https_port=443
      - webapp_https_enabled=true
@@ -74,6 +80,7 @@ services:
      - webapp_client_ip_header=X-Real-IP
      - default_locale=en_US
      - default_time_zone=US/Pacific
+     - DB_DATA=INSTALL
     networks:
       - my-network
 
@@ -126,8 +133,9 @@ services:
     expose:
       - 8080
     environment:
-      - DATABASEBACKEND=https://moqui.local
-      - VIRTUAL_HOST=moqui1.local
+      - DATABASEBACKEND=https://backend.growerp.local
+      - VIRTUAL_HOST=chat.growerp.local
+      - VIRTUAL_PORT=8080
     external_links:
       - internet_gateway
     networks:
@@ -137,23 +145,22 @@ services:
     image: alpine  # or any other suitable image
     container_name: gateway
     network_mode: host
-    dns:
-      - 192.168.1.31
     command: sh -c "sleep infinity"
 
-#  watch:
-#    image: containrrr/watchtower
-#    container_name: watch
-#    mem_limit: 100m
-#    restart: unless-stopped
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock   
-#    environment:
-#      - TZ=Asia/Bangkok  # thailand
-#      - WATCHTOWER_DEBUG
-#      - WATCHTOWER_POLL_INTERVAL=60
-#      - WATCHTOWER_MONITOR_ONLY
-#      - WATCHTOWER_NO_PULL
+
+  watch:
+    image: containrrr/watchtower
+    container_name: watch
+    mem_limit: 100m
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   
+    environment:
+      - TZ=Asia/Bangkok  # thailand
+      - WATCHTOWER_DEBUG
+      - WATCHTOWER_POLL_INTERVAL=60
+      - WATCHTOWER_MONITOR_ONLY
+      - WATCHTOWER_NO_PULL
       #   - WATCHTOWER_SCHEDULE="0 0 9 * * 1-5" # At 09:00 on every day-of-week from Monday through Friday.
       
   admin:
@@ -169,6 +176,6 @@ services:
     volumes:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
-      - VIRTUAL_HOST=moqui2.local 
+      - VIRTUAL_HOST=admin.growerp.local 
     networks:
       - my-network

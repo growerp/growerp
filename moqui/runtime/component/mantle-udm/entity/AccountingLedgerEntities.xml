@@ -54,7 +54,7 @@ along with this software (see the LICENSE.md file). If not, see
         <relationship type="one" title="GlXbrlClass" related="moqui.basic.Enumeration">
             <key-map field-name="glXbrlClassEnumId"/></relationship>
 
-        <index name="GLACCT_UNQCD" unique="true"><index-field name="accountCode"/></index>
+        <index name="GLACCT_UNQCD" unique="false"><index-field name="accountCode"/></index>
 
         <seed-data>
             <moqui.basic.EnumerationType description="GL Account Class" enumTypeId="GlAccountClass"/>

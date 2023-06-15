@@ -12,3 +12,7 @@ Email Address []:moqui@googlegroups.com
 
 $ openssl dhparam -out moqui.local.dhparam.pem 2048
 
+growerp.local wild card key valid until 2033
+pass phrase: growerp
+generated according: https://www.brainbytez.nl/tutorials/linux-tutorials/create-a-self-signed-wildcard-ssl-certificate-openssl/
+

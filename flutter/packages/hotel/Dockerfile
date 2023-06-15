@@ -13,32 +13,40 @@
 #
 
 #Stage 1 - Install dependencies and build the app
-FROM debian:latest AS build-env
+FROM mobiledevops/flutter-sdk-image AS build-env
 
-# Install flutter dependencies
+ARG BRANCH=development # currently either master or development we need to add existing
+USER root
+# Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y curl git wget zip unzip libgconf-2-4 gdb libstdc++6 \
-        libglu1-mesa fonts-droid-fallback lib32stdc++6 python3 nano && \
+    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+        fonts-droid-fallback nano && \
     apt-get clean
 
-# Clone the flutter repo
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
-    /usr/local/flutter/bin/flutter doctor -v
+# git security
+RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# activate melos
+RUN dart pub global activate melos
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
-# set flutter channel
-RUN flutter channel stable && flutter upgrade
-
-# Copy files to container and build
-RUN git clone --depth 1 https://github.com/growerp/growerp.git /usr/local/growerp
-RUN cd /usr/local/growerp/packages/core && \
-    flutter pub get && \
-    flutter pub run build_runner build
-WORKDIR /usr/local/growerp/packages/hotel
-RUN /usr/local/flutter/bin/flutter build web --release
+# get growerp repos
+USER mobiledevops
+WORKDIR /home/mobiledevops
+RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+#RUN dart pub global run melos:melos clean
+WORKDIR /home/mobiledevops/growerp/flutter
+RUN melos bootstrap
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build_all --no-select
+# build flutter app
+WORKDIR /home/mobiledevops/growerp/flutter/packages/hotel
+RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /usr/local/growerp/packages/hotel/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/growerp/flutter/packages/hotel/build/web /usr/share/nginx/html
 EXPOSE 80

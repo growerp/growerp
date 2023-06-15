@@ -1186,15 +1186,23 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="create#moqui.security.UserGroupMember"
                 in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
             <!-- only send email when login name provided -->
-            <if condition="user.loginName">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
-                    <field-map field-name="emailTemplateId" value="WELCOME" />
-                    <field-map field-name="toAddresses" from="user.email" />
-                    <field-map field-name="bodyParameters" 
-                        from="[classification: classificationId.substring(3),
-                            newPassword:newPassword, firstName: user.firstName,
-                            lastName: user.lastName]" />
-                </service-call>
+            <if condition="user.email">
+                <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
+                    <field-map field-name="emailServerId" value="SYSTEM"/></entity-find-one>
+                <if condition="emailExist">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                        <field-map field-name="emailTemplateId" value="WELCOME" />
+                        <field-map field-name="toAddresses" from="user.email" />
+                        <field-map field-name="bodyParameters" 
+                            from="[classification: classificationId.substring(3),
+                                newPassword:newPassword, firstName: user.firstName,
+                                lastName: user.lastName]" />
+                    </service-call>
+                    <else>
+                        <log level="warn" message="Email not configured, ${user.LoginName} password: $newPassword"/>
+                    </else>
+                </if>
+                <!-- add to mailing list -->
                 <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
                     in-map="email: user.email, firstName: user.firstName,
                             lastName: user.lastName"/>
@@ -1846,18 +1854,27 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call  name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
                 in-map="[companyPartyId: user.company.partyId, classificationId: classificationId]"/>
             <!--send email -->
-            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
-                <field-map field-name="emailTemplateId" value="WELCOME" />
-                <field-map field-name="toAddresses" from="emailAddress" />
-                <field-map field-name="bodyParameters" 
-                    from="[classification: classificationId.substring(3),
-                        newPassword: password, firstName: firstName,
-                        lastName: lastName]" />
-            </service-call>
-            <!-- add to mailing list -->
-            <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
-                in-map="email: emailAddress, firstName: firstName,
-                    lastName: lastName"/>
+            <if condition="user.loginName">
+                <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
+                    <field-map field-name="emailServerId" value="SYSTEM"/></entity-find-one>
+                <if condition="emailExist">
+                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+                        <field-map field-name="emailTemplateId" value="WELCOME" />
+                        <field-map field-name="toAddresses" from="emailAddress" />
+                        <field-map field-name="bodyParameters" 
+                            from="[classification: classificationId.substring(3),
+                                newPassword: password, firstName: firstName,
+                                lastName: lastName]" />
+                    </service-call>
+                    <else>
+                        <log level="warn" message="Email not configured, ${user.LoginName} password: $newPassword"/>
+                    </else>
+                </if>
+                <!-- add to mailing list -->
+                <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
+                    in-map="email: emailAddress, firstName: firstName,
+                        lastName: lastName"/>
+            </if>
             <!-- login -->
             <script>ec.user.internalLoginUser(username)</script>
             <!-- load demo data -->

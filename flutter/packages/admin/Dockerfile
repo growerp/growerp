@@ -14,7 +14,6 @@
 
 #Stage 1 - Install dependencies and build the app
 FROM mobiledevops/flutter-sdk-image AS build-env
-MAINTAINER GrowERP <support@growerp.com>
 
 ARG BRANCH=development # currently either master or development we need to add existing
 USER root
