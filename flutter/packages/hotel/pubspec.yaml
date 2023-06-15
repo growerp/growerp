@@ -17,6 +17,8 @@ dependencies:
   growerp_order_accounting: ^1.0.1
   growerp_user_company: ^1.0.0
   growerp_catalog: ^1.0.0
+  growerp_inventory: ^1.0.0
+  growerp_marketing: ^1.0.0
   package_info_plus: ^3.1.2
   date_utils: ^0.2.0
   flutter_bloc: ^8.1.1

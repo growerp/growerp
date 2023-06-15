@@ -573,6 +573,20 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  growerp_inventory:
+    dependency: "direct main"
+    description:
+      path: "../growerp_inventory"
+      relative: true
+    source: path
+    version: "1.0.0"
+  growerp_marketing:
+    dependency: "direct main"
+    description:
+      path: "../growerp_marketing"
+      relative: true
+    source: path
+    version: "1.0.0"
   growerp_order_accounting:
     dependency: "direct main"
     description:

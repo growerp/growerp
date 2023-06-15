@@ -20,6 +20,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 import 'menu_option_data.dart';
 import 'router.dart' as router;
@@ -62,5 +68,14 @@ Future main() async {
       chatServer: ChatServer(),
       title: 'GrowERP Hotel.',
       router: router.generateRoute,
-      menuOptions: menuOptions));
+      menuOptions: menuOptions,
+      extraDelegates: const [
+        UserCompanyLocalizations.delegate,
+        CatalogLocalizations.delegate,
+        InventoryLocalizations.delegate,
+        OrderAccountingLocalizations.delegate,
+        WebsiteLocalizations.delegate,
+        MarketingLocalizations.delegate,
+        InventoryLocalizations.delegate,
+      ]));
 }
