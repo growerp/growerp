@@ -76,17 +76,13 @@ class _UserListHeaderState extends State<UserListHeader> {
                   const Expanded(child: Text("Name")),
                   if (!widget.isPhone)
                     const Expanded(child: Text("login name")),
-                  if (!widget.isPhone && widget.role == null)
-                    const Expanded(child: Text("Role")),
-                  if (!widget.isPhone) const Expanded(child: Text("Email")),
+                  if (!widget.isPhone)
+                    const Expanded(child: Text("       Email")),
                   if (!widget.isPhone) const Expanded(child: Text("Telephone")),
-                  if (widget.role == Role.company)
-                    const Expanded(child: Text("Admin")),
-                  if (!widget.isPhone && widget.role != Role.company)
+                  if (!widget.isPhone)
                     const Expanded(
                         child: Text("Company", textAlign: TextAlign.center)),
-                  if (widget.isPhone && widget.role != Role.company)
-                    const Expanded(child: Text("Company"))
+                  const Expanded(child: Text("Admin?"))
                 ],
               ),
         trailing: const Text(' '));

@@ -57,39 +57,29 @@ class UserListItem extends StatelessWidget {
             if (isDeskTop)
               Expanded(
                   child: Text(
-                user.company!.role != null ? user.company!.role!.value : '',
-                key: Key('role$index'),
-              )),
-            if (isDeskTop)
-              Expanded(
-                  child: Text(
-                      (!user.loginDisabled! ? user.loginName ?? '' : " "),
+                      (!user.loginDisabled! ? user.loginName ?? ' ' : ' '),
                       key: Key('username$index'))),
             if (isDeskTop)
               Expanded(
                   child: Text(
-                user.email ?? '',
+                user.email ?? ' ',
+                textAlign: TextAlign.left,
                 key: Key('email$index'),
               )),
             if (isDeskTop)
               Expanded(
                   child: Text(
-                user.telephoneNr ?? '',
+                user.telephoneNr ?? ' ',
                 key: Key('telephone$index'),
               )),
-            if (role == Role.company)
-              Expanded(
-                child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
-                    key: Key('isAdmin$index')),
-              ),
-            if (!isDeskTop && role != Role.company)
-              Expanded(
-                  child: Text(
-                      user.company?.name == null
-                          ? 'Unknown'
-                          : user.company!.name!,
-                      key: Key('companyName$index'),
-                      textAlign: TextAlign.center))
+            Expanded(
+                child: Text(user.company?.name ?? ' ',
+                    key: Key('companyName$index'),
+                    textAlign: TextAlign.center)),
+            Expanded(
+              child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
+                  textAlign: TextAlign.center, key: Key('isAdmin$index')),
+            ),
           ],
         ),
         onTap: () async {

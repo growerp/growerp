@@ -147,22 +147,6 @@ services:
     network_mode: host
     command: sh -c "sleep infinity"
 
-
-  watch:
-    image: containrrr/watchtower
-    container_name: watch
-    mem_limit: 100m
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock   
-    environment:
-      - TZ=Asia/Bangkok  # thailand
-      - WATCHTOWER_DEBUG
-      - WATCHTOWER_POLL_INTERVAL=60
-      - WATCHTOWER_MONITOR_ONLY
-      - WATCHTOWER_NO_PULL
-      #   - WATCHTOWER_SCHEDULE="0 0 9 * * 1-5" # At 09:00 on every day-of-week from Monday through Friday.
-      
   admin:
     container_name: admin
     image: admin

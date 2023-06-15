@@ -15,7 +15,7 @@ docker compose build # create the moqui, chat, admin images
 docker compose up -d # start the images
 ```
 
-browser logon to backend: https://backand.growerp.local/vapps
+browser logon to backend: https://backend.growerp.local/vapps
 browser flutter frontend: https://admin.growerp.local
 ignore ssl errors of self signed cert.
 
