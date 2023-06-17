@@ -86,7 +86,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
       image: "packages/growerp_core/images/reservationGrey.png",
       selectedImage: "packages/growerp_core/images/reservation.png",
-      title: "Reservations",
+      title: "Reservations\n",
       route: '/sales',
       readGroups: [
         UserGroup.admin,
@@ -110,14 +110,14 @@ List<MenuOption> menuOptions = [
             key: Key('Customer'),
             role: Role.customer,
           ),
-          label: 'Customer\nContacts',
+          label: 'Customer Contacts',
           icon: const Icon(Icons.school),
         ),
       ]),
   MenuOption(
       image: "packages/growerp_core/images/check-in-outGrey.png",
       selectedImage: "packages/growerp_core/images/check-in-out.png",
-      title: "check-In-Out",
+      title: "In-Out",
       route: '/checkInOut',
       readGroups: [
         UserGroup.admin,

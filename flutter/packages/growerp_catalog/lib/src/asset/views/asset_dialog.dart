@@ -40,15 +40,16 @@ class AssetDialogState extends State<AssetDialog> {
       TextEditingController();
   late String classificationId;
   late AssetBloc _assetBloc;
-  late CatalogAPIRepository repos;
+  late ProductBloc _productBloc;
   Product? _selectedProduct;
   String? _statusId = 'Available';
 
   @override
   void initState() {
     super.initState();
-    repos = context.read<CatalogAPIRepository>();
     _assetBloc = context.read<AssetBloc>();
+    _productBloc = context.read<ProductBloc>();
+    _productBloc.add(const ProductFetch());
     _statusId = widget.asset.statusId;
     _nameController.text = widget.asset.assetName ?? '';
     _quantityOnHandController.text = widget.asset.quantityOnHand == null
@@ -85,13 +86,13 @@ class AssetDialogState extends State<AssetDialog> {
                 },
                 child: popUp(
                     context: context,
-                    child: _showForm(repos, isPhone),
+                    child: _showForm(isPhone),
                     title: 'Asset Information',
                     height: 550,
                     width: 400))));
   }
 
-  Widget _showForm(CatalogAPIRepository repos, bool isPhone) {
+  Widget _showForm(bool isPhone) {
     return Center(
         child: Form(
             key: _assetDialogformKey,
@@ -143,50 +144,54 @@ class AssetDialogState extends State<AssetDialog> {
                     },
                   )),
               const SizedBox(height: 20),
-              DropdownSearch<Product>(
-                key: const Key('productDropDown'),
-                selectedItem: _selectedProduct,
-                popupProps: PopupProps.menu(
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
+              BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
+                if (state.status == ProductStatus.failure) {
+                  return const FatalErrorForm(
+                      message: 'server connection problem');
+                }
+                if (state.status == ProductStatus.success) {
+                  return DropdownSearch<Product>(
+                    key: const Key('productDropDown'),
+                    selectedItem: _selectedProduct,
+                    popupProps: PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0)),
+                        ),
+                        controller: _productSearchBoxController,
+                      ),
+                      menuProps:
+                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                      title: popUp(
+                        context: context,
+                        title: 'Select product',
+                        height: 50,
+                      ),
+                    ),
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: classificationId == 'AppHotel'
+                          ? 'Room Type'
+                          : 'Product',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25.0)),
                     ),
-                    controller: _productSearchBoxController,
-                  ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: popUp(
-                    context: context,
-                    title: 'Select product',
-                    height: 50,
-                  ),
-                ),
-                dropdownSearchDecoration: InputDecoration(
-                  labelText:
-                      classificationId == 'AppHotel' ? 'Room Type' : 'Product',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0)),
-                ),
-                showClearButton: false,
-                itemAsString: (Product? u) => "${u!.productName}",
-                asyncItems: (String? filter) async {
-                  ApiResult<List<Product>> result = await repos.getProduct(
-                      filter: _productSearchBoxController.text,
-                      assetClassId:
-                          classificationId == 'AppHotel' ? 'Hotel Room' : null);
-                  return result.when(
-                      success: (data) => data,
-                      failure: (_) =>
-                          [Product(productName: 'get data error!')]);
-                },
-                validator: (value) => value == null ? 'field required' : null,
-                onChanged: (Product? newValue) {
-                  _selectedProduct = newValue;
-                },
-              ),
+                    showClearButton: false,
+                    itemAsString: (Product? u) => "${u!.productName}",
+                    onChanged: (Product? newValue) {
+                      _selectedProduct = newValue;
+                    },
+                    items: state.products,
+                    filterFn: (user, filter) {
+                      _productBloc.add(ProductFetch(searchString: filter));
+                      return true;
+                    },
+                  );
+                }
+                return const Center(child: CircularProgressIndicator());
+              }),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 key: const Key('statusDropDown'),

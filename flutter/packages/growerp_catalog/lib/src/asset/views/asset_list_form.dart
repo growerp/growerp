@@ -15,34 +15,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../../api_repository.dart';
 import '../asset.dart';
 
-class AssetListForm extends StatelessWidget {
+class AssetListForm extends StatefulWidget {
   const AssetListForm({super.key});
-
-  @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
-      child: BlocProvider<AssetBloc>(
-          create: (BuildContext context) => AssetBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))
-            ..add(const AssetFetch()),
-          child: const AssetList()));
-}
-
-class AssetList extends StatefulWidget {
-  const AssetList({super.key});
-
   @override
   AssetListState createState() => AssetListState();
 }
 
-class AssetListState extends State<AssetList> {
+class AssetListState extends State<AssetListForm> {
   final _scrollController = ScrollController();
   late AssetBloc _assetBloc;
-  late CatalogAPIRepository _repos;
   int limit = 20;
   late bool search;
   String? searchString;
@@ -52,9 +35,9 @@ class AssetListState extends State<AssetList> {
   @override
   void initState() {
     super.initState();
-    _repos = context.read<CatalogAPIRepository>();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'Asset';
     _assetBloc = context.read<AssetBloc>();
+    _assetBloc.add(const AssetFetch());
     _scrollController.addListener(_onScroll);
   }
 
@@ -71,6 +54,7 @@ class AssetListState extends State<AssetList> {
         }
       },
       builder: (context, state) {
+        debugPrint("======status: ${state.status}");
         switch (state.status) {
           case AssetStatus.failure:
             return Center(
@@ -78,17 +62,15 @@ class AssetListState extends State<AssetList> {
           case AssetStatus.success:
             return Scaffold(
                 floatingActionButton: FloatingActionButton(
+                    heroTag: "btn1",
                     key: const Key("addNew"),
                     onPressed: () async {
                       await showDialog(
                           barrierDismissible: true,
                           context: context,
                           builder: (BuildContext context) {
-                            return RepositoryProvider.value(
-                                value: _repos,
-                                child: BlocProvider.value(
-                                    value: _assetBloc,
-                                    child: AssetDialog(Asset())));
+                            return BlocProvider.value(
+                                value: _assetBloc, child: AssetDialog(Asset()));
                           });
                     },
                     tooltip: 'Add New',

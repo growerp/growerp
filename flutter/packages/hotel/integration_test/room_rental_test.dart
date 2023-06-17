@@ -19,8 +19,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/test_data.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:hotel/menu_option_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
@@ -43,7 +46,18 @@ void main() {
 
   group('Order Rental tests>>>>>', () {
     testWidgets("Prepare>>>>>>", (WidgetTester tester) async {
-      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+      await CommonTest.startTestApp(
+          tester,
+          router.generateRoute,
+          menuOptions,
+          [
+            CatalogLocalizations.delegate,
+            InventoryLocalizations.delegate,
+            OrderAccountingLocalizations.delegate,
+            WebsiteLocalizations.delegate,
+            MarketingLocalizations.delegate,
+            InventoryLocalizations.delegate,
+          ],
           clear: true);
       await CommonTest.createCompanyAndAdmin(tester);
       await AssetTest.addAssets(tester, assets);
@@ -55,7 +69,18 @@ void main() {
 
     testWidgets("check orders for rental data >>>>>",
         (WidgetTester tester) async {
-      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+      await CommonTest.startTestApp(
+          tester,
+          router.generateRoute,
+          menuOptions,
+          [
+            CatalogLocalizations.delegate,
+            InventoryLocalizations.delegate,
+            OrderAccountingLocalizations.delegate,
+            WebsiteLocalizations.delegate,
+            MarketingLocalizations.delegate,
+            InventoryLocalizations.delegate,
+          ],
           clear: true);
       await CommonTest.createCompanyAndAdmin(tester);
       await tester.tap(find.byKey(const Key('tap/sales')));
@@ -72,7 +97,18 @@ void main() {
     }, skip: false);
     testWidgets("check blocked dates for new reservation>>>>>",
         (WidgetTester tester) async {
-      await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
+      await CommonTest.startTestApp(
+          tester,
+          router.generateRoute,
+          menuOptions,
+          [
+            CatalogLocalizations.delegate,
+            InventoryLocalizations.delegate,
+            OrderAccountingLocalizations.delegate,
+            WebsiteLocalizations.delegate,
+            MarketingLocalizations.delegate,
+            InventoryLocalizations.delegate,
+          ],
           clear: true);
       if (CommonTest.isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));

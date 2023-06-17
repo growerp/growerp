@@ -31,6 +31,11 @@ Future main() async {
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [CatalogLocalizations.delegate],
+    blocProviders: [
+      BlocProvider<AssetBloc>(
+          create: (context) => AssetBloc(CatalogAPIRepository(
+              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+    ],
   ));
 }
 

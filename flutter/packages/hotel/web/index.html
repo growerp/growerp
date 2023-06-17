@@ -1,16 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  -->
+  
   <base href="/">
 
   <meta charset="UTF-8">
@@ -26,7 +17,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" sizes="32x32"/>
 
-  <title>GrowERP-Hotel</title>
+  <title>GrowERP-Admin</title>
   <style>
   body {
     background-color: #030303;
@@ -34,15 +25,10 @@
   </style>
   <link rel="manifest" href="manifest.json">
   <script>
-    let searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.has('renderer')) {
-      window.flutterWebRenderer = searchParams.get('renderer');
-      console.log(searchParams.get('renderer') + ' renderer requested in the URL');
-    }
-
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
+   // The value below is injected by flutter build, do not touch.
+   var serviceWorkerVersion = null;
   </script>
+  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
@@ -80,24 +66,20 @@
   </div>
 
   <script>
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function(ev) {
       var loading = document.querySelector('#loading');
+      // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         }
       }).then(function(engineInitializer) {
-        loading.classList.add('main_done');
         return engineInitializer.initializeEngine();
       }).then(function(appRunner) {
-        loading.classList.add('init_done');
-        return appRunner.runApp();
-      }).then(function(app) {
-        // Wait a few milliseconds so users can see the "zoooom" animation
-        // before getting rid of the "loading" div.
         window.setTimeout(function() {
           loading.remove();
         }, 200);
+        return appRunner.runApp();
       });
     });
   </script>

@@ -26,46 +26,28 @@ late int chartInDays;
 late int chartColumns; // total columns on chart
 late int columnsOnScreen; // periods plus room column
 
-class GanttForm extends StatelessWidget {
-  const GanttForm({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    FinDocAPIRepository finDocAPIRepository = FinDocAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
-    CatalogAPIRepository catalogAPIRepository = CatalogAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
-    return MultiBlocProvider(providers: [
-      BlocProvider<FinDocBloc>(
-          create: (context) =>
-              FinDocBloc(finDocAPIRepository, true, FinDocType.order)
-                ..add(const FinDocFetch())),
-      BlocProvider<AssetBloc>(
-          create: (context) =>
-              AssetBloc(catalogAPIRepository)..add(const AssetFetch()))
-    ], child: const GanttPage());
-  }
-}
-
-class GanttPage extends StatefulWidget {
-  const GanttPage({super.key});
-
+class GanttForm extends StatefulWidget {
+  const GanttForm({super.key});
   @override
   State<StatefulWidget> createState() {
     return GanttPageState();
   }
 }
 
-class GanttPageState extends State<GanttPage> {
+class GanttPageState extends State<GanttForm> {
   late DateTime ganttFromDate;
   late int columnPeriod; //day,  week, month
   late FinDocBloc _finDocBloc;
+  late AssetBloc _assetBloc;
 
   @override
   void initState() {
     super.initState();
     columnPeriod = day;
     _finDocBloc = context.read<FinDocBloc>();
+    _finDocBloc.add(const FinDocFetch());
+    _assetBloc = context.read<AssetBloc>();
+    _assetBloc.add(const AssetFetch());
   }
 
   @override
@@ -151,9 +133,8 @@ class GanttPageState extends State<GanttPage> {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () => setState(() => context
-                      .read<FinDocBloc>()
-                      .add(const FinDocFetch(refresh: true))),
+                  onPressed: () => setState(
+                      () => _finDocBloc.add(const FinDocFetch(refresh: true))),
                   child: const Text('Refresh'),
                 ),
                 const SizedBox(width: 10),
@@ -189,60 +170,64 @@ class GanttChart extends StatelessWidget {
     List<FinDoc> finDocs = [];
     List<FinDoc> reservations = [];
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, state) {
-      assets = state.assets;
-      if (assets.isEmpty) {
-        return const Center(child: Text("No Rooms found!"));
-      }
-      // sort by room number
-      assets.sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
-      return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-        finDocs = state.finDocs;
-        reservations = [];
-        for (var asset in assets) {
-          for (var finDoc in finDocs) {
-            if (finDoc.status != FinDocStatusVal.created ||
-                finDoc.status != FinDocStatusVal.approved) {
-              // create a findoc for every item
-              for (var item in finDoc.items) {
-                if (item.assetId == asset.assetId &&
-                    item.rentalFromDate != null &&
-                    item.rentalThruDate != null) {
-                  reservations.add(finDoc.copyWith(items: [item]));
+      if (state.status == AssetStatus.success) {
+        assets = state.assets;
+        if (assets.isEmpty) {
+          return const Center(child: Text("No Rooms found!"));
+        }
+        // sort by room number
+        assets
+            .sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
+        return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+          if (state.status == FinDocStatus.success) {
+            finDocs = state.finDocs;
+            reservations = [];
+            for (var asset in assets) {
+              for (var finDoc in finDocs) {
+                if (finDoc.status != FinDocStatusVal.created ||
+                    finDoc.status != FinDocStatusVal.approved) {
+                  // create a findoc for every item
+                  for (var item in finDoc.items) {
+                    if (item.assetId == asset.assetId &&
+                        item.rentalFromDate != null &&
+                        item.rentalThruDate != null) {
+                      reservations.add(finDoc.copyWith(items: [item]));
+                    }
+                  }
                 }
               }
             }
+            var screenWidth = MediaQuery.of(context).size.width;
+            var chartBars =
+                buildAssetBars(context, screenWidth, reservations, finDocs);
+            return SizedBox(
+              height: chartBars.length * 29.0 + 25.0 + 4.0,
+              child: ListView(
+                physics: const ClampingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                children: <Widget>[
+                  Stack(fit: StackFit.loose, children: <Widget>[
+                    buildGrid(screenWidth),
+                    buildHeader(screenWidth, Colors.lightGreen),
+                    Container(
+                        margin: const EdgeInsets.only(top: 25.0),
+                        child: Column(
+                          children: <Widget>[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: chartBars,
+                            ),
+                          ],
+                        )),
+                  ]),
+                ],
+              ),
+            );
           }
-        }
-        if (state.status != FinDocStatus.success) {
           return const Center(child: CircularProgressIndicator());
-        }
-        var screenWidth = MediaQuery.of(context).size.width;
-        var chartBars =
-            buildAssetBars(context, screenWidth, reservations, finDocs);
-        return SizedBox(
-          height: chartBars.length * 29.0 + 25.0 + 4.0,
-          child: ListView(
-            physics: const ClampingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            children: <Widget>[
-              Stack(fit: StackFit.loose, children: <Widget>[
-                buildGrid(screenWidth),
-                buildHeader(screenWidth, Colors.lightGreen),
-                Container(
-                    margin: const EdgeInsets.only(top: 25.0),
-                    child: Column(
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: chartBars,
-                        ),
-                      ],
-                    )),
-              ]),
-            ],
-          ),
-        );
-      });
+        });
+      }
+      return const Center(child: CircularProgressIndicator());
     });
   }
 

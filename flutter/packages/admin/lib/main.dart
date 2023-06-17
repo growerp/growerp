@@ -76,5 +76,10 @@ Future main() async {
         WebsiteLocalizations.delegate,
         MarketingLocalizations.delegate,
         InventoryLocalizations.delegate,
+      ],
+      blocProviders: [
+        BlocProvider<AssetBloc>(
+            create: (context) => AssetBloc(CatalogAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!))),
       ]));
 }
