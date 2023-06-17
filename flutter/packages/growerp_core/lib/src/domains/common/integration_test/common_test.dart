@@ -38,7 +38,8 @@ class CommonTest {
       Route<dynamic> Function(RouteSettings) router,
       List<MenuOption> menuOptions,
       List<LocalizationsDelegate> extraDelegates,
-      {bool clear = false,
+      {List<BlocProvider>? blocProviders,
+      bool clear = false,
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
@@ -56,6 +57,7 @@ class CommonTest {
       title: title,
       menuOptions: menuOptions,
       extraDelegates: extraDelegates,
+      blocProviders: blocProviders ?? [],
     ));
     await tester.pumpAndSettle(Duration(seconds: waitTime));
   }
