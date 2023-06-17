@@ -32,6 +32,7 @@ class TopApp extends StatelessWidget {
     required this.router,
     required this.menuOptions,
     this.extraDelegates = const [],
+    this.blocProviders = const [],
   }) : super(key: key);
 
   final APIRepository dbServer;
@@ -40,6 +41,7 @@ class TopApp extends StatelessWidget {
   final Route<dynamic> Function(RouteSettings) router;
   final List<MenuOption> menuOptions;
   final List<LocalizationsDelegate> extraDelegates;
+  final List<BlocProvider> blocProviders;
 
   final List<LocalizationsDelegate> localizationsDelegates = [
     CoreLocalizations.delegate,
@@ -55,70 +57,82 @@ class TopApp extends StatelessWidget {
           ],
           child: MultiBlocProvider(
               providers: [
-                BlocProvider<ThemeBloc>(
-                    create: (context) => ThemeBloc()..add(ThemeSwitch())),
+                if (blocProviders.isNotEmpty)
+                  BlocProvider<ThemeBloc>(
+                      create: (context) => ThemeBloc()..add(ThemeSwitch())),
                 BlocProvider<AuthBloc>(
-                    create: (context) =>
-                        AuthBloc(dbServer, chatServer)..add(AuthLoad())),
-                BlocProvider<ChatRoomBloc>(
-                  create: (context) => ChatRoomBloc(
-                      dbServer, chatServer, context.read<AuthBloc>())
-                    ..add(ChatRoomFetch()),
-                ),
-                BlocProvider<ChatMessageBloc>(
-                    create: (context) => ChatMessageBloc(
-                        dbServer, chatServer, context.read<AuthBloc>())),
+                    create: (context) => AuthBloc(APIRepository(), ChatServer())
+                      ..add(AuthLoad())),
               ],
-              child:
-                  BlocBuilder<ThemeBloc, ThemeState>(builder: (context, state) {
-                localizationsDelegates.addAll(extraDelegates);
-                return GestureDetector(
-                    // close keyboard
-                    onTap: () {
-                      final currentFocus = FocusScope.of(context);
+              child: Builder(builder: (context) {
+                return MultiBlocProvider(
+                    // this list cannot be empty
+                    providers: blocProviders.isNotEmpty
+                        ? blocProviders
+                        : [
+                            BlocProvider<ThemeBloc>(
+                                create: (context) =>
+                                    ThemeBloc()..add(ThemeSwitch()))
+                          ],
+                    child: BlocBuilder<ThemeBloc, ThemeState>(
+                        builder: (context, state) {
+                      localizationsDelegates.addAll(extraDelegates);
+                      return GestureDetector(
+                          // close keyboard
+                          onTap: () {
+                            final currentFocus = FocusScope.of(context);
 
-                      if (!currentFocus.hasPrimaryFocus) {
-                        currentFocus.unfocus();
-                      }
-                    },
-                    child: MaterialApp(
-                        title: title,
-                        supportedLocales: const [Locale('en'), Locale('th')],
-                        debugShowCheckedModeBanner: false,
-                        localizationsDelegates: localizationsDelegates,
-                        builder: (context, child) =>
-                            ResponsiveBreakpoints.builder(
-                                child: child!,
-                                breakpoints: [
-                                  const Breakpoint(
-                                      start: 0, end: 500, name: MOBILE),
-                                  const Breakpoint(
-                                      start: 451, end: 800, name: TABLET),
-                                  const Breakpoint(
-                                      start: 801, end: 1920, name: DESKTOP),
-                                  const Breakpoint(
-                                      start: 1921,
-                                      end: double.infinity,
-                                      name: '4K'),
-                                ]),
-                        themeMode: state.themeMode,
-                        theme: ThemeData(
-                            useMaterial3: true, colorScheme: lightColorScheme),
-                        darkTheme: ThemeData(
-                            useMaterial3: true, colorScheme: darkColorScheme),
-                        onGenerateRoute: router,
-                        home: BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) {
-                            switch (state.status) {
-                              case AuthStatus.loading:
-                                return const SplashForm();
-                              case AuthStatus.changeIp:
-                                return const ChangeIpForm();
-                              default:
-                                return HomeForm(
-                                    menuOptions: menuOptions, title: title);
+                            if (!currentFocus.hasPrimaryFocus) {
+                              currentFocus.unfocus();
                             }
                           },
-                        )));
+                          child: MaterialApp(
+                              title: title,
+                              supportedLocales: const [
+                                Locale('en'),
+                                Locale('th')
+                              ],
+                              debugShowCheckedModeBanner: false,
+                              localizationsDelegates: localizationsDelegates,
+                              builder: (context, child) =>
+                                  ResponsiveBreakpoints.builder(
+                                      child: child!,
+                                      breakpoints: [
+                                        const Breakpoint(
+                                            start: 0, end: 500, name: MOBILE),
+                                        const Breakpoint(
+                                            start: 451, end: 800, name: TABLET),
+                                        const Breakpoint(
+                                            start: 801,
+                                            end: 1920,
+                                            name: DESKTOP),
+                                        const Breakpoint(
+                                            start: 1921,
+                                            end: double.infinity,
+                                            name: '4K'),
+                                      ]),
+                              themeMode: state.themeMode,
+                              theme: ThemeData(
+                                  useMaterial3: true,
+                                  colorScheme: lightColorScheme),
+                              darkTheme: ThemeData(
+                                  useMaterial3: true,
+                                  colorScheme: darkColorScheme),
+                              onGenerateRoute: router,
+                              home: BlocBuilder<AuthBloc, AuthState>(
+                                builder: (context, state) {
+                                  switch (state.status) {
+                                    case AuthStatus.loading:
+                                      return const SplashForm();
+                                    case AuthStatus.changeIp:
+                                      return const ChangeIpForm();
+                                    default:
+                                      return HomeForm(
+                                          menuOptions: menuOptions,
+                                          title: title);
+                                  }
+                                },
+                              )));
+                    }));
               })));
 }
