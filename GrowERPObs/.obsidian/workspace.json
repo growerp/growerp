@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/8 Deployment.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/8 Deployment.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "3 Technical documentation/8 Deployment.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md"
+                "file": "3 Technical documentation/8 Deployment.md"
               }
             }
           }
@@ -154,19 +154,21 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "ee481afbef6892fd",
+  "active": "3e1cbc4fc81746df",
   "lastOpenFiles": [
-    "3 Technical documentation/10 GrowERP Flutter Application and plugins.md",
-    "3 Technical documentation/5 Chat Server.md",
-    "3 Technical documentation/4 Integration tests.md",
+    "GrowERP documentation.md",
+    "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
+    "3 Technical documentation/8 Deployment.md",
+    "3 Technical documentation/9 Andriod Playstore publication.md",
+    "3 Technical documentation/8 IOS AppStore publication.md",
+    "3 Technical documentation/5 HTML Website.md",
+    "3 Technical documentation/3 Moqui Backend.md",
+    "3 Technical documentation/4 Chat Server.md",
+    "3 Technical documentation/6 Stripe.md",
+    "3 Technical documentation/7 Integration tests.md",
     "1 Introduction/5 Road Map and Releases.md",
     "3 Technical documentation/2 Flutter frontend.md",
     "3 Technical documentation/1 Technical Introduction.md",
-    "3 Technical documentation/3 Moqui Backend.md",
-    "3 Technical documentation/6 HTML Website.md",
-    "3 Technical documentation/9 Andriod Playstore publication.md",
-    "3 Technical documentation/8 IOS AppStore publication.md",
-    "3 Technical documentation/7 Stripe.md",
     "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",
     "1 Introduction/3 Getting started.md",
@@ -179,8 +181,6 @@
     "2 End User documentation/9 Authentication & Usertypes.md",
     "2 End User documentation/8 General business flow.md",
     "2 End User documentation/7 Accounting.md",
-    "2 End User documentation/6 Inventory management.md",
-    "2 End User documentation/5 Order management.md",
-    "2 End User documentation/4 Marketing & sales.md"
+    "2 End User documentation/6 Inventory management.md"
   ]
 }

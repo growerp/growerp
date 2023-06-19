@@ -1,4 +1,6 @@
-![](https://raw.githubusercontent.com/growerp/growerp-moqui/master/README.md)
+Check the README.md in the Moqui main directory
+
+further at the [moqui main site](https://www.moqui.org)
 
 
 # API

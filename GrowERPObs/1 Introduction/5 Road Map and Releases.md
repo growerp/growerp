@@ -119,7 +119,7 @@ First comments from end users arrived.
     -   using improved demo data
     -   multi currency
     -   multi company
-2.  Api documented and available: [[4 Integration tests]] for testing with Flutter front-end
+2.  Api documented and available: [[7 Integration tests]] for testing with Flutter front-end
     -   in/output parameters definition
     -   authorization
     -   test/production public API sites
