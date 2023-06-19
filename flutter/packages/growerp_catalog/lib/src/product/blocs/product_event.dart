@@ -20,6 +20,7 @@ abstract class ProductEvent extends Equatable {
   List<Object> get props => [];
 }
 
+/// Get A product list with optional selection criteria
 class ProductFetch extends ProductEvent {
   const ProductFetch(
       {this.categoryId = '',
@@ -34,18 +35,22 @@ class ProductFetch extends ProductEvent {
   List<Object> get props => [categoryId, companyPartyId, searchString, refresh];
 }
 
+/// delete an existing product
 class ProductDelete extends ProductEvent {
   const ProductDelete(this.product);
   final Product product;
 }
 
+/// update an existing product
 class ProductUpdate extends ProductEvent {
   const ProductUpdate(this.product);
   final Product product;
 }
 
+/// initiate a download of products by email.
 class ProductDownload extends ProductEvent {}
 
+/// start a [Product] import
 class ProductUpload extends ProductEvent {
   const ProductUpload(this.file);
   final String file;

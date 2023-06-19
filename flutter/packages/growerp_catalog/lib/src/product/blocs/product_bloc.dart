@@ -34,6 +34,7 @@ EventTransformer<E> productDroppable<E>(Duration duration) {
   };
 }
 
+/// Bloc to access [Product] information
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ProductBloc(this.repos) : super(const ProductState()) {
     on<ProductFetch>(_onProductFetch,

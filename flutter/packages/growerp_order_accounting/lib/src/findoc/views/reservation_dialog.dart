@@ -137,28 +137,23 @@ class ReservationDialogState extends State<ReservationDialog> {
     }
 
     return Center(
-        child: SizedBox(
-            width: 300,
+        child: popUp(
+            context: context,
+            height: 750,
+            width: 400,
+            title: widget.finDoc.orderId == null
+                ? (classificationId == 'AppHotel'
+                    ? "New Reservation"
+                    : "New order")
+                : (classificationId == 'AppHotel'
+                        ? "Reservation #"
+                        : "Order #") +
+                    widget.finDoc.orderId!,
             child: Form(
                 key: _formKey,
                 child: SingleChildScrollView(
                     key: const Key('listView'),
                     child: Column(children: <Widget>[
-                      const SizedBox(height: 30),
-                      Center(
-                          child: Text(
-                              widget.finDoc.orderId == null
-                                  ? (classificationId == 'AppHotel'
-                                      ? "New Reservation"
-                                      : "New order")
-                                  : (classificationId == 'AppHotel'
-                                          ? "Reservation #"
-                                          : "Order #") +
-                                      widget.finDoc.orderId!,
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold))),
                       const SizedBox(height: 20),
                       Row(children: [
                         Expanded(
@@ -168,10 +163,6 @@ class ReservationDialogState extends State<ReservationDialog> {
                             showSearchBox: true,
                             searchFieldProps: TextFieldProps(
                               autofocus: true,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(25.0)),
-                              ),
                               controller: _userSearchBoxController,
                             ),
                             menuProps: MenuProps(
@@ -182,10 +173,8 @@ class ReservationDialogState extends State<ReservationDialog> {
                               height: 50,
                             ),
                           ),
-                          dropdownSearchDecoration: InputDecoration(
+                          dropdownSearchDecoration: const InputDecoration(
                             labelText: 'Customer',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
                           ),
                           key: const Key('customer'),
                           itemAsString: (User? u) =>
@@ -241,10 +230,6 @@ class ReservationDialogState extends State<ReservationDialog> {
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autofocus: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(25.0)),
-                            ),
                             controller: _productSearchBoxController,
                           ),
                           menuProps: MenuProps(
@@ -260,8 +245,6 @@ class ReservationDialogState extends State<ReservationDialog> {
                           labelText: classificationId == 'AppHotel'
                               ? 'Room Type'
                               : 'Product',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0)),
                         ),
                         key: const Key('product'),
                         itemAsString: (Product? u) => "${u!.productName}",
@@ -312,13 +295,11 @@ class ReservationDialogState extends State<ReservationDialog> {
                           "${_selectedDate.toLocal()}".split(' ')[0],
                           key: const Key('date'),
                         ))),
-                        SizedBox(
-                            width: 100,
-                            child: ElevatedButton(
-                              key: const Key('setDate'),
-                              onPressed: () => selectDate(context),
-                              child: const Text(' Update\nBegindate'),
-                            )),
+                        ElevatedButton(
+                          key: const Key('setDate'),
+                          onPressed: () => selectDate(context),
+                          child: const Text(' Update Begindate'),
+                        ),
                       ]),
                       const SizedBox(height: 20),
                       Row(children: [
