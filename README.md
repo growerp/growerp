@@ -49,22 +49,26 @@ Run:
     cd moqui
     java -jar moqui.war
 ```
+### build flutter system:
 
-OR: use our test backend:  
-change file packages/admin/assets/cfg/app_settings.json:
+Install 'melos' and build: 
+```sh
+dart pub global install melos
+cd growerp
+melos bootstrap
+melos build_all
+melos l10n
 ```
-- from:   "databaseUrlDebug": "",
-- to:     "databaseUrlDebug": "https://test.growerp.org",  
 
-- from:   "chatUrlDebug":  "",
-- to:     "chatUrlDebug": "wss://chat.growerp.org",  
-```  
 ### emulator/browser
 start emulator or use browser and start app in directory: packages/admin:
 ```sh
 cd flutter/packages/admin
 flutter run
 ```
+## Use with docker
+
+In the docker directory there is a README.md to run the complete system in docker images locally.
 
 ### Some phone screen shots:
 <div style="text-align: center">

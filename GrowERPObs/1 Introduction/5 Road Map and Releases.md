@@ -35,6 +35,8 @@ Let us know if you have suggestions at support@growerp.com
 * Added Dockerfile for all required images to automatically build on dockerhub.com
 * Added docker-compose file to run images locally.
 * Docker Inc. now [sponsors GrowERP](https://hub.docker.com/search?q=growerp)
+* Hotel app now upgraded to the new core system
+* Moved often used Blocs into the core component
 
 ## Release June 5 2023 (V0.9.5)
 1. Use the new [Material Design 3](https://m3.material.io/) with a switch to select dark or light mode.

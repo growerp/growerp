@@ -1,12 +1,5 @@
 version: "2"
 
-# to use this system:
-# docker compose build
-# docker compose up -d
-# go to the browser: https://admin.growerp.local
-#                    https://hotel.growerp.local
-#                    https://backend.growerp.local/vapps
-
 networks:
     my-network:
       driver: bridge
@@ -161,5 +154,22 @@ services:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
       - VIRTUAL_HOST=admin.growerp.local 
+    networks:
+      - my-network
+
+  hotel:
+    container_name: hotel
+    image: hotel
+    build:
+      context: ../flutter
+      dockerfile: ../flutter/packages/hotel/Dockerfile
+    mem_limit: 10m
+    restart: unless-stopped
+    expose:
+      - 80
+    volumes:
+      - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
+    environment:
+      - VIRTUAL_HOST=hotel.growerp.local 
     networks:
       - my-network

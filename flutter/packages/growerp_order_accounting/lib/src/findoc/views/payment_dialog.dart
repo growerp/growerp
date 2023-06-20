@@ -37,6 +37,7 @@ class PaymentDialogState extends State<PaymentDialog> {
   User? _selectedUser;
   Company? _selectedCompany;
   ItemType? _selectedItemType;
+  late UserBloc _userBloc;
 
   late bool isPhone;
   late PaymentInstrument _paymentInstrument;
@@ -58,6 +59,8 @@ class PaymentDialogState extends State<PaymentDialog> {
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
+    _userBloc = context.read<UserBloc>();
+    _userBloc.add(const UserFetch());
   }
 
   @override
@@ -120,55 +123,59 @@ class PaymentDialogState extends State<PaymentDialog> {
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
-              DropdownSearch<User>(
-                selectedItem: _selectedUser,
-                popupProps: PopupProps.menu(
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0)),
-                    ),
-                    controller: _userSearchBoxController,
-                  ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                  title: popUp(
-                    context: context,
-                    title:
-                        "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
-                    height: 50,
-                  ),
-                ),
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
-                ),
-                key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                itemAsString: (User? u) =>
-                    "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
-                asyncItems: (String? filter) async {
-                  finDocBloc.add(FinDocGetUsers(
-                      role: finDocUpdated.sales == true
-                          ? Role.customer
-                          : Role.supplier,
-                      filter: _userSearchBoxController.text));
-                  int times = 0;
-                  while (finDocBloc.state.users.isEmpty && times++ < 10) {
-                    await Future.delayed(const Duration(milliseconds: 500));
-                  }
-                  return finDocBloc.state.users;
-                },
-                onChanged: (User? newValue) {
-                  setState(() {
-                    _selectedUser = newValue;
-                    _selectedCompany = newValue!.company;
-                  });
-                },
-                validator: (value) => value == null
-                    ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
-                    : null,
-              ),
+              BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+                switch (state.status) {
+                  case UserStatus.failure:
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  case UserStatus.success:
+                    return DropdownSearch<User>(
+                      selectedItem: _selectedUser,
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0)),
+                          ),
+                          controller: _userSearchBoxController,
+                        ),
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title:
+                              "Select ${finDocUpdated.sales ? 'customer' : 'supplier'}",
+                          height: 50,
+                        ),
+                      ),
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText:
+                            finDocUpdated.sales ? 'Customer' : 'Supplier',
+                      ),
+                      key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
+                      itemAsString: (User? u) =>
+                          "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                      items: state.users,
+                      filterFn: (user, filter) {
+                        _userBloc.add(UserFetch(searchString: filter));
+                        return true;
+                      },
+                      onChanged: (User? newValue) {
+                        setState(() {
+                          _selectedUser = newValue;
+                          _selectedCompany = newValue!.company;
+                        });
+                      },
+                      validator: (value) => value == null
+                          ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                          : null,
+                    );
+                  default:
+                    return const Center(child: CircularProgressIndicator());
+                }
+              }),
               const SizedBox(height: 20),
               TextFormField(
                   key: const Key('amount'),

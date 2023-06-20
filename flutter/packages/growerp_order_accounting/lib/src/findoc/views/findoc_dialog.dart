@@ -33,23 +33,41 @@ class FinDocDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     if (finDoc.sales) {
-      return BlocProvider<SalesCartBloc>(
+      return MultiBlocProvider(providers: [
+        BlocProvider<SalesCartBloc>(
+            create: (context) => CartBloc(
+                docType: finDoc.docType!,
+                sales: true,
+                finDocBloc: finDocBloc,
+                repos: context.read<FinDocAPIRepository>())
+              ..add(CartFetch(finDoc))),
+        BlocProvider<UserBloc>(
+            create: (context) => UserBloc(
+                CompanyUserAPIRepository(
+                    context.read<AuthBloc>().state.authenticate!.apiKey!),
+                Role.customer)),
+        BlocProvider<ProductBloc>(
+            create: (context) => ProductBloc(CatalogAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+      ], child: FinDocPage(finDoc));
+    }
+    return MultiBlocProvider(providers: [
+      BlocProvider<PurchaseCartBloc>(
           create: (context) => CartBloc(
               docType: finDoc.docType!,
-              sales: true,
+              sales: false,
               finDocBloc: finDocBloc,
               repos: context.read<FinDocAPIRepository>())
-            ..add(CartFetch(finDoc)),
-          child: FinDocPage(finDoc));
-    }
-    return BlocProvider<PurchaseCartBloc>(
-        create: (context) => CartBloc(
-            docType: finDoc.docType!,
-            sales: false,
-            finDocBloc: finDocBloc,
-            repos: context.read<FinDocAPIRepository>())
-          ..add(CartFetch(finDoc)),
-        child: FinDocPage(finDoc));
+            ..add(CartFetch(finDoc))),
+      BlocProvider<UserBloc>(
+          create: (context) => UserBloc(
+              CompanyUserAPIRepository(
+                  context.read<AuthBloc>().state.authenticate!.apiKey!),
+              Role.supplier)),
+      BlocProvider<ProductBloc>(
+          create: (context) => ProductBloc(CatalogAPIRepository(
+              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+    ], child: FinDocPage(finDoc));
   }
 }
 
@@ -65,7 +83,9 @@ class MyFinDocState extends State<FinDocPage> {
   final _descriptionController = TextEditingController();
   final _userSearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
-  late FinDocAPIRepository repos;
+  late UserBloc _userBloc;
+  late ProductBloc _productBloc;
+  late String classificationId;
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   User? _selectedUser;
@@ -78,14 +98,19 @@ class MyFinDocState extends State<FinDocPage> {
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
     _selectedUser = finDocUpdated.otherUser;
-    _selectedCompany = finDocUpdated.otherCompany;
+    _selectedCompany =
+        finDocUpdated.otherCompany ?? finDocUpdated.otherUser?.company;
+    _userBloc = context.read<UserBloc>();
+    _userBloc.add(const UserFetch());
+    _productBloc = context.read<ProductBloc>();
+    _productBloc.add(const ProductFetch());
     _descriptionController.text = finDocUpdated.description ?? "";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
     } else {
       _cartBloc = context.read<PurchaseCartBloc>() as CartBloc;
     }
-    repos = context.read<FinDocAPIRepository>();
+    classificationId = GlobalConfiguration().get("classificationId");
   }
 
   @override
@@ -117,9 +142,8 @@ class MyFinDocState extends State<FinDocPage> {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
           return Column(children: [
-            headerEntry(repos),
-            SizedBox(
-                height: isPhone ? 110 : 50, child: updateButtons(repos, state)),
+            headerEntry(),
+            SizedBox(height: isPhone ? 110 : 50, child: updateButtons(state)),
             finDocItemList(state),
             const SizedBox(height: 10),
             Center(
@@ -162,12 +186,17 @@ class MyFinDocState extends State<FinDocPage> {
             )));
   }
 
-  Widget headerEntry(repos) {
+  Widget headerEntry() {
     List<Widget> widgets = [
       Expanded(
           child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: DropdownSearch<User>(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+        child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+          switch (state.status) {
+            case UserStatus.failure:
+              return const FatalErrorForm(message: 'server connection problem');
+            case UserStatus.success:
+              return DropdownSearch<User>(
                 selectedItem: _selectedUser,
                 popupProps: PopupProps.menu(
                   showSearchBox: true,
@@ -190,18 +219,10 @@ class MyFinDocState extends State<FinDocPage> {
                 key: Key(finDocUpdated.sales == true ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
                     "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
-                asyncItems: (String? filter) async {
-                  final finDocBloc = context.read<FinDocBloc>();
-                  finDocBloc.add(FinDocGetUsers(
-                      role: finDocUpdated.sales == true
-                          ? Role.customer
-                          : Role.supplier,
-                      filter: _userSearchBoxController.text));
-                  int times = 0;
-                  while (finDocBloc.state.users.isEmpty && times++ < 10) {
-                    await Future.delayed(const Duration(milliseconds: 500));
-                  }
-                  return finDocBloc.state.users;
+                items: state.users,
+                filterFn: (user, filter) {
+                  _userBloc.add(UserFetch(searchString: filter));
+                  return true;
                 },
                 onChanged: (User? newValue) {
                   setState(() {
@@ -212,7 +233,12 @@ class MyFinDocState extends State<FinDocPage> {
                 validator: (value) => value == null
                     ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
                     : null,
-              ))),
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        }),
+      )),
       Expanded(
           child: Padding(
               padding: const EdgeInsets.all(10),
@@ -238,7 +264,7 @@ class MyFinDocState extends State<FinDocPage> {
     );
   }
 
-  Widget updateButtons(repos, state) {
+  Widget updateButtons(state) {
     List<Widget> buttons = [
       ElevatedButton(
           child: const Text("Update header"),
@@ -252,8 +278,8 @@ class MyFinDocState extends State<FinDocPage> {
           key: const Key('addItem'),
           child: const Text('Add other Item'),
           onPressed: () async {
-            final dynamic finDocItem = await addAnotherItemDialog(
-                context, repos, finDocUpdated.sales, state);
+            final dynamic finDocItem =
+                await addAnotherItemDialog(context, finDocUpdated.sales, state);
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
@@ -269,8 +295,7 @@ class MyFinDocState extends State<FinDocPage> {
               key: const Key('itemRental'),
               child: const Text('Asset Rental'),
               onPressed: () async {
-                final dynamic finDocItem =
-                    await addRentalItemDialog(context, repos);
+                final dynamic finDocItem = await addRentalItemDialog(context);
                 if (finDocItem != null) {
                   _cartBloc.add(CartAdd(
                       finDoc: finDocUpdated.copyWith(
@@ -284,8 +309,8 @@ class MyFinDocState extends State<FinDocPage> {
           key: const Key('addProduct'),
           child: const Text('Add Product'),
           onPressed: () async {
-            final dynamic finDocItem =
-                await addProductItemDialog(context, repos);
+            final dynamic finDocItem = await addProductItemDialog(
+                context, classificationId, _productBloc);
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
@@ -348,7 +373,7 @@ class MyFinDocState extends State<FinDocPage> {
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
                       otherUser: _selectedUser,
-                      otherCompany: _selectedUser!.company,
+                      otherCompany: _selectedUser?.company,
                       description: _descriptionController.text);
                   if (finDocUpdated.items.isNotEmpty &&
                       finDocUpdated.otherCompany != null) {
@@ -458,7 +483,7 @@ class MyFinDocState extends State<FinDocPage> {
 }
 
 Future addAnotherItemDialog(
-    BuildContext context, dynamic repos, bool sales, CartState state) async {
+    BuildContext context, bool sales, CartState state) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -554,7 +579,8 @@ Future addAnotherItemDialog(
   );
 }
 
-Future addProductItemDialog(BuildContext context, repos) async {
+Future addProductItemDialog(BuildContext context, String classificationId,
+    ProductBloc productBloc) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -568,149 +594,174 @@ Future addProductItemDialog(BuildContext context, repos) async {
         var addProductFormKey = GlobalKey<FormState>();
         return StatefulBuilder(
           builder: (context, setState) {
-            return Dialog(
-                key: const Key('addProductItemDialog'),
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: popUp(
-                    context: context,
-                    height: 520,
-                    title: 'Add a Product',
-                    child: Form(
-                        key: addProductFormKey,
-                        child: SingleChildScrollView(
-                            key: const Key('listView3'),
-                            child: Column(children: <Widget>[
-                              DropdownSearch<Product>(
-                                selectedItem: selectedProduct,
-                                popupProps: PopupProps.menu(
-                                  showSearchBox: true,
-                                  searchFieldProps: TextFieldProps(
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                    ),
-                                    controller: productSearchBoxController,
-                                  ),
-                                  menuProps: MenuProps(
-                                      borderRadius: BorderRadius.circular(20)),
-                                  title: popUp(
-                                    context: context,
-                                    title: 'Select product',
-                                    height: 50,
-                                  ),
-                                ),
-                                dropdownSearchDecoration: InputDecoration(
-                                  labelText: 'Product',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20)),
-                                ),
-                                key: const Key('product'),
-                                itemAsString: (Product? u) =>
-                                    "${u!.pseudoId}\n${u.productName}",
-                                asyncItems: (String? filter) async {
-                                  ApiResult<List<Product>> result =
-                                      await repos.lookUpProduct(
-                                          searchString:
-                                              productSearchBoxController.text);
-                                  return result.when(
-                                      success: (data) => data,
-                                      failure: (_) => [
-                                            Product(
-                                                productName: 'get data error!')
-                                          ]);
-                                },
-                                onChanged: (Product? newValue) {
-                                  setState(() {
-                                    selectedProduct = newValue;
-                                  });
-                                  if (newValue != null) {
-                                    priceController.text =
-                                        newValue.price.toString();
-                                    itemDescriptionController.text =
-                                        "${newValue.productName}";
-                                  }
-                                },
-                                validator: (value) =>
-                                    value == null ? "Select a product?" : null,
-                              ),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                  key: const Key('itemDescription'),
-                                  decoration: const InputDecoration(
-                                      labelText: 'Item Description'),
-                                  controller: itemDescriptionController,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Item description?';
+            return BlocProvider.value(
+                value: productBloc,
+                child: Dialog(
+                    key: const Key('addProductItemDialog'),
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: popUp(
+                        context: context,
+                        height: 520,
+                        title: 'Add a Product',
+                        child: Form(
+                            key: addProductFormKey,
+                            child: SingleChildScrollView(
+                                key: const Key('listView3'),
+                                child: Column(children: <Widget>[
+                                  BlocBuilder<ProductBloc, ProductState>(
+                                      builder: (context, productState) {
+                                    switch (productState.status) {
+                                      case ProductStatus.failure:
+                                        return const FatalErrorForm(
+                                            message:
+                                                'server connection problem');
+                                      case ProductStatus.success:
+                                        return DropdownSearch<Product>(
+                                          selectedItem: selectedProduct,
+                                          popupProps: PopupProps.menu(
+                                            showSearchBox: true,
+                                            searchFieldProps: TextFieldProps(
+                                              autofocus: true,
+                                              decoration: InputDecoration(
+                                                border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20)),
+                                              ),
+                                              controller:
+                                                  productSearchBoxController,
+                                            ),
+                                            menuProps: MenuProps(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                            title: popUp(
+                                              context: context,
+                                              title: 'Select product',
+                                              height: 50,
+                                            ),
+                                          ),
+                                          dropdownSearchDecoration:
+                                              InputDecoration(
+                                            labelText: 'Product',
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                          ),
+                                          key: const Key('product'),
+                                          itemAsString: (Product? u) =>
+                                              "${u!.pseudoId}\n${u.productName}",
+                                          items: productState.products,
+                                          filterFn: (user, filter) {
+                                            context.read<ProductBloc>().add(
+                                                ProductFetch(
+                                                    searchString: filter,
+                                                    assetClassId:
+                                                        classificationId ==
+                                                                'AppHotel'
+                                                            ? 'Hotel Room'
+                                                            : ''));
+                                            return true;
+                                          },
+                                          onChanged: (Product? newValue) {
+                                            setState(() {
+                                              selectedProduct = newValue;
+                                            });
+                                            if (newValue != null) {
+                                              priceController.text =
+                                                  newValue.price.toString();
+                                              itemDescriptionController.text =
+                                                  "${newValue.productName}";
+                                            }
+                                          },
+                                          validator: (value) => value == null
+                                              ? "Select a product?"
+                                              : null,
+                                        );
+                                      default:
+                                        return const Center(
+                                            child: CircularProgressIndicator());
                                     }
-                                    return null;
                                   }),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                key: const Key('itemPrice'),
-                                decoration: const InputDecoration(
-                                    labelText: 'Price/Amount'),
-                                controller: priceController,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Enter Price or Amount?';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                key: const Key('itemQuantity'),
-                                keyboardType: TextInputType.number,
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp('[0-9.,]+'))
-                                ],
-                                decoration: const InputDecoration(
-                                    labelText: 'Quantity'),
-                                controller: quantityController,
-                                validator: (value) =>
-                                    value == null ? "Enter a quantity?" : null,
-                              ),
-                              const SizedBox(height: 20),
-                              Row(children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    key: const Key('ok'),
-                                    child: const Text('Add product'),
-                                    onPressed: () {
-                                      if (addProductFormKey.currentState!
-                                          .validate()) {
-                                        Navigator.of(context).pop(FinDocItem(
-                                          itemType: ItemType(
-                                              itemTypeId: 'ItemProduct'),
-                                          productId: selectedProduct!.productId,
-                                          price: Decimal.parse(
-                                              priceController.text),
-                                          description:
-                                              itemDescriptionController.text,
-                                          quantity:
-                                              quantityController.text.isEmpty
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                      key: const Key('itemDescription'),
+                                      decoration: const InputDecoration(
+                                          labelText: 'Item Description'),
+                                      controller: itemDescriptionController,
+                                      validator: (value) {
+                                        if (value!.isEmpty) {
+                                          return 'Item description?';
+                                        }
+                                        return null;
+                                      }),
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                    key: const Key('itemPrice'),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Price/Amount'),
+                                    controller: priceController,
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Enter Price or Amount?';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+                                  TextFormField(
+                                    key: const Key('itemQuantity'),
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.allow(
+                                          RegExp('[0-9.,]+'))
+                                    ],
+                                    decoration: const InputDecoration(
+                                        labelText: 'Quantity'),
+                                    controller: quantityController,
+                                    validator: (value) => value == null
+                                        ? "Enter a quantity?"
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        key: const Key('ok'),
+                                        child: const Text('Add product'),
+                                        onPressed: () {
+                                          if (addProductFormKey.currentState!
+                                              .validate()) {
+                                            Navigator.of(context)
+                                                .pop(FinDocItem(
+                                              itemType: ItemType(
+                                                  itemTypeId: 'ItemProduct'),
+                                              productId:
+                                                  selectedProduct!.productId,
+                                              price: Decimal.parse(
+                                                  priceController.text),
+                                              description:
+                                                  itemDescriptionController
+                                                      .text,
+                                              quantity: quantityController
+                                                      .text.isEmpty
                                                   ? Decimal.parse('1')
                                                   : Decimal.parse(
                                                       quantityController.text),
-                                        ));
-                                      }
-                                    },
-                                  ),
-                                )
-                              ])
-                            ])))));
+                                            ));
+                                          }
+                                        },
+                                      ),
+                                    )
+                                  ])
+                                ]))))));
           },
         );
       });
 }
 
 /// [addRentalItemDialog] add a rental order item [FinDocItem]
-Future addRentalItemDialog(BuildContext context, repos) async {
+Future addRentalItemDialog(BuildContext context) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -774,86 +825,97 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              BlocBuilder<FinDocBloc, FinDocState>(
-                                  builder: (context, state) {
-                                switch (state.status) {
-                                  case FinDocStatus.failure:
+                              BlocBuilder<ProductBloc, ProductState>(
+                                  builder: (context, productState) {
+                                switch (productState.status) {
+                                  case ProductStatus.failure:
                                     return const FatalErrorForm(
                                         message: 'server connection problem');
-                                  case FinDocStatus.success:
-                                    return DropdownSearch<Product>(
-                                      key: const Key('product'),
-                                      selectedItem: selectedProduct,
-                                      popupProps: PopupProps.menu(
-                                        showSearchBox: true,
-                                        searchFieldProps: TextFieldProps(
-                                          autofocus: true,
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20)),
-                                          ),
-                                          controller:
-                                              productSearchBoxController,
-                                        ),
-                                        menuProps: MenuProps(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        title: popUp(
-                                          context: context,
-                                          title: 'Select product',
-                                          height: 50,
-                                        ),
-                                      ),
-                                      dropdownSearchDecoration: InputDecoration(
-                                        labelText: 'Product',
-                                        border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                      ),
-                                      itemAsString: (Product? u) =>
-                                          "${u!.productName}",
-                                      asyncItems: (String? filter) async {
-                                        ApiResult<List<Product>> result =
-                                            await repos.lookUpProduct(
-                                                searchString:
-                                                    productSearchBoxController
-                                                        .text,
-                                                assetClassId:
-                                                    classificationId ==
-                                                            'AppHotel'
-                                                        ? 'Hotel Room'
-                                                        : null,
-                                                productTypeId: 'Rental');
-                                        return result.when(
-                                            success: (data) => data,
-                                            failure: (_) => [
-                                                  Product(
-                                                      productName:
-                                                          'get data error!')
-                                                ]);
-                                      },
-                                      onChanged: (Product? newValue) async {
-                                        selectedProduct = newValue;
-                                        priceController.text =
-                                            newValue!.price.toString();
-                                        itemDescriptionController.text =
-                                            "${newValue.productName}";
-                                        context.read<FinDocBloc>().add(
-                                            FinDocGetRentalOccupancy(
-                                                newValue.productId));
-                                        //           rentalDays = await getRentalOccupancy(
-                                        //             repos: repos,
-                                        //           productId: newValue.productId);
-                                        while (!whichDayOk(startDate)) {
-                                          startDate = startDate
-                                              .add(const Duration(days: 1));
-                                        }
-                                      },
-                                      validator: (value) => value == null
-                                          ? 'Select product?'
-                                          : null,
-                                    );
+                                  case ProductStatus.success:
+                                    return BlocBuilder<FinDocBloc, FinDocState>(
+                                        builder: (context, state) {
+                                      switch (state.status) {
+                                        case FinDocStatus.failure:
+                                          return const FatalErrorForm(
+                                              message:
+                                                  'server connection problem');
+                                        case FinDocStatus.success:
+                                          return DropdownSearch<Product>(
+                                            key: const Key('product'),
+                                            selectedItem: selectedProduct,
+                                            popupProps: PopupProps.menu(
+                                              showSearchBox: true,
+                                              searchFieldProps: TextFieldProps(
+                                                autofocus: true,
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20)),
+                                                ),
+                                                controller:
+                                                    productSearchBoxController,
+                                              ),
+                                              menuProps: MenuProps(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20)),
+                                              title: popUp(
+                                                context: context,
+                                                title: 'Select product',
+                                                height: 50,
+                                              ),
+                                            ),
+                                            dropdownSearchDecoration:
+                                                InputDecoration(
+                                              labelText: 'Product',
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20)),
+                                            ),
+                                            itemAsString: (Product? u) =>
+                                                "${u!.productName}",
+                                            items: productState.products,
+                                            filterFn: (user, filter) {
+                                              context.read<ProductBloc>().add(
+                                                  ProductFetch(
+                                                      searchString: filter,
+                                                      assetClassId:
+                                                          classificationId ==
+                                                                  'AppHotel'
+                                                              ? 'Hotel Room'
+                                                              : ''));
+                                              return true;
+                                            },
+                                            onChanged:
+                                                (Product? newValue) async {
+                                              selectedProduct = newValue;
+                                              priceController.text =
+                                                  newValue!.price.toString();
+                                              itemDescriptionController.text =
+                                                  "${newValue.productName}";
+                                              context.read<FinDocBloc>().add(
+                                                  FinDocGetRentalOccupancy(
+                                                      newValue.productId));
+                                              //           rentalDays = await getRentalOccupancy(
+                                              //             repos: repos,
+                                              //           productId: newValue.productId);
+                                              while (!whichDayOk(startDate)) {
+                                                startDate = startDate.add(
+                                                    const Duration(days: 1));
+                                              }
+                                            },
+                                            validator: (value) => value == null
+                                                ? 'Select product?'
+                                                : null,
+                                          );
+                                        default:
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                      }
+                                    });
                                   default:
                                     return const Center(
                                         child: CircularProgressIndicator());

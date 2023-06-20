@@ -61,7 +61,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocUpdate>(_onFinDocUpdate);
     on<FinDocShipmentReceive>(_onFinDocShipmentReceive);
     on<FinDocConfirmPayment>(_onFinDocConfirmPayment);
-    on<FinDocGetUsers>(_onFinDocGetUsers);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
     on<FinDocGetPaymentTypes>(_onFinDocGetPaymentTypes);
     on<FinDocGetRentalOccupancy>(_onFinDocGetRentalOccupancy);
@@ -255,21 +254,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
               finDocs: finDocs,
               message: 'Payment processed successfully');
         },
-        failure: (error) => state.copyWith(
-            status: FinDocStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
-  }
-
-  Future<void> _onFinDocGetUsers(
-    FinDocGetUsers event,
-    Emitter<FinDocState> emit,
-  ) async {
-    emit(state.copyWith(status: FinDocStatus.parmLoading));
-    ApiResult<List<User>> result =
-        await repos.lookUpUser(role: event.role, searchString: event.filter);
-    return emit(result.when(
-        success: (data) =>
-            state.copyWith(users: data, status: FinDocStatus.success),
         failure: (error) => state.copyWith(
             status: FinDocStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));

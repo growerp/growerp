@@ -178,48 +178,49 @@ class ReservationDialogState extends State<ReservationForm> {
                 key: _formKey,
                 child: ListView(key: const Key('listView'), children: <Widget>[
                   BlocBuilder<UserBloc, UserState>(builder: (context, state) {
-                    if (state.status == UserStatus.failure) {
-                      return const FatalErrorForm(
-                          message: 'server connection problem');
-                    }
-                    if (state.status == UserStatus.success) {
-                      return DropdownSearch<User>(
-                        selectedItem: _selectedUser,
-                        popupProps: PopupProps.menu(
-                          showSearchBox: true,
-                          searchFieldProps: TextFieldProps(
-                            autofocus: true,
-                            controller: _userSearchBoxController,
+                    switch (state.status) {
+                      case UserStatus.failure:
+                        return const FatalErrorForm(
+                            message: 'server connection problem');
+                      case UserStatus.success:
+                        return DropdownSearch<User>(
+                          selectedItem: _selectedUser,
+                          popupProps: PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              autofocus: true,
+                              controller: _userSearchBoxController,
+                            ),
+                            menuProps: MenuProps(
+                                borderRadius: BorderRadius.circular(20.0)),
+                            title: popUp(
+                              context: context,
+                              title: 'Select customer',
+                              height: 50,
+                            ),
                           ),
-                          menuProps: MenuProps(
-                              borderRadius: BorderRadius.circular(20.0)),
-                          title: popUp(
-                            context: context,
-                            title: 'Select customer',
-                            height: 50,
+                          dropdownSearchDecoration: const InputDecoration(
+                            labelText: 'Customer',
                           ),
-                        ),
-                        dropdownSearchDecoration: const InputDecoration(
-                          labelText: 'Customer',
-                        ),
-                        key: const Key('customer'),
-                        itemAsString: (User? u) =>
-                            "${u!.firstName} ${u.lastName}, ${u.company!.name}",
-                        items: state.users,
-                        filterFn: (user, filter) {
-                          _userBloc.add(UserFetch(searchString: filter));
-                          return true;
-                        },
-                        onChanged: (User? newValue) {
-                          setState(() {
-                            _selectedUser = newValue;
-                          });
-                        },
-                        validator: (value) =>
-                            value == null ? 'field required' : null,
-                      );
+                          key: const Key('customer'),
+                          itemAsString: (User? u) =>
+                              "${u!.firstName} ${u.lastName}, ${u.company!.name}",
+                          items: state.users,
+                          filterFn: (user, filter) {
+                            _userBloc.add(UserFetch(searchString: filter));
+                            return true;
+                          },
+                          onChanged: (User? newValue) {
+                            setState(() {
+                              _selectedUser = newValue;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? 'field required' : null,
+                        );
+                      default:
+                        return const Center(child: CircularProgressIndicator());
                     }
-                    return const Center(child: CircularProgressIndicator());
                   }),
                   const SizedBox(height: 20),
                   BlocBuilder<ProductBloc, ProductState>(
