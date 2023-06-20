@@ -19,7 +19,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import '../../l10n/generated/catalog_localizations.dart';
-import '../product.dart';
 
 class ProductListHeader extends StatefulWidget {
   const ProductListHeader({Key? key}) : super(key: key);

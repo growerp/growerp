@@ -16,6 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../models/models.dart';
 import '../services/json_converters.dart';
+import '../domains/inventory/inventory.dart';
 
 part 'findoc_item_model.freezed.dart';
 part 'findoc_item_model.g.dart';

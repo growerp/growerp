@@ -17,7 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../../api_repository.dart';
 import '../product.dart';
 
 class ProductListForm extends StatelessWidget {

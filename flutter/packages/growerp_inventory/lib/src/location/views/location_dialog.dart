@@ -17,8 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../location.dart';
-
 class LocationDialog extends StatefulWidget {
   final Location location;
   const LocationDialog(this.location, {super.key});

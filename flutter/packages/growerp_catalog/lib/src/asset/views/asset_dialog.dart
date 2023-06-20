@@ -22,7 +22,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../../../growerp_catalog.dart';
 
 class AssetDialog extends StatefulWidget {
   final Asset asset;
@@ -87,7 +86,9 @@ class AssetDialogState extends State<AssetDialog> {
                 child: popUp(
                     context: context,
                     child: _showForm(isPhone),
-                    title: 'Asset Information',
+                    title: classificationId == 'AppHotel'
+                        ? 'Room information'
+                        : 'Asset Information',
                     height: 550,
                     width: 400))));
   }
@@ -103,10 +104,6 @@ class AssetDialogState extends State<AssetDialog> {
                           (widget.asset.assetId.isEmpty
                               ? "New"
                               : widget.asset.assetId),
-                      style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
                       key: const Key('header'))),
               const SizedBox(height: 30),
               TextFormField(
@@ -145,52 +142,53 @@ class AssetDialogState extends State<AssetDialog> {
                   )),
               const SizedBox(height: 20),
               BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
-                if (state.status == ProductStatus.failure) {
-                  return const FatalErrorForm(
-                      message: 'server connection problem');
-                }
-                if (state.status == ProductStatus.success) {
-                  return DropdownSearch<Product>(
-                    key: const Key('productDropDown'),
-                    selectedItem: _selectedProduct,
-                    popupProps: PopupProps.menu(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0)),
+                switch (state.status) {
+                  case ProductStatus.failure:
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  case ProductStatus.success:
+                    return DropdownSearch<Product>(
+                      key: const Key('productDropDown'),
+                      selectedItem: _selectedProduct,
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0)),
+                          ),
+                          controller: _productSearchBoxController,
                         ),
-                        controller: _productSearchBoxController,
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title: 'Select product',
+                          height: 50,
+                        ),
                       ),
-                      menuProps:
-                          MenuProps(borderRadius: BorderRadius.circular(20.0)),
-                      title: popUp(
-                        context: context,
-                        title: 'Select product',
-                        height: 50,
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: classificationId == 'AppHotel'
+                            ? 'Room Type'
+                            : 'Product',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0)),
                       ),
-                    ),
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: classificationId == 'AppHotel'
-                          ? 'Room Type'
-                          : 'Product',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0)),
-                    ),
-                    showClearButton: false,
-                    itemAsString: (Product? u) => "${u!.productName}",
-                    onChanged: (Product? newValue) {
-                      _selectedProduct = newValue;
-                    },
-                    items: state.products,
-                    filterFn: (user, filter) {
-                      _productBloc.add(ProductFetch(searchString: filter));
-                      return true;
-                    },
-                  );
+                      showClearButton: false,
+                      itemAsString: (Product? u) => "${u!.productName}",
+                      onChanged: (Product? newValue) {
+                        _selectedProduct = newValue;
+                      },
+                      items: state.products,
+                      filterFn: (user, filter) {
+                        _productBloc.add(ProductFetch(searchString: filter));
+                        return true;
+                      },
+                    );
+                  default:
+                    return const Center(child: CircularProgressIndicator());
                 }
-                return const Center(child: CircularProgressIndicator());
               }),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(

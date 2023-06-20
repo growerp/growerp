@@ -54,6 +54,7 @@ class FinDocConfirmPayment extends FinDocEvent {
   final FinDoc payment;
 }
 
+@Deprecated("You should use the UserBloc")
 class FinDocGetUsers extends FinDocEvent {
   const FinDocGetUsers({this.role, this.filter});
   final Role? role;
@@ -65,4 +66,10 @@ class FinDocGetItemTypes extends FinDocEvent {}
 class FinDocGetPaymentTypes extends FinDocEvent {
   const FinDocGetPaymentTypes(this.sales);
   final bool sales;
+}
+
+/// Get the dates that this product had reservations
+class FinDocGetRentalOccupancy extends FinDocEvent {
+  const FinDocGetRentalOccupancy(this.productId);
+  final String productId;
 }

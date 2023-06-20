@@ -15,9 +15,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 import '../../l10n/generated/inventory_localizations.dart';
-import '../location.dart';
 
 class LocationListHeader extends StatefulWidget {
   const LocationListHeader({Key? key, required this.locationBloc})

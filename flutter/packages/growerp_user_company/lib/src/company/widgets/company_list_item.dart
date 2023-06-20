@@ -18,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../api_repository.dart';
 import '../company.dart';
 
 class CompanyListItem extends StatelessWidget {

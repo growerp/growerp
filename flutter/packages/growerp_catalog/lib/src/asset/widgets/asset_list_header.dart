@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../blocs/asset_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class AssetListHeader extends StatefulWidget {
   const AssetListHeader({Key? key}) : super(key: key);

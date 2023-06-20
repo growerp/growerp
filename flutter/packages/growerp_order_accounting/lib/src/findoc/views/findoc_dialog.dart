@@ -351,7 +351,7 @@ class MyFinDocState extends State<FinDocPage> {
                       otherCompany: _selectedUser!.company,
                       description: _descriptionController.text);
                   if (finDocUpdated.items.isNotEmpty &&
-                      finDocUpdated.otherUser != null) {
+                      finDocUpdated.otherCompany != null) {
                     _cartBloc.add(CartCreateFinDoc(finDocUpdated));
                   } else {
                     HelperFunctions.showMessage(
@@ -774,69 +774,91 @@ Future addRentalItemDialog(BuildContext context, repos) async {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              DropdownSearch<Product>(
-                                key: const Key('product'),
-                                selectedItem: selectedProduct,
-                                popupProps: PopupProps.menu(
-                                  showSearchBox: true,
-                                  searchFieldProps: TextFieldProps(
-                                    autofocus: true,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                    ),
-                                    controller: productSearchBoxController,
-                                  ),
-                                  menuProps: MenuProps(
-                                      borderRadius: BorderRadius.circular(20)),
-                                  title: popUp(
-                                    context: context,
-                                    title: 'Select product',
-                                    height: 50,
-                                  ),
-                                ),
-                                dropdownSearchDecoration: InputDecoration(
-                                  labelText: 'Product',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20)),
-                                ),
-                                itemAsString: (Product? u) =>
-                                    "${u!.productName}",
-                                asyncItems: (String? filter) async {
-                                  ApiResult<List<Product>> result =
-                                      await repos.lookUpProduct(
-                                          searchString:
-                                              productSearchBoxController.text,
-                                          assetClassId:
-                                              classificationId == 'AppHotel'
-                                                  ? 'Hotel Room'
-                                                  : null,
-                                          productTypeId: 'Rental');
-                                  return result.when(
-                                      success: (data) => data,
-                                      failure: (_) => [
-                                            Product(
-                                                productName: 'get data error!')
-                                          ]);
-                                },
-                                onChanged: (Product? newValue) async {
-                                  selectedProduct = newValue;
-                                  priceController.text =
-                                      newValue!.price.toString();
-                                  itemDescriptionController.text =
-                                      "${newValue.productName}";
-                                  rentalDays = await getRentalOccupancy(
-                                      repos: repos,
-                                      productId: newValue.productId);
-                                  while (!whichDayOk(startDate)) {
-                                    startDate =
-                                        startDate.add(const Duration(days: 1));
-                                  }
-                                },
-                                validator: (value) =>
-                                    value == null ? 'Select product?' : null,
-                              ),
+                              BlocBuilder<FinDocBloc, FinDocState>(
+                                  builder: (context, state) {
+                                switch (state.status) {
+                                  case FinDocStatus.failure:
+                                    return const FatalErrorForm(
+                                        message: 'server connection problem');
+                                  case FinDocStatus.success:
+                                    return DropdownSearch<Product>(
+                                      key: const Key('product'),
+                                      selectedItem: selectedProduct,
+                                      popupProps: PopupProps.menu(
+                                        showSearchBox: true,
+                                        searchFieldProps: TextFieldProps(
+                                          autofocus: true,
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                          ),
+                                          controller:
+                                              productSearchBoxController,
+                                        ),
+                                        menuProps: MenuProps(
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        title: popUp(
+                                          context: context,
+                                          title: 'Select product',
+                                          height: 50,
+                                        ),
+                                      ),
+                                      dropdownSearchDecoration: InputDecoration(
+                                        labelText: 'Product',
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                      ),
+                                      itemAsString: (Product? u) =>
+                                          "${u!.productName}",
+                                      asyncItems: (String? filter) async {
+                                        ApiResult<List<Product>> result =
+                                            await repos.lookUpProduct(
+                                                searchString:
+                                                    productSearchBoxController
+                                                        .text,
+                                                assetClassId:
+                                                    classificationId ==
+                                                            'AppHotel'
+                                                        ? 'Hotel Room'
+                                                        : null,
+                                                productTypeId: 'Rental');
+                                        return result.when(
+                                            success: (data) => data,
+                                            failure: (_) => [
+                                                  Product(
+                                                      productName:
+                                                          'get data error!')
+                                                ]);
+                                      },
+                                      onChanged: (Product? newValue) async {
+                                        selectedProduct = newValue;
+                                        priceController.text =
+                                            newValue!.price.toString();
+                                        itemDescriptionController.text =
+                                            "${newValue.productName}";
+                                        context.read<FinDocBloc>().add(
+                                            FinDocGetRentalOccupancy(
+                                                newValue.productId));
+                                        //           rentalDays = await getRentalOccupancy(
+                                        //             repos: repos,
+                                        //           productId: newValue.productId);
+                                        while (!whichDayOk(startDate)) {
+                                          startDate = startDate
+                                              .add(const Duration(days: 1));
+                                        }
+                                      },
+                                      validator: (value) => value == null
+                                          ? 'Select product?'
+                                          : null,
+                                    );
+                                  default:
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                }
+                              }),
                               const SizedBox(height: 20),
                               TextFormField(
                                 key: const Key('itemDescription'),
@@ -923,14 +945,4 @@ Future addRentalItemDialog(BuildContext context, repos) async {
               ),
             ));
       });
-}
-
-Future<List<String>> getRentalOccupancy({repos, String? productId}) async {
-  if (productId != null) {
-    ApiResult<List<String>> result =
-        await repos.getRentalOccupancy(productId: productId);
-    return result.when(
-        success: (data) => data, failure: (_) => ['get data error!']);
-  }
-  return [];
 }

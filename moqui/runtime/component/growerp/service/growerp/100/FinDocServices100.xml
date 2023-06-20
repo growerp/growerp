@@ -1334,8 +1334,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     assetId: item.assetId,
                                     orderId: orderId,
                                     orderItemSeqId: orderItemSeqId,
-                                    rentalFromDate: item.rentalFromDate,
-                                    rentalThruDate: item.rentalThruDate,
+                                    rentalFromDate: item.rentalFromDate.substring(0,19),
+                                    rentalThruDate: item.rentalThruDate.substring(0,19),
                                 ]"/>
                 </else-if>
                 <else>

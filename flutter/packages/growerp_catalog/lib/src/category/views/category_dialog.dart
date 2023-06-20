@@ -13,7 +13,6 @@
  */
 
 import 'dart:io';
-import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';

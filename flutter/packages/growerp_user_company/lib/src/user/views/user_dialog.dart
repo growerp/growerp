@@ -21,8 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
+
 import '../../company/views/views.dart';
 
 class ShowUserDialog extends StatelessWidget {

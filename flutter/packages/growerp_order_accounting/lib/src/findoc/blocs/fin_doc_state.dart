@@ -26,6 +26,7 @@ class FinDocState extends Equatable {
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
+    this.occupancyDates = const [],
   });
 
   final FinDocStatus status;
@@ -35,6 +36,7 @@ class FinDocState extends Equatable {
   final List<User> users;
   final bool hasReachedMax;
   final String searchString;
+  final List<String> occupancyDates;
 
   FinDocState copyWith({
     FinDocStatus? status,
@@ -44,6 +46,7 @@ class FinDocState extends Equatable {
     List<User>? users,
     bool? hasReachedMax,
     String? searchString,
+    List<String>? occupancyDates,
   }) {
     return FinDocState(
       status: status ?? this.status,
@@ -53,6 +56,7 @@ class FinDocState extends Equatable {
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
+      occupancyDates: occupancyDates ?? this.occupancyDates,
     );
   }
 

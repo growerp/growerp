@@ -16,7 +16,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/src/models/category_model.dart' as cat;
 import 'services/api_result.dart';
 import 'services/dio_client.dart';
 import 'services/network_exceptions.dart';
@@ -148,34 +147,6 @@ class APIRepository {
     }
   }
 
-  Future<ApiResult<List<ItemType>>> getItemTypes({bool sales = true}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/ItemTypes', apiKey!,
-          queryParameters: <String, dynamic>{
-            'sales': sales,
-          });
-      return getResponseList<ItemType>(
-          "itemTypes", response, (json) => ItemType.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<ItemType>>> getPaymentTypes({bool sales = true}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/PaymentTypes', apiKey!,
-          queryParameters: <String, dynamic>{
-            'sales': sales,
-          });
-      return getResponseList<ItemType>(
-          "itemTypes", response, (json) => ItemType.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
   /// The demo store can only register as a customer.
   /// Any other store it depends on the person logging in.
   Future<ApiResult<Authenticate>> register({
@@ -265,17 +236,6 @@ class APIRepository {
     try {
       final response = await dioClient.post('growerp/logout', apiKey!);
       return ApiResult.success(data: response);
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<GlAccount>>> getGlAccount() async {
-    try {
-      final response =
-          await dioClient.get('rest/s1/growerp/100/Ledger', apiKey!);
-      return getResponseList<GlAccount>(
-          "glAccountList", response, (json) => GlAccount.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -481,7 +441,7 @@ class APIRepository {
   }
 
   // lookup entities for general use
-
+  @Deprecated("use [UserFetch] !")
   Future<ApiResult<List<User>>> lookUpUser(
       {Role? role, String? searchString}) async {
     try {
@@ -497,6 +457,7 @@ class APIRepository {
     }
   }
 
+  @Deprecated("use [CompanyFetch]")
   Future<ApiResult<List<Company>>> lookUpCompany(
       {bool mainCompanies = true, // just owner organizations or all?
       String? searchString}) async {
@@ -514,6 +475,7 @@ class APIRepository {
     }
   }
 
+  @Deprecated("use [ProductFetch] ")
   Future<ApiResult<List<Product>>> lookUpProduct(
       {String? companyPartyId,
       String? categoryId,
@@ -532,38 +494,6 @@ class APIRepository {
           });
       return getResponseList<Product>(
           "products", response, (json) => Product.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<Asset>>> lookUpAsset(
-      {String? assetClassId, String? searchString}) async {
-    try {
-      final response = await dioClient.get('rest/s1/growerp/100/Asset', apiKey!,
-          queryParameters: <String, dynamic>{
-            'assetClassId': assetClassId,
-            'filer': searchString
-          });
-      return getResponseList<Asset>(
-          "assets", response, (json) => Asset.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
-  Future<ApiResult<List<cat.Category>>> lookUpCategory(
-      {String? companyPartyId, String? searchString}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/Categories', apiKey,
-          queryParameters: <String, dynamic>{
-            'companyPartyId': companyPartyId,
-            'filer': searchString,
-            'classificationId': classificationId,
-          });
-      return getResponseList<cat.Category>(
-          "categories", response, (json) => cat.Category.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

@@ -18,7 +18,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
-import '../../api_repository.dart';
+import '../../marketing_api_repository.dart';
 import '../models/opportunity_model.dart';
 
 part 'opportunity_event.dart';

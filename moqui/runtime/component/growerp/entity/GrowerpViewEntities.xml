@@ -848,7 +848,7 @@ along with this software (see the LICENSE.md file). If not, see
 
 
 
-    <!-- depreciated!!!! -->
+    <!-- deprecated!!!! -->
     <view-entity entity-name="CompanyPersonAndLogin" package="growerp.mobile">
         <description>get all people related to a certain companyId = PR => toPartyId</description>
         <member-entity entity-alias="PR" entity-name="mantle.party.PartyRelationship">

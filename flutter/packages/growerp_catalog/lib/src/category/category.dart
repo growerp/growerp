@@ -1,4 +1,3 @@
-export 'blocs/category_bloc.dart';
 export 'views/category_dialog.dart';
 export 'views/category_list_form.dart';
 export 'views/category_files_dialog.dart';

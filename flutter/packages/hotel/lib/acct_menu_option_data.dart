@@ -150,6 +150,44 @@ List<MenuOption> acctMenuOptions = [
         UserGroup.admin
       ]),
   MenuOption(
+    image: 'packages/growerp_core/images/orderGrey.png',
+    selectedImage: 'packages/growerp_core/images/order.png',
+    title: 'Orders\n',
+    route: '/orders',
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
+    tabItems: [
+      TabItem(
+        form: const FinDocListForm(
+            key: Key('SalesOrder'), sales: true, docType: FinDocType.order),
+        label: 'Sales orders',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Customer'),
+          role: Role.customer,
+        ),
+        label: 'Customers',
+        icon: const Icon(Icons.business),
+      ),
+      TabItem(
+        form: const FinDocListForm(
+            key: Key('PurchaseOrder'), sales: false, docType: FinDocType.order),
+        label: 'Purchase orders',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Supplier'),
+          role: Role.supplier,
+        ),
+        label: 'Suppliers',
+        icon: const Icon(Icons.business),
+      ),
+    ],
+  ),
+  MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main dashboard",

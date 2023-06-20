@@ -15,7 +15,7 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../api_repository.dart';
+import '../../marketing_api_repository.dart';
 import '../bloc/opportunity_bloc.dart';
 import '../models/opportunity_model.dart';
 import '../widgets/widgets.dart';

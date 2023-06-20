@@ -45,7 +45,7 @@ class CartBloc extends Bloc<CartEvent, CartState>
     on<CartClear>(_onCartClear);
   }
 
-  final APIRepository repos;
+  final FinDocAPIRepository repos;
   final bool sales;
   final FinDocType docType;
   final FinDocBloc finDocBloc;

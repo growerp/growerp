@@ -149,6 +149,32 @@ List<MenuOption> menuOptions = [
         ),
       ]),
   MenuOption(
+    image: 'packages/growerp_core/images/companyGrey.png',
+    selectedImage: 'packages/growerp_core/images/company.png',
+    title: 'Companies',
+    route: '/companies',
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin],
+    tabItems: [
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Customer'),
+          role: Role.customer,
+        ),
+        label: '\nCustomers',
+        icon: const Icon(Icons.home),
+      ),
+      TabItem(
+        form: const CompanyListForm(
+          key: Key('Lead'),
+          role: Role.lead,
+        ),
+        label: 'Leads',
+        icon: const Icon(Icons.home),
+      ),
+    ],
+  ),
+  MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",
       title: "Accounting",

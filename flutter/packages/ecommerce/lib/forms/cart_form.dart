@@ -125,15 +125,17 @@ class _CartTotal extends StatelessWidget {
                                   _finDocBloc.add(FinDocFetch(
                                       customerCompanyPartyId:
                                           result.user!.companyPartyId!));
-                                  _cartBloc.add(CartCreateFinDoc(
-                                      order.copyWith(otherUser: result.user)));
+                                  _cartBloc.add(CartCreateFinDoc(order.copyWith(
+                                      otherUser: result.user,
+                                      otherCompany: result.user.company)));
                                 }
                               } else if (state.status ==
                                   AuthStatus.authenticated) {
                                 HelperFunctions.showMessage(
                                     context, 'Sending order...', Colors.green);
                                 _cartBloc.add(CartCreateFinDoc(order.copyWith(
-                                    otherUser: state.authenticate!.user)));
+                                    otherUser: state.authenticate!.user,
+                                    otherCompany: result.user.company)));
                               }
                             }),
                 ]);

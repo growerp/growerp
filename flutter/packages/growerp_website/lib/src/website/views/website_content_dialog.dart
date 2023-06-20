@@ -7,9 +7,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
-import '../../api_repository.dart';
-import '../blocs/blocs.dart';
-import '../models/models.dart';
+import '../../../growerp_website.dart';
 
 class WebsiteContentDialog extends StatelessWidget {
   final String websiteId;

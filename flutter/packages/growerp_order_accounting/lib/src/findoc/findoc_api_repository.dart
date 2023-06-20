@@ -129,4 +129,43 @@ class FinDocAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
+
+  Future<ApiResult<List<ItemType>>> getItemTypes({bool sales = true}) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/ItemTypes', apiKey!,
+          queryParameters: <String, dynamic>{
+            'sales': sales,
+          });
+      return getResponseList<ItemType>(
+          "itemTypes", response, (json) => ItemType.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<ItemType>>> getPaymentTypes({bool sales = true}) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/PaymentTypes', apiKey!,
+          queryParameters: <String, dynamic>{
+            'sales': sales,
+          });
+      return getResponseList<ItemType>(
+          "itemTypes", response, (json) => ItemType.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<GlAccount>>> getGlAccount() async {
+    try {
+      final response =
+          await dioClient.get('rest/s1/growerp/100/Ledger', apiKey!);
+      return getResponseList<GlAccount>(
+          "glAccountList", response, (json) => GlAccount.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
 }
