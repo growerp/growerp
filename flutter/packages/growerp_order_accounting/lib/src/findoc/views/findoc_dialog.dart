@@ -85,6 +85,7 @@ class MyFinDocState extends State<FinDocPage> {
   late CartBloc _cartBloc;
   late UserBloc _userBloc;
   late ProductBloc _productBloc;
+  late FinDocBloc _finDocBloc;
   late String classificationId;
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
@@ -100,6 +101,7 @@ class MyFinDocState extends State<FinDocPage> {
     _selectedUser = finDocUpdated.otherUser;
     _selectedCompany =
         finDocUpdated.otherCompany ?? finDocUpdated.otherUser?.company;
+    _finDocBloc = context.read<FinDocBloc>();
     _userBloc = context.read<UserBloc>();
     _userBloc.add(const UserFetch());
     _productBloc = context.read<ProductBloc>();
@@ -295,7 +297,8 @@ class MyFinDocState extends State<FinDocPage> {
               key: const Key('itemRental'),
               child: const Text('Asset Rental'),
               onPressed: () async {
-                final dynamic finDocItem = await addRentalItemDialog(context);
+                final dynamic finDocItem = await addRentalItemDialog(
+                    context, _productBloc, _finDocBloc);
                 if (finDocItem != null) {
                   _cartBloc.add(CartAdd(
                       finDoc: finDocUpdated.copyWith(
@@ -761,7 +764,8 @@ Future addProductItemDialog(BuildContext context, String classificationId,
 }
 
 /// [addRentalItemDialog] add a rental order item [FinDocItem]
-Future addRentalItemDialog(BuildContext context) async {
+Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
+    FinDocBloc finDocBloc) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -783,228 +787,267 @@ Future addRentalItemDialog(BuildContext context) async {
         }
 
         var addRentalFormKey = GlobalKey<FormState>();
-        return Dialog(
-            key: const Key('addRentalItemDialog'),
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20))),
-            child: popUp(
-              context: context,
-              height: 600,
-              title: 'Add a Reservation',
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  Future<void> selectDate(BuildContext context) async {
-                    final DateTime? picked = await showDatePicker(
+        return BlocProvider.value(
+            value: finDocBloc,
+            child: BlocProvider.value(
+                value: productBloc,
+                child: Dialog(
+                    key: const Key('addRentalItemDialog'),
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: popUp(
                       context: context,
-                      initialDate: startDate,
-                      firstDate: CustomizableDateTime.current,
-                      lastDate: DateTime(CustomizableDateTime.current.year + 1),
-                      selectableDayPredicate: whichDayOk,
-                      builder: (BuildContext context, Widget? child) {
-                        return FittedBox(
-                          child: Theme(
-                            data: ThemeData(
-                              primaryColor: Theme.of(context).primaryColor,
-                            ),
-                            child: child!,
-                          ),
-                        );
-                      },
-                    );
-                    if (picked != null && picked != startDate) {
-                      setState(() {
-                        startDate = picked;
-                      });
-                    }
-                  }
+                      height: 600,
+                      title: 'Add a Reservation',
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          Future<void> selectDate(BuildContext context) async {
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: startDate,
+                              firstDate: CustomizableDateTime.current,
+                              lastDate: DateTime(
+                                  CustomizableDateTime.current.year + 1),
+                              selectableDayPredicate: whichDayOk,
+                              builder: (BuildContext context, Widget? child) {
+                                return FittedBox(
+                                  child: Theme(
+                                    data: ThemeData(
+                                      primaryColor:
+                                          Theme.of(context).primaryColor,
+                                    ),
+                                    child: child!,
+                                  ),
+                                );
+                              },
+                            );
+                            if (picked != null && picked != startDate) {
+                              setState(() {
+                                startDate = picked;
+                              });
+                            }
+                          }
 
-                  return Form(
-                      key: addRentalFormKey,
-                      child: SingleChildScrollView(
-                          key: const Key('listView4'),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              BlocBuilder<ProductBloc, ProductState>(
-                                  builder: (context, productState) {
-                                switch (productState.status) {
-                                  case ProductStatus.failure:
-                                    return const FatalErrorForm(
-                                        message: 'server connection problem');
-                                  case ProductStatus.success:
-                                    return BlocBuilder<FinDocBloc, FinDocState>(
-                                        builder: (context, state) {
-                                      switch (state.status) {
-                                        case FinDocStatus.failure:
-                                          return const FatalErrorForm(
-                                              message:
-                                                  'server connection problem');
-                                        case FinDocStatus.success:
-                                          return DropdownSearch<Product>(
-                                            key: const Key('product'),
-                                            selectedItem: selectedProduct,
-                                            popupProps: PopupProps.menu(
-                                              showSearchBox: true,
-                                              searchFieldProps: TextFieldProps(
-                                                autofocus: true,
-                                                decoration: InputDecoration(
-                                                  border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                ),
-                                                controller:
-                                                    productSearchBoxController,
-                                              ),
-                                              menuProps: MenuProps(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20)),
-                                              title: popUp(
-                                                context: context,
-                                                title: 'Select product',
-                                                height: 50,
-                                              ),
-                                            ),
-                                            dropdownSearchDecoration:
-                                                InputDecoration(
-                                              labelText: 'Product',
-                                              border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20)),
-                                            ),
-                                            itemAsString: (Product? u) =>
-                                                "${u!.productName}",
-                                            items: productState.products,
-                                            filterFn: (user, filter) {
-                                              context.read<ProductBloc>().add(
-                                                  ProductFetch(
-                                                      searchString: filter,
-                                                      assetClassId:
-                                                          classificationId ==
-                                                                  'AppHotel'
-                                                              ? 'Hotel Room'
-                                                              : ''));
-                                              return true;
-                                            },
-                                            onChanged:
-                                                (Product? newValue) async {
-                                              selectedProduct = newValue;
-                                              priceController.text =
-                                                  newValue!.price.toString();
-                                              itemDescriptionController.text =
-                                                  "${newValue.productName}";
-                                              context.read<FinDocBloc>().add(
-                                                  FinDocGetRentalOccupancy(
-                                                      newValue.productId));
-                                              //           rentalDays = await getRentalOccupancy(
-                                              //             repos: repos,
-                                              //           productId: newValue.productId);
-                                              while (!whichDayOk(startDate)) {
-                                                startDate = startDate.add(
-                                                    const Duration(days: 1));
+                          return Form(
+                              key: addRentalFormKey,
+                              child: SingleChildScrollView(
+                                  key: const Key('listView4'),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      BlocBuilder<ProductBloc, ProductState>(
+                                          builder: (context, productState) {
+                                        switch (productState.status) {
+                                          case ProductStatus.failure:
+                                            return const FatalErrorForm(
+                                                message:
+                                                    'server connection problem');
+                                          case ProductStatus.success:
+                                            return BlocBuilder<FinDocBloc,
+                                                    FinDocState>(
+                                                builder: (context, state) {
+                                              switch (state.status) {
+                                                case FinDocStatus.failure:
+                                                  return const FatalErrorForm(
+                                                      message:
+                                                          'server connection problem');
+                                                case FinDocStatus.success:
+                                                  return DropdownSearch<
+                                                      Product>(
+                                                    key: const Key('product'),
+                                                    selectedItem:
+                                                        selectedProduct,
+                                                    popupProps: PopupProps.menu(
+                                                      showSearchBox: true,
+                                                      searchFieldProps:
+                                                          TextFieldProps(
+                                                        autofocus: true,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20)),
+                                                        ),
+                                                        controller:
+                                                            productSearchBoxController,
+                                                      ),
+                                                      menuProps: MenuProps(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      20)),
+                                                      title: popUp(
+                                                        context: context,
+                                                        title: 'Select product',
+                                                        height: 50,
+                                                      ),
+                                                    ),
+                                                    dropdownSearchDecoration:
+                                                        InputDecoration(
+                                                      labelText: 'Product',
+                                                      border:
+                                                          OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20)),
+                                                    ),
+                                                    itemAsString:
+                                                        (Product? u) =>
+                                                            "${u!.productName}",
+                                                    items:
+                                                        productState.products,
+                                                    filterFn: (user, filter) {
+                                                      context
+                                                          .read<ProductBloc>()
+                                                          .add(ProductFetch(
+                                                              searchString:
+                                                                  filter,
+                                                              assetClassId:
+                                                                  classificationId ==
+                                                                          'AppHotel'
+                                                                      ? 'Hotel Room'
+                                                                      : ''));
+                                                      return true;
+                                                    },
+                                                    onChanged: (Product?
+                                                        newValue) async {
+                                                      selectedProduct =
+                                                          newValue;
+                                                      priceController.text =
+                                                          newValue!.price
+                                                              .toString();
+                                                      itemDescriptionController
+                                                              .text =
+                                                          "${newValue.productName}";
+                                                      context.read<FinDocBloc>().add(
+                                                          FinDocGetRentalOccupancy(
+                                                              newValue
+                                                                  .productId));
+                                                      //           rentalDays = await getRentalOccupancy(
+                                                      //             repos: repos,
+                                                      //           productId: newValue.productId);
+                                                      while (!whichDayOk(
+                                                          startDate)) {
+                                                        startDate = startDate
+                                                            .add(const Duration(
+                                                                days: 1));
+                                                      }
+                                                    },
+                                                    validator: (value) =>
+                                                        value == null
+                                                            ? 'Select product?'
+                                                            : null,
+                                                  );
+                                                default:
+                                                  return const Center(
+                                                      child:
+                                                          CircularProgressIndicator());
                                               }
-                                            },
-                                            validator: (value) => value == null
-                                                ? 'Select product?'
-                                                : null,
-                                          );
-                                        default:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                      }
-                                    });
-                                  default:
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                }
-                              }),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                key: const Key('itemDescription'),
-                                decoration: const InputDecoration(
-                                    labelText: 'Item Description'),
-                                controller: itemDescriptionController,
-                                validator: (value) =>
-                                    value!.isEmpty ? 'Item description?' : null,
-                              ),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                key: const Key('price'),
-                                decoration: const InputDecoration(
-                                    labelText: 'Price/Amount'),
-                                controller: priceController,
-                                validator: (value) =>
-                                    value!.isEmpty ? 'Enter Price?' : null,
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      "${startDate.toLocal()}".split(' ')[0],
-                                      key: const Key('date'),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  ElevatedButton(
-                                    key: const Key('setDate'),
-                                    child: const Text(
-                                      'Select date',
-                                    ),
-                                    onPressed: () => selectDate(context),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                key: const Key('quantity'),
-                                decoration: const InputDecoration(
-                                    labelText: 'Nbr. of days'),
-                                controller: quantityController,
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      key: const Key('okRental'),
-                                      child: const Text('Add reservation'),
-                                      onPressed: () {
-                                        if (addRentalFormKey.currentState!
-                                            .validate()) {
-                                          Navigator.of(context).pop(FinDocItem(
-                                            itemType: ItemType(
-                                                itemTypeId: 'ItemRental'),
-                                            productId:
-                                                selectedProduct!.productId,
-                                            price: Decimal.parse(
-                                                priceController.text),
-                                            description:
-                                                itemDescriptionController.text,
-                                            rentalFromDate: startDate,
-                                            rentalThruDate: startDate.add(
-                                                Duration(
-                                                    days: int.parse(
-                                                        quantityController
-                                                                .text.isEmpty
-                                                            ? '1'
-                                                            : quantityController
-                                                                .text))),
-                                            quantity: Decimal.parse('1'),
-                                          ));
+                                            });
+                                          default:
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
                                         }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )));
-                },
-              ),
-            ));
+                                      }),
+                                      const SizedBox(height: 20),
+                                      TextFormField(
+                                        key: const Key('itemDescription'),
+                                        decoration: const InputDecoration(
+                                            labelText: 'Item Description'),
+                                        controller: itemDescriptionController,
+                                        validator: (value) => value!.isEmpty
+                                            ? 'Item description?'
+                                            : null,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      TextFormField(
+                                        key: const Key('price'),
+                                        decoration: const InputDecoration(
+                                            labelText: 'Price/Amount'),
+                                        controller: priceController,
+                                        validator: (value) => value!.isEmpty
+                                            ? 'Enter Price?'
+                                            : null,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              "${startDate.toLocal()}"
+                                                  .split(' ')[0],
+                                              key: const Key('date'),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          ElevatedButton(
+                                            key: const Key('setDate'),
+                                            child: const Text(
+                                              'Select date',
+                                            ),
+                                            onPressed: () =>
+                                                selectDate(context),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 20),
+                                      TextFormField(
+                                        key: const Key('quantity'),
+                                        decoration: const InputDecoration(
+                                            labelText: 'Nbr. of days'),
+                                        controller: quantityController,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              key: const Key('okRental'),
+                                              child:
+                                                  const Text('Add reservation'),
+                                              onPressed: () {
+                                                if (addRentalFormKey
+                                                    .currentState!
+                                                    .validate()) {
+                                                  Navigator.of(context)
+                                                      .pop(FinDocItem(
+                                                    itemType: ItemType(
+                                                        itemTypeId:
+                                                            'ItemRental'),
+                                                    productId: selectedProduct!
+                                                        .productId,
+                                                    price: Decimal.parse(
+                                                        priceController.text),
+                                                    description:
+                                                        itemDescriptionController
+                                                            .text,
+                                                    rentalFromDate: startDate,
+                                                    rentalThruDate:
+                                                        startDate.add(Duration(
+                                                            days: int.parse(
+                                                                quantityController
+                                                                        .text
+                                                                        .isEmpty
+                                                                    ? '1'
+                                                                    : quantityController
+                                                                        .text))),
+                                                    quantity:
+                                                        Decimal.parse('1'),
+                                                  ));
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )));
+                        },
+                      ),
+                    ))));
       });
 }

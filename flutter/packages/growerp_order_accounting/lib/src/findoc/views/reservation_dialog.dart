@@ -246,9 +246,6 @@ class ReservationDialogState extends State<ReservationForm> {
                                     autofocus: true,
                                     controller: _productSearchBoxController,
                                   ),
-                                  menuProps: MenuProps(
-                                      borderRadius:
-                                          BorderRadius.circular(20.0)),
                                   title: popUp(
                                     context: context,
                                     title:
