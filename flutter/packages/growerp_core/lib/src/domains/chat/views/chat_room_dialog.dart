@@ -119,12 +119,12 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                   ),
                 ),
                 selectedItem: _selectedUser,
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Private chat with Other User',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0)),
-                ),
-                showClearButton: false,
+                //             dropdownSearchDecoration: InputDecoration(
+                //             labelText: 'Private chat with Other User',
+                //           border: OutlineInputBorder(
+                //             borderRadius: BorderRadius.circular(25.0)),
+                //     ),
+                //   showClearButton: false,
                 itemAsString: (User? u) => "${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
                   ApiResult<List<User>> result = await repos.lookUpUser(

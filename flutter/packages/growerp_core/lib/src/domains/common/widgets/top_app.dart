@@ -63,6 +63,14 @@ class TopApp extends StatelessWidget {
                 BlocProvider<AuthBloc>(
                     create: (context) => AuthBloc(APIRepository(), ChatServer())
                       ..add(AuthLoad())),
+                BlocProvider<ChatRoomBloc>(
+                  create: (context) => ChatRoomBloc(
+                      APIRepository(), ChatServer(), context.read<AuthBloc>())
+                    ..add(ChatRoomFetch()),
+                ),
+                BlocProvider<ChatMessageBloc>(
+                    create: (context) => ChatMessageBloc(APIRepository(),
+                        ChatServer(), context.read<AuthBloc>())),
               ],
               child: Builder(builder: (context) {
                 return MultiBlocProvider(
@@ -78,9 +86,9 @@ class TopApp extends StatelessWidget {
                         builder: (context, state) {
                       localizationsDelegates.addAll(extraDelegates);
                       return GestureDetector(
-                          // close keyboard
                           onTap: () {
-                            final currentFocus = FocusScope.of(context);
+                            FocusScopeNode currentFocus =
+                                FocusScope.of(context);
 
                             if (!currentFocus.hasPrimaryFocus) {
                               currentFocus.unfocus();

@@ -383,7 +383,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                           productName: _nameController.text,
                           assetClassId: classificationId == 'AppHotel'
                               ? 'Hotel Room'
-                              : null,
+                              : 'AsClsInventoryFin', // finished good
                           description: _descriptionController.text,
                           listPrice: Decimal.parse(_listPriceController.text),
                           price: Decimal.parse(_priceController.text.isEmpty

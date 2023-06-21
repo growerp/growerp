@@ -157,11 +157,11 @@ class AddressDialogState extends State<AddressDialog> {
                       height: 50,
                     ),
                   ),
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'Country',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0)),
-                  ),
+                  //               dropdownSearchDecoration: InputDecoration(
+                  //               labelText: 'Country',
+                  //             border: OutlineInputBorder(
+                  //               borderRadius: BorderRadius.circular(25.0)),
+                  //       ),
                   itemAsString: (Country? u) => u!.name,
                   items: countries,
                   validator: (value) {

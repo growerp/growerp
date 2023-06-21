@@ -172,13 +172,13 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                           height: 50,
                                         ),
                                       ),
-                                      dropdownSearchDecoration: InputDecoration(
-                                        labelText: 'Location',
-                                        border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25.0)),
-                                      ),
-                                      showClearButton: false,
+                                      //                                     dropdownSearchDecoration: InputDecoration(
+                                      //                                     labelText: 'Location',
+                                      //                                   border: OutlineInputBorder(
+                                      //                                     borderRadius:
+                                      //                                       BorderRadius.circular(25.0)),
+                                      //                           ),
+                                      //                         showClearButton: false,
                                       itemAsString: (Location? u) =>
                                           "${u?.locationName}",
 /*                                      asyncItems: (String? filter) async {

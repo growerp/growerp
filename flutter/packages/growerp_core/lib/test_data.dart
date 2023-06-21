@@ -464,6 +464,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('23.99'),
     listPrice: Decimal.parse('27.99'),
+    assetClassId: 'AsClsInventoryFin',
     categories: [categories[0]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of first product',
@@ -474,6 +475,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('73.99'),
     listPrice: Decimal.parse('73.99'),
+    assetClassId: 'AsClsInventoryFin',
     categories: [categories[0], categories[1]],
     productTypeId: productTypes[0], // must be zero: shippable good
     description: 'This is a dummy description of second product',
@@ -484,6 +486,7 @@ List<Product> products = [
     //  image: Uint8List.fromList('R0lGODlhAQABAAAAACwAAAAAAQABAAA='.codeUnits),
     price: Decimal.parse('93.99'),
     listPrice: Decimal.parse('99.99'),
+    assetClassId: 'AsClsInventoryFin',
     categories: [categories[0]], // only category 0 or rental test fails
     productTypeId: productTypes[2],
     description: 'This is a dummy description of third product',

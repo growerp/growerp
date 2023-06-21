@@ -199,16 +199,15 @@ class ReservationDialogState extends State<ReservationForm> {
                               height: 50,
                             ),
                           ),
-                          dropdownSearchDecoration: const InputDecoration(
-                            labelText: 'Customer',
-                          ),
+                          dropdownDecoratorProps: const DropDownDecoratorProps(
+                              dropdownSearchDecoration:
+                                  InputDecoration(labelText: 'Customer')),
                           key: const Key('customer'),
                           itemAsString: (User? u) =>
                               "${u!.firstName} ${u.lastName}, ${u.company!.name}",
-                          items: state.users,
-                          filterFn: (user, filter) {
+                          asyncItems: (String filter) {
                             _userBloc.add(UserFetch(searchString: filter));
-                            return true;
+                            return Future.value(state.users);
                           },
                           onChanged: (User? newValue) {
                             setState(() {
@@ -244,6 +243,8 @@ class ReservationDialogState extends State<ReservationForm> {
                                   showSearchBox: true,
                                   searchFieldProps: TextFieldProps(
                                     autofocus: true,
+                                    decoration: const InputDecoration(
+                                        labelText: "customer,name"),
                                     controller: _productSearchBoxController,
                                   ),
                                   title: popUp(
@@ -253,23 +254,25 @@ class ReservationDialogState extends State<ReservationForm> {
                                     height: 50,
                                   ),
                                 ),
-                                dropdownSearchDecoration: InputDecoration(
+                                dropdownDecoratorProps: DropDownDecoratorProps(
+                                    dropdownSearchDecoration: InputDecoration(
                                   labelText: classificationId == 'AppHotel'
                                       ? 'Room Type'
                                       : 'Product',
-                                ),
+                                )),
                                 key: const Key('product'),
                                 itemAsString: (Product? u) =>
                                     "${u!.productName}",
-                                items: productState.products,
-                                filterFn: (user, filter) {
+                                asyncItems: (String filter) {
                                   _productBloc.add(ProductFetch(
                                       searchString: filter,
                                       assetClassId:
                                           classificationId == 'AppHotel'
                                               ? 'Hotel Room'
                                               : ''));
-                                  return true;
+                                  return Future.value(
+                                    productState.products,
+                                  );
                                 },
                                 onChanged: (Product? newValue) async {
                                   _selectedProduct = newValue;

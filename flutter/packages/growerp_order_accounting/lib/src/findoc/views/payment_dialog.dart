@@ -21,15 +21,41 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../findoc.dart';
 
-class PaymentDialog extends StatefulWidget {
+class PaymentDialog extends StatelessWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
   const PaymentDialog({required this.finDoc, this.paymentMethod, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (finDoc.sales) {
+      return BlocProvider<UserBloc>(
+          create: (context) => UserBloc(
+              CompanyUserAPIRepository(
+                  context.read<AuthBloc>().state.authenticate!.apiKey!),
+              Role.customer),
+          child:
+              PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
+    }
+    return BlocProvider<UserBloc>(
+        create: (context) => UserBloc(
+            CompanyUserAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!),
+            Role.supplier),
+        child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
+  }
+}
+
+class PaymentDialogFull extends StatefulWidget {
+  final FinDoc finDoc;
+  final PaymentMethod? paymentMethod;
+  const PaymentDialogFull(
+      {required this.finDoc, this.paymentMethod, super.key});
   @override
   PaymentDialogState createState() => PaymentDialogState();
 }
 
-class PaymentDialogState extends State<PaymentDialog> {
+class PaymentDialogState extends State<PaymentDialogFull> {
   final GlobalKey<FormState> paymentDialogFormKey = GlobalKey<FormState>();
   late FinDoc finDoc; // incoming finDoc
   late FinDoc finDocUpdated;
@@ -150,17 +176,17 @@ class PaymentDialogState extends State<PaymentDialog> {
                           height: 50,
                         ),
                       ),
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText:
-                            finDocUpdated.sales ? 'Customer' : 'Supplier',
-                      ),
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                          dropdownSearchDecoration: InputDecoration(
+                              labelText: finDocUpdated.sales
+                                  ? 'Customer'
+                                  : 'Supplier')),
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                       itemAsString: (User? u) =>
                           "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
-                      items: state.users,
-                      filterFn: (user, filter) {
+                      asyncItems: (String filter) {
                         _userBloc.add(UserFetch(searchString: filter));
-                        return true;
+                        return Future.value(state.users);
                       },
                       onChanged: (User? newValue) {
                         setState(() {
@@ -176,7 +202,6 @@ class PaymentDialogState extends State<PaymentDialog> {
                     return const Center(child: CircularProgressIndicator());
                 }
               }),
-              const SizedBox(height: 20),
               TextFormField(
                   key: const Key('amount'),
                   decoration: const InputDecoration(labelText: 'Amount'),

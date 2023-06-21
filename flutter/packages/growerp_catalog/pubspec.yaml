@@ -41,7 +41,7 @@ dependencies:
   stream_transform: ^2.1.0
   decimal: ^2.1.0
   fast_csv: ^0.1.44
-  dropdown_search: ^4.0.1
+  dropdown_search: ^5.0.6
   growerp_core: ^1.0.0
 dependency_overrides: 
   intl: ^0.18.0

@@ -220,16 +220,15 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                     height: 50,
                   ),
                 ),
-                dropdownSearchDecoration:
-                    const InputDecoration(labelText: 'Lead'),
-                showClearButton: true,
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownSearchDecoration:
+                        InputDecoration(labelText: 'Lead')),
                 key: const Key('lead'),
                 itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
                     "${u?.company!.name}",
-                items: state.users,
-                filterFn: (user, filter) {
+                asyncItems: (String filter) {
                   _leadBloc.add(UserFetch(searchString: filter));
-                  return true;
+                  return Future.value(state.users);
                 },
                 onChanged: (User? newValue) {
                   _selectedLead = newValue;
@@ -258,24 +257,21 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                       ),
                       controller: _accountSearchBoxController,
                     ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
                       title: 'Select employee',
                       height: 50,
                     ),
                   ),
-                  dropdownSearchDecoration:
-                      const InputDecoration(labelText: 'Account Employee'),
-                  showClearButton: true,
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration:
+                          InputDecoration(labelText: 'Account Employee')),
                   key: const Key('employee'),
                   itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
                       "${u?.company!.name}",
-                  items: state.users,
-                  filterFn: (user, filter) {
+                  asyncItems: (String filter) {
                     _employeeBloc.add(UserFetch(searchString: filter));
-                    return true;
+                    return Future.value(state.users);
                   },
                   onChanged: (User? newValue) {
                     _selectedAccount = newValue;

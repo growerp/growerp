@@ -119,7 +119,6 @@ class AssetDialogState extends State<AssetDialogFull> {
                               ? "New"
                               : widget.asset.assetId),
                       key: const Key('header'))),
-              const SizedBox(height: 30),
               TextFormField(
                 key: const Key('name'),
                 decoration: InputDecoration(
@@ -132,7 +131,6 @@ class AssetDialogState extends State<AssetDialogFull> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
               Visibility(
                   visible: classificationId != 'AppHotel',
                   child: const SizedBox(height: 20)),
@@ -154,7 +152,6 @@ class AssetDialogState extends State<AssetDialogFull> {
                       return null;
                     },
                   )),
-              const SizedBox(height: 20),
               BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
                 switch (state.status) {
                   case ProductStatus.failure:
@@ -172,38 +169,36 @@ class AssetDialogState extends State<AssetDialogFull> {
                               labelText: "product id,name"),
                           controller: _productSearchBoxController,
                         ),
-                        menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0)),
                         title: popUp(
                           context: context,
                           title: 'Select product',
                           height: 50,
                         ),
                       ),
-                      dropdownSearchDecoration: InputDecoration(
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
                           labelText: classificationId == 'AppHotel'
                               ? 'Room Type'
-                              : 'Product'),
-                      showClearButton: false,
+                              : 'Product',
+                          hintText: "country in menu mode",
+                        ),
+                      ),
                       itemAsString: (Product? u) => "${u!.productName}",
                       onChanged: (Product? newValue) {
                         _selectedProduct = newValue;
                       },
-                      items: state.products,
-                      filterFn: (user, filter) {
+                      asyncItems: (String filter) {
                         _productBloc.add(ProductFetch(searchString: filter));
-                        return true;
+                        return Future.value(state.products);
                       },
                     );
                   default:
                     return const Center(child: CircularProgressIndicator());
                 }
               }),
-              const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 key: const Key('statusDropDown'),
                 decoration: const InputDecoration(labelText: 'Status'),
-                hint: const Text('Status'),
                 value: _statusId,
                 validator: (value) => value == null ? 'field required' : null,
                 items: assetStatusValues

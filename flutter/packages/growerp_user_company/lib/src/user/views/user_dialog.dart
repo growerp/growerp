@@ -349,11 +349,11 @@ class UserDialogState extends State<UserDialog> {
                           width: 450,
                         ),
                       ),
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Select a Company name',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0)),
-                      ),
+                      //                 dropdownSearchDecoration: InputDecoration(
+                      //                 labelText: 'Select a Company name',
+                      //               border: OutlineInputBorder(
+                      //                 borderRadius: BorderRadius.circular(25.0)),
+                      //         ),
                       itemAsString: (Company? u) => "${u!.name}",
                       asyncItems: (String? filter) =>
                           getOwnedCompanies(_companySearchBoxController.text),

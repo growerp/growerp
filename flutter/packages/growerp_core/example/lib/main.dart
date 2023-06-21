@@ -29,16 +29,6 @@ Future main() async {
     title: 'GrowERP package: growerp_core.',
     router: generateRoute,
     menuOptions: menuOptions,
-    blocProviders: [
-      BlocProvider<ChatRoomBloc>(
-        create: (context) => ChatRoomBloc(
-            APIRepository(), ChatServer(), context.read<AuthBloc>())
-          ..add(ChatRoomFetch()),
-      ),
-      BlocProvider<ChatMessageBloc>(
-          create: (context) => ChatMessageBloc(
-              APIRepository(), ChatServer(), context.read<AuthBloc>())),
-    ],
   ));
 }
 

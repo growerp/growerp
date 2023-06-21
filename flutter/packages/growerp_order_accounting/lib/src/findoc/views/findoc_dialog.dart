@@ -206,8 +206,6 @@ class MyFinDocState extends State<FinDocPage> {
                     autofocus: true,
                     controller: _userSearchBoxController,
                   ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
                   title: popUp(
                     context: context,
                     title:
@@ -215,16 +213,17 @@ class MyFinDocState extends State<FinDocPage> {
                     height: 50,
                   ),
                 ),
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
+                  ),
                 ),
                 key: Key(finDocUpdated.sales == true ? 'customer' : 'supplier'),
                 itemAsString: (User? u) =>
                     "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
-                items: state.users,
-                filterFn: (user, filter) {
+                asyncItems: (String filter) {
                   _userBloc.add(UserFetch(searchString: filter));
-                  return true;
+                  return Future.value(state.users);
                 },
                 onChanged: (User? newValue) {
                   setState(() {
@@ -626,45 +625,37 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                             showSearchBox: true,
                                             searchFieldProps: TextFieldProps(
                                               autofocus: true,
-                                              decoration: InputDecoration(
-                                                border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20)),
+                                              decoration: const InputDecoration(
+                                                labelText: 'Product',
                                               ),
                                               controller:
                                                   productSearchBoxController,
                                             ),
-                                            menuProps: MenuProps(
-                                                borderRadius:
-                                                    BorderRadius.circular(20)),
                                             title: popUp(
                                               context: context,
                                               title: 'Select product',
                                               height: 50,
                                             ),
                                           ),
-                                          dropdownSearchDecoration:
-                                              InputDecoration(
-                                            labelText: 'Product',
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20)),
-                                          ),
+                                          dropdownDecoratorProps:
+                                              const DropDownDecoratorProps(
+                                                  dropdownSearchDecoration:
+                                                      InputDecoration(
+                                                          labelText:
+                                                              'Product')),
                                           key: const Key('product'),
                                           itemAsString: (Product? u) =>
                                               "${u!.pseudoId}\n${u.productName}",
-                                          items: productState.products,
-                                          filterFn: (user, filter) {
-                                            context.read<ProductBloc>().add(
-                                                ProductFetch(
-                                                    searchString: filter,
-                                                    assetClassId:
-                                                        classificationId ==
-                                                                'AppHotel'
-                                                            ? 'Hotel Room'
-                                                            : ''));
-                                            return true;
+                                          asyncItems: (String filter) {
+                                            productBloc.add(ProductFetch(
+                                                searchString: filter,
+                                                assetClassId:
+                                                    classificationId ==
+                                                            'AppHotel'
+                                                        ? 'Hotel Room'
+                                                        : ''));
+                                            return Future.value(
+                                                productState.products);
                                           },
                                           onChanged: (Product? newValue) {
                                             setState(() {
@@ -857,6 +848,12 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                     key: const Key('product'),
                                                     selectedItem:
                                                         selectedProduct,
+                                                    dropdownDecoratorProps:
+                                                        const DropDownDecoratorProps(
+                                                            dropdownSearchDecoration:
+                                                                InputDecoration(
+                                                                    labelText:
+                                                                        'Product')),
                                                     popupProps: PopupProps.menu(
                                                       showSearchBox: true,
                                                       searchFieldProps:
@@ -864,42 +861,26 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                         autofocus: true,
                                                         decoration:
                                                             InputDecoration(
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20)),
+                                                          labelText:
+                                                              classificationId ==
+                                                                      'AppHotel'
+                                                                  ? 'Room Type'
+                                                                  : 'Product',
                                                         ),
                                                         controller:
                                                             productSearchBoxController,
                                                       ),
-                                                      menuProps: MenuProps(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
                                                       title: popUp(
                                                         context: context,
                                                         title: 'Select product',
                                                         height: 50,
                                                       ),
                                                     ),
-                                                    dropdownSearchDecoration:
-                                                        InputDecoration(
-                                                      labelText: 'Product',
-                                                      border:
-                                                          OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20)),
-                                                    ),
                                                     itemAsString:
                                                         (Product? u) =>
                                                             "${u!.productName}",
-                                                    items:
-                                                        productState.products,
-                                                    filterFn: (user, filter) {
+                                                    asyncItems:
+                                                        (String filter) {
                                                       context
                                                           .read<ProductBloc>()
                                                           .add(ProductFetch(
@@ -910,7 +891,9 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                                           'AppHotel'
                                                                       ? 'Hotel Room'
                                                                       : ''));
-                                                      return true;
+                                                      return Future.value(
+                                                          productState
+                                                              .products);
                                                     },
                                                     onChanged: (Product?
                                                         newValue) async {
@@ -926,9 +909,6 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                           FinDocGetRentalOccupancy(
                                                               newValue
                                                                   .productId));
-                                                      //           rentalDays = await getRentalOccupancy(
-                                                      //             repos: repos,
-                                                      //           productId: newValue.productId);
                                                       while (!whichDayOk(
                                                           startDate)) {
                                                         startDate = startDate
