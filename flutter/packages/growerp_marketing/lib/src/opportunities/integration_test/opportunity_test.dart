@@ -98,17 +98,15 @@ class OpportunityTest {
       await CommonTest.enterText(
           tester, 'estProbability', opportunity.estProbability.toString());
       await CommonTest.enterText(tester, 'nextStep', opportunity.nextStep!);
-      await CommonTest.drag(tester, seconds: 5);
-      await CommonTest.enterDropDown(tester, 'stageId', opportunity.stageId!,
-          seconds: 5);
-      await CommonTest.drag(tester, seconds: 5);
-      await CommonTest.enterDropDown(
+      await CommonTest.drag(tester, seconds: 1);
+      await CommonTest.enterDropDown(tester, 'stageId', opportunity.stageId!);
+      await CommonTest.enterDropDownSearch(
           tester, 'lead', opportunity.leadUser!.firstName!,
-          seconds: 5);
-      await CommonTest.enterDropDown(
+          seconds: 3);
+      await CommonTest.enterDropDownSearch(
           tester, 'employee', opportunity.employeeUser!.firstName!,
-          seconds: 5);
-      await CommonTest.drag(tester, seconds: 5);
+          seconds: 3);
+      await CommonTest.drag(tester, seconds: 1);
       await CommonTest.tapByKey(tester, 'update');
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);

@@ -23,14 +23,28 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-class AssetDialog extends StatefulWidget {
+class AssetDialog extends StatelessWidget {
   final Asset asset;
   const AssetDialog(this.asset, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (BuildContext context) => ProductBloc(CatalogAPIRepository(
+          context.read<AuthBloc>().state.authenticate!.apiKey!))
+        ..add(const ProductFetch()),
+      child: AssetDialogFull(asset),
+    );
+  }
+}
+
+class AssetDialogFull extends StatefulWidget {
+  final Asset asset;
+  const AssetDialogFull(this.asset, {super.key});
   @override
   AssetDialogState createState() => AssetDialogState();
 }
 
-class AssetDialogState extends State<AssetDialog> {
+class AssetDialogState extends State<AssetDialogFull> {
   final _assetDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityOnHandController =
@@ -154,10 +168,8 @@ class AssetDialogState extends State<AssetDialog> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
+                          decoration: const InputDecoration(
+                              labelText: "product id,name"),
                           controller: _productSearchBoxController,
                         ),
                         menuProps: MenuProps(
@@ -169,12 +181,9 @@ class AssetDialogState extends State<AssetDialog> {
                         ),
                       ),
                       dropdownSearchDecoration: InputDecoration(
-                        labelText: classificationId == 'AppHotel'
-                            ? 'Room Type'
-                            : 'Product',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0)),
-                      ),
+                          labelText: classificationId == 'AppHotel'
+                              ? 'Room Type'
+                              : 'Product'),
                       showClearButton: false,
                       itemAsString: (Product? u) => "${u!.productName}",
                       onChanged: (Product? newValue) {

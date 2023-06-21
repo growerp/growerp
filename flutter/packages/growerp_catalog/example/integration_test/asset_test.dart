@@ -31,6 +31,7 @@ void main() {
   testWidgets('''GrowERP asset test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         CatalogLocalizations.localizationsDelegates,
+        title: "Asset test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
 //      "categories": categories.sublist(0, 2),

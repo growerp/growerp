@@ -22,14 +22,37 @@ import 'package:growerp_core/growerp_core.dart';
 import '../models/models.dart';
 import '../bloc/opportunity_bloc.dart';
 
-class OpportunityDialog extends StatefulWidget {
+class OpportunityDialog extends StatelessWidget {
   final Opportunity opportunity;
   const OpportunityDialog(this.opportunity, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LeadBloc>(
+            create: (BuildContext context) => UserBloc(
+                CompanyUserAPIRepository(
+                    context.read<AuthBloc>().state.authenticate!.apiKey!),
+                Role.lead)),
+        BlocProvider<EmployeeBloc>(
+            create: (BuildContext context) => UserBloc(
+                CompanyUserAPIRepository(
+                    context.read<AuthBloc>().state.authenticate!.apiKey!),
+                Role.company)),
+      ],
+      child: OpportunityDialogFull(opportunity),
+    );
+  }
+}
+
+class OpportunityDialogFull extends StatefulWidget {
+  final Opportunity opportunity;
+  const OpportunityDialogFull(this.opportunity, {super.key});
   @override
   OpportunityDialogState createState() => OpportunityDialogState();
 }
 
-class OpportunityDialogState extends State<OpportunityDialog> {
+class OpportunityDialogState extends State<OpportunityDialogFull> {
   final _formKeyOpportunity = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -42,13 +65,17 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   String? _selectedStageId;
   User? _selectedAccount;
   User? _selectedLead;
-  late APIRepository repos;
   late OpportunityBloc _opportunityBloc;
+  late EmployeeBloc _employeeBloc;
+  late LeadBloc _leadBloc;
 
   @override
   void initState() {
     super.initState();
-    repos = context.read<APIRepository>();
+    _employeeBloc = context.read<EmployeeBloc>();
+    _employeeBloc.add(const UserFetch());
+    _leadBloc = context.read<LeadBloc>();
+    _leadBloc.add(const UserFetch());
     _opportunityBloc = context.read<OpportunityBloc>();
     _nameController.text = widget.opportunity.opportunityName ?? '';
     _descriptionController.text = widget.opportunity.description ?? '';
@@ -105,14 +132,6 @@ class OpportunityDialogState extends State<OpportunityDialog> {
   }
 
   Widget _opportunityForm() {
-    Future<List<User>> getData(Role role, String filter) async {
-      ApiResult<List<User>> result = await repos.lookUpUser(
-          role: role, searchString: _leadSearchBoxController.text);
-      return result.when(
-          success: (data) => data,
-          failure: (_) => [User(lastName: 'get data error!')]);
-    }
-
     List<Widget> widgets = [
       TextFormField(
         key: const Key('name'),
@@ -175,72 +194,97 @@ class OpportunityDialogState extends State<OpportunityDialog> {
         },
         isExpanded: true,
       ),
-      DropdownSearch<User>(
-        selectedItem: _selectedLead,
-        popupProps: PopupProps.menu(
-          showSearchBox: true,
-          searchFieldProps: TextFieldProps(
-            autofocus: true,
-            decoration: InputDecoration(
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-            ),
-            controller: _leadSearchBoxController,
-          ),
-          menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-          title: popUp(
-            context: context,
-            title: 'Select Lead',
-            height: 50,
-          ),
-        ),
-        dropdownSearchDecoration: InputDecoration(
-          labelText: 'Lead',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-        ),
-        showClearButton: true,
-        key: const Key('lead'),
-        itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
-            "${u?.company!.name}",
-        asyncItems: (String? filter) =>
-            getData(Role.lead, _leadSearchBoxController.text),
-        onChanged: (User? newValue) {
-          _selectedLead = newValue;
+      BlocBuilder<LeadBloc, UserState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case UserStatus.failure:
+              return const FatalErrorForm(message: 'server connection problem');
+            case UserStatus.success:
+              return DropdownSearch<User>(
+                selectedItem: _selectedLead,
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0)),
+                    ),
+                    controller: _leadSearchBoxController,
+                  ),
+                  menuProps:
+                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                  title: popUp(
+                    context: context,
+                    title: 'Select Lead',
+                    height: 50,
+                  ),
+                ),
+                dropdownSearchDecoration:
+                    const InputDecoration(labelText: 'Lead'),
+                showClearButton: true,
+                key: const Key('lead'),
+                itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
+                    "${u?.company!.name}",
+                items: state.users,
+                filterFn: (user, filter) {
+                  _leadBloc.add(UserFetch(searchString: filter));
+                  return true;
+                },
+                onChanged: (User? newValue) {
+                  _selectedLead = newValue;
+                },
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
         },
       ),
-      DropdownSearch<User>(
-          selectedItem: _selectedAccount,
-          popupProps: PopupProps.menu(
-            showSearchBox: true,
-            searchFieldProps: TextFieldProps(
-              autofocus: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
-              ),
-              controller: _accountSearchBoxController,
-            ),
-            menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
-            title: popUp(
-              context: context,
-              title: 'Select employee',
-              height: 50,
-            ),
-          ),
-          dropdownSearchDecoration: InputDecoration(
-            labelText: 'Account Employee',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(25.0)),
-          ),
-          showClearButton: true,
-          key: const Key('employee'),
-          itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
-              "${u?.company!.name}",
-          asyncItems: (String? filter) =>
-              getData(Role.company, _accountSearchBoxController.text),
-          onChanged: (User? newValue) {
-            _selectedAccount = newValue;
-          }),
+      BlocBuilder<EmployeeBloc, UserState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case UserStatus.failure:
+              return const FatalErrorForm(message: 'server connection problem');
+            case UserStatus.success:
+              return DropdownSearch<User>(
+                  selectedItem: _selectedAccount,
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0)),
+                      ),
+                      controller: _accountSearchBoxController,
+                    ),
+                    menuProps:
+                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
+                    title: popUp(
+                      context: context,
+                      title: 'Select employee',
+                      height: 50,
+                    ),
+                  ),
+                  dropdownSearchDecoration:
+                      const InputDecoration(labelText: 'Account Employee'),
+                  showClearButton: true,
+                  key: const Key('employee'),
+                  itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
+                      "${u?.company!.name}",
+                  items: state.users,
+                  filterFn: (user, filter) {
+                    _employeeBloc.add(UserFetch(searchString: filter));
+                    return true;
+                  },
+                  onChanged: (User? newValue) {
+                    _selectedAccount = newValue;
+                  });
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
       Row(
         children: [
           Expanded(
@@ -288,7 +332,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
     }
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
-      column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
+      column.add(widgets[i]);
     }
 
     return Form(
