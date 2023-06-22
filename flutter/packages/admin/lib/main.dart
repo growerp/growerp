@@ -63,23 +63,19 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-      dbServer: APIRepository(),
-      chatServer: ChatServer(),
-      title: 'GrowERP administrator.',
-      router: router.generateRoute,
-      menuOptions: menuOptions,
-      extraDelegates: const [
-        UserCompanyLocalizations.delegate,
-        CatalogLocalizations.delegate,
-        InventoryLocalizations.delegate,
-        OrderAccountingLocalizations.delegate,
-        WebsiteLocalizations.delegate,
-        MarketingLocalizations.delegate,
-        InventoryLocalizations.delegate,
-      ],
-      blocProviders: [
-        BlocProvider<AssetBloc>(
-            create: (context) => AssetBloc(CatalogAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!))),
-      ]));
+    dbServer: APIRepository(),
+    chatServer: ChatServer(),
+    title: 'GrowERP administrator.',
+    router: router.generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: const [
+      UserCompanyLocalizations.delegate,
+      CatalogLocalizations.delegate,
+      InventoryLocalizations.delegate,
+      OrderAccountingLocalizations.delegate,
+      WebsiteLocalizations.delegate,
+      MarketingLocalizations.delegate,
+      InventoryLocalizations.delegate,
+    ],
+  ));
 }

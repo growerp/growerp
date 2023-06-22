@@ -28,7 +28,6 @@ class CategoryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var repos = context.read<CatalogAPIRepository>();
     final categoryBloc = context.read<CategoryBloc>();
     return ListTile(
         leading: CircleAvatar(
@@ -60,10 +59,8 @@ class CategoryListItem extends StatelessWidget {
           await showDialog(
               barrierDismissible: true,
               context: context,
-              builder: (BuildContext context) => RepositoryProvider.value(
-                  value: repos,
-                  child: BlocProvider.value(
-                      value: categoryBloc, child: CategoryDialog(category))));
+              builder: (BuildContext context) => BlocProvider.value(
+                  value: categoryBloc, child: CategoryDialog(category)));
         },
         trailing: IconButton(
           key: Key('delete$index'),

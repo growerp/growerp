@@ -17,13 +17,25 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import '../asset.dart';
 
-class AssetListForm extends StatefulWidget {
+class AssetListForm extends StatelessWidget {
   const AssetListForm({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<AssetBloc>(
+      create: (context) => AssetBloc(CatalogAPIRepository(
+          context.read<AuthBloc>().state.authenticate!.apiKey!)),
+      child: const AssetListFormFull(),
+    );
+  }
+}
+
+class AssetListFormFull extends StatefulWidget {
+  const AssetListFormFull({super.key});
   @override
   AssetListState createState() => AssetListState();
 }
 
-class AssetListState extends State<AssetListForm> {
+class AssetListState extends State<AssetListFormFull> {
   final _scrollController = ScrollController();
   late AssetBloc _assetBloc;
   int limit = 20;

@@ -21,14 +21,11 @@ class CategoryListForm extends StatelessWidget {
   const CategoryListForm({super.key});
 
   @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
-      child: BlocProvider<CategoryBloc>(
-          create: (BuildContext context) => CategoryBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))
-            ..add(const CategoryFetch()),
-          child: const CategoryList()));
+  Widget build(BuildContext context) => BlocProvider<CategoryBloc>(
+      create: (BuildContext context) => CategoryBloc(CatalogAPIRepository(
+          context.read<AuthBloc>().state.authenticate!.apiKey!))
+        ..add(const CategoryFetch()),
+      child: const CategoryList());
 }
 
 class CategoryList extends StatefulWidget {
@@ -42,7 +39,6 @@ class CategoriesListState extends State<CategoryList> {
   final _scrollController = ScrollController();
   late bool search;
   late CategoryBloc _categoryBloc;
-  late CatalogAPIRepository _repos;
   late bool started;
 
   @override
@@ -51,7 +47,6 @@ class CategoriesListState extends State<CategoryList> {
     started = false;
     search = false;
     _categoryBloc = context.read<CategoryBloc>();
-    _repos = context.read<CatalogAPIRepository>();
     _scrollController.addListener(_onScroll);
   }
 
@@ -84,11 +79,9 @@ class CategoriesListState extends State<CategoryList> {
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) =>
-                                RepositoryProvider.value(
-                                    value: _repos,
-                                    child: BlocProvider.value(
-                                        value: _categoryBloc,
-                                        child: const CategoryFilesDialog())));
+                                BlocProvider.value(
+                                    value: _categoryBloc,
+                                    child: const CategoryFilesDialog()));
                       },
                       tooltip: 'category up/download',
                       child: const Icon(Icons.file_copy)),

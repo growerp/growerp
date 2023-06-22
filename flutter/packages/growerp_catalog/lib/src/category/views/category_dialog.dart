@@ -301,7 +301,6 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                                   : null;
                             },
                           ),
-                          const SizedBox(height: 10),
                           TextFormField(
                             key: const Key('description'),
                             decoration:
@@ -315,7 +314,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 20),
                           InputDecorator(
                               decoration: InputDecoration(
                                   labelText:

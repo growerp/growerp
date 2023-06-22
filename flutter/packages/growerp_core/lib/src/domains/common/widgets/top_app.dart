@@ -61,16 +61,16 @@ class TopApp extends StatelessWidget {
                   BlocProvider<ThemeBloc>(
                       create: (context) => ThemeBloc()..add(ThemeSwitch())),
                 BlocProvider<AuthBloc>(
-                    create: (context) => AuthBloc(APIRepository(), ChatServer())
-                      ..add(AuthLoad())),
+                    create: (context) =>
+                        AuthBloc(dbServer, chatServer)..add(AuthLoad())),
                 BlocProvider<ChatRoomBloc>(
                   create: (context) => ChatRoomBloc(
-                      APIRepository(), ChatServer(), context.read<AuthBloc>())
+                      dbServer, chatServer, context.read<AuthBloc>())
                     ..add(ChatRoomFetch()),
                 ),
                 BlocProvider<ChatMessageBloc>(
-                    create: (context) => ChatMessageBloc(APIRepository(),
-                        ChatServer(), context.read<AuthBloc>())),
+                    create: (context) => ChatMessageBloc(
+                        dbServer, chatServer, context.read<AuthBloc>())),
               ],
               child: Builder(builder: (context) {
                 return MultiBlocProvider(
