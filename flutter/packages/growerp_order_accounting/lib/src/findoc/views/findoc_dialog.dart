@@ -204,6 +204,10 @@ class MyFinDocState extends State<FinDocPage> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0)),
+                    ),
                     controller: _userSearchBoxController,
                   ),
                   title: popUp(

@@ -19,11 +19,20 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname" description="Product Store ID From Hostname" enumId="PsstHostname" enumTypeId="ProductStoreSettingType"/>
     <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId" enumId="PsstMeasurementId" enumTypeId="ProductStoreSettingType"/>
 
-    <!-- Configuration send email -->
+    <!-- Configuration send email GMAIL-->
     <!--moqui.basic.email.EmailServer emailServerId="SYSTEM"
             smtpHost="smtp.gmail.com" smtpPort="587" smtpStartTls="Y" smtpSsl="N"
             storeHost="imap.gmail.com" storePort="993" storeProtocol="imaps" storeFolder=""
-            storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="mobile@growerp.com" mailPassword="xxxxxxx"/-->
+            storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}" mailPassword="${SMTP_PASSWORD}"/-->
+    <!-- email opensrs -->
+    <moqui.basic.email.EmailServer emailServerId="SYSTEM"
+            smtpHost="smtp.growerp.com.cust.hostedemail.com" smtpPort="465" smtpStartTls="Y" smtpSsl="Y"
+        storeHost="mail.growerp.com.cust.hostedemail.com" storePort="993" storeProtocol="imaps" storeFolder="backend"
+        storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}" mailPassword="${SMTP_PASSWORD}"/>
+
+    <!-- birdsend email registration -->
+    <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co" apiVersion="v1"
+		value1="${appInstance.BIRDSEND_AUTM_SEQUENCE}" apiKey="${appInstance.BIRDSEND_API_KEY}"/>   
 
      <!-- allocate companies to application -->
     <moqui.basic.Enumeration description="Mobile App Name used by company" enumId="PcltMobileApp" enumTypeId="PartyClassificationType"/>

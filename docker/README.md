@@ -6,6 +6,7 @@ add to /etc/hosts:
 127.0.0.1 backend.growerp.local # moqui server
 127.0.0.1 chat.growerp.local # chat server
 127.0.0.1 admin.growerp.local # flutter admin app
+127.0.0.1 hotel.growerp.local # flutter admin app
 127.0.0.1 100000.growerp.local # first generated website
 
 # to use this system:

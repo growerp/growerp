@@ -1,6 +1,5 @@
 #stage 1 -get files and build
 FROM openjdk:11-jdk as build-env
-MAINTAINER GrowERP <support@growerp.com>
 
 ARG BRANCH=development # currently either master or development we need to add existing
 
@@ -9,24 +8,29 @@ RUN apt-get update && \
     apt-get clean
 
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
+# build from the moqui directory instead of repository for debugging
+#COPY . /root/growerp/moqui
+# delete debug user
+RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
 RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
+# antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui
-# antwebsystems website
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/service/growerp
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/data
-RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar 
+# Postgresql driver
+RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
+# build Moqui system
 RUN ./gradlew addRunTime
 # unzip war file
 WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
-
 # stage 2 create image
 FROM openjdk:11-jdk
 RUN apt-get update && apt-get install -y apt-transport-https nano && apt-get clean
-WORKDIR /opt
-COPY --from=build-env /opt/moqui .
+COPY --from=build-env /opt/moqui /opt/moqui
+COPY --from=build-env /root/growerp/moqui/runtime /opt/moqui/runtime
 # exposed as volumes for configuration purposes
-VOLUME ["/opt/moqui/runtime/conf", "/opt/moqui/runtime/lib", "/opt/moqui/runtime/classes", "/opt/moqui/runtime/ecomponent"]
+VOLUME ["/opt/moqui/runtime/conf", "/opt/moqui/runtime/lib", "/opt/moqui/runtime/classes", "/opt/moqui/runtime/component"]
 # exposed as volumes to persist data outside the container, recommended
 VOLUME ["/opt/moqui/runtime/log", "/opt/moqui/runtime/txlog", "/opt/moqui/runtime/sessions", "/opt/moqui/runtime/db", "/opt/moqui/runtime/elasticsearch"]
 
@@ -41,7 +45,10 @@ EXPOSE 5701
 
 # this is to run from the war file directly, preferred approach unzips war file in advance
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
-ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
+RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
+WORKDIR /opt/moqui
+ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh"]
+#ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
 # specify this as a default parameter if none are specified with docker exec/run, ie run production by default
