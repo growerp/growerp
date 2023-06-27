@@ -43,8 +43,8 @@ services:
      #- ./runtime/lib:/opt/moqui/runtime/lib
      #- ./runtime/classes:/opt/moqui/runtime/classes
      #- ../moqui/runtime/component:/opt/moqui/runtime/component
-      - ./runtime/log:/opt/moqui/runtime/log
-      - ./runtime/txlog:/opt/moqui/runtime/txlog
+     #- ./runtime/log:/opt/moqui/runtime/log
+     #- ./runtime/txlog:/opt/moqui/runtime/txlog
       - ./runtime/sessions:/opt/moqui/runtime/sessions
      # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
       - ./runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles

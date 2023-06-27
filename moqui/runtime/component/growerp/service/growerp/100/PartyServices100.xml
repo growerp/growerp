@@ -1189,7 +1189,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="user.email">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM"/></entity-find-one>
-                <if condition="emailExist">
+                <if condition="emailExist &amp;&amp; emailExist.mailPassword != '${SMTP_PASSWORD}'">
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
                         <field-map field-name="emailTemplateId" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
@@ -1857,7 +1857,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="user.loginName">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
                     <field-map field-name="emailServerId" value="SYSTEM"/></entity-find-one>
-                <if condition="emailExist">
+                <if condition="emailExist &amp;&amp; emailExist.mailPassword != '${SMTP_PASSWORD}'">
                     <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
                         <field-map field-name="emailTemplateId" value="WELCOME" />
                         <field-map field-name="toAddresses" from="emailAddress" />
