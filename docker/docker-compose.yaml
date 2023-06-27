@@ -75,6 +75,8 @@ services:
       - default_time_zone=US/Pacific
       - DB_DATA=SEED
       # do not use quotes here
+      - paymentGatewayConfigId=StripeDemo
+      - STRIPE_SECRET_KEY=
       - SMTP_USER=
       - SMTP_PASSWORD=
       - BIRDSEND_API_KEY=

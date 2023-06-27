@@ -21,6 +21,10 @@ if [ -n "$BIRDSEND_API_KEY" ] ; then
     sed -i -e "s/\${BIRDSEND_API_KEY}/$BIRDSEND_API_KEY/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
     sed -i -e "s/\${BIRDSEND_AUTM_SEQUENCE}/$BIRDSEND_AUTM_SEQUENCE=/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
 fi
+if [ -n "$STRIPE_SECRET_KEY" ] ; then
+    echo "updating stripe key"
+    sed -i -e "s/\${STRIPE_SECRET_KEY}/$STRIPE_SECRET_KEY/g" runtime/component/mantle-stripe/data/StripeInstallData.xml
+fi
 
 #load data if required
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
