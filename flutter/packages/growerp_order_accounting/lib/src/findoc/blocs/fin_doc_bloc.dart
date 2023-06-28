@@ -76,6 +76,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocGetRentalOccupancy event,
     Emitter<FinDocState> emit,
   ) async {
+    emit(state.copyWith(status: FinDocStatus.loading));
     ApiResult<List<String>> result =
         await repos.getRentalOccupancy(productId: event.productId);
     return emit(result.when(

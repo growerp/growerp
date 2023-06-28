@@ -847,6 +847,8 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                       message:
                                                           'server connection problem');
                                                 case FinDocStatus.success:
+                                                  rentalDays =
+                                                      state.occupancyDates;
                                                   return DropdownSearch<
                                                       Product>(
                                                     key: const Key('product'),
