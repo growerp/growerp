@@ -15,7 +15,6 @@ analyzer:
     - "**.freezed.dart"
     - "**/build/**"
     - "packages/ecommerce/**"
-    - "packages/hotel/**"
     - "packages/freelance/**"
     - "packages/growerp_select_dialog/**"
   errors:

@@ -48,6 +48,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       return;
     }
     // start from record zero for initial and refresh
+    emit(state.copyWith(status: AssetStatus.loading));
     if (state.status == AssetStatus.initial || event.refresh) {
       ApiResult<List<Asset>> compResult =
           await repos.getAsset(searchString: event.searchString);
@@ -98,6 +99,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     AssetUpdate event,
     Emitter<AssetState> emit,
   ) async {
+    emit(state.copyWith(status: AssetStatus.loading));
     List<Asset> assets = List.from(state.assets);
     if (event.asset.assetId.isNotEmpty) {
       ApiResult<Asset> compResult = await repos.updateAsset(event.asset);
@@ -135,6 +137,7 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     AssetDelete event,
     Emitter<AssetState> emit,
   ) async {
+    emit(state.copyWith(status: AssetStatus.loading));
     List<Asset> assets = List.from(state.assets);
     ApiResult<Asset> compResult = await repos.deleteAsset(event.asset);
     return emit(compResult.when(

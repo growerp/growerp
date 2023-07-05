@@ -4,9 +4,15 @@
             "name": "Flutter (lib/main.dart)",
             "type": "dart",
             "request": "launch",
-            "cwd": "packages/growerp_user_company/example",
-            "program": "lib/main.dart",
-            "deviceId": "chrome"
+            "cwd": "packages/hotel",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "Flutter (lib/room_rental_test.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "packages/hotel",
+            "program": "lib/room_rental_test.dart"
         }
     ]
 }

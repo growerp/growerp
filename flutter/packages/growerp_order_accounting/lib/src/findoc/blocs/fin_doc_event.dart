@@ -67,9 +67,3 @@ class FinDocGetPaymentTypes extends FinDocEvent {
   const FinDocGetPaymentTypes(this.sales);
   final bool sales;
 }
-
-/// Get the dates that this product had reservations
-class FinDocGetRentalOccupancy extends FinDocEvent {
-  const FinDocGetRentalOccupancy(this.productId);
-  final String productId;
-}

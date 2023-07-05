@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 import 'acct_menu_option_data.dart';
 import 'menu_option_data.dart';
@@ -29,8 +30,19 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               ));
     case '/company':
       return MaterialPageRoute(
+          builder: (context) =>
+              ShowCompanyDialog(settings.arguments as Company));
+    case '/user':
+      return MaterialPageRoute(
+          builder: (context) => ShowUserDialog(settings.arguments as User));
+    case '/myHotel':
+      return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/customers':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 5, tabIndex: 0));
     case '/admins':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -39,11 +51,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 2));
-    case '/catalog':
+    case '/rooms':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
-    case '/sales':
+    case '/reservations':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));

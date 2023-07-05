@@ -63,7 +63,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     on<FinDocConfirmPayment>(_onFinDocConfirmPayment);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
     on<FinDocGetPaymentTypes>(_onFinDocGetPaymentTypes);
-    on<FinDocGetRentalOccupancy>(_onFinDocGetRentalOccupancy);
   }
 
   final FinDocAPIRepository repos;
@@ -71,23 +70,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final FinDocType docType;
 
   String classificationId = GlobalConfiguration().get("classificationId");
-
-  Future<void> _onFinDocGetRentalOccupancy(
-    FinDocGetRentalOccupancy event,
-    Emitter<FinDocState> emit,
-  ) async {
-    emit(state.copyWith(status: FinDocStatus.loading));
-    ApiResult<List<String>> result =
-        await repos.getRentalOccupancy(productId: event.productId);
-    return emit(result.when(
-        success: (data) => state.copyWith(
-              status: FinDocStatus.success,
-              occupancyDates: data,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: FinDocStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
-  }
 
   Future<void> _onFinDocFetch(
     FinDocFetch event,

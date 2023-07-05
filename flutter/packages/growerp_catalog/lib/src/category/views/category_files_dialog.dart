@@ -91,8 +91,7 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
               const SizedBox(height: 20),
               const Text("A data file will be send by email"),
             ]),
-        if (state.status == CategoryStatus.filesLoading)
-          const LoadingIndicator(),
+        if (state.status == CategoryStatus.loading) const LoadingIndicator(),
       ]);
     });
   }

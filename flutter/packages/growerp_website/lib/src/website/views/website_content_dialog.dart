@@ -7,6 +7,9 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
+//import 'package:html_editor_enhanced/html_editor.dart';
+//import 'package:html_editor_enhanced/utils/options.dart';
+
 import '../../../growerp_website.dart';
 
 class WebsiteContentDialog extends StatelessWidget {
@@ -39,6 +42,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   late Content newContent;
   String data = '';
   String newData = '';
+  late bool isMarkDown;
 
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
@@ -50,6 +54,11 @@ class WebsiteContentState extends State<WebsiteContent> {
     super.initState();
     newContent = widget.content;
     _nameController.text = widget.content.title;
+    if (newContent.text.contains("<html")) {
+      isMarkDown = false;
+    } else {
+      isMarkDown = true;
+    }
   }
 
   @override
@@ -98,7 +107,9 @@ class WebsiteContentState extends State<WebsiteContent> {
                         width: isPhone ? 400 : 800,
                         height: 600,
                         title: 'Update content ${widget.content.title}',
-                        child: _showTextForm(isPhone)));
+                        child: isMarkDown
+                            ? _showMdTextForm(isPhone)
+                            : _showHtmlTextForm(isPhone)));
               } else {
                 return Dialog(
                     key: const Key('WebsiteContentImage'),
@@ -116,12 +127,8 @@ class WebsiteContentState extends State<WebsiteContent> {
                                 topLeft: Radius.circular(20),
                                 topRight: Radius.circular(20),
                               )),
-                          child: const Center(
-                              child: Text('Image Information',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)))),
+                          child:
+                              const Center(child: Text('Image Information'))),
                       Container(
                           width: 400,
                           height: 400,
@@ -225,12 +232,9 @@ class WebsiteContentState extends State<WebsiteContent> {
                           : Image.file(File(_imageFile!.path), scale: 0.3)
                       : newContent.image != null
                           ? Image.memory(newContent.image!, scale: 0.3)
-                          : Text(
-                              newContent.title.isEmpty
-                                  ? '?'
-                                  : newContent.title[0],
-                              style: const TextStyle(
-                                  fontSize: 30, color: Colors.black))),
+                          : Text(newContent.title.isEmpty
+                              ? '?'
+                              : newContent.title[0])),
               const SizedBox(height: 30),
               TextFormField(
                 key: const Key('imageName'),
@@ -269,7 +273,7 @@ class WebsiteContentState extends State<WebsiteContent> {
             ])));
   }
 
-  Widget _showTextForm(bool isPhone) {
+  Widget _showMdTextForm(bool isPhone) {
     Widget input = TextFormField(
         key: const Key('mdInput'),
         autofocus: true,
@@ -292,16 +296,15 @@ class WebsiteContentState extends State<WebsiteContent> {
                 const SizedBox(height: 10),
                 Expanded(
                     child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25.0),
-                          border: Border.all(
-                              color: Colors.black45,
-                              style: BorderStyle.solid,
-                              width: 0.80),
-                        ),
-                        child: MarkdownWidget(
-                            data: newData.isNotEmpty ? newData : data))),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25.0),
+                    border: Border.all(style: BorderStyle.solid, width: 0.80),
+                  ),
+                  child: MarkdownWidget(
+                    data: newData.isNotEmpty ? newData : data,
+                  ),
+                )),
               ]),
             )
           : Expanded(
@@ -324,5 +327,36 @@ class WebsiteContentState extends State<WebsiteContent> {
             }
           })
     ]);
+  }
+
+  Widget _showHtmlTextForm(bool isPhone) {
+    return Container();
+/*    Widget input = TextFormField(
+        key: const Key('htmlInput'),
+        autofocus: true,
+        decoration: const InputDecoration(labelText: 'Enter text here...'),
+        expands: true,
+        maxLines: null,
+        textAlignVertical: TextAlignVertical.top,
+        textInputAction: TextInputAction.newline,
+        initialValue: data,
+        onChanged: (text) {
+          setState(() {
+            newData = text;
+          });
+        });
+
+    HtmlEditorController controller = HtmlEditorController();
+
+    return HtmlEditor(
+      controller: controller, //required
+      htmlEditorOptions: HtmlEditorOptions(
+        hint: "Your text here...",
+        //initalText: "text content initial, if any",
+      ),
+      otherOptions: OtherOptions(
+        height: 400,
+      ),
+    );*/
   }
 }

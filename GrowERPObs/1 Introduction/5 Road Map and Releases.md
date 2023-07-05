@@ -20,6 +20,7 @@ Let us know if you have suggestions at support@growerp.com
 
 ## Technical internal requests
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
+* [Reusable blocs](https://itnext.io/flutter-blocs-at-scale-2-keeping-blocs-lean-1b659536e3ec)
 * Separate the order/accounting package
 * Move flutter chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.

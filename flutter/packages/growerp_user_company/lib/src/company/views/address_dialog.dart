@@ -143,25 +143,18 @@ class AddressDialogState extends State<AddressDialog> {
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0)),
-                      ),
+                      decoration: const InputDecoration(labelText: 'Country'),
                       controller: _countrySearchBoxController,
                     ),
-                    menuProps:
-                        MenuProps(borderRadius: BorderRadius.circular(20.0)),
                     title: popUp(
                       context: context,
                       title: 'Select country',
                       height: 50,
                     ),
                   ),
-                  //               dropdownSearchDecoration: InputDecoration(
-                  //               labelText: 'Country',
-                  //             border: OutlineInputBorder(
-                  //               borderRadius: BorderRadius.circular(25.0)),
-                  //       ),
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration:
+                          InputDecoration(labelText: 'Country')),
                   itemAsString: (Country? u) => u!.name,
                   items: countries,
                   validator: (value) {

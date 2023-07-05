@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import '../asset.dart';
 
@@ -36,10 +35,9 @@ class AssetListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(child: Text("${asset.assetName}", key: Key('name$index'))),
-            if (!ResponsiveBreakpoints.of(context).isMobile)
-              Expanded(
-                  child: Text("${asset.statusId}",
-                      key: Key('statusId$index'), textAlign: TextAlign.center)),
+            Expanded(
+                child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
+                    key: Key('statusId$index'), textAlign: TextAlign.center)),
             Expanded(
                 child: Text("${asset.product!.productName}",
                     key: Key('product$index'), textAlign: TextAlign.center)),

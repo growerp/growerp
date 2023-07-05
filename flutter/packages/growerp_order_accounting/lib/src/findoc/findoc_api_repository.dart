@@ -109,27 +109,6 @@ class FinDocAPIRepository extends APIRepository {
     }
   }
 
-  Future<ApiResult<List<String>>> getRentalOccupancy(
-      {required String productId}) async {
-    try {
-      final response = await dioClient.get(
-          'rest/s1/growerp/100/RentalOccupancy', apiKey!,
-          queryParameters: <String, dynamic>{
-            'productId': productId,
-          });
-      var json = jsonDecode(response.toString())['rentalFullDates'];
-      List<dynamic> list = List.from(json);
-      List<String> stringList = [];
-      // change members from dynamic to string
-      for (String string in list) {
-        stringList.add(string);
-      }
-      return ApiResult.success(data: stringList);
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
-
   Future<ApiResult<List<ItemType>>> getItemTypes({bool sales = true}) async {
     try {
       final response = await dioClient.get(

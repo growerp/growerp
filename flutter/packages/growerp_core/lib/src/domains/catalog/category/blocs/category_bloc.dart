@@ -168,7 +168,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     CategoryUpload event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(state.copyWith(status: CategoryStatus.filesLoading));
+    emit(state.copyWith(status: CategoryStatus.loading));
     List<Category> categories = [];
     final result = fast_csv.parse(event.file);
     int line = 0;
@@ -196,7 +196,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     CategoryDownload event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(state.copyWith(status: CategoryStatus.filesLoading));
+    emit(state.copyWith(status: CategoryStatus.loading));
     ApiResult<String> compResult = await repos.exportCategories();
     return emit(compResult.when(
         success: (data) {

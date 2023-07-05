@@ -26,7 +26,7 @@ class InvoiceTest {
   static Future<void> selectSalesInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'accntSales', 'FinDocListFormSalesInvoice');
+        tester, 'acctSales', 'FinDocListFormSalesInvoice');
   }
 
   static Future<void> addInvoices(WidgetTester tester, List<FinDoc> invoices,

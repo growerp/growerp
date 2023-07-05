@@ -66,20 +66,22 @@ class MenuOptionState extends State<DisplayMenuOption>
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
     route = menuOption.route; // used also for key
-    actions = List.of(widget.actions);
-    actions.add(IconButton(
-        key: const Key('topChatButton'), // causes a duplicate key?
-        icon: const Icon(Icons.chat),
-        tooltip: 'Chat',
-        onPressed: () async => {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return const ChatRoomListDialog();
-                },
-              )
-            }));
+    actions = [
+      IconButton(
+          key: const Key('topChatButton'), // causes a duplicate key?
+          icon: const Icon(Icons.chat),
+          tooltip: 'Chat',
+          onPressed: () async => {
+                await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const ChatRoomListDialog();
+                  },
+                )
+              })
+    ];
+    actions.addAll(widget.actions);
 
     if (route != '/') {
       actions.add(IconButton(

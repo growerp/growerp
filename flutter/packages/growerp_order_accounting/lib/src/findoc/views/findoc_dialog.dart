@@ -205,9 +205,8 @@ class MyFinDocState extends State<FinDocPage> {
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0)),
-                    ),
+                        labelText:
+                            "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
                     controller: _userSearchBoxController,
                   ),
                   title: popUp(
@@ -630,7 +629,7 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                             searchFieldProps: TextFieldProps(
                                               autofocus: true,
                                               decoration: const InputDecoration(
-                                                labelText: 'Product',
+                                                labelText: 'Product name',
                                               ),
                                               controller:
                                                   productSearchBoxController,
@@ -838,101 +837,74 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                 message:
                                                     'server connection problem');
                                           case ProductStatus.success:
-                                            return BlocBuilder<FinDocBloc,
-                                                    FinDocState>(
-                                                builder: (context, state) {
-                                              switch (state.status) {
-                                                case FinDocStatus.failure:
-                                                  return const FatalErrorForm(
-                                                      message:
-                                                          'server connection problem');
-                                                case FinDocStatus.success:
-                                                  rentalDays =
-                                                      state.occupancyDates;
-                                                  return DropdownSearch<
-                                                      Product>(
-                                                    key: const Key('product'),
-                                                    selectedItem:
-                                                        selectedProduct,
-                                                    dropdownDecoratorProps:
-                                                        const DropDownDecoratorProps(
-                                                            dropdownSearchDecoration:
-                                                                InputDecoration(
-                                                                    labelText:
-                                                                        'Product')),
-                                                    popupProps: PopupProps.menu(
-                                                      showSearchBox: true,
-                                                      searchFieldProps:
-                                                          TextFieldProps(
-                                                        autofocus: true,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              classificationId ==
-                                                                      'AppHotel'
-                                                                  ? 'Room Type'
-                                                                  : 'Product',
-                                                        ),
-                                                        controller:
-                                                            productSearchBoxController,
-                                                      ),
-                                                      title: popUp(
-                                                        context: context,
-                                                        title: 'Select product',
-                                                        height: 50,
-                                                      ),
-                                                    ),
-                                                    itemAsString:
-                                                        (Product? u) =>
-                                                            "${u!.productName}",
-                                                    asyncItems:
-                                                        (String filter) {
-                                                      context
-                                                          .read<ProductBloc>()
-                                                          .add(ProductFetch(
-                                                              searchString:
-                                                                  filter,
-                                                              assetClassId:
-                                                                  classificationId ==
-                                                                          'AppHotel'
-                                                                      ? 'Hotel Room'
-                                                                      : ''));
-                                                      return Future.value(
-                                                          productState
-                                                              .products);
-                                                    },
-                                                    onChanged: (Product?
-                                                        newValue) async {
-                                                      selectedProduct =
-                                                          newValue;
-                                                      priceController.text =
-                                                          newValue!.price
-                                                              .toString();
-                                                      itemDescriptionController
-                                                              .text =
-                                                          "${newValue.productName}";
-                                                      context.read<FinDocBloc>().add(
-                                                          FinDocGetRentalOccupancy(
-                                                              newValue
-                                                                  .productId));
-                                                      while (!whichDayOk(
-                                                          startDate)) {
-                                                        startDate = startDate
-                                                            .add(const Duration(
-                                                                days: 1));
-                                                      }
-                                                    },
-                                                    validator: (value) =>
-                                                        value == null
-                                                            ? 'Select product?'
-                                                            : null,
-                                                  );
-                                                default:
-                                                  return const Center(
-                                                      child:
-                                                          CircularProgressIndicator());
-                                              }
-                                            });
+                                            rentalDays =
+                                                productState.occupancyDates;
+
+                                            return DropdownSearch<Product>(
+                                              key: const Key('product'),
+                                              selectedItem: selectedProduct,
+                                              dropdownDecoratorProps:
+                                                  const DropDownDecoratorProps(
+                                                      dropdownSearchDecoration:
+                                                          InputDecoration(
+                                                              labelText:
+                                                                  'Product')),
+                                              popupProps: PopupProps.menu(
+                                                showSearchBox: true,
+                                                searchFieldProps:
+                                                    TextFieldProps(
+                                                  autofocus: true,
+                                                  decoration: InputDecoration(
+                                                    labelText:
+                                                        classificationId ==
+                                                                'AppHotel'
+                                                            ? 'Room Type'
+                                                            : 'Product',
+                                                  ),
+                                                  controller:
+                                                      productSearchBoxController,
+                                                ),
+                                                title: popUp(
+                                                  context: context,
+                                                  title: 'Select product',
+                                                  height: 50,
+                                                ),
+                                              ),
+                                              itemAsString: (Product? u) =>
+                                                  "${u!.productName}",
+                                              asyncItems: (String filter) {
+                                                context.read<ProductBloc>().add(
+                                                    ProductFetch(
+                                                        searchString: filter,
+                                                        assetClassId:
+                                                            classificationId ==
+                                                                    'AppHotel'
+                                                                ? 'Hotel Room'
+                                                                : ''));
+                                                return Future.value(
+                                                    productState.products);
+                                              },
+                                              onChanged:
+                                                  (Product? newValue) async {
+                                                selectedProduct = newValue;
+                                                priceController.text =
+                                                    newValue!.price.toString();
+                                                itemDescriptionController.text =
+                                                    "${newValue.productName}";
+                                                context.read<ProductBloc>().add(
+                                                    ProductRentalOccupancy(
+                                                        productId: newValue
+                                                            .productId));
+                                                while (!whichDayOk(startDate)) {
+                                                  startDate = startDate.add(
+                                                      const Duration(days: 1));
+                                                }
+                                              },
+                                              validator: (value) =>
+                                                  value == null
+                                                      ? 'Select product?'
+                                                      : null,
+                                            );
                                           default:
                                             return const Center(
                                                 child:

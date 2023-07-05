@@ -29,7 +29,6 @@ dependencies:
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.0.3
   from_css_color: ^2.0.0
-  markdown_widget: ^2.1.0
   bloc_concurrency: ^0.2.0
   flutter_test: 
     sdk: flutter

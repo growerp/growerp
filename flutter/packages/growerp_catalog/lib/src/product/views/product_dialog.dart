@@ -15,7 +15,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:growerp_core/growerp_core.dart';
-// ignore: depend_on_referenced_packages
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
@@ -167,8 +166,10 @@ class ProductDialogState extends State<ProductDialogFull> {
               child: popUp(
                   context: context,
                   child: listChild(classificationId, isPhone, categoryState),
-                  title: 'Product Information',
-                  height: 750,
+                  title: classificationId == 'AppAdmin'
+                      ? 'Product Information'
+                      : 'Room Type Information',
+                  height: classificationId == 'AppAdmin' ? 750 : 600,
                   width: isPhone ? 450 : 800));
         }
       });

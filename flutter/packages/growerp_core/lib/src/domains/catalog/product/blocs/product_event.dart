@@ -49,6 +49,12 @@ class ProductUpdate extends ProductEvent {
   final Product product;
 }
 
+/// get the rental  usage of related assets for rental purposes
+class ProductRentalOccupancy extends ProductEvent {
+  const ProductRentalOccupancy({this.productId = ""});
+  final String productId;
+}
+
 /// initiate a download of products by email.
 class ProductDownload extends ProductEvent {}
 

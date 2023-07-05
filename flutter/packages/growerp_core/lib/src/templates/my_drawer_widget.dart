@@ -81,6 +81,7 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                   const Text("Theme"),
                 ]));
           }
+          print("===tap=====tap${options[i - 1]["route"]}==========");
           return ListTile(
               key: Key('tap${options[i - 1]["route"]}'),
               contentPadding: const EdgeInsets.all(5.0),

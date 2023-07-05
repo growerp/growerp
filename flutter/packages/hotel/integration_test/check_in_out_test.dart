@@ -12,21 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/test_data.dart';
-import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:growerp_website/growerp_website.dart';
-import 'package:hotel/menu_option_data.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
-import 'package:hotel/router.dart' as router;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -36,33 +27,6 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
-  });
-
-  testWidgets('''GrowERP asset rental sales order test''', (tester) async {
-    await CommonTest.startTestApp(
-        tester,
-        router.generateRoute,
-        menuOptions,
-        [
-          CatalogLocalizations.delegate,
-          InventoryLocalizations.delegate,
-          OrderAccountingLocalizations.delegate,
-          WebsiteLocalizations.delegate,
-          MarketingLocalizations.delegate,
-          InventoryLocalizations.delegate,
-        ],
-        clear: true);
-
-    await CommonTest.createCompanyAndAdmin(tester);
-    await CategoryTest.selectCategories(tester);
-    await CategoryTest.addCategories(tester, [categories[0]], check: false);
-    await ProductTest.selectProducts(tester);
-    await ProductTest.addProducts(tester, [products[2]], check: false);
-    await AssetTest.selectAsset(tester);
-    await AssetTest.addAssets(tester, [assets[2]], check: false);
-    await UserTest.selectCustomers(tester);
-    await UserTest.addCustomers(tester, [customers[0]], check: false);
-    // rental order test
   });
 
   testWidgets("Test checkin >>>>>", (WidgetTester tester) async {

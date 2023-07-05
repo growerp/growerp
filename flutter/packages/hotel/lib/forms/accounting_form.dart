@@ -27,7 +27,7 @@ class AccountingForm extends StatelessWidget {
     return DashBoardForm(
       key: const Key('AcctDashBoard'),
       dashboardItems: [
-        makeDashboardItem('accntSales', context, acctMenuOptions[1], [
+        makeDashboardItem('acctSales', context, acctMenuOptions[1], [
           "Sales open invoices: ",
           "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "

@@ -42,6 +42,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductDelete>(_onProductDelete);
     on<ProductUpload>(_onProductUpload);
     on<ProductDownload>(_onProductDownload);
+    on<ProductRentalOccupancy>(_onProductRentalOccupancy);
   }
 
   final CatalogAPIRepository repos;
@@ -53,9 +54,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
+    emit(state.copyWith(status: ProductStatus.loading));
     // start from record zero for initial and refresh
     if (state.status == ProductStatus.initial || event.refresh) {
-      emit(state.copyWith(status: ProductStatus.loading));
       ApiResult<List<Product>> compResult = await repos.getProduct(
         start: 0,
         limit: _productLimit,
@@ -75,7 +76,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
               message: NetworkExceptions.getErrorMessage(error))));
     }
     // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
+    else if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
         (state.searchString.isNotEmpty &&
             event.searchString != state.searchString)) {
       ApiResult<List<Product>> compResult = await repos.getProduct(
@@ -92,19 +93,22 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
               message: NetworkExceptions.getErrorMessage(error))));
     }
     // get next page also for search
-    ApiResult<List<Product>> compResult = await repos.getProduct(
-        searchString: event.searchString,
-        start: state.products.length,
-        limit: _productLimit);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: ProductStatus.success,
-              products: List.of(state.products)..addAll(data),
-              hasReachedMax: data.length < _productLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: ProductStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    else {
+      ApiResult<List<Product>> compResult = await repos.getProduct(
+          searchString: event.searchString,
+          start: state.products.length,
+          limit: _productLimit);
+
+      return emit(compResult.when(
+          success: (data) => state.copyWith(
+                status: ProductStatus.success,
+                products: List.of(state.products)..addAll(data),
+                hasReachedMax: data.length < _productLimit ? true : false,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
   }
 
   Future<void> _onProductUpdate(
@@ -225,6 +229,35 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
               message:
                   "The request is scheduled and the email will be sent shortly");
         },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: ProductStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
+  }
+
+  Future<void> _onProductRentalOccupancy(
+    ProductRentalOccupancy event,
+    Emitter<ProductState> emit,
+  ) async {
+    //emit(state.copyWith(status: ProductStatus.loading));
+    if (event.productId.isNotEmpty) {
+      ApiResult<List<String>> result =
+          await repos.getRentalOccupancy(productId: event.productId);
+      return emit(result.when(
+          success: (data) => state.copyWith(
+                status: ProductStatus.success,
+                occupancyDates: data,
+              ),
+          failure: (NetworkExceptions error) => state.copyWith(
+              status: ProductStatus.failure,
+              message: NetworkExceptions.getErrorMessage(error))));
+    }
+    ApiResult<List<FullDatesProductRental>> result =
+        await repos.getRentalAllOccupancy();
+    return emit(result.when(
+        success: (data) => state.copyWith(
+              status: ProductStatus.success,
+              fullDates: data,
+            ),
         failure: (NetworkExceptions error) => state.copyWith(
             status: ProductStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));

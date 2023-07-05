@@ -20,27 +20,22 @@ import '../asset.dart';
 class AssetListForm extends StatelessWidget {
   const AssetListForm({super.key});
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<AssetBloc>(
-      create: (context) => AssetBloc(CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!)),
-      child: const AssetListFormFull(),
-    );
-  }
+  Widget build(BuildContext context) => BlocProvider<AssetBloc>(
+        create: (context) => AssetBloc(CatalogAPIRepository(
+            context.read<AuthBloc>().state.authenticate!.apiKey!)),
+        child: const AssetList(),
+      );
 }
 
-class AssetListFormFull extends StatefulWidget {
-  const AssetListFormFull({super.key});
+class AssetList extends StatefulWidget {
+  const AssetList({super.key});
   @override
   AssetListState createState() => AssetListState();
 }
 
-class AssetListState extends State<AssetListFormFull> {
+class AssetListState extends State<AssetList> {
   final _scrollController = ScrollController();
   late AssetBloc _assetBloc;
-  int limit = 20;
-  late bool search;
-  String? searchString;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
 
@@ -48,83 +43,89 @@ class AssetListState extends State<AssetListFormFull> {
   void initState() {
     super.initState();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'Asset';
+    _scrollController.addListener(_onScroll);
     _assetBloc = context.read<AssetBloc>();
     _assetBloc.add(const AssetFetch());
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AssetBloc, AssetState>(
-      listener: (context, state) {
-        if (state.status == AssetStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-        }
-        if (state.status == AssetStatus.success) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-      },
-      builder: (context, state) {
-        debugPrint("======status: ${state.status}");
-        switch (state.status) {
-          case AssetStatus.failure:
-            return Center(
-                child: Text('failed to fetch assets: ${state.message}'));
-          case AssetStatus.success:
-            return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                    heroTag: "btn1",
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                                value: _assetBloc, child: AssetDialog(Asset()));
-                          });
-                    },
-                    tooltip: 'Add New',
-                    child: const Icon(Icons.add)),
-                body: RefreshIndicator(
-                    onRefresh: (() async =>
-                        _assetBloc.add(const AssetFetch(refresh: true))),
-                    child: ListView.builder(
-                      key: const Key('listView'),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.hasReachedMax
-                          ? state.assets.length + 1
-                          : state.assets.length + 2,
-                      controller: _scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Column(children: [
-                            const AssetListHeader(),
-                            Visibility(
-                                visible: state.assets.isEmpty,
-                                child: Center(
-                                    heightFactor: 20,
-                                    child: Text("no ${entityName}s found!",
-                                        key: const Key('empty'),
-                                        textAlign: TextAlign.center)))
-                          ]);
-                        }
-                        index--;
-                        return index >= state.assets.length
-                            ? const BottomLoader()
-                            : Dismissible(
-                                key: const Key('assetItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: AssetListItem(
-                                    asset: state.assets[index], index: index));
+        listenWhen: (previous, current) =>
+            previous.status == AssetStatus.loading,
+        listener: (context, state) {
+          if (state.status == AssetStatus.failure) {
+            HelperFunctions.showMessage(
+                context, '${state.message}', Colors.red);
+          }
+          if (state.status == AssetStatus.success) {
+            HelperFunctions.showMessage(
+                context, '${state.message}', Colors.green);
+          }
+        },
+        builder: (context, state) {
+          switch (state.status) {
+            case AssetStatus.failure:
+              return Center(
+                  child: Text('failed to fetch assets: ${state.message}'));
+            case AssetStatus.success:
+              return Scaffold(
+                  floatingActionButton: FloatingActionButton(
+                      heroTag: "assetNew",
+                      key: const Key("addNew"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _assetBloc,
+                                  child: AssetDialog(Asset()));
+                            });
                       },
-                    )));
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      },
-    );
+                      tooltip: CoreLocalizations.of(context)!.addNew,
+                      child: const Icon(Icons.add)),
+                  body: Column(children: [
+                    const AssetListHeader(),
+                    Expanded(
+                        child: RefreshIndicator(
+                            onRefresh: (() async => _assetBloc
+                                .add(const AssetFetch(refresh: true))),
+                            child: ListView.builder(
+                                key: const Key('listView'),
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: state.hasReachedMax
+                                    ? state.assets.length + 1
+                                    : state.assets.length + 2,
+                                controller: _scrollController,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index == 0) {
+                                    return Visibility(
+                                        visible: state.assets.isEmpty,
+                                        child: Center(
+                                            heightFactor: 20,
+                                            child: Text(
+                                                "no ${entityName}s found!",
+                                                key: const Key('empty'),
+                                                textAlign: TextAlign.center)));
+                                  }
+                                  index--;
+                                  return index >= state.assets.length
+                                      ? const BottomLoader()
+                                      : Dismissible(
+                                          key: const Key('assetItem'),
+                                          direction:
+                                              DismissDirection.startToEnd,
+                                          child: AssetListItem(
+                                              asset: state.assets[index],
+                                              index: index));
+                                })))
+                  ]));
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        });
   }
 
   @override

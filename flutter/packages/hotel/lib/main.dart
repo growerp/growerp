@@ -61,7 +61,6 @@ Future main() async {
       debugPrint('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
-
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
     dbServer: APIRepository(),
@@ -69,28 +68,16 @@ Future main() async {
     title: 'GrowERP Hotel.',
     router: router.generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [
-      UserCompanyLocalizations.delegate,
-      CatalogLocalizations.delegate,
-      InventoryLocalizations.delegate,
-      OrderAccountingLocalizations.delegate,
-      WebsiteLocalizations.delegate,
-      MarketingLocalizations.delegate,
-      InventoryLocalizations.delegate,
-    ],
-    blocProviders: [
-      BlocProvider<AssetBloc>(
-          create: (context) => AssetBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))),
-      BlocProvider<ProductBloc>(
-          create: (context) => ProductBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))),
-      BlocProvider<FinDocBloc>(
-          create: (context) => FinDocBloc(
-              FinDocAPIRepository(
-                  context.read<AuthBloc>().state.authenticate!.apiKey),
-              true,
-              FinDocType.order)),
-    ],
+    extraDelegates: delegates,
   ));
 }
+
+List<LocalizationsDelegate<dynamic>> delegates = const [
+  UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  InventoryLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+  MarketingLocalizations.delegate,
+  InventoryLocalizations.delegate,
+];

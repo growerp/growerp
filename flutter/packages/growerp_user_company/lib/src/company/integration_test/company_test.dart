@@ -34,18 +34,17 @@ class CompanyTest {
     SaveTest test = await PersistFunctions.getTest();
 
     if (inputList.length == 1) {
-      // main company test
+      // if single company: main company test
       test = test.copyWith(companies: [test.company!]);
     }
     // if already done return
-//    if (test.companies.isNotEmpty &&
-//        test.companies[0].name == inputList[0].name) {
-//      return;
-//    }
+    if (test.companies.isNotEmpty &&
+        test.companies[0].name == inputList[0].name) {
+      return;
+    }
 
     // create new list with partyId from last list from test if not empty
     List<Company> clist = List.of(inputList);
-
     if (test.companies.isNotEmpty) {
       for (int x = 0; x < test.companies.length; x++) {
         clist[x] = clist[x].copyWith(partyId: test.companies[x].partyId);

@@ -147,13 +147,24 @@ class CommonTest {
   static Future<void> selectOption(
       WidgetTester tester, String option, String formName,
       [String? tapNumber]) async {
-    if (!option.startsWith('accnt')) await gotoMainMenu(tester);
-    await tapByKey(tester, option, seconds: 3);
+    if (isPhone()) {
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await tester.pump(const Duration(seconds: 3));
+    }
+    debugPrint("=====incoming key: $option");
+    if (option.startsWith('db')) {
+      // convert old mainscrean tapping to drawer on mobile
+      option = "/${option.substring(2).toLowerCase()}";
+    } else if (!option.startsWith('/')) {
+      option = "/$option";
+    }
+    debugPrint("=====looking for key: tap$option");
+    await tapByKey(tester, "tap$option", seconds: 3);
     if (tapNumber != null) {
       if (isPhone()) {
         await tester.tap(find.byTooltip(tapNumber));
       } else {
-        await tester.tap(find.byKey(Key("tap$formName")));
+        await tapByKey(tester, "tap$formName");
       }
       await tester.pumpAndSettle(Duration(seconds: waitTime));
     }
@@ -186,11 +197,11 @@ class CommonTest {
     String moquiSessionToken = CommonTest.getTextField('moquiSessionToken');
     await GlobalConfiguration()
         .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
+    int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
       APIRepository repos = APIRepository();
       repos.setApiKey(apiKey, moquiSessionToken);
       // replace XXX strings
-      int seq = test.sequence;
       Map parsed = {};
       testData.forEach((k, v) {
         List newList = [];
@@ -212,9 +223,9 @@ class CommonTest {
         parsed[k] = newList;
       });
       await repos.upLoadEntities(parsed);
-      await PersistFunctions.persistTest(
-          test.copyWith(sequence: seq, testDataLoaded: true));
     }
+    await PersistFunctions.persistTest(
+        test.copyWith(sequence: seq, testDataLoaded: true));
   }
 
   static Future<void> gotoMainMenu(WidgetTester tester) async {

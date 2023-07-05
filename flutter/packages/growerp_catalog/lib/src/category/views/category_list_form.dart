@@ -23,8 +23,7 @@ class CategoryListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<CategoryBloc>(
       create: (BuildContext context) => CategoryBloc(CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const CategoryFetch()),
+          context.read<AuthBloc>().state.authenticate!.apiKey!)),
       child: const CategoryList());
 }
 
@@ -45,9 +44,9 @@ class CategoriesListState extends State<CategoryList> {
   void initState() {
     super.initState();
     started = false;
-    search = false;
-    _categoryBloc = context.read<CategoryBloc>();
     _scrollController.addListener(_onScroll);
+    _categoryBloc = context.read<CategoryBloc>();
+    _categoryBloc.add(const CategoryFetch());
   }
 
   @override
@@ -67,80 +66,88 @@ class CategoriesListState extends State<CategoryList> {
           }
         },
         builder: (context, state) {
-          return Stack(children: [
-            Scaffold(
-                floatingActionButton:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  FloatingActionButton(
-                      heroTag: 'catFiles',
-                      key: const Key("upDownload"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) =>
-                                BlocProvider.value(
-                                    value: _categoryBloc,
-                                    child: const CategoryFilesDialog()));
-                      },
-                      tooltip: 'category up/download',
-                      child: const Icon(Icons.file_copy)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      heroTag: 'catNew',
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _categoryBloc,
-                                  child: CategoryDialog(Category()));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                ]),
-                body: RefreshIndicator(
-                    onRefresh: (() async => context
-                        .read<CategoryBloc>()
-                        .add(const CategoryFetch(refresh: true))),
-                    child: ListView.builder(
-                      key: const Key('listView'),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.hasReachedMax
-                          ? state.categories.length + 1
-                          : state.categories.length + 2,
-                      controller: _scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Column(children: [
-                            const CategoryListHeader(),
-                            Visibility(
-                                visible: state.categories.isEmpty,
-                                child: Center(
-                                    heightFactor: 20,
-                                    child: Text(
-                                        started ? 'No categories found' : '',
-                                        key: const Key('empty'),
-                                        textAlign: TextAlign.center)))
-                          ]);
-                        }
-                        index--;
-                        return index >= state.categories.length
-                            ? const BottomLoader()
-                            : Dismissible(
-                                key: const Key('categoryItem'),
-                                direction: DismissDirection.startToEnd,
-                                child: CategoryListItem(
-                                    category: state.categories[index],
-                                    index: index));
-                      },
-                    ))),
-            if (state.status == CategoryStatus.updateLoading)
-              const LoadingIndicator(),
-          ]);
+          switch (state.status) {
+            case CategoryStatus.failure:
+              return Center(
+                  child: Text('failed to fetch categories: ${state.message}'));
+            case CategoryStatus.success:
+              return Scaffold(
+                  floatingActionButton: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                            heroTag: 'catFiles',
+                            key: const Key("upDownload"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      BlocProvider.value(
+                                          value: _categoryBloc,
+                                          child: const CategoryFilesDialog()));
+                            },
+                            tooltip: 'category up/download',
+                            child: const Icon(Icons.file_copy)),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            heroTag: 'catNew',
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _categoryBloc,
+                                        child: CategoryDialog(Category()));
+                                  });
+                            },
+                            tooltip: 'Add New',
+                            child: const Icon(Icons.add)),
+                      ]),
+                  body: Column(children: [
+                    const CategoryListHeader(),
+                    Expanded(
+                        child: RefreshIndicator(
+                            onRefresh: (() async => _categoryBloc
+                                .add(const CategoryFetch(refresh: true))),
+                            child: ListView.builder(
+                                key: const Key('listView'),
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: state.hasReachedMax
+                                    ? state.categories.length + 1
+                                    : state.categories.length + 2,
+                                controller: _scrollController,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index == 0) {
+                                    return Visibility(
+                                        visible: state.categories.isEmpty,
+                                        child: Center(
+                                            heightFactor: 20,
+                                            child: Text(
+                                                started
+                                                    ? 'No categories found'
+                                                    : '',
+                                                key: const Key('empty'),
+                                                textAlign: TextAlign.center)));
+                                  }
+                                  index--;
+                                  return index >= state.categories.length
+                                      ? const BottomLoader()
+                                      : Dismissible(
+                                          key: const Key('categoryItem'),
+                                          direction:
+                                              DismissDirection.startToEnd,
+                                          child: CategoryListItem(
+                                              category: state.categories[index],
+                                              index: index));
+                                })))
+                  ]));
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
         });
   }
 

@@ -24,25 +24,26 @@ class AssetTest {
   }
 
   static Future<void> addAssets(WidgetTester tester, List<Asset> assets,
-      {bool check = true}) async {
+      {bool check = true, String classificationId = 'AppAdmin'}) async {
     SaveTest test = await PersistFunctions.getTest();
     int seq = test.sequence;
     if (test.assets.isEmpty) {
       // not yet created
       test = test.copyWith(assets: assets);
-      await enterAssetData(tester, assets);
+      await enterAssetData(tester, assets, classificationId: classificationId);
       await PersistFunctions.persistTest(test);
     }
     if (check && test.assets[0].assetId.isEmpty) {
       await PersistFunctions.persistTest(test.copyWith(
-        assets: await checkAssetDetail(tester, test.assets),
+        assets: await checkAssetDetail(tester, test.assets,
+            classificationId: classificationId),
         sequence: seq,
       ));
     }
   }
 
-  static Future<void> enterAssetData(
-      WidgetTester tester, List<Asset> assets) async {
+  static Future<void> enterAssetData(WidgetTester tester, List<Asset> assets,
+      {String classificationId = 'AppAdmin'}) async {
     for (Asset asset in assets) {
       if (asset.assetId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
@@ -55,8 +56,10 @@ class AssetTest {
       await CommonTest.tapByKey(
           tester, 'name'); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', asset.assetName!);
-      await CommonTest.enterText(
-          tester, 'quantityOnHand', asset.quantityOnHand.toString());
+      if (classificationId == 'AppAdmin') {
+        await CommonTest.enterText(
+            tester, 'quantityOnHand', asset.quantityOnHand.toString());
+      }
       await CommonTest.enterDropDownSearch(
           tester, 'productDropDown', asset.product!.productName!);
       await CommonTest.enterDropDown(tester, 'statusDropDown', asset.statusId!);
@@ -68,7 +71,8 @@ class AssetTest {
   }
 
   static Future<List<Asset>> checkAssetDetail(
-      WidgetTester tester, List<Asset> assets) async {
+      WidgetTester tester, List<Asset> assets,
+      {String classificationId = 'AppAdmin'}) async {
     List<Asset> newAssets = [];
     for (Asset asset in assets) {
       await CommonTest.doSearch(tester, searchString: asset.assetName!);
@@ -83,8 +87,10 @@ class AssetTest {
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('AssetDialog')), findsOneWidget);
       expect(CommonTest.getTextFormField('name'), equals(asset.assetName!));
-      expect(CommonTest.getTextFormField('quantityOnHand'),
-          equals(asset.quantityOnHand.toString()));
+      if (classificationId == 'AppAdmin') {
+        expect(CommonTest.getTextFormField('quantityOnHand'),
+            equals(asset.quantityOnHand.toString()));
+      }
       expect(CommonTest.getDropdownSearch('productDropDown'),
           asset.product!.productName!);
       expect(CommonTest.getDropdown('statusDropDown'), asset.statusId);

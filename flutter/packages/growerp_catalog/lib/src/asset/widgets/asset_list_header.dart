@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 class AssetListHeader extends StatefulWidget {
@@ -25,6 +25,7 @@ class AssetListHeader extends StatefulWidget {
 }
 
 class _AssetListHeaderState extends State<AssetListHeader> {
+  String classificationId = GlobalConfiguration().getValue("classificationId");
   String searchString = '';
   bool search = false;
   @override
@@ -63,12 +64,13 @@ class _AssetListHeaderState extends State<AssetListHeader> {
             : Column(children: [
                 Row(children: <Widget>[
                   const Expanded(
-                      child: Text("Name[ID]", textAlign: TextAlign.center)),
-                  if (!ResponsiveBreakpoints.of(context).isMobile)
-                    const Expanded(
-                        child: Text("Status", textAlign: TextAlign.center)),
+                      child: Text("Name", textAlign: TextAlign.center)),
                   const Expanded(
-                      child: Text("Product", textAlign: TextAlign.center)),
+                      child: Text("Act.", textAlign: TextAlign.center)),
+                  Expanded(
+                      child: Text(
+                          classificationId == 'AppHotel' ? 'Type' : 'Product',
+                          textAlign: TextAlign.center)),
                 ]),
                 const Divider(),
               ]),

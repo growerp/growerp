@@ -87,7 +87,10 @@ class FinDoc with _$FinDoc {
   @override
   String toString() =>
       "$docType# $orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
-      "Date: $creationDate! $description! ";
+      "Date: $creationDate! $description! items: ${items.length} "
+      "asset: ${items.isNotEmpty ? items[0].assetName : ''} "
+      "${items.isNotEmpty ? items[0].assetId : ''}"
+      "descr: ${items.isNotEmpty ? items[0].description : ''} ";
 //      "status: $statusId! otherUser: $otherUser! Items: ${items!.length}";
 
   String? displayName(String classificationId) {

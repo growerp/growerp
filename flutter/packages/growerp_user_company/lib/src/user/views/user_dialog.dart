@@ -58,7 +58,7 @@ class UserDialogState extends State<UserDialog> {
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
   late Role _selectedRole;
-  Company? _selectedCompany;
+  Company _selectedCompany = Company();
   XFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -176,7 +176,7 @@ class UserDialogState extends State<UserDialog> {
           title:
               "${_selectedRole == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : _selectedRole.name} contact person information",
           width: isPhone ? 400 : 1000,
-          height: isPhone ? 750 : 700,
+          height: isPhone ? 700 : 700,
           child: ScaffoldMessenger(
               key: _userDialogKey,
               child: Scaffold(
@@ -230,7 +230,7 @@ class UserDialogState extends State<UserDialog> {
     Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
     User? currentUser = authenticate.user;
     if (_selectedRole == Role.company) {
-      _selectedCompany = authenticate.company;
+      _selectedCompany = authenticate.company!;
     }
 
     Future<List<Company>> getOwnedCompanies(filter) async {
@@ -275,7 +275,6 @@ class UserDialogState extends State<UserDialog> {
                 ),
               )
             ]),
-            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
@@ -316,7 +315,7 @@ class UserDialogState extends State<UserDialog> {
           visible: _selectedRole != Role.company,
           child: InputDecorator(
               decoration: InputDecoration(
-                labelText: "${_selectedCompany!.role?.value ?? Role.unknown}"
+                labelText: "${_selectedCompany.role?.value ?? Role.unknown}"
                     " Company information",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.0),
@@ -327,17 +326,15 @@ class UserDialogState extends State<UserDialog> {
                   Expanded(
                     child: DropdownSearch<Company>(
                       key: const Key('userCompanyName'),
-                      selectedItem: _selectedCompany!.name == null
+                      selectedItem: _selectedCompany.name == null
                           ? Company(name: '')
-                          : _selectedCompany!,
+                          : _selectedCompany,
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
+                          decoration:
+                              const InputDecoration(labelText: "company,name"),
                           controller: _companySearchBoxController,
                         ),
                         menuProps: MenuProps(
@@ -349,17 +346,15 @@ class UserDialogState extends State<UserDialog> {
                           width: 450,
                         ),
                       ),
-                      //                 dropdownSearchDecoration: InputDecoration(
-                      //                 labelText: 'Select a Company name',
-                      //               border: OutlineInputBorder(
-                      //                 borderRadius: BorderRadius.circular(25.0)),
-                      //         ),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration:
+                              InputDecoration(labelText: 'Company')),
                       itemAsString: (Company? u) => "${u!.name}",
                       asyncItems: (String? filter) =>
                           getOwnedCompanies(_companySearchBoxController.text),
                       onChanged: (Company? newValue) {
                         setState(() {
-                          _selectedCompany = newValue;
+                          _selectedCompany = newValue ?? Company();
                         });
                       },
                       validator: (value) =>
@@ -372,7 +367,7 @@ class UserDialogState extends State<UserDialog> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    if (_selectedCompany!.name != null)
+                    if (_selectedCompany.name != null)
                       Expanded(
                           child: ElevatedButton(
                         key: const Key('editCompany'),
@@ -381,7 +376,7 @@ class UserDialogState extends State<UserDialog> {
                               barrierDismissible: true,
                               context: context,
                               builder: (BuildContext context) {
-                                return ShowCompanyDialog(_selectedCompany!);
+                                return ShowCompanyDialog(_selectedCompany);
                               });
                         },
                         child: const Text('Update Company'),
@@ -536,7 +531,12 @@ class UserDialogState extends State<UserDialog> {
                       language: Localizations.localeOf(context)
                           .languageCode
                           .toString(),
-                      company: _selectedCompany,
+                      company: _selectedCompany.name != null
+                          ? _selectedCompany
+                          : Company(
+                              name:
+                                  "${_lastNameController.text}, ${_firstNameController.text}",
+                              role: _selectedRole),
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
                   if (!mounted) return;

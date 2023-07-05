@@ -14,14 +14,7 @@ part of 'category_bloc.dart';
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-enum CategoryStatus {
-  initial,
-  loading,
-  filesLoading,
-  updateLoading,
-  success,
-  failure
-}
+enum CategoryStatus { initial, loading, success, failure }
 
 class CategoryState extends Equatable {
   const CategoryState({

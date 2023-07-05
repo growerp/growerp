@@ -34,8 +34,8 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/companyGrey.png",
     selectedImage: "packages/growerp_core/images/company.png",
-    title: "Hotel",
-    route: '/company',
+    title: "My Hotel",
+    route: '/myHotel',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
     tabItems: [
@@ -66,19 +66,18 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/single-bedGrey.png",
     selectedImage: "packages/growerp_core/images/single-bed.png",
-    title: "Rooms",
-    route: '/catalog',
+    title: "Room",
+    route: '/rooms',
     readGroups: [UserGroup.admin, UserGroup.employee],
     tabItems: [
       TabItem(
         form: const AssetListForm(),
-        label: "Rooms",
+        label: "Names",
         icon: const Icon(Icons.home),
-        floatButtonForm: AssetDialog(Asset()),
       ),
       TabItem(
         form: const ProductListForm(),
-        label: "Room Types",
+        label: "Types",
         icon: const Icon(Icons.home),
       ),
     ],
@@ -87,7 +86,7 @@ List<MenuOption> menuOptions = [
       image: "packages/growerp_core/images/reservationGrey.png",
       selectedImage: "packages/growerp_core/images/reservation.png",
       title: "Reservations\n",
-      route: '/sales',
+      route: '/reservations',
       readGroups: [
         UserGroup.admin,
         UserGroup.employee
@@ -110,7 +109,15 @@ List<MenuOption> menuOptions = [
             key: Key('Customer'),
             role: Role.customer,
           ),
-          label: 'Customer Contacts',
+          label: 'Contacts',
+          icon: const Icon(Icons.school),
+        ),
+        TabItem(
+          form: const CompanyListForm(
+            key: Key('Customer'),
+            role: Role.customer,
+          ),
+          label: 'Companies',
           icon: const Icon(Icons.school),
         ),
       ]),
@@ -148,32 +155,6 @@ List<MenuOption> menuOptions = [
           icon: const Icon(Icons.home),
         ),
       ]),
-  MenuOption(
-    image: 'packages/growerp_core/images/companyGrey.png',
-    selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Companies',
-    route: '/companies',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
-    tabItems: [
-      TabItem(
-        form: const CompanyListForm(
-          key: Key('Customer'),
-          role: Role.customer,
-        ),
-        label: '\nCustomers',
-        icon: const Icon(Icons.home),
-      ),
-      TabItem(
-        form: const CompanyListForm(
-          key: Key('Lead'),
-          role: Role.lead,
-        ),
-        label: 'Leads',
-        icon: const Icon(Icons.home),
-      ),
-    ],
-  ),
   MenuOption(
       image: "packages/growerp_core/images/accountingGrey.png",
       selectedImage: "packages/growerp_core/images/accounting.png",

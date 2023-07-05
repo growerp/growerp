@@ -934,3 +934,183 @@ List<Location> locations = [
   Location(locationName: "loc3", assets: [assets[2]]),
   Location(locationName: "loc4", assets: [assets[3]]),
 ];
+
+List<Product> productsHotel = [
+  Product(
+    productName: 'Single Room',
+    description: 'The Single bed room',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'AsClsInventoryFin',
+    listPrice: Decimal.parse('60'),
+    price: Decimal.parse('50'),
+    categories: [Category(categoryName: "Hotel room types")],
+  ),
+  Product(
+    productName: 'Standard Room',
+    description: 'The Standard room',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'AsClsInventoryFin',
+    listPrice: Decimal.parse('90'),
+    price: Decimal.parse('80'),
+    categories: [Category(categoryName: "Hotel room types")],
+  ),
+  Product(
+    productName: 'Deluxe Room',
+    description: 'The Deluxe room offering',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'AsClsInventoryFin',
+    listPrice: Decimal.parse('180'),
+    price: Decimal.parse('170'),
+    categories: [Category(categoryName: "Hotel room types")],
+  ),
+  Product(
+    productName: 'Suite',
+    description: 'The Suite',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'AsClsInventoryFin',
+    listPrice: Decimal.parse('380'),
+    price: Decimal.parse('360'),
+    categories: [Category(categoryName: "Hotel room types")],
+  ),
+  Product(
+    productName: 'Appartment',
+    description: 'The living,  two bedroom appartment',
+    productTypeId: productTypes[2], //rental
+    assetClassId: 'AsClsInventoryFin',
+    listPrice: Decimal.parse('480'),
+    price: Decimal.parse('460'),
+    categories: [Category(categoryName: "Hotel room types")],
+  ),
+];
+
+List<Asset> roomsHotel = [
+  Asset(
+      statusId: "Available",
+      assetName: "Room  1",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[0]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  2",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  3",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  4",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  5",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[2]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  6",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[2]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  7",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[2]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  8",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[3]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room  9",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[3]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 10",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[4]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 11",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 12",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 13",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 14",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 15",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 16",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 17",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 18",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 19",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+  Asset(
+      statusId: "Available",
+      assetName: "Room 20",
+      quantityOnHand: Decimal.parse("1"),
+      availableToPromise: Decimal.parse("1"),
+      product: productsHotel[1]),
+];
+
+List<FinDoc> roomReservations = [
+  FinDoc(otherUser: customers[0], items: [
+    FinDocItem(
+        description: productsHotel[0].productName,
+        rentalFromDate: DateTime.now(),
+        quantity: Decimal.parse('1')) // nbr of days
+  ]),
+];

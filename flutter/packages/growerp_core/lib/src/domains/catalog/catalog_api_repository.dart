@@ -32,6 +32,7 @@ class CatalogAPIRepository extends APIRepository {
       final response = await dioClient.get(
           'rest/s1/growerp/100/Products', apiKey,
           queryParameters: <String, dynamic>{
+            'classificationId': classificationId,
             'companyPartyId': companyPartyId,
             'categoryId': categoryId,
             'productId': productId,
@@ -297,6 +298,39 @@ class CatalogAPIRepository extends APIRepository {
           });
       return getResponse<Category>(
           "category", response, (json) => Category.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<String>>> getRentalOccupancy(
+      {required String productId}) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/RentalOccupancy', apiKey!,
+          queryParameters: <String, dynamic>{
+            'productId': productId,
+          });
+      var json = jsonDecode(response.toString())['rentalFullDates'];
+      List<dynamic> list = List.from(json);
+      List<String> stringList = [];
+      // change members from dynamic to string
+      for (String string in list) {
+        stringList.add(string);
+      }
+      return ApiResult.success(data: stringList);
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<FullDatesProductRental>>>
+      getRentalAllOccupancy() async {
+    try {
+      final response =
+          await dioClient.get('rest/s1/growerp/100/RentalOccupancy', apiKey!);
+      return getResponseList<FullDatesProductRental>("fullDatesProductRental",
+          response, (json) => FullDatesProductRental.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

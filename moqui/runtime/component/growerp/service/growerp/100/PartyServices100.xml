@@ -347,8 +347,8 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="company" type="Map" required="true">
                 <parameter name="partyId"/>
-                <parameter name="name"/>
-                <parameter name="role"/>
+                <parameter name="name" required="true"/>
+                <parameter name="role" required="true"/>
                 <parameter name="email"/>
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId"/>
@@ -434,6 +434,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED"/>
                 </else-if>
             </if>
+            <log message="=====role: ${company.role} ${customerStatusId}"/>
             <service-call 
                 name="mantle.party.PartyServices.create#Organization"
                 out-map="context"
@@ -903,11 +904,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="disabled" value="N"/></if>
             <!-- adjust role -->
             <set field="companyRole" from="role"/>
+            <if condition="role == 'Customer'">
+                <set field="customerStatusId" value="CUSTOMER_QUALIFIED"/></if>
             <if condition="role == 'Lead'">
                 <set field="customerStatusId" value="CUSTOMER_ASSIGNED"/>
                 <set field="companyRole" value="Customer"/></if>
-            <if condition="role == 'Customer'">
-                <set field="customerStatusId" value="CUSTOMER_QUALIFIED"/></if>
             <if condition="role == 'Unknown'">
                 <set field="companyRole" from="null"/>
             </if>
@@ -950,6 +951,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="lastName^,firstName^,companyName^"/>
             </entity-find>
+            <log message="====users found ${userInfos?.size()} user: ${userInfos[0]} looking for: $companyRole $customerStatusId $userGroupId"/>
             <iterate entry="userInfo" list="userInfos">
                 <!-- adjust role -->
                 <if condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
@@ -1006,6 +1008,7 @@ along with this software (see the LICENSE.md file). If not, see
                     role: userInfo.companyRole,
                     paymentMethod: paymentMethod,
                     ]"/>
+                <log message="=====company set: $company"/>
                 <set field="telephoneNr" value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}"/>
                 <set field="userOut" from="[
                     partyId: userInfo?.userPartyId,
@@ -1350,10 +1353,9 @@ along with this software (see the LICENSE.md file). If not, see
                                     contactMechPurposeId:'EmailPrimary']"/>
                     </if></else>
             </if>
+            <log message="========create user for company ${user.company}"/>
             <!-- create company if required -->
             <if condition="!user.company.partyId &amp;&amp; user.company.name">
-                <if condition="!user.company.role">
-                    <return error="true" message="Role required for new company!"/></if>
                 <service-call name="growerp.100.PartyServices100.create#Company"
                     in-map="[company: user.company, ownerPartyId: ownerPartyId]"
                     out-map="context"/>
@@ -1362,6 +1364,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="companyPartyId" from="user.company?.partyId"/>
                 </else>
             </if>
+            <log message="====company created: $companyPartyId"/>
             <!-- add user to company relationship when company provided -->
             <if condition="companyPartyId">
                 <service-call name="create#mantle.party.PartyRelationship"
@@ -1388,9 +1391,11 @@ along with this software (see the LICENSE.md file). If not, see
                         partyId: userPartyId,
                             ]"/>
             </if>
+            <entity-find entity-name="OwnerPersonDetailAndCompany" list="results"/>
+            <log message="=======results: ${results?[0].companyPartyId}"/>
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="userInfo"/>
-            <if condition="userInfo.users"><set field="user" from="userInfo.users[0]"/></if>
+            <set field="user" from="userInfo.users?[0]"/>
         </actions>
     </service>
 
@@ -1847,6 +1852,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ownerPartyId: owner.partyId]"
                     out-map="context"/>
             <!-- initialize accounting with defaults -->
+            <log message="=====init user: $user"/>
             <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                 in-map="[sourcePartyId: 'DefaultSettings',
                         organizationPartyId: user.company.partyId, baseCurrencyUomId: currencyId]" />
@@ -1878,6 +1884,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- login -->
             <script>ec.user.internalLoginUser(username)</script>
             <!-- load demo data -->
+            <log message="=====demo data: $demoData"/>
             <if condition="demoData == 'true'">
                 <service-call name="growerp.100.PartyServices100.load#DefaultData"
                     in-map="[ownerPartyId: owner.partyId,
@@ -2225,6 +2232,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <message>Indexed ${documentsIndexed} documents for feed ${dataFeedId} in ${System.currentTimeMillis() - startTime}ms</message>
             <!-- hotel app not using categories but need one for products -->
+            <!-- looks like we better use the 'All Products Category' -->
             <!--entity-find list="categories" limit="1"
                     entity-name="mantle.product.category.ProductCategory">
                 <econdition field-name="ownerPartyId" from="ownerPartyId"/>
@@ -2544,7 +2552,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <!-- assets -->
                     <set field="assetsHotel" from="[
-                        [ assetName: '01', productName: 'Single Room'],
+                        [ assetName: '01', productName: 'Single Room', ],
                         [ assetName: '02', productName: 'Single Room'],
                         [ assetName: '03', productName: 'Single Room'],
                         [ assetName: '04', productName: 'Standard Room'],                
@@ -2704,7 +2712,15 @@ along with this software (see the LICENSE.md file). If not, see
                     [ productName: 'Suite', quantity: 1,
                         rentalFromDate: nowDate.plus(4), quantity: 1,
                         rentalThruDate: nowDate.plus(11), 
-                        orderName: 'fifth generated Hotel order']
+                        orderName: 'fifth generated Hotel order'],
+                    [ productName: 'Appartment', quantity: 1,
+                        rentalFromDate: nowDate.plus(1), quantity: 1,
+                        rentalThruDate: nowDate.plus(3), 
+                        orderName: 'fifth generated Hotel order'],
+                    [ productName: 'Appartment', quantity: 1,
+                        rentalFromDate: nowDate.plus(4), quantity: 1,
+                        rentalThruDate: nowDate.plus(7), 
+                        orderName: 'fifth generated Hotel order'],
                     ]"/>
     
                 <!--if condition="classificationId == 'AppAdmin'"><set field="ordersIn" from="ordersAdmin"/></if-->

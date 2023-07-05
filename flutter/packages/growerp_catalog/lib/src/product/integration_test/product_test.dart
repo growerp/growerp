@@ -25,23 +25,26 @@ class ProductTest {
   }
 
   static Future<void> addProducts(WidgetTester tester, List<Product> products,
-      {bool check = true}) async {
+      {bool check = true, String classificationId = "AppAdmin"}) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
     // test = test.copyWith(products: []); // ======== remove , just for test
     if (test.products.isEmpty) {
       // not yet created
       test = test.copyWith(products: products);
-      await enterProductData(tester, products);
+      await enterProductData(tester, products,
+          classificationId: classificationId);
       await PersistFunctions.persistTest(test.copyWith(products: products));
     }
     if (check) {
-      await PersistFunctions.persistTest(
-          test.copyWith(products: await checkProduct(tester, products)));
+      await PersistFunctions.persistTest(test.copyWith(
+          products: await checkProduct(tester, products,
+              classificationId: classificationId)));
     }
   }
 
   static Future<void> enterProductData(
-      WidgetTester tester, List<Product> products) async {
+      WidgetTester tester, List<Product> products,
+      {String classificationId = "AppAdmin"}) async {
     for (Product product in products) {
       if (product.productId.isEmpty) {
         await CommonTest.tapByKey(tester, 'addNew');
@@ -58,22 +61,24 @@ class ProductTest {
       await CommonTest.enterText(tester, 'price', product.price.toString());
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());
-      await CommonTest.drag(tester);
-      // remove existing categories
-      while (tester.any(find.byKey(const Key("deleteChip")))) {
-        await CommonTest.tapByKey(tester, "deleteChip");
-      }
-      await CommonTest.tapByKey(tester, "addCategories");
-      for (Category category in product.categories) {
-        await CommonTest.tapByText(tester, category.categoryName);
-      }
-      await CommonTest.tapByKey(tester, 'ok');
-      await CommonTest.dragUntil(tester, key: 'productTypeDropDown');
-      await CommonTest.enterDropDown(
-          tester, 'productTypeDropDown', product.productTypeId!);
-      if (product.productTypeId != 'Service') {
-        if (product.useWarehouse == true) {
-          await CommonTest.tapByKey(tester, 'useWarehouse');
+      if (classificationId == 'AppAdmin') {
+        await CommonTest.drag(tester);
+        // remove existing categories
+        while (tester.any(find.byKey(const Key("deleteChip")))) {
+          await CommonTest.tapByKey(tester, "deleteChip");
+        }
+        await CommonTest.tapByKey(tester, "addCategories");
+        for (Category category in product.categories) {
+          await CommonTest.tapByText(tester, category.categoryName);
+        }
+        await CommonTest.tapByKey(tester, 'ok');
+        await CommonTest.dragUntil(tester, key: 'productTypeDropDown');
+        await CommonTest.enterDropDown(
+            tester, 'productTypeDropDown', product.productTypeId!);
+        if (product.productTypeId != 'Service') {
+          if (product.useWarehouse == true) {
+            await CommonTest.tapByKey(tester, 'useWarehouse');
+          }
         }
       }
       // needed when service is removed
@@ -85,7 +90,8 @@ class ProductTest {
   }
 
   static Future<List<Product>> checkProduct(
-      WidgetTester tester, List<Product> products) async {
+      WidgetTester tester, List<Product> products,
+      {String classificationId = 'AppAdmin'}) async {
     List<Product> newProducts = [];
     for (Product product in products) {
       await CommonTest.doSearch(tester, searchString: product.productName!);
@@ -93,12 +99,14 @@ class ProductTest {
       expect(CommonTest.getTextField('name0'), equals(product.productName));
       expect(
           CommonTest.getTextField('price0'), equals(product.price.toString()));
-      if (product.categories.length == 1) {
-        expect(CommonTest.getTextField('categoryName0'),
-            equals(product.categories[0].categoryName));
-      } else {
-        expect(CommonTest.getTextField('categoryName0'),
-            equals(product.categories.length.toString()));
+      if (classificationId == 'AppAdmin') {
+        if (product.categories.length == 1) {
+          expect(CommonTest.getTextField('categoryName0'),
+              equals(product.categories[0].categoryName));
+        } else {
+          expect(CommonTest.getTextField('categoryName0'),
+              equals(product.categories.length.toString()));
+        }
       }
       if (!CommonTest.isPhone()) {
         expect(CommonTest.getTextField('description0'),
@@ -113,21 +121,23 @@ class ProductTest {
       expect(CommonTest.getTextFormField('price'), product.price.toString());
       expect(CommonTest.getTextFormField('listPrice'),
           product.listPrice.toString());
-      for (Category category in product.categories) {
-        expect(find.byKey(Key(category.categoryName)), findsOneWidget);
-      }
-      // not sure how to test checked list
+      if (classificationId == 'AppAdmin') {
+        for (Category category in product.categories) {
+          expect(find.byKey(Key(category.categoryName)), findsOneWidget);
+        }
+        // not sure how to test checked list
 //      await CommonTest.tapByKey(tester, 'addCategories');
 //      for (Category category in product.categories) {
 //        expect(
 //            CommonTest.getCheckboxListTile("${category.categoryName!}["), true);
 //      }
-      expect(
-          CommonTest.getDropdown('productTypeDropDown'), product.productTypeId);
 //      if (product.productTypeId != 'service') {
 //        expect(
 //          CommonTest.getCheckboxListTile('useWarehouse'), product.useWarehouse);
 //      }
+        expect(CommonTest.getDropdown('productTypeDropDown'),
+            product.productTypeId);
+      }
       newProducts.add(product.copyWith(productId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

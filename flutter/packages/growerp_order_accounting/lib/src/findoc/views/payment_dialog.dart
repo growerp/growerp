@@ -162,9 +162,8 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0)),
-                          ),
+                              labelText:
+                                  "${finDocUpdated.sales ? 'customer' : 'supplier'} name"),
                           controller: _userSearchBoxController,
                         ),
                         menuProps: MenuProps(

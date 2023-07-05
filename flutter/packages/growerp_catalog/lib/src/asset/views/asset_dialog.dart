@@ -75,36 +75,44 @@ class AssetDialogState extends State<AssetDialogFull> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Dialog(
-            key: const Key('AssetDialog'),
-            insetPadding: const EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: BlocListener<AssetBloc, AssetState>(
-                listener: (context, state) async {
-                  switch (state.status) {
-                    case AssetStatus.success:
-                      Navigator.of(context).pop();
-                      break;
-                    case AssetStatus.failure:
-                      HelperFunctions.showMessage(
-                          context, 'Error: ${state.message}', Colors.red);
-                      break;
-                    default:
-                      const Text("????");
-                  }
-                },
-                child: popUp(
-                    context: context,
-                    child: _showForm(isPhone),
-                    title: classificationId == 'AppHotel'
-                        ? 'Room information'
-                        : 'Asset Information',
-                    height: 550,
-                    width: 400))));
+    return BlocConsumer<AssetBloc, AssetState>(
+        listener: (context, state) async {
+      switch (state.status) {
+        case AssetStatus.success:
+          Navigator.of(context).pop();
+          break;
+        case AssetStatus.failure:
+          HelperFunctions.showMessage(
+              context, 'Error: ${state.message}', Colors.red);
+          break;
+        default:
+          const Text("????");
+      }
+    }, builder: (context, state) {
+      switch (state.status) {
+        case AssetStatus.success:
+          return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Dialog(
+                  key: const Key('AssetDialog'),
+                  insetPadding: const EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: popUp(
+                      context: context,
+                      title: classificationId == 'AppHotel'
+                          ? 'Room information'
+                          : 'Asset Information',
+                      height: 400,
+                      width: 400,
+                      child: _showForm(isPhone))));
+        case AssetStatus.failure:
+          return const FatalErrorForm(message: 'Asset load problem');
+        default:
+          return const Center(child: CircularProgressIndicator());
+      }
+    });
   }
 
   Widget _showForm(bool isPhone) {
@@ -165,13 +173,15 @@ class AssetDialogState extends State<AssetDialogFull> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autofocus: true,
-                          decoration: const InputDecoration(
-                              labelText: "product id,name"),
+                          decoration: InputDecoration(
+                              labelText:
+                                  "${classificationId == 'AppHotel' ? 'Room Type' : 'Product id'} name"),
                           controller: _productSearchBoxController,
                         ),
                         title: popUp(
                           context: context,
-                          title: 'Select product',
+                          title:
+                              'Select ${classificationId == 'AppHotel' ? 'Room Type' : 'Product'}',
                           height: 50,
                         ),
                       ),
@@ -191,6 +201,8 @@ class AssetDialogState extends State<AssetDialogFull> {
                         _productBloc.add(ProductFetch(searchString: filter));
                         return Future.value(state.products);
                       },
+                      validator: (value) =>
+                          value == null ? 'field required' : null,
                     );
                   default:
                     return const Center(child: CircularProgressIndicator());

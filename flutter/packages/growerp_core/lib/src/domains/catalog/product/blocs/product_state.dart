@@ -27,6 +27,8 @@ class ProductState extends Equatable {
   const ProductState({
     this.status = ProductStatus.initial,
     this.products = const <Product>[],
+    this.occupancyDates = const <String>[], // format YYYY-MM-DD
+    this.fullDates = const <FullDatesProductRental>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -35,6 +37,8 @@ class ProductState extends Equatable {
   final ProductStatus status;
   final String? message;
   final List<Product> products;
+  final List<String> occupancyDates;
+  final List<FullDatesProductRental> fullDates;
   final bool hasReachedMax;
   final String searchString;
 
@@ -42,6 +46,8 @@ class ProductState extends Equatable {
     ProductStatus? status,
     String? message,
     List<Product>? products,
+    List<String>? occupancyDates,
+    List<FullDatesProductRental>? fullDates,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -49,6 +55,8 @@ class ProductState extends Equatable {
     return ProductState(
       status: status ?? this.status,
       products: products ?? this.products,
+      occupancyDates: occupancyDates ?? this.occupancyDates,
+      fullDates: fullDates ?? this.fullDates,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,

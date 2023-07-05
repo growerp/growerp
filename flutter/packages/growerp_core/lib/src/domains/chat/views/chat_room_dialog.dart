@@ -104,14 +104,10 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0)),
-                    ),
+                    decoration:
+                        const InputDecoration(labelText: "Select chat partner"),
                     controller: _userSearchBoxController,
                   ),
-                  menuProps:
-                      MenuProps(borderRadius: BorderRadius.circular(20.0)),
                   title: popUp(
                     context: context,
                     title: 'Select chat partner',
@@ -119,12 +115,9 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                   ),
                 ),
                 selectedItem: _selectedUser,
-                //             dropdownSearchDecoration: InputDecoration(
-                //             labelText: 'Private chat with Other User',
-                //           border: OutlineInputBorder(
-                //             borderRadius: BorderRadius.circular(25.0)),
-                //     ),
-                //   showClearButton: false,
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownSearchDecoration:
+                        InputDecoration(labelText: 'Chat partner')),
                 itemAsString: (User? u) => "${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
                   ApiResult<List<User>> result = await repos.lookUpUser(

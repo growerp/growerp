@@ -96,21 +96,20 @@
                             </div>
                         </div>
                         <!-- State -->
-                        <div class="form-group row justify-content-between">
+                        <!--div class="form-group row justify-content-between">
                             <label for="state" class="col-form-label modal-text ml-3">State<span>&nbsp;*</span></label>
                             <div class="col-sm-8 col-xs-12">
                                 <select id="state"
                                         v-model="shippingAddress.stateProvinceGeoId"
                                         class="form-control"
-                                        @focus="resetStateErrorMessage(shippingAddress.stateProvinceGeoId)"
-                                        required>
+                                        @focus="resetStateErrorMessage(shippingAddress.stateProvinceGeoId)">
                                     <option v-for="region in regionsList" :value="region.geoId">{{region.geoName}}</option>
                                 </select>
                                 <div v-if="stateErrorMessage != null && stateErrorMessage != ''">
                                     <small class="input-text form-text text-danger">{{stateErrorMessage}}</small>
                                 </div>
                             </div>
-                        </div>
+                        </div-->
                         <!-- Zip/Postal code -->
                         <div class="form-group row justify-content-between">
                             <label for="postalcode" class="col-form-label modal-text ml-3">{{shippingAddress.countryGeoId == 'USA' ? 'Zip Code' : 'Postal Code'}}<span>&nbsp;*</span></label>

@@ -17,6 +17,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="Products" authenticate="false">
         <description> get a single, or all products</description>
         <in-parameters>
+            <parameter name="classificationId" default="AppAdmin"/><!-- AppHotel AppXXXXX-->
             <parameter name="companyPartyId"/>
             <parameter name="categoryId"/>
             <parameter name="productId"/>
@@ -43,7 +44,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
                 <parameter name="image"/>
             </parameter>
             <parameter name="products" type="List">
@@ -169,14 +169,25 @@ along with this software (see the LICENSE.md file). If not, see
                         </script>
                         <continue/>
                     </if>
-                    <!-- assets totalled by quantityOnHand -->
-                    <entity-find entity-name="growerp.mobile.asset.ProductAssetSummary"  list="assetCount">
-                        <econdition field-name="productId" from="product.productId"/>
-                        <econdition field-name="ownerPartyId" from="companyPartyId"/>
-                        <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"/>
-                        <!--econdition field-name="classEnumId" from="product.assetClassEnumId" ignore-if-empty="true"/>
-                        <econdition field-name="assetTypeEnumId" from="product.assetTypeEnumId" ignore-if-empty="true"/-->
-                    </entity-find>
+                    <!-- assets for hotel not using moqui inventory -->
+                    <if condition="classificationId == 'AppHotel'">
+                        <entity-find-count entity-name="mantle.product.asset.Asset" count-field="assetCount">
+                            <econdition field-name="productId" from="product.productId"/>
+                        </entity-find-count>
+                        <else>
+                            <!-- assets totalled by quantityOnHand -->
+                            <entity-find entity-name="growerp.mobile.asset.ProductAssetSummary"  list="assetCountList">
+                                <econdition field-name="productId" from="product.productId"/>
+                                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                                <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"/>
+                                <!--econdition field-name="classEnumId" from="product.assetClassEnumId" ignore-if-empty="true"/>
+                                <econdition field-name="assetTypeEnumId" from="product.assetTypeEnumId" ignore-if-empty="true"/-->
+                            </entity-find>
+                            <set field="assetCount" from="assetCountList ? (int) assetCountList[0].totalAssets : null"/>
+                        </else>
+                    </if>
+
+
                     <!-- content -->
                     <entity-find entity-name="mantle.product.ProductContent" list="contents" limit="1">
                         <econdition field-name="productId" from="product.productId"/>
@@ -201,7 +212,7 @@ along with this software (see the LICENSE.md file). If not, see
                         price: product.price ? product.price.toString() : null,
                         listPrice: product.listPrice ? product.listPrice.toString() : null,
                         useWarehouse: product.requireInventory == 'Y' ? true : false,
-                        assetCount: assetCount ? (int) assetCount[0].totalAssets : null,
+                        assetCount: assetCount ? assetCount : null,
                         image: imageFile]"/>
                 </if>
                 <if condition="product.categoryId &amp;&amp; 
@@ -247,7 +258,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
                 <parameter name="image"/>
             </parameter>
             <parameter name="classificationId" required="true"/>
@@ -377,7 +387,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
                 <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
                 <parameter name="image"/>
             </parameter>
         </in-parameters>
@@ -630,8 +639,8 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find offset="start" limit="limit" list="assetList"
                 entity-name="mantle.product.asset.AssetAndProduct">
                 <econdition field-name="assetId" ignore-if-empty="true"/>
-                <econdition field-name="statusId"
-                    operator="not-equals" from="activated" ignore-if-empty="true"/>
+                <!--econdition field-name="statusId"
+                    operator="not-equals" from="activated" ignore-if-empty="true"/-->
                 <econdition field-name="classEnumId"
                     from="assetClass.convertedStatusId" ignore-if-empty="true"/>
                 <econdition field-name="ownerPartyId" from="companyPartyId"/>
@@ -650,8 +659,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="!assetId">
                 <set field="assets" from="[]"/></if>
-            <if condition="assetList">
-                <iterate entry="item" list="assetList">
+            <iterate entry="item" list="assetList">
                 <if condition="filter != null">
                     <script>
                         assets.add([
@@ -687,7 +695,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <script>assets.add(assetOut)</script>
                     </else>
                 </if>
-            </iterate></if>
+            </iterate>
         </actions>
     </service>
 
@@ -721,7 +729,6 @@ along with this software (see the LICENSE.md file). If not, see
                         </parameter>
                     </parameter>
                     <parameter name="useWarehouse" type="Boolean"/>
-                    <parameter name="assetCount"/>
                     <parameter name="image"/>
                 </parameter>
             </parameter>
@@ -756,10 +763,20 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="storeDomain" from="classificationId"/>
             </entity-find>
             <if condition="!asset.product?.productId &amp;&amp; asset.product?.productName">
-                <service-call name="growerp.100.CatgProdServices100.create#Product"
-                    in-map="[classificationId: classificationId, product: asset.product]"
-                    out-map="productResult"/>
-                <set field="asset.product.productId" from="productResult.product.productId"/>
+                <!-- check first if exist by name -->
+                <entity-find entity-name="mantle.product.Product" list="checkProducts" limit="1">
+                    <econdition field-name="productName" from="asset.product?.productName"/>
+                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                </entity-find>
+                <if condition="checkProducts">
+                    <set field="asset.product.productId" from="checkProducts[0].productId"/>
+                    <else>
+                        <service-call name="growerp.100.CatgProdServices100.create#Product"
+                            in-map="[classificationId: classificationId, product: asset.product]"
+                            out-map="productResult"/>
+                        <set field="asset.product.productId" from="productResult.product.productId"/>
+                    </else>
+                </if>
             </if>
             <service-call name="create#mantle.product.asset.Asset"
                 in-map="[

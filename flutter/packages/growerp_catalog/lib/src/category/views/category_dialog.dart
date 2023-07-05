@@ -130,8 +130,11 @@ class CategoryDialogState extends State<CategoryDialogFull> {
           default:
         }
       }, builder: (context, productState) {
-        return Stack(children: [
-          Dialog(
+        if (productState.status == ProductStatus.loading ||
+            categoryState.status == CategoryStatus.loading) {
+          return const LoadingIndicator();
+        } else {
+          return Dialog(
               key: const Key('CategoryDialog'),
               insetPadding: const EdgeInsets.all(20),
               shape: RoundedRectangleBorder(
@@ -142,11 +145,8 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                   child: listChild(productState),
                   title: 'Category Information',
                   height: 650,
-                  width: 400)),
-          if (categoryState.status == CategoryStatus.updateLoading ||
-              productState.status == ProductStatus.loading)
-            const LoadingIndicator(),
-        ]);
+                  width: 400));
+        }
       });
     });
   }
@@ -180,20 +180,6 @@ class CategoryDialogState extends State<CategoryDialogFull> {
   }
 
   Widget _showForm(state) {
-    final Text? retrieveError = _getRetrieveErrorWidget();
-    if (retrieveError != null) {
-      return retrieveError;
-    }
-    if (_pickImageError != null) {
-      return Text(
-        'Pick image error: $_pickImageError',
-        textAlign: TextAlign.center,
-      );
-    }
-    return _categoryDialog(state);
-  }
-
-  Widget _categoryDialog(state) {
     final Text? retrieveError = _getRetrieveErrorWidget();
     if (retrieveError != null) {
       return retrieveError;
@@ -246,115 +232,110 @@ class CategoryDialogState extends State<CategoryDialogFull> {
       },
     ));
 
-    return Center(
-        child: ScaffoldMessenger(
-            key: categoryDialogKey,
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                floatingActionButton:
-                    ImageButtons(_scrollController, _onImageButtonPressed),
-                body: Form(
-                    key: _categoryDialogFormKey,
-                    child: SingleChildScrollView(
-                        controller: _scrollController,
-                        key: const Key('listView'),
-                        child: Column(children: [
-                          Center(
-                              child: Text(
-                            'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',
-                            style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                            key: const Key('header'),
-                          )),
-                          const SizedBox(height: 30),
-                          CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 70,
-                              child: _imageFile != null
-                                  ? foundation.kIsWeb
-                                      ? Image.network(_imageFile!.path,
-                                          scale: 0.3)
-                                      : Image.file(File(_imageFile!.path),
-                                          scale: 0.3)
-                                  : widget.category.image != null
-                                      ? Image.memory(widget.category.image!,
-                                          scale: 0.3)
-                                      : Text(
-                                          widget.category.categoryName.isEmpty
-                                              ? '?'
-                                              : widget.category.categoryName
-                                                  .substring(0, 1),
-                                          style: const TextStyle(
-                                              fontSize: 30,
-                                              color: Colors.black))),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            key: const Key('name'),
-                            decoration: const InputDecoration(
-                                labelText: 'Category Name'),
-                            controller: _nameController,
-                            validator: (value) {
-                              return value!.isEmpty
-                                  ? 'Please enter a category name?'
-                                  : null;
-                            },
-                          ),
-                          TextFormField(
-                            key: const Key('description'),
-                            decoration:
-                                const InputDecoration(labelText: 'Description'),
-                            controller: _descrController,
-                            maxLines: 3,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter a category description?';
+    return ScaffoldMessenger(
+        key: categoryDialogKey,
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            floatingActionButton:
+                ImageButtons(_scrollController, _onImageButtonPressed),
+            body: Form(
+                key: _categoryDialogFormKey,
+                child: SingleChildScrollView(
+                    controller: _scrollController,
+                    key: const Key('listView'),
+                    child: Column(children: [
+                      Center(
+                          child: Text(
+                        'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
+                        key: const Key('header'),
+                      )),
+                      const SizedBox(height: 30),
+                      CircleAvatar(
+                          backgroundColor: Colors.green,
+                          radius: 70,
+                          child: _imageFile != null
+                              ? foundation.kIsWeb
+                                  ? Image.network(_imageFile!.path, scale: 0.3)
+                                  : Image.file(File(_imageFile!.path),
+                                      scale: 0.3)
+                              : widget.category.image != null
+                                  ? Image.memory(widget.category.image!,
+                                      scale: 0.3)
+                                  : Text(
+                                      widget.category.categoryName.isEmpty
+                                          ? '?'
+                                          : widget.category.categoryName
+                                              .substring(0, 1),
+                                      style: const TextStyle(
+                                          fontSize: 30, color: Colors.black))),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        key: const Key('name'),
+                        decoration:
+                            const InputDecoration(labelText: 'Category Name'),
+                        controller: _nameController,
+                        validator: (value) {
+                          return value!.isEmpty
+                              ? 'Please enter a category name?'
+                              : null;
+                        },
+                      ),
+                      TextFormField(
+                        key: const Key('description'),
+                        decoration:
+                            const InputDecoration(labelText: 'Description'),
+                        controller: _descrController,
+                        maxLines: 3,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter a category description?';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      InputDecorator(
+                          decoration: InputDecoration(
+                              labelText:
+                                  'Related Products${widget.category.nbrOfProducts > widget.category.products.length ? ' total: '
+                                      '${widget.category.nbrOfProducts}, '
+                                      'shown first ${widget.category.products.length}' : ''}',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(25.0),
+                              )),
+                          child: Wrap(spacing: 10.0, children: relProducts)),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                          key: const Key('update'),
+                          child: Text(widget.category.categoryId.isEmpty
+                              ? 'Create'
+                              : 'Update'),
+                          onPressed: () async {
+                            if (_categoryDialogFormKey.currentState!
+                                .validate()) {
+                              updatedCategory = Category(
+                                  categoryId: widget.category.categoryId,
+                                  categoryName: _nameController.text,
+                                  description: _descrController.text,
+                                  products: _selectedProducts,
+                                  image: await HelperFunctions.getResizedImage(
+                                      _imageFile?.path));
+                              if (!mounted) return;
+                              if (_imageFile?.path != null &&
+                                  updatedCategory.image == null) {
+                                HelperFunctions.showMessage(
+                                    context, "Image upload error!", Colors.red);
+                              } else {
+                                _categoryBloc.add(CategoryUpdate(
+                                  updatedCategory,
+                                ));
                               }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          InputDecorator(
-                              decoration: InputDecoration(
-                                  labelText:
-                                      'Related Products${widget.category.nbrOfProducts > widget.category.products.length ? ' total: '
-                                          '${widget.category.nbrOfProducts}, '
-                                          'shown first ${widget.category.products.length}' : ''}',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(25.0),
-                                  )),
-                              child:
-                                  Wrap(spacing: 10.0, children: relProducts)),
-                          const SizedBox(height: 10),
-                          ElevatedButton(
-                              key: const Key('update'),
-                              child: Text(widget.category.categoryId.isEmpty
-                                  ? 'Create'
-                                  : 'Update'),
-                              onPressed: () async {
-                                if (_categoryDialogFormKey.currentState!
-                                    .validate()) {
-                                  updatedCategory = Category(
-                                      categoryId: widget.category.categoryId,
-                                      categoryName: _nameController.text,
-                                      description: _descrController.text,
-                                      products: _selectedProducts,
-                                      image:
-                                          await HelperFunctions.getResizedImage(
-                                              _imageFile?.path));
-                                  if (!mounted) return;
-                                  if (_imageFile?.path != null &&
-                                      updatedCategory.image == null) {
-                                    HelperFunctions.showMessage(context,
-                                        "Image upload error!", Colors.red);
-                                  } else {
-                                    _categoryBloc.add(CategoryUpdate(
-                                      updatedCategory,
-                                    ));
-                                  }
-                                }
-                              }),
-                        ]))))));
+                            }
+                          }),
+                    ])))));
   }
 }

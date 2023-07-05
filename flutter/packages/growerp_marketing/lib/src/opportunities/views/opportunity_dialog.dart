@@ -206,10 +206,7 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
                     autofocus: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0)),
-                    ),
+                    decoration: const InputDecoration(labelText: "lead,name"),
                     controller: _leadSearchBoxController,
                   ),
                   menuProps:
@@ -251,10 +248,8 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
                       autofocus: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20.0)),
-                      ),
+                      decoration:
+                          const InputDecoration(labelText: "employee,name"),
                       controller: _accountSearchBoxController,
                     ),
                     title: popUp(

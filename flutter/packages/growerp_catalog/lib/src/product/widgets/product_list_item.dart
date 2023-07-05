@@ -29,7 +29,6 @@ class ProductListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String classificationId = GlobalConfiguration().get("classificationId");
-    var repos = context.read<CatalogAPIRepository>();
     final productBloc = context.read<ProductBloc>();
     return ListTile(
         leading: CircleAvatar(
@@ -72,10 +71,8 @@ class ProductListItem extends StatelessWidget {
           await showDialog(
               barrierDismissible: true,
               context: context,
-              builder: (BuildContext context) => RepositoryProvider.value(
-                  value: repos,
-                  child: BlocProvider.value(
-                      value: productBloc, child: ProductDialog(product))));
+              builder: (BuildContext context) => BlocProvider.value(
+                  value: productBloc, child: ProductDialog(product)));
         },
         trailing: IconButton(
           key: Key('delete$index'),

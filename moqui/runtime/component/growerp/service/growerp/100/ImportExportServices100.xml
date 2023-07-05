@@ -53,8 +53,21 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate></if>
             <if condition="entities.products">
                 <iterate list="entities.products" entry="product">
-                    <service-call name="growerp.100.CatgProdServices100.create#Product"
+                    <log message="===== processing product: ${product.productName}"/>
+                    <!-- check if related category exist using name, if yes use these-->
+                    <iterate list="product.categories" entry="category">
+                        <entity-find entity-name="mantle.product.category.ProductCategory" list="foundCategories">
+                            <!--econdition field-name="categoryName" from="category.categoryName"/-->
+                            <econdition field-name="ownerPartyId" from="relComp.ownerPartyId"/>
+                        </entity-find>
+                        <if condition="foundCategories">
+                            <log message="======= category found: ${foundCategories}"/>
+                            <set field="category.categoryId" from="foundCategories[0].productCategoryId"/>
+                        </if>
+                    </iterate>
+                    <service-call name="growerp.100.CatgProdServices100.create#Product" out-map="result"
                         in-map="[product: product, classificationId: classificationId]"/>
+                    <log message="=========prod created: ${result.product}"/>
                 </iterate></if>
             <if condition="entities.assets">
                 <iterate list="entities.assets" entry="asset">

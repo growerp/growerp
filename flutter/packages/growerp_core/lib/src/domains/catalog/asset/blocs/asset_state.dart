@@ -14,7 +14,7 @@
 
 part of 'asset_bloc.dart';
 
-enum AssetStatus { initial, success, failure }
+enum AssetStatus { initial, loading, success, failure }
 
 class AssetState extends Equatable {
   const AssetState({
@@ -49,7 +49,7 @@ class AssetState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [message, assets, hasReachedMax];
+  List<Object?> get props => [status, message, assets, hasReachedMax];
 
   @override
   String toString() => '$status { #assets: ${assets.length}, '

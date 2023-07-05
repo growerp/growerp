@@ -1103,8 +1103,12 @@ along with this software (see the LICENSE.md file). If not, see
     <member-entity entity-alias="PROD" entity-name="mantle.product.Product"/>
     <member-entity entity-alias="RENTAL" entity-name="growerp.product.AssetRental"
         join-from-alias="PROD"><key-map field-name="productId"/></member-entity>
-    <alias-all entity-alias="PROD"/>
     <alias-all entity-alias="RENTAL"/>
+    <alias name="productId" entity-alias="PROD"/>
+    <alias name="ownerPartyId" entity-alias="PROD"/>
+    <alias name="productName" entity-alias="PROD"/>
+    <alias name="productTypeEnumId" entity-alias="PROD"/>
+    <alias name="productClassEnumId" entity-alias="PROD"/>
 </view-entity>
 
 <view-entity entity-name="ProductStoreAndCategory" package="growerp.category">

@@ -26,7 +26,7 @@ class PaymentTest {
   static Future<void> selectSalesPayments(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'accntSales', 'FinDocListFormSalesPayment', '2');
+        tester, 'acctSales', 'FinDocListFormSalesPayment', '2');
   }
 
   static Future<void> addPayments(WidgetTester tester, List<FinDoc> payments,

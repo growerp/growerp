@@ -68,14 +68,16 @@ Future main() async {
     title: 'GrowERP administrator.',
     router: router.generateRoute,
     menuOptions: menuOptions,
-    extraDelegates: const [
-      UserCompanyLocalizations.delegate,
-      CatalogLocalizations.delegate,
-      InventoryLocalizations.delegate,
-      OrderAccountingLocalizations.delegate,
-      WebsiteLocalizations.delegate,
-      MarketingLocalizations.delegate,
-      InventoryLocalizations.delegate,
-    ],
+    extraDelegates: extraDelegates,
   ));
 }
+
+List<LocalizationsDelegate<dynamic>> extraDelegates = const [
+  UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  InventoryLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+  MarketingLocalizations.delegate,
+  InventoryLocalizations.delegate,
+];

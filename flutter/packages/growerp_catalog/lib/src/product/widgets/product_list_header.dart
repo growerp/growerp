@@ -99,7 +99,7 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                         child: Text(
                             classificationId != 'AppHotel'
                                 ? "Nbr Of Assets"
-                                : "Number of Rooms",
+                                : "Number of Units",
                             textAlign: TextAlign.center)),
                   ]),
                   const Divider(),

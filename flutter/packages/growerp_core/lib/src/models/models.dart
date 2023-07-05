@@ -6,4 +6,4 @@ export 'gl_account_model.dart';
 export 'payment_method_model.dart';
 export 'payment_instrument_model.dart';
 export 'item_type_model.dart';
-export '../domains/company_user/models/role_model.dart';
+export 'full_dates_product_rental_model.dart';

@@ -137,7 +137,7 @@ class OrderTest {
           tester, 'quantity', finDoc.items[0].quantity.toString());
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'okRental');
-      await CommonTest.tapByKey(tester, 'update', seconds: 10);
+      await CommonTest.tapByKey(tester, 'update', seconds: 5);
       // get productId
       await CommonTest.tapByKey(tester, 'id0'); // added at the top
       List<FinDocItem> newItems = List.of(finDoc.items);

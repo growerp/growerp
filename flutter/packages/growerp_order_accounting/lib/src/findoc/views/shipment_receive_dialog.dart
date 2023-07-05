@@ -153,12 +153,8 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                         showSearchBox: true,
                                         searchFieldProps: TextFieldProps(
                                           autofocus: true,
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        25.0)),
-                                          ),
+                                          decoration: const InputDecoration(
+                                              labelText: "location name"),
                                           controller:
                                               _locationSearchBoxControllers[
                                                   index],
@@ -172,13 +168,11 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                           height: 50,
                                         ),
                                       ),
-                                      //                                     dropdownSearchDecoration: InputDecoration(
-                                      //                                     labelText: 'Location',
-                                      //                                   border: OutlineInputBorder(
-                                      //                                     borderRadius:
-                                      //                                       BorderRadius.circular(25.0)),
-                                      //                           ),
-                                      //                         showClearButton: false,
+                                      dropdownDecoratorProps:
+                                          const DropDownDecoratorProps(
+                                              dropdownSearchDecoration:
+                                                  InputDecoration(
+                                                      labelText: 'Location')),
                                       itemAsString: (Location? u) =>
                                           "${u?.locationName}",
 /*                                      asyncItems: (String? filter) async {

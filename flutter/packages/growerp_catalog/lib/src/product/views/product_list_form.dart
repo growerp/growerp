@@ -23,14 +23,10 @@ class ProductListForm extends StatelessWidget {
   const ProductListForm({super.key});
 
   @override
-  Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
-      child: BlocProvider<ProductBloc>(
-          create: (BuildContext context) => ProductBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))
-            ..add(const ProductFetch()),
-          child: const ProductList()));
+  Widget build(BuildContext context) => BlocProvider<ProductBloc>(
+      create: (BuildContext context) => ProductBloc(CatalogAPIRepository(
+          context.read<AuthBloc>().state.authenticate!.apiKey!)),
+      child: const ProductList());
 }
 
 class ProductList extends StatefulWidget {
@@ -41,11 +37,7 @@ class ProductList extends StatefulWidget {
 
 class ProductListState extends State<ProductList> {
   final _scrollController = ScrollController();
-  late Authenticate authenticate;
   late ProductBloc _productBloc;
-  late int limit;
-  late bool search;
-  String? searchString;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool started;
@@ -57,7 +49,7 @@ class ProductListState extends State<ProductList> {
     entityName = classificationId == 'AppHotel' ? 'Room Type' : 'Product';
     _scrollController.addListener(_onScroll);
     _productBloc = context.read<ProductBloc>();
-    search = false;
+    _productBloc.add(const ProductFetch());
   }
 
   @override
@@ -77,79 +69,92 @@ class ProductListState extends State<ProductList> {
           }
         },
         builder: (context, state) {
-          return Stack(children: [
-            Scaffold(
-                floatingActionButton:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  FloatingActionButton(
-                      heroTag: 'files',
-                      key: const Key("upDownload"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: const ProductFilesDialog());
-                            });
-                      },
-                      tooltip: 'products up/download',
-                      child: const Icon(Icons.file_copy)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      heroTag: 'new',
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: ProductDialog(Product()));
-                            });
-                      },
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add))
-                ]),
-                body: RefreshIndicator(
-                    onRefresh: () async => context
-                        .read<ProductBloc>()
-                        .add(const ProductFetch(refresh: true)),
-                    child: ListView.builder(
-                        key: const Key('listView'),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: state.hasReachedMax
-                            ? state.products.length + 1
-                            : state.products.length + 2,
-                        controller: _scrollController,
-                        itemBuilder: (BuildContext context, int index) {
-                          if (index == 0) {
-                            return Column(children: [
-                              const ProductListHeader(),
-                              Visibility(
-                                  visible: state.products.isEmpty,
-                                  child: Center(
-                                      heightFactor: 20,
-                                      child: Text(
-                                          started ? 'No products found' : '',
-                                          key: const Key('empty'),
-                                          textAlign: TextAlign.center)))
-                            ]);
-                          }
-                          index--;
-                          return index >= state.products.length
-                              ? const BottomLoader()
-                              : Dismissible(
-                                  key: const Key('productItem'),
-                                  direction: DismissDirection.startToEnd,
-                                  child: ProductListItem(
-                                      product: state.products[index],
-                                      index: index));
-                        }))),
-            if (state.status == ProductStatus.loading) const LoadingIndicator()
-          ]);
+          switch (state.status) {
+            case ProductStatus.failure:
+              return Center(
+                  child: Text('failed to fetch product: ${state.message}'));
+            case ProductStatus.success:
+              return Scaffold(
+                  floatingActionButton: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                            heroTag: 'productFiles',
+                            key: const Key("upDownload"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _productBloc,
+                                        child: const ProductFilesDialog());
+                                  });
+                            },
+                            tooltip: 'products up/download',
+                            child: const Icon(Icons.file_copy)),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            heroTag: 'productNew',
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _productBloc,
+                                        child: ProductDialog(Product()));
+                                  });
+                            },
+                            tooltip: CoreLocalizations.of(context)!.addNew,
+                            child: const Icon(Icons.add))
+                      ]),
+                  body: Column(children: [
+                    const ProductListHeader(),
+                    Expanded(
+                        child: RefreshIndicator(
+                            onRefresh: () async => _productBloc
+                                .add(const ProductFetch(refresh: true)),
+                            child: ListView.builder(
+                                key: const Key('listView'),
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: state.hasReachedMax
+                                    ? state.products.length + 1
+                                    : state.products.length + 2,
+                                controller: _scrollController,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index == 0) {
+                                    return Visibility(
+                                        visible: state.products.isEmpty,
+                                        child: Center(
+                                            heightFactor: 20,
+                                            child: Text(
+                                                started
+                                                    ? classificationId ==
+                                                            'AppHotel'
+                                                        ? 'No Room Types found'
+                                                        : 'No Products found'
+                                                    : '',
+                                                key: const Key('empty'),
+                                                textAlign: TextAlign.center)));
+                                  }
+                                  index--;
+                                  return index >= state.products.length
+                                      ? const BottomLoader()
+                                      : Dismissible(
+                                          key: const Key('productItem'),
+                                          direction:
+                                              DismissDirection.startToEnd,
+                                          child: ProductListItem(
+                                              product: state.products[index],
+                                              index: index));
+                                })))
+                  ]));
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
         });
   }
 

@@ -15,6 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:date_utils/date_utils.dart' as utils;
 import 'package:flutter_bloc/flutter_bloc.dart';
+// ignore: depend_on_referenced_packages
+import 'package:collection/collection.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -23,21 +25,46 @@ const day = 1, week = 2, month = 3; // columnPeriod values
 
 late int chartInDays;
 late int chartColumns; // total columns on chart
-late int columnsOnScreen; // periods plus room column
+late int columnsOnScreen; // periods
 
-class GanttForm extends StatefulWidget {
+class GanttForm extends StatelessWidget {
   const GanttForm({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AssetBloc>(
+            create: (context) => AssetBloc(CatalogAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+        BlocProvider<ProductBloc>(
+            create: (context) => ProductBloc(CatalogAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+        BlocProvider<FinDocBloc>(
+            create: (context) => FinDocBloc(
+                FinDocAPIRepository(
+                    context.read<AuthBloc>().state.authenticate!.apiKey),
+                true,
+                FinDocType.order)),
+      ],
+      child: const GanttFormFull(),
+    );
+  }
+}
+
+class GanttFormFull extends StatefulWidget {
+  const GanttFormFull({super.key});
   @override
   State<StatefulWidget> createState() {
     return GanttPageState();
   }
 }
 
-class GanttPageState extends State<GanttForm> {
+class GanttPageState extends State<GanttFormFull> {
   late DateTime ganttFromDate;
   late int columnPeriod; //day,  week, month
   late FinDocBloc _finDocBloc;
   late AssetBloc _assetBloc;
+  late ProductBloc _productBloc;
 
   @override
   void initState() {
@@ -47,6 +74,8 @@ class GanttPageState extends State<GanttForm> {
     _finDocBloc.add(const FinDocFetch());
     _assetBloc = context.read<AssetBloc>();
     _assetBloc.add(const AssetFetch());
+    _productBloc = context.read<ProductBloc>();
+    _productBloc.add(const ProductRentalOccupancy());
   }
 
   @override
@@ -98,12 +127,15 @@ class GanttPageState extends State<GanttForm> {
                 context: context,
                 builder: (BuildContext context) {
                   return BlocProvider.value(
-                      value: _finDocBloc,
-                      child: ReservationDialog(
-                          finDoc: FinDoc(
-                              sales: true,
-                              docType: FinDocType.order,
-                              items: [])));
+                    value: _productBloc,
+                    child: BlocProvider.value(
+                        value: _finDocBloc,
+                        child: ReservationDialog(
+                            finDoc: FinDoc(
+                                sales: true,
+                                docType: FinDocType.order,
+                                items: []))),
+                  );
                 });
           },
           tooltip: 'Add New',
@@ -163,73 +195,6 @@ class GanttChart extends StatelessWidget {
     required this.ganttFromDate,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    List<Asset> assets = [];
-    List<FinDoc> finDocs = [];
-    List<FinDoc> reservations = [];
-    return BlocBuilder<AssetBloc, AssetState>(builder: (context, state) {
-      if (state.status == AssetStatus.success) {
-        assets = state.assets;
-        if (assets.isEmpty) {
-          return const Center(child: Text("No Rooms found!"));
-        }
-        // sort by room number
-        assets
-            .sort((a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
-        return BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
-          if (state.status == FinDocStatus.success) {
-            finDocs = state.finDocs;
-            reservations = [];
-            for (var asset in assets) {
-              for (var finDoc in finDocs) {
-                if (finDoc.status != FinDocStatusVal.created ||
-                    finDoc.status != FinDocStatusVal.approved) {
-                  // create a findoc for every item
-                  for (var item in finDoc.items) {
-                    if (item.assetId == asset.assetId &&
-                        item.rentalFromDate != null &&
-                        item.rentalThruDate != null) {
-                      reservations.add(finDoc.copyWith(items: [item]));
-                    }
-                  }
-                }
-              }
-            }
-            var screenWidth = MediaQuery.of(context).size.width;
-            var chartBars =
-                buildAssetBars(context, screenWidth, reservations, finDocs);
-            return SizedBox(
-              height: chartBars.length * 29.0 + 25.0 + 4.0,
-              child: ListView(
-                physics: const ClampingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                children: <Widget>[
-                  Stack(fit: StackFit.loose, children: <Widget>[
-                    buildGrid(screenWidth),
-                    buildHeader(screenWidth, Colors.lightGreen),
-                    Container(
-                        margin: const EdgeInsets.only(top: 25.0),
-                        child: Column(
-                          children: <Widget>[
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: chartBars,
-                            ),
-                          ],
-                        )),
-                  ]),
-                ],
-              ),
-            );
-          }
-          return const Center(child: CircularProgressIndicator());
-        });
-      }
-      return const Center(child: CircularProgressIndicator());
-    });
-  }
-
   Widget buildGrid(double screenWidth) {
     List<Widget> gridColumns = [];
 
@@ -237,7 +202,7 @@ class GanttChart extends StatelessWidget {
       gridColumns.add(Container(
         decoration: BoxDecoration(
             border: Border(
-                right:
+                left:
                     BorderSide(color: Colors.grey.withAlpha(100), width: 1.0))),
         width: screenWidth / columnsOnScreen,
         // height: 300.0,
@@ -249,21 +214,10 @@ class GanttChart extends StatelessWidget {
     );
   }
 
-  Widget buildHeader(double screenWidth, Color color) {
+  Widget buildHeader(double screenWidth) {
     List<Widget> headerItems = [];
 
     DateTime? tempDate = ganttFromDate;
-
-    headerItems.add(SizedBox(
-      width: screenWidth / columnsOnScreen,
-      child: const Text(
-        'Room',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 10.0,
-        ),
-      ),
-    ));
 
     const List<String> months = [
       "Jan",
@@ -310,50 +264,24 @@ class GanttChart extends StatelessWidget {
     }
 
     return Container(
-      height: 25.0,
-      color: color.withAlpha(100),
+      height: 30.0,
+      color: Colors.lightGreen.withAlpha(100),
       child: Row(
         children: headerItems,
       ),
     );
   }
 
-  List<Widget> buildAssetBars(context, double screenWidth,
+  /// print bars depending on the start and end rental dates for
+  /// either by product (room type) or asset(room)
+  Widget buildAssetReservation(BuildContext context, double screenWidth,
       List<FinDoc> reservations, List<FinDoc> finDocs) {
-    List<Widget> chartBars = [];
-    FinDoc? last;
-    for (int i = 0; i < reservations.length; i++) {
-      if (last != null &&
-          reservations[i].items[0].assetId == last.items[0].assetId) continue;
-      // only process assets here, all reservation per asset in buildAssetReservations
-      last = reservations[i];
-      chartBars.add(Row(children: <Widget>[
-        SizedBox(
-          height: 20,
-          width: screenWidth / columnsOnScreen,
-          child: Text(
-            reservations[i].items[0].assetName ??
-                "${reservations[i].items[0].assetId}",
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Row(
-            children: buildAssetReservations(
-                context, i, screenWidth, reservations, finDocs)),
-      ]));
-    }
-    return chartBars;
-  }
-
-  List<Widget> buildAssetReservations(BuildContext context, int startIndex,
-      double screenWidth, List<FinDoc> reservations, List<FinDoc> finDocs) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
-    if (reservations[startIndex].items[0].rentalFromDate == null) {
-      return []; // no reservations for this asset
-    }
+    ProductBloc productBloc = context.read<ProductBloc>();
     DateTime lastDate = ganttFromDate.subtract(const Duration(days: 1));
     List<Widget> chartContent = [];
-    int index = startIndex;
+    List<Widget> chartLineProduct = [];
+    List<Widget> chartLineRoom = [];
     // define the scale of 1 day
     late double dayScale;
     if (columnPeriod == day) dayScale = screenWidth / columnsOnScreen;
@@ -362,79 +290,288 @@ class GanttChart extends StatelessWidget {
       dayScale = screenWidth / (columnsOnScreen * 365 / 12);
     }
     double halfDay = dayScale / 2;
-    while (index < reservations.length &&
-        reservations[index].items[0].assetId ==
-            reservations[startIndex].items[0].assetId) {
-      DateTime from = reservations[index].items[0].rentalFromDate!;
-      DateTime thru = reservations[index].items[0].rentalThruDate!;
-      if (from.difference(lastDate).inDays < 0) {
-        index++;
-        continue;
-      }
-      BorderRadius borderRadius = BorderRadius.circular(10.0);
-      if (from.difference(ganttFromDate).inDays < 0) {
-        borderRadius = const BorderRadius.only(
-            topRight: Radius.circular(10.0),
-            bottomRight: Radius.circular(10.0));
-      }
-      // save local copy for onTap below
-      FinDoc reservation = reservations[index];
-      chartContent.add(MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-              onTap: () {
-                FinDoc original = finDocs
-                    .firstWhere((item) => item.orderId == reservation.orderId);
-                showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return BlocProvider.value(
-                          value: finDocBloc,
-                          child: ReservationDialog(
-                              original: original, finDoc: reservation));
-                    });
-              },
-              child: Container(
-                // bar on screen
-                decoration: BoxDecoration(
-                    color: reservations[index].status == FinDocStatusVal.created
-                        ? Theme.of(context).focusColor
-                        : reservations[index].status == FinDocStatusVal.approved
-                            ? Theme.of(context).canvasColor
-                            : Theme.of(context).cardColor,
-                    borderRadius: borderRadius),
-                height: 20.0,
-                width: from.difference(ganttFromDate).inDays < 0
-                    ? (thru.difference(from).inDays +
-                                from.difference(ganttFromDate).inDays) *
-                            dayScale +
-                        halfDay
-                    : (thru.difference(from).inDays) * dayScale,
-                margin: EdgeInsets.only(
-                    left: from.difference(ganttFromDate).inDays < 0
-                        ? (from.difference(lastDate).inDays) * dayScale
-                        : (from.difference(lastDate).inDays) * dayScale +
-                            halfDay,
-                    top: 4.0,
-                    bottom: 4.0),
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    "${reservations[index].orderId} "
-                    " ${reservations[index].otherUser!.firstName}"
-                    " ${reservations[index].otherUser!.lastName}",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10.0),
+    BorderRadius borderRadius = BorderRadius.circular(10.0);
+    for (var reservation in reservations) {
+      if (reservation.items[0].description != null &&
+          reservation.items[0].description!.startsWith('!!') &&
+          reservation.items[0].description! != '!!') {
+        // show full occupation by product
+        List dates = reservation.items[0].description!.substring(2).split(',');
+        for (String date in dates) {
+          if (date.isEmpty) continue;
+          DateTime from = DateTime.parse(date);
+          if (from.difference(ganttFromDate).inDays < -1) continue;
+          if (from.difference(ganttFromDate).inDays < 0) {
+            borderRadius = const BorderRadius.only(
+                topRight: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0));
+          } else {
+            borderRadius = BorderRadius.circular(10.0);
+          }
+          chartLineProduct.add(Container(
+            // bar on screen
+            decoration:
+                BoxDecoration(color: Colors.red, borderRadius: borderRadius),
+            height: 18.0,
+            width:
+                from.difference(ganttFromDate).inDays < 0 ? halfDay : dayScale,
+            margin: EdgeInsets.only(
+                // spacing from the left
+                left: from.difference(ganttFromDate).inDays < 0
+                    ? (from.difference(lastDate).inDays) * dayScale
+                    : (from.difference(lastDate).inDays) * dayScale + halfDay,
+                top: 1.0,
+                bottom: 1.0),
+            alignment: Alignment.centerLeft,
+          ));
+        }
+      } else if (reservation.items[0].rentalFromDate != null) {
+        // show occupation by room(asset)
+        DateTime from = reservation.items[0].rentalFromDate!;
+        DateTime thru = reservation.items[0].rentalThruDate!;
+        if (from.difference(lastDate).inDays < 0) {
+          continue;
+        }
+        if (from.difference(ganttFromDate).inDays < 0) {
+          borderRadius = const BorderRadius.only(
+              topRight: Radius.circular(10.0),
+              bottomRight: Radius.circular(10.0));
+        }
+        chartLineRoom.add(MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+                onTap: () {
+                  FinDoc original = finDocs.firstWhere(
+                      (item) => item.orderId == reservation.orderId);
+                  showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BlocProvider.value(
+                          value: productBloc,
+                          child: BlocProvider.value(
+                              value: finDocBloc,
+                              child: ReservationDialog(
+                                  original: original, finDoc: reservation)),
+                        );
+                      });
+                },
+                child: Container(
+                  // bar on screen
+                  decoration: BoxDecoration(
+                      color: reservation.status == FinDocStatusVal.created
+                          ? Theme.of(context).focusColor
+                          : reservation.status == FinDocStatusVal.approved
+                              ? Theme.of(context).canvasColor
+                              : Theme.of(context).cardColor,
+                      borderRadius: borderRadius),
+                  height: 18.0,
+                  width: from.difference(ganttFromDate).inDays < 0
+                      ? (thru.difference(from).inDays +
+                                  from.difference(ganttFromDate).inDays) *
+                              dayScale +
+                          halfDay
+                      : (thru.difference(from).inDays) * dayScale,
+                  margin: EdgeInsets.only(
+                      left: from.difference(ganttFromDate).inDays < 0
+                          ? (from.difference(lastDate).inDays) * dayScale
+                          : (from.difference(lastDate).inDays) * dayScale +
+                              halfDay,
+                      top: 1.0,
+                      bottom: 1.0),
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      "${reservation.orderId} "
+                      " ${reservation.otherUser!.firstName}"
+                      " ${reservation.otherUser!.lastName}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 10.0),
+                    ),
                   ),
-                ),
-              ))));
-      lastDate = reservations[index].items[0].rentalThruDate as DateTime;
-      index++;
-      halfDay = 0.00;
+                ))));
+        lastDate = reservation.items[0].rentalThruDate as DateTime;
+        halfDay = 0.00;
+      } else {
+        // empty lines
+        chartLineProduct.add(const SizedBox(
+          height: 20.0,
+          width: 1,
+        ));
+      }
     }
-    return chartContent;
+    if (chartLineRoom.isNotEmpty) {
+      chartContent.add(Stack(children: chartLineRoom));
+    }
+    if (chartLineProduct.isNotEmpty) {
+      chartContent.add(Stack(children: chartLineProduct));
+    }
+    return Row(children: chartContent);
+  }
+
+  (Widget leftColomnItem, Widget rightColumnItem) makeColumnItem(
+      BuildContext context,
+      double screenWidth,
+      List<FinDoc> reservations,
+      List<FinDoc> finDocs) {
+    return (
+      SizedBox(
+        height: 20,
+        width: screenWidth / columnsOnScreen,
+        child: reservations[0].items[0].assetName != null
+            ? Text(
+                reservations[0].items[0].assetName ??
+                    "${reservations[0].items[0].assetId}",
+                textAlign: TextAlign.center,
+              )
+            : null,
+      ),
+      buildAssetReservation(context, screenWidth, reservations, finDocs)
+    );
+  }
+
+  (List<Widget>, List<Widget>) buildAssetBars(BuildContext context,
+      double screenWidth, List<FinDoc> reservations, List<FinDoc> finDocs) {
+    List<Widget> leftColumn = [
+      Container(
+          height: 30.0,
+          color: Colors.lightGreen.withAlpha(100),
+          child: SizedBox(
+            width: screenWidth / columnsOnScreen,
+            child: const Text(
+              'Room Type\n Room',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10.0,
+              ),
+            ),
+          )),
+    ];
+    List<Widget> rightColumn = [const SizedBox(height: 5)];
+    FinDoc? last;
+    int start = 0, end = 0;
+    reservations.forEachIndexed((i, el) {
+      debugPrint("===$el");
+      if (last?.sales != null &&
+          el.items[0].assetId != last!.items[0].assetId) {
+        end = i;
+        var (leftColumnItem, rightColumnItem) = makeColumnItem(
+            context, screenWidth, reservations.sublist(start, end), finDocs);
+        leftColumn.add(leftColumnItem);
+        rightColumn.add(rightColumnItem);
+        start = i;
+      }
+      last = el;
+    });
+    if (last?.sales != null) {
+      end = reservations.length;
+      var (leftColumnItem, rightColumnItem) = makeColumnItem(
+          context, screenWidth, reservations.sublist(start, end), finDocs);
+      leftColumn.add(leftColumnItem);
+      rightColumn.add(rightColumnItem);
+    }
+    return (leftColumn, rightColumn);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    List<Asset> assets = [];
+    List<FinDoc> finDocs = [];
+    List<FinDoc> reservations = [];
+    List<FullDatesProductRental> fullDates = [];
+
+    return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
+      return BlocBuilder<FinDocBloc, FinDocState>(
+          builder: (context, finDocState) {
+        return BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, productState) {
+          debugPrint(finDocState.status.toString());
+          debugPrint(productState.status.toString());
+          debugPrint(assetState.status.toString());
+          if (finDocState.status == FinDocStatus.success &&
+              productState.status == ProductStatus.success &&
+              assetState.status == AssetStatus.success) {
+            if (assetState.assets.isEmpty) {
+              return const Center(child: Text("No Rooms found!"));
+            }
+            assets = assetState.assets;
+            fullDates = productState.fullDates;
+            finDocs = finDocState.finDocs;
+
+            // all open reservations combined by Room type(product) in the server
+            for (var fullDate in fullDates) {
+              reservations.add(FinDoc(items: [
+                FinDocItem(
+                    assetId: fullDate.productId,
+                    assetName: fullDate.productName,
+                    description: '!!${fullDate.fullDates.join(',')}')
+              ])); // space
+            }
+
+            reservations.add(FinDoc(
+                items: [FinDocItem(assetId: '', assetName: '')])); // space
+
+            // group all open reservations by Room number as a single item
+            assets.sort(
+                (a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
+            for (var asset in assets) {
+              bool hasReservation = false;
+              for (var finDoc in finDocs) {
+                if (finDoc.status != FinDocStatusVal.created ||
+                    finDoc.status != FinDocStatusVal.approved) {
+                  // create a findoc for every item
+                  for (var item in finDoc.items) {
+                    if (item.assetId == asset.assetId &&
+                        item.rentalFromDate != null &&
+                        item.rentalThruDate != null) {
+                      reservations.add(finDoc.copyWith(items: [item]));
+                      hasReservation = true;
+                    }
+                  }
+                }
+              }
+              if (!hasReservation) {
+                reservations.add(FinDoc(items: [
+                  FinDocItem(assetId: asset.assetId, assetName: asset.assetName)
+                ]));
+              }
+            }
+            var (leftColumn, rightColumn) =
+                buildAssetBars(context, screenWidth, reservations, finDocs);
+            return Row(children: [
+              Column(children: leftColumn),
+              Expanded(
+                child: ListView(
+                  physics: const ClampingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Stack(fit: StackFit.loose, children: <Widget>[
+                      buildGrid(screenWidth),
+                      buildHeader(screenWidth),
+                      SingleChildScrollView(
+                        child: Container(
+                            margin: const EdgeInsets.only(top: 25.0),
+                            child: Column(
+                              children: <Widget>[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: rightColumn,
+                                ),
+                              ],
+                            )),
+                      ),
+                    ]),
+                  ],
+                ),
+              ),
+            ]);
+          }
+          return const Center(child: CircularProgressIndicator());
+        });
+      });
+    });
   }
 }
