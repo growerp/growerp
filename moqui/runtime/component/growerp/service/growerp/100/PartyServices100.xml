@@ -951,7 +951,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="lastName^,firstName^,companyName^"/>
             </entity-find>
-            <log message="====users found ${userInfos?.size()} user: ${userInfos[0]} looking for: $companyRole $customerStatusId $userGroupId"/>
+            <!--log message="====users found ${userInfos?.size()} user: ${userInfos[0]} looking for: $companyRole $customerStatusId $userGroupId"/-->
             <iterate entry="userInfo" list="userInfos">
                 <!-- adjust role -->
                 <if condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
@@ -2552,17 +2552,17 @@ along with this software (see the LICENSE.md file). If not, see
 
                     <!-- assets -->
                     <set field="assetsHotel" from="[
-                        [ assetName: '01', productName: 'Single Room', ],
-                        [ assetName: '02', productName: 'Single Room'],
-                        [ assetName: '03', productName: 'Single Room'],
-                        [ assetName: '04', productName: 'Standard Room'],                
-                        [ assetName: '05', productName: 'Standard Room'],                
-                        [ assetName: '06', productName: 'Standard Room'],                
-                        [ assetName: '07', productName: 'Deluxe Room'],                
-                        [ assetName: '08', productName: 'Deluxe Room'],                
-                        [ assetName: '09', productName: 'Suite'],                
-                        [ assetName: '10', productName: 'Suite'],                
-                        [ assetName: '11', productName: 'Appartment'],                
+                        [ assetName: 'Room 01', productName: 'Single Room', ],
+                        [ assetName: 'Room 02', productName: 'Single Room'],
+                        [ assetName: 'Room 03', productName: 'Single Room'],
+                        [ assetName: 'Room 04', productName: 'Standard Room'],                
+                        [ assetName: 'Room 05', productName: 'Standard Room'],                
+                        [ assetName: 'Room 06', productName: 'Standard Room'],                
+                        [ assetName: 'Room 07', productName: 'Deluxe Room'],                
+                        [ assetName: 'Room 08', productName: 'Deluxe Room'],                
+                        [ assetName: 'Room 09', productName: 'Suite'],                
+                        [ assetName: 'Room 10', productName: 'Suite'],                
+                        [ assetName: 'Room 11', productName: 'Appartment'],                
                         ]"/>
                     <set field="assetsAdmin" from="[
                         [ assetName: '01', productName: 'wiskey'],

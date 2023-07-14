@@ -178,6 +178,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limit" default-value="10" type="Integer"/>
             <parameter name="search" default="null"/>
             <parameter name="customerCompanyPartyId"/>
+            <parameter name="rentalFromDate"/>
+            <parameter name="rentalThruDate"/>
         </in-parameters>
         <out-parameters>
             <parameter name="finDocs" type="List">
@@ -337,6 +339,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="vendorPartyId" from="vendorPartyId"
                                 ignore-if-empty="true"/>
                             <econdition field-name="customerPartyId" from="customerPartyId"
+                                ignore-if-empty="true"/>
+                            <econdition field-name="rentalFromDate" from="rentalFromDate"
+                                ignore-if-empty="true"/>
+                            <econdition field-name="rentalThruDate" from="rentalThruDate"
                                 ignore-if-empty="true"/>
                             <econditions combine="or">
                                 <econdition field-name="orderId" ignore-case="true"
@@ -1086,6 +1092,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"  out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]"/>
+            <log message="===converted from ${finDoc.statusId} to ${convertedStatusId}"/>
             <set field="finDoc.statusId" from="convertedStatusId"/>
             <if condition="finDoc.docType == 'Order'">
                 <service-call name="growerp.100.FinDocServices100.create#Order"
@@ -1169,6 +1176,7 @@ along with this software (see the LICENSE.md file). If not, see
                              orderPartSeqId: orderPartSeqId,
                              orderItems: order.items]"/>
             <!-- update status if required -->
+            <log message="====order status creation: ${order.statusId}"/>
             <if condition="order.statusId == 'OrderPlaced'">
                 <set field="order.orderId" from="orderId"/>
                 <service-call name="growerp.100.FinDocServices100.update#Order"
@@ -1570,6 +1578,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                 in-map="inMap" out-map="context"/>
+            <log message="===findoc updated new status: ${finDoc.statusId}"/>
         </actions>
     </service>
 
@@ -1604,76 +1613,75 @@ along with this software (see the LICENSE.md file). If not, see
                     from="Timestamp.valueOf(nowBeginOfNextDay.toLocalDateTime())"/>
                 <order-by field-name="productName,productId"/>
             </entity-find>
-            <log message="======rental products retrieved for product $productId: ${rentals?.size()}"/>
-            <!-- gather dates which have rentals of this product -->
-            <set field="fullDatesProducts" from="[]"/>
-            <set field="dates" from="[]"/>
+            <!-- gather fullDates which have rentals of this product -->
+            <set field="fullDates" from="[]"/>
             <set field="fullDatesProductRental" from="[]"/>
             <iterate list="rentals" entry="rental">
+                <log message="====1==processing rental: ${rental.assetRentalId}"/>
                 <if condition="lastItem &amp;&amp; lastItem.productId != rental.productId">
                     <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
-                        out-map="context" in-map="[productId: lastItem.productId, dates: dates]"/>
+                        out-map="context" in-map="[productId: lastItem.productId, dates: fullDates]"/>
+                    <!-- RentalLastItem has as output fullDates -->
                     <script>fullDatesProductRental.add([
                         productId: lastItem.productId,
                         productName: lastItem.productName,
                         fullDates: fullDates,
                         ])</script>
-                    <set field="dates" from="[]"/>
+                    <log message="===added product: ${lastItem.productId} dates: $fullDates"/>
+                    <set field="fullDates" from="[]"/>
                 </if>
                 <!-- convert date to begin of day -->
                 <set field="rentalFromDate" from="Timestamp.valueOf(rental.rentalFromDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).truncatedTo(java.time.temporal.ChronoUnit.DAYS).toLocalDateTime())"/>
                 <!-- fromdate in the past? set to today-->
                 <if condition="rentalFromDate &lt; Timestamp.valueOf(nowBeginOfDay.toLocalDateTime())">
                     <set field="rentalFromdate" from="Timestamp.valueOf(nowBeginOfDay.toLocalDateTime())"/></if>
-                <!-- subtract one day from thrudate: should only count start of day -->
-                <set field="rental.rentalThruDate" from="Timestamp.valueOf(rental.rentalThruDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(-1).toLocalDateTime())"/>
+                <set field="rental.rentalThruDate" from="Timestamp.valueOf(rental.rentalThruDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).truncatedTo(java.time.temporal.ChronoUnit.DAYS).toLocalDateTime())"/>
                 <!-- for every date, record the number of assets that have a reservation -->
+                <log message="===pr: ${rental.productId}  proc from/to: $rentalFromDate ${rental.rentalThruDate}"/>
                 <while condition="rentalFromDate &lt; rental.rentalThruDate">
                     <set field="rentalDate" from="[d: rentalFromDate.toString().substring(0,10), n:1]"/>
                     <script>
-                        int index = dates.findIndexOf{it.d == rentalDate.d};
+                        int index = fullDates.findIndexOf{it.d == rentalDate.d};
                         if (index != -1)
-                            dates[index].n++
+                            fullDates[index].n++
                         else
-                            dates.add(rentalDate);
+                            fullDates.add(rentalDate);
                     </script>
                     <!-- add a day to timestamp -->
                     <set field="rentalFromDate" from="Timestamp.valueOf(rentalFromDate.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(1).toLocalDateTime())"/>
                 </while>
                 <set field="lastItem" from="rental"/>
             </iterate>
-            <set field="fullDates" from="[]"/>
             <if condition="lastItem">
                 <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
-                    out-map="context" in-map="[productId: lastItem.productId, dates: dates]"/>
+                    out-map="context" in-map="[productId: lastItem.productId,dates: fullDates]"/>
                 <script>fullDatesProductRental.add([
                     productId: lastItem.productId,
                     productName: lastItem.productName,
                     fullDates: fullDates,
                     ])</script>
             </if>
-            <if condition="productId">
-                <set field="rentalFullDates" from="fullDates"/>
-                <else><!-- add empty rental products -->
-                    <entity-find entity-name="mantle.product.Product" list="rentalProducts">
-                        <econdition field-name="ownerPartyId" from="companyPartyId"/>
-                        <econdition field-name="productTypeEnumId" value="PtFixedAssetUse"/>
-                        <order-by field-name="productName,productId"/>
-                    </entity-find>
-                    <log message="======#product found: ${rentalProducts?.size()} ${fullDatesProductRental}"/>
-                    <set field="newList" from="[]"/>
-                    <iterate list="rentalProducts" entry="rentalProduct">
-                        <script>
-                        var fullDates = fullDatesProductRental.find 
-                                {it.productId == rentalProduct.productId}?.fullDates;
-                        newList.add([
-                            productId: rentalProduct.productId,
-                            productName: rentalProduct.productName,
-                            fullDates: fullDates ?: []])</script>
-                    </iterate>
-                    <set field="fullDatesProductRental" from="newList"/>
-                </else>
+            <set field="rentalFullDates" from="productId ? fullDates : null"/>
+            <if condition="!productId">
+                <!-- add empty rental products -->
+                <entity-find entity-name="mantle.product.Product" list="rentalProducts">
+                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                    <econdition field-name="productTypeEnumId" value="PtFixedAssetUse"/>
+                    <order-by field-name="productName,productId"/>
+                </entity-find>
+                <log message="======#product found: ${rentalProducts?.size()} ${fullDatesProductRental}"/>
+                <set field="newList" from="[]"/>
+                <iterate list="rentalProducts" entry="rentalProduct">
+                    <script>
+                    var fullDates = fullDatesProductRental.find 
+                            {it.productId == rentalProduct.productId}?.fullDates;
+                    newList.add([
+                        productId: rentalProduct.productId,
+                        productName: rentalProduct.productName,
+                        fullDates: fullDates ?: []])</script>
+                </iterate>
             </if>
+            <set field="fullDatesProductRental" from="!productId ? newList : null"/>
             <log message="=====output RentalOccupancy $productId $rentalFullDates $fullDatesProductRental"/>
         </actions>
     </service>
@@ -1682,11 +1690,13 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters><parameter name="productId"/><parameter name="dates" type="List"/></in-parameters>
         <out-parameters><parameter name="fullDates"/></out-parameters>
         <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <!-- get available number of assets for this product -->
-            <log message="====processing productId: $productId and dates: $dates"/>
             <entity-find-count entity-name="mantle.product.asset.Asset" count-field="nbrOfAssets">
                 <econdition field-name="ownerPartyId" from="companyPartyId"/>
                 <econdition field-name="productId" from="productId"/></entity-find-count>
+            <log message="====processing productId: $productId max: ${nbrOfAssets} and dates: $dates"/>
             <set field="fullDates" from="[]"/>
             <!-- get the dates where the available assets are used -->
             <iterate list="dates" entry="date">
@@ -1694,11 +1704,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>fullDates.add(date.d)</script>
                 </if>
             </iterate>
-            <log message="====rental last item dates: $fullDates"/>
+            <log message="====rental item out fullDates: $fullDates"/>
         </actions>
     </service>
 
     <service verb="get" noun="AssetsAvailableForProduct">
+        <description>Service for getting the assets which are still free for a product by providing the from/thue dates</description>
         <in-parameters>
             <parameter name="productId" required="true"/>
             <parameter name="fromDate" type="Timestamp" required="true"/>
@@ -1742,6 +1753,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </econditions>
                     </econditions>
                 </entity-find-count>
+                <log message="=====free: ${nbrUsed == 0?'Y':'N'} looking for p/a: $productId/${asset.assetId} f/t: ${fromDate.toString().substring(0,10)}/${thruDate.toString().substring(0,10)} "/>
                 <if condition="nbrUsed == 0">
                     <script>availableAssetIds.add(asset.assetId)</script>
                 </if>

@@ -46,7 +46,7 @@ Future<void> selectCompanyCustomers(WidgetTester tester) async {
 
 Future<void> selectReservations(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'CompanyListFormCustomer');
+      tester, '/reservations', 'FinDocListFormSalesOrder');
 }
 
 void main() {
@@ -77,7 +77,7 @@ void main() {
     await selectRoomTypes(tester);
     await ProductTest.addProducts(tester, productsHotel.sublist(0, 1),
         classificationId: "AppHotel"); // room types
-  }, skip: true);
+  }, skip: false);
 
   testWidgets("test rooms", (WidgetTester tester) async {
     await CommonTest.startTestApp(
@@ -93,7 +93,7 @@ void main() {
     await selectRooms(tester);
     await AssetTest.addAssets(tester, roomsHotel.sublist(0, 4),
         classificationId: "AppHotel"); // actual rooms
-  }, skip: true);
+  }, skip: false);
 
   testWidgets("test customer company", (WidgetTester tester) async {
     await CommonTest.startTestApp(
@@ -107,7 +107,7 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
     await selectCompanyCustomers(tester);
     await CompanyTest.enterCompanyData(tester, customerCompanies);
-  }, skip: true);
+  }, skip: false);
 
   testWidgets("test customer contact", (WidgetTester tester) async {
     await CommonTest.startTestApp(
@@ -121,7 +121,7 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
     await selectUserCustomers(tester);
     await UserTest.addCustomers(tester, customers);
-  }, skip: true);
+  }, skip: false);
 
   testWidgets("test room reservation", (WidgetTester tester) async {
     await CommonTest.startTestApp(
@@ -145,8 +145,9 @@ void main() {
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
-    await OrderTest.selectSalesOrders(tester);
-    await OrderTest.checkOrderCompleted(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await selectReservations(tester);
+    await OrderTest.checkOrderCompleted(tester, classificationId: 'AppHotel');
   }, skip: false);
 }
 

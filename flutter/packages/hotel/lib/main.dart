@@ -61,7 +61,10 @@ Future main() async {
       debugPrint('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
+  // set dates for rental testing
+  CustomizableDateTime.customTime = DateTime.now().add(const Duration(days: 0));
   Bloc.observer = AppBlocObserver();
+  debugPrint("=== current date: ${CustomizableDateTime.current}");
   runApp(TopApp(
     dbServer: APIRepository(),
     chatServer: ChatServer(),

@@ -107,11 +107,11 @@ class GanttPageState extends State<GanttFormFull> {
         break;
       case day:
         if (screenWidth < 800) {
-          chartColumns = 18;
+          chartColumns = 60;
           columnsOnScreen = 5;
         } else {
-          chartColumns = 36;
-          columnsOnScreen = 21;
+          chartColumns = 60;
+          columnsOnScreen = 16;
         }
         chartInDays = chartColumns;
         ganttFromDate = nowDate;
@@ -164,8 +164,13 @@ class GanttPageState extends State<GanttFormFull> {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () => setState(
-                      () => _finDocBloc.add(const FinDocFetch(refresh: true))),
+                  onPressed: () {
+                    _finDocBloc.add(const FinDocFetch(refresh: true));
+                    _assetBloc.add(const AssetFetch(refresh: true));
+                    _productBloc.add(const ProductRentalOccupancy());
+                    setState(() {});
+                    return;
+                  },
                   child: const Text('Refresh'),
                 ),
                 const SizedBox(width: 10),
@@ -205,7 +210,6 @@ class GanttChart extends StatelessWidget {
                 left:
                     BorderSide(color: Colors.grey.withAlpha(100), width: 1.0))),
         width: screenWidth / columnsOnScreen,
-        // height: 300.0,
       ));
     }
 
@@ -244,7 +248,7 @@ class GanttChart extends StatelessWidget {
       var formatter = DateFormat('yy-MM-dd');
       if (columnPeriod == week) {
         headerText =
-            'Week starting: ${days[(ganttFromDate.weekday) % 7]}\n${formatter.format(ganttFromDate.add(Duration(days: i * 7)))}';
+            'Week starting:\n${days[(ganttFromDate.weekday) % 7]} ${formatter.format(ganttFromDate.add(Duration(days: i * 7)))}';
       }
       if (columnPeriod == day) {
         headerText =
@@ -278,10 +282,10 @@ class GanttChart extends StatelessWidget {
       List<FinDoc> reservations, List<FinDoc> finDocs) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
     ProductBloc productBloc = context.read<ProductBloc>();
-    DateTime lastDate = ganttFromDate.subtract(const Duration(days: 1));
+    DateTime ganttFromDateMin1day =
+        ganttFromDate.subtract(const Duration(days: 1));
     List<Widget> chartContent = [];
-    List<Widget> chartLineProduct = [];
-    List<Widget> chartLineRoom = [];
+    List<Widget> chartLine = [];
     // define the scale of 1 day
     late double dayScale;
     if (columnPeriod == day) dayScale = screenWidth / columnsOnScreen;
@@ -289,26 +293,30 @@ class GanttChart extends StatelessWidget {
     if (columnPeriod == month) {
       dayScale = screenWidth / (columnsOnScreen * 365 / 12);
     }
+    // avoid overlapping of bars of future over earlier.....
+    reservations.sort((b, a) => (a.items[0].rentalFromDate!.dateOnly())
+        .compareTo(b.items[0].rentalFromDate!.dateOnly()));
     double halfDay = dayScale / 2;
-    BorderRadius borderRadius = BorderRadius.circular(10.0);
-    for (var reservation in reservations) {
+    for (FinDoc reservation in reservations) {
       if (reservation.items[0].description != null &&
+          // all dates concatenated in description
           reservation.items[0].description!.startsWith('!!') &&
+          // ignore if empty
           reservation.items[0].description! != '!!') {
-        // show full occupation by product
+        // show full occupation by product ============================
+        debugPrint("");
         List dates = reservation.items[0].description!.substring(2).split(',');
         for (String date in dates) {
           if (date.isEmpty) continue;
           DateTime from = DateTime.parse(date);
           if (from.difference(ganttFromDate).inDays < -1) continue;
+          BorderRadius borderRadius = BorderRadius.circular(10.0);
           if (from.difference(ganttFromDate).inDays < 0) {
             borderRadius = const BorderRadius.only(
                 topRight: Radius.circular(10.0),
                 bottomRight: Radius.circular(10.0));
-          } else {
-            borderRadius = BorderRadius.circular(10.0);
           }
-          chartLineProduct.add(Container(
+          chartLine.add(Container(
             // bar on screen
             decoration:
                 BoxDecoration(color: Colors.red, borderRadius: borderRadius),
@@ -318,31 +326,41 @@ class GanttChart extends StatelessWidget {
             margin: EdgeInsets.only(
                 // spacing from the left
                 left: from.difference(ganttFromDate).inDays < 0
-                    ? (from.difference(lastDate).inDays) * dayScale
-                    : (from.difference(lastDate).inDays) * dayScale + halfDay,
+                    ? from.difference(ganttFromDateMin1day).inDays * dayScale
+                    : from.difference(ganttFromDateMin1day).inDays * dayScale +
+                        halfDay,
                 top: 1.0,
                 bottom: 1.0),
             alignment: Alignment.centerLeft,
           ));
         }
-      } else if (reservation.items[0].rentalFromDate != null) {
-        // show occupation by room(asset)
+      } else if (reservation.items[0].rentalFromDate != null &&
+          reservation.items[0].rentalThruDate!
+                  .difference(ganttFromDate)
+                  .inDays >=
+              0) {
+        // show occupation by room(asset) ==================================
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
-        if (from.difference(lastDate).inDays < 0) {
-          continue;
-        }
+        debugPrint("====room: ${reservation.items[0].assetName} "
+            "orderId: ${reservation.orderId} "
+            "fr:${reservation.items[0].rentalFromDate!.dateOnly()} "
+            "to: ${reservation.items[0].rentalThruDate!.dateOnly()}");
+        // started before today only borderradius on the right
+        BorderRadius borderRadius = BorderRadius.circular(10.0);
         if (from.difference(ganttFromDate).inDays < 0) {
           borderRadius = const BorderRadius.only(
               topRight: Radius.circular(10.0),
               bottomRight: Radius.circular(10.0));
+          from = ganttFromDateMin1day;
         }
-        chartLineRoom.add(MouseRegion(
+        chartLine.add(MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
                 onTap: () {
                   FinDoc original = finDocs.firstWhere(
-                      (item) => item.orderId == reservation.orderId);
+                      (FinDoc item) => item.orderId == reservation.orderId);
                   showDialog(
                       barrierDismissible: true,
                       context: context,
@@ -351,31 +369,24 @@ class GanttChart extends StatelessWidget {
                           value: productBloc,
                           child: BlocProvider.value(
                               value: finDocBloc,
-                              child: ReservationDialog(
-                                  original: original, finDoc: reservation)),
+                              child: ReservationDialog(finDoc: original)),
                         );
                       });
                 },
                 child: Container(
                   // bar on screen
                   decoration: BoxDecoration(
-                      color: reservation.status == FinDocStatusVal.created
-                          ? Theme.of(context).focusColor
-                          : reservation.status == FinDocStatusVal.approved
-                              ? Theme.of(context).canvasColor
-                              : Theme.of(context).cardColor,
-                      borderRadius: borderRadius),
+                      color: Colors.lightGreen, borderRadius: borderRadius),
                   height: 18.0,
                   width: from.difference(ganttFromDate).inDays < 0
-                      ? (thru.difference(from).inDays +
-                                  from.difference(ganttFromDate).inDays) *
-                              dayScale +
-                          halfDay
-                      : (thru.difference(from).inDays) * dayScale,
+                      ? thru.difference(from).inDays * dayScale + halfDay
+                      : thru.difference(from).inDays * dayScale,
                   margin: EdgeInsets.only(
                       left: from.difference(ganttFromDate).inDays < 0
-                          ? (from.difference(lastDate).inDays) * dayScale
-                          : (from.difference(lastDate).inDays) * dayScale +
+                          ? from.difference(ganttFromDateMin1day).inDays *
+                              dayScale
+                          : from.difference(ganttFromDateMin1day).inDays *
+                                  dayScale +
                               halfDay,
                       top: 1.0,
                       bottom: 1.0),
@@ -392,22 +403,15 @@ class GanttChart extends StatelessWidget {
                     ),
                   ),
                 ))));
-        lastDate = reservation.items[0].rentalThruDate as DateTime;
-        halfDay = 0.00;
       } else {
-        // empty lines
-        chartLineProduct.add(const SizedBox(
+        // empty lines =====================================================
+        chartLine.add(const SizedBox(
           height: 20.0,
           width: 1,
         ));
       }
     }
-    if (chartLineRoom.isNotEmpty) {
-      chartContent.add(Stack(children: chartLineRoom));
-    }
-    if (chartLineProduct.isNotEmpty) {
-      chartContent.add(Stack(children: chartLineProduct));
-    }
+    chartContent.add(Stack(children: chartLine));
     return Row(children: chartContent);
   }
 
@@ -424,7 +428,7 @@ class GanttChart extends StatelessWidget {
             ? Text(
                 reservations[0].items[0].assetName ??
                     "${reservations[0].items[0].assetId}",
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
               )
             : null,
       ),
@@ -432,7 +436,7 @@ class GanttChart extends StatelessWidget {
     );
   }
 
-  (List<Widget>, List<Widget>) buildAssetBars(BuildContext context,
+  (List<Widget>, List<Widget>) buildLeftRightColumn(BuildContext context,
       double screenWidth, List<FinDoc> reservations, List<FinDoc> finDocs) {
     List<Widget> leftColumn = [
       Container(
@@ -449,14 +453,15 @@ class GanttChart extends StatelessWidget {
             ),
           )),
     ];
-    List<Widget> rightColumn = [const SizedBox(height: 5)];
+    List<Widget> rightColumn = [const SizedBox(height: 30)];
     FinDoc? last;
     int start = 0, end = 0;
     reservations.forEachIndexed((i, el) {
-      debugPrint("===$el");
       if (last?.sales != null &&
           el.items[0].assetId != last!.items[0].assetId) {
         end = i;
+        debugPrint(
+            "====reservation group room: ${last!.items[0].assetName} from $start to: $end");
         var (leftColumnItem, rightColumnItem) = makeColumnItem(
             context, screenWidth, reservations.sublist(start, end), finDocs);
         leftColumn.add(leftColumnItem);
@@ -464,11 +469,15 @@ class GanttChart extends StatelessWidget {
         start = i;
       }
       last = el;
+      debugPrint("==r: $i $el");
     });
     if (last?.sales != null) {
+      debugPrint("==r: ${reservations.length} $last");
       end = reservations.length;
       var (leftColumnItem, rightColumnItem) = makeColumnItem(
           context, screenWidth, reservations.sublist(start, end), finDocs);
+      debugPrint(
+          "====reservation group room: ${last!.items[0].assetName} from $start to: $end");
       leftColumn.add(leftColumnItem);
       rightColumn.add(rightColumnItem);
     }
@@ -482,15 +491,11 @@ class GanttChart extends StatelessWidget {
     List<FinDoc> finDocs = [];
     List<FinDoc> reservations = [];
     List<FullDatesProductRental> fullDates = [];
-
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
       return BlocBuilder<FinDocBloc, FinDocState>(
           builder: (context, finDocState) {
         return BlocBuilder<ProductBloc, ProductState>(
             builder: (context, productState) {
-          debugPrint(finDocState.status.toString());
-          debugPrint(productState.status.toString());
-          debugPrint(assetState.status.toString());
           if (finDocState.status == FinDocStatus.success &&
               productState.status == ProductStatus.success &&
               assetState.status == AssetStatus.success) {
@@ -500,6 +505,7 @@ class GanttChart extends StatelessWidget {
             assets = assetState.assets;
             fullDates = productState.fullDates;
             finDocs = finDocState.finDocs;
+            reservations = [];
 
             // all open reservations combined by Room type(product) in the server
             for (var fullDate in fullDates) {
@@ -520,8 +526,8 @@ class GanttChart extends StatelessWidget {
             for (var asset in assets) {
               bool hasReservation = false;
               for (var finDoc in finDocs) {
-                if (finDoc.status != FinDocStatusVal.created ||
-                    finDoc.status != FinDocStatusVal.approved) {
+                if (finDoc.status == FinDocStatusVal.created ||
+                    finDoc.status == FinDocStatusVal.approved) {
                   // create a findoc for every item
                   for (var item in finDoc.items) {
                     if (item.assetId == asset.assetId &&
@@ -539,34 +545,21 @@ class GanttChart extends StatelessWidget {
                 ]));
               }
             }
-            var (leftColumn, rightColumn) =
-                buildAssetBars(context, screenWidth, reservations, finDocs);
+            var (leftColumn, rightColumn) = buildLeftRightColumn(
+                context, screenWidth, reservations, finDocs);
             return Row(children: [
               Column(children: leftColumn),
               Expanded(
-                child: ListView(
-                  physics: const ClampingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    Stack(fit: StackFit.loose, children: <Widget>[
-                      buildGrid(screenWidth),
-                      buildHeader(screenWidth),
-                      SingleChildScrollView(
-                        child: Container(
-                            margin: const EdgeInsets.only(top: 25.0),
-                            child: Column(
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: rightColumn,
-                                ),
-                              ],
-                            )),
-                      ),
-                    ]),
-                  ],
-                ),
-              ),
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                          height: 1000,
+                          width: 5000,
+                          child: Stack(children: [
+                            buildGrid(screenWidth),
+                            buildHeader(screenWidth),
+                            Column(children: rightColumn)
+                          ]))))
             ]);
           }
           return const Center(child: CircularProgressIndicator());

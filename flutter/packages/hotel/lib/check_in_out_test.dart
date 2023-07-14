@@ -26,12 +26,12 @@ import 'package:hotel/main.dart';
 import 'room_rental_test.dart';
 
 Future<void> selectCheckInOut(WidgetTester tester) async {
-  await CommonTest.selectOption(tester, '/checkInOut', 'FinDocsFormCheckIn');
+  await CommonTest.selectOption(tester, '/checkInOut', 'FinDocListFormCheckIn');
 }
 
 Future<void> selectCheckOut(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/checkOut', 'FinDocsFormCheckOut', '2');
+      tester, '/checkInOut', 'FinDocListFormCheckOut', '2');
 }
 
 void main() {
@@ -60,46 +60,30 @@ void main() {
     });
     await createRoomReservation(tester, roomReservations.sublist(0));
     await selectCheckInOut(tester);
-    expect(find.byKey(const Key('finDocItem')), findsNWidgets(1));
-    expect(CommonTest.getTextField('statusId0'), equals('Created'));
-    await tester.tap(find.byKey(const Key('ID0')));
-    await tester.pump(const Duration(seconds: 10));
+    expect(find.byKey(const Key('id0')), findsNWidgets(1));
+    expect(CommonTest.getTextField('status0'), equals('Created'));
+    await CommonTest.tapByKey(tester, 'id0');
     expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
-    await tester.tap(find.byKey(const Key('nextStatus')));
-    await tester.pump(const Duration(seconds: 10));
-  }, skip: true);
+    await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+  }, skip: false);
 
   testWidgets("Test checkout >>>>>", (WidgetTester tester) async {
-    // change the time
-    CustomizableDateTime.customTime =
-        DateTime.now().add(const Duration(days: 1));
     await selectCheckOut(tester);
-    expect(find.byKey(const Key('FinDocsFormCheckOut')), findsOneWidget);
-    // refresh screen
-    await tester.drag(
-        find.byKey(const Key('listView')), const Offset(0.0, 500.0));
+    await CommonTest.drag(tester);
     await tester.pumpAndSettle(const Duration(seconds: 5));
-    expect(find.byKey(const Key('finDocItem')), findsNWidgets(1));
-    expect(CommonTest.getTextField('statusId0'), equals('Checked In'));
-    await tester.tap(find.byKey(const Key('ID0')));
-    await tester.pump(const Duration(seconds: 10));
+    expect(find.byKey(const Key('id0')), findsNWidgets(1));
+    expect(CommonTest.getTextField('status0'), equals('Checked In'));
+    await CommonTest.tapByKey(tester, 'id0');
     expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
-    await tester.tap(find.byKey(const Key('nextStatus')));
-    await tester.pump(const Duration(seconds: 10));
+    await CommonTest.tapByKey(tester, 'nextStatus0');
   }, skip: false);
 
   testWidgets("Test empty checkin and checkout >>>>>",
       (WidgetTester tester) async {
     await CommonTest.login(tester);
-    await tester.tap(find.byKey(const Key('tap/checkInOut')));
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byKey(const Key('finDocItem')), findsNothing);
-    if (CommonTest.isPhone()) {
-      await tester.tap(find.byTooltip('2'));
-    } else {
-      await tester.tap(find.byKey(const Key('tapFinDocsFormCheckOut')));
-    }
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byKey(const Key('finDocItem')), findsNothing);
+    await selectCheckInOut(tester);
+    expect(find.byKey(const Key('id0')), findsNothing);
+    await selectCheckOut(tester);
+    expect(find.byKey(const Key('id0')), findsNothing);
   }, skip: false);
 }

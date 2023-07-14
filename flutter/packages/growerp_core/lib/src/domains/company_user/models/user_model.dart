@@ -42,7 +42,10 @@ class User with _$User {
     /// admin, employee, customer, supplier etc...
     // ignore: invalid_annotation_target
     @JsonKey(name: 'userGroupId') @UserGroupConverter() UserGroup? userGroup,
-    String? language,
+    // the localization variables
+    @Default('EN') String language,
+    @Default('THB') String currency,
+    @Default('GMT') String timeZone,
     @Uint8ListConverter() Uint8List? image,
     Company? company,
   }) = _User;

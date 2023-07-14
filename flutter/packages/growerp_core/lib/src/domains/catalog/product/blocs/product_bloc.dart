@@ -238,7 +238,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     ProductRentalOccupancy event,
     Emitter<ProductState> emit,
   ) async {
-    //emit(state.copyWith(status: ProductStatus.loading));
+    emit(state.copyWith(status: ProductStatus.loading));
     if (event.productId.isNotEmpty) {
       ApiResult<List<String>> result =
           await repos.getRentalOccupancy(productId: event.productId);

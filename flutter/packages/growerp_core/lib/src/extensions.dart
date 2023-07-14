@@ -12,7 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// https://stackoverflow.com/a/63073876/2235274https://stackoverflow.com/questions/53674027/is-there-a-way-to-fake-datetime-now-in-a-flutter-test/63073876#63073876
+// https://stackoverflow.com/a/63073876/2235274
+// https://stackoverflow.com/questions/53674027/is-there-a-way-to-fake-datetime-now-in-a-flutter-test/63073876#63073876
+
+// to modify the time, add one day:
+//  CustomizableDateTime.customTime =
+//      DateTime.now().add(const Duration(days: 1));
+
 extension CustomizableDateTime on DateTime {
   static DateTime? _customTime;
   static DateTime get current {
@@ -27,5 +33,17 @@ extension CustomizableDateTime on DateTime {
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1)}";
+  }
+}
+
+extension DateOnlyCompare on DateTime {
+  bool isSameDate(DateTime other) {
+    return day == other.day && month == other.month && year == other.year;
+  }
+}
+
+extension DateOnly on DateTime {
+  String dateOnly() {
+    return "$year-$month-$day";
   }
 }

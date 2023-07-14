@@ -15,13 +15,18 @@
 import 'package:flutter/material.dart';
 
 SnackBar snackBar(BuildContext context, Color colors, String message) {
+  var screenWidth = MediaQuery.of(context).size.width;
   return SnackBar(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
     duration: Duration(milliseconds: colors == Colors.red ? 5000 : 2000),
     content: Container(
         padding: const EdgeInsets.all(16.0),
-        width: MediaQuery.of(context).size.width * 0.8,
+        width: screenWidth < 800 ? screenWidth * 0.8 : 500,
         child: Text(message)),
     backgroundColor: colors,
+    behavior: SnackBarBehavior.floating,
     action: SnackBarAction(
       key: const Key('dismiss'),
       label: 'Dismiss',

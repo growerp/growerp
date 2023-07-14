@@ -257,12 +257,14 @@ class OrderTest {
     await CommonTest.gotoMainMenu(tester);
   }
 
-  static Future<void> checkOrderCompleted(WidgetTester tester) async {
+  static Future<void> checkOrderCompleted(WidgetTester tester,
+      {String classificationId = 'AppAdmin'}) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      expect(CommonTest.getTextField('status0'), equals('Completed'));
+      expect(CommonTest.getTextField('status0'),
+          equals(classificationId == 'AppHotel' ? 'Checked Out' : 'Completed'));
     }
   }
 

@@ -86,12 +86,13 @@ class FinDoc with _$FinDoc {
 
   @override
   String toString() =>
+      "rental: ${items[0].rentalFromDate?.toString().substring(0, 10)}/${items[0].rentalThruDate?.toString().substring(0, 10)} st:$status!"
       "$docType# $orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
       "Date: $creationDate! $description! items: ${items.length} "
       "asset: ${items.isNotEmpty ? items[0].assetName : ''} "
       "${items.isNotEmpty ? items[0].assetId : ''}"
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
-//      "status: $statusId! otherUser: $otherUser! Items: ${items!.length}";
+//      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 
   String? displayName(String classificationId) {
     switch (classificationId) {

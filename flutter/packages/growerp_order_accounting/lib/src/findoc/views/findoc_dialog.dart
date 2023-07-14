@@ -377,6 +377,7 @@ class MyFinDocState extends State<FinDocPage> {
                     "${FinDocType.translated(context, finDocUpdated.docType!)}"),
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
+                      status: FinDocStatusVal.created,
                       otherUser: _selectedUser,
                       otherCompany: _selectedUser?.company,
                       description: _descriptionController.text);
@@ -780,6 +781,14 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
           return true;
         }
 
+        DateTime firstFreeDate() {
+          var nowDate = CustomizableDateTime.current;
+          while (whichDayOk(nowDate) == false) {
+            nowDate = nowDate.add(const Duration(days: 1));
+          }
+          return nowDate;
+        }
+
         var addRentalFormKey = GlobalKey<FormState>();
         return BlocProvider.value(
             value: finDocBloc,
@@ -798,21 +807,16 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                           Future<void> selectDate(BuildContext context) async {
                             final DateTime? picked = await showDatePicker(
                               context: context,
-                              initialDate: startDate,
+                              initialDate: firstFreeDate(),
                               firstDate: CustomizableDateTime.current,
                               lastDate: DateTime(
                                   CustomizableDateTime.current.year + 1),
                               selectableDayPredicate: whichDayOk,
                               builder: (BuildContext context, Widget? child) {
-                                return FittedBox(
-                                  child: Theme(
-                                    data: ThemeData(
-                                      primaryColor:
-                                          Theme.of(context).primaryColor,
-                                    ),
-                                    child: child!,
-                                  ),
-                                );
+                                return Theme(
+                                    data:
+                                        ThemeData(primarySwatch: Colors.green),
+                                    child: child!);
                               },
                             );
                             if (picked != null && picked != startDate) {
@@ -839,7 +843,6 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                           case ProductStatus.success:
                                             rentalDays =
                                                 productState.occupancyDates;
-
                                             return DropdownSearch<Product>(
                                               key: const Key('product'),
                                               selectedItem: selectedProduct,

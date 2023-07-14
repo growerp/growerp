@@ -134,23 +134,25 @@ class ReservationDialogState extends State<ReservationForm> {
       return true;
     }
 
-    bool allDayOk(DateTime day, int days) {
-      var formatter = DateFormat('yyyy-MM-dd');
-      for (int d = 0; d < days; d++) {
-        if (rentalDays.contains(formatter.format(day.add(Duration(days: d))))) {
-          return false;
-        }
+    DateTime firstFreeDate() {
+      var nowDate = CustomizableDateTime.current;
+      while (whichDayOk(nowDate) == false) {
+        nowDate = nowDate.add(const Duration(days: 1));
       }
-      return true;
+      return nowDate;
     }
 
     Future<void> selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: _selectedDate,
+        initialDate: firstFreeDate(),
         firstDate: CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
         selectableDayPredicate: whichDayOk,
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+              data: ThemeData(primarySwatch: Colors.green), child: child!);
+        },
       );
       if (picked != null && picked != _selectedDate) {
         setState(() {
@@ -351,16 +353,11 @@ class ReservationDialogState extends State<ReservationForm> {
                                 ? 'Create'
                                 : 'Update'),
                             onPressed: () {
-                              if (!allDayOk(_selectedDate,
-                                  int.parse(_daysController.text))) {
-                                HelperFunctions.showMessage(
-                                    context,
-                                    'Error: "some dates not available for ${_selectedProduct!.productName}',
-                                    Colors.red);
-                              } else if (_formKey.currentState!.validate()) {
+                              if (_formKey.currentState!.validate()) {
                                 FinDoc newFinDoc = widget.finDoc.copyWith(
                                     otherUser: _selectedUser,
-                                    otherCompany: _selectedUser?.company);
+                                    otherCompany: _selectedUser?.company,
+                                    status: FinDocStatusVal.created);
                                 FinDocItem newItem = FinDocItem(
                                     productId: _selectedProduct!.productId,
                                     itemType:

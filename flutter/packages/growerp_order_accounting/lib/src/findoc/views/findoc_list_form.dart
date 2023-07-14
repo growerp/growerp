@@ -140,12 +140,13 @@ class FinDocList extends StatefulWidget {
   FinDocListState createState() => FinDocListState();
 }
 
+/*
 extension DateOnlyCompare on DateTime {
   bool isSameDate(DateTime other) {
     return year == other.year && month == other.month && day == other.day;
   }
 }
-
+*/
 class FinDocListState extends State<FinDocList> {
   final _scrollController = ScrollController();
   List<FinDoc> finDocs = <FinDoc>[];
@@ -287,8 +288,8 @@ class FinDocListState extends State<FinDocList> {
           // if rental (hotelroom) need to show checkin/out orders
           if (widget.onlyRental && widget.status != null) {
             if (widget.status == FinDocStatusVal.created.toString()) {
-              finDocs = finDocs
-                  .where((el) =>
+              finDocs = state.finDocs
+                  .where((FinDoc el) =>
                       el.items[0].rentalFromDate != null &&
                       el.status.toString() == widget.status &&
                       el.items[0].rentalFromDate!
@@ -296,8 +297,8 @@ class FinDocListState extends State<FinDocList> {
                   .toList();
             }
             if (widget.status == FinDocStatusVal.approved.toString()) {
-              finDocs = finDocs
-                  .where((el) =>
+              finDocs = state.finDocs
+                  .where((FinDoc el) =>
                       el.items[0].rentalThruDate != null &&
                       el.status.toString() == widget.status &&
                       el.items[0].rentalThruDate!
@@ -305,7 +306,7 @@ class FinDocListState extends State<FinDocList> {
                   .toList();
             }
           } else if (widget.onlyRental == true) {
-            finDocs = finDocs
+            finDocs = state.finDocs
                 .where((el) => el.items[0].rentalFromDate != null)
                 .toList();
           }

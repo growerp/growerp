@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="grandTotal" entity-alias="ORHD"/>
         <alias name="placedDate" entity-alias="ORHD"/>
         <alias name="salesChannel" field="description" entity-alias="SC"/>
-        <alias name="statusId" entity-alias="OPRT"/>
+        <alias name="statusId" entity-alias="ORHD"/>
         
         <alias name="vendorPartyId" entity-alias="OPRT"/>
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG"/>

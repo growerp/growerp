@@ -82,6 +82,8 @@ class FinDocAPIRepository extends APIRepository {
       bool? sales,
       FinDocType? docType,
       DateTime? startDate,
+      DateTime? rentalFromDate,
+      DateTime? rentalThruDate,
       String? finDocId,
       String? searchString,
       String? customerCompanyPartyId}) async {

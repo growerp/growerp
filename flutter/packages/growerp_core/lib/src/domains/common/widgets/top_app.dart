@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -100,6 +101,13 @@ class TopApp extends StatelessWidget {
                                 Locale('en'),
                                 Locale('th')
                               ],
+                              scrollBehavior:
+                                  const MaterialScrollBehavior().copyWith(
+                                dragDevices: {
+                                  PointerDeviceKind.mouse,
+                                  PointerDeviceKind.touch,
+                                },
+                              ),
                               debugShowCheckedModeBanner: false,
                               localizationsDelegates: localizationsDelegates,
                               builder: (context, child) =>
