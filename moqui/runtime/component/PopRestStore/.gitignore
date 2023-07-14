@@ -1,5 +1,6 @@
 
-screen/store/components/styles/
+screen/store/components/styles/*
+!screen/store/components/styles/POPC_DEFAULT.css
 screen/store/components/combined.*
 screen/store/components/*.min.js
 
