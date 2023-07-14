@@ -1911,9 +1911,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="shipmentId != null">
                         <service-call name="update#mantle.shipment.Shipment" out-map="context"
                             in-map="[shipmentId: shipmentId, statusId: order.sales == true ? 'ShipScheduled' : 'ShipPacked']"/>
-                        <else><!-- no shipable items so complete order alreade here -->
-                            <service-call name="mantle.order.OrderServices.complete#Order"
-                                in-map="[orderId: order.orderId]"/>
+                        <else><!-- no shipable items so complete order already here not with rental though-->
+                            <entity-find entity-name="growerp.product.AssetRental" list="rentals">
+                                <econdition field-name="orderId" from="order.orderId"/>
+                            </entity-find>
+                            <if condition="!rentals">
+                                <service-call name="mantle.order.OrderServices.complete#Order"
+                                    in-map="[orderId: order.orderId]"/>
+                            </if>
                         </else>
                     </if>
                 </if>

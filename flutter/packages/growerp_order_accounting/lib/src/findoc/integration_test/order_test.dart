@@ -202,7 +202,7 @@ class OrderTest {
     var intlFormat = DateFormat('yyyy-MM-dd');
     int x = 0;
     for (FinDoc order in test.orders) {
-      expect(CommonTest.getTextField('status$x'), equals('in Preparation'));
+      expect(CommonTest.getTextField('status$x'), equals('Created'));
       await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
       expect(CommonTest.getTextField('itemLine$x'),
           contains(intlFormat.format(order.items[0].rentalFromDate!)));
