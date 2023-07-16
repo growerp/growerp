@@ -37,7 +37,7 @@ class AssetListItem extends StatelessWidget {
             Expanded(child: Text("${asset.assetName}", key: Key('name$index'))),
             Expanded(
                 child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
-                    key: Key('statusId$index'), textAlign: TextAlign.center)),
+                    key: Key('status$index'), textAlign: TextAlign.center)),
             Expanded(
                 child: Text("${asset.product!.productName}",
                     key: Key('product$index'), textAlign: TextAlign.center)),

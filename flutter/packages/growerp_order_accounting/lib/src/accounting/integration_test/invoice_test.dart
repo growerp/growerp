@@ -19,7 +19,7 @@ class InvoiceTest {
   static Future<void> selectPurchaseInvoices(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'accntPurchase', 'FinDocListFormPurchaseInvoice');
+        tester, 'acctPurchase', 'FinDocListFormPurchaseInvoice');
     await tester.pumpAndSettle(const Duration(seconds: 3));
   }
 

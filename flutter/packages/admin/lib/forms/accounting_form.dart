@@ -33,17 +33,17 @@ class AccountingForm extends StatelessWidget {
               "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.salesInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('accntPurchase', context, acctMenuOptions[2], [
+        makeDashboardItem('acctPurchase', context, acctMenuOptions[2], [
           "Pur unp inv: "
               "${authenticate.company!.currency!.description} "
               "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
               "(${authenticate.stats?.purchInvoicesNotPaidCount})",
         ]),
-        makeDashboardItem('accntLedger', context, acctMenuOptions[3], [
+        makeDashboardItem('acctLedger', context, acctMenuOptions[3], [
           "Accounts",
           "Transactions",
         ]),
-        makeDashboardItem('accntReports', context, acctMenuOptions[4], [
+        makeDashboardItem('acctReports', context, acctMenuOptions[4], [
           "Balance Sheet",
           "Balance summary",
         ]),

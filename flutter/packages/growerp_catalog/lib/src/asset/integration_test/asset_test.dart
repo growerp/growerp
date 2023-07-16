@@ -111,7 +111,7 @@ class AssetTest {
     await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
     await CommonTest.gotoMainMenu(tester);
     await AssetTest.selectAsset(tester);
-    expect(find.byKey(const Key('assetItem')), findsNWidgets(count - 1));
+    expect(CommonTest.getTextField('status${count - 1}'), 'N');
     PersistFunctions.persistTest(
         test.copyWith(assets: test.assets.sublist(0, test.assets.length - 1)));
   }
