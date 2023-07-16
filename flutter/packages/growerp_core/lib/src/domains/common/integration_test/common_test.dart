@@ -152,14 +152,17 @@ class CommonTest {
       await tester.pump(const Duration(seconds: 3));
     }
     debugPrint("=====incoming key: $option");
-    if (option.startsWith('db')) {
-      // convert old mainscrean tapping to drawer on mobile
-      option = "/${option.substring(2).toLowerCase()}";
-    } else if (!option.startsWith('/')) {
-      option = "/$option";
+    if (!option.startsWith('tap')) {
+      if (option.startsWith('db')) {
+        // convert old mainscrean tapping to drawer on mobile
+        option = "/${option.substring(2).toLowerCase()}";
+      } else if (!option.startsWith('/')) {
+        option = "/$option";
+      }
+      option = "tap$option";
     }
-    debugPrint("=====looking for key: tap$option");
-    await tapByKey(tester, "tap$option", seconds: 3);
+    debugPrint("=====looking for tap key: $option");
+    await tapByKey(tester, option, seconds: 3);
     if (tapNumber != null) {
       if (isPhone()) {
         await tester.tap(find.byTooltip(tapNumber));

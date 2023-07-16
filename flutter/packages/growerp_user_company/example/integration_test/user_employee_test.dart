@@ -15,8 +15,7 @@ void main() {
   });
 
   Future<void> selectEmployees(WidgetTester tester) async {
-    await UserTest.selectUsers(
-        tester, 'dbPersons', 'UserListFormEmployee', '1');
+    await UserTest.selectUsers(tester, 'dbUsers', 'UserListFormEmployee', '1');
   }
 
   testWidgets('''GrowERP user employee test''', (tester) async {

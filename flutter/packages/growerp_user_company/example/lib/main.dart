@@ -203,7 +203,7 @@ class MainMenu extends StatelessWidget {
             "Leads: ${authenticate.stats != null ? authenticate.stats!.leads : 0}",
             "Suppliers: ${authenticate.stats != null ? authenticate.stats!.suppliers : 0}",
           ]),
-          makeDashboardItem('dbPersons', context, menuOptions[2], [
+          makeDashboardItem('dbUsers', context, menuOptions[2], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
