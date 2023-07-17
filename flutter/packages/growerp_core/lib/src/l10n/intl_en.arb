@@ -1,12 +1,5 @@
 {
   "@@locale": "en",
-  "@update": {
-    "placeholders": {
-      "num": {
-        "example": "10"
-      }
-    }
-  },
   "addNew": "Add new",
   "andAtLeastOne": "and at least one ",
   "create": "Create",
@@ -20,5 +13,5 @@
   "supplier": "Supplier",
   "transaction": "Transaction",
   "unknown": "Unknown",
-  "update": "update {num}"
+  "update": "update"
 }

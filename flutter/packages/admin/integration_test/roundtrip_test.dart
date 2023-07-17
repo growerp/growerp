@@ -50,6 +50,7 @@ void main() {
     await PaymentTest.checkPayments(tester);
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.checkTransactionComplete(tester);
+    await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.checkOrderCompleted(tester);
     await PaymentTest.selectPurchasePayments(tester);
@@ -62,6 +63,7 @@ void main() {
     await InvoiceTest.selectPurchaseInvoices(tester);
     await InvoiceTest.checkInvoicesComplete(tester);
     // check purchase orders complete
+    await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.checkPurchaseOrdersComplete(tester);
   });
@@ -71,6 +73,7 @@ void main() {
     await CommonTest.startTestApp(
         tester, router.generateRoute, menuOptions, extraDelegates,
         clear: false); // have to use data from previous testWidget
+    await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.createSalesOrder(tester, salesOrders);
     await OrderTest.checkSalesOrder(tester);
@@ -80,6 +83,7 @@ void main() {
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
+    await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
     await OrderTest.checkOrderCompleted(tester);
     await PaymentTest.selectSalesPayments(tester);

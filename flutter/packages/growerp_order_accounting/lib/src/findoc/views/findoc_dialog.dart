@@ -377,7 +377,10 @@ class MyFinDocState extends State<FinDocPage> {
                     "${FinDocType.translated(context, finDocUpdated.docType!)}"),
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
-                      status: FinDocStatusVal.created,
+                      // set order to created, others not. inprep only used by website.
+                      status: finDocUpdated.docType == FinDocType.order
+                          ? FinDocStatusVal.created
+                          : FinDocStatusVal.inPreparation,
                       otherUser: _selectedUser,
                       otherCompany: _selectedUser?.company,
                       description: _descriptionController.text);

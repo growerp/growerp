@@ -236,8 +236,9 @@ class OrderTest {
     List<FinDoc> orders = test.orders;
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: 5); // to created
+      // in the app the order starts as created
+      //    await CommonTest.tapByKey(tester, 'nextStatus0',
+      //        seconds: 5); // to created
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
     }
@@ -249,8 +250,9 @@ class OrderTest {
     List<FinDoc> orders = test.orders;
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      await CommonTest.tapByKey(tester, 'nextStatus0',
-          seconds: 5); // to created
+//    starts as 'created' in the app, in the website as inprep
+//      await CommonTest.tapByKey(tester, 'nextStatus0',
+//          seconds: 5); // to created
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
     }
