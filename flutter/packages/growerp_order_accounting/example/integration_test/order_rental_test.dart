@@ -29,7 +29,7 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP room rental sales order test''', (tester) async {
+  testWidgets('''GrowERP order rental sales order test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
         title: "Order rental test",

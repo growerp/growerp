@@ -95,6 +95,9 @@ class FinDoc with _$FinDoc {
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 
   String? displayName(String classificationId) {
+    if (docType != FinDocType.order) {
+      return finDocStatusValues[status.toString()];
+    }
     switch (classificationId) {
       case 'AppHotel':
         return finDocStatusValuesHotel[status.toString()];

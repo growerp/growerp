@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "4. Applications/2. Hotel/1. Introduction.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "4. Applications/2. Hotel/1. Introduction.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "4. Applications/2. Hotel/1. Introduction.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md"
+                "file": "4. Applications/2. Hotel/1. Introduction.md"
               }
             }
           }
@@ -156,10 +156,17 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "4. Applications/1. Admin/1. Introduction.md",
+    "4. Applications/2. Hotel/1. Introduction.md",
+    "4. Applications/3. Freelance/Under development.md",
+    "1 Introduction/5 Road Map and Releases.md",
+    "4. Applications/3. Freelance",
+    "4. Applications/1. Admin",
+    "4. Applications/2. Hotel",
+    "4. Applications",
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/1 Technical Introduction.md",
     "3 Technical documentation/8 Deployment.md",
-    "1 Introduction/5 Road Map and Releases.md",
     "GrowERP documentation.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
     "3 Technical documentation/9 Andriod Playstore publication.md",
@@ -178,9 +185,6 @@
     "2 End User documentation/1 Overview.md",
     "1 Introduction/2 What is GrowERP.md",
     "1 Introduction/1 Overview.md",
-    "2 End User documentation/9 Authentication & Usertypes.md",
-    "2 End User documentation/8 General business flow.md",
-    "2 End User documentation/7 Accounting.md",
-    "2 End User documentation/6 Inventory management.md"
+    "2 End User documentation/9 Authentication & Usertypes.md"
   ]
 }

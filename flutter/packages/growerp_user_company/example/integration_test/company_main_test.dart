@@ -14,24 +14,15 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  Future<void> selectCompany(WidgetTester tester) async {
-    await CommonTest.selectOption(
-        tester, 'dbCompanies', 'ShowCompanyDialogCompanyForm');
-  }
-
   testWidgets('''GrowERP main company test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
         title: "growerp_user_company: main company test", clear: true);
     await CommonTest.createCompanyAndAdmin(tester);
-    await CommonTest.selectTopCompany(tester);
-    await CompanyTest.checkCompany(tester);
-    await selectCompany(tester);
+    await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);
     await CompanyTest.enterCompanyData(tester, [company]); // modify
-    await CommonTest.selectTopCompany(tester);
-    await CompanyTest.checkCompany(tester);
-    await selectCompany(tester);
+    await CommonTest.selectMainCompany(tester);
     await CompanyTest.checkCompany(tester);
   });
 }

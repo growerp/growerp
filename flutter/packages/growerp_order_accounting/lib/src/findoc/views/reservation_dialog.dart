@@ -357,7 +357,10 @@ class ReservationDialogState extends State<ReservationForm> {
                                 FinDoc newFinDoc = widget.finDoc.copyWith(
                                     otherUser: _selectedUser,
                                     otherCompany: _selectedUser?.company,
-                                    status: FinDocStatusVal.created);
+                                    status: widget.finDoc.docType ==
+                                            FinDocType.order
+                                        ? FinDocStatusVal.created
+                                        : FinDocStatusVal.inPreparation);
                                 FinDocItem newItem = FinDocItem(
                                     productId: _selectedProduct!.productId,
                                     itemType:

@@ -1867,7 +1867,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="order.statusId == 'OrderApproved'">
                     <!-- when sales order: set shipping address and method -->
                     <!-- Simplescreens orderDetail.xml line 1138 -->
-                    <if  condition="order.sales == true">
+                    <entity-find-one entity-name="growerp.product.AssetRental" value-field="isRoomRental">
+                                <field-map field-name="orderId" from="order.orderId"/></entity-find-one>
+                    <if  condition="order.sales == true &amp;&amp; !isRoomRental">
                         <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
                                 out-map="customerShippingInfo"
                             in-map="[partyId: order.otherCompany.partyId,
@@ -1925,15 +1927,17 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="order.statusId == 'OrderCompleted'">
                     <service-call name="mantle.order.OrderServices.complete#Order"
                         in-map="context"/>
-                    <entity-find-one entity-name="mantle.account.invoice.Invoice"
-                        value-field="invoice" for-update="true"/>
-                    <if condition="sales == true">
+                    <!-- invoice only be updated is required? it can make the order completed-->
+                    <!--entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice">
+                        <field-map field-name="invoiceId" from="order.invoiceId"/>
+                    </entity-find-one>
+                    <if condition="order.sales == true">
                         <set field="invoice.statusId" value="InvoiceSent"/>
                         <else>
                             <set field="invoice.statusId" value="InvoiceReceived"/>
                         </else>
                     </if>
-                    <service-call name="update#mantle.account.invoice.Invoice" in-map="invoice"/>
+                    <service-call name="update#mantle.account.invoice.Invoice" in-map="invoice"/-->
                 </if>
                 <if condition="order.statusId == 'OrderCancelled'">
                     <service-call name="mantle.order.OrderServices.cancel#Order"

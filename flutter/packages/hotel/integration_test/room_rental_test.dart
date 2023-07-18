@@ -125,7 +125,7 @@ void main() {
 
   testWidgets("test room reservation", (WidgetTester tester) async {
     await CommonTest.startTestApp(
-      clear: true,
+      clear: false,
       title: 'Hotel reservation Test',
       tester,
       router.generateRoute,
@@ -141,12 +141,14 @@ void main() {
     await selectReservations(tester);
     await OrderTest.checkRentalSalesOrder(tester);
     await OrderTest.checkRentalSalesOrderBlocDates(tester);
-    await OrderTest.approveSalesOrder(tester);
+    await OrderTest.approveSalesOrder(tester, classificationId: 'AppHotel');
     await InvoiceTest.selectSalesInvoices(tester);
     await InvoiceTest.checkInvoices(tester);
     await InvoiceTest.sendOrApproveInvoices(tester);
     await CommonTest.gotoMainMenu(tester);
     await selectReservations(tester);
+    await CommonTest.tapByKey(tester, 'nextStatus0',
+        seconds: 5); // to completed
     await OrderTest.checkOrderCompleted(tester, classificationId: 'AppHotel');
   }, skip: false);
 }

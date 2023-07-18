@@ -245,7 +245,8 @@ class OrderTest {
     await CommonTest.gotoMainMenu(tester);
   }
 
-  static Future<void> approveSalesOrder(WidgetTester tester) async {
+  static Future<void> approveSalesOrder(WidgetTester tester,
+      {String classificationId = 'AppAdmin'}) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
     for (FinDoc order in orders) {
@@ -255,6 +256,8 @@ class OrderTest {
 //          seconds: 5); // to created
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
+      expect(CommonTest.getTextField('status0'),
+          equals(classificationId == 'AppHotel' ? 'Checked In' : 'Approved'));
     }
     await CommonTest.gotoMainMenu(tester);
   }

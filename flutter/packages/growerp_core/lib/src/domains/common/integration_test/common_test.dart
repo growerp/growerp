@@ -29,10 +29,6 @@ class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
   static int waitTime = 2;
 
-  static Future<void> selectTopCompany(WidgetTester tester) async {
-    await selectOption(tester, 'tapCompany', 'CompanyDialogOrgInternal');
-  }
-
   static Future<void> startTestApp(
       WidgetTester tester,
       Route<dynamic> Function(RouteSettings) router,
@@ -233,6 +229,11 @@ class CommonTest {
 
   static Future<void> gotoMainMenu(WidgetTester tester) async {
     await selectMainMenu(tester, "tap/");
+  }
+
+  static Future<void> selectMainCompany(WidgetTester tester) async {
+    await CommonTest.tapByKey(tester, 'tapCompany');
+    await CommonTest.checkWidgetKey(tester, 'CompanyDialogOrgInternal');
   }
 
   static Future<void> doSearch(WidgetTester tester,
