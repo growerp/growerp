@@ -51,6 +51,7 @@ enum FinDocStatusVal {
     }
   }
 
+// flag to show next Status icon: if fixed, then cannot change
   static bool? statusFixed(FinDocStatusVal currentStatus) {
     switch (currentStatus) {
       case inPreparation:
@@ -58,7 +59,7 @@ enum FinDocStatusVal {
       case created:
         return false;
       case approved:
-        return true;
+        return false;
       case completed:
         return true;
       case cancelled:

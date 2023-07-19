@@ -48,6 +48,8 @@ void main() {
     await InvoiceTest.sendOrApproveInvoices(tester);
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectSalesOrders(tester);
+    await CommonTest.tapByKey(tester, 'nextStatus0',
+        seconds: 5); // to completed
     await OrderTest.checkOrderCompleted(tester);
   });
 }
