@@ -594,59 +594,67 @@ packages:
   growerp_catalog:
     dependency: "direct main"
     description:
-      path: "../growerp_catalog"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_catalog
+      sha256: "847fd1dbcfc15d28cf6e3eadea960920398efda2f99acafce658218f8b131f14"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   growerp_core:
     dependency: "direct main"
     description:
-      path: "../growerp_core"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_core
+      sha256: e169df41c65e0d1830b89f2774b68d740a0b2cee443db2573507ee9a650a6f72
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   growerp_inventory:
     dependency: "direct main"
     description:
-      path: "../growerp_inventory"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_inventory
+      sha256: d22014671c620747c077eca84f5e35dc788929a3207b787d3260588103cc4b0d
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   growerp_marketing:
     dependency: "direct main"
     description:
-      path: "../growerp_marketing"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_marketing
+      sha256: d42d4050e1059e032d1282bed43001d517be69cc9c17692176503bed3fcc7eea
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   growerp_order_accounting:
     dependency: "direct main"
     description:
-      path: "../growerp_order_accounting"
-      relative: true
-    source: path
-    version: "1.0.1"
+      name: growerp_order_accounting
+      sha256: "1fff1fc846f85d34a41a5dcd0d9eb3febfc0f116b53a83cffd6009412b54faf7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   growerp_select_dialog:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../growerp_select_dialog"
-      relative: true
-    source: path
+      name: growerp_select_dialog
+      sha256: ab2372a42eae30859573271d62143ebca6ea3d62bab59b5853fab6d24057c5ff
+      url: "https://pub.dev"
+    source: hosted
     version: "0.6.0"
   growerp_user_company:
     dependency: "direct main"
     description:
-      path: "../growerp_user_company"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_user_company
+      sha256: "1edfd9d50b945484a08f92e66290d1e24848b700ec616448a6bcd48839b5fb88"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   growerp_website:
     dependency: "direct main"
     description:
-      path: "../growerp_website"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: growerp_website
+      sha256: "5a28d8776857ccdbf60d55da75a476d6a40a86d542758891f75199afd98b3771"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   highlight:
     dependency: transitive
     description:

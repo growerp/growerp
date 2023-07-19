@@ -1,4 +1,7 @@
-# 1.0.0
+## 1.1.0
+* Upgraded with core package 1.1.0
+
+## 1.0.0
 * added localization
 * updated to dart 3
 * upgrade to material 3 light/dart scheme

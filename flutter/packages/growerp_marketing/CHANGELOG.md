@@ -1,3 +1,6 @@
+## 1.1.0
+* upgraded searchdropdown
+
 ## 1.0.0
 * upgrade to material 3 light/dart scheme
 * refactor: removed not required material,GestureDetectors

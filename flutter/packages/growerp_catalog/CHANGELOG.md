@@ -1,3 +1,8 @@
+## 1.1.0
+* upgraded search drop down
+* moved product/asset/catagory into the core
+* fixed headers of various forms 
+
 ## 1.0.0
 * upgrade to material 3 light/dart scheme
 * refactor: removed not required material,GestureDetectors

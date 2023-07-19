@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "4. Applications/2. Hotel/1. Introduction.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "4. Applications/2. Hotel/1. Introduction.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "4. Applications/2. Hotel/1. Introduction.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "4. Applications/2. Hotel/1. Introduction.md"
+                "file": "1 Introduction/5 Road Map and Releases.md"
               }
             }
           }
@@ -156,9 +156,9 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
-    "4. Applications/1. Admin/1. Introduction.md",
+    "4. Applications/3. Freelance/1. Introduction.md",
     "4. Applications/2. Hotel/1. Introduction.md",
-    "4. Applications/3. Freelance/Under development.md",
+    "4. Applications/1. Admin/1. Introduction.md",
     "1 Introduction/5 Road Map and Releases.md",
     "4. Applications/3. Freelance",
     "4. Applications/1. Admin",

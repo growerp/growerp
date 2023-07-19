@@ -1,4 +1,8 @@
-# 1.0.0
+## 1.1.0
+* upgraded searchdropdown
+* Moved blocs into the core
+
+## 1.0.0
 * added localization
 * updated to dart 3
 * upgrade to material 3 light/dart scheme

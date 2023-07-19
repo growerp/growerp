@@ -40,7 +40,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="partyIds" from="partyIds + [partyInfo.partyId]"/></if>
             </iterate>
             <if condition="partyIds.size() &gt; 0">
-                <log message="email address $email found for partyId: ${partyIds}"/>
                 <set field="ok" value="ok"/>
             </if>
         </actions>
@@ -434,7 +433,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED"/>
                 </else-if>
             </if>
-            <log message="=====role: ${company.role} ${customerStatusId}"/>
             <service-call 
                 name="mantle.party.PartyServices.create#Organization"
                 out-map="context"
@@ -1008,7 +1006,6 @@ along with this software (see the LICENSE.md file). If not, see
                     role: userInfo.companyRole,
                     paymentMethod: paymentMethod,
                     ]"/>
-                <log message="=====company set: $company"/>
                 <set field="telephoneNr" value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}"/>
                 <set field="userOut" from="[
                     partyId: userInfo?.userPartyId,
@@ -1353,7 +1350,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     contactMechPurposeId:'EmailPrimary']"/>
                     </if></else>
             </if>
-            <log message="========create user for company ${user.company}"/>
             <!-- create company if required -->
             <if condition="!user.company.partyId &amp;&amp; user.company.name">
                 <service-call name="growerp.100.PartyServices100.create#Company"
@@ -1364,7 +1360,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="companyPartyId" from="user.company?.partyId"/>
                 </else>
             </if>
-            <log message="====company created: $companyPartyId"/>
             <!-- add user to company relationship when company provided -->
             <if condition="companyPartyId">
                 <service-call name="create#mantle.party.PartyRelationship"
@@ -1392,7 +1387,6 @@ along with this software (see the LICENSE.md file). If not, see
                             ]"/>
             </if>
             <entity-find entity-name="OwnerPersonDetailAndCompany" list="results"/>
-            <log message="=======results: ${results?[0].companyPartyId}"/>
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="userInfo"/>
             <set field="user" from="userInfo.users?[0]"/>
@@ -1852,7 +1846,6 @@ along with this software (see the LICENSE.md file). If not, see
                         ownerPartyId: owner.partyId]"
                     out-map="context"/>
             <!-- initialize accounting with defaults -->
-            <log message="=====init user: $user"/>
             <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                 in-map="[sourcePartyId: 'DefaultSettings',
                         organizationPartyId: user.company.partyId, baseCurrencyUomId: currencyId]" />
@@ -1884,7 +1877,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- login -->
             <script>ec.user.internalLoginUser(username)</script>
             <!-- load demo data -->
-            <log message="=====demo data: $demoData"/>
             <if condition="demoData == 'true'">
                 <service-call name="growerp.100.PartyServices100.load#DefaultData"
                     in-map="[ownerPartyId: owner.partyId,
@@ -2594,8 +2586,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="products">
                             <set field="product" from="products[0]"/>
                             <else>
-                                <log
-                                    message="While creating assets, could not find product: ${asset.productName + (classificationId != 'AppHotel'? counter : '')} on asset: ${asset.assetName}"/>
                                 <continue/>
                             </else>
                         </if>

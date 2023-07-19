@@ -98,7 +98,6 @@ class PersistFunctions {
       }
       return SaveTest();
     } catch (err) {
-      debugPrint("=================getTest====SaveTest decode error: $err");
       return SaveTest();
     }
   }

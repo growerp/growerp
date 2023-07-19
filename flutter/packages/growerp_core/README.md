@@ -1,6 +1,6 @@
 This is the core package of the GrowERP frontend.
 
-It is called from an Flutter application like the app in the example directory.
+It is called from an Flutter application like the admin app in the example directory.
 
 It provides the core of the system:
 - Initialize the REST interface
@@ -9,6 +9,7 @@ It provides the core of the system:
 - Company creation and maintance
 - User maintenace
 - Task maintenance.
+- Catalog/inventory/user/company blocs
 
 a full admin system is available in the 'admin' app. 
 
@@ -25,10 +26,8 @@ Start test with:
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 cd example
-flutter test integration_test/all_test.dart
+flutter test integration_test
 ```
-
-
 ## use the example component
 As with the integration test you can use a local backend or our test backend.
 Before you can use the Core component you have to create a company which sends an email with a password. Use this password to login and the Core components appear in the main menu.

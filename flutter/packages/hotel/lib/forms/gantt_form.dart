@@ -304,7 +304,6 @@ class GanttChart extends StatelessWidget {
           // ignore if empty
           reservation.items[0].description! != '!!') {
         // show full occupation by product ============================
-        debugPrint("");
         List dates = reservation.items[0].description!.substring(2).split(',');
         for (String date in dates) {
           if (date.isEmpty) continue;
@@ -342,10 +341,10 @@ class GanttChart extends StatelessWidget {
         // show occupation by room(asset) ==================================
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
-        debugPrint("====room: ${reservation.items[0].assetName} "
-            "orderId: ${reservation.orderId} "
-            "fr:${reservation.items[0].rentalFromDate!.dateOnly()} "
-            "to: ${reservation.items[0].rentalThruDate!.dateOnly()}");
+//        debugPrint("====room: ${reservation.items[0].assetName} "
+//            "orderId: ${reservation.orderId} "
+//            "fr:${reservation.items[0].rentalFromDate!.dateOnly()} "
+//            "to: ${reservation.items[0].rentalThruDate!.dateOnly()}");
         // started before today only borderradius on the right
         BorderRadius borderRadius = BorderRadius.circular(10.0);
         if (from.difference(ganttFromDate).inDays < 0) {
@@ -460,8 +459,6 @@ class GanttChart extends StatelessWidget {
       if (last?.sales != null &&
           el.items[0].assetId != last!.items[0].assetId) {
         end = i;
-        debugPrint(
-            "====reservation group room: ${last!.items[0].assetName} from $start to: $end");
         var (leftColumnItem, rightColumnItem) = makeColumnItem(
             context, screenWidth, reservations.sublist(start, end), finDocs);
         leftColumn.add(leftColumnItem);
@@ -469,15 +466,11 @@ class GanttChart extends StatelessWidget {
         start = i;
       }
       last = el;
-      debugPrint("==r: $i $el");
     });
     if (last?.sales != null) {
-      debugPrint("==r: ${reservations.length} $last");
       end = reservations.length;
       var (leftColumnItem, rightColumnItem) = makeColumnItem(
           context, screenWidth, reservations.sublist(start, end), finDocs);
-      debugPrint(
-          "====reservation group room: ${last!.items[0].assetName} from $start to: $end");
       leftColumn.add(leftColumnItem);
       rightColumn.add(rightColumnItem);
     }

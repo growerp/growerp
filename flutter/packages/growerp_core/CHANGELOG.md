@@ -1,3 +1,13 @@
+## 1.1.2
+* add platform indicators
+
+## 1.1.1
+* add platform indicators
+
+## 1.1.0
+* Moved most used blocs into the core: product/asset/category/user/company/inventory
+* Now source stored in https://github.com/growerp/growerp/tree/master/flutter/packages/growerp_core
+
 ## 1.0.0
 * model changes: 
   * company now directly on order

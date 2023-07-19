@@ -28,14 +28,14 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
-## Release July 31 2023 (V0.9.8)
+## Release July 20 2023 (V1.0.0)
 
 * Moqui upgraded to V3.0.0
 * Monorepo: All GrowERP parts now in a single repository
 * Added a Dockerfile for all required images to automatically build on dockerhub.com
 * Added docker-compose file and self signed certs to run all images locally.
 * Docker Inc. now [sponsors GrowERP](https://hub.docker.com/search?q=growerp) with a free dockerhub account.
-* Hotel app now upgraded to the new core system
+* Hotel app now improved and upgraded to the new core system
 * Moved often used Blocs into the core component
 
 ## Release June 5 2023 (V0.9.5)

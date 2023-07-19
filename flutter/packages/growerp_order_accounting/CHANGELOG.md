@@ -1,7 +1,11 @@
-# 1.0.1
+## 1.1.0
+* upgraded searchdropdown
+* rental screens changed for hotel app
+
+## 1.0.1
 * freezed files missing
 
-# 1.0.0
+## 1.0.0
 * added localization
 * updated to dart 3
 * upgrade to material 3 light/dart scheme
@@ -22,6 +26,6 @@
 ## 0.9.0-dev.1
 * Refactoring and UI improvements.
 
-## 0.8.0-dev.1
+## 0.8.0-dev.1nn
 * Initial version.
 
