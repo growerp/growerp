@@ -16,7 +16,7 @@ RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /
 # antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/data
-RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/100
+RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
 # Postgresql driver
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
 # build Moqui system

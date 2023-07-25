@@ -67,8 +67,8 @@ cd flutter/packages/admin
 flutter run
 ```
 ## Use with docker
-
-In the docker directory there is a README.md to run the complete system in docker images locally.
+Super simple! 
+In the docker directory there is a README.md to run the complete system with docker images locally.
 
 ### Some phone screen shots:
 <div style="text-align: center">

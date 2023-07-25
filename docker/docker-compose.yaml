@@ -17,7 +17,6 @@ services:
       - 443:443
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      # note: .crt, .key, and .dhparam.pem files start with the domain name in VIRTUAL_HOST (ie 'moqui.local.*') or use  env var
       - ./certs:/etc/nginx/certs
       - ./nginx/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf
       #- ./logs/nginx:/var/log/nginx
@@ -29,7 +28,7 @@ services:
       - my-network
 
   moqui-server:
-    image: moqui
+    image: growerp/moqui
     container_name: moqui
     build:
       context: ../moqui
@@ -49,7 +48,7 @@ services:
      # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
       - ./runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
     environment:
-      - instance_purpose=production
+      - instance_purpose=test
       - entity_ds_db_conf=postgres
       - entity_ds_host=moqui-database
       - entity_ds_port=5432
@@ -65,7 +64,7 @@ services:
       - VIRTUAL_HOST=*.growerp.local
       - webapp_allow_origins=*
      # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
-      - webapp_http_host=backend.growerp.local
+      - webapp_http_host=
       - webapp_http_port=80
       - webapp_https_port=443
       - webapp_https_enabled=true
@@ -73,7 +72,7 @@ services:
       - webapp_client_ip_header=X-Real-IP
       - default_locale=en_US
       - default_time_zone=US/Pacific
-      - DB_DATA=SEED
+      - DB_DATA=INSTALL
       # do not use quotes here
       - paymentGatewayConfigId=StripeDemo
       - STRIPE_SECRET_KEY=
@@ -125,7 +124,7 @@ services:
       
   chat:
     container_name: chat
-    image: chat
+    image: growerp/chat
     build:
       context: ../chat
     mem_limit: 100m
@@ -141,6 +140,7 @@ services:
     networks:
       - my-network
 
+  # internet gateway required by chat to validate api_key with moqui
   internet_gateway:
     image: alpine  # or any other suitable image
     container_name: gateway
@@ -149,7 +149,7 @@ services:
 
   admin:
     container_name: admin
-    image: admin
+    image: growerp/admin
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/admin/Dockerfile
@@ -166,7 +166,7 @@ services:
 
   hotel:
     container_name: hotel
-    image: hotel
+    image: growerp/hotel
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/hotel/Dockerfile
