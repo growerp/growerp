@@ -139,7 +139,6 @@ General Order Placement and eCommerce Usage
                 paymentInfoList = []
                 paymentsTotal = 0.0
                 for (EntityValue payment in paymentList) {
-                    logger.info("=======processing payment: $payment");
                     if (!(((String) payment.statusId) in ['PmntCancelled', 'PmntVoid', 'PmntDeclined']))
                         paymentsTotal += (payment.amount ?: 0)
                     Map paymentInfo = [payment:payment, statusItem:payment.status]
@@ -166,7 +165,6 @@ General Order Placement and eCommerce Usage
                 postalAddress = (EntityValue) orderPart.'mantle.party.contact.PostalAddress'
                 postalAddressStateGeo = (EntityValue) postalAddress?."StateProvince#moqui.basic.Geo"
                 telecomNumber = (EntityValue) orderPart.'mantle.party.contact.TelecomNumber'
-                logger.info("=====output orderInfoInternal paymentInfoList: $paymentInfoList")
             ]]></script>
         </actions>
     </service>
@@ -386,16 +384,21 @@ General Order Placement and eCommerce Usage
             <set field="companyPartyId" from="sessionAttributes.companyPartyId"/>
             <!-- user changed on the device? -->
             <if condition="ec.user.userAccount &amp;&amp; ec.user.userAccount.partyId != sessionAttributes.customerPartyId">
-                <!-- get related company of the employee-->
+                <set field="customerPartyId" from="ec.user.userAccount?.partyId"/>
+                <set field="sessionAttributes.customerPartyId" from="ec.user.userAccount?.partyId"/>
+                <!-- get related company of the employee i-->
                 <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
                     <econdition field-name="fromPartyId" from="ec.user.userAccount?.partyId"/>
                     <econdition field-name="fromRoleTypeId" value="Employee"/>
                     <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
                     <date-filter/>
                 </entity-find>
-                <set field="customerPartyId" from="ec.user.userAccount?.partyId"/>
-                <set field="companyPartyId" from="rel[0].toPartyId"/>
-                <set field="sessionAttributes.customerPartyId" from="ec.user.userAccount?.partyId"/>
+                <if condition="rel">
+                    <set field="companyPartyId" from="rel[0].toPartyId"/>
+                    <else>
+                        <set field="companyPartyId" from="ec.user.userAccount?.partyId"/>
+                    </else>
+                </if>
                 <set field="sessionAttributes.companyPartyId" from="companyPartyId"/>
             </if>
             <if condition="!cartOrderId &amp;&amp; companyPartyId">

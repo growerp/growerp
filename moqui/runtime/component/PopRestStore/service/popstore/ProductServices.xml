@@ -81,9 +81,9 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
 
             <set field="productRating" from="0"/>
-            <!--<entity-find entity-name="mantle.product.ProductReview" list="productReviewList">
-                <date-filter/><econdition field-name="productId"/>
-                <order-by field-name="sequenceNum,-fromDate"/>
+            <entity-find entity-name="mantle.product.ProductReview" list="productReviewList">
+                <econdition field-name="productId"/>
+                <order-by field-name="sequenceNum,-postedDateTime"/>
             </entity-find>
             <set field="sumaReview" from="0"/>
             <set field="productReviewListSize" from="0"/>
@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
             <if condition="productReviewListSize > 0">
                 <set field="productRating" from="sumaReview / productReviewListSize"/>
-            </if>-->
+            </if>
 
             <if condition="locale">
                 <!-- filter after by locale to streamline cached find -->

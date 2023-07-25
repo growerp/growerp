@@ -7,7 +7,7 @@
                 <span class="font-italic navbar-title">${storeInfo.productStore.storeName}</span>
             </a>
              <a class="navbar-brand d-block d-sm-none" href="/">
-                <span class="font-italic navbar-title">${storeInfo.productStore.storeName.substring(0,15)}...</span>
+                <span class="font-italic navbar-title">${storeInfo.productStore.storeName}...</span>
             </a>
             <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav_collapse1"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
