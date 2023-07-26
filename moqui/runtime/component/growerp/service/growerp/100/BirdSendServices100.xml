@@ -27,7 +27,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find-one entity-name="growerp.general.Interface" value-field="interfaceValue">
                 <field-map field-name="interfaceId" value="birdSend"/>
             </entity-find-one>
-            <if condition="!interfaceValue || interfaceValue.apiKey == '${BIRDSEND_API}'">
+            <if condition="!interfaceValue || interfaceValue.apiKey == '${BIRDSEND_API_KEY}' || interfaceValue.apiKey == ''">
                 <return error="false" message="birdsend not configured see growerp/100/BirdSendServices100.xml"/>
             </if>
             <set field="apiKey" from="interfaceValue?.apiKey"/>
