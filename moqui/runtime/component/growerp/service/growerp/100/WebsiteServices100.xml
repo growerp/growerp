@@ -178,10 +178,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <field-map field-name="productStoreId" from="stores[0].productStoreId"/>
                 <field-map field-name="settingTypeEnumId" value="PsstContentLocation"/>
             </entity-find-one>
-            <set field="location" value="${topResource.settingValue}/content/websiteColor.json"/>
-            <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
-            <if condition="contentRef != null">
-                <set field="website.colorJson" from="contentRef.getText()"/>
+            <if condition="topResource">
+                <set field="location" value="${topResource.settingValue}/content/websiteColor.json"/>
+                <set field="contentRef" from="ec.resource.getLocationReference(location)"/>
+                <if condition="contentRef != null">
+                    <set field="website.colorJson" from="contentRef.getText()"/>
+                </if>
             </if>
             <!-- google analytics -->
             <entity-find entity-name="mantle.product.store.ProductStoreSetting"
