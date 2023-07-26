@@ -20,6 +20,7 @@ docker compose up -d # start the images
 ### use the system
 ```
 browser logon to backend: https://backend.growerp.local/vapps
+create company with admin or hotel with browser
 browser flutter frontend: https://admin.growerp.local
 browser hotel frontend: https://hotel.growerp.local
 ```

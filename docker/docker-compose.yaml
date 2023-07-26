@@ -28,7 +28,7 @@ services:
       - my-network
 
   moqui-server:
-    image: growerp/moqui
+    image: growerp/growerp-moqui
     container_name: moqui
     build:
       context: ../moqui

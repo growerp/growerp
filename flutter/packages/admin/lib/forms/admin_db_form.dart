@@ -33,7 +33,6 @@ class AdminDbForm extends StatelessWidget {
       ]),
       makeDashboardItem('dbCrm', context, menuOptions[2], [
         "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
-        "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
         "Leads: ${authenticate.stats?.leads ?? 0}",
         "Customers: ${authenticate.stats?.customers ?? 0}",
       ]),
