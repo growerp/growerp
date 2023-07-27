@@ -1,28 +1,20 @@
 # Welcome to flutter open source GrowERP.
 
-GrowERP is an open source multi platform ERP application you can try right now!
+GrowERP is an open source multi platform ERP application you can use right now!
 
-We have now started a production version:
+We have now started a production admin version:
 - Web:     https://admin.growerp.com
 - Android: https://play.google.com/store/apps/details?id=org.growerp.admin
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1545521755
 
-The next version with limited availability you can try at:
-- Web:     https://admin.growerp.org
-
-When the application is started, create a new company, select demo data or an empty system and look around!
-
-If you like this initiative, please give a star to the project.
- 
-Documentation available at https://www.growerp.com
-
-We also created a first vertical app for Hotel owners which will be released later. 
+We also created a vertical app for Hotel owners: 
 - Web:     https://hotel.growerp.org
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
 - IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1531267095
 
-The next version with limited availability you can try at:
-- Web:     https://hotel.growerp.org
+When the application is started, create a new company, select demo data or an empty system and look around!
+
+Documentation available at https://www.growerp.com
 
 ## Use GrowERP locally
 
@@ -39,9 +31,9 @@ cd chat
 Initialize:
 ```sh
     cd moqui
-    ./gradlew downloadel #only first time
-    ./gradlew cleanall
-    ./gradlew build
+    ./gradlew downloadel #only one time
+    ./gradlew cleanall   #only one time
+    ./gradlew build      #only one time
     java -jar moqui.war load types=seed,seed-initial,install
 ```
 Run:
@@ -49,19 +41,9 @@ Run:
     cd moqui
     java -jar moqui.war
 ```
-### build flutter system:
+### run the flutter system:
 
-Install 'melos' and build: 
-```sh
-dart pub global install melos
-cd growerp
-melos bootstrap
-melos build_all
-melos l10n
-```
-
-### emulator/browser
-start emulator or use browser and start app in directory: packages/admin:
+### run the flutter emulator or browser
 ```sh
 cd flutter/packages/admin
 flutter run
@@ -70,7 +52,7 @@ flutter run
 Super simple! 
 In the docker directory there is a README.md to run the complete system with docker images locally.
 
-### Some phone screen shots:
+## Some phone screen shots:
 <div style="text-align: center">
     <table>
         <tr>
