@@ -41,7 +41,7 @@ flutter pub global run frameit_chrome \
     (everything including build/meta/screenshots)
     fastlane supply \
         --aab ../build/app/outputs/bundle/release/app-release.aab \
-        --track beta --in_app_update_priority 3
+        --track production --in_app_update_priority 3
 
    upload just binary:
     fastlane upload
