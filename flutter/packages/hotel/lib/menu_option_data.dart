@@ -106,7 +106,7 @@ List<MenuOption> menuOptions = [
         ),
         TabItem(
           form: const UserListForm(
-            key: Key('Customer'),
+            key: Key('CustomerUser'),
             role: Role.customer,
           ),
           label: 'Contacts',
@@ -114,7 +114,7 @@ List<MenuOption> menuOptions = [
         ),
         TabItem(
           form: const CompanyListForm(
-            key: Key('Customer'),
+            key: Key('CustomerCompany'),
             role: Role.customer,
           ),
           label: 'Companies',
