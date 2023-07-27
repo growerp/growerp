@@ -43,10 +43,12 @@ flutter pub global run frameit_chrome \
         --aab ../build/app/outputs/bundle/release/app-release.aab \
         --track production --in_app_update_priority 3
 
-   upload just binary:
-    fastlane upload
+6. Upload just binary:
+    fastlane supply \
+        --aab ../build/app/outputs/bundle/release/app-release.aab \
+        skip_upload_images
 
-check file fastfile for another actions.
+check [fastfile](https://docs.fastlane.tools/actions/supply/) for another actions.
 
 
 ### Other requirements:
