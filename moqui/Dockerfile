@@ -1,12 +1,14 @@
 #stage 1 -get files and build
 FROM openjdk:11-jdk as build-env
 
-ARG BRANCH=development # currently either master or development we need to add existing
+ARG BRANCH=master # currently either master or development we need to add existing
+ARG TAG=?
+
+RUN echo "Tag version: $TAG"
 
 RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https && \
     apt-get clean
-
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 # build from the moqui directory instead of repository for debugging
 #COPY . /root/growerp/moqui
