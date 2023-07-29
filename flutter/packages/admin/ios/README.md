@@ -27,9 +27,19 @@ flutter pub global run frameit_chrome \
 When generated then move from framed/en-US to metadata/screenshots/en-US
 
 Build and upload Manual:
-    https://flutter.dev/docs/deployment/ios
+    https://docs.flutter.dev/deployment/cd#fastlane
 certicate access (rediculus!!)    
     https://stackoverflow.com/questions/10204320/mac-os-x-wants-to-use-system-keychain-when-compiling-the-project
+
+create certificates inside xcode easy!:
+    https://help.twixlmedia.com/hc/en-us/articles/115000790705-iOS-Manage-signing-certificates-for-your-apps
+
+to test for profile and certificate, provide proper messages:
+    flutter build ipa
+
+short:
+export FLUTTER_ROOT=/Users/hans/flutter/bin
+
 
 ### Fastlane
 install: brew install fastlane
