@@ -10,7 +10,7 @@ We have now started a production admin version:
 We also created a vertical app for Hotel owners: 
 - Web:     https://hotel.growerp.org
 - Android: https://play.google.com/store/apps/details?id=org.growerp.hotel
-- IOS:     https://apps.apple.com/us/app/growerp-admin-open-source/id1531267095
+- IOS:     https://apps.apple.com/app/growerp-hotel-open-source/id1531267095 
 
 When the application is started, create a new company, select demo data or an empty system and look around!
 
