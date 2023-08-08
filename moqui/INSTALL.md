@@ -34,6 +34,17 @@ Update file at: runtime/component/mantle-udm/entity/AccountingLedgerEntities.xml
    from: <index name="GLACCT_UNQCD" unique="true">.....
    to: <index name="GLACCT_UNQCD" unique="false">....
 ```
+7. update log4j to remove error message at startup
+
+overwrite the following lines in framework/build.gradle starting from line167
+    // SLF4J, Log4j 2 (note Log4j 2 is used by various libraries, best not to replace it even if mostly possible with SLF4J)
+    api 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-jcl:2.20.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
+(https://forum.moqui.org/t/receiver-class-org-apache-logging-slf4j-slf4jserviceprovider-does-not-define-or-inherit-an-implementation-of-the-resolved-method-abstract-java-lang-string-getrequestedapiversion-of-interface-org-slf4j-spi-slf4jserviceprovider/345/6)
+
 Build moqui system:
 ```sh
     ./gradlew downloadel #only first time

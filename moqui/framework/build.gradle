@@ -163,13 +163,11 @@ dependencies {
     api module('org.apache.shiro:shiro-web:1.9.0') // Apache 2.0
 
     // SLF4J, Log4j 2 (note Log4j 2 is used by various libraries, best not to replace it even if mostly possible with SLF4J)
-    // NOTE: using slf4j 2.0.0-alpha2 because Jetty 10 uses it, overriding earlier version in embedded mode with shared classpath
-    api 'org.slf4j:slf4j-api:2.0.0-alpha7'
-    implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
-    implementation 'org.apache.logging.log4j:log4j-api:2.17.2'
-    runtimeOnly 'org.apache.logging.log4j:log4j-jcl:2.17.2'
-    // NOTE using log4j-slf4j18-impl instead of log4j-slf4j-impl because the SLF4J 1.8 version includes a SLF4J 2.0 compatible logging provider
-    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j18-impl:2.17.2'
+    api 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-jcl:2.20.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
 
     // SubEtha SMTP (module as depends on old javax.mail location; also uses SLF4J, activation included elsewhere)
     api module('org.subethamail:subethasmtp:3.1.7')
