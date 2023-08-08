@@ -1,5 +1,4 @@
 
-
 # Integration tests
 
 For this system we created integration tests only. We consider unit test too high maintenance. These integration tests are 'kind of' end user readable. The top level integration tests in the admin and hotel etc packages and can be started with the general 'flutter test integration_test/testname_test' command.

@@ -1,6 +1,5 @@
 # General
 
-
 ## Docker environment
 
 The initial installation can be done by installing docker on your server and using the docker-compose.yaml  in the docker directory.
