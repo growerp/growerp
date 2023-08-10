@@ -67,7 +67,7 @@ task clean(type: Delete) { delete file(warName); delete file(execTempDir); delet
 task cleanTempDir(type: Delete) { delete file(execTempDir) }
 task cleanDb { doLast {
     if (!file(moquiRuntime).exists()) return
-    delete files(file(moquiRuntime+'/db/derby').listFiles()) - files(moquiRuntime+'/db/derby/derby.properties')
+//    delete files(file(moquiRuntime+'/db/derby').listFiles()) - files(moquiRuntime+'/db/derby/derby.properties')
     delete file(moquiRuntime+'/db/h2')
     delete file(moquiRuntime+'/db/orientdb/databases')
     delete fileTree(dir: moquiRuntime+'/txlog', include: '*')

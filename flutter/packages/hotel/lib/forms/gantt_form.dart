@@ -73,7 +73,7 @@ class GanttPageState extends State<GanttFormFull> {
     _finDocBloc = context.read<FinDocBloc>();
     _finDocBloc.add(const FinDocFetch());
     _assetBloc = context.read<AssetBloc>();
-    _assetBloc.add(const AssetFetch());
+    _assetBloc.add(const AssetFetch(assetClassId: 'Hotel Room'));
     _productBloc = context.read<ProductBloc>();
     _productBloc.add(const ProductRentalOccupancy());
   }

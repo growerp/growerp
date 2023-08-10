@@ -80,7 +80,7 @@ along with this software (see the LICENSE.md file). If not, see
                     but do not know which one that is -->
                 <entity-find
                     entity-name="mantle.product.category.ProductCategory" list="catList" limit="1">
-                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                     <econdition field-name="productCategoryTypeEnumId" operator="not-equals" value="PsctBrowseRoot"/>
                     <order-by field-name="categoryName"/>
                 </entity-find>
@@ -98,13 +98,13 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[docType: 'product', statusId: productTypeId]" out-map="productType"/>
             <!-- get products , ignore allProducts category-->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
             </entity-find>
             <entity-find offset="start" limit="limit*3"
                     entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
                         list="productList">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productTypeEnumId"
                     from="productType.convertedStatusId" ignore-if-empty="true"/>
                 <econdition field-name="assetClassEnumId"
@@ -144,7 +144,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="lastItem" from="null"/>
             <!-- get root category, do not display -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
             </entity-find>
             <if condition="!catgs">
@@ -296,7 +296,7 @@ along with this software (see the LICENSE.md file). If not, see
                 productName: product.productName,
                 description: product.description,
                 salesIntroductionDate: ec.user.nowTimestamp,
-                ownerPartyId: companyPartyId,
+                ownerPartyId: ownerPartyId,
                 productTypeEnumId: prodConvert.convertedStatusId,
                 assetTypeEnumId: 'AstTpInventory',
                 requireInventory: product.useWarehouse == true ? 'Y' : 'N',
@@ -339,7 +339,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- always connect product to category allProducts -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
             </entity-find>
             <!-- add allProducts to category member -->
@@ -417,7 +417,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <entity-find list="prods" entity-name="mantle.product.Product" for-update="true" limit="1">
                 <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <if condition="!prods"><return error="true" message="product ${product.productId} not found!}"/></if>
             <set field="oldProduct" from="prods[0]"/>
             <!-- require inventory flag -->
@@ -450,7 +450,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
                     list="productPrices">
                 <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
             </entity-find>
             <if condition="productPrices &amp;&amp; productPrices[0].price != product.price">
                 <!-- existing current price -->
@@ -487,7 +487,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     ]"/></if>
             <!-- get root catg -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
             </entity-find>
             <!-- related categories  delete all and add all with root category -->
@@ -569,7 +569,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <entity-find list="prods" entity-name="mantle.product.Product" for-update="true" limit="1">
                 <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <set field="prods[0].salesDiscontinuationDate" from="ec.user.nowTimestamp"/>
             <entity-update value-field="prods[0]"/>
             <service-call name="growerp.100.CatgProdServices100.get#Products"
@@ -766,7 +766,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- check first if exist by name -->
                 <entity-find entity-name="mantle.product.Product" list="checkProducts" limit="1">
                     <econdition field-name="productName" from="asset.product?.productName"/>
-                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 </entity-find>
                 <if condition="checkProducts">
                     <set field="asset.product.productId" from="checkProducts[0].productId"/>
@@ -947,7 +947,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- root category -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <if condition="!rootList">
                 <return error="true" message="Root category not found for companyId: $companyPartyId"/></if>
             <set field="parentProductCategoryId" from="rootList[0].productCategoryId"/>
@@ -957,7 +957,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="search" value="%${search}%"/></if>
             <entity-find  offset="start" limit="limit" list="groups"
                 entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="parentProductCategoryId"
                     from="parentProductCategoryId"/>
                 <econdition field-name="productCategoryId"
@@ -1056,13 +1056,10 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <service-call  name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
-                in-map="[companyPartyId: companyPartyId, classificationId: classificationId]"
-                out-map="context"/>
             <!-- get root category -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <if condition="!rootList">
                 <return error="true" message="Root category not found for companyId: $companyPartyId"/></if>
             <set field="rootProductCategoryId" from="rootList[0].productCategoryId"/>
@@ -1071,7 +1068,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[categoryName: category.categoryName,
                     description: category.description,
                     productCategoryTypeEnumId: 'PctCatalog',
-                    ownerPartyId: companyPartyId]" out-map="context"/>
+                    ownerPartyId: ownerPartyId]" out-map="context"/>
             <!-- add to root category -->
             <service-call
                 name="create#mantle.product.category.ProductCategoryRollup"
@@ -1143,7 +1140,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find for-update="true"  list="productCategories" limit="1"
                 entity-name="mantle.product.category.ProductCategory">
                 <econdition field-name="productCategoryId" from="category.categoryId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <if condition="!productCategories">
                 <return error="true" message="Category: ${category.categoryId} not found"/></if>
             <set field="productCategory" from="productCategories[0]"/>
@@ -1205,11 +1202,11 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find list="productCategories"
                     entity-name="mantle.product.category.ProductCategory" limit="1">
                 <econdition field-name="productCategoryId" from="category.categoryId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
             <set field="productCategory" from="productCategories[0]"/>
             <!-- disable category in categoryRollUp entity -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/></entity-find>
             <entity-find entity-name="mantle.product.category.ProductCategoryRollup" 
                     list="rollUpList" for-update="true" limit="1">

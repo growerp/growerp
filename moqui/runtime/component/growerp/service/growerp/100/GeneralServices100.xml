@@ -147,7 +147,7 @@ along with this software (see the LICENSE.md file). If not, see
                         count-field="assets">
                     <econdition field-name="statusId"
                         operator="not-equals" value="AstDeactivated"/>
-                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
                 </entity-find-count>
                 <entity-find-count count-field="categories"
                     entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
@@ -158,7 +158,7 @@ along with this software (see the LICENSE.md file). If not, see
                     entity-name="mantle.sales.opportunity.SalesOpportunity">
                     <econdition field-name="opportunityStageId"
                         operator="not-equals" value="Deleted"/>
-                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="ownerPartyId" from="companyPartyId"/>
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.order.OrderPart"
                     count-field="openSlsOrders">
@@ -256,6 +256,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description>Get userlogin information when a proper Apikey is provided in the header</description>
         <out-parameters>
             <parameter name="authenticate" type="Map">
+                <parameter name="ownerPartyId"/>
                 <parameter name="user" type="Map">
                     <parameter name="partyId"/>
                     <parameter name="email"/>
@@ -344,9 +345,9 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <set field="authenticate" from="[:]"/>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <set field="authenticate" from="[ownerPartyId: ownerPartyId]"/>
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="userInfo"/>
             <set field="authenticate.user" from="userInfo.users[0]"/>
@@ -422,6 +423,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="login" noun="User" authenticate="anonymous-all">
         <description>service to return an apikey and user information if user/password ok, when not check for a reset password</description>
         <in-parameters>
+            <parameter name="classificationId" required="true" />
             <parameter name="username" required="true">
                 <description>any name, can also be the entered email address</description></parameter>
             <parameter name="password" required="true">
@@ -429,6 +431,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
+                <parameter name="ownerPartyId"/>
                 <parameter name="user" type="Map">
                     <parameter name="partyId"/>
                     <parameter name="email"/>
@@ -549,6 +552,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>ec.user.loginUser(username, password)</script>
                 <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                      out-map="context"/>
+                <!-- check if specific app already logged in before -->
+                <service-call  name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
+                     in-map="[ownerPartyId: authenticate.ownerPartyId, userPartyId: authenticate.user.partyId,
+                             companyPartyId: authenticate.company.partyId, classificationId: classificationId]"/>     
               </else>
             </if>
         </actions>

@@ -50,8 +50,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     // start from record zero for initial and refresh
     emit(state.copyWith(status: AssetStatus.loading));
     if (state.status == AssetStatus.initial || event.refresh) {
-      ApiResult<List<Asset>> compResult =
-          await repos.getAsset(searchString: event.searchString);
+      ApiResult<List<Asset>> compResult = await repos.getAsset(
+          searchString: event.searchString, assetClassId: event.assetClassId);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: AssetStatus.success,
@@ -67,8 +67,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
     if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
         (state.searchString.isNotEmpty &&
             event.searchString != state.searchString)) {
-      ApiResult<List<Asset>> compResult =
-          await repos.getAsset(searchString: event.searchString);
+      ApiResult<List<Asset>> compResult = await repos.getAsset(
+          searchString: event.searchString, assetClassId: event.assetClassId);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: AssetStatus.success,
@@ -81,9 +81,8 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
               message: NetworkExceptions.getErrorMessage(error))));
     }
     // get next page also for search
-
-    ApiResult<List<Asset>> compResult =
-        await repos.getAsset(searchString: event.searchString);
+    ApiResult<List<Asset>> compResult = await repos.getAsset(
+        searchString: event.searchString, assetClassId: event.assetClassId);
     return emit(compResult.when(
         success: (data) => state.copyWith(
               status: AssetStatus.success,

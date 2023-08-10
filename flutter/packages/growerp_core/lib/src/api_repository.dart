@@ -187,12 +187,13 @@ class APIRepository {
   Future<ApiResult<Authenticate>> login(
       {required String username, required String password}) async {
     try {
-      final response = await dioClient.post('rest/s1/growerp/100/Login', null,
-          data: <String, dynamic>{
-            'username': username,
-            'password': password,
-            'moquiSessionToken': sessionToken
-          });
+      final response = await dioClient
+          .post('rest/s1/growerp/100/Login', null, data: <String, dynamic>{
+        'username': username,
+        'password': password,
+        'moquiSessionToken': sessionToken,
+        'classificationId': classificationId,
+      });
       return getResponse<Authenticate>(
           "authenticate", response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {

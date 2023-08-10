@@ -24,6 +24,7 @@ class Authenticate with _$Authenticate {
   factory Authenticate({
     final String? apiKey,
     String? moquiSessionToken,
+    String? ownerPartyId,
     Company? company, //postall address not used here, use user comp address
     User? user, // user has a company companyAddress
     Stats? stats,

@@ -1,6 +1,8 @@
 # Ignoring generated files, as they pollute pull requests and can create merge conflicts
+*.xcconfig
 *.g.dart
 *.freezed.dart
+Podfile
 
 pubspec.lock
 generated

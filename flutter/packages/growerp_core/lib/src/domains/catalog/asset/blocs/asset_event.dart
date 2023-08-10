@@ -21,9 +21,11 @@ abstract class AssetEvent extends Equatable {
 }
 
 class AssetFetch extends AssetEvent {
-  const AssetFetch({this.searchString = '', this.refresh = false});
+  const AssetFetch(
+      {this.searchString = '', this.refresh = false, this.assetClassId = ''});
   final String searchString;
   final bool refresh;
+  final String assetClassId;
   @override
   List<Object> get props => [searchString, refresh];
 }
