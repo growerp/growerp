@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "3 Technical documentation/2 Flutter frontend & development.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "3 Technical documentation/2 Flutter frontend & development.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "GrowERP documentation.md",
+                "file": "3 Technical documentation/2 Flutter frontend & development.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "GrowERP documentation.md"
+                "file": "3 Technical documentation/2 Flutter frontend & development.md"
               }
             }
           }
@@ -156,15 +156,15 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "3 Technical documentation/1 Technical Introduction.md",
+    "GrowERP documentation.md",
     "3 Technical documentation/8 Deployment.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "3 Technical documentation/4 Chat Server.md",
-    "3 Technical documentation/1 Technical Introduction.md",
     "3 Technical documentation/7 Integration tests.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
     "4 Applications/1 Admin/1 Introduction.md",
-    "GrowERP documentation.md",
     "4 Applications/3 Freelance/1 Introduction.md",
     "4 Applications/2 Hotel/1 Introduction.md",
     "1 Introduction/5 Road Map and Releases.md",
