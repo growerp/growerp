@@ -16,9 +16,6 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="Website">
         <description>get the website information</description>
-        <in-parameters>
-            <parameter name="classificationId" default="AppAdmin"/><!-- admin, hotel etc -->
-        </in-parameters>
         <out-parameters>
             <parameter name="website" type="Map" default-value="AppAdmin">
                 <parameter name="id"/><!-- productStoreId -->
@@ -58,7 +55,6 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="classificationId"/>
             </entity-find>
             <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="pages">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
@@ -119,7 +115,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- categories and products -->
             <entity-find entity-name="growerp.website.ProductStoreAndWebsiteCategories" list="items">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="classificationId" from="classificationId"/>
                 <econditions combine="or"><!-- just show deals and new products -->
                     <econdition field-name="storeCategoryTypeEnumId" value="PsctPromotions"/>
                     <econdition field-name="storeCategoryTypeEnumId" value="PsctFeatured"/>
@@ -396,9 +391,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </if>
                 <!-- get changed website -->
-                <service-call name="growerp.100.WebsiteServices100.get#Website"
-                    in-map="[classificationId: stores[0].storeDomain]"
-                    out-map="context"/>
+                <service-call name="growerp.100.WebsiteServices100.get#Website" out-map="context"/>
               </else>
             </if>
         </actions>
@@ -407,7 +400,6 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="WebsiteContent">
         <description>get the content, text and images from the website</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
             <parameter name="content" type="Map" required="true">
                 <parameter name="path"/>
                 <parameter name="text"/><!-- not empty to indicate text otherwise image-->
@@ -427,11 +419,11 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="classificationId"/>
             </entity-find>
             <if condition="!stores">
                 <return error="true"
-                    message="Could not find product store for path: ${content.path} and classificationId: $classificationId"/></if>
+                    message="Could not find product store for path: ${content.path} and orgPartyId: $companyPartyId"/>
+            </if>
             <!-- text content -->
             <if condition="content.text">
               <then>
@@ -483,7 +475,6 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="upload" noun="WebsiteContent">
         <description>update the website information</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
             <parameter name="content" type="Map" required="true">
                 <parameter name="path"/>
                 <parameter name="title"/>
@@ -506,7 +497,6 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="classificationId"/>
             </entity-find>
             <if condition="content.text">
                 <!-- get top resource location -->
@@ -618,15 +608,13 @@ along with this software (see the LICENSE.md file). If not, see
               </else>
             </if>
             <service-call name="growerp.100.WebsiteServices100.get#WebsiteContent"
-                in-map="[content: content, classificationId: classificationId]"
-                out-map="context"/>
+                in-map="[content: content]" out-map="context"/>
             </actions>
     </service>
 
     <service verb="upload" noun="Obsidian">
         <description>upload an obsidian vault in zip format</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
             <parameter name="obsidian" type="Map" required="true">
                 <parameter name="title" default-value="obsidian"/>
                 <parameter name="zip"/>
@@ -894,9 +882,7 @@ along with this software (see the LICENSE.md file). If not, see
                 zis.close()
             }
             </script>
-            <service-call name="growerp.100.WebsiteServices100.get#Website"
-                in-map="[classificationId: stores[0].storeDomain]"
-                out-map="context"/>
+            <service-call name="growerp.100.WebsiteServices100.get#Website" out-map="context"/>
         </actions>
     </service>
 </services>

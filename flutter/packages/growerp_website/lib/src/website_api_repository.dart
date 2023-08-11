@@ -22,10 +22,9 @@ class WebsiteAPIRepository extends APIRepository {
   Future<ApiResult<Website>> getWebsite() async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/Website', apiKey!,
-          queryParameters: <String, dynamic>{
-            'classificationId': classificationId
-          });
+        'rest/s1/growerp/100/Website',
+        apiKey!,
+      );
       return getResponse<Website>(
           "website", response, (json) => Website.fromJson(json));
     } on Exception catch (e) {
@@ -38,8 +37,7 @@ class WebsiteAPIRepository extends APIRepository {
       final response = await dioClient.get(
           'rest/s1/growerp/100/WebsiteContent', apiKey!,
           queryParameters: <String, dynamic>{
-            'content': jsonEncode(content.toJson()),
-            'classificationId': classificationId
+            'content': jsonEncode(content.toJson())
           });
       return getResponse<Content>(
           "content", response, (json) => Content.fromJson(json));
@@ -55,7 +53,6 @@ class WebsiteAPIRepository extends APIRepository {
           'rest/s1/growerp/100/WebsiteContent', apiKey!,
           data: <String, dynamic>{
             'content': jsonEncode(content.toJson()),
-            'classificationId': classificationId,
             'moquiSessionToken': sessionToken
           });
       return getResponse<Content>(
@@ -82,12 +79,10 @@ class WebsiteAPIRepository extends APIRepository {
   Future<ApiResult<Website>> obsUpload(Obsidian obsidian) async {
     try {
       final response = await dioClient.post(
-          'rest/s1/growerp/100/Obsidian', apiKey!,
-          data: <String, dynamic>{
-            'obsidian': jsonEncode(obsidian.toJson()),
-            'classificationId': classificationId,
-            'moquiSessionToken': sessionToken
-          });
+          'rest/s1/growerp/100/Obsidian', apiKey!, data: <String, dynamic>{
+        'obsidian': jsonEncode(obsidian.toJson()),
+        'moquiSessionToken': sessionToken
+      });
       return getResponse<Website>(
           "website", response, (json) => Website.fromJson(json));
     } on Exception catch (e) {
@@ -110,7 +105,6 @@ class WebsiteAPIRepository extends APIRepository {
             'companyPartyId': companyPartyId,
             'filter': filter,
             'search': searchString,
-            'classificationId': classificationId,
           });
       return getResponseList<Category>(
           "categories", response, (json) => Category.fromJson(json));

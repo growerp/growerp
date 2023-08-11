@@ -1930,7 +1930,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- already exist -->
                 <!-- we just have a single productstore and a single website -->
                 <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
-                    <field-map field-name="organizationPartyId" from="ownerPartyId"/>
+                    <field-map field-name="organizationPartyId" from="companyPartyId"/>
                 </entity-find-one>
                 <return/>
                 <else>
@@ -1966,6 +1966,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <if condition="newOwner">
+                <log message="============NEW OWNER=========="/>
                 <entity-find-one entity-name="mantle.party.Organization" value-field="company">
                     <field-map field-name="partyId" from="companyPartyId" />
                 </entity-find-one>
@@ -1989,6 +1990,34 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="loc + [facilityId: facilityId]"/>
                 </iterate>
 
+                <!-- create top resource for this company  linkedto
+                        wikiSpace and productStore to organizationPartyId-->
+                <service-call name="create#moqui.resource.DbResource"
+                        in-map="[isFile: 'N']"
+                        out-map="topResource"/>
+                <service-call name="update#moqui.resource.DbResource"
+                    in-map="[resourceId: topResource.resourceId,
+                                filename: topResource.resourceId]"/>
+
+                <!-- create wiki space -->
+                <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                    <field-map field-name="wikiSpaceId" value="DEFAULT_WS"/>
+                </entity-find-one>
+                <service-call name="create#moqui.resource.wiki.WikiSpace"
+                    in-map="wikiSpace + [wikiSpaceId: null,
+                    rootPageLocation: wikiSpace.rootPageLocation.replace('DEFAULT_ROOT', topResource.resourceId)]"
+                    out-map="context"/>
+
+                <!-- wikipages and connect to data resource wikipageId = dbResourceId not use for now-->
+                <entity-find entity-name="moqui.resource.wiki.WikiPage" list="pages">
+                    <econdition field-name="wikiSpaceId" value="DEFAULT_WS"/>
+                </entity-find>
+                <iterate list="pages" entry="page">
+                    <service-call name="create#moqui.resource.wiki.WikiPage"
+                        in-map="page + [wikiSpaceId: wikiSpaceId,
+                                wikiPageId: null]"/>
+                </iterate>
+
                 <!-- get currency -->
                 <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
                         value-field="aPref">
@@ -2002,7 +2031,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="inMap" from="defProductStore + [
                     productStoreId: null,
                     organizationPartyId: companyPartyId,
-                    storeDomain: classificationId,
                     inventoryFacilityId: facilityId,
                     storeName: company.organizationName,
                     defaultCurrencyUomId: aPref.baseCurrencyUomId,
@@ -2030,34 +2058,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="options" entry="option">
                     <service-call name="create#mantle.product.store.ProductStoreShipOption"
                         in-map="option + [productStoreId: productStoreId]"/>
-                </iterate>
-
-                <!-- create top resource for this company  linkedto
-                        wikiSpace and productStore to organizationPartyId-->
-                <service-call name="create#moqui.resource.DbResource"
-                    in-map="[isFile: 'N']"
-                    out-map="topResource"/>
-                <service-call name="update#moqui.resource.DbResource"
-                    in-map="[resourceId: topResource.resourceId,
-                                filename: topResource.resourceId]"/>
-
-                <!-- create wiki space -->
-                <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
-                    <field-map field-name="wikiSpaceId" value="DEFAULT_WS"/>
-                </entity-find-one>
-                <service-call name="create#moqui.resource.wiki.WikiSpace"
-                    in-map="wikiSpace + [wikiSpaceId: null,
-                    rootPageLocation: wikiSpace.rootPageLocation.replace('DEFAULT_ROOT', topResource.resourceId)]"
-                    out-map="context"/>
-
-                <!-- wikipages and connect to data resource wikipageId = dbResourceId not use for now-->
-                <entity-find entity-name="moqui.resource.wiki.WikiPage" list="pages">
-                    <econdition field-name="wikiSpaceId" value="DEFAULT_WS"/>
-                </entity-find>
-                <iterate list="pages" entry="page">
-                    <service-call name="create#moqui.resource.wiki.WikiPage"
-                        in-map="page + [wikiSpaceId: wikiSpaceId,
-                                wikiPageId: null]"/>
                 </iterate>
 
                 <!-- update website settings-->
