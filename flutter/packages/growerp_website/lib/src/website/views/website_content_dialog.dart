@@ -311,7 +311,15 @@ class WebsiteContentState extends State<WebsiteContent> {
               child: Row(children: [
                 Expanded(child: input),
                 const SizedBox(width: 20),
-                Expanded(child: MarkdownWidget(data: newData)),
+                Expanded(
+                    child: MarkdownWidget(
+                        data: newData,
+                        styleConfig: StyleConfig(
+                            markdownTheme:
+                                context.read<ThemeBloc>().state.themeMode ==
+                                        ThemeMode.dark
+                                    ? MarkdownTheme.darkTheme
+                                    : MarkdownTheme.lightTheme))),
               ]),
             ),
       const SizedBox(height: 10),
