@@ -62,7 +62,7 @@ class ProductTest {
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());
       if (classificationId == 'AppAdmin') {
-        await CommonTest.drag(tester);
+        await CommonTest.drag(tester, listViewName: 'deleteChip');
         // remove existing categories
         while (tester.any(find.byKey(const Key("deleteChip")))) {
           await CommonTest.tapByKey(tester, "deleteChip");
