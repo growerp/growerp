@@ -760,7 +760,6 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass"/>
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="classificationId"/>
             </entity-find>
             <if condition="!asset.product?.productId &amp;&amp; asset.product?.productName">
                 <!-- check first if exist by name -->

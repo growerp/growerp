@@ -1138,7 +1138,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- get currency -->
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="order.classificationId"/>
             </entity-find>
             <set field="productStoreId" from="stores[0].productStoreId"/>
             <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
@@ -1205,7 +1204,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- get currency -->
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="storeDomain" from="invoice.classificationId"/>
             </entity-find>
             <set field="productStoreId" from="stores[0].productStoreId"/>
             <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
