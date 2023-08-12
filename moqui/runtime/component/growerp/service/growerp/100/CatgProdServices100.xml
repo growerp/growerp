@@ -260,7 +260,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="useWarehouse" type="Boolean"/>
                 <parameter name="image"/>
             </parameter>
-            <parameter name="classificationId" required="true"/>
         </in-parameters>
         <out-parameters>
             <parameter name="product" type="Map">
@@ -322,19 +321,21 @@ along with this software (see the LICENSE.md file). If not, see
                                     ]"/>
             <!-- related categories -->
             <if condition="product.categories">
-                <iterate list="product.categories" entry="productCategory">
+                <iterate list="product.categories" entry="category">
                     <!-- add if no id's but have name-->
-                    <if condition="!productCategory.categoryId &amp;&amp; productCategory.categoryName">
+                    <if condition="!category.categoryId &amp;&amp; category.categoryName">
+                        <log message="========create category: ${category.categoryName}"/>
                         <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
-                            in-map="[category: productCategory, classificationId: classificationId]"
+                            in-map="[category: category]"
                             out-map="categoryResult"/>
-                        <set field="productCategory.categoryId" from="categoryResult.category.categoryId"/>
+                        <log message="====result category creation: $categoryResult"/>
+                        <!-- add to category member -->
+                        <log message="=========create category memeber for productId: $productId ${categoryResult.category.categoryId}"/>
+                        <service-call name="create#mantle.product.category.ProductCategoryMember"
+                            in-map="[   productId: productId,
+                                        productCategoryId: categoryResult.category.categoryId,
+                                        fromDate: ec.user.nowTimestamp]"/>
                     </if>
-                    <!-- add to category member -->
-                    <service-call name="create#mantle.product.category.ProductCategoryMember"
-                        in-map="[   productId: productId,
-                                    productCategoryId: productCategory.categoryId,
-                                    fromDate: ec.user.nowTimestamp]"/>
                 </iterate>
             </if>
             <!-- always connect product to category allProducts -->
@@ -371,7 +372,6 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="update" noun="Product">
         <description> Update an existing Product</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
             <parameter name="product" required="true" type="Map">
                 <parameter name="productId"/>
                 <parameter name="productTypeId"/>
@@ -523,7 +523,7 @@ along with this software (see the LICENSE.md file). If not, see
                             product: newProduct,
                             statusId: 'Available']"/>
                         <service-call name="growerp.100.CatgProdServices100.create#Asset"
-                            in-map="[asset: asset, classificationId: classificationId]"/>
+                            in-map="[asset: asset]"/>
                     </else>
                 </if>
             </if>
@@ -771,7 +771,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="asset.product.productId" from="checkProducts[0].productId"/>
                     <else>
                         <service-call name="growerp.100.CatgProdServices100.create#Product"
-                            in-map="[classificationId: classificationId, product: asset.product]"
+                            in-map="[product: asset.product]"
                             out-map="productResult"/>
                         <set field="asset.product.productId" from="productResult.product.productId"/>
                     </else>
@@ -1036,7 +1036,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="classificationId" required="true"/>
         </in-parameters>
         <out-parameters>
             <parameter name="category" type="Map">
