@@ -1073,17 +1073,6 @@ along with this software (see the LICENSE.md file). If not, see
                 name="create#mantle.product.category.ProductCategoryRollup"
                     in-map="[parentProductCategoryId: rootProductCategoryId,
                         productCategoryId: productCategoryId]"/>
-            <!-- connect also to browse root for ecommerce site -->
-            <entity-find entity-name="mantle.product.store.ProductStoreCategory" list="browseRoot">
-                <econdition field-name="productStoreId" from="productStore.productStoreId"/>
-                <econdition field-name="storeCategoryTypeEnumId" value="PsctBrowseRoot"/>
-            </entity-find>
-            <if condition="browseRoot">
-                <service-call
-                name="create#mantle.product.category.ProductCategoryRollup"
-                    in-map="[parentProductCategoryId: browseRoot[0].productCategoryId,
-                        productCategoryId: productCategoryId]"/>
-            </if>
             <!-- image -->
             <if condition="category.image != null">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
