@@ -62,7 +62,7 @@ class ProductTest {
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());
       if (classificationId == 'AppAdmin') {
-        await CommonTest.drag(tester, listViewName: 'deleteChip');
+        await CommonTest.drag(tester);
         // remove existing categories
         while (tester.any(find.byKey(const Key("deleteChip")))) {
           await CommonTest.tapByKey(tester, "deleteChip");
@@ -151,7 +151,7 @@ class ProductTest {
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count));
-    await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
+    await CommonTest.tapByKey(tester, 'delete${count - 2}', seconds: 5);
     await CommonTest.gotoMainMenu(tester);
     await ProductTest.selectProducts(tester);
     expect(find.byKey(const Key('productItem')), findsNWidgets(count - 1));

@@ -9,6 +9,8 @@ plugins {
     id 'war'
 }
 
+sourceSets {}
+
 repositories {
     mavenLocal()
     maven {
