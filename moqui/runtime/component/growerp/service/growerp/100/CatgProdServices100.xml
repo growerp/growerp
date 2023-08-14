@@ -324,13 +324,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="product.categories" entry="category">
                     <!-- add if no id's but have name-->
                     <if condition="!category.categoryId &amp;&amp; category.categoryName">
-                        <log message="========create category: ${category.categoryName}"/>
                         <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
                             in-map="[category: category]"
                             out-map="categoryResult"/>
-                        <log message="====result category creation: $categoryResult"/>
                         <!-- add to category member -->
-                        <log message="=========create category memeber for productId: $productId ${categoryResult.category.categoryId}"/>
                         <service-call name="create#mantle.product.category.ProductCategoryMember"
                             in-map="[   productId: productId,
                                         productCategoryId: categoryResult.category.categoryId,
