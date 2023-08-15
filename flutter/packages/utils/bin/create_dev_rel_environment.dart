@@ -112,8 +112,8 @@ main(List<String> args) {
       run('flutter run',
           workingDirectory: '$home/growerp/flutterDevelopment/packages/admin');
     } else {
-      logger..i('GrowERP Installed but not started');
-      logger..i('Create 3 command line windows:');
+      logger.i('GrowERP Installed but not started');
+      logger.i('Create 3 command line windows:');
       logger.i(
           "Moqui backend in directory moquiDevelopment: java -jar moqui.war");
       logger.i("Chat backend in directory chatDevelopment: gradlew appRun");

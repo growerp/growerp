@@ -9,8 +9,8 @@ class HomeForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenTypeLayout(
-      mobile: HomeContentMobile(),
-      desktop: HomeContentDesktop(),
+      mobile: const HomeContentMobile(),
+      desktop: const HomeContentDesktop(),
     );
   }
 }
@@ -20,7 +20,7 @@ class HomeContentDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: <Widget>[
         GrowerpDetails(),
         Expanded(
@@ -38,7 +38,7 @@ class HomeContentMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -71,7 +71,7 @@ class GrowerpDetails extends StatelessWidget {
                 ? 16
                 : 21;
 
-        return Container(
+        return SizedBox(
           width: 800,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +106,7 @@ class GrowerpDetails extends StatelessWidget {
 
 class CallToAction extends StatelessWidget {
   final String title;
-  CallToAction(this.title);
+  const CallToAction(this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -119,24 +119,24 @@ class CallToAction extends StatelessWidget {
 
 class CallToActionMobile extends StatelessWidget {
   final String title;
-  const CallToActionMobile(this.title);
+  const CallToActionMobile(this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 60,
       alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: BorderRadius.circular(5),
+      ),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w800,
           color: Colors.white,
         ),
-      ),
-      decoration: BoxDecoration(
-        color: primaryColor,
-        borderRadius: BorderRadius.circular(5),
       ),
     );
   }
@@ -144,7 +144,7 @@ class CallToActionMobile extends StatelessWidget {
 
 class CallToActionTabletDesktop extends StatelessWidget {
   final String title;
-  const CallToActionTabletDesktop(this.title);
+  const CallToActionTabletDesktop(this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +152,7 @@ class CallToActionTabletDesktop extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
         child: InkWell(
           child: Text(title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 color: Colors.black,

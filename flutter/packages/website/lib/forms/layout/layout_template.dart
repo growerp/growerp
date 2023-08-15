@@ -14,8 +14,8 @@ class LayoutTemplate extends StatelessWidget {
         body: CenteredView(
           child: Column(
             children: <Widget>[
-              NavigationMenu(),
-              SizedBox(height: 20),
+              const NavigationMenu(),
+              const SizedBox(height: 20),
               Expanded(child: form)
             ],
           ),
@@ -35,7 +35,7 @@ class CenteredView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 60),
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 1200),
+        constraints: const BoxConstraints(maxWidth: 1200),
         child: child,
       ),
     );

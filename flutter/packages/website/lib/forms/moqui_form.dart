@@ -97,7 +97,7 @@ class MoquiForm extends StatelessWidget {
 TextSpan _textLink(final String url, final String text) {
   return TextSpan(
       text: text,
-      style: TextStyle(
+      style: const TextStyle(
           color: Colors.blueAccent, decoration: TextDecoration.underline),
       recognizer: TapGestureRecognizer()
         ..onTap = () async {
@@ -108,5 +108,5 @@ TextSpan _textLink(final String url, final String text) {
 }
 
 TextSpan _text(final String text) {
-  return TextSpan(text: text, style: TextStyle(color: Colors.black));
+  return TextSpan(text: text, style: const TextStyle(color: Colors.black));
 }

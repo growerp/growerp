@@ -4,7 +4,7 @@ class Bloc extends StatelessWidget {
   final String? header;
   final String? logo;
   final TextSpan? content;
-  const Bloc({this.header, this.content, this.logo});
+  const Bloc({super.key, this.header, this.content, this.logo});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class Bloc extends StatelessWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (logo != null) Image.asset(logo!),
               Text(header!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                   )),
             ]),

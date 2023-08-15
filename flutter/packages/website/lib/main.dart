@@ -6,10 +6,12 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
   configureApp();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Open Sans'),
       ),
       onGenerateRoute: router.generateRoute,
-      home: LayoutTemplate(form: HomeForm()),
+      home: const LayoutTemplate(form: HomeForm()),
     );
   }
 }

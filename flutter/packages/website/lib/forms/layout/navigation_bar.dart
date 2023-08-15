@@ -9,9 +9,9 @@ class NavigationMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenTypeLayout(
-      mobile: NavigationMenuMobile(),
-      tablet: NavigationMenuTabletDesktop(20),
-      desktop: NavigationMenuTabletDesktop(50),
+      mobile: const NavigationMenuMobile(),
+      tablet: const NavigationMenuTabletDesktop(20),
+      desktop: const NavigationMenuTabletDesktop(50),
     );
   }
 }
@@ -21,19 +21,19 @@ class NavigationMenuMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 80,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
           ),
-          NavBarLogo()
+          const NavBarLogo()
         ],
       ),
     );
@@ -42,26 +42,26 @@ class NavigationMenuMobile extends StatelessWidget {
 
 class NavigationMenuTabletDesktop extends StatelessWidget {
   final double spacing;
-  const NavigationMenuTabletDesktop(this.spacing);
+  const NavigationMenuTabletDesktop(this.spacing, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 100,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          NavBarLogo(),
+          const NavBarLogo(),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              NavBarItem('Home', HomeRoute),
+              const NavBarItem('Home', HomeRoute),
               SizedBox(width: spacing),
-              NavBarItem('About', AboutRoute),
+              const NavBarItem('About', AboutRoute),
               SizedBox(width: spacing),
-              NavBarItem('Moqui', MoquiRoute),
+              const NavBarItem('Moqui', MoquiRoute),
               SizedBox(width: spacing),
-              NavBarItem('OFBiz', OfbizRoute),
+              const NavBarItem('OFBiz', OfbizRoute),
             ],
           )
         ],

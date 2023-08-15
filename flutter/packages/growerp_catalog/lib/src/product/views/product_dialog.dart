@@ -307,6 +307,7 @@ class ProductDialogState extends State<ProductDialogFull> {
           )
         ],
       ),
+      const SizedBox(height: 10),
       Visibility(
           visible: classificationId != 'AppHotel',
           child: InputDecorator(

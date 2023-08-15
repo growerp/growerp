@@ -33,95 +33,95 @@ void main(List<String> arguments) async {
   // growerp already cloned or pulled
   // update growerp itself
   print("update growerp itself");
-  await Process.runSync('git', ['stash'], workingDirectory: '$home/growerp');
-  await Process.runSync('git', ['pull'], workingDirectory: '$home/growerp');
-  await Process.runSync('flutter', ['pub', 'get'],
+  Process.runSync('git', ['stash'], workingDirectory: '$home/growerp');
+  Process.runSync('git', ['pull'], workingDirectory: '$home/growerp');
+  Process.runSync('flutter', ['pub', 'get'],
       workingDirectory: '$home/growerp/packages/admin');
 
   // growerp-chat
   print("update chat");
-  if (await Directory('$home/growerpChat').existsSync() == false) {
-    await Process.runSync('git', [
+  if (Directory('$home/growerpChat').existsSync() == false) {
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/growerp-chat',
       '$home/growerpChat'
     ]);
   } else {
-    await Process.runSync('git', ['stash'],
+    Process.runSync('git', ['stash'],
         workingDirectory: '$home/growerpChat');
-    await Process.runSync('git', ['pull'],
+    Process.runSync('git', ['pull'],
         workingDirectory: '$home/growerpChat');
   }
-  await Process.runSync('./gradlew', ['appRun'],
+  Process.runSync('./gradlew', ['appRun'],
       workingDirectory: '$home/growerpChat');
 
   // growerp-moqui
-  if (await Directory('$home/growerpMoqui').existsSync() == false) {
+  if (Directory('$home/growerpMoqui').existsSync() == false) {
     print("create growerpMoqui backend system");
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/moqui-framework',
       '-b',
       'growerp',
       '$home/growerpMoqui'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/moqui-runtime',
       '$home/growerpMoqui/runtime'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/growerp-moqui',
       '$home/growerpMoqui/runtime/component/growerp'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/mantle-udm.git',
       '-b',
       'growerp',
       '$home/growerpMoqui/runtime/component/mantle-udm'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/mantle-usl.git',
       '-b',
       'growerp',
       '$home/growerpMoqui/runtime/component/mantle-usl'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/SimpleScreens.git',
       '$home/growerpMoqui/runtime/component/SimpleScreens'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/PopRestStore.git',
       '-b',
       'growerp',
       '$home/growerpMoqui/runtime/component/PopRestStore'
     ]);
-    await Process.runSync('git', [
+    Process.runSync('git', [
       'clone',
       'https://github.com/growerp/moqui-fop.git',
       '$home/growerpMoqui/runtime/component/moqui-fop'
     ]);
-    await Process.runSync('./gradlew', ['downloadElasticSearch'],
+    Process.runSync('./gradlew', ['downloadElasticSearch'],
         workingDirectory: '$home/growerpMoqui');
     print("built system");
-    await Process.runSync('./gradlew', ['build'],
+    Process.runSync('./gradlew', ['build'],
         workingDirectory: '$home/growerpMoqui');
   } else {
     print("update existing growerpMoqui backend system");
-    await Process.runSync('git', ['stash'],
+    Process.runSync('git', ['stash'],
         workingDirectory: '$home/growerpMoqui/runtime/component/growerp');
-    await Process.runSync('./gradlew', ['gitp'],
+    Process.runSync('./gradlew', ['gitp'],
         workingDirectory: '$home/growerpMoqui');
   }
 
-  await Process.runSync('./gradlew', ['cleandb'],
+  Process.runSync('./gradlew', ['cleandb'],
       workingDirectory: '$home/growerpMoqui');
-  await Process.runSync(
+  Process.runSync(
       'java', ['-jar', 'moqui.war', 'load', 'types=seed,seed-initial,install'],
       workingDirectory: '$home/growerpMoqui');
 
@@ -133,22 +133,22 @@ void main(List<String> arguments) async {
   await Process.start('flutter', ['emulators', '--launch', emulator]);
 
   print(' wait for emulator to start');
-  await Future<void>.delayed(Duration(seconds: 60));
+  await Future<void>.delayed(const Duration(seconds: 60));
 
   print('======start test....');
-  await Process.runSync('flutter', ['pub', 'get'],
+  Process.runSync('flutter', ['pub', 'get'],
       workingDirectory: '$home/growerp/packages/growerp_core');
-  await Process.runSync('flutter',
+  Process.runSync('flutter',
       ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
       workingDirectory: '$home/growerp/packages/growerp_core');
-  await Process.runSync('flutter', ['pub', 'get'],
+  Process.runSync('flutter', ['pub', 'get'],
       workingDirectory: '$home/growerp/packages/growerp_marketing');
-  await Process.runSync('flutter',
+  Process.runSync('flutter',
       ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
       workingDirectory: '$home/growerp/packages/growerp_marketing');
-  await Process.runSync('flutter', ['pub', 'get'],
+  Process.runSync('flutter', ['pub', 'get'],
       workingDirectory: '$home/growerp/packages/growerp_website');
-  await Process.runSync('flutter',
+  Process.runSync('flutter',
       ['pub', 'run', 'build_runner', 'build', '--delete-conflicting-outputs'],
       workingDirectory: '$home/growerp/packages/growerp_website');
   await Process.start('flutter', ['test', 'integration_test/all_test.dart'],

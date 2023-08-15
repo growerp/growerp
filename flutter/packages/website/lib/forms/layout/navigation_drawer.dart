@@ -9,13 +9,13 @@ class NavigationDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 300,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 16),
         ],
       ),
-      child: Column(
+      child: const Column(
         children: <Widget>[
           NavigationDrawerHeader(),
           // BONUS: Combine the UI for this widget with the NavBarItem and make it responsive.
@@ -34,7 +34,7 @@ class DrawerItem extends StatelessWidget {
   final String title;
   final IconData icon;
   final String navigationPath;
-  const DrawerItem(this.title, this.icon, this.navigationPath);
+  const DrawerItem(this.title, this.icon, this.navigationPath, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class DrawerItem extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Icon(icon),
-          SizedBox(
+          const SizedBox(
             width: 30,
           ),
           NavBarItem(title, navigationPath, true)
@@ -65,7 +65,7 @@ class NavigationDrawerHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Image.asset('assets/growerp.png'),
-          Text(
+          const Text(
             'Please select...',
           )
         ],
