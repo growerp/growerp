@@ -320,21 +320,20 @@ along with this software (see the LICENSE.md file). If not, see
                                     price: product.price,
                                     ]"/>
             <!-- related categories -->
-            <if condition="product.categories">
-                <iterate list="product.categories" entry="category">
-                    <!-- add if no id's but have name-->
-                    <if condition="!category.categoryId &amp;&amp; category.categoryName">
-                        <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
-                            in-map="[category: category]"
-                            out-map="categoryResult"/>
-                        <!-- add to category member -->
-                        <service-call name="create#mantle.product.category.ProductCategoryMember"
-                            in-map="[   productId: productId,
-                                        productCategoryId: categoryResult.category.categoryId,
-                                        fromDate: ec.user.nowTimestamp]"/>
-                    </if>
-                </iterate>
-            </if>
+            <iterate list="product.categories" entry="category">
+                <!-- add if no id's -->
+                <if condition="!category.categoryId">
+                    <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                        in-map="[category: category]"
+                        out-map="categoryResult"/>
+                    <set field="category.categoryId" from="categoryResult.category.categoryId"/>
+                </if>
+                <!-- add to category member -->
+                <service-call name="create#mantle.product.category.ProductCategoryMember"
+                    in-map="[   productId: productId,
+                                productCategoryId: category.categoryId,
+                                fromDate: ec.user.nowTimestamp]"/>
+            </iterate>
             <!-- always connect product to category allProducts -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
                 <econdition field-name="ownerPartyId" from="ownerPartyId"/>
