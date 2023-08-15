@@ -24,14 +24,12 @@ class WebsiteTest {
   }
 
   static Future<void> updateWebsite(WidgetTester tester) async {
-/*    await updateHost(tester);
+    await updateHost(tester);
     await updateTitle(tester);
     await updateTextSection(tester);
     await updateImages(tester);
     await updateHomePageCategories(tester, "Deals", products);
     await updateHomePageCategories(tester, "Featured", products);
-
-*/
     await updateShopCategories(tester);
   }
 
@@ -67,6 +65,8 @@ class WebsiteTest {
     while (tester.any(find.byKey(const Key("deleteImageChip")))) {
       await CommonTest.tapByKey(tester, "deleteImageChip");
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
+      await CommonTest.waitForKey(tester, 'dismiss');
+      await CommonTest.waitForSnackbarToGo(tester);
     }
     await CommonTest.drag(tester);
     await CommonTest.tapByKey(tester, 'addImage');
@@ -89,6 +89,7 @@ class WebsiteTest {
     while (tester.any(find.byKey(const Key("deleteProductChip")))) {
       await CommonTest.tapByKey(tester, "deleteProductChip");
     }
+    await CommonTest.dragUntil(tester, key: "addProduct$categoryName");
     await CommonTest.tapByKey(tester, "addProduct$categoryName");
     await CommonTest.tapByText(tester, products[0].productName!);
     await CommonTest.tapByKey(tester, "ok");

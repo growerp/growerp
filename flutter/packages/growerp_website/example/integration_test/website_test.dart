@@ -37,7 +37,7 @@ void main() {
         WebsiteLocalizations.localizationsDelegates,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "categories": categories.sublist(0, 2),
+      // related categories also created
       "products": products.sublist(0, 2),
     });
 

@@ -323,15 +323,18 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="product.categories" entry="category">
                 <!-- add if no id's -->
                 <if condition="!category.categoryId">
+                    <!-- check if exist not required, already done in entity import -->
                     <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
-                        in-map="[category: category]"
-                        out-map="categoryResult"/>
-                    <set field="category.categoryId" from="categoryResult.category.categoryId"/>
+                        in-map="[category: category]" out-map="categoryResult"/>
+                    <set field="categoryId" from="categoryResult.category.categoryId"/>
+                    <else>
+                        <set field="categoryId" from="category.categoryId"/>
+                    </else>
                 </if>
                 <!-- add to category member -->
                 <service-call name="create#mantle.product.category.ProductCategoryMember"
                     in-map="[   productId: productId,
-                                productCategoryId: category.categoryId,
+                                productCategoryId: categoryId,
                                 fromDate: ec.user.nowTimestamp]"/>
             </iterate>
             <!-- always connect product to category allProducts -->

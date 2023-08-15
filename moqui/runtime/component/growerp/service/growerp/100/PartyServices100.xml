@@ -1853,7 +1853,6 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- login -->
             <script>ec.user.internalLoginUser(username)</script>
             <!-- create productStore and other setup data.-->
-            <log message="==0===demodata: $demoData"/>
             <service-call  name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
                 in-map="[ownerPartyId: owner.partyId, userPartyId: user.partyId,
                         demoData: demoData == 'true'? true : false,
@@ -1907,7 +1906,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="partyClassification"/>
         </out-parameters>
         <actions>
-            <log message="=====verifyProd: $ownerPartyId $classificationId $demoData"/>
             <!-- verify classification -->
             <entity-find-one entity-name="mantle.party.PartyClassification"
                     value-field="classification">
@@ -1925,7 +1923,6 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-one>
             <set field="demoData" from="demoData ?: false"/>
             <set field="newOwner" value="true" type="Boolean"/>
-            <log message="==1===demodata: $demoData"/>
             <if condition="partyClassification">
                 <!-- already exist -->
                 <!-- we just have a single productstore and a single website -->
@@ -1940,7 +1937,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="partyId" from="ownerPartyId"/>
                         <econdition field-name="classificationTypeEnumId" value="PcltMobileApp"/>
                     </entity-find>
-                    <log message="===classifications found ${partyClassifications} "/>
                     <if condition="partyClassifications">
                         <set field="newOwner" value="false" type="Boolean"/>
                         <!-- check if first product of demo data exist -->
@@ -1966,7 +1962,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <if condition="newOwner">
-                <log message="============NEW OWNER=========="/>
                 <entity-find-one entity-name="mantle.party.Organization" value-field="company">
                     <field-map field-name="partyId" from="companyPartyId" />
                 </entity-find-one>
@@ -2247,7 +2242,6 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[parentProductCategoryId: rootProductCategoryId,
                             productCategoryId: productCategoryId]"/>
             </if>
-            <log message="==9===demodata: $demoData"/>
             <if condition="demoData">
                 <service-call name="growerp.100.PartyServices100.load#DefaultData"
                     in-map="[ownerPartyId: ownerPartyId,

@@ -56,7 +56,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- check if related category exist using name, if yes use these-->
                     <iterate list="product.categories" entry="category">
                         <entity-find entity-name="mantle.product.category.ProductCategory" list="foundCategories">
-                            <!--econdition field-name="categoryName" from="category.categoryName"/-->
+                            <econdition field-name="categoryName" from="category.categoryName"/>
                             <econdition field-name="ownerPartyId" from="relComp.ownerPartyId"/>
                         </entity-find>
                         <if condition="foundCategories">
