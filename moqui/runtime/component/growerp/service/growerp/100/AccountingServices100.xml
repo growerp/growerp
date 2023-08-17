@@ -407,6 +407,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="printDate"/>
                 <parameter name="glAccounts" type="List">
                     <parameter name="glAccount" type="Map">
+                        <parameter name="glAccountId"/>
                         <parameter name="accountCode"/>
                         <parameter name="accountName"/>
                         <parameter name="level"/>
@@ -449,6 +450,7 @@ along with this software (see the LICENSE.md file). If not, see
                     glAccount.postedBalance = dbGlAccount.postedBalance ? dbGlAccount.postedBalance.toString() : '0';
                     glAccount.rollUp = dbGlAccount.postedBalance ? dbGlAccount.postedBalance.toString() : '0';
                     glAccount.classId = dbGlAccount.glAccountClassEnumId;
+                    glAccount.glAccountId = dbGlAccount.glAccountId;
                     glAccount.accountCode = dbGlAccount.accountCode;
                     def dependents = dbGlAccounts.findAll { 
                         dbGlAccount.glAccountId == it.parentGlAccountId
