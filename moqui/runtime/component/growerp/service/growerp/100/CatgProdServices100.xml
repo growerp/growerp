@@ -770,7 +770,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="asset.product.productId" from="checkProducts[0].productId"/>
                     <else>
                         <service-call name="growerp.100.CatgProdServices100.create#Product"
-                            in-map="[product: asset.product]"
+                            in-map="[product: asset.product,classificationId: classificationId]"
                             out-map="productResult"/>
                         <set field="asset.product.productId" from="productResult.product.productId"/>
                     </else>

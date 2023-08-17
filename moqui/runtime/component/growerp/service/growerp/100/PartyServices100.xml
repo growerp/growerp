@@ -1840,7 +1840,6 @@ along with this software (see the LICENSE.md file). If not, see
                     loginName: emailAddress,
                     company: company,
                     ]"/>
-            <log message="====owner created: $owner"/>
             <!-- will create admin and company and link to owner; return results in the map user -->
             <service-call name="growerp.100.PartyServices100.create#User"
                     in-map="[user: user, password: newPassword,
@@ -1954,7 +1953,6 @@ along with this software (see the LICENSE.md file). If not, see
                         <if condition="products">
                             <set field="demoData" value="true"/>
                         </if>
-                        <log message="==3===demodata: $demoData"/>
                     </if>
                     <service-call name="create#mantle.party.PartyClassificationAppl"
                         in-map="[partyId: ownerPartyId, partyClassificationId: classificationId,
@@ -1975,15 +1973,6 @@ along with this software (see the LICENSE.md file). If not, see
                         ownerPartyId: companyPartyId,
                         facilityName: company.organizationName + ' Inventory']"
                     out-map="context"/>
-
-                <!-- facility default locations -->
-                <entity-find entity-name="mantle.facility.FacilityLocation" list="locs">
-                    <econdition field-name="facilityId" value="DEFAULT_WH"/>
-                </entity-find>
-                <iterate list="locs" entry="loc">
-                    <service-call name="create#mantle.facility.FacilityLocation"
-                        in-map="loc + [facilityId: facilityId]"/>
-                </iterate>
 
                 <!-- create top resource for this company  linkedto
                         wikiSpace and productStore to organizationPartyId-->
@@ -2648,6 +2637,17 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="index" from="index + 1"/>
                     </iterate>
                 </if>
+
+                <!-- facility locations -->
+                <entity-find entity-name="mantle.facility.FacilityLocation" list="locs">
+                    <econdition field-name="facilityId" value="DEFAULT_WH"/>
+                </entity-find>
+
+                <iterate list="locs" entry="loc">
+                    <service-call name="create#mantle.facility.FacilityLocation"
+                        in-map="loc + [facilityId: facilityId]"/>
+                </iterate>
+
 
                 <!-- orders -->
                 <set field="ordersAdmin" from="[

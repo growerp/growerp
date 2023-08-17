@@ -30,8 +30,7 @@ void main() {
       extraDelegates,
     ); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "categories": categories.sublist(0, 2),
-      "products": products.sublist(0, 2),
+      "products": products.sublist(0, 2), // will add categories too
       "users": suppliers.sublist(0, 2) + [customers[0]],
     });
     await OrderTest.selectPurchaseOrders(tester);

@@ -2189,7 +2189,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find list="shipmentItemDetailList"
                 entity-name="mantle.shipment.ShipmentItemDetail">
                 <econdition field-name="shipmentId" from="finDoc.shipmentId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/><!-- product owner -->
                 <order-by field-name="productId"/>
             </entity-find>
             <entity-find entity-name="mantle.facility.Facility" list="facilities">

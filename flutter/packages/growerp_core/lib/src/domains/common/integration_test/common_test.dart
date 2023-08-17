@@ -39,7 +39,7 @@ class CommonTest {
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
-    debugPrint("====startapp seq: $seq");
+    // debugPrint("====startapp seq: $seq");
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {

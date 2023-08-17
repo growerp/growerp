@@ -70,8 +70,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="entities.assets" entry="asset">
                     <service-call name="growerp.100.CatgProdServices100.create#Asset"
                         in-map="[asset: asset, classificationId: classificationId]"/>
-                </iterate></if>
-            </actions>
+            </iterate></if>
+            <if condition="entities.locations">
+                <iterate list="entities.locations" entry="location">
+                    <service-call name="growerp.100.WarehouseServices100.create#Location"
+                        in-map="[location: location]"/>
+            </iterate></if>
+        </actions>
     </service>
     
     <service verb="export" noun="Categories">

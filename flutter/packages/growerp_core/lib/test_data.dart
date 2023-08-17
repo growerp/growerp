@@ -943,7 +943,7 @@ List<Product> productsHotel = [
     assetClassId: 'AsClsInventoryFin',
     listPrice: Decimal.parse('60'),
     price: Decimal.parse('50'),
-    categories: [Category(categoryName: "Hotel room types")],
+    categories: [Category(categoryName: "rooms")],
   ),
   Product(
     productName: 'Standard Room',
@@ -952,7 +952,7 @@ List<Product> productsHotel = [
     assetClassId: 'AsClsInventoryFin',
     listPrice: Decimal.parse('90'),
     price: Decimal.parse('80'),
-    categories: [Category(categoryName: "Hotel room types")],
+    categories: [Category(categoryName: "rooms")],
   ),
   Product(
     productName: 'Deluxe Room',
@@ -961,7 +961,7 @@ List<Product> productsHotel = [
     assetClassId: 'AsClsInventoryFin',
     listPrice: Decimal.parse('180'),
     price: Decimal.parse('170'),
-    categories: [Category(categoryName: "Hotel room types")],
+    categories: [Category(categoryName: "rooms")],
   ),
   Product(
     productName: 'Suite',
@@ -970,7 +970,7 @@ List<Product> productsHotel = [
     assetClassId: 'AsClsInventoryFin',
     listPrice: Decimal.parse('380'),
     price: Decimal.parse('360'),
-    categories: [Category(categoryName: "Hotel room types")],
+    categories: [Category(categoryName: "rooms")],
   ),
   Product(
     productName: 'Appartment',
@@ -979,7 +979,7 @@ List<Product> productsHotel = [
     assetClassId: 'AsClsInventoryFin',
     listPrice: Decimal.parse('480'),
     price: Decimal.parse('460'),
-    categories: [Category(categoryName: "Hotel room types")],
+    categories: [Category(categoryName: "rooms")],
   ),
 ];
 

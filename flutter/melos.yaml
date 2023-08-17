@@ -40,14 +40,6 @@ scripts:
     packageFilters:
       dirExists: "integration_test"
       scope: "*_example"
-  test_app:
-    description: run all app tests.
-    run: "flutter test integration_test"
-    exec:
-      concurrency: 1
-    packageFilters:
-      dirExists: "integration_test"
-      ignore: "*_example"
   test_all:
     description: run all app and package tests.
     run: "flutter test integration_test"
@@ -56,3 +48,4 @@ scripts:
       concurrency: 1
     packageFilters:
       dirExists: "integration_test"
+

@@ -36,12 +36,12 @@ Future<void> selectRooms(WidgetTester tester) async {
 
 Future<void> selectUserCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'UserListFormCustomer', '2');
+      tester, '/reservations', 'UserListFormCustomerUser', '2');
 }
 
 Future<void> selectCompanyCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'CompanyListFormCustomer', '3');
+      tester, '/reservations', 'CompanyListFormCustomerCompany', '3');
 }
 
 Future<void> selectReservations(WidgetTester tester) async {
@@ -125,7 +125,7 @@ void main() {
 
   testWidgets("test room reservation", (WidgetTester tester) async {
     await CommonTest.startTestApp(
-      clear: false,
+      clear: true,
       title: 'Hotel reservation Test',
       tester,
       router.generateRoute,
@@ -133,8 +133,7 @@ void main() {
       delegates,
     );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-      "products": productsHotel,
-      "assets": roomsHotel,
+      "assets": roomsHotel, // will also add products
       "users": customers
     });
     await createRoomReservation(tester, roomReservations);
