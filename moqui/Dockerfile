@@ -1,6 +1,7 @@
 #stage 1 -get files and build
 FROM openjdk:11-jdk as build-env
 
+ARG PAT
 ARG BRANCH=master # currently either master or development we need to add existing
 ARG TAG=?
 
@@ -14,7 +15,7 @@ RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/
 #COPY . /root/growerp/moqui
 # delete debug user
 RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
-RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
+RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 # antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/data
