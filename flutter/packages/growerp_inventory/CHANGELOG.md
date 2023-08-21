@@ -1,3 +1,6 @@
+## 1.1.3
+* upgrade to growerp_core 1.1.3
+
 ## 1.1.0
 * upgraded searchdropdown
 * Moved blocs into the core

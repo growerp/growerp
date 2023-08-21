@@ -12,13 +12,13 @@ dependencies:
   meta: ^1.3.0
   shared_preferences: ^2.0.6
   animations: ^2.0.0
-  growerp_website: ^1.1.0
-  growerp_core: ^1.1.0
-  growerp_order_accounting: ^1.1.0
-  growerp_user_company: ^1.1.0
-  growerp_catalog: ^1.1.0
-  growerp_inventory: ^1.1.0
-  growerp_marketing: ^1.1.0
+  growerp_website: ^1.1.4
+  growerp_core: ^1.1.3
+  growerp_order_accounting: ^1.1.3
+  growerp_user_company: ^1.1.3
+  growerp_catalog: ^1.1.3
+  growerp_inventory: ^1.1.3
+  growerp_marketing: ^1.1.3
   package_info_plus: ^3.1.2
   date_utils: ^0.2.0
   flutter_bloc: ^8.1.1

@@ -19,12 +19,13 @@ It uses a local backend system.
 
 You can also use our test backend system   
     set in: example/assets/cfg/app_settings.json  
-        databaseUrlDebug: https://test.growerp.org
+        "databaseUrlDebug": https://backend.growerp.org
+        "chatUrlDebug": "wss://chat.growerp.org"
 
-Start test with: 
+Start test with melos: (activate with: dart global activate melos) 
 ```sh
-flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+melos build_all
+melos l10n
 cd example
 flutter test integration_test
 ```

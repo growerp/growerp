@@ -3,7 +3,7 @@ description: >
   Package designed to select an item from a list, with the option to filter and    
    \n \n \n even search the items online, tailored to the GrowERP   
   \n\nenvironment.\n\n\n\n\n\n\n\n\n\n
-version: 0.6.0
+version: 0.6.1
 homepage: https://flutterando.com.br/
 git: https://github.com/growerp/growerp/tree/master/packages/growerp_select_dialog
 environment: 

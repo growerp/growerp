@@ -1,3 +1,6 @@
+## 1.1.3
+* upgrade to growerp_core 1.1.3
+
 ## 1.1.0
 *  moved bloc to the core package
 *  user list improved
