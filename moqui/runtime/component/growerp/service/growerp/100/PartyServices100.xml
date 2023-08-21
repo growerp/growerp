@@ -1949,7 +1949,6 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="productName" from="productName"/>
                             <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                         </entity-find>
-                        <log message="======products found: $products $ownerPartyId $productName"/>
                         <if condition="products">
                             <set field="demoData" value="true"/>
                         </if>
@@ -2542,6 +2541,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <entity-find entity-name="mantle.facility.Facility" limit="1" list="facilities">
                         <econdition field-name="ownerPartyId" from="companyPartyId"/>
                     </entity-find>
+                    <set field="facilityId" from="facilities[0].facilityId"/>
 
                     <set field="xLoc" value="0" type="Integer"/>
                     <iterate list="assetsIn" entry="asset">
@@ -2558,7 +2558,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <!-- create location -->
                             <service-call name="create#mantle.facility.FacilityLocation"
-                                in-map="[facilityId: facilities[0].facilityId,
+                                in-map="[facilityId: facilityId,
                                         description: 'loc' + xLoc++]"
                                 out-map="context"/>
 
@@ -2573,7 +2573,7 @@ along with this software (see the LICENSE.md file). If not, see
                             assetName: asset.assetName,
                             ownerPartyId: companyPartyId,
                             statusId: 'AstAvailable',
-                            facilityId: product.assetTypeEnumId != 'AstTpFixed'? facilities[0].facilityId : null,
+                            facilityId: product.assetTypeEnumId != 'AstTpFixed'? facilityId : null,
                             locationSeqId: product.assetTypeEnumId != 'AstTpFixed'?  locationSeqId : null
                             "/>
                             <service-call name="create#mantle.product.asset.AssetDetail"
@@ -2638,15 +2638,20 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                 </if>
 
-                <!-- facility locations -->
-                <entity-find entity-name="mantle.facility.FacilityLocation" list="locs">
-                    <econdition field-name="facilityId" value="DEFAULT_WH"/>
+                <!-- create facility locations if not exist yet-->
+                <entity-find entity-name="mantle.facility.FacilityLocation" list="locations">
+                    <econdition field-name="facilityId" from="facilityId" />
                 </entity-find>
+                <if condition="!locations">
+                    <entity-find entity-name="mantle.facility.FacilityLocation" list="locs">
+                        <econdition field-name="facilityId" value="DEFAULT_WH"/>
+                    </entity-find>
 
-                <iterate list="locs" entry="loc">
-                    <service-call name="create#mantle.facility.FacilityLocation"
-                        in-map="loc + [facilityId: facilityId]"/>
-                </iterate>
+                    <iterate list="locs" entry="loc">
+                        <service-call name="create#mantle.facility.FacilityLocation"
+                            in-map="loc + [facilityId: facilityId]"/>
+                    </iterate>
+                </if>
 
 
                 <!-- orders -->

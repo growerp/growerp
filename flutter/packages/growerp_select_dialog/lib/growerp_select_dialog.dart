@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'multiple_items_bloc.dart';
 import 'select_bloc.dart';
 
-typedef Widget SelectOneItemBuilderType<T>(BuildContext context, T item, bool isSelected);
+typedef Widget SelectOneItemBuilderType<T>(
+    BuildContext context, T item, bool isSelected);
 
 typedef Widget ErrorBuilderType<T>(BuildContext context, dynamic exception);
 typedef Widget ButtonBuilderType(BuildContext context, VoidCallback onPressed);
@@ -83,7 +84,8 @@ class SelectDialog<T> extends StatefulWidget {
     void Function(T)? onChange,
     void Function(List<T>)? onMultipleItemsChange,
     InputDecoration? searchBoxDecoration,
-    @Deprecated("Use 'hintText' property from searchBoxDecoration") String? searchHint,
+    @Deprecated("Use 'hintText' property from searchBoxDecoration")
+    String? searchHint,
     Color? backgroundColor,
     TextStyle? titleStyle,
     WidgetBuilder? emptyBuilder,
@@ -122,7 +124,13 @@ class SelectDialog<T> extends StatefulWidget {
                                   topLeft: Radius.circular(20),
                                   topRight: Radius.circular(20),
                                 )),
-                            child: Center(child: Text(label ?? "", key: const Key('header'), style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold))))),
+                            child: Center(
+                                child: Text(label ?? "",
+                                    key: const Key('header'),
+                                    style: const TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold))))),
                     SelectDialog<T>(
                       selectedValue: selectedValue,
                       multipleSelectedValues: multipleSelectedValues,
@@ -185,9 +193,16 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
   late MultipleItemsBloc<T> multipleItemsBloc;
   void Function(T)? onChange;
 
-  _SelectDialogState(List<T>? itemsList, this.onChange, void Function(List<T>)? onMultipleItemsChange, List<T>? multipleSelectedValues, Future<List<T>> Function(String text)? onFind, TextEditingController? findController) {
+  _SelectDialogState(
+      List<T>? itemsList,
+      this.onChange,
+      void Function(List<T>)? onMultipleItemsChange,
+      List<T>? multipleSelectedValues,
+      Future<List<T>> Function(String text)? onFind,
+      TextEditingController? findController) {
     bloc = SelectOneBloc(itemsList, onFind, findController);
-    multipleItemsBloc = MultipleItemsBloc(multipleSelectedValues, onMultipleItemsChange);
+    multipleItemsBloc =
+        MultipleItemsBloc(multipleSelectedValues, onMultipleItemsChange);
   }
 
   @override
@@ -204,27 +219,36 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
     bloc.dispose();
   }
 
-  bool get isWeb => MediaQuery.of(context).size.width > MediaQuery.of(context).size.height;
+  bool get isWeb =>
+      MediaQuery.of(context).size.width > MediaQuery.of(context).size.height;
 
   bool get isMultipleItems => widget.onMultipleItemsChange != null;
 
-  BoxConstraints get webDefaultConstraints => BoxConstraints(maxWidth: 250, maxHeight: 500);
+  BoxConstraints get webDefaultConstraints =>
+      BoxConstraints(maxWidth: 250, maxHeight: 500);
 
   BoxConstraints get mobileDefaultConstraints => BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width * 0.9,
         maxHeight: MediaQuery.of(context).size.height * 0.7,
       );
 
-  SelectOneItemBuilderType<T> get itemBuilder => widget.itemBuilder ?? (context, item, isSelected) => ListTile(title: Text(item.toString()), selected: isSelected);
+  SelectOneItemBuilderType<T> get itemBuilder =>
+      widget.itemBuilder ??
+      (context, item, isSelected) =>
+          ListTile(title: Text(item.toString()), selected: isSelected);
 
-  ButtonBuilderType get okButtonBuilder => widget.okButtonBuilder ?? (context, onPressed) => ElevatedButton(child: Text("Ok"), onPressed: onPressed);
+  ButtonBuilderType get okButtonBuilder =>
+      widget.okButtonBuilder ??
+      (context, onPressed) =>
+          ElevatedButton(child: Text("Ok"), onPressed: onPressed);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 400,
       height: 400,
-      constraints: widget.constraints ?? (isWeb ? webDefaultConstraints : mobileDefaultConstraints),
+      constraints: widget.constraints ??
+          (isWeb ? webDefaultConstraints : mobileDefaultConstraints),
       child: Column(
         children: <Widget>[
           if (widget.showSearchBox)
@@ -235,7 +259,12 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
                 focusNode: bloc.focusNode,
                 maxLines: widget.searchBoxMaxLines,
                 minLines: widget.searchBoxMinLines,
-                decoration: widget.searchBoxDecoration?.copyWith(hintText: widget.searchHint ?? widget.searchBoxDecoration!.hintText) ?? InputDecoration(hintText: widget.searchHint ?? "Find", contentPadding: const EdgeInsets.all(2.0)),
+                decoration: widget.searchBoxDecoration?.copyWith(
+                        hintText: widget.searchHint ??
+                            widget.searchBoxDecoration!.hintText) ??
+                    InputDecoration(
+                        hintText: widget.searchHint ?? "Find",
+                        contentPadding: const EdgeInsets.all(2.0)),
               ),
             ),
           Expanded(
@@ -243,27 +272,33 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
               stream: bloc.filteredListOut,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return widget.errorBuilder?.call(context, snapshot.error) ?? Center(child: Text("Oops. \n${snapshot.error}"));
+                  return widget.errorBuilder?.call(context, snapshot.error) ??
+                      Center(child: Text("Oops. \n${snapshot.error}"));
                 } else if (!snapshot.hasData) {
-                  return widget.loadingBuilder?.call(context) ?? Center(child: CircularProgressIndicator());
+                  return widget.loadingBuilder?.call(context) ??
+                      Center(child: CircularProgressIndicator());
                 } else if (snapshot.data!.isEmpty) {
-                  return widget.emptyBuilder?.call(context) ?? Center(child: Text("No data found"));
+                  return widget.emptyBuilder?.call(context) ??
+                      Center(child: Text("No data found"));
                 }
                 return Scrollbar(
                   controller: bloc.scrollController,
-                  isAlwaysShown: widget.alwaysShowScrollBar,
+                  // isAlwaysShown: widget.alwaysShowScrollBar,
                   child: ListView.builder(
                     controller: bloc.scrollController,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
                       var item = snapshot.data![index];
-                      bool isSelected = multipleItemsBloc.selectedItems.contains(item);
+                      bool isSelected =
+                          multipleItemsBloc.selectedItems.contains(item);
                       isSelected = isSelected || item == widget.selectedValue;
                       return InkWell(
                         child: itemBuilder(context, item, isSelected),
                         onTap: () {
                           if (isMultipleItems) {
-                            setState(() => (isSelected) ? multipleItemsBloc.unselectItem(item) : multipleItemsBloc.selectItem(item));
+                            setState(() => (isSelected)
+                                ? multipleItemsBloc.unselectItem(item)
+                                : multipleItemsBloc.selectItem(item));
                           } else {
                             onChange?.call(item);
                             Navigator.pop(context);
