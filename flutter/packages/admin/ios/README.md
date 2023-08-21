@@ -45,11 +45,12 @@ export FLUTTER_ROOT=/Users/hans/flutter/bin
 install: brew install fastlane
 
 1. increase numbers pubspec.yaml version: x.x.x+1
-2. build flutter: (project home)
+2. set the target backend!!!! and back again!!!!
+3. build flutter: (project home)
     flutter build ios --release --no-codesign
-3. compile and sign (in ios dir)
+4. compile and sign (in ios dir)
     fastlane gym
-4. upload: (in ios dir)
+5. upload: (in ios dir)
     binary only: fastlane upload
     all including meta: fastlane deliver --overwrite_screenshots 
     just screenshots: fastlane deliver --overwrite_screenshots \
