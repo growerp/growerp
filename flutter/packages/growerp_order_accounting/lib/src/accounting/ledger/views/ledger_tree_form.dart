@@ -21,7 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../accounting.dart';
+import '../../accounting.dart';
 
 class LedgerTreeForm extends StatelessWidget {
   const LedgerTreeForm({Key? key}) : super(key: key);

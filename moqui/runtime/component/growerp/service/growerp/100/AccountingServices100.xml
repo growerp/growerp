@@ -544,40 +544,6 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service-->
 
-    <!-- replace by update findoc payment status to 'PmntDelivered' -->
-    <service verb="confirm" noun="PurchasePayment">
-        <in-parameters><parameter name="paymentId"/></in-parameters>
-        <out-parameters><parameter name="finDoc"/></out-parameters>
-        <actions>
-            <set field="nowDate" from="ec.user.nowTimestamp"/>
-            <service-call  out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <!-- get payment -->
-            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment"/>
-            <if condition="!payment 
-                || (payment.fromPartyId != companyPartyId &amp;&amp; payment.toPartyId != companyPartyId)">
-                <return error="true" message="Payment $paymentId not found"/>
-            </if>
-            <!-- set effective date -->
-            <service-call name="mantle.account.PaymentServices.update#Payment"
-                in-map="[paymentId: paymentId, effectiveDate: nowDate]"/>
-            <!-- update status to delivered -->
-            <service-call name="mantle.account.PaymentServices.update#Payment"
-                in-map="[paymentId: paymentId, statusId: 'PmntDelivered']"/>
-            <!-- find related invoice over orderItemBilling -->
-            <entity-find entity-name="mantle.order.OrderItemBilling" list="billings">
-                <econdition field-name="orderId" from="payment.orderId"/></entity-find>
-            <!-- apply payment to invoice -->
-            <service-call name="mantle.account.PaymentServices.apply#InvoicePayment"
-                in-map="[paymentId: paymentId, invoiceId: billings[0].invoiceId]"/>
-            <!-- update status to confirm paid -->
-            <service-call name="mantle.account.PaymentServices.update#Payment"
-                in-map="[paymentId: paymentId, statusId: 'PmntConfirmed']"/>
-            <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                in-map="[docType: 'Payment', finDocId: paymentId, sales: ]" out-map="context"/>
-        </actions>
-    </service>
-
     <service verb="get" noun="ItemTypes">
         <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
         <in-parameters>
@@ -647,4 +613,139 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="get" noun="LedgerJournal">
+        <in-parameters>
+            <parameter name="journalId"/>
+            <parameter name="isPosted" type="Boolean"/>
+            <parameter name="start" default-value="0" type="Integer"/>
+            <parameter name="limit" default-value="10" type="Integer"/>
+            <parameter name="search"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ledgerJournalList" type="List">
+                <parameter name="journalId"/>
+                <parameter name="journalName"/>
+                <parameter name="isError" type="Boolean"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean"/>
+            </parameter>
+            <parameter name="ledgerJournal" type="Map">
+                <parameter name="journalId"/>
+                <parameter name="journalName"/>
+                <parameter name="isError" type="Boolean"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="search">
+                <set field="search" value="%$search%"/>
+            </if>
+            <entity-find entity-name="mantle.ledger.transaction.GlJournal"
+                    limit="limit" offset="start" list="ledgerJournals">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="glJournalId"
+                    from="journalId" ignore-if-empty="true"/>
+                <econdition field-name="isPosted" from="isPosted" ignore-if-empty="true"/>
+                <econdition field-name="glJournalName" operator="like" ignore-case="true"
+                    from="search" ignore-if-empty="true"/>
+                <econdition field-name="glJournalId" operator="like" ignore-case="true"
+                    from="search" ignore-if-empty="true"/>
+            </entity-find>
+            <set field="ledgerJournalList" from="[]"/>
+            <iterate list="ledgerJournals" entry="journal">
+                <script>
+                    ledgerJournalList.add(
+                        journalId: journal.glJournalId,
+                        journalName: journal.glJournalName,
+                        isError: journal.glJournalTypeEnumId == 'GLJRNL_ERROR'
+                            ? true : false,
+                        postedDate: journal.postedDate
+                            ? journal.postedDate.toString().substring(0,19) + 'Z': null,
+                        isPosted: journal.isPosted=='N' ? false : true,
+                        )
+                </script>
+            </iterate>
+            <if condition="journalId">
+                <set field="ledgerJournal" from="ledgerJournalList[0]"/>
+                <set field="ledgerJournalList" from="null"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="LedgerJournal">
+        <in-parameters>
+            <parameter name="ledgerJournal" type="Map">
+                <parameter name="journalName" required="true"/>
+                <parameter name="isError" type="Boolean" default="false"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean" default="false"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ledgerJournal" type="Map">
+                <parameter name="journalId"/>
+                <parameter name="journalName"/>
+                <parameter name="isError" type="Boolean"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="create#mantle.ledger.transaction.GlJournal"
+                in-map="[
+                            glJournalName: ledgerJournal.journalName,
+                            glJournalTypeEnumId: ledgerJournal.error == true
+                                ? 'GLJRNL_ERROR'
+                                : 'GLJRNL_MANUAL',
+                        ]"/>
+            <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
+                        in-map="[journalId: glJournalId]" out-map="context"/>
+            </actions>
+    </service>
+
+    <service verb="update" noun="LedgerJournal">
+        <in-parameters>
+            <parameter name="ledgerJournal" type="Map">
+                <parameter name="journalId" required="true"/>
+                <parameter name="journalName" required="true"/>
+                <parameter name="isError" type="Boolean" default="false"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean" default="false"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ledgerJournal" type="Map">
+                <parameter name="journalId"/>
+                <parameter name="journalName"/>
+                <parameter name="isError" type="Boolean"/>
+                <parameter name="postedDate"/>
+                <parameter name="isPosted" type="Boolean"/>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
+                in-map="[journalId: ledgerJournal.journalId]" out-map="old"/>
+            <if condition="ledgerJournal.journalName != old.journalName">
+                <service-call name="update#mantle.ledger.transaction.GlJournal"
+                    in-map="[
+                        glJournalId: ledgerJournal.journalId,
+                        glJournalName: ledgerJournal.journalName,
+                    ]"/>
+            </if>
+            <if condition="ledgerJournal.isPosted &amp;&amp;
+                ledgerJournal.isPosted != old.ledgerJournal.isPosted">
+                <service-call name="mantle.ledger.LedgerServices.post#GlJournal"
+                    in-map="[glJournalId: ledgerJournal.journalId]"/>
+            </if>
+            <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
+                in-map="[journalId: ledgerJournal.journalId]" out-map="context"/>
+        </actions>
+    </service>
 </services>

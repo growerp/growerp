@@ -18,7 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../accounting.dart';
+import '../../accounting.dart';
 
 class BalanceSummaryListForm extends StatelessWidget {
   const BalanceSummaryListForm({super.key});

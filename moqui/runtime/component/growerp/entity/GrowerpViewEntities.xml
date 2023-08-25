@@ -467,8 +467,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <view-entity entity-name="AcctgTransAndEntryAndCompany" package="growerp.account">
         <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
-            <key-map field-name="acctgTransId"/></member-entity>
+        <member-entity entity-alias="JRNL" entity-name="mantle.ledger.transaction.GlJournal"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="glJournalId"/></member-entity>
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="ATX"><key-map field-name="acctgTransId"/></member-entity>
         <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
             join-from-alias="ATX" join-optional="true">
             <key-map field-name="otherPartyId" related="partyId"/></member-entity>
@@ -482,7 +485,9 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="ownerPartyId" field="organizationPartyId" entity-alias="ATX"/>
         <alias name="typeId" field="acctgTransTypeEnumId" entity-alias="ATX"/>
         <alias name="transactionDate" entity-alias="ATX"/>
-        <alias name="isPosted" entity-alias="ATX"></alias>
+        <alias name="isPosted" entity-alias="ATX"/>
+        <alias name="journalId" field="glJournalId" entity-alias="JRNL"/>
+        <alias name="journalName" field="glJournalName" entity-alias="JRNL"/>
         <alias name="entryId" field="acctgTransEntrySeqId" entity-alias="ATE"/>
         <alias name="debitCreditFlag" entity-alias="ATE"/>
         <alias name="productId" entity-alias="ATE"/>

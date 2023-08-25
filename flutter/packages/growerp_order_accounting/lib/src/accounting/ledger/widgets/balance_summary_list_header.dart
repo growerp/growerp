@@ -16,7 +16,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import '../accounting.dart';
+import '../../accounting.dart';
 
 class BalanceSummaryListHeader extends StatefulWidget {
   const BalanceSummaryListHeader(this.controller, this.ledgerReport, {Key? key})

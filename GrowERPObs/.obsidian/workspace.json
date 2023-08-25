@@ -156,6 +156,9 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "Stripe.md",
+    "1 Introduction/5 Road Map and Releases.md",
+    "1 Introduction/3 Feature list.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/1 Technical Introduction.md",
     "GrowERP documentation.md",
@@ -167,7 +170,6 @@
     "4 Applications/1 Admin/1 Introduction.md",
     "4 Applications/3 Freelance/1 Introduction.md",
     "4 Applications/2 Hotel/1 Introduction.md",
-    "1 Introduction/5 Road Map and Releases.md",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
     "4 Applications/2 Hotel",
@@ -176,7 +178,6 @@
     "3 Technical documentation/8 IOS AppStore publication.md",
     "3 Technical documentation/5 HTML Website.md",
     "3 Technical documentation/6 Stripe.md",
-    "1 Introduction/3 Feature list.md",
     "1 Introduction/4 Getting started.md",
     "1 Introduction/3 Getting started.md",
     "1 Introduction/4 Releases.md",
@@ -184,7 +185,6 @@
     "2 End User documentation/2 Getting Started.md",
     "2 End User documentation/1 Overview.md",
     "1 Introduction/2 What is GrowERP.md",
-    "1 Introduction/1 Overview.md",
-    "2 End User documentation/9 Authentication & Usertypes.md"
+    "1 Introduction/1 Overview.md"
   ]
 }

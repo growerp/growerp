@@ -30,6 +30,7 @@ class FinDocListForm extends StatelessWidget {
     this.status,
     this.additionalItemButtonName,
     this.additionalItemButtonRoute,
+    this.journalId,
   });
 
   final bool sales;
@@ -38,6 +39,7 @@ class FinDocListForm extends StatelessWidget {
   final String? status;
   final String? additionalItemButtonName;
   final String? additionalItemButtonRoute;
+  final String? journalId;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,7 @@ class FinDocListForm extends StatelessWidget {
           status: status,
           additionalItemButtonName: additionalItemButtonName,
           additionalItemButtonRoute: additionalItemButtonRoute,
+          journalId: journalId,
         ));
     switch (docType) {
       case FinDocType.order:
@@ -109,7 +112,8 @@ class FinDocListForm extends StatelessWidget {
             child: finDocList);
       case FinDocType.transaction:
         return BlocProvider<TransactionBloc>(
-            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType)
+            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType,
+                journalId: journalId ?? '')
               ..add(const FinDocFetch()),
             child: finDocList);
       default:
@@ -127,6 +131,7 @@ class FinDocList extends StatefulWidget {
     this.status,
     this.additionalItemButtonName,
     this.additionalItemButtonRoute,
+    this.journalId,
   });
 
   final bool sales;
@@ -135,6 +140,7 @@ class FinDocList extends StatefulWidget {
   final String? status;
   final String? additionalItemButtonName;
   final String? additionalItemButtonRoute;
+  final String? journalId;
 
   @override
   FinDocListState createState() => FinDocListState();
@@ -201,70 +207,74 @@ class FinDocListState extends State<FinDocList> {
     limit = (MediaQuery.of(context).size.height / 60).round();
     Widget finDocsPage() {
       bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-      return RefreshIndicator(
-          onRefresh: (() async =>
-              _finDocBloc.add(const FinDocFetch(refresh: true))),
-          child: ListView.builder(
-              key: const Key('listView'),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount:
-                  hasReachedMax ? finDocs.length + 1 : finDocs.length + 2,
-              controller: _scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Column(children: [
-                    FinDocListHeader(
-                        isPhone: isPhone,
-                        sales: widget.sales,
-                        docType: widget.docType,
-                        finDocBloc: _finDocBloc),
-                    const Divider(),
-                    Visibility(
-                        visible: finDocs.isEmpty,
-                        child: Center(
-                            heightFactor: 20,
-                            child: Text(
-                                "no (open)${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
-                                textAlign: TextAlign.center)))
-                  ]);
-                }
-                index--;
-                return index >= finDocs.length
-                    ? const BottomLoader()
-                    : Dismissible(
-                        key: const Key('finDocItem'),
-                        direction: DismissDirection.startToEnd,
-                        child: BlocProvider.value(
-                            value: _finDocBloc,
-                            child: RepositoryProvider.value(
-                                value: repos,
-                                child: FinDocListItem(
-                                  finDoc: finDocs[index],
-                                  docType: widget.docType,
-                                  index: index,
-                                  isPhone: isPhone,
-                                  sales: widget.sales,
-                                  onlyRental: widget.onlyRental,
-                                  additionalItemButton: widget
-                                                  .additionalItemButtonName !=
-                                              null &&
-                                          widget.additionalItemButtonRoute !=
-                                              null
-                                      ? TextButton(
-                                          key: Key('addButton$index'),
-                                          child: Text(
-                                              widget.additionalItemButtonName!),
-                                          onPressed: () async {
-                                            await Navigator.pushNamed(
-                                                context,
-                                                widget
-                                                    .additionalItemButtonRoute!,
-                                                arguments: finDocs[index]);
-                                          },
-                                        )
-                                      : null,
-                                ))));
-              }));
+      return Column(children: [
+        FinDocListHeader(
+            isPhone: isPhone,
+            sales: widget.sales,
+            docType: widget.docType,
+            finDocBloc: _finDocBloc),
+        Expanded(
+            child: RefreshIndicator(
+                onRefresh: (() async =>
+                    _finDocBloc.add(const FinDocFetch(refresh: true))),
+                child: ListView.builder(
+                    key: const Key('listView'),
+                    shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount:
+                        hasReachedMax ? finDocs.length + 1 : finDocs.length + 2,
+                    controller: _scrollController,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == 0) {
+                        return Visibility(
+                            visible: finDocs.isEmpty,
+                            child: Center(
+                                heightFactor: 20,
+                                child: Text(
+                                    widget.journalId != null
+                                        ? "no journal entries found"
+                                        : "no (open)${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
+                                    textAlign: TextAlign.center)));
+                      }
+                      index--;
+                      return index >= finDocs.length
+                          ? const BottomLoader()
+                          : Dismissible(
+                              key: const Key('finDocItem'),
+                              direction: DismissDirection.startToEnd,
+                              child: BlocProvider.value(
+                                  value: _finDocBloc,
+                                  child: RepositoryProvider.value(
+                                      value: repos,
+                                      child: FinDocListItem(
+                                        finDoc: finDocs[index],
+                                        docType: widget.docType,
+                                        index: index,
+                                        isPhone: isPhone,
+                                        sales: widget.sales,
+                                        onlyRental: widget.onlyRental,
+                                        additionalItemButton:
+                                            widget.additionalItemButtonName !=
+                                                        null &&
+                                                    widget.additionalItemButtonRoute !=
+                                                        null
+                                                ? TextButton(
+                                                    key: Key('addButton$index'),
+                                                    child: Text(widget
+                                                        .additionalItemButtonName!),
+                                                    onPressed: () async {
+                                                      await Navigator.pushNamed(
+                                                          context,
+                                                          widget
+                                                              .additionalItemButtonRoute!,
+                                                          arguments:
+                                                              finDocs[index]);
+                                                    },
+                                                  )
+                                                : null,
+                                      ))));
+                    })))
+      ]);
     }
 
     return Builder(builder: (BuildContext context) {

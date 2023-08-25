@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../accounting.dart';
+import '../../accounting.dart';
 
 part 'ledger_event.dart';
 part 'ledger_state.dart';

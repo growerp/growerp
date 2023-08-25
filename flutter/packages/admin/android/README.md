@@ -46,7 +46,7 @@ flutter pub global run frameit_chrome \
 6. Upload just binary:
     fastlane supply \
         --aab ../build/app/outputs/bundle/release/app-release.aab \
-        skip_upload_images
+        --skip_upload_images
 
 check [fastfile](https://docs.fastlane.tools/actions/supply/) for another actions.
 

@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
 import 'package:growerp_core/growerp_core.dart';
 
 import 'accounting.dart';
@@ -66,6 +68,61 @@ class AccountingAPIRepository extends APIRepository {
           await dioClient.get('rest/s1/growerp/100/Timeperiod', apiKey!);
       return getResponseList<TimePeriod>(
           "timePeriods", response, (json) => TimePeriod.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<LedgerJournal>>> getLedgerJournal({
+    int? start,
+    int? limit,
+    String? ledgerJournalId,
+    bool? my,
+    String? searchString,
+  }) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/LedgerJournal', apiKey!,
+          queryParameters: <String, dynamic>{
+            'ledgerJournalId': ledgerJournalId,
+            'start': start,
+            'limit': limit,
+            'search': searchString
+          });
+      return getResponseList<LedgerJournal>("ledgerJournalList", response,
+          (json) => LedgerJournal.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<LedgerJournal>> createLedgerJournal(
+      LedgerJournal ledgerJournal) async {
+    try {
+      final response = await dioClient.post(
+          'rest/s1/growerp/100/LedgerJournal', apiKey!,
+          data: <String, dynamic>{
+            'ledgerJournal': jsonEncode(ledgerJournal.toJson()),
+            'moquiSessionToken': sessionToken
+          });
+      return getResponse<LedgerJournal>(
+          "ledgerJournal", response, (json) => LedgerJournal.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<LedgerJournal>> updateLedgerJournal(
+      LedgerJournal ledgerJournal) async {
+    try {
+      final response = await dioClient.patch(
+          'rest/s1/growerp/100/LedgerJournal', apiKey!,
+          data: <String, dynamic>{
+            'ledgerJournal': jsonEncode(ledgerJournal.toJson()),
+            'moquiSessionToken': sessionToken
+          });
+      return getResponse<LedgerJournal>(
+          "ledgerJournal", response, (json) => LedgerJournal.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

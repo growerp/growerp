@@ -18,9 +18,9 @@ import 'package:growerp_core/src/l10n/generated/core_localizations.dart';
 enum FinDocType {
   order('Order'),
   invoice('Invoice'),
-  payment('Payment'),
-  shipment('Shipment'),
-  transaction('Transaction'),
+  payment('Paymnt'),
+  shipment('Shipmnt'),
+  transaction('Trnsact'),
   unknown('UnKnown');
 
   const FinDocType(this._name);

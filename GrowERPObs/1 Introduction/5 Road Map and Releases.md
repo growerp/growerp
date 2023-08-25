@@ -126,8 +126,8 @@ First comments from end users arrived.
     -   authorization
     -   test/production public API sites
 3.  [[Stripe]] gateway    
-    -   working with E-commerce website and flutter frontend.
-4.  Flutter frontend improvements:
+    -   working with E-commerce website and flutter frontend. 
+4.  Flutter frontend improvements: 
     -   Added E-commerce website maintenance to flutter frontend at company -> website
     -   adding categories to products and adding products to categories improved
     -   no mandatory assignment of a product to at least a single category

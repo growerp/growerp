@@ -125,6 +125,11 @@ List<MenuOption> acctMenuOptions = [
           label: "Ledger Transactions",
           icon: const Icon(Icons.home),
         ),
+        TabItem(
+          form: const LedgerJournalListForm(key: Key("LedgerJournal")),
+          label: "Ledger Journals",
+          icon: const Icon(Icons.home),
+        ),
       ]),
   MenuOption(
       image: "packages/growerp_core/images/reportGrey.png",

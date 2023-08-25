@@ -42,6 +42,7 @@ class AccountingForm extends StatelessWidget {
         makeDashboardItem('acctLedger', context, acctMenuOptions[3], [
           "Accounts",
           "Transactions",
+          "Journals",
         ]),
         makeDashboardItem('reports', context, acctMenuOptions[4], [
           "Balance Sheet",

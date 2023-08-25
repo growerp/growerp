@@ -21,15 +21,18 @@ abstract class FinDocEvent extends Equatable {
 }
 
 class FinDocFetch extends FinDocEvent {
-  const FinDocFetch(
-      {this.finDocId = '',
-      this.docType = FinDocType.unknown,
-      this.customerCompanyPartyId = '',
-      this.searchString = '',
-      this.refresh = false});
+  const FinDocFetch({
+    this.finDocId = '',
+    this.docType = FinDocType.unknown,
+    this.customerCompanyPartyId = '',
+    this.searchString = '',
+    this.refresh = false,
+    this.journalId,
+  });
   final String searchString;
   final bool refresh;
   final String finDocId;
+  final String? journalId;
   final FinDocType docType; // to get a single document id, docType
   final String customerCompanyPartyId;
   @override

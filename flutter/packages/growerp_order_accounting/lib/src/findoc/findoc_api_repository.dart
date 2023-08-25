@@ -86,7 +86,8 @@ class FinDocAPIRepository extends APIRepository {
       DateTime? rentalThruDate,
       String? finDocId,
       String? searchString,
-      String? customerCompanyPartyId}) async {
+      String? customerCompanyPartyId,
+      String? journalId}) async {
     try {
       final response = await dioClient.get(
           'rest/s1/growerp/100/FinDoc', apiKey!,
@@ -103,6 +104,7 @@ class FinDocAPIRepository extends APIRepository {
             'search': searchString,
             'classificationId': classificationId,
             'customerCompanyPartyId': customerCompanyPartyId,
+            'journalId': journalId,
           });
       return getResponseList<FinDoc>(
           "finDocs", response, (json) => FinDoc.fromJson(json));

@@ -54,7 +54,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         IncomingShipmentBloc,
         OutgoingShipmentBloc,
         TransactionBloc {
-  FinDocBloc(this.repos, this.sales, this.docType)
+  FinDocBloc(this.repos, this.sales, this.docType, {this.journalId = ''})
       : super(const FinDocState()) {
     on<FinDocFetch>(_onFinDocFetch,
         transformer: finDocDroppable(const Duration(milliseconds: 100)));
@@ -68,6 +68,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final FinDocAPIRepository repos;
   final bool sales;
   final FinDocType docType;
+  final String journalId;
 
   String classificationId = GlobalConfiguration().get("classificationId");
 
@@ -86,7 +87,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         add(FinDocGetItemTypes());
       }
       ApiResult<List<FinDoc>> result = await repos.getFinDoc(
-          sales: sales, docType: docType, searchString: event.searchString);
+          sales: sales,
+          docType: docType,
+          searchString: event.searchString,
+          journalId: journalId);
       return emit(result.when(
           success: (data) => state.copyWith(
                 status: FinDocStatus.success,
@@ -104,7 +108,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         (state.searchString.isNotEmpty &&
             event.searchString != state.searchString)) {
       ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
-          sales: sales, docType: docType, searchString: event.searchString);
+          sales: sales,
+          docType: docType,
+          searchString: event.searchString,
+          journalId: journalId);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: FinDocStatus.success,
@@ -119,7 +126,10 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     // get next page also for search
     else {
       ApiResult<List<FinDoc>> compResult = await repos.getFinDoc(
-          sales: sales, docType: docType, searchString: event.searchString);
+          sales: sales,
+          docType: docType,
+          searchString: event.searchString,
+          journalId: journalId);
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: FinDocStatus.success,
