@@ -32,6 +32,7 @@ class FinDocItem with _$FinDocItem {
     Decimal? quantity,
     Decimal? price,
     GlAccount? glAccount,
+    bool? isDebit,
     String? assetId,
     String? assetName,
     Location? location,

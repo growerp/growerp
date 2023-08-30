@@ -140,15 +140,4 @@ class FinDocAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
-  Future<ApiResult<List<GlAccount>>> getGlAccount() async {
-    try {
-      final response =
-          await dioClient.get('rest/s1/growerp/100/Ledger', apiKey!);
-      return getResponseList<GlAccount>(
-          "glAccountList", response, (json) => GlAccount.fromJson(json));
-    } on Exception catch (e) {
-      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
-    }
-  }
 }

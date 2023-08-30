@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 This software is in the public domain under CC0 1.0 Universal plus a 
 Grant of Patent License.
@@ -12,110 +12,124 @@ You should have received a copy of the CC0 Public Domaicrn Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="init" noun="PartyAccountingConfiguration">
         <!-- partly copied from mantle-usl/service/mantle/ledger/LedgerServices.xml -->
         <in-parameters>
-            <parameter name="sourcePartyId" required="true"/>
-            <parameter name="organizationPartyId" required="true"/>
-            <auto-parameters entity-name="mantle.ledger.config.PartyAcctgPreference" include="nonpk"/>
-            <parameter name="startYear" format="0000"><description>If specified creates fiscal time periods (year, quarter, month) starting that
-                year and through the following year, otherwise starts now and creates current and next year, quarter, and month</description></parameter>
+            <parameter name="sourcePartyId" required="true" />
+            <parameter name="organizationPartyId" required="true" />
+            <auto-parameters entity-name="mantle.ledger.config.PartyAcctgPreference" include="nonpk" />
+            <parameter name="startYear" format="0000">
+                <description>If specified creates fiscal time periods (year, quarter, month) starting that
+                year and through the following year, otherwise starts now and creates current and next year, quarter, and month</description>
+            </parameter>
         </in-parameters>
         <actions>
-            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference" value-field="existingPartyAcctgPreference">
-                <field-map field-name="organizationPartyId"/>
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="existingPartyAcctgPreference">
+                <field-map field-name="organizationPartyId" />
             </entity-find-one>
             <if condition="existingPartyAcctgPreference">
-                <return message="Party [${organizationPartyId}] already has a PartyAcctgPreference record, so not initializing accounting configuration."/>
+                <return
+                    message="Party [${organizationPartyId}] already has a PartyAcctgPreference record, so not initializing accounting configuration." />
             </if>
 
             <!-- create an error Journal mantle.ledger.transaction.GlJournal -->
             <entity-find-one entity-name="mantle.party.Organization" value-field="organization">
-                <field-map field-name="partyId" from="organizationPartyId"/></entity-find-one>
-            <set field="errorGlJournalId" value="${organizationPartyId}Error"/>
+                <field-map field-name="partyId" from="organizationPartyId" />
+            </entity-find-one>
+            <set field="errorGlJournalId" value="${organizationPartyId}Error" />
             <service-call name="create#mantle.ledger.transaction.GlJournal"
-                    in-map="[organizationPartyId:organizationPartyId, glJournalId:errorGlJournalId,
+                in-map="[organizationPartyId:organizationPartyId, glJournalId:errorGlJournalId,
                         glJournalTypeEnumId:'GLJRNL_ERROR', isPosted:'N',
-                        glJournalName:('Error Journal for ' + (organization?.organizationName ?: organizationPartyId))]"/>
+                        glJournalName:('Error Journal for ' + (organization?.organizationName ?: organizationPartyId))]" />
 
             <!-- copy the mantle.ledger.config.PartyAcctgPreference -->
-            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference" value-field="sourcePartyAcctgPreference">
-                <field-map field-name="organizationPartyId" from="sourcePartyId"/>
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="sourcePartyAcctgPreference">
+                <field-map field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find-one>
-            <if condition="!sourcePartyAcctgPreference"><return error="true" message="Could not find PartyAcctgPreference for source party [${sourcePartyId}]"/></if>
-            <set field="partyAcctgPreference" from="sourcePartyAcctgPreference.cloneValue()"/>
-            <entity-set value-field="partyAcctgPreference" include="nonpk" set-if-empty="false"/>
+            <if condition="!sourcePartyAcctgPreference">
+                <return error="true"
+                    message="Could not find PartyAcctgPreference for source party [${sourcePartyId}]" />
+            </if>
+            <set field="partyAcctgPreference" from="sourcePartyAcctgPreference.cloneValue()" />
+            <entity-set value-field="partyAcctgPreference" include="nonpk" set-if-empty="false" />
             <service-call name="create#mantle.ledger.config.PartyAcctgPreference"
-                    in-map="partyAcctgPreference + [organizationPartyId:organizationPartyId, errorGlJournalId:errorGlJournalId]"/>
+                in-map="partyAcctgPreference + [organizationPartyId:organizationPartyId, errorGlJournalId:errorGlJournalId]" />
 
-            <!-- create new ledger from default settings --> 
-            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization" list="glAccounts">
-                <econdition field-name="partyId" from="sourcePartyId"/>
+            <!-- create new ledger from default settings -->
+            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                list="glAccounts">
+                <econdition field-name="partyId" from="sourcePartyId" />
                 <order-by field-name="glAccountId" />
             </entity-find>
-            <set field="translate" from="[:]"/>
+            <set field="translate" from="[:]" />
             <iterate list="glAccounts" entry="glAccountOrg">
-                <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="glAccount">
-                    <field-map field-name="glAccountId" from="glAccountOrg.glAccountId"/></entity-find-one>
+                <entity-find-one entity-name="mantle.ledger.account.GlAccount"
+                    value-field="glAccount">
+                    <field-map field-name="glAccountId" from="glAccountOrg.glAccountId" />
+                </entity-find-one>
                 <service-call name="create#mantle.ledger.account.GlAccount"
                     in-map="glAccount + [glAccountId: null,
                         accountCode: glAccountOrg.glAccountId,
                         parentGlAccountId: translate[glAccount.parentGlAccountId]]"
-                    out-map="result"/>
-                <set field="translate[glAccount.glAccountId]" from="result.glAccountId"/>
+                    out-map="result" />
+                <set field="translate[glAccount.glAccountId]" from="result.glAccountId" />
                 <service-call name="create#mantle.ledger.account.GlAccountOrganization"
-                    in-map="[glAccountId: result.glAccountId, organizationPartyId: organizationPartyId]"/>
+                    in-map="[glAccountId: result.glAccountId, organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- glAccount type default -->
             <entity-find entity-name="mantle.ledger.config.GlAccountTypeDefault" list="typeDefaults">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="typeDefaults" entry="typeDefault">
                 <service-call name="create#mantle.ledger.config.GlAccountTypeDefault"
                     in-map="typeDefault + [glAccountId: translate[typeDefault.glAccountId],
-                            organizationPartyId: organizationPartyId]"/>
+                            organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- Invoice type -->
             <entity-find entity-name="mantle.ledger.config.InvoiceTypeTransType" list="invoiceTypes">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="invoiceTypes" entry="invoiceType">
                 <service-call name="create#mantle.ledger.config.InvoiceTypeTransType"
                     in-map="invoiceType + [glAccountId: translate[invoiceType.glAccountId],
-                            organizationPartyId: organizationPartyId]"/>
+                            organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- Item type -->
             <entity-find entity-name="mantle.ledger.config.ItemTypeGlAccount" list="itemTypes">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="itemTypes" entry="itemType">
                 <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
                     in-map="itemType + [glAccountId: translate[itemType.glAccountId],
-                            organizationPartyId: organizationPartyId]"/>
+                            organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- payment type -->
             <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount" list="paymentTypes">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="paymentTypes" entry="paymentType">
                 <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
                     in-map="paymentType + [glAccountId: translate[paymentType.glAccountId],
-                            organizationPartyId: organizationPartyId]"/>
+                            organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- financial account -->
-            <entity-find entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount" list="finAccounts">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+            <entity-find entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount"
+                list="finAccounts">
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="finAccounts" entry="finAccount">
                 <service-call name="create#mantle.ledger.config.FinancialAccountTypeGlAccount"
                     in-map="finAccount + [glAccountId: translate[finAccount.glAccountId],
-                            organizationPartyId: organizationPartyId]"/>
+                            organizationPartyId: organizationPartyId]" />
             </iterate>
             <!-- Asset type -->
             <entity-find entity-name="mantle.ledger.config.AssetTypeGlAccount" list="assetTypes">
-                <econdition field-name="organizationPartyId" from="sourcePartyId"/>
+                <econdition field-name="organizationPartyId" from="sourcePartyId" />
             </entity-find>
             <iterate list="assetTypes" entry="assetType">
                 <service-call name="create#mantle.ledger.config.AssetTypeGlAccount"
@@ -131,34 +145,41 @@ along with this software (see the LICENSE.md file). If not, see
                                 lossGlAccountId: translate[assetType.lossGlAccountId],
                                 shrinkageGlAccountId: translate[assetType.shrinkageGlAccountId],
                                 foundGlAccountId: translate[assetType.foundGlAccountId],
-                                organizationPartyId: organizationPartyId]"/>
+                                organizationPartyId: organizationPartyId]" />
             </iterate>
 
             <!-- setup mantle.party.time.TimePeriod for FiscalMonth, FiscalQuarter, FiscalYear -->
-            <if condition="startYear"><then>
-                <set field="nextYearInt" from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1"/>
-                <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')"/>
+            <if condition="startYear">
+                <then>
+                    <set field="nextYearInt"
+                        from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1" />
+                    <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')" />
 
-                <set field="curYear" from="startYear"/>
-                <set field="prevPeriodId" from="null"/>
-                <while condition="curYear &lt;= lastYear">
-                    <set field="fromDate" from="ec.l10n.parseDate(curYear + '-01-01', 'yyyy-MM-dd')"/>
-                    <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod" out-map="curYearOut"
-                            in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]"/>
-                    <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="quartersOut"
-                            in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]"/>
-                    <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
-                        <service-call name="mantle.party.TimeServices.get#DescendantPeriods" out-map="quartersOut"
-                                in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]"/>
-                    </iterate>
+                    <set field="curYear" from="startYear" />
+                    <set field="prevPeriodId" from="null" />
+                    <while condition="curYear &lt;= lastYear">
+                        <set field="fromDate"
+                            from="ec.l10n.parseDate(curYear + '-01-01', 'yyyy-MM-dd')" />
+                        <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                            out-map="curYearOut"
+                            in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
+                        <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                            out-map="quartersOut"
+                            in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
+                        <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
+                            <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                                out-map="quartersOut"
+                                in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
+                        </iterate>
 
-                    <set field="prevPeriodId" from="curYearOut.timePeriodId"/>
-                    <set field="curYear" from="((curYear as int) + 1) as String"/>
-                </while></then>
-            <else>
-                <service-call name="mantle.ledger.LedgerServices.check#NextFiscalTimePeriods"
-                        in-map="[organizationPartyId:organizationPartyId]"/>
-            </else>
+                        <set field="prevPeriodId" from="curYearOut.timePeriodId" />
+                        <set field="curYear" from="((curYear as int) + 1) as String" />
+                    </while>
+                </then>
+                <else>
+                    <service-call name="mantle.ledger.LedgerServices.check#NextFiscalTimePeriods"
+                        in-map="[organizationPartyId:organizationPartyId]" />
+                </else>
             </if>
         </actions>
     </service>
@@ -168,23 +189,23 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="timePeriods" type="List">
                 <parameter name="timePeriod" type="Map">
-                    <parameter name="periodId"/>
-                    <parameter name="periodName"/>
-                    <parameter name="fromDate"/>
-                    <parameter name="thruDate"/>
-                    <parameter name="isClosed" type="Boolean"/>
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                <econdition field-name="partyId" from="companyPartyId"/>
-                <econdition field-name="timePeriodTypeId" value="FiscalYear"/>
-                <order-by field-name="periodName"/>
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <order-by field-name="periodName" />
             </entity-find>
-            <set field="timePeriods" from="[]"/>
+            <set field="timePeriods" from="[]" />
             <iterate list="periods" entry="p">
                 <script>
                     timePeriods.add([periodId: p.timePeriodId,
@@ -200,60 +221,67 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="BalanceSummary">
         <in-parameters>
-            <parameter name="periodName" required="true"/>
+            <parameter name="periodName" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="ledgerReport" type="Map">
                 <parameter name="company" type="Map">
-                    <parameter name="companyId"/>
-                    <parameter name="companyName"/>
+                    <parameter name="companyId" />
+                    <parameter name="companyName" />
                 </parameter>
-                <parameter name="title"/>
-                <parameter name="printDate"/>
+                <parameter name="title" />
+                <parameter name="printDate" />
                 <parameter name="timePeriod" type="Map">
-                    <parameter name="periodId"/>
-                    <parameter name="periodName"/>
-                    <parameter name="fromDate"/>
-                    <parameter name="thruDate"/>
-                    <parameter name="isClosed" type="Boolean"/>
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
                 </parameter>
                 <parameter name="glAccounts" type="List">
-                    <parameter name="accountCode"/>
-                    <parameter name="accountName"/>
-                    <parameter name="level"/>
-                    <parameter name="beginningBalance"/>
-                    <parameter name="postedDebits"/>
-                    <parameter name="postedCredits"/>
-                    <parameter name="postedBalance"/>
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
+                    <parameter name="level" />
+                    <parameter name="beginningBalance" />
+                    <parameter name="postedDebits" />
+                    <parameter name="postedCredits" />
+                    <parameter name="postedBalance" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                <econdition field-name="partyId" from="companyPartyId"/>
-                <econdition field-name="periodName" from="periodName"/>
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="periodName" from="periodName" />
             </entity-find>
             <if condition="!periods">
-                <return error="true" message="Period $periodName not found!"/>
+                <return error="true" message="Period $periodName not found!" />
             </if>
-            <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail" list="postedBalanceSummary" limit="150">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="periodName" from="periodName"/>
+            <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail"
+                list="postedBalanceSummary" limit="150">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="periodName" from="periodName" />
                 <econditions combine="or">
-                    <econdition field-name="beginningBalance" operator="not-equals" from="BigDecimal.ZERO"/>
-                    <econdition field-name="endingBalance" operator="not-equals" from="BigDecimal.ZERO"/>
-                    <econdition field-name="postedDebits" operator="not-equals" from="BigDecimal.ZERO"/>
-                    <econdition field-name="postedCredits" operator="not-equals" from="BigDecimal.ZERO"/>
+                    <econdition field-name="beginningBalance" operator="not-equals"
+                        from="BigDecimal.ZERO" />
+                    <econdition field-name="endingBalance" operator="not-equals"
+                        from="BigDecimal.ZERO" />
+                    <econdition field-name="postedDebits" operator="not-equals"
+                        from="BigDecimal.ZERO" />
+                    <econdition field-name="postedCredits" operator="not-equals"
+                        from="BigDecimal.ZERO" />
                 </econditions>
-                <select-field field-name="accountCode,accountName,beginningBalance,postedDebits,postedCredits,endingBalance"/>
-                <order-by field-name="accountCode"/>
+                <select-field
+                    field-name="accountCode,accountName,beginningBalance,postedDebits,postedCredits,endingBalance" />
+                <order-by field-name="accountCode" />
             </entity-find>
             <entity-find-one entity-name="mantle.party.Organization" value-field="company">
-                <field-map field-name="partyId" from="companyPartyId"/>
+                <field-map field-name="partyId" from="companyPartyId" />
             </entity-find-one>
-            <set field="ledgerReport" from="[
+            <set field="ledgerReport"
+                from="[
                 period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
                                     fromDate: periods[0].fromDate.toString(),
@@ -262,9 +290,10 @@ along with this software (see the LICENSE.md file). If not, see
                                     ], company: [companyPartyId: companyPartyId,
                 companyName: company.organizationName],
                 title: 'Balance Summary report',
-                printDate: ec.user.nowTimestamp.toString(),glAccounts: []]"/>
-            <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/>
+                printDate: ec.user.nowTimestamp.toString(),glAccounts: []]" />
+            <set field="glAccountCodeMask"
+                from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
+            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
             <script>
                 //change values into strings
                 for (el in postedBalanceSummary) {
@@ -283,56 +312,58 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="BalanceSheet">
         <in-parameters>
-            <parameter name="periodName" required="true"/>
+            <parameter name="periodName" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="ledgerReport" type="Map">
                 <parameter name="company" type="Map">
-                    <parameter name="companyId"/>
-                    <parameter name="companyName"/>
+                    <parameter name="companyId" />
+                    <parameter name="companyName" />
                 </parameter>
-                <parameter name="title"/>
-                <parameter name="printDate"/>
+                <parameter name="title" />
+                <parameter name="printDate" />
                 <parameter name="timePeriod" type="Map">
-                    <parameter name="periodId"/>
-                    <parameter name="periodName"/>
-                    <parameter name="fromDate"/>
-                    <parameter name="thruDate"/>
-                    <parameter name="isClosed" type="Boolean"/>
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
                 </parameter>
                 <parameter name="glAccounts" type="List">
                     <parameter name="glAccount" type="Map">
-                        <parameter name="accountCode"/>
-                        <parameter name="accountName"/>
-                        <parameter name="level"/>
-                        <parameter name="beginningBalance"/>
-                        <parameter name="postedDebits"/>
-                        <parameter name="postedCredits"/>
-                        <parameter name="postedBalance"/>
+                        <parameter name="accountCode" />
+                        <parameter name="accountName" />
+                        <parameter name="level" />
+                        <parameter name="beginningBalance" />
+                        <parameter name="postedDebits" />
+                        <parameter name="postedCredits" />
+                        <parameter name="postedBalance" />
                     </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call in-map="organizationPartyId: companyPartyId"
-                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"/>
+                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                <econdition field-name="partyId" from="companyPartyId"/>
-                <econdition field-name="periodName" from="periodName"/>
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="periodName" from="periodName" />
             </entity-find>
             <if condition="!periods">
-                <return error="true" message="Balance sheet, period: $periodId not found"/>
+                <return error="true" message="Balance sheet, period: $periodId not found" />
             </if>
             <service-call
                 name="mantle.ledger.LedgerReportServices.run#BalanceSheet"
                 in-map="[organizationPartyId: companyPartyId, 
                                     timePeriodIdList: [periods[0].timePeriodId]]"
-                out-map="context"/>
-            <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/>
-            <!--log message="====run balance sheet out: ${classInfoById}"/-->
+                out-map="context" />
+            <set field="glAccountCodeMask"
+                from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
+            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
+            <!--log
+            message="====run balance sheet out: ${classInfoById}"/-->
             <script>
                 def currencyFormat = currencyFormat ?: "#,##0.00";
 
@@ -384,7 +415,8 @@ along with this software (see the LICENSE.md file). If not, see
                 if(classInfoById.DISTRIBUTION) distribution = showClass(classInfoById.DISTRIBUTION, 1);
                 def incomeAmount = [accountCode: 'INCOME', postedBalance: netIncomeOut.totalBalance.ALL.toString()];
             </script>
-            <set field="ledgerReport" from="[
+            <set field="ledgerReport"
+                from="[
                 period: [periodId: periods[0].timePeriodId,
                                     periodName: periods[0].periodName,
                                     fromDate: periods[0].fromDate.toString(),
@@ -392,7 +424,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     isClosed: periods[0].isClosed == 'Y' ? true : false,
                                     ],
                 title: 'Balance Sheet', printDate: ec.user.nowTimestamp.toString(),
-                glAccounts: [asset?:[:], liability?:[:], equity?:[:], distribution?:[:], incomeAmount.totalBalance?.ALL?incomeAmount:[:]]]"/>
+                glAccounts: [asset?:[:], liability?:[:], equity?:[:], distribution?:[:], incomeAmount.totalBalance?.ALL?incomeAmount:[:]]]" />
         </actions>
     </service>
 
@@ -400,46 +432,49 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="ledgerReport" type="Map">
                 <parameter name="company" type="Map">
-                    <parameter name="companyId"/>
-                    <parameter name="companyName"/>
+                    <parameter name="companyId" />
+                    <parameter name="companyName" />
                 </parameter>
-                <parameter name="title"/>
-                <parameter name="printDate"/>
+                <parameter name="title" />
+                <parameter name="printDate" />
                 <parameter name="glAccounts" type="List">
                     <parameter name="glAccount" type="Map">
-                        <parameter name="glAccountId"/>
-                        <parameter name="accountCode"/>
-                        <parameter name="accountName"/>
-                        <parameter name="level"/>
-                        <parameter name="beginningBalance"/>
-                        <parameter name="postedDebits"/>
-                        <parameter name="postedCredits"/>
-                        <parameter name="postedBalance"/>
+                        <parameter name="glAccountId" />
+                        <parameter name="accountCode" />
+                        <parameter name="accountName" />
+                        <parameter name="level" />
+                        <parameter name="beginningBalance" />
+                        <parameter name="postedDebits" />
+                        <parameter name="postedCredits" />
+                        <parameter name="postedBalance" />
                     </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
-            <service-call out-map="context" 
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <!--service-call in-map="organizationPartyId: companyPartyId"
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!--service-call
+            in-map="organizationPartyId: companyPartyId"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"/-->
-            <entity-find list="dbGlAccounts" 
+            <entity-find list="dbGlAccounts"
                 entity-name="mantle.ledger.account.GlAccountAndOrganization">
-                <econdition field-name="partyId" from="companyPartyId"/>
-                <order-by field-name="accountCode"/>
+                <econdition field-name="partyId" from="companyPartyId" />
+                <order-by field-name="accountCode" />
             </entity-find>
             <entity-find-one entity-name="mantle.party.Organization" value-field="company">
-                <field-map field-name="partyId" from="companyPartyId"/>
+                <field-map field-name="partyId" from="companyPartyId" />
             </entity-find-one>
-            <set field="ledgerReport" from="[
+            <set field="ledgerReport"
+                from="[
                 company: [companyPartyId: companyPartyId,
                 companyName: company.organizationName],
                 title: 'Current Ledger Tree report',
                 printDate: ec.user.nowTimestamp.toString(),
-                glAccounts: []]"/>
-            <set field="glAccountCodeMask" from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/>
+                glAccounts: []]" />
+            <set field="glAccountCodeMask"
+                from="partyAcctgPreference?.glAccountCodeMask ?: ec.user.getPreference('GlAccountCodeMask')" />
+            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')" />
             <script>
                 def getGlAccountTree(Map dbGlAccount, int dept) {
                     def glAccount = [:];
@@ -473,107 +508,38 @@ along with this software (see the LICENSE.md file). If not, see
             </script>
         </actions>
     </service>
-    <!-- replaced by getFinDoc -->
-    <!--service verb="get" noun="Transaction">
-        <description> get a accounting single or all transactions</description>
-        <in-parameters>
-            <parameter name="acctgTransId"/>
-            <parameter name="start" default-value="0" type="Integer"/>
-            <parameter name="limit" default-value="20" type="Integer"/>
-            <parameter name="search"/>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="acctgTrans" type="Map"/>
-            <parameter name="acctgTransList" type="List"/>
-        </out-parameters>
-        <actions>
-            <service-call  out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <if condition="search != null">
-                <set field="search" value="%${search}%"/></if>
-            <entity-find  offset="start" limit="limit" list="entries"
-                entity-name="mantle.ledger.transaction.AcctgTransAndEntry">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="isPosted" value="Y"/>
-                <econditions combine="or">
-                    <econdition field-name="txDescription" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
-                    <econdition field-name="acctgTransId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
-                    <econdition field-name="otherPartyId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
-                </econditions>
-                <order-by field-name="-transactionDate"/>
-            </entity-find>
-            <if condition="!acctgTransId">
-                <set field="acctgTransList" from="[]"/></if>
-            <set field="lastEntry" from="null"/>
-            <set field="accountCodeFormatter" from="masker(glAccountCodeMask, '0')"/>
-            <iterate entry="entry" list="entries">
-                <if condition="lastEntry &amp;&amp; lastEntry.acctgTransId != entry.acctgTransId">
-                    <script>acctgTransList.add(acctgTransOut)</script>
-                </if>
-                <if condition="!lastEntry || lastEntry.acctgTransId != entry.acctgTransId">
-                    <set field="acctgTransOut" from="[
-                        transactionId: entry.acctgTransId,
-                        description: entry.txDescription,
-                        assetId: entry.txAssetId,
-                        date: entry.transactionDate,
-                        otherPartyId: entry.otherPartyId,
-                        entries: [],
-                    ]"/>
-                </if>
-                <set field="itemOut" from="[
-                        amount: entry.amount,
-                        debitCreditFlag: entry.debitCreditFlag,
-                        glAccountId: entry.glAccountId,
-                        productId: entry.productId,
-                        description: entry.description,
-                        paymentId: entry.paymentId,
-                        invoiceId: entry.invoiceId,
-                        invoiceItemSeqId: entry.invoiceItemSeqId
-                    ]"/>
-                <script>acctgTransOut.entries.add(itemOut)</script>
-                <if condition="acctgTransId">
-                    <set field="acctgTrans" from="acctgTransOut"/>
-                    <else>
-                        <script>acctgTransList.add(acctgTransOut)</script>
-                    </else>
-                </if>
-            </iterate>
-        </actions>
-    </service-->
 
     <service verb="get" noun="ItemTypes">
         <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
         <in-parameters>
-            <parameter name="sales" type="Boolean" required="true"/>
+            <parameter name="sales" type="Boolean" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="itemTypes" type="List">
                 <parameter name="itemType" type="Map">
-                    <parameter name="itemTypeId"/>
-                    <parameter name="itemTypeName"/>
-                    <parameter name="accountCode"/>
-                    <parameter name="accountName"/>
+                    <parameter name="itemTypeId" />
+                    <parameter name="itemTypeName" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <set field="itemTypes" from="[]"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="itemTypes" from="[]" />
             <entity-find entity-name="mantle.ledger.config.ItemTypeAndGlAccount" list="itemTypeList">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="disallowPosting" value="N" or-null="true"/>
-                <econdition field-name="direction" from="sales? 'O' : 'I'"/>
-                <order-by field-name="[paymentTypeEnumId,accountCode]"/>
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="disallowPosting" value="N" or-null="true" />
+                <econdition field-name="direction" from="sales? 'O' : 'I'" />
+                <order-by field-name="[paymentTypeEnumId,accountCode]" />
             </entity-find>
             <iterate list="itemTypeList" entry="itemType">
-                <set field="itemTypeOut" from="[itemTypeId: itemType.itemTypeEnumId,
+                <set field="itemTypeOut"
+                    from="[itemTypeId: itemType.itemTypeEnumId,
                                                 itemTypeName: itemType.itemTypeDescription,
                                                 accountCode: itemType.accountCode,
-                                                accountName: itemType.accountName]"/>
+                                                accountName: itemType.accountName]" />
                 <script>itemTypes.add(itemTypeOut)</script>
             </iterate>
         </actions>
@@ -582,32 +548,35 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="PaymentTypes">
         <description>payment types for payment</description>
         <in-parameters>
-            <parameter name="sales" type="Boolean" required="true"/>
+            <parameter name="sales" type="Boolean" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="itemTypes" type="List">
                 <parameter name="itemType" type="Map">
-                    <parameter name="itemTypeId"/>
-                    <parameter name="itemTypeName"/>
-                    <parameter name="accountCode"/>
-                    <parameter name="accountName"/>
+                    <parameter name="itemTypeId" />
+                    <parameter name="itemTypeName" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <set field="itemTypes" from="[]"/>
-            <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount" list="paymentTypeList">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
-                <econdition field-name="disallowPosting" value="N" or-null="true"/>
-                <econdition field-name="isPayable" from="sales? 'N' : 'Y'"/>
-                <order-by field-name="[paymentTypeEnumId,accountCode]"/></entity-find>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="itemTypes" from="[]" />
+            <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount"
+                list="paymentTypeList">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="disallowPosting" value="N" or-null="true" />
+                <econdition field-name="isPayable" from="sales? 'N' : 'Y'" />
+                <order-by field-name="[paymentTypeEnumId,accountCode]" />
+            </entity-find>
             <iterate list="paymentTypeList" entry="paymentType">
-                <set field="itemTypeOut" from="[itemTypeId: paymentType.paymentTypeEnumId,
+                <set field="itemTypeOut"
+                    from="[itemTypeId: paymentType.paymentTypeEnumId,
                                                 itemTypeName: paymentType.typeDescription,
                                                 accountCode: paymentType.accountCode,
-                                                accountName: paymentType.accountName]"/>
+                                                accountName: paymentType.accountName]" />
                 <script>itemTypes.add(itemTypeOut)</script>
             </iterate>
         </actions>
@@ -615,46 +584,46 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="LedgerJournal">
         <in-parameters>
-            <parameter name="journalId"/>
-            <parameter name="isPosted" type="Boolean"/>
-            <parameter name="start" default-value="0" type="Integer"/>
-            <parameter name="limit" default-value="10" type="Integer"/>
-            <parameter name="search"/>
+            <parameter name="journalId" />
+            <parameter name="isPosted" type="Boolean" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="10" type="Integer" />
+            <parameter name="search" />
         </in-parameters>
         <out-parameters>
             <parameter name="ledgerJournalList" type="List">
-                <parameter name="journalId"/>
-                <parameter name="journalName"/>
-                <parameter name="isError" type="Boolean"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean"/>
+                <parameter name="journalId" />
+                <parameter name="journalName" />
+                <parameter name="isError" type="Boolean" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" />
             </parameter>
             <parameter name="ledgerJournal" type="Map">
-                <parameter name="journalId"/>
-                <parameter name="journalName"/>
-                <parameter name="isError" type="Boolean"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean"/>
+                <parameter name="journalId" />
+                <parameter name="journalName" />
+                <parameter name="isError" type="Boolean" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="search">
-                <set field="search" value="%$search%"/>
+                <set field="search" value="%$search%" />
             </if>
             <entity-find entity-name="mantle.ledger.transaction.GlJournal"
-                    limit="limit" offset="start" list="ledgerJournals">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                limit="limit" offset="start" list="ledgerJournals">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="glJournalId"
-                    from="journalId" ignore-if-empty="true"/>
-                <econdition field-name="isPosted" from="isPosted" ignore-if-empty="true"/>
+                    from="journalId" ignore-if-empty="true" />
+                <econdition field-name="isPosted" from="isPosted" ignore-if-empty="true" />
                 <econdition field-name="glJournalName" operator="like" ignore-case="true"
-                    from="search" ignore-if-empty="true"/>
+                    from="search" ignore-if-empty="true" />
                 <econdition field-name="glJournalId" operator="like" ignore-case="true"
-                    from="search" ignore-if-empty="true"/>
+                    from="search" ignore-if-empty="true" />
             </entity-find>
-            <set field="ledgerJournalList" from="[]"/>
+            <set field="ledgerJournalList" from="[]" />
             <iterate list="ledgerJournals" entry="journal">
                 <script>
                     ledgerJournalList.add(
@@ -669,8 +638,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </script>
             </iterate>
             <if condition="journalId">
-                <set field="ledgerJournal" from="ledgerJournalList[0]"/>
-                <set field="ledgerJournalList" from="null"/>
+                <set field="ledgerJournal" from="ledgerJournalList[0]" />
+                <set field="ledgerJournalList" from="null" />
             </if>
         </actions>
     </service>
@@ -678,74 +647,310 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="LedgerJournal">
         <in-parameters>
             <parameter name="ledgerJournal" type="Map">
-                <parameter name="journalName" required="true"/>
-                <parameter name="isError" type="Boolean" default="false"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean" default="false"/>
+                <parameter name="journalName" required="true" />
+                <parameter name="isError" type="Boolean" default="false" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" default="false" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="ledgerJournal" type="Map">
-                <parameter name="journalId"/>
-                <parameter name="journalName"/>
-                <parameter name="isError" type="Boolean"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean"/>
+                <parameter name="journalId" />
+                <parameter name="journalName" />
+                <parameter name="isError" type="Boolean" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="create#mantle.ledger.transaction.GlJournal"
                 in-map="[
                             glJournalName: ledgerJournal.journalName,
                             glJournalTypeEnumId: ledgerJournal.error == true
                                 ? 'GLJRNL_ERROR'
                                 : 'GLJRNL_MANUAL',
-                        ]"/>
+                        ]" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
-                        in-map="[journalId: glJournalId]" out-map="context"/>
-            </actions>
+                in-map="[journalId: glJournalId]" out-map="context" />
+        </actions>
     </service>
 
     <service verb="update" noun="LedgerJournal">
         <in-parameters>
             <parameter name="ledgerJournal" type="Map">
-                <parameter name="journalId" required="true"/>
-                <parameter name="journalName" required="true"/>
-                <parameter name="isError" type="Boolean" default="false"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean" default="false"/>
+                <parameter name="journalId" required="true" />
+                <parameter name="journalName" required="true" />
+                <parameter name="isError" type="Boolean" default="false" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" default="false" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="ledgerJournal" type="Map">
-                <parameter name="journalId"/>
-                <parameter name="journalName"/>
-                <parameter name="isError" type="Boolean"/>
-                <parameter name="postedDate"/>
-                <parameter name="isPosted" type="Boolean"/>
+                <parameter name="journalId" />
+                <parameter name="journalName" />
+                <parameter name="isError" type="Boolean" />
+                <parameter name="postedDate" />
+                <parameter name="isPosted" type="Boolean" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
-                in-map="[journalId: ledgerJournal.journalId]" out-map="old"/>
+                in-map="[journalId: ledgerJournal.journalId]" out-map="old" />
             <if condition="ledgerJournal.journalName != old.journalName">
                 <service-call name="update#mantle.ledger.transaction.GlJournal"
                     in-map="[
                         glJournalId: ledgerJournal.journalId,
                         glJournalName: ledgerJournal.journalName,
-                    ]"/>
+                    ]" />
             </if>
-            <if condition="ledgerJournal.isPosted &amp;&amp;
+            <if
+                condition="ledgerJournal.isPosted &amp;&amp;
                 ledgerJournal.isPosted != old.ledgerJournal.isPosted">
                 <service-call name="mantle.ledger.LedgerServices.post#GlJournal"
-                    in-map="[glJournalId: ledgerJournal.journalId]"/>
+                    in-map="[glJournalId: ledgerJournal.journalId]" />
             </if>
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
-                in-map="[journalId: ledgerJournal.journalId]" out-map="context"/>
+                in-map="[journalId: ledgerJournal.journalId]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="GlAccount">
+        <in-parameters>
+            <parameter name="glAccountId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="10" type="Integer" />
+            <parameter name="search" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccountList" type="List">
+                <parameter name="glAccountId" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                    <parameter name="description" />
+                </parameter>
+                <parameter name="beginningBalance" />
+                <parameter name="postedDebits" />
+                <parameter name="postedCredits" />
+                <parameter name="postedBalance" />
+            </parameter>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountId" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                    <parameter name="description" />
+                </parameter>
+                <parameter name="beginningBalance" />
+                <parameter name="postedDebits" />
+                <parameter name="postedCredits" />
+                <parameter name="postedBalance" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search">
+                <set field="search" value="%$search%" />
+            </if>
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                limit="limit" offset="start" list="glAccounts">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="glAccountId"
+                    from="glAccountId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="accountName" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                    <econdition field-name="accountCode" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="accountCode" />
+            </entity-find>
+            <set field="glAccountList" from="[]" />
+            <iterate list="glAccounts" entry="glAccount">
+                <script>
+                    glAccountList.add(
+                        glAccountId: glAccount.glAccountId,
+                        accountCode: glAccount.accountCode,
+                        accountName: glAccount.accountName,
+                        accountClass: [glAccountClassId: glAccount.glAccountClassEnumId,
+                                        description: glAccount.description],
+                        isDebit: glAccount.isDebit == 'Y' ? true : false,
+                        postedBalance: glAccount.postedBalance,
+                        )
+                </script>
+            </iterate>
+            <if condition="glAccountId">
+                <set field="glAccount" from="glAccountList[0]" />
+                <set field="glAccountList" from="null" />
+                <else>
+                    <set field="glAccount" from="null" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="GlAccount">
+        <in-parameters>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountCode" required="true" />
+                <parameter name="glAccountName" />
+                <parameter name="isDebit" type="Boolean" required="true" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountId" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                    <parameter name="description" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.AccountingServices100.get#AccountParent"
+                in-map="[accountCode: accountCode]"
+                out-map="context" />
+            <service-call name="create#mantle.ledger.account.GlAccount"
+                in-map="[   glAccountCode: glAccount.glAccountCode,
+                            parentGlAccountId: parentGlAccountId,
+                            accountName: glAccount.accountName,
+                            glAccountClassEnumId: glAccount.glAccountClass.glAccountClassId,
+                        ]" />
+            <service-call name="create#mantle.ledger.account.GlAccountOrganization"
+                in-map="[   glAccountId: glAccountId,
+                            organizationPartyId: companyPartyId,
+                        ]" />
+            <service-call name="growerp.100.AccountingServices100.get#GlAccount"
+                in-map="[glAccountId: glAccountId]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="AccountParent">
+        <description>Get the account code parent by just analysing the accountCode</description>
+        <in-parameters>
+            <parameter name="accountCode" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="parentGlAccountId"></parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <log message="=======$accountCode" />
+            <script>
+                def List glAccounts;
+                def String newAccountCode;
+                def lastNumber = accountCode.indexOf('0')-1;
+                while(!glAccounts) {
+                    newAccountCode = accountCode.substring(0, lastNumber);
+                    newAccountCode += ('0' * (accountCode.size() - lastNumber));
+                    logger.info("=======$newAccountCode")
+                    if (newAccountcode == ('0' * accountCode.size())) return;
+
+                    // groovy code generated from commented code below 
+                    glAccounts_xafind = ec.entity.find("mantle.ledger.account.GlAccountAndOrganization")
+                    .condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("organizationPartyId", "equals", companyPartyId, null, null, false, false, false, "false")).condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("accountCode", "equals", newAccountCode, null, null, false, false, false, "false"))
+                    glAccounts = glAccounts_xafind.list()
+                }
+                parentGlAccountId = (glAccounts[0]?.glAccountId)    
+            </script>
+            <!--entity-find
+            entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                list="glAccounts">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="accountCode" from="newAccountCode" />
+            </entity-find>
+            <set field="parentGlAccountId" from="glAccounts[0]?.glAccountId" /-->
+            <log message="=======$parentGlAccountId " />
+        </actions>
+    </service>
+
+    <service verb="update" noun="GlAccount">
+        <in-parameters>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountId" required="true" />
+                <parameter name="accountCode" required="true" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" required="true" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountId" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" />
+                <parameter name="glAccountClass" required="true">
+                    <parameter name="glAccountClassId" />
+                    <parameter name="description" />
+                </parameter>
+                <parameter name="beginningBalance" />
+                <parameter name="postedDebits" />
+                <parameter name="postedCredits" />
+                <parameter name="postedBalance" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.AccountingServices100.get#AccountParent"
+                in-map="[accountCode: glAccount.accountCode]"
+                out-map="context" />
+            <service-call name="update#mantle.ledger.account.GlAccount"
+                in-map="[   glAccountId: glAccount.glAccountId,
+                            parentGlAccountId: parentGlAccountId,
+                            accountCode: glAccount.accountCode,
+                            accountName: glAccount.accountName,
+                            glAccountClassEnumId: glAccount.glAccountClass.glAccountClassId,
+                        ]" />
+            <service-call name="growerp.100.AccountingServices100.get#GlAccount"
+                in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="GlAccountClass">
+        <out-parameters>
+            <parameter name="glAccountClassList" type="List">
+                <parameter name="glAccountClassId" />
+                <parameter name="parentClassId" />
+                <parameter name="description" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+                <econdition field-name="enumTypeId" value="GlAccountClass" />
+            </entity-find>
+            <set field="glAccountClassList" from="[]" />
+            <iterate list="enums" entry="enumEntry">
+                <script>
+                    glAccountClassList.add(
+                        glAccountClassId: enumEntry.enumId,
+                        parentClassId: enumEntry.parentEnumId,
+                        description: enumEntry.description,
+                    );
+                </script>
+            </iterate>
         </actions>
     </service>
 </services>

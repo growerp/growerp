@@ -28,8 +28,11 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
+## # Fault fix release August 20 2023 (v1.1.0)
+1. Separate apps can now be used with the same email address
+2. all packages upgraded in pub.dev
+3. Admin and Hotel app can now be used again with pub.dev packages
 ## Release July 20 2023 (V1.0.0)
-
 * Moqui upgraded to V3.0.0
 * Monorepo: All GrowERP parts now in a single repository
 * Added a Dockerfile for all required images to automatically build on dockerhub.com
@@ -75,14 +78,12 @@ Let us know if you have suggestions at support@growerp.com
 10. Rename files and variable names according Dart standard. 
 
 ## Production release December 20 2022 (V0.6.0)
-
 1. User backend organization change from owner/user/company to owner/company/user
 2. Finished documents like order/invoices/payment also shown when not older than one week.
 3. Userlogin can be reused as customer with any other company within the system.
 4. Removed internal coding for single company use. With new user organization change no special coding required when used in single mode.
 
 ## Production release November 23 2022 (V0.5.0)
-
 1. It is now possible to use [Obsidian](https://obsidian.md/) to publish information about your company or provide documentation of your product on the generated Website. Functions supported:
 	1. Internal and external linking
 	2. Inclusion of external md files.
@@ -94,7 +95,6 @@ Let us know if you have suggestions at support@growerp.com
 7. The system at [growerp.com](https://admin.growerp.com) is now in production, while [growerp.org](https://admin.growerp.org) is our test system.
 
 ## Fifth beta release August 17 2022
-
 1.  improved documentation
 2.  improved category and product interface
 3.  Added category & product CSV up/download
@@ -102,7 +102,6 @@ Let us know if you have suggestions at support@growerp.com
 5.  Removed repository history, size reduced by 75%. history now in repository [growerpuntil20220814](https://github.com/growerp/growerpuntil20220814)
 
 ## Fourth beta release July 7, 2022.
-
 First comments from end users arrived.
 1.  Upload images was limited to 200K, now larger although after upload the size will be reduced to about 200k
 2.  At the html website one can now add menu dropdowns which are generated from the markdown documents
@@ -113,7 +112,6 @@ First comments from end users arrived.
 7.  Web application has now an improved user interface taking advantage of the larger screen.
 
 ## Third beta release July 1, 2022.
-
 1.  Automatically generated website.
     -   Maintenance from flutter frontend:
         -   logo, products and categories
@@ -140,7 +138,6 @@ First comments from end users arrived.
     -   More documentation.
 
 ## Second beta release May 3, 2022]
-
 1.  Input of invoice/payment without an order with automatic posting.
 2.  better integration tests.
 3.  more confirmation messages.

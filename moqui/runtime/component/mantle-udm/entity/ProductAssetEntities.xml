@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
     <!-- ========================================================= -->
     <!--  - mantle.product.asset -->
     <!--  - mantle.product.issuance -->
@@ -26,136 +26,196 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <entity entity-name="Asset" package="mantle.product.asset" short-alias="assets" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="parentAssetId" type="id"/>
-        <field name="assetTypeEnumId" type="id"/>
-        <field name="classEnumId" type="id"/>
-        <field name="statusId" type="id" enable-audit-log="true"/>
-        <field name="ownerPartyId" type="id" enable-audit-log="update"/>
-        <field name="assetPoolId" type="id" enable-audit-log="update"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="parentAssetId" type="id" />
+        <field name="assetTypeEnumId" type="id" />
+        <field name="classEnumId" type="id" />
+        <field name="statusId" type="id" enable-audit-log="true" />
+        <field name="ownerPartyId" type="id" enable-audit-log="update" />
+        <field name="assetPoolId" type="id" enable-audit-log="update" />
 
         <field name="productId" type="id" enable-audit-log="update">
             <description>The Asset is an Instance of this Product (for inventory, maintenance
                 schedules/etc, content about what sort of thing the Asset is, etc)</description>
         </field>
 
-        <field name="hasQuantity" type="text-indicator"><description>If Y asset has a quantity and QOH/ATP may be
-            greater than one. If N (default) asset is a single item and may have a serial number, etc.</description></field>
-        <field name="quantityOnHandTotal" type="number-decimal"/>
-        <field name="availableToPromiseTotal" type="number-decimal"/>
+        <field name="hasQuantity" type="text-indicator">
+            <description>If Y asset has a quantity and QOH/ATP may be
+            greater than one. If N (default) asset is a single item and may have a serial number, etc.</description>
+        </field>
+        <field name="quantityOnHandTotal" type="number-decimal" />
+        <field name="availableToPromiseTotal" type="number-decimal" />
 
-        <field name="originalQuantity" type="number-decimal"/>
-        <field name="originalQuantityUomId" type="id"><description>QOHT and ATPT are in units of the Product (amountUomId).
-            This field specifies the original UOM (along with originalQuantity) when it differs from Product.amountUomId.</description></field>
+        <field name="originalQuantity" type="number-decimal" />
+        <field name="originalQuantityUomId" type="id">
+            <description>QOHT and ATPT are in units of the Product (amountUomId).
+            This field specifies the original UOM (along with originalQuantity) when it differs from Product.amountUomId.</description>
+        </field>
 
-        <field name="assetName" type="text-medium"/>
-        <field name="comments" type="text-long"/>
+        <field name="assetName" type="text-medium" />
+        <field name="comments" type="text-long" />
 
-        <field name="serialNumber" type="text-medium" enable-audit-log="update"/>
-        <field name="softIdentifier" type="text-medium"/>
-        <field name="activationNumber" type="text-medium"/>
-        <field name="activationValidThru" type="date-time"/>
+        <field name="serialNumber" type="text-medium" enable-audit-log="update" />
+        <field name="softIdentifier" type="text-medium" />
+        <field name="activationNumber" type="text-medium" />
+        <field name="activationValidThru" type="date-time" />
 
-        <field name="receivedDate" type="date-time"/>
-        <field name="acquiredDate" type="date-time"/>
-        <field name="manufacturedDate" type="date-time"/>
-        <field name="expectedEndOfLife" type="date"/>
-        <field name="actualEndOfLife" type="date"/>
+        <field name="receivedDate" type="date-time" />
+        <field name="acquiredDate" type="date-time" />
+        <field name="manufacturedDate" type="date-time" />
+        <field name="expectedEndOfLife" type="date" />
+        <field name="actualEndOfLife" type="date" />
 
-        <field name="capacity" type="number-decimal"/>
-        <field name="capacityUomId" type="id"/>
+        <field name="capacity" type="number-decimal" />
+        <field name="capacityUomId" type="id" />
 
         <field name="facilityId" type="id" enable-audit-log="update">
-            <description>Current Facility, where stored.</description></field>
-        <field name="locationSeqId" type="id" enable-audit-log="update"/>
-        <field name="containerId" type="id" enable-audit-log="update"><description>
+            <description>Current Facility, where stored.</description>
+        </field>
+        <field name="locationSeqId" type="id" enable-audit-log="update" />
+        <field name="containerId" type="id" enable-audit-log="update">
+            <description>
             Container stored in, if specified the current facilityId and locationSeqId should come from the container
             and not from this record or with standard EECA rule in place facilityId and locationSeqId will be set and
             maintained from the Container values.
-        </description></field>
-        <field name="shipmentBoxTypeId" type="id"/>
-        <field name="lotId" type="id" enable-audit-log="update"/>
-        <field name="geoPointId" type="id" enable-audit-log="update"/>
+        </description>
+        </field>
+        <field name="shipmentBoxTypeId" type="id" />
+        <field name="lotId" type="id" enable-audit-log="update" />
+        <field name="geoPointId" type="id" enable-audit-log="update" />
 
-        <field name="originId" type="id"><description>Origin ID, the ID used wherever this came from.</description></field>
-        <field name="originFacilityId" type="id"><description>Origin Facility, where manufactured or came from.</description></field>
-        <field name="acquireOrderId" type="id"/>
-        <field name="acquireOrderItemSeqId" type="id"/>
-        <field name="acquireWorkEffortId" type="id"><description>For assets created from production runs, etc.</description></field>
-        <field name="acquireShipmentId" type="id"/>
-        <field name="acquireCost" type="currency-amount" enable-audit-log="update"/>
-        <field name="acquireCostUomId" type="id" enable-audit-log="update"/>
+        <field name="originId" type="id">
+            <description>Origin ID, the ID used wherever this came from.</description>
+        </field>
+        <field name="originFacilityId" type="id">
+            <description>Origin Facility, where manufactured or came from.</description>
+        </field>
+        <field name="acquireOrderId" type="id" />
+        <field name="acquireOrderItemSeqId" type="id" />
+        <field name="acquireWorkEffortId" type="id">
+            <description>For assets created from production runs, etc.</description>
+        </field>
+        <field name="acquireShipmentId" type="id" />
+        <field name="acquireCost" type="currency-amount" enable-audit-log="update" />
+        <field name="acquireCostUomId" type="id" enable-audit-log="update" />
 
-        <field name="salvageValue" type="currency-amount" enable-audit-log="update"/>
+        <field name="salvageValue" type="currency-amount" enable-audit-log="update" />
         <field name="depreciation" type="currency-amount" enable-audit-log="update">
-            <description>History in AssetDepreciation</description></field>
-        <field name="depreciationTypeEnumId" type="id" enable-audit-log="update"/>
+            <description>History in AssetDepreciation</description>
+        </field>
+        <field name="depreciationTypeEnumId" type="id" enable-audit-log="update" />
         <field name="yearBeginDepreciation" type="currency-amount" enable-audit-log="update">
-            <description>History in AssetDepreciation</description></field>
-        <field name="taxDepreciation" type="currency-amount" enable-audit-log="update"/>
-        <field name="taxDepreciationTypeEnumId" type="id"/>
+            <description>History in AssetDepreciation</description>
+        </field>
+        <field name="taxDepreciation" type="currency-amount" enable-audit-log="update" />
+        <field name="taxDepreciationTypeEnumId" type="id" />
 
-        <relationship type="one" title="Parent" related="mantle.product.asset.Asset" short-alias="parent">
-            <key-map field-name="parentAssetId" related="assetId"/></relationship>
-        <relationship type="one" title="AssetType" related="moqui.basic.Enumeration" short-alias="type">
-            <key-map field-name="assetTypeEnumId"/></relationship>
-        <relationship type="one" title="AssetClass" related="moqui.basic.Enumeration" short-alias="class">
-            <key-map field-name="classEnumId"/></relationship>
-        <relationship type="one" title="Asset" related="moqui.basic.StatusItem" short-alias="status"/>
+        <relationship type="one" title="Parent" related="mantle.product.asset.Asset"
+            short-alias="parent">
+            <key-map field-name="parentAssetId" related="assetId" />
+        </relationship>
+        <relationship type="one" title="AssetType" related="moqui.basic.Enumeration"
+            short-alias="type">
+            <key-map field-name="assetTypeEnumId" />
+        </relationship>
+        <relationship type="one" title="AssetClass" related="moqui.basic.Enumeration"
+            short-alias="class">
+            <key-map field-name="classEnumId" />
+        </relationship>
+        <relationship type="one" title="Asset" related="moqui.basic.StatusItem" short-alias="status" />
         <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
-            <key-map field-name="ownerPartyId"/></relationship>
-        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool"/>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one" title="OriginalQuantity" related="moqui.basic.Uom" short-alias="originalQuantityUom">
-            <key-map field-name="originalQuantityUomId"/></relationship>
-        <relationship type="one" title="Origin" related="mantle.facility.Facility" short-alias="originFacility">
-            <key-map field-name="originFacilityId"/></relationship>
-        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
-        <relationship type="one-nofk" related="mantle.facility.FacilityLocation" short-alias="location"/>
-        <relationship type="one" related="mantle.product.asset.Container" short-alias="container"/>
-        <relationship type="one" related="mantle.shipment.ShipmentBoxType" short-alias="boxType"/>
-        <relationship type="one" related="mantle.product.asset.Lot" short-alias="lot"/>
-        <relationship type="one" related="moqui.basic.GeoPoint" short-alias="geoPoint"/>
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one" title="OriginalQuantity" related="moqui.basic.Uom"
+            short-alias="originalQuantityUom">
+            <key-map field-name="originalQuantityUomId" />
+        </relationship>
+        <relationship type="one" title="Origin" related="mantle.facility.Facility"
+            short-alias="originFacility">
+            <key-map field-name="originFacilityId" />
+        </relationship>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility" />
+        <relationship type="one-nofk" related="mantle.facility.FacilityLocation"
+            short-alias="location" />
+        <relationship type="one" related="mantle.product.asset.Container" short-alias="container" />
+        <relationship type="one" related="mantle.shipment.ShipmentBoxType" short-alias="boxType" />
+        <relationship type="one" related="mantle.product.asset.Lot" short-alias="lot" />
+        <relationship type="one" related="moqui.basic.GeoPoint" short-alias="geoPoint" />
 
         <relationship type="one-nofk" title="Acquire" related="mantle.order.OrderHeader">
-            <key-map field-name="acquireOrderId"/></relationship>
-        <relationship type="one" title="Acquire" related="mantle.order.OrderItem" short-alias="acquireOrderItem">
-            <key-map field-name="acquireOrderId" related="orderId"/>
-            <key-map field-name="acquireOrderItemSeqId" related="orderItemSeqId"/>
+            <key-map field-name="acquireOrderId" />
         </relationship>
-        <relationship type="one" title="Acquire" related="mantle.work.effort.WorkEffort" short-alias="acquireWorkEffort">
-            <key-map field-name="acquireWorkEffortId"/></relationship>
-        <relationship type="one" title="Acquire" related="mantle.shipment.Shipment" short-alias="acquireShipment">
-            <key-map field-name="acquireShipmentId"/></relationship>
-        <relationship type="one" title="AcquireCost" related="moqui.basic.Uom" short-alias="acquireCostUom">
-            <key-map field-name="acquireCostUomId"/></relationship>
-        <relationship type="one" title="DepreciationType" related="moqui.basic.Enumeration" short-alias="depreciationType">
-            <key-map field-name="depreciationTypeEnumId"/></relationship>
-        <relationship type="one" title="TaxDepreciationType" related="moqui.basic.Enumeration" short-alias="taxDepreciationType">
-            <key-map field-name="taxDepreciationTypeEnumId"/></relationship>
+        <relationship type="one" title="Acquire" related="mantle.order.OrderItem"
+            short-alias="acquireOrderItem">
+            <key-map field-name="acquireOrderId" related="orderId" />
+            <key-map field-name="acquireOrderItemSeqId" related="orderItemSeqId" />
+        </relationship>
+        <relationship type="one" title="Acquire" related="mantle.work.effort.WorkEffort"
+            short-alias="acquireWorkEffort">
+            <key-map field-name="acquireWorkEffortId" />
+        </relationship>
+        <relationship type="one" title="Acquire" related="mantle.shipment.Shipment"
+            short-alias="acquireShipment">
+            <key-map field-name="acquireShipmentId" />
+        </relationship>
+        <relationship type="one" title="AcquireCost" related="moqui.basic.Uom"
+            short-alias="acquireCostUom">
+            <key-map field-name="acquireCostUomId" />
+        </relationship>
+        <relationship type="one" title="DepreciationType" related="moqui.basic.Enumeration"
+            short-alias="depreciationType">
+            <key-map field-name="depreciationTypeEnumId" />
+        </relationship>
+        <relationship type="one" title="TaxDepreciationType" related="moqui.basic.Enumeration"
+            short-alias="taxDepreciationType">
+            <key-map field-name="taxDepreciationTypeEnumId" />
+        </relationship>
 
         <relationship type="many" related="mantle.product.asset.AssetDetail" short-alias="details">
-            <key-map field-name="assetId"/></relationship>
-        <relationship type="many" related="mantle.product.asset.AssetDepreciation" short-alias="depreciations">
-            <key-map field-name="assetId"/></relationship>
+            <key-map field-name="assetId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.asset.AssetDepreciation"
+            short-alias="depreciations">
+            <key-map field-name="assetId" />
+        </relationship>
         <relationship type="many" related="mantle.product.asset.AssetGlAppl" short-alias="glAppls">
-            <key-map field-name="assetId"/></relationship>
-        <relationship type="many" related="mantle.product.asset.AssetIdentification" short-alias="identifications">
-            <key-map field-name="assetId"/></relationship>
-        <relationship type="many" related="mantle.product.asset.AssetPartyAssignment" short-alias="partyAssignments">
-            <key-map field-name="assetId"/></relationship>
+            <key-map field-name="assetId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.asset.AssetIdentification"
+            short-alias="identifications">
+            <key-map field-name="assetId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.asset.AssetPartyAssignment"
+            short-alias="partyAssignments">
+            <key-map field-name="assetId" />
+        </relationship>
 
-        <relationship type="many" related="mantle.product.issuance.AssetIssuance" short-alias="issuances">
-            <key-map field-name="assetId"/></relationship>
-        <relationship type="many" related="mantle.product.issuance.AssetReservation" short-alias="reservations">
-            <key-map field-name="assetId"/></relationship>
-        <relationship type="many" related="mantle.product.receipt.AssetReceipt" short-alias="receipts">
-            <key-map field-name="assetId"/></relationship>
+        <relationship type="many" related="mantle.product.issuance.AssetIssuance"
+            short-alias="issuances">
+            <key-map field-name="assetId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.issuance.AssetReservation"
+            short-alias="reservations">
+            <key-map field-name="assetId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.receipt.AssetReceipt"
+            short-alias="receipts">
+            <key-map field-name="assetId" />
+        </relationship>
 
-        <index name="ASSET_SN"><index-field name="serialNumber"/></index>
-        <!-- this index is used for the main asset reservation query, important for larger Asset tables -->
-        <index name="ASSET_PdStFacAtp"><index-field name="productId"/><index-field name="statusId"/>
-            <index-field name="facilityId"/><index-field name="availableToPromiseTotal"/></index>
+        <index name="ASSET_SN">
+            <index-field name="serialNumber" />
+        </index>
+        <!-- this index is used for the main asset reservation query, important for larger Asset
+        tables -->
+        <index name="ASSET_PdStFacAtp">
+            <index-field name="productId" />
+            <index-field name="statusId" />
+            <index-field name="facilityId" />
+            <index-field name="availableToPromiseTotal" />
+        </index>
         <!-- might be useful in some cases:
             <index name="INVITEM_SOFID" unique="true"><index-field name="softIdentifier"/></index>
             <index name="INVITEM_ACTNM" unique="true"><index-field name="activationNumber"/></index>
@@ -163,286 +223,450 @@ along with this software (see the LICENSE.md file). If not, see
 
         <seed-data>
             <!-- Asset Type -->
-            <moqui.basic.EnumerationType description="Asset Type" enumTypeId="AssetType"/>
-            <moqui.basic.Enumeration description="Inventory" enumId="AstTpInventory" enumTypeId="AssetType"/><!-- IAS 2 -->
-            <moqui.basic.Enumeration description="Supplies" enumId="AstTpSupplies" enumTypeId="AssetType"/><!-- IAS? -->
+            <moqui.basic.EnumerationType description="Asset Type" enumTypeId="AssetType" />
+            <moqui.basic.Enumeration description="Inventory" enumId="AstTpInventory"
+                enumTypeId="AssetType" /><!-- IAS 2 -->
+            <moqui.basic.Enumeration description="Supplies" enumId="AstTpSupplies"
+                enumTypeId="AssetType" /><!-- IAS? -->
 
-            <moqui.basic.Enumeration description="Fixed Asset" enumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS 16 -->
-            <moqui.basic.Enumeration description="Equipment" enumId="AstTpEquipment" parentEnumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS 16 -->
-            <moqui.basic.Enumeration description="Rental Equipment Asset" enumId="AstTpRental" parentEnumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS? -->
-            <moqui.basic.Enumeration description="Real Estate" enumId="AstTpRealEstate" parentEnumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS 16 -->
-            <moqui.basic.Enumeration description="Investment Real Estate" enumId="AstTpInvRealEstate" parentEnumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS 40 -->
-            <moqui.basic.Enumeration description="Bearer Biological" enumId="AstTpBearerBiological" parentEnumId="AstTpFixed" enumTypeId="AssetType"/><!-- IAS 16 -->
-            <moqui.basic.Enumeration description="Biological" enumId="AstTpBiological" enumTypeId="AssetType"/><!-- IAS 41 -->
-            <moqui.basic.Enumeration description="Intangible" enumId="AstTpIntangible" enumTypeId="AssetType"/><!-- IAS 38 -->
+            <moqui.basic.Enumeration description="Fixed Asset" enumId="AstTpFixed"
+                enumTypeId="AssetType" /><!-- IAS 16 -->
+            <moqui.basic.Enumeration description="Equipment" enumId="AstTpEquipment"
+                parentEnumId="AstTpFixed" enumTypeId="AssetType" /><!-- IAS 16 -->
+            <moqui.basic.Enumeration description="Rental Equipment Asset" enumId="AstTpRental"
+                parentEnumId="AstTpFixed" enumTypeId="AssetType" /><!-- IAS? -->
+            <moqui.basic.Enumeration description="Real Estate" enumId="AstTpRealEstate"
+                parentEnumId="AstTpFixed" enumTypeId="AssetType" /><!-- IAS 16 -->
+            <moqui.basic.Enumeration description="Investment Real Estate"
+                enumId="AstTpInvRealEstate" parentEnumId="AstTpFixed" enumTypeId="AssetType" /><!--
+            IAS 40 -->
+            <moqui.basic.Enumeration description="Bearer Biological" enumId="AstTpBearerBiological"
+                parentEnumId="AstTpFixed" enumTypeId="AssetType" /><!-- IAS 16 -->
+            <moqui.basic.Enumeration description="Biological" enumId="AstTpBiological"
+                enumTypeId="AssetType" /><!-- IAS 41 -->
+            <moqui.basic.Enumeration description="Intangible" enumId="AstTpIntangible"
+                enumTypeId="AssetType" /><!-- IAS 38 -->
 
             <!-- Asset Class -->
-            <moqui.basic.EnumerationType description="Asset Class" enumTypeId="AssetClass"/>
+            <moqui.basic.EnumerationType description="Asset Class" enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Inventory" enumId="AsClsInventory" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Inventory - Raw Material" enumId="AsClsInventoryRaw"
-                    parentEnumId="AsClsInventory" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Inventory - Sub-assembly" enumId="AsClsInventorySub"
-                    parentEnumId="AsClsInventory" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Inventory - Finished Good" enumId="AsClsInventoryFin"
-                    parentEnumId="AsClsInventory" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Inventory - Digital Good" enumId="AsClsInventoryDig"
-                    parentEnumId="AsClsInventory" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Inventory" enumId="AsClsInventory"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Inventory - Raw Material"
+                enumId="AsClsInventoryRaw"
+                parentEnumId="AsClsInventory" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Inventory - Sub-assembly"
+                enumId="AsClsInventorySub"
+                parentEnumId="AsClsInventory" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Inventory - Finished Good"
+                enumId="AsClsInventoryFin"
+                parentEnumId="AsClsInventory" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Inventory - Digital Good"
+                enumId="AsClsInventoryDig"
+                parentEnumId="AsClsInventory" enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Warehouse Equipment" enumId="AsClsWhEquip" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Manufacturing Equipment" enumId="AsClsMfgEquip" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Warehouse Equipment" enumId="AsClsWhEquip"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Manufacturing Equipment" enumId="AsClsMfgEquip"
+                enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Boat" enumId="AsClsBoat" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Forklift" enumId="AsClsForklift" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Digger" enumId="AsClsDigger" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Manlift" enumId="AsClsManlift" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Service Body" enumId="AsClsServiceBody" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Tractor" enumId="AsClsTractor" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Passenger Vehicle" enumId="AsClsPassengerVeh" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Compressor" enumId="AsClsCompressor" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Trencher" enumId="AsClsTrencher" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Puller" enumId="AsClsPuller" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Tanker" enumId="AsClsTanker" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Reel Stand" enumId="AsClsReelStand" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Boat" enumId="AsClsBoat" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Forklift" enumId="AsClsForklift"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Digger" enumId="AsClsDigger"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Manlift" enumId="AsClsManlift"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Service Body" enumId="AsClsServiceBody"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Tractor" enumId="AsClsTractor"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Passenger Vehicle" enumId="AsClsPassengerVeh"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Compressor" enumId="AsClsCompressor"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Trencher" enumId="AsClsTrencher"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Puller" enumId="AsClsPuller"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Tanker" enumId="AsClsTanker"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Reel Stand" enumId="AsClsReelStand"
+                enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Cargo Vehicle" enumId="AsClsCargoVehicle" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Truck" enumId="AsClsTruck" parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Trailer" enumId="AsClsTrailer" parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Container" enumId="AsClsContainer" parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Cargo Vehicle" enumId="AsClsCargoVehicle"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Truck" enumId="AsClsTruck"
+                parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Trailer" enumId="AsClsTrailer"
+                parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Container" enumId="AsClsContainer"
+                parentEnumId="AsClsCargoVehicle" enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Computer Hardware" enumId="AsClsComputerHard" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Desktop" enumId="AsClsDesktop" parentEnumId="AsClsComputerHard" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Laptop" enumId="AsClsLaptop" parentEnumId="AsClsComputerHard" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Tablet" enumId="AsClsTablet" parentEnumId="AsClsComputerHard" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Monitor" enumId="AsClsMonitor" parentEnumId="AsClsComputerHard" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Computer Hardware" enumId="AsClsComputerHard"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Desktop" enumId="AsClsDesktop"
+                parentEnumId="AsClsComputerHard" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Laptop" enumId="AsClsLaptop"
+                parentEnumId="AsClsComputerHard" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Tablet" enumId="AsClsTablet"
+                parentEnumId="AsClsComputerHard" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Monitor" enumId="AsClsMonitor"
+                parentEnumId="AsClsComputerHard" enumTypeId="AssetClass" />
 
-            <moqui.basic.Enumeration description="Computer Software" enumId="AsClsComputerSoft" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Programming Software" enumId="AsClsSoftProgramming" parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="System Software" enumId="AsClsSoftSystem" parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Application Software" enumId="AsClsSoftApp" parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass"/>
-            <moqui.basic.Enumeration description="Utility Software" enumId="AsClsSoftUtility" parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass"/>
+            <moqui.basic.Enumeration description="Computer Software" enumId="AsClsComputerSoft"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Programming Software"
+                enumId="AsClsSoftProgramming" parentEnumId="AsClsComputerSoft"
+                enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="System Software" enumId="AsClsSoftSystem"
+                parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Application Software" enumId="AsClsSoftApp"
+                parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass" />
+            <moqui.basic.Enumeration description="Utility Software" enumId="AsClsSoftUtility"
+                parentEnumId="AsClsComputerSoft" enumTypeId="AssetClass" />
 
             <!-- Asset Status -->
-            <moqui.basic.StatusType description="Asset" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Incoming" sequenceNum="1" statusId="AstIncoming" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Available" sequenceNum="2" statusId="AstAvailable" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Promised" sequenceNum="3" statusId="AstPromised" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Delivered" sequenceNum="4" statusId="AstDelivered" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Activated" sequenceNum="5" statusId="AstActivated" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Deactivated" sequenceNum="6" statusId="AstDeactivated" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="On Hold" sequenceNum="7" statusId="AstOnHold" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="In Use" sequenceNum="8" statusId="AstInUse" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="In Storage" sequenceNum="9" statusId="AstInStorage" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="In Transfer" sequenceNum="10" statusId="AstInTransfer" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="In Transfer (Promised)" sequenceNum="11" statusId="AstInTransferPromise" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Returned" sequenceNum="20" statusId="AstReturned" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Defective" sequenceNum="21" statusId="AstDefective" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Quarantine" sequenceNum="30" statusId="AstQuarantine" statusTypeId="Asset"/>
-            <moqui.basic.StatusItem description="Morgue" sequenceNum="31" statusId="AstMorgue" statusTypeId="Asset"/>
+            <moqui.basic.StatusType description="Asset" statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Incoming" sequenceNum="1" statusId="AstIncoming"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Available" sequenceNum="2" statusId="AstAvailable"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Promised" sequenceNum="3" statusId="AstPromised"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Delivered" sequenceNum="4" statusId="AstDelivered"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Activated" sequenceNum="5" statusId="AstActivated"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Deactivated" sequenceNum="6"
+                statusId="AstDeactivated" statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="On Hold" sequenceNum="7" statusId="AstOnHold"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="In Use" sequenceNum="8" statusId="AstInUse"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="In Storage" sequenceNum="9" statusId="AstInStorage"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="In Transfer" sequenceNum="10"
+                statusId="AstInTransfer" statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="In Transfer (Promised)" sequenceNum="11"
+                statusId="AstInTransferPromise" statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Returned" sequenceNum="20" statusId="AstReturned"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Defective" sequenceNum="21" statusId="AstDefective"
+                statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Quarantine" sequenceNum="30"
+                statusId="AstQuarantine" statusTypeId="Asset" />
+            <moqui.basic.StatusItem description="Morgue" sequenceNum="31" statusId="AstMorgue"
+                statusTypeId="Asset" />
 
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming" toStatusId="AstAvailable" transitionName="Arrived"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming" toStatusId="AstOnHold" transitionName="Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstPromised" transitionName="Promise"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstDelivered" transitionName="Deliver"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstOnHold" transitionName="Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstDefective" transitionName="Mark As Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstInTransfer" transitionName="Start Transfer"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold" toStatusId="AstAvailable" transitionName="Release Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold" toStatusId="AstDefective" transitionName="Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold" toStatusId="AstDelivered" transitionName="Deliver"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer" toStatusId="AstAvailable" transitionName="Transfer Complete"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised" toStatusId="AstAvailable" transitionName="Cancel Promise"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised" toStatusId="AstDelivered" transitionName="Deliver"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised" toStatusId="AstDefective" transitionName="Mark As Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised" toStatusId="AstInTransferPromise" transitionName="Start Transfer (Promised)"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransferPromise" toStatusId="AstPromised" transitionName="Transfer Complete (Promised)"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered" toStatusId="AstReturned" transitionName="Return Status Pending"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered" toStatusId="AstActivated" transitionName="Activate"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered" toStatusId="AstAvailable" transitionName="Un-Deliver (Available)"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned" toStatusId="AstAvailable" transitionName="Make Return Available"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned" toStatusId="AstOnHold" transitionName="Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned" toStatusId="AstDefective" transitionName="Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstActivated" toStatusId="AstDeactivated" transitionName="Deactivate"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstActivated" toStatusId="AstReturned" transitionName="Return"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDeactivated" toStatusId="AstOnHold" transitionName="Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDeactivated" toStatusId="AstReturned" transitionName="Return"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming"
+                toStatusId="AstAvailable" transitionName="Arrived" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming"
+                toStatusId="AstOnHold" transitionName="Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstPromised" transitionName="Promise" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstDelivered" transitionName="Deliver" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstOnHold" transitionName="Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstDefective" transitionName="Mark As Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstInTransfer" transitionName="Start Transfer" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold"
+                toStatusId="AstAvailable" transitionName="Release Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold"
+                toStatusId="AstDefective" transitionName="Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold"
+                toStatusId="AstDelivered" transitionName="Deliver" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer"
+                toStatusId="AstAvailable" transitionName="Transfer Complete" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised"
+                toStatusId="AstAvailable" transitionName="Cancel Promise" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised"
+                toStatusId="AstDelivered" transitionName="Deliver" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised"
+                toStatusId="AstDefective" transitionName="Mark As Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstPromised"
+                toStatusId="AstInTransferPromise" transitionName="Start Transfer (Promised)" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransferPromise"
+                toStatusId="AstPromised" transitionName="Transfer Complete (Promised)" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered"
+                toStatusId="AstReturned" transitionName="Return Status Pending" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered"
+                toStatusId="AstActivated" transitionName="Activate" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered"
+                toStatusId="AstAvailable" transitionName="Un-Deliver (Available)" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned"
+                toStatusId="AstAvailable" transitionName="Make Return Available" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned"
+                toStatusId="AstOnHold" transitionName="Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstReturned"
+                toStatusId="AstDefective" transitionName="Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstActivated"
+                toStatusId="AstDeactivated" transitionName="Deactivate" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstActivated"
+                toStatusId="AstReturned" transitionName="Return" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDeactivated"
+                toStatusId="AstOnHold" transitionName="Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDeactivated"
+                toStatusId="AstReturned" transitionName="Return" />
 
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming" toStatusId="AstQuarantine" transitionName="Quarantine"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstQuarantine" transitionName="Quarantine"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold" toStatusId="AstQuarantine" transitionName="Quarantine"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine" toStatusId="AstAvailable" transitionName="Release Available"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine" toStatusId="AstOnHold" transitionName="Release Hold"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine" toStatusId="AstMorgue" transitionName="Morgue"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming" toStatusId="AstMorgue" transitionName="Morgue"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable" toStatusId="AstMorgue" transitionName="Morgue"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold" toStatusId="AstMorgue" transitionName="Morgue"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstMorgue" toStatusId="AstIncoming" transitionName="Incoming"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming"
+                toStatusId="AstQuarantine" transitionName="Quarantine" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstQuarantine" transitionName="Quarantine" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold"
+                toStatusId="AstQuarantine" transitionName="Quarantine" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine"
+                toStatusId="AstAvailable" transitionName="Release Available" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine"
+                toStatusId="AstOnHold" transitionName="Release Hold" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstQuarantine"
+                toStatusId="AstMorgue" transitionName="Morgue" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstIncoming"
+                toStatusId="AstMorgue" transitionName="Morgue" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstAvailable"
+                toStatusId="AstMorgue" transitionName="Morgue" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstOnHold"
+                toStatusId="AstMorgue" transitionName="Morgue" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstMorgue"
+                toStatusId="AstIncoming" transitionName="Incoming" />
 
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse" toStatusId="AstInStorage" transitionName="Store"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse" toStatusId="AstReturned" transitionName="Return"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse" toStatusId="AstDefective" transitionName="Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse" toStatusId="AstInTransfer" transitionName="Start Transfer"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer" toStatusId="AstInUse" transitionName="Transfer Complete (Use)"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstInUse" transitionName="Use"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstAvailable" transitionName="Make Available"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstReturned" transitionName="Return"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstDefective" transitionName="Defective"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstInTransfer" transitionName="Start Transfer"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer" toStatusId="AstInStorage" transitionName="Transfer Complete (Store)"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse"
+                toStatusId="AstInStorage" transitionName="Store" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse"
+                toStatusId="AstReturned" transitionName="Return" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse"
+                toStatusId="AstDefective" transitionName="Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInUse"
+                toStatusId="AstInTransfer" transitionName="Start Transfer" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer"
+                toStatusId="AstInUse" transitionName="Transfer Complete (Use)" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstInUse" transitionName="Use" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstAvailable" transitionName="Make Available" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstReturned" transitionName="Return" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstDefective" transitionName="Defective" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstInTransfer" transitionName="Start Transfer" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInTransfer"
+                toStatusId="AstInStorage" transitionName="Transfer Complete (Store)" />
 
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage" toStatusId="AstDelivered" transitionName="Deliver"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered" toStatusId="AstInStorage" transitionName="Un-Deliver (In Storage)"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstInStorage"
+                toStatusId="AstDelivered" transitionName="Deliver" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDelivered"
+                toStatusId="AstInStorage" transitionName="Un-Deliver (In Storage)" />
 
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDefective" toStatusId="AstOnHold" transitionName="Not Defective"/>
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AstDefective"
+                toStatusId="AstOnHold" transitionName="Not Defective" />
 
             <!-- Depreciation Type -->
-            <moqui.basic.EnumerationType description="Depreciation Type" enumTypeId="DepreciationType"/>
-            <moqui.basic.Enumeration description="Straight Line" enumId="DtpStraightLine" enumTypeId="DepreciationType"/>
-            <moqui.basic.Enumeration description="Double Declining Balance" enumId="DtpDoubleDeclining" enumTypeId="DepreciationType"/>
-            <moqui.basic.Enumeration description="Sum of Years Digits" enumId="DtpSumYearsDigits" enumTypeId="DepreciationType"/>
-            <!-- not yet supported: <moqui.basic.Enumeration description="Units of Production" enumId="DtpUnitsProduction" enumTypeId="DepreciationType"/> -->
+            <moqui.basic.EnumerationType description="Depreciation Type"
+                enumTypeId="DepreciationType" />
+            <moqui.basic.Enumeration description="Straight Line" enumId="DtpStraightLine"
+                enumTypeId="DepreciationType" />
+            <moqui.basic.Enumeration description="Double Declining Balance"
+                enumId="DtpDoubleDeclining" enumTypeId="DepreciationType" />
+            <moqui.basic.Enumeration description="Sum of Years Digits" enumId="DtpSumYearsDigits"
+                enumTypeId="DepreciationType" />
+            <!-- not yet supported: <moqui.basic.Enumeration description="Units of Production"
+            enumId="DtpUnitsProduction" enumTypeId="DepreciationType"/> -->
 
             <!-- Tax Depreciation Type -->
-            <!-- NOTE: there are many variations, especially for USA MACRS ADS; future effort to model all of them -->
-            <!-- For a summary of USA IRS MACRS deprecations see: https://en.wikipedia.org/wiki/MACRS -->
-            <moqui.basic.EnumerationType description="Tax Depreciation Type" enumTypeId="TaxDepreciationType"/>
-            <moqui.basic.Enumeration description="MACRS GDS 5 Year" enumId="TxdtMacrsGds5Yr" enumTypeId="TaxDepreciationType"/>
-            <moqui.basic.Enumeration description="MACRS GDS 7 Year" enumId="TxdtMacrsGds7Yr" enumTypeId="TaxDepreciationType"/>
+            <!-- NOTE: there are many variations, especially for USA MACRS ADS; future effort to
+            model all of them -->
+            <!-- For a summary of USA IRS MACRS deprecations see:
+            https://en.wikipedia.org/wiki/MACRS -->
+            <moqui.basic.EnumerationType description="Tax Depreciation Type"
+                enumTypeId="TaxDepreciationType" />
+            <moqui.basic.Enumeration description="MACRS GDS 5 Year" enumId="TxdtMacrsGds5Yr"
+                enumTypeId="TaxDepreciationType" />
+            <moqui.basic.Enumeration description="MACRS GDS 7 Year" enumId="TxdtMacrsGds7Yr"
+                enumTypeId="TaxDepreciationType" />
         </seed-data>
         <master>
-            <detail relationship="parent"/><detail relationship="type"/><detail relationship="class"/>
-            <detail relationship="status"/><detail relationship="owner"/>
-            <detail relationship="originalQuantityUom"/><detail relationship="originFacility"/>
-            <detail relationship="facility"/><detail relationship="location"/>
-            <detail relationship="container"/><detail relationship="boxType"/>
-            <detail relationship="lot"/><detail relationship="geoPoint"/>
+            <detail relationship="parent" />
+            <detail relationship="type" />
+            <detail relationship="class" />
+            <detail relationship="status" />
+            <detail relationship="owner" />
+            <detail relationship="originalQuantityUom" />
+            <detail relationship="originFacility" />
+            <detail relationship="facility" />
+            <detail relationship="location" />
+            <detail relationship="container" />
+            <detail relationship="boxType" />
+            <detail relationship="lot" />
+            <detail relationship="geoPoint" />
 
-            <detail relationship="acquireOrderItem"/><detail relationship="acquireWorkEffort"/>
-            <detail relationship="acquireShipment"/><detail relationship="acquireCostUom"/>
-            <detail relationship="depreciationType"/><detail relationship="taxDepreciationType"/>
+            <detail relationship="acquireOrderItem" />
+            <detail relationship="acquireWorkEffort" />
+            <detail relationship="acquireShipment" />
+            <detail relationship="acquireCostUom" />
+            <detail relationship="depreciationType" />
+            <detail relationship="taxDepreciationType" />
 
-            <detail relationship="details"/>
-            <detail relationship="depreciations"/><detail relationship="identifications"/>
-            <detail relationship="partyAssignments"/>
+            <detail relationship="details" />
+            <detail relationship="depreciations" />
+            <detail relationship="identifications" />
+            <detail relationship="partyAssignments" />
 
-            <detail relationship="issuances"/>
-            <detail relationship="reservations"/>
-            <detail relationship="receipts"/>
+            <detail relationship="issuances" />
+            <detail relationship="reservations" />
+            <detail relationship="receipts" />
         </master>
     </entity>
-    <entity entity-name="AssetDetail" package="mantle.product.asset" create-only="true" cache="never">
-        <field name="assetDetailId" type="id" is-pk="true"/>
-        <field name="assetId" type="id"/>
-        <!-- would be nice if effectiveDate was immutable but we allow update of issuedDate through service and this needs to be updated to match -->
-        <field name="effectiveDate" type="date-time" create-only="false"/>
+    <entity entity-name="AssetDetail" package="mantle.product.asset" create-only="true"
+        cache="never">
+        <field name="assetDetailId" type="id" is-pk="true" />
+        <field name="assetId" type="id" />
+        <!-- would be nice if effectiveDate was immutable but we allow update of issuedDate through
+        service and this needs to be updated to match -->
+        <field name="effectiveDate" type="date-time" create-only="false" />
 
-        <field name="quantityOnHandDiff" type="number-decimal"/>
-        <field name="availableToPromiseDiff" type="number-decimal"/>
+        <field name="quantityOnHandDiff" type="number-decimal" />
+        <field name="availableToPromiseDiff" type="number-decimal" />
 
-        <field name="unitCost" type="number-decimal"/>
-        <field name="assetReservationId" type="id"/>
-        <field name="otherAssetId" type="id"/>
-        <field name="shipmentId" type="id"/>
-        <field name="productId" type="id"/>
-        <field name="orderId" type="id"/>
-        <field name="orderItemSeqId" type="id"/>
-        <field name="returnId" type="id"/>
-        <field name="returnItemSeqId" type="id"/>
-        <field name="workEffortId" type="id"/>
-        <field name="assetMaintenanceId" type="id"/>
-        <field name="assetIssuanceId" type="id"/>
-        <field name="assetReceiptId" type="id"/>
-        <field name="physicalInventoryId" type="id"/>
-        <field name="physicalInventoryCountId" type="id"/>
-        <field name="varianceReasonEnumId" type="id"/>
-        <field name="description" type="text-medium"/>
-        <field name="acctgTransResultEnumId" type="id" create-only="false"/>
-        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
-        <relationship type="one-nofk" related="mantle.product.issuance.AssetReservation" short-alias="assetReservation"/><!-- no FK for when record is deleted -->
-        <relationship type="one" title="Other" related="mantle.product.asset.Asset" short-alias="otherAsset">
-            <key-map field-name="otherAssetId"/></relationship>
-        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment"/>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem"/>
-        <relationship type="one" related="mantle.order.return.ReturnItem" short-alias="returnItem"/>
-        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort"/>
-        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance" short-alias="assetMaintenance"/>
-        <relationship type="one" related="mantle.product.issuance.AssetIssuance" short-alias="assetIssuance"/>
-        <relationship type="one" related="mantle.product.receipt.AssetReceipt" short-alias="assetReceipt"/>
-        <relationship type="one" related="mantle.product.asset.PhysicalInventory" short-alias="physicalInventory"/>
-        <relationship type="one" related="mantle.product.asset.PhysicalInventoryCount" short-alias="physicalInventoryCount"/>
-        <relationship type="one" title="InventoryVarianceReason" related="moqui.basic.Enumeration" short-alias="varianceReasonEnum">
-            <key-map field-name="varianceReasonEnumId"/></relationship>
-        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration" short-alias="acctgTransResultEnum">
-            <key-map field-name="acctgTransResultEnumId"/></relationship>
+        <field name="unitCost" type="number-decimal" />
+        <field name="assetReservationId" type="id" />
+        <field name="otherAssetId" type="id" />
+        <field name="shipmentId" type="id" />
+        <field name="productId" type="id" />
+        <field name="orderId" type="id" />
+        <field name="orderItemSeqId" type="id" />
+        <field name="returnId" type="id" />
+        <field name="returnItemSeqId" type="id" />
+        <field name="workEffortId" type="id" />
+        <field name="assetMaintenanceId" type="id" />
+        <field name="assetIssuanceId" type="id" />
+        <field name="assetReceiptId" type="id" />
+        <field name="physicalInventoryId" type="id" />
+        <field name="physicalInventoryCountId" type="id" />
+        <field name="varianceReasonEnumId" type="id" />
+        <field name="description" type="text-medium" />
+        <field name="acctgTransResultEnumId" type="id" create-only="false" />
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset" />
+        <relationship type="one-nofk" related="mantle.product.issuance.AssetReservation"
+            short-alias="assetReservation" /><!-- no FK for when record is deleted -->
+        <relationship type="one" title="Other" related="mantle.product.asset.Asset"
+            short-alias="otherAsset">
+            <key-map field-name="otherAssetId" />
+        </relationship>
+        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem" />
+        <relationship type="one" related="mantle.order.return.ReturnItem" short-alias="returnItem" />
+        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort" />
+        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance"
+            short-alias="assetMaintenance" />
+        <relationship type="one" related="mantle.product.issuance.AssetIssuance"
+            short-alias="assetIssuance" />
+        <relationship type="one" related="mantle.product.receipt.AssetReceipt"
+            short-alias="assetReceipt" />
+        <relationship type="one" related="mantle.product.asset.PhysicalInventory"
+            short-alias="physicalInventory" />
+        <relationship type="one" related="mantle.product.asset.PhysicalInventoryCount"
+            short-alias="physicalInventoryCount" />
+        <relationship type="one" title="InventoryVarianceReason" related="moqui.basic.Enumeration"
+            short-alias="varianceReasonEnum">
+            <key-map field-name="varianceReasonEnumId" />
+        </relationship>
+        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration"
+            short-alias="acctgTransResultEnum">
+            <key-map field-name="acctgTransResultEnumId" />
+        </relationship>
 
-        <index name="AST_DET_EFF_DATE"><index-field name="effectiveDate"/></index>
+        <index name="AST_DET_EFF_DATE">
+            <index-field name="effectiveDate" />
+        </index>
         <seed-data>
             <!-- Inventory Variance Reason -->
-            <moqui.basic.EnumerationType description="Inventory Variance Reason" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrLost" description="Lost" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrStolen" description="Stolen" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrFound" description="Found" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrDamaged" description="Damaged" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrIntegration" description="Integration" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrSample" description="Sample (Giveaway)" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrMisShipOrdered" description="Mis-shipped Item Ordered (+)" enumTypeId="InventoryVarianceReason"/>
-            <moqui.basic.Enumeration enumId="InVrMisShipShipped" description="Mis-shipped Item Shipped (-)" enumTypeId="InventoryVarianceReason"/>
+            <moqui.basic.EnumerationType description="Inventory Variance Reason"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrLost" description="Lost"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrStolen" description="Stolen"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrFound" description="Found"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrDamaged" description="Damaged"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrIntegration" description="Integration"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrSample" description="Sample (Giveaway)"
+                enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrMisShipOrdered"
+                description="Mis-shipped Item Ordered (+)" enumTypeId="InventoryVarianceReason" />
+            <moqui.basic.Enumeration enumId="InVrMisShipShipped"
+                description="Mis-shipped Item Shipped (-)" enumTypeId="InventoryVarianceReason" />
         </seed-data>
     </entity>
     <entity entity-name="AssetDepreciation" package="mantle.product.asset" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="timePeriodId" type="id" is-pk="true"/>
-        <field name="monthlyDepreciation" type="currency-amount"/>
-        <field name="annualDepreciation" type="currency-amount"/>
-        <field name="yearBeginDepreciation" type="currency-amount"/>
-        <field name="isLastYearPeriod" type="text-indicator"/>
-        <field name="usefulLifeYears" type="number-integer"/>
-        <field name="yearsRemaining" type="number-integer"/>
-        <field name="acctgTransId" type="id"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
-        <relationship type="one" related="mantle.party.time.TimePeriod"/>
-        <relationship type="one" related="mantle.ledger.transaction.AcctgTrans"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="timePeriodId" type="id" is-pk="true" />
+        <field name="monthlyDepreciation" type="currency-amount" />
+        <field name="annualDepreciation" type="currency-amount" />
+        <field name="yearBeginDepreciation" type="currency-amount" />
+        <field name="isLastYearPeriod" type="text-indicator" />
+        <field name="usefulLifeYears" type="number-integer" />
+        <field name="yearsRemaining" type="number-integer" />
+        <field name="acctgTransId" type="id" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" related="mantle.party.time.TimePeriod" />
+        <relationship type="one" related="mantle.ledger.transaction.AcctgTrans" />
     </entity>
     <entity entity-name="AssetIdentification" package="mantle.product.asset" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="identificationTypeEnumId" type="id" is-pk="true"/>
-        <field name="idValue" type="text-medium"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="identificationTypeEnumId" type="id" is-pk="true" />
+        <field name="idValue" type="text-medium" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
         <relationship type="one" title="AssetIdentificationType" related="moqui.basic.Enumeration">
-            <key-map field-name="identificationTypeEnumId"/></relationship>
+            <key-map field-name="identificationTypeEnumId" />
+        </relationship>
         <seed-data>
             <!-- Asset Identification Type -->
-            <moqui.basic.EnumerationType description="Asset Identification Type" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Manufacturer Serial Number" enumId="AitMfgSerial" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Media Access Control (MAC) Address" enumId="AitMac" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Vendor Inventory/Tracking" enumId="AitVendorInventory" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Tracking Label Number" enumId="AitTrackingLabel" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Vehicle Identification Number (VIN)" enumId="AitVin" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="Gas Card Number" enumId="AitGasCard" enumTypeId="AssetIdentificationType"/>
-            <moqui.basic.Enumeration description="License Plate Number" enumId="AitLicensePlate" enumTypeId="AssetIdentificationType"/>
+            <moqui.basic.EnumerationType description="Asset Identification Type"
+                enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Manufacturer Serial Number" enumId="AitMfgSerial"
+                enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Media Access Control (MAC) Address"
+                enumId="AitMac" enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Vendor Inventory/Tracking"
+                enumId="AitVendorInventory" enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Tracking Label Number" enumId="AitTrackingLabel"
+                enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Vehicle Identification Number (VIN)"
+                enumId="AitVin" enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="Gas Card Number" enumId="AitGasCard"
+                enumTypeId="AssetIdentificationType" />
+            <moqui.basic.Enumeration description="License Plate Number" enumId="AitLicensePlate"
+                enumTypeId="AssetIdentificationType" />
         </seed-data>
     </entity>
     <entity entity-name="AssetGlAppl" package="mantle.product.asset">
         <description>Used to specify relevant GL Accounts for an Asset (expense, revenue, etc); not related to posting conf</description>
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="glAccountId" type="id" is-pk="true"/>
-        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
-        <relationship type="one" related="mantle.ledger.account.GlAccount" short-alias="glAccount"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="glAccountId" type="id" is-pk="true" />
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset" />
+        <relationship type="one" related="mantle.ledger.account.GlAccount" short-alias="glAccount" />
     </entity>
     <entity entity-name="AssetPartyAssignment" package="mantle.product.asset" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="partyId" type="id" is-pk="true"/>
-        <field name="roleTypeId" type="id" is-pk="true"/>
-        <field name="fromDate" type="date-time" is-pk="true"/>
-        <field name="thruDate" type="date-time"/>
-        <field name="allocatedDate" type="date-time"/>
-        <field name="statusId" type="id"/>
-        <field name="comments" type="text-medium"/>
-        <relationship type="one" related="mantle.party.Party"/>
-        <relationship type="one" related="mantle.party.RoleType"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
-        <relationship type="one" related="moqui.basic.StatusItem"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="roleTypeId" type="id" is-pk="true" />
+        <field name="fromDate" type="date-time" is-pk="true" />
+        <field name="thruDate" type="date-time" />
+        <field name="allocatedDate" type="date-time" />
+        <field name="statusId" type="id" />
+        <field name="comments" type="text-medium" />
+        <relationship type="one" related="mantle.party.Party" />
+        <relationship type="one" related="mantle.party.RoleType" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" related="moqui.basic.StatusItem" />
     </entity>
     <!-- unused and probably not useful 20170417:
     <entity entity-name="AssetProduct" package="mantle.product.asset" cache="never">
@@ -459,151 +683,200 @@ along with this software (see the LICENSE.md file). If not, see
         <relationship type="one" related="mantle.product.asset.Asset"/>
         <relationship type="one" title="AssetProductType" related="moqui.basic.Enumeration">
             <key-map field-name="assetProductTypeEnumId"/></relationship>
-        <relationship type="one" title="Quantity" related="moqui.basic.Uom"><key-map field-name="quantityUomId"/></relationship>
+        <relationship type="one" title="Quantity" related="moqui.basic.Uom"><key-map
+    field-name="quantityUomId"/></relationship>
         <seed-data>
             <moqui.basic.EnumerationType description="Asset Product Type" enumTypeId="AssetProductType"/>
-            <moqui.basic.Enumeration description="Use of Asset" enumId="AspTpUse" enumTypeId="AssetProductType"/>
-            <moqui.basic.Enumeration description="Sale of Asset" enumId="AspTpSale" enumTypeId="AssetProductType"/>
+            <moqui.basic.Enumeration description="Use of Asset" enumId="AspTpUse"
+    enumTypeId="AssetProductType"/>
+            <moqui.basic.Enumeration description="Sale of Asset" enumId="AspTpSale"
+    enumTypeId="AssetProductType"/>
         </seed-data>
     </entity>
     -->
 
     <entity entity-name="AssetPaymentMethod" package="mantle.product.asset">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="paymentMethodId" type="id" is-pk="true"/>
-        <field name="typeEnumId" type="id"/>
-        <field name="sequenceNum" type="number-integer"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
-        <relationship type="one" related="mantle.account.method.PaymentMethod"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="paymentMethodId" type="id" is-pk="true" />
+        <field name="typeEnumId" type="id" />
+        <field name="sequenceNum" type="number-integer" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" related="mantle.account.method.PaymentMethod" />
         <relationship type="one" title="AssetPaymentMethodType" related="moqui.basic.Enumeration">
-            <key-map field-name="typeEnumId"/></relationship>
+            <key-map field-name="typeEnumId" />
+        </relationship>
         <seed-data>
-            <moqui.basic.EnumerationType description="Asset Payment Method Type" enumTypeId="AssetPaymentMethodType"/>
-            <moqui.basic.Enumeration enumId="ApmtSecuredLoan" description="Secured Loan" enumTypeId="AssetPaymentMethodType"/>
+            <moqui.basic.EnumerationType description="Asset Payment Method Type"
+                enumTypeId="AssetPaymentMethodType" />
+            <moqui.basic.Enumeration enumId="ApmtSecuredLoan" description="Secured Loan"
+                enumTypeId="AssetPaymentMethodType" />
         </seed-data>
     </entity>
 
     <entity entity-name="AssetPool" package="mantle.product.asset">
-        <field name="assetPoolId" type="id" is-pk="true"/>
-        <field name="pseudoId" type="text-short" default="assetPoolId"/>
-        <field name="ownerPartyId" type="id" enable-audit-log="update" default="'_NA_'"/>
-        <field name="description" type="text-medium"/>
+        <field name="assetPoolId" type="id" is-pk="true" />
+        <field name="pseudoId" type="text-short" default="assetPoolId" />
+        <field name="ownerPartyId" type="id" enable-audit-log="update" default="'_NA_'" />
+        <field name="description" type="text-medium" />
         <relationship type="many" related="mantle.product.asset.Asset" short-alias="assets">
-            <key-map field-name="assetPoolId"/></relationship>
-        <relationship type="many" related="mantle.product.asset.AssetPoolParty" short-alias="poolParties">
-            <key-map field-name="assetPoolId"/></relationship>
-        <relationship type="many" related="mantle.product.asset.AssetPoolStore" short-alias="poolStores">
-            <key-map field-name="assetPoolId"/></relationship>
-        <index name="ASSET_POOL_PSEUDO" unique="true"><index-field name="pseudoId"/><index-field name="ownerPartyId"/></index>
+            <key-map field-name="assetPoolId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.asset.AssetPoolParty"
+            short-alias="poolParties">
+            <key-map field-name="assetPoolId" />
+        </relationship>
+        <relationship type="many" related="mantle.product.asset.AssetPoolStore"
+            short-alias="poolStores">
+            <key-map field-name="assetPoolId" />
+        </relationship>
+        <index name="ASSET_POOL_PSEUDO" unique="true">
+            <index-field name="pseudoId" />
+            <index-field name="ownerPartyId" />
+        </index>
     </entity>
     <entity entity-name="AssetPoolParty" package="mantle.product.asset">
-        <field name="assetPoolId" type="id" is-pk="true"/>
-        <field name="partyId" type="id" is-pk="true"/>
-        <field name="roleTypeId" type="id"/>
-        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool"/>
-        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
-        <relationship type="one" related="mantle.party.RoleType" short-alias="roleType"/>
+        <field name="assetPoolId" type="id" is-pk="true" />
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="roleTypeId" type="id" />
+        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool" />
+        <relationship type="one" related="mantle.party.Party" short-alias="party" />
+        <relationship type="one" related="mantle.party.RoleType" short-alias="roleType" />
     </entity>
     <entity entity-name="AssetPoolStore" package="mantle.product.asset">
-        <field name="assetPoolId" type="id" is-pk="true"/>
-        <field name="productStoreId" type="id" is-pk="true"/>
-        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool"/>
-        <relationship type="one" related="mantle.product.store.ProductStore" short-alias="productStore"/>
+        <field name="assetPoolId" type="id" is-pk="true" />
+        <field name="productStoreId" type="id" is-pk="true" />
+        <relationship type="one" related="mantle.product.asset.AssetPool" short-alias="pool" />
+        <relationship type="one" related="mantle.product.store.ProductStore"
+            short-alias="productStore" />
     </entity>
 
     <entity entity-name="AssetStandardCost" package="mantle.product.asset" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="assetStandardCostTypeEnumId" type="id" is-pk="true"/>
-        <field name="fromDate" type="date-time" is-pk="true"/>
-        <field name="thruDate" type="date-time"/>
-        <field name="amountUomId" type="id"/>
-        <field name="amount" type="currency-amount"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="assetStandardCostTypeEnumId" type="id" is-pk="true" />
+        <field name="fromDate" type="date-time" is-pk="true" />
+        <field name="thruDate" type="date-time" />
+        <field name="amountUomId" type="id" />
+        <field name="amount" type="currency-amount" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
         <relationship type="one" title="AssetStandardCostType" related="moqui.basic.Enumeration">
-            <key-map field-name="assetStandardCostTypeEnumId"/></relationship>
+            <key-map field-name="assetStandardCostTypeEnumId" />
+        </relationship>
         <relationship type="one" related="moqui.basic.Uom">
-            <key-map field-name="amountUomId"/></relationship>
+            <key-map field-name="amountUomId" />
+        </relationship>
     </entity>
 
-    <entity entity-name="Container" package="mantle.product.asset" sequence-primary-prefix="C" cache="never">
-        <!-- Sequence prefix of "C" is mostly to differentiate from Asset IDs; in inventory situations either may be scanned/entered -->
-        <field name="containerId" type="id" is-pk="true"/>
+    <entity entity-name="Container" package="mantle.product.asset" sequence-primary-prefix="C"
+        cache="never">
+        <!-- Sequence prefix of "C" is mostly to differentiate from Asset IDs; in inventory
+        situations either may be scanned/entered -->
+        <field name="containerId" type="id" is-pk="true" />
         <field name="serialNumber" type="id" default="containerId">
-            <description>Serial number or license plate for the container.</description></field>
-        <field name="containerTypeEnumId" type="id"/>
-        <field name="createdDate" type="date-time" default="ec.user.nowTimestamp"/>
-        <field name="description" type="text-medium"/>
+            <description>Serial number or license plate for the container.</description>
+        </field>
+        <field name="containerTypeEnumId" type="id" />
+        <field name="createdDate" type="date-time" default="ec.user.nowTimestamp" />
+        <field name="description" type="text-medium" />
         <field name="externalId" type="id">
-            <description>An identifier for the container in an external system (source, origin, etc).</description></field>
-        <field name="facilityId" type="id" enable-audit-log="update"/>
-        <field name="locationSeqId" type="id" enable-audit-log="update"/>
-        <field name="geoPointId" type="id" enable-audit-log="update"/>
+            <description>An identifier for the container in an external system (source, origin, etc).</description>
+        </field>
+        <field name="facilityId" type="id" enable-audit-log="update" />
+        <field name="locationSeqId" type="id" enable-audit-log="update" />
+        <field name="geoPointId" type="id" enable-audit-log="update" />
         <relationship type="one" title="ContainerType" related="moqui.basic.Enumeration">
-            <key-map field-name="containerTypeEnumId"/></relationship>
-        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
-        <relationship type="one-nofk" related="mantle.facility.FacilityLocation" short-alias="location"/>
-        <index name="CONTNR_SER_NUM" unique="true"><index-field name="serialNumber"/></index>
+            <key-map field-name="containerTypeEnumId" />
+        </relationship>
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility" />
+        <relationship type="one-nofk" related="mantle.facility.FacilityLocation"
+            short-alias="location" />
+        <index name="CONTNR_SER_NUM" unique="true">
+            <index-field name="serialNumber" />
+        </index>
         <seed-data>
             <!-- Container Type -->
-            <moqui.basic.EnumerationType description="Container Type" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Bin - Shelf Std" enumId="CtBinShelf" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet US 40x48in" enumId="CtPalletUs4048" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet US 40x40in" enumId="CtPalletUs4040" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet US 42x42in" enumId="CtPalletUs4242" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet US 48x40in" enumId="CtPalletUs4840" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet US 48x48in" enumId="CtPalletUs4848" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet ISO1/EUR1 0.8x1.2m" enumId="CtPalletIso1" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet ISO2/EUR2 1.2x1.0m" enumId="CtPalletIso2" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet ISO0/EUR6 0.8x0.6m" enumId="CtPalletIso0" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Pallet EUR3 1.0x1.2m" enumId="CtPalletEur3" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Container ISO 40ft" enumId="CtContainerIso40" enumTypeId="ContainerType"/>
-            <moqui.basic.Enumeration description="Container ISO 20ft" enumId="CtContainerIso20" enumTypeId="ContainerType"/>
+            <moqui.basic.EnumerationType description="Container Type" enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Bin - Shelf Std" enumId="CtBinShelf"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet US 40x48in" enumId="CtPalletUs4048"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet US 40x40in" enumId="CtPalletUs4040"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet US 42x42in" enumId="CtPalletUs4242"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet US 48x40in" enumId="CtPalletUs4840"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet US 48x48in" enumId="CtPalletUs4848"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet ISO1/EUR1 0.8x1.2m" enumId="CtPalletIso1"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet ISO2/EUR2 1.2x1.0m" enumId="CtPalletIso2"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet ISO0/EUR6 0.8x0.6m" enumId="CtPalletIso0"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Pallet EUR3 1.0x1.2m" enumId="CtPalletEur3"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Container ISO 40ft" enumId="CtContainerIso40"
+                enumTypeId="ContainerType" />
+            <moqui.basic.Enumeration description="Container ISO 20ft" enumId="CtContainerIso20"
+                enumTypeId="ContainerType" />
         </seed-data>
     </entity>
     <entity entity-name="Lot" package="mantle.product.asset" cache="never">
-        <field name="lotId" type="id" is-pk="true"/>
-        <field name="mfgPartyId" type="id" enable-audit-log="update"/>
-        <field name="lotNumber" type="text-short" enable-audit-log="update"/>
-        <field name="quantity" type="number-decimal"/>
-        <field name="manufacturedDate" type="date-time"/>
-        <field name="expirationDate" type="date" enable-audit-log="update"/>
+        <field name="lotId" type="id" is-pk="true" />
+        <field name="mfgPartyId" type="id" enable-audit-log="update" />
+        <field name="lotNumber" type="text-short" enable-audit-log="update" />
+        <field name="quantity" type="number-decimal" />
+        <field name="manufacturedDate" type="date-time" />
+        <field name="expirationDate" type="date" enable-audit-log="update" />
         <relationship type="one" title="Mfg" related="mantle.party.Party" short-alias="mfgParty">
-            <key-map field-name="mfgPartyId"/></relationship>
-        <index name="LOT_MFG_ID_LOT" unique="true"><index-field name="mfgPartyId"/><index-field name="lotNumber"/></index>
+            <key-map field-name="mfgPartyId" />
+        </relationship>
+        <index name="LOT_MFG_ID_LOT" unique="true">
+            <index-field name="mfgPartyId" />
+            <index-field name="lotNumber" />
+        </index>
     </entity>
     <entity entity-name="PhysicalInventory" package="mantle.product.asset" cache="never">
-        <field name="physicalInventoryId" type="id" is-pk="true"/>
-        <field name="physicalInventoryDate" type="date-time"/>
-        <field name="statusId" type="id" default="PIInPlanning" enable-audit-log="true"/>
-        <field name="facilityId" type="id"/>
-        <field name="partyId" type="id"/>
-        <field name="comments" type="text-long"/>
-        <relationship type="one" related="mantle.party.Party" short-alias="party"/>
-        <relationship type="one" title="PhysicalInventory" related="moqui.basic.StatusItem" short-alias="status" fk-name="physicalInventoryStatusId"/>
-        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
+        <field name="physicalInventoryId" type="id" is-pk="true" />
+        <field name="physicalInventoryDate" type="date-time" />
+        <field name="statusId" type="id" default="PIInPlanning" enable-audit-log="true" />
+        <field name="facilityId" type="id" />
+        <field name="partyId" type="id" />
+        <field name="comments" type="text-long" />
+        <relationship type="one" related="mantle.party.Party" short-alias="party" />
+        <relationship type="one" title="PhysicalInventory" related="moqui.basic.StatusItem"
+            short-alias="status" fk-name="physicalInventoryStatusId" />
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility" />
         <seed-data>
-            <moqui.basic.StatusType description="Physical Inventory Status" statusTypeId="PhysicalInventory"/>
-            <moqui.basic.StatusItem description="In Planning" sequenceNum="1" statusId="PIInPlanning" statusTypeId="PhysicalInventory"/>
-            <moqui.basic.StatusItem description="In Progress" sequenceNum="2" statusId="PIInProgress" statusTypeId="PhysicalInventory"/>
-            <moqui.basic.StatusItem description="In Validation" sequenceNum="3" statusId="PIInValidation" statusTypeId="PhysicalInventory"/>
-            <moqui.basic.StatusItem description="Complete" sequenceNum="4" statusId="PIComplete" statusTypeId="PhysicalInventory"/>
+            <moqui.basic.StatusType description="Physical Inventory Status"
+                statusTypeId="PhysicalInventory" />
+            <moqui.basic.StatusItem description="In Planning" sequenceNum="1"
+                statusId="PIInPlanning" statusTypeId="PhysicalInventory" />
+            <moqui.basic.StatusItem description="In Progress" sequenceNum="2"
+                statusId="PIInProgress" statusTypeId="PhysicalInventory" />
+            <moqui.basic.StatusItem description="In Validation" sequenceNum="3"
+                statusId="PIInValidation" statusTypeId="PhysicalInventory" />
+            <moqui.basic.StatusItem description="Complete" sequenceNum="4" statusId="PIComplete"
+                statusTypeId="PhysicalInventory" />
         </seed-data>
     </entity>
     <entity entity-name="PhysicalInventoryCount" package="mantle.product.asset" cache="never">
-        <field name="physicalInventoryCountId" type="id" is-pk="true"/>
-        <field name="physicalInventoryId" type="id"/>
-        <field name="facilityId" type="id"/>
-        <field name="locationSeqId" type="id"/>
-        <field name="productId" type="id"/>
-        <field name="lotId" type="id"/>
-        <field name="countDate" type="date-time"/>
-        <field name="quantityOnHand" type="number-decimal"/>
-        <field name="comments" type="text-medium"/>
-        <relationship type="one" related="mantle.product.asset.PhysicalInventory" short-alias="physicalInventory"/>
-        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
-        <relationship type="one-nofk" related="mantle.facility.FacilityLocation" short-alias="facilityLocation"/>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one" related="mantle.product.asset.Lot" short-alias="lot"/>
+        <field name="physicalInventoryCountId" type="id" is-pk="true" />
+        <field name="physicalInventoryId" type="id" />
+        <field name="facilityId" type="id" />
+        <field name="locationSeqId" type="id" />
+        <field name="productId" type="id" />
+        <field name="lotId" type="id" />
+        <field name="countDate" type="date-time" />
+        <field name="quantityOnHand" type="number-decimal" />
+        <field name="comments" type="text-medium" />
+        <relationship type="one" related="mantle.product.asset.PhysicalInventory"
+            short-alias="physicalInventory" />
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility" />
+        <relationship type="one-nofk" related="mantle.facility.FacilityLocation"
+            short-alias="facilityLocation" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one" related="mantle.product.asset.Lot" short-alias="lot" />
     </entity>
 
     <!-- ========================================================= -->
@@ -611,80 +884,104 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <entity entity-name="AssetIssuance" package="mantle.product.issuance" cache="never">
-        <field name="assetIssuanceId" type="id" is-pk="true"/>
-        <field name="assetId" type="id"/>
-        <field name="assetReservationId" type="id"/>
-        <field name="orderId" type="id"/>
-        <field name="orderItemSeqId" type="id"/>
-        <field name="shipmentId" type="id"/>
-        <field name="shipmentItemSourceId" type="id"/>
-        <field name="productId" type="id"/>
-        <field name="invoiceId" type="id"/>
-        <field name="invoiceItemSeqId" type="id"/>
-        <field name="returnId" type="id"/>
-        <field name="returnItemSeqId" type="id"/>
-        <field name="workEffortId" type="id"/>
-        <field name="facilityId" type="id"/>
-        <field name="assetMaintenanceId" type="id"/>
-        <field name="issuedByUserId" type="id"/>
-        <field name="issuedDate" type="date-time"/>
-        <field name="quantity" type="number-decimal" enable-audit-log="update"/>
-        <field name="quantityCancelled" type="number-decimal"/>
-        <field name="acctgTransResultEnumId" type="id"/>
+        <field name="assetIssuanceId" type="id" is-pk="true" />
+        <field name="assetId" type="id" />
+        <field name="assetReservationId" type="id" />
+        <field name="orderId" type="id" />
+        <field name="orderItemSeqId" type="id" />
+        <field name="shipmentId" type="id" />
+        <field name="shipmentItemSourceId" type="id" />
+        <field name="productId" type="id" />
+        <field name="invoiceId" type="id" />
+        <field name="invoiceItemSeqId" type="id" />
+        <field name="returnId" type="id" />
+        <field name="returnItemSeqId" type="id" />
+        <field name="workEffortId" type="id" />
+        <field name="facilityId" type="id" />
+        <field name="assetMaintenanceId" type="id" />
+        <field name="issuedByUserId" type="id" />
+        <field name="issuedDate" type="date-time" />
+        <field name="quantity" type="number-decimal" enable-audit-log="update" />
+        <field name="quantityCancelled" type="number-decimal" />
+        <field name="acctgTransResultEnumId" type="id" />
 
-        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
-        <relationship type="one-nofk" related="mantle.product.issuance.AssetReservation" short-alias="assetReservation"/><!-- nofk for when record is deleted -->
-        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem"/>
-        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment"/>
-        <relationship type="one-nofk" related="mantle.shipment.ShipmentItem" short-alias="shipmentItem"/><!-- nofk as may have a productId but not be issued to a Shipment -->
-        <relationship type="one" related="mantle.shipment.ShipmentItemSource" short-alias="shipmentItemSource"/>
-        <relationship type="one-nofk" related="mantle.account.invoice.Invoice" short-alias="invoice"/>
-        <relationship type="one" related="mantle.account.invoice.InvoiceItem" short-alias="invoiceItem"/>
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset" />
+        <relationship type="one-nofk" related="mantle.product.issuance.AssetReservation"
+            short-alias="assetReservation" /><!-- nofk for when record is deleted -->
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem" />
+        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment" />
+        <relationship type="one-nofk" related="mantle.shipment.ShipmentItem"
+            short-alias="shipmentItem" /><!-- nofk as may have a productId but not be issued to a
+        Shipment -->
+        <relationship type="one" related="mantle.shipment.ShipmentItemSource"
+            short-alias="shipmentItemSource" />
+        <relationship type="one-nofk" related="mantle.account.invoice.Invoice" short-alias="invoice" />
+        <relationship type="one" related="mantle.account.invoice.InvoiceItem"
+            short-alias="invoiceItem" />
         <relationship type="one" related="mantle.order.return.ReturnItem" short-alias="returnItem">
-            <key-map field-name="returnId"/><key-map field-name="returnItemSeqId"/></relationship>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort"/>
-        <relationship type="one" related="mantle.facility.Facility" short-alias="facility"/>
-        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance" short-alias="assetMaintenance"/>
-        <relationship type="many" related="mantle.work.effort.WorkEffortProduct" short-alias="workEffortProducts">
-            <key-map field-name="workEffortId"/><key-map field-name="productId"/></relationship>
-        <relationship type="one" title="IssuedBy" related="moqui.security.UserAccount" short-alias="issuedByUserAccount">
-            <key-map field-name="issuedByUserId"/></relationship>
-        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration" short-alias="acctgTransResult">
-            <key-map field-name="acctgTransResultEnumId"/></relationship>
+            <key-map field-name="returnId" />
+            <key-map field-name="returnItemSeqId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort" />
+        <relationship type="one" related="mantle.facility.Facility" short-alias="facility" />
+        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance"
+            short-alias="assetMaintenance" />
+        <relationship type="many" related="mantle.work.effort.WorkEffortProduct"
+            short-alias="workEffortProducts">
+            <key-map field-name="workEffortId" />
+            <key-map field-name="productId" />
+        </relationship>
+        <relationship type="one" title="IssuedBy" related="moqui.security.UserAccount"
+            short-alias="issuedByUserAccount">
+            <key-map field-name="issuedByUserId" />
+        </relationship>
+        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration"
+            short-alias="acctgTransResult">
+            <key-map field-name="acctgTransResultEnumId" />
+        </relationship>
 
-        <index name="ASSET_ISS_SHPPRD"><index-field name="shipmentId"/><index-field name="productId"/></index>
+        <index name="ASSET_ISS_SHPPRD">
+            <index-field name="shipmentId" />
+            <index-field name="productId" />
+        </index>
     </entity>
     <entity entity-name="AssetIssuanceParty" package="mantle.product.issuance" cache="never">
-        <field name="assetIssuanceId" type="id" is-pk="true"/>
-        <field name="partyId" type="id" is-pk="true"/>
-        <field name="roleTypeId" type="id" is-pk="true"/>
-        <relationship type="one" related="mantle.product.issuance.AssetIssuance"/>
-        <relationship type="one" related="mantle.party.Party"/>
-        <relationship type="one" related="mantle.party.RoleType"/>
+        <field name="assetIssuanceId" type="id" is-pk="true" />
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="roleTypeId" type="id" is-pk="true" />
+        <relationship type="one" related="mantle.product.issuance.AssetIssuance" />
+        <relationship type="one" related="mantle.party.Party" />
+        <relationship type="one" related="mantle.party.RoleType" />
     </entity>
     <entity entity-name="AssetReservation" package="mantle.product.issuance" cache="never">
-        <field name="assetReservationId" type="id" is-pk="true"/>
-        <field name="assetId" type="id"/>
-        <field name="productId" type="id"/>
-        <field name="orderId" type="id"/>
-        <field name="orderItemSeqId" type="id"/>
-        <field name="reservationOrderEnumId" type="id"/>
-        <field name="quantity" type="number-decimal"/>
-        <field name="quantityNotAvailable" type="number-decimal"><description>The quantity not available to promise for
-            this reservation (corresponds to negative Asset.availableToPromiseTotal).</description></field>
-        <field name="quantityNotIssued" type="number-decimal"><description>The quantity not yet issued.</description></field>
-        <field name="reservedDate" type="date-time"/>
-        <field name="originalPromisedDate" type="date-time"/>
-        <field name="currentPromisedDate" type="date-time"/>
-        <field name="priority" type="number-integer"/>
-        <field name="sequenceNum" type="number-integer"/>
-        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one-nofk" related="mantle.order.OrderHeader" short-alias="orderHeader"/>
-        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem"/>
-        <relationship type="one" title="AssetReservationOrder" related="moqui.basic.Enumeration" short-alias="reservationOrderEnum">
-            <key-map field-name="reservationOrderEnumId"/></relationship>
+        <field name="assetReservationId" type="id" is-pk="true" />
+        <field name="assetId" type="id" />
+        <field name="productId" type="id" />
+        <field name="orderId" type="id" />
+        <field name="orderItemSeqId" type="id" />
+        <field name="reservationOrderEnumId" type="id" />
+        <field name="quantity" type="number-decimal" />
+        <field name="quantityNotAvailable" type="number-decimal">
+            <description>The quantity not available to promise for
+            this reservation (corresponds to negative Asset.availableToPromiseTotal).</description>
+        </field>
+        <field name="quantityNotIssued" type="number-decimal">
+            <description>The quantity not yet issued.</description>
+        </field>
+        <field name="reservedDate" type="date-time" />
+        <field name="originalPromisedDate" type="date-time" />
+        <field name="currentPromisedDate" type="date-time" />
+        <field name="priority" type="number-integer" />
+        <field name="sequenceNum" type="number-integer" />
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one-nofk" related="mantle.order.OrderHeader" short-alias="orderHeader" />
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem" />
+        <relationship type="one" title="AssetReservationOrder" related="moqui.basic.Enumeration"
+            short-alias="reservationOrderEnum">
+            <key-map field-name="reservationOrderEnumId" />
+        </relationship>
     </entity>
 
     <!-- ========================================================= -->
@@ -692,179 +989,235 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <entity entity-name="AssetMaintenance" package="mantle.product.maintenance" cache="never">
-        <field name="assetMaintenanceId" type="id" is-pk="true"/>
-        <field name="assetId" type="id"/>
-        <field name="statusId" type="id" enable-audit-log="true"/>
-        <field name="maintenanceDate" type="date-time"/>
-        <field name="maintenanceTypeEnumId" type="id"/>
+        <field name="assetMaintenanceId" type="id" is-pk="true" />
+        <field name="assetId" type="id" />
+        <field name="statusId" type="id" enable-audit-log="true" />
+        <field name="maintenanceDate" type="date-time" />
+        <field name="maintenanceTypeEnumId" type="id" />
         <field name="productMaintenanceId" type="id">
             <description>Optional, though should be filled in to determine upcoming maintenance for all scheduled
                 maintenance</description>
         </field>
-        <field name="taskWorkEffortId" type="id"/>
-        <field name="intervalQuantity" type="number-decimal"/>
+        <field name="taskWorkEffortId" type="id" />
+        <field name="intervalQuantity" type="number-decimal" />
         <field name="intervalUomId" type="id">
-            <description>UOM for intervalQuantity; ignored if intervalProductMeterId is used</description></field>
-        <!-- <field name="intervalMeterTypeId" type="id"><description>Meter Type for intervalQuantity; if used intervalUomId is generally not used (ie one or the other)</description></field> -->
-        <field name="intervalProductMeterId" type="id"/>
-        <field name="purchaseOrderId" type="id"/>
-        <field name="userId" type="id" default="ec.user.userId"/>
-        <field name="comments" type="text-long"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
-        <relationship type="one" title="AssetMaintenance" related="moqui.basic.StatusItem"/>
+            <description>UOM for intervalQuantity; ignored if intervalProductMeterId is used</description>
+        </field>
+        <!-- <field name="intervalMeterTypeId" type="id"><description>Meter Type for
+        intervalQuantity; if used intervalUomId is generally not used (ie one or the
+        other)</description></field> -->
+        <field name="intervalProductMeterId" type="id" />
+        <field name="purchaseOrderId" type="id" />
+        <field name="userId" type="id" default="ec.user.userId" />
+        <field name="comments" type="text-long" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" title="AssetMaintenance" related="moqui.basic.StatusItem" />
         <relationship type="one" title="MaintenanceType" related="moqui.basic.Enumeration">
-            <key-map field-name="maintenanceTypeEnumId"/></relationship>
-        <relationship type="one" related="ProductMaintenance"/>
+            <key-map field-name="maintenanceTypeEnumId" />
+        </relationship>
+        <relationship type="one" related="ProductMaintenance" />
         <relationship type="one" title="Task" related="mantle.work.effort.WorkEffort">
-            <key-map field-name="taskWorkEffortId"/></relationship>
+            <key-map field-name="taskWorkEffortId" />
+        </relationship>
         <relationship type="one" title="Interval" related="moqui.basic.Uom">
-            <key-map field-name="intervalUomId"/></relationship>
+            <key-map field-name="intervalUomId" />
+        </relationship>
         <!-- <relationship type="one" title="Interval" related="ProductMeterType">
             <key-map field-name="intervalMeterTypeId"/></relationship> -->
         <relationship type="one" title="Interval" related="mantle.product.maintenance.ProductMeter">
-            <key-map field-name="intervalProductMeterId"/></relationship>
+            <key-map field-name="intervalProductMeterId" />
+        </relationship>
         <relationship type="one" title="Purchase" related="mantle.order.OrderHeader">
-            <key-map field-name="purchaseOrderId"/></relationship>
-        <relationship type="one" related="moqui.security.UserAccount"/>
+            <key-map field-name="purchaseOrderId" />
+        </relationship>
+        <relationship type="one" related="moqui.security.UserAccount" />
         <seed-data>
             <!-- Asset Maintenance Status -->
-            <moqui.basic.StatusType description="Asset Maintenance Status" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusItem description="Created" sequenceNum="1" statusId="AsMntCreated" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusItem description="Scheduled" sequenceNum="3" statusId="AsMntScheduled" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusItem description="In Process" sequenceNum="5" statusId="AsMntInProcess" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusItem description="Completed" sequenceNum="10" statusId="AsMntCompleted" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusItem description="Cancelled" sequenceNum="99" statusId="AsMntCancelled" statusTypeId="AssetMaintenance"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated" toStatusId="AsMntScheduled" transitionName="Scheduled"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated" toStatusId="AsMntInProcess" transitionName="In-Process"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated" toStatusId="AsMntCancelled" transitionName="Cancel"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntScheduled" toStatusId="AsMntInProcess" transitionName="In-Process"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntScheduled" toStatusId="AsMntCancelled" transitionName="Cancel"/>
-            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntInProcess" toStatusId="AsMntCompleted" transitionName="Complete"/>
+            <moqui.basic.StatusType description="Asset Maintenance Status"
+                statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusItem description="Created" sequenceNum="1" statusId="AsMntCreated"
+                statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusItem description="Scheduled" sequenceNum="3"
+                statusId="AsMntScheduled" statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusItem description="In Process" sequenceNum="5"
+                statusId="AsMntInProcess" statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusItem description="Completed" sequenceNum="10"
+                statusId="AsMntCompleted" statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusItem description="Cancelled" sequenceNum="99"
+                statusId="AsMntCancelled" statusTypeId="AssetMaintenance" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated"
+                toStatusId="AsMntScheduled" transitionName="Scheduled" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated"
+                toStatusId="AsMntInProcess" transitionName="In-Process" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntCreated"
+                toStatusId="AsMntCancelled" transitionName="Cancel" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntScheduled"
+                toStatusId="AsMntInProcess" transitionName="In-Process" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntScheduled"
+                toStatusId="AsMntCancelled" transitionName="Cancel" />
+            <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="AsMntInProcess"
+                toStatusId="AsMntCompleted" transitionName="Complete" />
 
             <!-- Maintenance Type -->
-            <moqui.basic.EnumerationType description="Maintenance Type" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Vehicle Maintenance" enumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Oil Change" enumId="MntTpOilChange" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Belt Replacement" enumId="MntTpBeltReplace" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Re-Fuel" enumId="MntTpRefuel" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Tune Up" enumId="MntTpTuneUp" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Battery Replace" enumId="MntTpBatteryReplace" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Battery Check" enumId="MntTpBatteryCheck" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Lubricate Chassis" enumId="MntTpLubeChassis" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Tires Rotate" enumId="MntTpTiresRotate" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Tire Replacement" enumId="MntTpTireReplacement" parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="HVAC Maintenance" enumId="MntTpHvac" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Air Filter Replace" enumId="MntTpAirFilterRepl" parentEnumId="MntTpHvac" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Refrigerant Check/Recharge" enumId="MntTpRefrChkChrg" parentEnumId="MntTpHvac" enumTypeId="MaintenanceType"/>
-            <moqui.basic.Enumeration description="Cleaning" enumId="MntTpCleaning" enumTypeId="MaintenanceType"/>
+            <moqui.basic.EnumerationType description="Maintenance Type" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Vehicle Maintenance" enumId="MntTpVehicle"
+                enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Oil Change" enumId="MntTpOilChange"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Belt Replacement" enumId="MntTpBeltReplace"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Re-Fuel" enumId="MntTpRefuel"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Tune Up" enumId="MntTpTuneUp"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Battery Replace" enumId="MntTpBatteryReplace"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Battery Check" enumId="MntTpBatteryCheck"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Lubricate Chassis" enumId="MntTpLubeChassis"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Tires Rotate" enumId="MntTpTiresRotate"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Tire Replacement" enumId="MntTpTireReplacement"
+                parentEnumId="MntTpVehicle" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="HVAC Maintenance" enumId="MntTpHvac"
+                enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Air Filter Replace" enumId="MntTpAirFilterRepl"
+                parentEnumId="MntTpHvac" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Refrigerant Check/Recharge"
+                enumId="MntTpRefrChkChrg" parentEnumId="MntTpHvac" enumTypeId="MaintenanceType" />
+            <moqui.basic.Enumeration description="Cleaning" enumId="MntTpCleaning"
+                enumTypeId="MaintenanceType" />
         </seed-data>
     </entity>
     <entity entity-name="AssetMaintenanceContent" package="mantle.product.maintenance" cache="never">
-        <field name="assetMaintenanceId" type="id" is-pk="true"/>
-        <field name="contentDate" type="date-time" default="ec.user.nowTimestamp" is-pk="true"/>
-        <field name="contentTypeEnumId" type="id"/>
-        <field name="contentLocation" type="text-medium"/>
-        <field name="description" type="text-long"/>
-        <field name="userId" type="id" default="ec.user.userId"/>
-        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance"/>
+        <field name="assetMaintenanceId" type="id" is-pk="true" />
+        <field name="contentDate" type="date-time" default="ec.user.nowTimestamp" is-pk="true" />
+        <field name="contentTypeEnumId" type="id" />
+        <field name="contentLocation" type="text-medium" />
+        <field name="description" type="text-long" />
+        <field name="userId" type="id" default="ec.user.userId" />
+        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance" />
         <relationship type="one" title="AssetMaintContentType" related="moqui.basic.Enumeration">
-            <key-map field-name="contentTypeEnumId"/></relationship>
-        <relationship type="one" related="moqui.security.UserAccount"/>
+            <key-map field-name="contentTypeEnumId" />
+        </relationship>
+        <relationship type="one" related="moqui.security.UserAccount" />
     </entity>
-    <entity entity-name="AssetMaintenanceOrderItem" package="mantle.product.maintenance" cache="never">
-        <field name="assetMaintenanceId" type="id" is-pk="true"/>
-        <field name="orderId" type="id" is-pk="true"/>
-        <field name="orderItemSeqId" type="id" is-pk="true"/>
-        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance"/>
-        <relationship type="one" related="mantle.order.OrderHeader"/>
+    <entity entity-name="AssetMaintenanceOrderItem" package="mantle.product.maintenance"
+        cache="never">
+        <field name="assetMaintenanceId" type="id" is-pk="true" />
+        <field name="orderId" type="id" is-pk="true" />
+        <field name="orderItemSeqId" type="id" is-pk="true" />
+        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance" />
+        <relationship type="one" related="mantle.order.OrderHeader" />
         <relationship type="one-nofk" related="mantle.order.OrderItem">
-            <key-map field-name="orderId"/>
-            <key-map field-name="orderItemSeqId"/>
+            <key-map field-name="orderId" />
+            <key-map field-name="orderItemSeqId" />
         </relationship>
     </entity>
     <entity entity-name="AssetMeter" package="mantle.product.maintenance" cache="never">
         <!-- TODO: deprecate this, use mantle.work.measurement.Measurement instead -->
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="readingDate" type="date-time" is-pk="true"/>
-        <field name="productMeterTypeId" type="id"/>
-        <field name="productMeterId" type="id"/>
-        <field name="meterValue" type="number-decimal" enable-audit-log="update"/>
-        <field name="readingReasonEnumId" type="id"/>
-        <field name="assetMaintenanceId" type="id"/>
-        <field name="workEffortId" type="id"/>
-        <field name="userId" type="id" default="ec.user.userId"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
-        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance"/>
-        <relationship type="one" related="mantle.product.maintenance.ProductMeterType"/>
-        <relationship type="one" related="moqui.security.UserAccount"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="readingDate" type="date-time" is-pk="true" />
+        <field name="productMeterTypeId" type="id" />
+        <field name="productMeterId" type="id" />
+        <field name="meterValue" type="number-decimal" enable-audit-log="update" />
+        <field name="readingReasonEnumId" type="id" />
+        <field name="assetMaintenanceId" type="id" />
+        <field name="workEffortId" type="id" />
+        <field name="userId" type="id" default="ec.user.userId" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" related="mantle.product.maintenance.AssetMaintenance" />
+        <relationship type="one" related="mantle.product.maintenance.ProductMeterType" />
+        <relationship type="one" related="moqui.security.UserAccount" />
     </entity>
     <entity entity-name="AssetRegistration" package="mantle.product.maintenance" cache="never">
-        <field name="assetId" type="id" is-pk="true"/>
-        <field name="assetRegSeqId" type="id" is-pk="true"/>
-        <field name="fromDate" type="date-time"/>
-        <field name="thruDate" type="date-time"/>
-        <field name="registrationDate" type="date-time"/>
-        <field name="govAgencyPartyId" type="id"/>
-        <field name="registrationNumber" type="text-medium"/>
-        <field name="licenseNumber" type="text-medium"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="assetRegSeqId" type="id" is-pk="true" />
+        <field name="fromDate" type="date-time" />
+        <field name="thruDate" type="date-time" />
+        <field name="registrationDate" type="date-time" />
+        <field name="govAgencyPartyId" type="id" />
+        <field name="registrationNumber" type="text-medium" />
+        <field name="licenseNumber" type="text-medium" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
         <relationship type="one" title="GovAgency" related="Party">
-            <key-map field-name="govAgencyPartyId"/></relationship>
+            <key-map field-name="govAgencyPartyId" />
+        </relationship>
     </entity>
 
     <entity entity-name="ProductMeter" package="mantle.product.maintenance">
-        <field name="productMeterId" type="id" is-pk="true"/>
-        <field name="productId" type="id"/>
-        <field name="productMeterTypeId" type="id"/>
-        <field name="meterUomId" type="id"/>
-        <field name="meterName" type="text-medium"/>
-        <relationship type="one" related="mantle.product.Product"/>
-        <relationship type="one" related="mantle.product.maintenance.ProductMeterType"/>
+        <field name="productMeterId" type="id" is-pk="true" />
+        <field name="productId" type="id" />
+        <field name="productMeterTypeId" type="id" />
+        <field name="meterUomId" type="id" />
+        <field name="meterName" type="text-medium" />
+        <relationship type="one" related="mantle.product.Product" />
+        <relationship type="one" related="mantle.product.maintenance.ProductMeterType" />
         <relationship type="one" title="Meter" related="moqui.basic.Uom">
-            <key-map field-name="meterUomId"/></relationship>
+            <key-map field-name="meterUomId" />
+        </relationship>
     </entity>
     <entity entity-name="ProductMeterType" package="mantle.product.maintenance">
-        <field name="productMeterTypeId" type="id" is-pk="true"/>
-        <field name="description" type="text-medium"/>
+        <field name="productMeterTypeId" type="id" is-pk="true" />
+        <field name="description" type="text-medium" />
         <field name="defaultUomId" type="id">
             <description>This is optional and if applicable can describe the meter better</description>
         </field>
         <relationship type="one" title="Default" related="moqui.basic.Uom">
-            <key-map field-name="defaultUomId"/></relationship>
+            <key-map field-name="defaultUomId" />
+        </relationship>
         <seed-data>
             <!-- Product Meter Type -->
-            <mantle.product.maintenance.ProductMeterType description="Speedometer" productMeterTypeId="PdMtrSpeedometer"/>
-            <mantle.product.maintenance.ProductMeterType description="Tachometer" productMeterTypeId="PdMtrTachometer"/>
-            <mantle.product.maintenance.ProductMeterType description="Distance Meter" productMeterTypeId="PdMtrDistance"/>
-            <mantle.product.maintenance.ProductMeterType description="Motor Time Meter" productMeterTypeId="PdMtrMotorTime"/>
-            <mantle.product.maintenance.ProductMeterType description="Use Count Meter" productMeterTypeId="PdMtrUseCount"/>
-            <mantle.product.maintenance.ProductMeterType description="Copy Count Meter" productMeterTypeId="PdMtrCopyCount"/>
-            <mantle.product.maintenance.ProductMeterType description="Trip Meter" productMeterTypeId="PdMtrTripMeter"/>
-            <mantle.product.maintenance.ProductMeterType description="Tachograph" productMeterTypeId="PdMtrTachograph"/>
-            <mantle.product.maintenance.ProductMeterType description="Taximeter" productMeterTypeId="PdMtrTaximeter"/>
-            <mantle.product.maintenance.ProductMeterType description="Event Data Recorder" productMeterTypeId="PdMtrEventDataRec"/>
-            <mantle.product.maintenance.ProductMeterType description="Pedometer" productMeterTypeId="PdMtrPedometer"/>
-            <mantle.product.maintenance.ProductMeterType description="Odometer" productMeterTypeId="PdMtrOdometer"/>
-            <mantle.product.maintenance.ProductMeterType description="Thermometer" productMeterTypeId="PdMtrThermometer"/>
+            <mantle.product.maintenance.ProductMeterType description="Speedometer"
+                productMeterTypeId="PdMtrSpeedometer" />
+            <mantle.product.maintenance.ProductMeterType description="Tachometer"
+                productMeterTypeId="PdMtrTachometer" />
+            <mantle.product.maintenance.ProductMeterType description="Distance Meter"
+                productMeterTypeId="PdMtrDistance" />
+            <mantle.product.maintenance.ProductMeterType description="Motor Time Meter"
+                productMeterTypeId="PdMtrMotorTime" />
+            <mantle.product.maintenance.ProductMeterType description="Use Count Meter"
+                productMeterTypeId="PdMtrUseCount" />
+            <mantle.product.maintenance.ProductMeterType description="Copy Count Meter"
+                productMeterTypeId="PdMtrCopyCount" />
+            <mantle.product.maintenance.ProductMeterType description="Trip Meter"
+                productMeterTypeId="PdMtrTripMeter" />
+            <mantle.product.maintenance.ProductMeterType description="Tachograph"
+                productMeterTypeId="PdMtrTachograph" />
+            <mantle.product.maintenance.ProductMeterType description="Taximeter"
+                productMeterTypeId="PdMtrTaximeter" />
+            <mantle.product.maintenance.ProductMeterType description="Event Data Recorder"
+                productMeterTypeId="PdMtrEventDataRec" />
+            <mantle.product.maintenance.ProductMeterType description="Pedometer"
+                productMeterTypeId="PdMtrPedometer" />
+            <mantle.product.maintenance.ProductMeterType description="Odometer"
+                productMeterTypeId="PdMtrOdometer" />
+            <mantle.product.maintenance.ProductMeterType description="Thermometer"
+                productMeterTypeId="PdMtrThermometer" />
         </seed-data>
     </entity>
     <entity entity-name="ProductMaintenance" package="mantle.product.maintenance">
         <description>This is used to specify the details for scheduled maintenance.</description>
-        <field name="productMaintenanceId" type="id" is-pk="true"/>
-        <field name="productId" type="id"/>
-        <field name="maintenanceTypeEnumId" type="id"/>
-        <field name="description" type="text-medium"/>
-        <field name="comments" type="text-long"/>
+        <field name="productMaintenanceId" type="id" is-pk="true" />
+        <field name="productId" type="id" />
+        <field name="maintenanceTypeEnumId" type="id" />
+        <field name="description" type="text-medium" />
+        <field name="comments" type="text-long" />
         <field name="templateWorkEffortId" type="id">
             <description>Template of Maintenance Plan. WorkEffort may have WorkEffortAssoc records for tasks/breakdown
-                details.</description></field>
-        <field name="intervalQuantity" type="number-decimal"/>
-        <field name="intervalProductMeterId" type="id"/>
+                details.</description>
+        </field>
+        <field name="intervalQuantity" type="number-decimal" />
+        <field name="intervalProductMeterId" type="id" />
         <field name="intervalUomId" type="id">
-            <description>UOM for intervalQuantity; ignored if intervalProductMeterId is used</description></field>
-        <!-- this isn't really needed with intervalProductMeterId, but leaving commented in case there is a scenario for it:
+            <description>UOM for intervalQuantity; ignored if intervalProductMeterId is used</description>
+        </field>
+        <!-- this isn't really needed with intervalProductMeterId, but leaving commented in case
+        there is a scenario for it:
         <field name="intervalMeterTypeId" type="id">
-            <description>Meter Type for intervalQuantity; if used intervalUomId is generally not used (ie one or the
+            <description>Meter Type for intervalQuantity; if used intervalUomId is generally not used (ie one
+        or the
                 other)</description>
         </field>
         -->
@@ -873,17 +1226,22 @@ along with this software (see the LICENSE.md file). If not, see
                 records for a single MaintenanceType in cases where maintenance intervals are not evenly distributed,
                 or only need to be done once like a break-in period</description>
         </field>
-        <relationship type="one" related="mantle.product.Product"/>
+        <relationship type="one" related="mantle.product.Product" />
         <relationship type="one" title="MaintenanceType" related="moqui.basic.Enumeration">
-            <key-map field-name="maintenanceTypeEnumId"/></relationship>
+            <key-map field-name="maintenanceTypeEnumId" />
+        </relationship>
         <relationship type="one" title="Template" related="mantle.work.effort.WorkEffort">
-            <key-map field-name="templateWorkEffortId"/></relationship>
+            <key-map field-name="templateWorkEffortId" />
+        </relationship>
         <relationship type="one" title="Interval" related="moqui.basic.Uom">
-            <key-map field-name="intervalUomId"/></relationship>
-        <!-- <relationship type="one" title="Interval" related="mantle.product.maintenance.ProductMeterType">
+            <key-map field-name="intervalUomId" />
+        </relationship>
+        <!-- <relationship type="one" title="Interval"
+        related="mantle.product.maintenance.ProductMeterType">
             <key-map field-name="intervalMeterTypeId"/></relationship> -->
         <relationship type="one" title="Interval" related="mantle.product.maintenance.ProductMeter">
-            <key-map field-name="intervalProductMeterId"/></relationship>
+            <key-map field-name="intervalProductMeterId" />
+        </relationship>
     </entity>
 
     <!-- ========================================================= -->
@@ -891,57 +1249,84 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <entity entity-name="AssetReceipt" package="mantle.product.receipt" cache="never">
-        <field name="assetReceiptId" type="id" is-pk="true"/>
-        <field name="assetId" type="id"/>
-        <field name="productId" type="id"/>
-        <field name="orderId" type="id"/>
-        <field name="orderItemSeqId" type="id"/>
-        <field name="shipmentId" type="id"/>
-        <field name="shipmentItemSourceId" type="id"/>
-        <field name="shipmentPackageSeqId" type="id"/>
-        <field name="invoiceId" type="id"/>
-        <field name="invoiceItemSeqId" type="id"/>
-        <field name="returnId" type="id"/>
-        <field name="returnItemSeqId" type="id"/>
-        <field name="workEffortId" type="id"/>
-        <field name="receivedByUserId" type="id"/>
-        <field name="receivedDate" type="date-time"/>
-        <field name="itemDescription" type="text-medium"/>
-        <field name="quantityAccepted" type="number-decimal"/>
-        <field name="quantityRejected" type="number-decimal"/>
-        <field name="rejectionReasonEnumId" type="id"/>
-        <field name="acctgTransResultEnumId" type="id"/>
-        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset"/>
-        <relationship type="one" related="mantle.product.Product" short-alias="product"/>
-        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem"/>
-        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment"/>
-        <relationship type="one" related="mantle.shipment.ShipmentItemSource" short-alias="shipmentItemSource"/>
-        <relationship type="one-nofk" related="mantle.shipment.ShipmentItem" short-alias="shipmentItem"/>
-        <relationship type="one-nofk" related="mantle.shipment.ShipmentPackage" short-alias="shipmentPackage">
-            <key-map field-name="shipmentId"/><key-map field-name="shipmentPackageSeqId"/></relationship>
-        <relationship type="one" related="mantle.account.invoice.InvoiceItem" short-alias="invoiceItem"/>
+        <field name="assetReceiptId" type="id" is-pk="true" />
+        <field name="assetId" type="id" />
+        <field name="productId" type="id" />
+        <field name="orderId" type="id" />
+        <field name="orderItemSeqId" type="id" />
+        <field name="shipmentId" type="id" />
+        <field name="shipmentItemSourceId" type="id" />
+        <field name="shipmentPackageSeqId" type="id" />
+        <field name="invoiceId" type="id" />
+        <field name="invoiceItemSeqId" type="id" />
+        <field name="returnId" type="id" />
+        <field name="returnItemSeqId" type="id" />
+        <field name="workEffortId" type="id" />
+        <field name="receivedByUserId" type="id" />
+        <field name="receivedDate" type="date-time" />
+        <field name="itemDescription" type="text-medium" />
+        <field name="quantityAccepted" type="number-decimal" />
+        <field name="quantityRejected" type="number-decimal" />
+        <field name="rejectionReasonEnumId" type="id" />
+        <field name="acctgTransResultEnumId" type="id" />
+        <relationship type="one" related="mantle.product.asset.Asset" short-alias="asset" />
+        <relationship type="one" related="mantle.product.Product" short-alias="product" />
+        <relationship type="one" related="mantle.order.OrderItem" short-alias="orderItem" />
+        <relationship type="one" related="mantle.shipment.Shipment" short-alias="shipment" />
+        <relationship type="one" related="mantle.shipment.ShipmentItemSource"
+            short-alias="shipmentItemSource" />
+        <relationship type="one-nofk" related="mantle.shipment.ShipmentItem"
+            short-alias="shipmentItem" />
+        <relationship type="one-nofk" related="mantle.shipment.ShipmentPackage"
+            short-alias="shipmentPackage">
+            <key-map field-name="shipmentId" />
+            <key-map field-name="shipmentPackageSeqId" />
+        </relationship>
+        <relationship type="one" related="mantle.account.invoice.InvoiceItem"
+            short-alias="invoiceItem" />
         <relationship type="one" related="mantle.order.return.ReturnItem" short-alias="returnItem">
-            <key-map field-name="returnId"/><key-map field-name="returnItemSeqId"/></relationship>
-        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort"/>
-        <relationship type="many" related="mantle.work.effort.WorkEffortProduct" short-alias="workEffortProducts">
-            <key-map field-name="workEffortId"/><key-map field-name="productId"/></relationship>
-        <relationship type="one" title="ReceivedBy" related="moqui.security.UserAccount" short-alias="receivedByUserAccount">
-            <key-map field-name="receivedByUserId"/></relationship>
-        <relationship type="one" title="RejectionReason" related="moqui.basic.Enumeration" short-alias="rejectionReason">
-            <key-map field-name="rejectionReasonEnumId"/></relationship>
-        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration" short-alias="acctgTransResult">
-            <key-map field-name="acctgTransResultEnumId"/></relationship>
+            <key-map field-name="returnId" />
+            <key-map field-name="returnItemSeqId" />
+        </relationship>
+        <relationship type="one" related="mantle.work.effort.WorkEffort" short-alias="workEffort" />
+        <relationship type="many" related="mantle.work.effort.WorkEffortProduct"
+            short-alias="workEffortProducts">
+            <key-map field-name="workEffortId" />
+            <key-map field-name="productId" />
+        </relationship>
+        <relationship type="one" title="ReceivedBy" related="moqui.security.UserAccount"
+            short-alias="receivedByUserAccount">
+            <key-map field-name="receivedByUserId" />
+        </relationship>
+        <relationship type="one" title="RejectionReason" related="moqui.basic.Enumeration"
+            short-alias="rejectionReason">
+            <key-map field-name="rejectionReasonEnumId" />
+        </relationship>
+        <relationship type="one" title="AcctgTransResult" related="moqui.basic.Enumeration"
+            short-alias="acctgTransResult">
+            <key-map field-name="acctgTransResultEnumId" />
+        </relationship>
 
-        <index name="ASSET_REC_ORDID"><index-field name="orderId"/></index>
-        <index name="ASSET_REC_SHPPRD"><index-field name="shipmentId"/><index-field name="productId"/></index>
+        <index name="ASSET_REC_ORDID">
+            <index-field name="orderId" />
+        </index>
+        <index name="ASSET_REC_SHPPRD">
+            <index-field name="shipmentId" />
+            <index-field name="productId" />
+        </index>
 
         <seed-data>
-            <moqui.basic.EnumerationType description="Rejection Reason" enumTypeId="RejectionReason"/>
-            <moqui.basic.Enumeration enumId="ArjDamaged" description="Damaged" enumTypeId="RejectionReason"/>
-            <moqui.basic.Enumeration enumId="ArjLost" description="Lost in Transit" enumTypeId="RejectionReason"/>
-            <moqui.basic.Enumeration enumId="ArjNotOrdered" description="Not Ordered" enumTypeId="RejectionReason"/>
-            <moqui.basic.Enumeration enumId="ArjOverShipped" description="Over Shipped" enumTypeId="RejectionReason"/>
-            <moqui.basic.Enumeration enumId="ArjNotToSpec" description="Not to Specification" enumTypeId="RejectionReason"/>
+            <moqui.basic.EnumerationType description="Rejection Reason" enumTypeId="RejectionReason" />
+            <moqui.basic.Enumeration enumId="ArjDamaged" description="Damaged"
+                enumTypeId="RejectionReason" />
+            <moqui.basic.Enumeration enumId="ArjLost" description="Lost in Transit"
+                enumTypeId="RejectionReason" />
+            <moqui.basic.Enumeration enumId="ArjNotOrdered" description="Not Ordered"
+                enumTypeId="RejectionReason" />
+            <moqui.basic.Enumeration enumId="ArjOverShipped" description="Over Shipped"
+                enumTypeId="RejectionReason" />
+            <moqui.basic.Enumeration enumId="ArjNotToSpec" description="Not to Specification"
+                enumTypeId="RejectionReason" />
         </seed-data>
     </entity>
 
@@ -950,7 +1335,7 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <extend-entity entity-name="NetworkPrinter" package="moqui.basic.print">
-        <field name="assetId" type="id"/>
-        <relationship type="one" related="mantle.product.asset.Asset"/>
+        <field name="assetId" type="id" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
     </extend-entity>
 </entities>

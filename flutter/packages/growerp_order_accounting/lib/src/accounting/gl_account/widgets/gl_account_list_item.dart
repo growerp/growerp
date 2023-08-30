@@ -14,47 +14,51 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class LedgerJournalListItem extends StatelessWidget {
-  const LedgerJournalListItem(
-      {Key? key, required this.ledgerJournal, required this.index})
+class GlAccountListItem extends StatelessWidget {
+  const GlAccountListItem(
+      {Key? key, required this.glAccount, required this.index})
       : super(key: key);
 
-  final LedgerJournal ledgerJournal;
+  final GlAccount glAccount;
   final int index;
 
   @override
   Widget build(BuildContext context) {
-    final ledgerJournalBloc = context.read<LedgerJournalBloc>();
+    final glAccountBloc = context.read<GlAccountBloc>();
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
-        child: Text(ledgerJournal.journalName.isEmpty ? '?' : ''),
+        child: Text(glAccount.accountName == null ? '?' : ''),
       ),
       title: Column(children: [
         if (ResponsiveBreakpoints.of(context).isMobile)
-          Text(ledgerJournal.journalName),
+          Text(glAccount.accountName ?? ''),
         Row(
           children: <Widget>[
+            Expanded(
+                child: Text(glAccount.accountCode ?? '',
+                    key: Key('glAccountId$index'))),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
               Expanded(
-                  child:
-                      Text(ledgerJournal.journalName, key: Key('name$index'))),
+                  child: Text(glAccount.accountName ?? '',
+                      key: Key('name$index'))),
+            Expanded(
+                child: Text(glAccount.isDebit == true ? 'Debit' : 'Credit',
+                    key: Key('isDebit$index'), textAlign: TextAlign.center)),
+            Expanded(
+                child: Text(glAccount.accountClass?.description ?? '',
+                    key: Key('name$index'))),
             Expanded(
                 child: Text(
-                    ledgerJournal.postedDate == null
+                    glAccount.postedBalance == null
                         ? ''
-                        : ledgerJournal.postedDate.toString(),
-                    key: Key('postedDate$index'),
+                        : glAccount.postedBalance.toString(),
+                    key: Key('postedBalance$index'),
                     textAlign: TextAlign.center)),
-            Expanded(
-                child: Text(ledgerJournal.isPosted == true ? 'Y' : 'N',
-                    key: Key('isPosted$index'), textAlign: TextAlign.center)),
-            Expanded(
-                child: Text(ledgerJournal.isError == true ? 'Y' : 'N',
-                    key: Key('isError$index'), textAlign: TextAlign.left)),
           ],
         )
       ]),
@@ -63,20 +67,8 @@ class LedgerJournalListItem extends StatelessWidget {
             barrierDismissible: true,
             context: context,
             builder: (BuildContext context) => BlocProvider.value(
-                value: ledgerJournalBloc,
-                child: LedgerJournalDialog(ledgerJournal)));
+                value: glAccountBloc, child: GlAccountDialog(glAccount)));
       },
-      trailing: GestureDetector(
-        child: const Text(
-          'POST',
-        ),
-        onTap: () async {
-          if (ledgerJournal.isPosted == false) {
-            ledgerJournalBloc.add(
-                LedgerJournalUpdate(ledgerJournal.copyWith(isPosted: true)));
-          }
-        },
-      ),
     );
   }
 }

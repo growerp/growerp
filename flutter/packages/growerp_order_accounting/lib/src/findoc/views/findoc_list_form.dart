@@ -233,7 +233,7 @@ class FinDocListState extends State<FinDocList> {
                                 child: Text(
                                     widget.journalId != null
                                         ? "no journal entries found"
-                                        : "no (open)${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
+                                        : "no (${widget.docType == FinDocType.transaction ? 'unposted' : 'open'})${widget.docType == FinDocType.shipment ? "${widget.sales ? 'outgoing' : 'incoming'} " : "${widget.docType == FinDocType.transaction ? '' : widget.sales ? 'sales' : 'purchase'} "}${entityName}s found!",
                                     textAlign: TextAlign.center)));
                       }
                       index--;
@@ -322,11 +322,8 @@ class FinDocListState extends State<FinDocList> {
           }
 
           return Scaffold(
-              floatingActionButton: [
-                FinDocType.order,
-                FinDocType.invoice,
-                FinDocType.payment,
-              ].contains(widget.docType)
+              floatingActionButton: ![FinDocType.shipment]
+                      .contains(widget.docType)
                   ? FloatingActionButton(
                       key: const Key("addNew"),
                       onPressed: () async {

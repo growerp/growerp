@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:growerp_core/growerp_core.dart';
 part 'gl_account_model.freezed.dart';
 part 'gl_account_model.g.dart';
 
@@ -25,7 +26,7 @@ class GlAccount with _$GlAccount {
     String? accountCode,
     String? accountName,
     int? level,
-    String? classId,
+    GlAccountClass? accountClass,
     bool? isDebit,
     Decimal? rollUp,
     Decimal? beginningBalance,

@@ -12,169 +12,402 @@ You should have received a copy of the CC0 Public Domaicrn Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/rest-api-2.1.xsd"
-        name="growerp" displayName="GrowERP REST API" version="1.0.0" description="Services for GrowERP system">
+<resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/rest-api-2.1.xsd"
+    name="growerp" displayName="GrowERP REST API" version="1.0.0"
+    description="Services for GrowERP system">
 
     <!-- flutter versioned REST interface -->
     <resource name="100">
         <!-- general -->
         <resource name="Ping" require-authentication="anonymous-all"
-                description="to check if the system is available, no authorization required">
-            <method type="get"><service name="growerp.100.GeneralServices100.check#Ping"/></method></resource>
+            description="to check if the system is available, no authorization required">
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.check#Ping" />
+            </method>
+        </resource>
         <resource name="Authenticate">
-            <method type="get"><service name="growerp.100.GeneralServices100.get#Authenticate"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#Authenticate" />
+            </method>
+        </resource>
         <resource name="Currencies" require-authentication="anonymous-all">
-            <method type="get"><service name="growerp.100.GeneralServices100.get#CurrencyList"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#CurrencyList" />
+            </method>
+        </resource>
         <resource name="Countries" require-authentication="anonymous-all">
-            <method type="get"><service name="growerp.100.GeneralServices100.get#CountryList"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#CountryList" />
+            </method>
+        </resource>
         <resource name="Login" require-authentication="anonymous-all">
-            <method type="post"><service name="growerp.100.GeneralServices100.login#User"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.GeneralServices100.login#User" />
+            </method>
+        </resource>
         <resource name="Logout">
-            <method type="post"><service name="growerp.100.GeneralServices100.logout#User"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.GeneralServices100.logout#User" />
+            </method>
+        </resource>
         <resource name="ResetPassword" require-authentication="anonymous-all">
-            <method type="post"><service name="growerp.100.GeneralServices100.reset#Password"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.GeneralServices100.reset#Password" />
+            </method>
+        </resource>
         <resource name="Password" require-authentication="anonymous-all">
-            <method type="post"><service name="growerp.100.GeneralServices100.update#Password"/></method></resource>
-        <!--resource name="Image just for internal use 
-            <method type="post"><service name="growerp.100.ImageServices100.upload#Image"/></method></resource-->
+            <method type="post">
+                <service name="growerp.100.GeneralServices100.update#Password" />
+            </method>
+        </resource>
+        <!--resource
+    name="Image just for internal use 
+            <method type="post"><service
+    name="growerp.100.ImageServices100.upload#Image"/></method></resource-->
         <!-- parties -->
         <resource name="CheckEmail" require-authentication="anonymous-all">
-            <method type="get"><service name="growerp.100.PartyServices100.check#Email"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.PartyServices100.check#Email" />
+            </method>
+        </resource>
         <resource name="CheckCompany" require-authentication="anonymous-all">
-            <method type="get"><service name="growerp.100.PartyServices100.check#Company"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.PartyServices100.check#Company" />
+            </method>
+        </resource>
         <resource name="UserAndCompany" require-authentication="anonymous-all">
-            <method type="post"><service name="growerp.100.PartyServices100.register#UserAndCompany"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.PartyServices100.register#UserAndCompany" />
+            </method>
+        </resource>
         <resource name="Companies" require-authentication="anonymous-all">
-            <method type="get"><service name="growerp.100.PartyServices100.get#Companies"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.PartyServices100.get#Companies" />
+            </method>
+        </resource>
         <resource name="Company">
-            <method type="get"><service name="growerp.100.PartyServices100.get#Company"/></method>
-            <method type="patch"><service name="growerp.100.PartyServices100.update#Company"/></method>
-            <method type="post"><service name="growerp.100.PartyServices100.create#Company"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.PartyServices100.get#Company" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.PartyServices100.update#Company" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.PartyServices100.create#Company" />
+            </method>
+        </resource>
         <resource name="RegisterUser" require-authentication="anonymous-all">
-            <method type="post"><service name="growerp.100.PartyServices100.register#User"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.PartyServices100.register#User" />
+            </method>
+        </resource>
         <resource name="User">
-            <method type="get"><service name="growerp.100.PartyServices100.get#User"/></method>
-            <method type="post"><service name="growerp.100.PartyServices100.create#User"/></method>
-            <method type="patch"><service name="growerp.100.PartyServices100.update#User"/></method>
-            <method type="delete"><service name="growerp.100.PartyServices100.delete#User"/></method></resource>
-        <resource name="Categories" require-authentication="anonymous-all"> <!-- separate from Category for security reasons -->
-            <method type="get"><service name="growerp.100.CatgProdServices100.get#ProductCategories"/></method>
-        </resource>  
+            <method type="get">
+                <service name="growerp.100.PartyServices100.get#User" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.PartyServices100.create#User" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.PartyServices100.update#User" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.PartyServices100.delete#User" />
+            </method>
+        </resource>
+        <resource name="Categories" require-authentication="anonymous-all"> <!-- separate from
+            Category
+        for security reasons -->
+            <method type="get">
+                <service name="growerp.100.CatgProdServices100.get#ProductCategories" />
+            </method>
+        </resource>
         <resource name="Category">
-            <method type="post"><service name="growerp.100.CatgProdServices100.create#ProductCategory"/></method>
-            <method type="patch"><service name="growerp.100.CatgProdServices100.update#ProductCategory"/></method>
-            <method type="delete"><service name="growerp.100.CatgProdServices100.delete#ProductCategory"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.CatgProdServices100.create#ProductCategory" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CatgProdServices100.update#ProductCategory" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CatgProdServices100.delete#ProductCategory" />
+            </method>
+        </resource>
         <!-- products -->
-        <resource name="Products" require-authentication="anonymous-all"><!-- separate from Product for security reasons --> 
-            <method type="get"><service name="growerp.100.CatgProdServices100.get#Products"/></method>
+        <resource name="Products" require-authentication="anonymous-all"><!-- separate from Product
+            for
+        security reasons -->
+            <method type="get">
+                <service name="growerp.100.CatgProdServices100.get#Products" />
+            </method>
         </resource>
         <resource name="Product">
-            <method type="post"><service name="growerp.100.CatgProdServices100.create#Product"/></method>
-            <method type="patch"><service name="growerp.100.CatgProdServices100.update#Product"/></method>
-            <method type="delete"><service name="growerp.100.CatgProdServices100.delete#Product"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.CatgProdServices100.create#Product" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CatgProdServices100.update#Product" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CatgProdServices100.delete#Product" />
+            </method>
+        </resource>
         <resource name="Asset">
-            <method type="get"><service name="growerp.100.CatgProdServices100.get#Assets"/></method>
-            <method type="post"><service name="growerp.100.CatgProdServices100.create#Asset"/></method>
-            <method type="patch"><service name="growerp.100.CatgProdServices100.update#Asset"/></method>
-            <method type="delete"><service name="growerp.100.CatgProdServices100.delete#Asset"/></method></resource>
-        <!--financial docs: order, invoice payments -->
+            <method type="get">
+                <service name="growerp.100.CatgProdServices100.get#Assets" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.CatgProdServices100.create#Asset" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CatgProdServices100.update#Asset" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CatgProdServices100.delete#Asset" />
+            </method>
+        </resource>
+        <!--financial
+    docs: order, invoice payments -->
         <resource name="FinDoc"><!-- get financial docs : order/invoice/payment -->
-            <method type="get"><service name="growerp.100.FinDocServices100.get#FinDoc"/></method>
-            <method type="post"><service name="growerp.100.FinDocServices100.create#FinDoc"/></method>
-            <method type="patch"><service name="growerp.100.FinDocServices100.update#FinDoc"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.FinDocServices100.get#FinDoc" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.FinDocServices100.create#FinDoc" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.FinDocServices100.update#FinDoc" />
+            </method>
+        </resource>
         <resource name="FinDocShipment">
-            <method type="patch"><service name="growerp.100.FinDocServices100.receive#Shipment"/></method></resource>
-        <!--Warehouse location -->
+            <method type="patch">
+                <service name="growerp.100.FinDocServices100.receive#Shipment" />
+            </method>
+        </resource>
+        <!--Warehouse
+    location -->
         <resource name="Location"><!-- get financial docs : order/invoice/payment -->
-            <method type="get"><service name="growerp.100.WarehouseServices100.get#Location"/></method>
-            <method type="post"><service name="growerp.100.WarehouseServices100.create#Location"/></method>
-            <method type="patch"><service name="growerp.100.WarehouseServices100.update#Location"/></method>
-            <method type="delete"><service name="growerp.100.WarehouseServices100.delete#Location"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.WarehouseServices100.get#Location" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.WarehouseServices100.create#Location" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.WarehouseServices100.update#Location" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.WarehouseServices100.delete#Location" />
+            </method>
+        </resource>
         <!--project/tasks -->
         <resource name="Project"><!-- get project tree-->
-            <method type="get"><service name="growerp.100.TaskServices100.get#ProjectTree"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.TaskServices100.get#ProjectTree" />
+            </method>
+        </resource>
         <resource name="Task"><!-- get tasks info -->
-            <method type="get"><service name="growerp.100.TaskServices100.get#Task"/></method>
-            <method type="post"><service name="growerp.100.TaskServices100.create#Task"/></method>
-            <method type="patch"><service name="growerp.100.TaskServices100.update#Task"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.TaskServices100.get#Task" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.TaskServices100.create#Task" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.TaskServices100.update#Task" />
+            </method>
+        </resource>
         <resource name="TimeEntry"><!-- task time entry -->
-            <method type="get"><service name="growerp.100.TaskServices100.get#TimeEntry"/></method>
-            <method type="post"><service name="growerp.100.TaskServices100.create#TimeEntry"/></method>
-            <method type="patch"><service name="growerp.100.TaskServices100.update#TimeEntry"/></method>
-            <method type="delete"><service name="growerp.100.TaskServices100.delete#TimeEntry"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.TaskServices100.get#TimeEntry" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.TaskServices100.create#TimeEntry" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.TaskServices100.update#TimeEntry" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.TaskServices100.delete#TimeEntry" />
+            </method>
+        </resource>
         <!-- rental -->
         <resource name="RentalOccupancy">
-                <method type="get"><service name="growerp.100.FinDocServices100.get#RentalOccupancy"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.FinDocServices100.get#RentalOccupancy" />
+            </method>
+        </resource>
         <!-- itemTypes -->
         <resource name="ItemTypes">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#ItemTypes"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#ItemTypes" />
+            </method>
+        </resource>
         <!-- paymentTypes -->
         <resource name="PaymentTypes">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#PaymentTypes"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#PaymentTypes" />
+            </method>
+        </resource>
         <!-- opportunity -->
         <resource name="Opportunity">
-            <method type="get"><service name="growerp.100.CrmServices100.get#Opportunity"/></method>
-            <method type="post"><service name="growerp.100.CrmServices100.create#Opportunity"/></method>
-            <method type="patch"><service name="growerp.100.CrmServices100.update#Opportunity"/></method>
-            <method type="delete"><service name="growerp.100.CrmServices100.delete#Opportunity"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.CrmServices100.get#Opportunity" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.CrmServices100.create#Opportunity" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CrmServices100.update#Opportunity" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CrmServices100.delete#Opportunity" />
+            </method>
+        </resource>
         <!-- Accounting -->
+        <resource name="GlAccount">
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#GlAccount" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AccountingServices100.create#GlAccount" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AccountingServices100.update#GlAccount" />
+            </method>
+        </resource>
+        <resource name="GlAccountClass">
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#GlAccountClass" />
+            </method>
+        </resource>
         <resource name="Timeperiod">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#TimePeriod"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#TimePeriod" />
+            </method>
+        </resource>
         <resource name="BalanceSheet">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#BalanceSheet"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#BalanceSheet" />
+            </method>
+        </resource>
         <resource name="BalanceSummary">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#BalanceSummary"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#BalanceSummary" />
+            </method>
+        </resource>
         <resource name="Ledger">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#Ledger"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#Ledger" />
+            </method>
+        </resource>
         <resource name="LedgerJournal">
-            <method type="get"><service name="growerp.100.AccountingServices100.get#LedgerJournal"/></method>
-            <method type="post"><service name="growerp.100.AccountingServices100.create#LedgerJournal"/></method>
-            <method type="patch"><service name="growerp.100.AccountingServices100.update#LedgerJournal"/></method>
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#LedgerJournal" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.AccountingServices100.create#LedgerJournal" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AccountingServices100.update#LedgerJournal" />
+            </method>
         </resource>
         <!-- chat server -->
         <resource name="ChatMessage">
-            <method type="get"><service name="growerp.100.ChatServices100.get#ChatMessage"/></method>
-            <method type="post"><service name="growerp.100.ChatServices100.create#ChatMessage"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.ChatServices100.get#ChatMessage" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.ChatServices100.create#ChatMessage" />
+            </method>
+        </resource>
         <resource name="ChatRoom">
-            <method type="get"><service name="growerp.100.ChatServices100.get#ChatRoom"/></method>
-            <method type="post"><service name="growerp.100.ChatServices100.create#ChatRoom"/></method>
-            <method type="patch"><service name="growerp.100.ChatServices100.update#ChatRoom"/></method>
-            <method type="delete"><service name="growerp.100.ChatServices100.delete#ChatRoom"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.ChatServices100.get#ChatRoom" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.ChatServices100.create#ChatRoom" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.ChatServices100.update#ChatRoom" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.ChatServices100.delete#ChatRoom" />
+            </method>
+        </resource>
         <!-- website -->
         <resource name="Website">
-            <method type="get"><service name="growerp.100.WebsiteServices100.get#Website"/></method>
-            <method type="patch"><service name="growerp.100.WebsiteServices100.update#Website"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.WebsiteServices100.get#Website" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.WebsiteServices100.update#Website" />
+            </method>
+        </resource>
         <resource name="WebsiteContent">
-            <method type="get"><service name="growerp.100.WebsiteServices100.get#WebsiteContent"/></method>
-            <method type="post"><service name="growerp.100.WebsiteServices100.upload#WebsiteContent"/></method></resource>
+            <method type="get">
+                <service name="growerp.100.WebsiteServices100.get#WebsiteContent" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.WebsiteServices100.upload#WebsiteContent" />
+            </method>
+        </resource>
         <resource name="Obsidian">
-            <method type="post"><service name="growerp.100.WebsiteServices100.upload#Obsidian"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.WebsiteServices100.upload#Obsidian" />
+            </method>
+        </resource>
         <!-- import JSON -->
         <resource name="Entities">
-            <method type="post"><service name="growerp.100.ImportExportServices100.import#Entities"/></method></resource>
+            <method type="post">
+                <service name="growerp.100.ImportExportServices100.import#Entities" />
+            </method>
+        </resource>
         <!-- export via email -->
         <resource name="ImportExport">
             <resource name="Categories">
-                <method type="get"><service name="growerp.100.ImportExportServices100.export#Categories"/></method>
-                <method type="post"><service name="growerp.100.ImportExportServices100.import#Categories"/></method>
+                <method type="get">
+                    <service name="growerp.100.ImportExportServices100.export#Categories" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.ImportExportServices100.import#Categories" />
+                </method>
             </resource>
             <resource name="Products">
-                <method type="get"><service name="growerp.100.ImportExportServices100.export#Products"/></method>
-                <method type="post"><service name="growerp.100.ImportExportServices100.import#Products"/></method>
+                <method type="get">
+                    <service name="growerp.100.ImportExportServices100.export#Products" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.ImportExportServices100.import#Products" />
+                </method>
             </resource>
         </resource>
     </resource>
     <!-- Antwebsystems website -->
     <resource name="storecontents" require-authentication="anonymous-view">
         <id name="productStoreId">
-            <resource name="info"><method type="get">
-                <service name="growerp.website.WebSiteRestServices.get#ProductStoreWikiContentInfo"/></method></resource>
-            <resource name="BlogInfo"><method type="get">
-                <service name="growerp.website.WebSiteRestServices.get#BlogInfo"/></method></resource>
-            <resource name="BlogPost"><method type="get">
-                <service name="growerp.website.WebSiteRestServices.get#PublishedBlogPost"/></method></resource>
-            <resource name="PublishedWikiPageText"><method type="get">
-                <service name="growerp.website.WebSiteRestServices.get#PublishedWikiPageText"/></method></resource>
+            <resource name="info">
+                <method type="get">
+                    <service
+                        name="growerp.website.WebSiteRestServices.get#ProductStoreWikiContentInfo" />
+                </method>
+            </resource>
+            <resource name="BlogInfo">
+                <method type="get">
+                    <service name="growerp.website.WebSiteRestServices.get#BlogInfo" />
+                </method>
+            </resource>
+            <resource name="BlogPost">
+                <method type="get">
+                    <service name="growerp.website.WebSiteRestServices.get#PublishedBlogPost" />
+                </method>
+            </resource>
+            <resource name="PublishedWikiPageText">
+                <method type="get">
+                    <service name="growerp.website.WebSiteRestServices.get#PublishedWikiPageText" />
+                </method>
+            </resource>
         </id>
     </resource>
 </resource>

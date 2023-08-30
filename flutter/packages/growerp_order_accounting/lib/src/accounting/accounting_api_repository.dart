@@ -77,7 +77,6 @@ class AccountingAPIRepository extends APIRepository {
     int? start,
     int? limit,
     String? ledgerJournalId,
-    bool? my,
     String? searchString,
   }) async {
     try {
@@ -123,6 +122,69 @@ class AccountingAPIRepository extends APIRepository {
           });
       return getResponse<LedgerJournal>(
           "ledgerJournal", response, (json) => LedgerJournal.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<GlAccount>>> getGlAccount({
+    int? start,
+    int? limit,
+    String? glAccountId,
+    String? searchString,
+  }) async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/GlAccount', apiKey!,
+          queryParameters: <String, dynamic>{
+            'GlAccountId': glAccountId,
+            'start': start,
+            'limit': limit,
+            'search': searchString
+          });
+      return getResponseList<GlAccount>(
+          "glAccountList", response, (json) => GlAccount.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<GlAccount>> createGlAccount(GlAccount glAccount) async {
+    try {
+      final response = await dioClient.post(
+          'rest/s1/growerp/100/GlAccount', apiKey!, data: <String, dynamic>{
+        'glAccount': jsonEncode(glAccount.toJson()),
+        'moquiSessionToken': sessionToken
+      });
+      return getResponse<GlAccount>(
+          "glAccount", response, (json) => GlAccount.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<GlAccount>> updateGlAccount(GlAccount glAccount) async {
+    try {
+      final response = await dioClient.patch(
+          'rest/s1/growerp/100/GlAccount', apiKey!, data: <String, dynamic>{
+        'glAccount': jsonEncode(glAccount.toJson()),
+        'moquiSessionToken': sessionToken
+      });
+      return getResponse<GlAccount>(
+          "GlAccount", response, (json) => GlAccount.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<List<GlAccountClass>>> getGlAccountClass() async {
+    try {
+      final response = await dioClient.get(
+        'rest/s1/growerp/100/GlAccountClass',
+        apiKey!,
+      );
+      return getResponseList<GlAccountClass>("glAccountClassList", response,
+          (json) => GlAccountClass.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
