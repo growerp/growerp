@@ -33,15 +33,14 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   final _accountCodeController = TextEditingController();
   final _classSearchBoxController = TextEditingController();
   bool? debitSelected;
-  GlAccountClass? classSelected;
+  AccountClass? classSelected;
   late GlAccountBloc _glAccountBloc;
 
   @override
   void initState() {
     super.initState();
     _glAccountBloc = context.read<GlAccountBloc>()..add(const GlAccountFetch());
-    _glAccountBloc = context.read<GlAccountBloc>()
-      ..add(GlAccountClassesFetch());
+    _glAccountBloc = context.read<GlAccountBloc>()..add(AccountClassesFetch());
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
@@ -54,10 +53,12 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   Widget build(BuildContext context) {
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<GlAccountBloc, GlAccountState>(
+        listenWhen: (previous, current) =>
+            previous.status == GlAccountStatus.loading,
         listener: (context, state) async {
           switch (state.status) {
             case GlAccountStatus.success:
-              //          Navigator.of(context).pop();
+              Navigator.of(context).pop();
               break;
             case GlAccountStatus.failure:
               HelperFunctions.showMessage(
@@ -112,7 +113,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           case GlAccountStatus.failure:
             return const FatalErrorForm(message: 'server connection problem');
           case GlAccountStatus.success:
-            return DropdownSearch<GlAccountClass>(
+            return DropdownSearch<AccountClass>(
               key: const Key('classesDropDown'),
               selectedItem: classSelected,
               popupProps: PopupProps.menu(
@@ -134,11 +135,11 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                   hintText: "Account Class",
                 ),
               ),
-              itemAsString: (GlAccountClass? u) => "${u!.description}",
-              onChanged: (GlAccountClass? newValue) {
+              itemAsString: (AccountClass? u) => "${u!.description}",
+              onChanged: (AccountClass? newValue) {
                 classSelected = newValue;
               },
-              items: state.glAccountClasses,
+              items: state.accountClasses,
               validator: (value) => value == null ? 'field required' : null,
             );
           default:
@@ -160,7 +161,6 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                       accountName: _accountNameController.text,
                       accountCode: _accountCodeController.text,
                       accountClass: classSelected,
-                      isDebit: debitSelected,
                     )));
                   }
                 }),

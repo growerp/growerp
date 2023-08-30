@@ -171,20 +171,20 @@ class AccountingAPIRepository extends APIRepository {
         'moquiSessionToken': sessionToken
       });
       return getResponse<GlAccount>(
-          "GlAccount", response, (json) => GlAccount.fromJson(json));
+          "glAccount", response, (json) => GlAccount.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
 
-  Future<ApiResult<List<GlAccountClass>>> getGlAccountClass() async {
+  Future<ApiResult<List<AccountClass>>> getAccountClass() async {
     try {
       final response = await dioClient.get(
-        'rest/s1/growerp/100/GlAccountClass',
+        'rest/s1/growerp/100/AccountClass',
         apiKey!,
       );
-      return getResponseList<GlAccountClass>("glAccountClassList", response,
-          (json) => GlAccountClass.fromJson(json));
+      return getResponseList<AccountClass>(
+          "accountClassList", response, (json) => AccountClass.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

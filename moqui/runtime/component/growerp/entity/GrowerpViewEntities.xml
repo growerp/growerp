@@ -1591,7 +1591,7 @@ along with this software (see the LICENSE.md file). If not, see
             <exclude field="glAccountId" />
         </alias-all>
         <alias-all entity-alias="ORG" />
-        <alias name="description" entity-alias="GLCLASS" />
+        <alias name="classDescription" field="description" entity-alias="GLCLASS" />
     </view-entity>
 
 

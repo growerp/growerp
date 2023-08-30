@@ -13,18 +13,18 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-part 'gl_account_class_model.freezed.dart';
-part 'gl_account_class_model.g.dart';
+part 'account_class_model.freezed.dart';
+part 'account_class_model.g.dart';
 
 @freezed
-class GlAccountClass with _$GlAccountClass {
-  GlAccountClass._();
-  factory GlAccountClass({
-    String? glAccountClassId,
+class AccountClass with _$AccountClass {
+  AccountClass._();
+  factory AccountClass({
+    String? accountClassId,
     String? parentClassId,
     String? description,
-  }) = _GlAccountClass;
+  }) = _AccountClass;
 
-  factory GlAccountClass.fromJson(Map<String, dynamic> json) =>
-      _$GlAccountClassFromJson(json);
+  factory AccountClass.fromJson(Map<String, dynamic> json) =>
+      _$AccountClassFromJson(json);
 }

@@ -277,7 +277,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AccountingServices100.update#GlAccount" />
             </method>
         </resource>
-        <resource name="GlAccountClass">
+        <resource name="AccountClass">
             <method type="get">
                 <service name="growerp.100.AccountingServices100.get#GlAccountClass" />
             </method>
