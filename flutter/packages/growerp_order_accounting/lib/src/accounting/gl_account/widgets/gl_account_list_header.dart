@@ -65,17 +65,30 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                           .add(GlAccountFetch(searchString: searchString));
                     })
               ])
-            : const Row(children: [
-                Expanded(child: Text("Account code")),
-                Expanded(
-                    child: Text("Account name", textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("debit/credit", textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("Account class", textAlign: TextAlign.center)),
-                Expanded(
-                    child: Text("Posted balance", textAlign: TextAlign.center)),
-                Divider(),
+            : Column(children: [
+                if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+                  const Text("Account name", textAlign: TextAlign.left),
+                Row(children: [
+                  const Expanded(child: Text("Account code")),
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                    const Expanded(
+                        child:
+                            Text("Account name", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("debit/credit", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                    const Expanded(
+                        child:
+                            Text("Account class", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                    const Expanded(
+                        child:
+                            Text("Account Type", textAlign: TextAlign.center)),
+                  const Expanded(
+                      child:
+                          Text("Posted balance", textAlign: TextAlign.center)),
+                ]),
+                const Divider(),
               ]),
         trailing: search ? null : const SizedBox(width: 20));
   }

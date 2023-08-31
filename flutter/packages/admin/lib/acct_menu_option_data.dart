@@ -118,6 +118,11 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.home),
         ),
         TabItem(
+          form: const GlAccountListForm(),
+          label: "Ledger Accounts",
+          icon: const Icon(Icons.home),
+        ),
+        TabItem(
           form: const FinDocListForm(
               key: Key("Transaction"),
               sales: true,

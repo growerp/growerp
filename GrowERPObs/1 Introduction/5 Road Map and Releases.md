@@ -4,6 +4,7 @@ Let us know if you have suggestions at support@growerp.com
 
 ## Functional requests
 
+* Follow up emails for users not logging on anymore
 * Create an accounting setup to:
 	* Select the ledger organization or upload your own.
 		* Default as is now

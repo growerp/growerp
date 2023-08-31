@@ -110,7 +110,7 @@ List<MenuOption> acctMenuOptions = [
               key: Key("Transaction"),
               sales: true,
               docType: FinDocType.transaction),
-          label: "Ledger Transactions",
+          label: "Ledger Trnact",
           icon: const Icon(Icons.home),
         ),
         TabItem(

@@ -27,6 +27,7 @@ class GlAccount with _$GlAccount {
     String? accountName,
     int? level,
     AccountClass? accountClass,
+    AccountType? accountType,
     bool? isDebit,
     Decimal? rollUp,
     Decimal? beginningBalance,

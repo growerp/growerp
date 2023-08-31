@@ -189,4 +189,17 @@ class AccountingAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
+
+  Future<ApiResult<List<AccountType>>> getAccountType() async {
+    try {
+      final response = await dioClient.get(
+        'rest/s1/growerp/100/AccountType',
+        apiKey!,
+      );
+      return getResponseList<AccountType>(
+          "accountTypeList", response, (json) => AccountType.fromJson(json));
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
 }

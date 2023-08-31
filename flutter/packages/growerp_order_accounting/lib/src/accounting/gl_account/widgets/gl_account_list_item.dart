@@ -49,18 +49,23 @@ class GlAccountListItem extends StatelessWidget {
             Expanded(
                 child: Text(glAccount.isDebit == true ? 'Debit' : 'Credit',
                     key: Key('isDebit$index'), textAlign: TextAlign.center)),
-            Expanded(
-                child: Text(glAccount.accountClass?.description ?? '',
-                    key: Key('name$index'))),
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+              Expanded(
+                  child: Text(glAccount.accountClass?.description ?? '',
+                      key: Key('class$index'))),
+            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+              Expanded(
+                  child: Text(glAccount.accountType?.description ?? '',
+                      key: Key('type$index'))),
             Expanded(
                 child: Text(
                     glAccount.postedBalance == null
-                        ? ''
+                        ? '0'
                         : glAccount.postedBalance.toString(),
                     key: Key('postedBalance$index'),
                     textAlign: TextAlign.center)),
           ],
-        )
+        ),
       ]),
       onTap: () async {
         await showDialog(

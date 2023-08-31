@@ -1576,7 +1576,17 @@ along with this software (see the LICENSE.md file). If not, see
         <member-entity entity-alias="GLACT" entity-name="mantle.ledger.account.GlAccount" />
         <member-entity entity-alias="GLCLASS" entity-name="moqui.basic.Enumeration"
             join-from-alias="GLACT">
+            <key-map field-name="glAccountClassEnumId" related="enumId" />
+            <entity-condition>
+                <econdition field-name="enumTypeId" value="GlAccountClass" entity-alias="GLCLASS" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="GLTYPE" entity-name="moqui.basic.Enumeration"
+            join-from-alias="GLACT" join-optional="true">
             <key-map field-name="glAccountTypeEnumId" related="enumId" />
+            <entity-condition>
+                <econdition field-name="enumTypeId" value="GlAccountType" entity-alias="GLTYPE" />
+            </entity-condition>
         </member-entity>
         <member-entity entity-alias="GLAO" entity-name="mantle.ledger.account.GlAccountOrganization"
             join-from-alias="GLACT">
@@ -1592,6 +1602,7 @@ along with this software (see the LICENSE.md file). If not, see
         </alias-all>
         <alias-all entity-alias="ORG" />
         <alias name="classDescription" field="description" entity-alias="GLCLASS" />
+        <alias name="typeDescription" field="description" entity-alias="GLTYPE" />
     </view-entity>
 
 

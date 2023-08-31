@@ -282,6 +282,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AccountingServices100.get#GlAccountClass" />
             </method>
         </resource>
+        <resource name="AccountType">
+            <method type="get">
+                <service name="growerp.100.AccountingServices100.get#GlAccountType" />
+            </method>
+        </resource>
         <resource name="Timeperiod">
             <method type="get">
                 <service name="growerp.100.AccountingServices100.get#TimePeriod" />

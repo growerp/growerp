@@ -38,6 +38,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
         transformer: glAccountDroppable(const Duration(milliseconds: 100)));
     on<GlAccountUpdate>(_onGlAccountUpdate);
     on<AccountClassesFetch>(_onAccountClassesFetch);
+    on<AccountTypesFetch>(_onAccountTypesFetch);
   }
 
   final AccountingAPIRepository repos;
@@ -104,7 +105,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     GlAccountUpdate event,
     Emitter<GlAccountState> emit,
   ) async {
-    emit(state.copyWith(status: GlAccountStatus.loading));
+    emit(state.copyWith(status: GlAccountStatus.glAccountLoading));
     List<GlAccount> glAccounts = List.from(state.glAccounts);
     if (event.glAccount.glAccountId != null) {
       ApiResult<GlAccount> compResult =
@@ -150,6 +151,21 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     return emit(periodResult.when(
         success: (data) => state.copyWith(
             accountClasses: data, status: GlAccountStatus.success),
+        failure: (error) => state.copyWith(
+            status: GlAccountStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
+  }
+
+  Future<void> _onAccountTypesFetch(
+    AccountTypesFetch event,
+    Emitter<GlAccountState> emit,
+  ) async {
+    emit(state.copyWith(status: GlAccountStatus.loading));
+
+    ApiResult<List<AccountType>> periodResult = await repos.getAccountType();
+    return emit(periodResult.when(
+        success: (data) =>
+            state.copyWith(accountTypes: data, status: GlAccountStatus.success),
         failure: (error) => state.copyWith(
             status: GlAccountStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));

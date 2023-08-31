@@ -18,7 +18,7 @@ class TransactionTest {
   static Future<void> selectTransactions(WidgetTester tester) async {
     await CommonTest.selectOption(tester, 'dbAccounting', 'AcctDashBoard');
     await CommonTest.selectOption(
-        tester, 'acctLedger', 'FinDocListFormTransaction', '2');
+        tester, 'acctLedger', 'FinDocListFormTransaction', '3');
   }
 
   static Future<void> checkTransactionComplete(WidgetTester tester) async {

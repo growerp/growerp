@@ -736,6 +736,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="accountClassId" />
                     <parameter name="description" />
                 </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
+                    <parameter name="description" />
+                </parameter>
                 <parameter name="beginningBalance" />
                 <parameter name="postedDebits" />
                 <parameter name="postedCredits" />
@@ -748,6 +752,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="isDebit" type="Boolean" />
                 <parameter name="accountClass" type="Map">
                     <parameter name="accountClassId" />
+                    <parameter name="description" />
+                </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
                     <parameter name="description" />
                 </parameter>
                 <parameter name="beginningBalance" />
@@ -783,7 +791,9 @@ along with this software (see the LICENSE.md file). If not, see
                         accountCode: glAccount.accountCode,
                         accountName: glAccount.accountName,
                         accountClass: [accountClassId: glAccount.glAccountClassEnumId,
-                                        description: glAccount.classDescription],
+                            description: glAccount.classDescription],
+                        accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
+                            description: glAccount.typeDescription],
                         isDebit: glAccount.isDebit == 'Y' ? true : false,
                         postedBalance: glAccount.postedBalance,
                         )
@@ -802,10 +812,14 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="GlAccount">
         <in-parameters>
             <parameter name="glAccount" type="Map">
-                <parameter name="glAccountCode" required="true" />
-                <parameter name="glAccountName" />
+                <parameter name="accountCode" required="true" />
+                <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
                     <parameter name="accountClassId" />
+                </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
+                    <parameter name="description" />
                 </parameter>
             </parameter>
         </in-parameters>
@@ -825,14 +839,17 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
-                in-map="[accountCode: accountCode]"
+                in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
             <service-call name="create#mantle.ledger.account.GlAccount"
-                in-map="[   glAccountCode: glAccount.glAccountCode,
+                in-map="[   accountCode: glAccount.accountCode,
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
                             glAccountClassEnumId: glAccount.accountClass.accountClassId,
-                        ]" />
+                            glAccountTypeEnumId: glAccount.accountType.accountTypeId,
+                            isTemporary: 'N',
+                        ]"
+                out-map="context" />
             <service-call name="create#mantle.ledger.account.GlAccountOrganization"
                 in-map="[   glAccountId: glAccountId,
                             organizationPartyId: companyPartyId,
@@ -891,6 +908,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountClass" type="Map" required="true">
                     <parameter name="accountClassId" />
                 </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
+                </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -901,6 +921,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="isDebit" type="Boolean" />
                 <parameter name="accountClass" type="Map">
                     <parameter name="accountClassId" />
+                    <parameter name="description" />
+                </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
                     <parameter name="description" />
                 </parameter>
                 <parameter name="beginningBalance" />
@@ -921,6 +945,7 @@ along with this software (see the LICENSE.md file). If not, see
                             accountCode: glAccount.accountCode,
                             accountName: glAccount.accountName,
                             glAccountClassEnumId: glAccount.accountClass.accountClassId,
+                            glAccountTypeEnumId: glAccount.accountType.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />
@@ -938,6 +963,30 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <entity-find entity-name="moqui.basic.Enumeration" list="enums">
                 <econdition field-name="enumTypeId" value="GlAccountClass" />
+            </entity-find>
+            <set field="accountClassList" from="[]" />
+            <iterate list="enums" entry="enumEntry">
+                <script>
+                    accountClassList.add(
+                        accountClassId: enumEntry.enumId,
+                        parentClassId: enumEntry.parentEnumId,
+                        description: enumEntry.description,
+                    );
+                </script>
+            </iterate>
+        </actions>
+    </service>
+    <service verb="get" noun="GlAccountType">
+        <out-parameters>
+            <parameter name="accountTypeList" type="List">
+                <parameter name="accountTypeId" />
+                <parameter name="parentTypeId" />
+                <parameter name="description" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+                <econdition field-name="enumTypeId" value="GlAccountType" />
             </entity-find>
             <set field="accountClassList" from="[]" />
             <iterate list="enums" entry="enumEntry">

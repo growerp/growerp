@@ -41,3 +41,7 @@ class GlAccountDelete extends GlAccountEvent {
 class AccountClassesFetch extends GlAccountEvent {
   const AccountClassesFetch();
 }
+
+class AccountTypesFetch extends GlAccountEvent {
+  const AccountTypesFetch();
+}

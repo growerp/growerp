@@ -32,20 +32,24 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   final _accountNameController = TextEditingController();
   final _accountCodeController = TextEditingController();
   final _classSearchBoxController = TextEditingController();
+  final _typeSearchBoxController = TextEditingController();
   bool? debitSelected;
   AccountClass? classSelected;
+  AccountType? typeSelected;
   late GlAccountBloc _glAccountBloc;
 
   @override
   void initState() {
     super.initState();
-    _glAccountBloc = context.read<GlAccountBloc>()..add(const GlAccountFetch());
-    _glAccountBloc = context.read<GlAccountBloc>()..add(AccountClassesFetch());
+    _glAccountBloc = context.read<GlAccountBloc>()
+      ..add(const AccountClassesFetch())
+      ..add(const AccountTypesFetch());
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
       debitSelected = widget.glAccount.isDebit;
       classSelected = widget.glAccount.accountClass;
+      typeSelected = widget.glAccount.accountType;
     }
   }
 
@@ -54,7 +58,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     int columns = ResponsiveBreakpoints.of(context).isMobile ? 1 : 2;
     return BlocListener<GlAccountBloc, GlAccountState>(
         listenWhen: (previous, current) =>
-            previous.status == GlAccountStatus.loading,
+            previous.status == GlAccountStatus.glAccountLoading,
         listener: (context, state) async {
           switch (state.status) {
             case GlAccountStatus.success:
@@ -140,6 +144,44 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                 classSelected = newValue;
               },
               items: state.accountClasses,
+              validator: (value) => value == null ? 'field required' : null,
+            );
+          default:
+            return const Center(child: CircularProgressIndicator());
+        }
+      }),
+      BlocBuilder<GlAccountBloc, GlAccountState>(builder: (context, state) {
+        switch (state.status) {
+          case GlAccountStatus.failure:
+            return const FatalErrorForm(message: 'server connection problem');
+          case GlAccountStatus.success:
+            return DropdownSearch<AccountType>(
+              key: const Key('typesDropDown'),
+              selectedItem: typeSelected,
+              popupProps: PopupProps.menu(
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  autofocus: true,
+                  decoration: const InputDecoration(labelText: 'Account Type'),
+                  controller: _typeSearchBoxController,
+                ),
+                title: popUp(
+                  context: context,
+                  title: 'Account Type',
+                  height: 50,
+                ),
+              ),
+              dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: 'Type',
+                  hintText: "Account Type",
+                ),
+              ),
+              itemAsString: (AccountType? u) => "${u!.description}",
+              onChanged: (AccountType? newValue) {
+                typeSelected = newValue;
+              },
+              items: state.accountTypes,
               validator: (value) => value == null ? 'field required' : null,
             );
           default:

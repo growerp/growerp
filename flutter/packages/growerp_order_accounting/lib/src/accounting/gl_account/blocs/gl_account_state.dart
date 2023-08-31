@@ -14,13 +14,14 @@
 
 part of 'gl_account_bloc.dart';
 
-enum GlAccountStatus { initial, loading, success, failure }
+enum GlAccountStatus { initial, glAccountLoading, loading, success, failure }
 
 class GlAccountState extends Equatable {
   const GlAccountState({
     this.status = GlAccountStatus.initial,
     this.glAccounts = const <GlAccount>[],
     this.accountClasses = const <AccountClass>[],
+    this.accountTypes = const <AccountType>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -30,6 +31,7 @@ class GlAccountState extends Equatable {
   final String? message;
   final List<GlAccount> glAccounts;
   final List<AccountClass> accountClasses;
+  final List<AccountType> accountTypes;
   final bool hasReachedMax;
   final String searchString;
 
@@ -38,6 +40,7 @@ class GlAccountState extends Equatable {
     String? message,
     List<GlAccount>? glAccounts,
     List<AccountClass>? accountClasses,
+    List<AccountType>? accountTypes,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -46,6 +49,7 @@ class GlAccountState extends Equatable {
       status: status ?? this.status,
       glAccounts: glAccounts ?? this.glAccounts,
       accountClasses: accountClasses ?? this.accountClasses,
+      accountTypes: accountTypes ?? this.accountTypes,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
