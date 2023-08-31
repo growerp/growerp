@@ -26,38 +26,33 @@ class BinaryRadioButtonState extends State<BinaryRadioButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Radio(
-              value: true,
-              groupValue: _isSelected,
-              onChanged: widget.canUpdate
-                  ? (value) {
-                      setState(() {
-                        _isSelected = (value ?? false) as bool?;
-                      });
-                    }
-                  : null,
-            ),
-            const Text('Debit'),
-            Radio(
-              value: false,
-              groupValue: _isSelected,
-              onChanged: widget.canUpdate
-                  ? (value) {
-                      setState(() {
-                        _isSelected = (value ?? false) as bool?;
-                      });
-                    }
-                  : null,
-            ),
-            const Text('Credit'),
-          ],
+        const Text('Debit'),
+        Radio(
+          value: true,
+          groupValue: _isSelected,
+          onChanged: widget.canUpdate
+              ? (value) {
+                  setState(() {
+                    _isSelected = (value ?? false) as bool?;
+                  });
+                }
+              : null,
         ),
+        Radio(
+          value: false,
+          groupValue: _isSelected,
+          onChanged: widget.canUpdate
+              ? (value) {
+                  setState(() {
+                    _isSelected = (value ?? false) as bool?;
+                  });
+                }
+              : null,
+        ),
+        const Text('Credit'),
       ],
     );
   }

@@ -369,7 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
 
                 def showClass(Map classInfo, int depth) {
                     // if (!classInfo.totalBalanceByTimePeriod.ALL &amp;&amp; !classInfo.totalPostedByTimePeriod.ALL) return null;
-                    ec.logger.info("==$depth-1==${classInfo.glAccountClassEnumId}/${classInfo.className} =======${classInfo.totalBalanceByTimePeriod.ALL}")
+                    //ec.logger.info("==$depth-1==${classInfo.glAccountClassEnumId}/${classInfo.className} =======${classInfo.totalBalanceByTimePeriod.ALL}")
                     def classInfoData = [level: depth, children: []];
                     classInfo.each { classInfoEl -&gt;
                         switch(classInfoEl.key) {
@@ -870,7 +870,6 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <log message="=======$accountCode" />
             <script>
                 def List glAccounts;
                 def String newAccountCode;
@@ -878,7 +877,7 @@ along with this software (see the LICENSE.md file). If not, see
                 while(!glAccounts) {
                     newAccountCode = accountCode.substring(0, lastNumber);
                     newAccountCode += ('0' * (accountCode.size() - lastNumber));
-                    logger.info("=======$newAccountCode")
+                    //logger.info("=======$newAccountCode")
                     if (newAccountcode == ('0' * accountCode.size())) return;
 
                     // groovy code generated from commented code below 
@@ -976,6 +975,7 @@ along with this software (see the LICENSE.md file). If not, see
             </iterate>
         </actions>
     </service>
+
     <service verb="get" noun="GlAccountType">
         <out-parameters>
             <parameter name="accountTypeList" type="List">
@@ -988,10 +988,10 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="moqui.basic.Enumeration" list="enums">
                 <econdition field-name="enumTypeId" value="GlAccountType" />
             </entity-find>
-            <set field="accountClassList" from="[]" />
+            <set field="accountTypeList" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
-                    accountClassList.add(
+                    accountTypeList.add(
                         accountClassId: enumEntry.enumId,
                         parentClassId: enumEntry.parentEnumId,
                         description: enumEntry.description,

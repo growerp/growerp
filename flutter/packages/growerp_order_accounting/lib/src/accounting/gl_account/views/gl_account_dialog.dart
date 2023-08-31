@@ -42,8 +42,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   void initState() {
     super.initState();
     _glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const AccountClassesFetch())
-      ..add(const AccountTypesFetch());
+      ..add(const AccountTypesFetch())
+      ..add(const AccountClassesFetch());
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
@@ -84,12 +84,24 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     context: context,
                     title:
                         "GlAccount #${widget.glAccount.glAccountId ?? " New"}",
-                    width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 700,
-                    child: _glAccountForm()))));
+                    width: columns.toDouble() * 350,
+                    height: 600 / columns.toDouble(),
+                    child: BlocBuilder<GlAccountBloc, GlAccountState>(
+                        builder: (context, state) {
+                      switch (state.status) {
+                        case GlAccountStatus.failure:
+                          return const FatalErrorForm(
+                              message: 'server connection problem');
+                        case GlAccountStatus.success:
+                          return _glAccountForm(state);
+                        default:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                      }
+                    })))));
   }
 
-  Widget _glAccountForm() {
+  Widget _glAccountForm(state) {
     List<Widget> widgets = [
       TextFormField(
         key: const Key('id'),
@@ -112,106 +124,83 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             isDebit: debitSelected,
             canUpdate: false,
             onValueChanged: (debitSelected) {}),
-      BlocBuilder<GlAccountBloc, GlAccountState>(builder: (context, state) {
-        switch (state.status) {
-          case GlAccountStatus.failure:
-            return const FatalErrorForm(message: 'server connection problem');
-          case GlAccountStatus.success:
-            return DropdownSearch<AccountClass>(
-              key: const Key('classesDropDown'),
-              selectedItem: classSelected,
-              popupProps: PopupProps.menu(
-                showSearchBox: true,
-                searchFieldProps: TextFieldProps(
-                  autofocus: true,
-                  decoration: const InputDecoration(labelText: 'Account Class'),
-                  controller: _classSearchBoxController,
-                ),
-                title: popUp(
-                  context: context,
-                  title: 'Account Class',
-                  height: 50,
-                ),
-              ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Class',
-                  hintText: "Account Class",
-                ),
-              ),
-              itemAsString: (AccountClass? u) => "${u!.description}",
-              onChanged: (AccountClass? newValue) {
-                classSelected = newValue;
-              },
-              items: state.accountClasses,
-              validator: (value) => value == null ? 'field required' : null,
-            );
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      }),
-      BlocBuilder<GlAccountBloc, GlAccountState>(builder: (context, state) {
-        switch (state.status) {
-          case GlAccountStatus.failure:
-            return const FatalErrorForm(message: 'server connection problem');
-          case GlAccountStatus.success:
-            return DropdownSearch<AccountType>(
-              key: const Key('typesDropDown'),
-              selectedItem: typeSelected,
-              popupProps: PopupProps.menu(
-                showSearchBox: true,
-                searchFieldProps: TextFieldProps(
-                  autofocus: true,
-                  decoration: const InputDecoration(labelText: 'Account Type'),
-                  controller: _typeSearchBoxController,
-                ),
-                title: popUp(
-                  context: context,
-                  title: 'Account Type',
-                  height: 50,
-                ),
-              ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Type',
-                  hintText: "Account Type",
-                ),
-              ),
-              itemAsString: (AccountType? u) => "${u!.description}",
-              onChanged: (AccountType? newValue) {
-                typeSelected = newValue;
-              },
-              items: state.accountTypes,
-              validator: (value) => value == null ? 'field required' : null,
-            );
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      }),
-      Row(
-        children: [
-          const SizedBox(width: 10),
-          Expanded(
-            child: ElevatedButton(
-                key: const Key('update'),
-                child: Text(
-                    widget.glAccount.glAccountId == null ? 'Create' : 'Update'),
-                onPressed: () {
-                  if (_formKeyGlAccount.currentState!.validate()) {
-                    _glAccountBloc.add(GlAccountUpdate(GlAccount(
-                      glAccountId: widget.glAccount.glAccountId,
-                      accountName: _accountNameController.text,
-                      accountCode: _accountCodeController.text,
-                      accountClass: classSelected,
-                    )));
-                  }
-                }),
+      DropdownSearch<AccountClass>(
+        key: const Key('classesDropDown'),
+        selectedItem: classSelected,
+        popupProps: PopupProps.menu(
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            autofocus: true,
+            decoration: const InputDecoration(labelText: 'Account Class'),
+            controller: _classSearchBoxController,
           ),
-        ],
+          title: popUp(
+            context: context,
+            title: 'Account Class',
+            height: 50,
+          ),
+        ),
+        dropdownDecoratorProps: const DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: 'Class',
+            hintText: "Account Class",
+          ),
+        ),
+        itemAsString: (AccountClass? u) => "${u!.description}",
+        onChanged: (AccountClass? newValue) {
+          classSelected = newValue;
+        },
+        items: state.accountClasses,
+        validator: (value) => value == null ? 'field required' : null,
       ),
+      DropdownSearch<AccountType>(
+        key: const Key('typesDropDown'),
+        selectedItem: typeSelected,
+        popupProps: PopupProps.menu(
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            autofocus: true,
+            decoration: const InputDecoration(labelText: 'Account Type'),
+            controller: _typeSearchBoxController,
+          ),
+          title: popUp(
+            context: context,
+            title: 'Account Type',
+            height: 50,
+          ),
+        ),
+        dropdownDecoratorProps: const DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: 'Type',
+            hintText: "Account Type",
+          ),
+        ),
+        itemAsString: (AccountType? u) => "${u!.description}",
+        onChanged: (AccountType? newValue) {
+          typeSelected = newValue;
+        },
+        items: state.accountTypes,
+        validator: (value) => value == null ? 'field required' : null,
+      ),
+      ElevatedButton(
+          key: const Key('update'),
+          child:
+              Text(widget.glAccount.glAccountId == null ? 'Create' : 'Update'),
+          onPressed: () {
+            if (_formKeyGlAccount.currentState!.validate()) {
+              _glAccountBloc.add(GlAccountUpdate(GlAccount(
+                glAccountId: widget.glAccount.glAccountId,
+                accountName: _accountNameController.text,
+                accountCode: _accountCodeController.text,
+                accountClass: classSelected,
+                accountType: typeSelected,
+              )));
+            }
+          }),
     ];
 
     List<Widget> rows = [];
+    List<Widget> column = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
       // change list in two columns
       for (var i = 0; i < widgets.length; i++) {
@@ -227,20 +216,21 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           ],
         ));
       }
-    }
-    List<Widget> column = [];
-    for (var i = 0; i < widgets.length; i++) {
-      column.add(widgets[i]);
+    } else {
+      for (var i = 0; i < widgets.length; i++) {
+        column.add(Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: widgets[i],
+        ));
+      }
     }
 
-    return Column(children: [
-      Form(
-          key: _formKeyGlAccount,
-          child: SingleChildScrollView(
-            key: const Key('listView'),
-            padding: const EdgeInsets.all(20),
-            child: Column(children: (rows.isEmpty ? column : rows)),
-          )),
-    ]);
+    return Form(
+      key: _formKeyGlAccount,
+      child: SingleChildScrollView(
+          key: const Key('listView'),
+          padding: const EdgeInsets.all(20),
+          child: Column(children: rows.isEmpty ? column : rows)),
+    );
   }
 }
