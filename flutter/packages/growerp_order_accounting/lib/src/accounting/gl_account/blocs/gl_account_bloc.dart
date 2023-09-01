@@ -18,6 +18,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
 import '../../accounting.dart';
 
@@ -39,6 +40,8 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     on<GlAccountUpdate>(_onGlAccountUpdate);
     on<AccountClassesFetch>(_onAccountClassesFetch);
     on<AccountTypesFetch>(_onAccountTypesFetch);
+    on<GlAccountUpload>(_onGlAccountUpload);
+    on<GlAccountDownload>(_onGlAccountDownload);
   }
 
   final AccountingAPIRepository repos;
@@ -167,6 +170,69 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
         success: (data) =>
             state.copyWith(accountTypes: data, status: GlAccountStatus.success),
         failure: (error) => state.copyWith(
+            status: GlAccountStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
+  }
+
+  Future<void> _onGlAccountUpload(
+    GlAccountUpload event,
+    Emitter<GlAccountState> emit,
+  ) async {
+    emit(state.copyWith(status: GlAccountStatus.loading));
+    List<GlAccount> glAccounts = [];
+    final result = fast_csv.parse(event.file);
+    int line = 0;
+    // import csv into glAccounts
+    for (final row in result) {
+      if (line++ < 2 || row.length < 12) continue;
+      List<Category> categories = [];
+      if (row[9].isNotEmpty) categories.add(Category(categoryName: row[9]));
+      if (row[10].isNotEmpty) categories.add(Category(categoryName: row[10]));
+      if (row[11].isNotEmpty) categories.add(Category(categoryName: row[11]));
+
+/*     glAccounts.add(GlAccount(
+        productName: row[0],
+        description: row[1],
+        productTypeId: row[2],
+        image: const Base64Decoder().convert(row[3]),
+        assetClassId: row[4],
+        listPrice: Decimal.parse(row[5]),
+        price: Decimal.parse(row[6]),
+        useWarehouse: row[7] == 'true' ? true : false,
+        assetCount: int.parse(row[8]),
+        categories: categories,
+      ));
+*/
+    }
+
+    ApiResult<String> compResult = await repos.importGlAccounts(glAccounts);
+    return emit(compResult.when(
+        success: (data) {
+          return state.copyWith(
+              status: GlAccountStatus.success,
+              glAccounts: state.glAccounts,
+              message: data);
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
+            status: GlAccountStatus.failure,
+            message: NetworkExceptions.getErrorMessage(error))));
+  }
+
+  Future<void> _onGlAccountDownload(
+    GlAccountDownload event,
+    Emitter<GlAccountState> emit,
+  ) async {
+    emit(state.copyWith(status: GlAccountStatus.loading));
+    ApiResult<String> compResult = await repos.exportGlAccounts();
+    return emit(compResult.when(
+        success: (data) {
+          return state.copyWith(
+              status: GlAccountStatus.success,
+              glAccounts: state.glAccounts,
+              message:
+                  "The request is scheduled and the email will be sent shortly");
+        },
+        failure: (NetworkExceptions error) => state.copyWith(
             status: GlAccountStatus.failure,
             message: NetworkExceptions.getErrorMessage(error))));
   }

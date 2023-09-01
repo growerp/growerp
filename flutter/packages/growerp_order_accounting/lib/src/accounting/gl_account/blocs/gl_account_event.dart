@@ -45,3 +45,12 @@ class AccountClassesFetch extends GlAccountEvent {
 class AccountTypesFetch extends GlAccountEvent {
   const AccountTypesFetch();
 }
+
+/// initiate a download of products by email.
+class GlAccountDownload extends GlAccountEvent {}
+
+/// start a [GlAccount] import
+class GlAccountUpload extends GlAccountEvent {
+  const GlAccountUpload(this.file);
+  final String file;
+}

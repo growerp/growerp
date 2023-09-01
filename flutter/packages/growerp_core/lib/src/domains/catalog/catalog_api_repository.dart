@@ -100,10 +100,9 @@ class CatalogAPIRepository extends APIRepository {
   Future<ApiResult<String>> importProducts(List<Product> products) async {
     try {
       final response = await dioClient.post(
-          'rest/s1/growerp/100/ImportExport/Products', apiKey!,
+          'rest/s1/growerp/100/ImportExport', apiKey!,
           data: <String, dynamic>{
-            'productList':
-                '{"products":${jsonEncode(products.map((x) => x.toJson()).toList())}}',
+            'products': 'jsonEncode(products.map((x) => x.toJson()).toList())',
             'classificationId': classificationId,
             'moquiSessionToken': sessionToken
           });
@@ -117,8 +116,9 @@ class CatalogAPIRepository extends APIRepository {
   Future<ApiResult<String>> exportProducts() async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/ImportExport/Products', apiKey,
+          'rest/s1/growerp/100/ImportExport', apiKey,
           queryParameters: <String, dynamic>{
+            'entityName': 'Product',
             'classificationId': classificationId,
           });
       return ApiResult.success(
@@ -226,10 +226,10 @@ class CatalogAPIRepository extends APIRepository {
   Future<ApiResult<String>> importCategories(List<Category> categories) async {
     try {
       final response = await dioClient.post(
-          'rest/s1/growerp/100/ImportExport/Categories', apiKey!,
+          'rest/s1/growerp/100/ImportExport', apiKey!,
           data: <String, dynamic>{
-            'categoryList':
-                '{"categories":${jsonEncode(categories.map((x) => x.toJson()).toList())}}',
+            'categories':
+                jsonEncode(categories.map((x) => x.toJson()).toList()),
             'classificationId': classificationId,
             'moquiSessionToken': sessionToken
           });
@@ -243,8 +243,9 @@ class CatalogAPIRepository extends APIRepository {
   Future<ApiResult<String>> exportCategories() async {
     try {
       final response = await dioClient.get(
-          'rest/s1/growerp/100/ImportExport/Categories', apiKey,
+          'rest/s1/growerp/100/ImportExport', apiKey,
           queryParameters: <String, dynamic>{
+            'entityName': 'Category',
             'classificationId': classificationId,
           });
       return ApiResult.success(

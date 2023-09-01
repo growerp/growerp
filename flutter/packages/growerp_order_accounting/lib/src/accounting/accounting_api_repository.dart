@@ -202,4 +202,36 @@ class AccountingAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
+
+  Future<ApiResult<String>> importGlAccounts(List<GlAccount> glAccounts) async {
+    try {
+      final response = await dioClient.post(
+          'rest/s1/growerp/100/ImportExport', apiKey!,
+          data: <String, dynamic>{
+            'glAccounts':
+                '{"glAccounts":${jsonEncode(glAccounts.map((x) => x.toJson()).toList())}}',
+            'classificationId': classificationId,
+            'moquiSessionToken': sessionToken
+          });
+      return ApiResult.success(
+          data: jsonDecode(response.toString())['messages'] ?? 'no result');
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
+
+  Future<ApiResult<String>> exportGlAccounts() async {
+    try {
+      final response = await dioClient.get(
+          'rest/s1/growerp/100/ImportExport', apiKey,
+          queryParameters: <String, dynamic>{
+            'entityName': 'GlAccount',
+            'classificationId': classificationId,
+          });
+      return ApiResult.success(
+          data: jsonDecode(response.toString())['messages'] ?? 'no result');
+    } on Exception catch (e) {
+      return ApiResult.failure(error: NetworkExceptions.getDioException(e));
+    }
+  }
 }

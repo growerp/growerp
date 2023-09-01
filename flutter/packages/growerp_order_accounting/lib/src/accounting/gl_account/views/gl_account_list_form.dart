@@ -64,18 +64,38 @@ class GlAccountsState extends State<GlAccountList> {
                 child: Text('failed to fetch glAccounts: ${state.message}'));
           case GlAccountStatus.success:
             return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) => BlocProvider.value(
-                              value: _glAccountBloc,
-                              child: GlAccountDialog(GlAccount())));
-                    },
-                    tooltip: 'Add New',
-                    child: const Icon(Icons.add)),
+                floatingActionButton:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  FloatingActionButton(
+                      heroTag: 'productFiles',
+                      key: const Key("upDownload"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _glAccountBloc,
+                                  child: const GlAccountFilesDialog());
+                            });
+                      },
+                      tooltip: 'products up/download',
+                      child: const Icon(Icons.file_copy)),
+                  const SizedBox(height: 10),
+                  FloatingActionButton(
+                      key: const Key("addNew"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) =>
+                                BlocProvider.value(
+                                    value: _glAccountBloc,
+                                    child: GlAccountDialog(GlAccount())));
+                      },
+                      tooltip: 'Add New',
+                      child: const Icon(Icons.add)),
+                ]),
                 body: Column(children: [
                   const GlAccountListHeader(),
                   Expanded(

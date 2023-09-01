@@ -14,79 +14,116 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <entity-facade-xml type="seed">
     <!-- owner party type -->
-    <moqui.basic.Enumeration description="Owner" enumId="PtyOwner" enumTypeId="PartyType"/>
+    <moqui.basic.Enumeration description="Owner" enumId="PtyOwner" enumTypeId="PartyType" />
 
-    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname" description="Product Store ID From Hostname" enumId="PsstHostname" enumTypeId="ProductStoreSettingType"/>
-    <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId" enumId="PsstMeasurementId" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
+        description="Product Store ID From Hostname" enumId="PsstHostname"
+        enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="product_store_id_measurement_id" description="MeasurementId"
+        enumId="PsstMeasurementId" enumTypeId="ProductStoreSettingType" />
 
     <!-- Configuration send email GMAIL-->
-    <!--moqui.basic.email.EmailServer emailServerId="SYSTEM"
+    <!--moqui.basic.email.EmailServer
+    emailServerId="SYSTEM"
             smtpHost="smtp.gmail.com" smtpPort="587" smtpStartTls="Y" smtpSsl="N"
             storeHost="imap.gmail.com" storePort="993" storeProtocol="imaps" storeFolder=""
-            storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}" mailPassword="${SMTP_PASSWORD}"/-->
+            storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}"
+    mailPassword="${SMTP_PASSWORD}"/-->
     <!-- email opensrs -->
     <moqui.basic.email.EmailServer emailServerId="SYSTEM"
-            smtpHost="smtp.growerp.com.cust.hostedemail.com" smtpPort="465" smtpStartTls="Y" smtpSsl="Y"
-        storeHost="mail.growerp.com.cust.hostedemail.com" storePort="993" storeProtocol="imaps" storeFolder="backend"
-        storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}" mailPassword="${SMTP_PASSWORD}"/>
+        smtpHost="smtp.growerp.com.cust.hostedemail.com" smtpPort="465" smtpStartTls="Y" smtpSsl="Y"
+        storeHost="mail.growerp.com.cust.hostedemail.com" storePort="993" storeProtocol="imaps"
+        storeFolder="backend"
+        storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}"
+        mailPassword="${SMTP_PASSWORD}" />
 
     <!-- birdsend email registration -->
-    <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co" apiVersion="v1"
-		value1="${appInstance.BIRDSEND_AUTM_SEQUENCE}" apiKey="${appInstance.BIRDSEND_API_KEY}"/>   
+    <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co"
+        apiVersion="v1"
+        value1="${appInstance.BIRDSEND_AUTM_SEQUENCE}" apiKey="${appInstance.BIRDSEND_API_KEY}" />
 
-     <!-- allocate companies to application -->
-    <moqui.basic.Enumeration description="Mobile App Name used by company" enumId="PcltMobileApp" enumTypeId="PartyClassificationType"/>
-    <mantle.party.PartyClassification partyClassificationId="AppAdmin" classificationTypeEnumId="PcltMobileApp" description="Admin app to maintain backoffice data, products, categories, orders"/>
-    <mantle.party.PartyClassification partyClassificationId="AppRestaurant" classificationTypeEnumId="PcltMobileApp" description="App for restaurant,cafe,bar"/>
-    <mantle.party.PartyClassification partyClassificationId="AppPOS" classificationTypeEnumId="PcltMobileApp" description="Point of sale APP"/>
-    <mantle.party.PartyClassification partyClassificationId="AppEcommerceShop" classificationTypeEnumId="PcltMobileApp" description="App for Ecommerce and shop"/>
-    <mantle.party.PartyClassification partyClassificationId="AppHospital" classificationTypeEnumId="PcltMobileApp" description="App for Hospital/Clinic/Dentist/Doctor/Beauty Shop"/>
-    <mantle.party.PartyClassification partyClassificationId="AppService" classificationTypeEnumId="PcltMobileApp" description="App for Service company, freelancer, wfh"/>
-    <mantle.party.PartyClassification partyClassificationId="AppHotel" classificationTypeEnumId="PcltMobileApp" description="App for Hotel, Bed &amp; Breakfeast"/>
-    <mantle.party.PartyClassification partyClassificationId="AppRealtor" classificationTypeEnumId="PcltMobileApp" description="App for Realtor/property management"/>
-    <mantle.party.PartyClassification partyClassificationId="AppFreelance" classificationTypeEnumId="PcltMobileApp" description="App for a freelancer"/>
+    <!-- allocate companies to application -->
+    <moqui.basic.Enumeration description="Mobile App Name used by company" enumId="PcltMobileApp"
+        enumTypeId="PartyClassificationType" />
+    <mantle.party.PartyClassification partyClassificationId="AppAdmin"
+        classificationTypeEnumId="PcltMobileApp"
+        description="Admin app to maintain backoffice data, products, categories, orders" />
+    <mantle.party.PartyClassification partyClassificationId="AppRestaurant"
+        classificationTypeEnumId="PcltMobileApp" description="App for restaurant,cafe,bar" />
+    <mantle.party.PartyClassification partyClassificationId="AppPOS"
+        classificationTypeEnumId="PcltMobileApp" description="Point of sale APP" />
+    <mantle.party.PartyClassification partyClassificationId="AppEcommerceShop"
+        classificationTypeEnumId="PcltMobileApp" description="App for Ecommerce and shop" />
+    <mantle.party.PartyClassification partyClassificationId="AppHospital"
+        classificationTypeEnumId="PcltMobileApp"
+        description="App for Hospital/Clinic/Dentist/Doctor/Beauty Shop" />
+    <mantle.party.PartyClassification partyClassificationId="AppService"
+        classificationTypeEnumId="PcltMobileApp"
+        description="App for Service company, freelancer, wfh" />
+    <mantle.party.PartyClassification partyClassificationId="AppHotel"
+        classificationTypeEnumId="PcltMobileApp" description="App for Hotel, Bed &amp; Breakfeast" />
+    <mantle.party.PartyClassification partyClassificationId="AppRealtor"
+        classificationTypeEnumId="PcltMobileApp" description="App for Realtor/property management" />
+    <mantle.party.PartyClassification partyClassificationId="AppFreelance"
+        classificationTypeEnumId="PcltMobileApp" description="App for a freelancer" />
 
     <!-- sales opportunity stage -->
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1"/>
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Qualification" sequenceNum="2"/>
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Demo/Meeting" sequenceNum="3"/>
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Proposal" sequenceNum="4"/>
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Quote" sequenceNum="5"/>
-    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Deleted" sequenceNum="5"/>
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Qualification"
+        sequenceNum="2" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Demo/Meeting"
+        sequenceNum="3" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Proposal" sequenceNum="4" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Quote" sequenceNum="5" />
+    <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Deleted" sequenceNum="5" />
     <!-- added thumbnail image size for party -->
-    <moqui.basic.Enumeration description="Logo Image Thump Nail"  enumId="PcntLogoThumbImage" enumTypeId="PartyContentType"/>
-    <moqui.basic.Enumeration description="Face Image Thump Nail"  enumId="PcntFaceThumbImage" enumTypeId="PartyContentType"/>
-    
+    <moqui.basic.Enumeration description="Logo Image Thump Nail" enumId="PcntLogoThumbImage"
+        enumTypeId="PartyContentType" />
+    <moqui.basic.Enumeration description="Face Image Thump Nail" enumId="PcntFaceThumbImage"
+        enumTypeId="PartyContentType" />
+
     <!-- Customer Status -->
-    <moqui.basic.StatusType statusTypeId="CustomerStatus" description="Customer Status"/>
-    <moqui.basic.StatusItem description="Assigned" sequenceNum="1" statusId="CUSTOMER_ASSIGNED" statusTypeId="CustomerStatus"/>
-    <moqui.basic.StatusItem description="Converted" sequenceNum="2" statusId="CUSTOMER_CONVERTED" statusTypeId="CustomerStatus"/>
-    <moqui.basic.StatusItem description="Qualified" sequenceNum="3" statusId="CUSTOMER_QUALIFIED" statusTypeId="CustomerStatus"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CUSTOMER_ASSIGNED" toStatusId="CUSTOMER_CONVERTED" transitionName="Converted"/>
-    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CUSTOMER_ASSIGNED" toStatusId="CUSTOMER_QUALIFIED" transitionName="Qualified"/>
+    <moqui.basic.StatusType statusTypeId="CustomerStatus" description="Customer Status" />
+    <moqui.basic.StatusItem description="Assigned" sequenceNum="1" statusId="CUSTOMER_ASSIGNED"
+        statusTypeId="CustomerStatus" />
+    <moqui.basic.StatusItem description="Converted" sequenceNum="2" statusId="CUSTOMER_CONVERTED"
+        statusTypeId="CustomerStatus" />
+    <moqui.basic.StatusItem description="Qualified" sequenceNum="3" statusId="CUSTOMER_QUALIFIED"
+        statusTypeId="CustomerStatus" />
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CUSTOMER_ASSIGNED"
+        toStatusId="CUSTOMER_CONVERTED" transitionName="Converted" />
+    <moqui.basic.StatusFlowTransition statusFlowId="Default" statusId="CUSTOMER_ASSIGNED"
+        toStatusId="CUSTOMER_QUALIFIED" transitionName="Qualified" />
 
     <!-- added images for category -->
-    <moqui.basic.Enumeration description="Category Image Thumb Nail" enumId="PcctImageThumbNail" enumTypeId="ProductCategoryContentType"/>
-    <moqui.basic.Enumeration description="Category Image Medium Size" enumId="PcctImageMedium" enumTypeId="ProductCategoryContentType"/>
-    <moqui.basic.Enumeration description="Category Image Large Size" enumId="PcctImageLarge" enumTypeId="ProductCategoryContentType"/>
+    <moqui.basic.Enumeration description="Category Image Thumb Nail" enumId="PcctImageThumbNail"
+        enumTypeId="ProductCategoryContentType" />
+    <moqui.basic.Enumeration description="Category Image Medium Size" enumId="PcctImageMedium"
+        enumTypeId="ProductCategoryContentType" />
+    <moqui.basic.Enumeration description="Category Image Large Size" enumId="PcctImageLarge"
+        enumTypeId="ProductCategoryContentType" />
 
     <!-- define a top level category  -->
-    <moqui.basic.Enumeration enumId="PctRoot" description="All Products Root category" enumTypeId="ProductCategoryType"/>
-    <!--moqui.basic.Enumeration enumId="PctRestaurant" description="Menu for Restauarant" enumTypeId="ProductCategoryType"/-->
+    <moqui.basic.Enumeration enumId="PctRoot" description="All Products Root category"
+        enumTypeId="ProductCategoryType" />
+    <!--moqui.basic.Enumeration
+    enumId="PctRestaurant" description="Menu for Restauarant" enumTypeId="ProductCategoryType"/-->
 
     <!-- hotel room reservation new product type: no shipment -->
-    <moqui.basic.Enumeration description="Fixed Asset Use" enumId="PtFixedAssetUse" enumTypeId="ProductType"/>
+    <moqui.basic.Enumeration description="Fixed Asset Use" enumId="PtFixedAssetUse"
+        enumTypeId="ProductType" />
 
     <!-- additional roles -->
     <!-- ordertaker is also stored in the field enteredByPartyId in orderheader -->
-    <mantle.party.RoleType description="Added more after initial entry of the order" roleTypeId="OrderTakeMore"/><!--  when entered as an update -->
-    <mantle.party.RoleType description="Prepared part of the order" roleTypeId="OrderPrepare"/>
-    <mantle.party.RoleType description="Served part of the order" roleTypeId="OrderServe"/>
+    <mantle.party.RoleType description="Added more after initial entry of the order"
+        roleTypeId="OrderTakeMore" /><!--  when entered as an update -->
+    <mantle.party.RoleType description="Prepared part of the order" roleTypeId="OrderPrepare" />
+    <mantle.party.RoleType description="Served part of the order" roleTypeId="OrderServe" />
     <!-- Cashier used for billing -->
 
     <!-- order to facilitate a contact person for the 'other' company -->
-    <mantle.party.RoleType description="Vendor Contact Person" roleTypeId="VendorContactPerson"/>
-    <mantle.party.RoleType description="Customer Contact Person" roleTypeId="CustomerContactPerson"/>
+    <mantle.party.RoleType description="Vendor Contact Person" roleTypeId="VendorContactPerson" />
+    <mantle.party.RoleType description="Customer Contact Person" roleTypeId="CustomerContactPerson" />
 
     <!-- email templates -->
     <!-- EmailTemplate for general notifications -->
@@ -96,22 +133,22 @@ along with this software (see the LICENSE.md file). If not, see
         bodyScreenLocation="classpath://screen/NotificationEmail.xml"
         webappName="webroot"
         fromAddress="support@growerp.com" fromName="GrowERP system"
-        ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y"/>
+        ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y" />
     <!-- EmailTemplate for password reset email -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PASSWORD_RESET"
-        description="Default Password Reset" 
-        emailServerId="SYSTEM" emailTypeEnumId="EMT_PWD_RESET" 
+        description="Default Password Reset"
+        emailServerId="SYSTEM" emailTypeEnumId="EMT_PWD_RESET"
         bodyScreenLocation="component://growerp/screen/email/PasswordReset.xml"
         fromAddress="support@growerp.com" ccAddresses=""
-        bccAddresses="" subject="Password Reset" sendPartial="Y"/>
+        bccAddresses="" subject="Password Reset" sendPartial="Y" />
     <!-- welcome email -->
     <moqui.basic.email.EmailTemplate emailTemplateId="WELCOME"
-        description="Welcome email with Password" 
-        emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM" 
+        description="Welcome email with Password"
+        emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
         bodyScreenLocation="component://growerp/screen/email/Welcome.xml"
         fromAddress="support@growerp.com" fromName="GrowERP system"
         ccAddresses="" bccAddresses="info@growerp.com"
-        subject="Welcome and Password!" sendPartial="Y"/>
+        subject="Welcome and Password!" sendPartial="Y" />
     <!-- export -->
     <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportCategories"
         description="GrowERP export Categories"
@@ -121,8 +158,9 @@ along with this software (see the LICENSE.md file). If not, see
         bodyScreenLocation="component://growerp/screen/email/CategoriesExportBody.xml">
         <attachments fileName="categories.csv"
             attachmentLocation="component://growerp/screen/email/CategoriesExportAtt.xml"
-            screenRenderMode="text"/>
+            screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
+
     <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportProducts"
         description="GrowERP export Products"
         emailServerId="SYSTEM" webappName="webroot"
@@ -131,134 +169,186 @@ along with this software (see the LICENSE.md file). If not, see
         bodyScreenLocation="component://growerp/screen/email/ProductsExportBody.xml">
         <attachments fileName="products.csv"
             attachmentLocation="component://growerp/screen/email/ProductsExportAtt.xml"
-            screenRenderMode="text"/>
+            screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
-    
-     <!--<growerp.InstallServices.deleteAssetClass/> existing classes used in accounting -->
-    <moqui.basic.Enumeration description="Hotel Room" enumId="AsClsRoom" enumTypeId="AssetClass"/>
-    <moqui.basic.Enumeration description="Restaurant Table" enumId="AsClsTable" enumTypeId="AssetClass"/>
-    <moqui.basic.Enumeration description="Restaurant Table Area" enumId="AsClsTableArea" enumTypeId="AssetClass"/>
+
+    <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportGlAccounts"
+        description="GrowERP export GlAccounts"
+        emailServerId="SYSTEM" webappName="webroot"
+        fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
+        subject="Export Ledger GlAccounts data"
+        bodyScreenLocation="component://growerp/screen/email/glAccountsExportBody.xml">
+        <attachments fileName="glAccounts.csv"
+            attachmentLocation="component://growerp/screen/email/GlAccountsExportAtt.xml"
+            screenRenderMode="text" />
+    </moqui.basic.email.EmailTemplate>
+
+    <!--<growerp.InstallServices.deleteAssetClass/>
+    existing classes used in accounting -->
+    <moqui.basic.Enumeration description="Hotel Room" enumId="AsClsRoom" enumTypeId="AssetClass" />
+    <moqui.basic.Enumeration description="Restaurant Table" enumId="AsClsTable"
+        enumTypeId="AssetClass" />
+    <moqui.basic.Enumeration description="Restaurant Table Area" enumId="AsClsTableArea"
+        enumTypeId="AssetClass" />
 
     <!-- default template Retail Wiki/Content -->
-    <moqui.resource.DbResource filename="DEFAULT_ROOT" isFile="N" resourceId="DEFAULT_ROOT" parentResourceId=""/>
-    <moqui.resource.DbResource filename="content.html" isFile="Y" resourceId="default_content" parentResourceId="DEFAULT_ROOT">
+    <moqui.resource.DbResource filename="DEFAULT_ROOT" isFile="N" resourceId="DEFAULT_ROOT"
+        parentResourceId="" />
+    <moqui.resource.DbResource filename="content.html" isFile="Y" resourceId="default_content"
+        parentResourceId="DEFAULT_ROOT">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<h3>Welcome to Default Retail</h3>]]></fileData>
-            <histories versionName="01" versionDate="1485028800000" isDiff="N"/>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
     </moqui.resource.DbResource>
     <!-- this is the directory to put all site content under -->
-    <moqui.resource.DbResource filename="content" isFile="N" resourceId="default_content_dir" parentResourceId="DEFAULT_ROOT"/>
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="default_content_dir"
+        parentResourceId="DEFAULT_ROOT" />
     <!-- default setup for wiki productstore, categories etc -->
-    <moqui.resource.wiki.WikiSpace wikiSpaceId="DEFAULT_WS" description="Default Content" restrictView="N" allowAnyHtml="Y"
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="DEFAULT_WS" description="Default Content"
+        restrictView="N" allowAnyHtml="Y"
         rootPageLocation="dbresource://DEFAULT_ROOT" decoratorScreenLocation=""
         publicPageUrl="/content/${pagePath}?ver=${versionName}"
-        publicAttachmentUrl="/popc/content/attachment/${wikiPageId}/${filename}"/>
-        <moqui.resource.wiki.WikiPage wikiPageId="default_content" wikiSpaceId="DEFAULT_WS" pagePath="">
-            <histories historySeqId="01" versionName="01" changeDateTime="1485028800000"/>
+        publicAttachmentUrl="/popc/content/attachment/${wikiPageId}/${filename}" />
+    <moqui.resource.wiki.WikiPage wikiPageId="default_content" wikiSpaceId="DEFAULT_WS" pagePath="">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
     </moqui.resource.wiki.WikiPage>
 
-    <mantle.facility.Facility facilityId="DEFAULT_WH" facilityTypeEnumId="FcTpWarehouse" assetAllowIssueOverQoh="Y"
+    <mantle.facility.Facility facilityId="DEFAULT_WH" facilityTypeEnumId="FcTpWarehouse"
+        assetAllowIssueOverQoh="Y"
         ownerPartyId="_NA_" facilityName="Default Warehouse">
-        <locations locationTypeEnumId="FltPick" description="loc 1" locationSeqId="0001" sequenceNum="1" areaId="01" aisleId="01" sectionId="01" levelId="01" positionId="A"/>
-        <locations locationTypeEnumId="FltPick" description="loc 2" locationSeqId="0002" sequenceNum="2" areaId="02" aisleId="01" sectionId="01" levelId="01" positionId="B"/>
-        <locations locationTypeEnumId="FltPick" description="loc 3" locationSeqId="0003" sequenceNum="3" areaId="03" aisleId="01" sectionId="01" levelId="01" positionId="C"/>
-        <locations locationTypeEnumId="FltPick" description="loc 4" locationSeqId="0004" sequenceNum="4" areaId="04" aisleId="01" sectionId="01" levelId="01" positionId="D"/>
-        <locations locationTypeEnumId="FltPick" description="loc 5" locationSeqId="0005" sequenceNum="5" areaId="05" aisleId="01" sectionId="01" levelId="01" positionId="E"/>
-        <locations locationTypeEnumId="FltPick" description="loc 6" locationSeqId="0006" sequenceNum="6" areaId="06" aisleId="01" sectionId="01" levelId="01" positionId="F"/>
+        <locations locationTypeEnumId="FltPick" description="loc 1" locationSeqId="0001"
+            sequenceNum="1" areaId="01" aisleId="01" sectionId="01" levelId="01" positionId="A" />
+        <locations locationTypeEnumId="FltPick" description="loc 2" locationSeqId="0002"
+            sequenceNum="2" areaId="02" aisleId="01" sectionId="01" levelId="01" positionId="B" />
+        <locations locationTypeEnumId="FltPick" description="loc 3" locationSeqId="0003"
+            sequenceNum="3" areaId="03" aisleId="01" sectionId="01" levelId="01" positionId="C" />
+        <locations locationTypeEnumId="FltPick" description="loc 4" locationSeqId="0004"
+            sequenceNum="4" areaId="04" aisleId="01" sectionId="01" levelId="01" positionId="D" />
+        <locations locationTypeEnumId="FltPick" description="loc 5" locationSeqId="0005"
+            sequenceNum="5" areaId="05" aisleId="01" sectionId="01" levelId="01" positionId="E" />
+        <locations locationTypeEnumId="FltPick" description="loc 6" locationSeqId="0006"
+            sequenceNum="6" areaId="06" aisleId="01" sectionId="01" levelId="01" positionId="F" />
     </mantle.facility.Facility>
 
     <!-- Product for eCommerce Search -->
     <org.moqui.impl.EntityServices.cloneDataDocument dataDocumentId="MantleProduct"
-        newDataDocumentId="PopcProduct" newIndexName="popc"/>
+        newDataDocumentId="PopcProduct" newIndexName="popc" />
     <moqui.entity.document.DataDocumentCondition dataDocumentId="PopcProduct" conditionSeqId="01"
-                fieldNameAlias="productStoreId" fieldValue="POPC_DEFAULT" postQuery="Y"/>
+        fieldNameAlias="productStoreId" fieldValue="POPC_DEFAULT" postQuery="Y" />
     <!-- NOTE: popc ecommerce search screen creates own links like /popc/Product/Detail/${productId} -->
     <moqui.entity.feed.DataFeed dataFeedId="PopCommerceSearch" dataFeedTypeEnumId="DTFDTP_RT_PUSH"
-        feedName="PopCommerce Search" feedReceiveServiceName="org.moqui.search.SearchServices.index#DataDocuments"
+        feedName="PopCommerce Search"
+        feedReceiveServiceName="org.moqui.search.SearchServices.index#DataDocuments"
         feedDeleteServiceName="org.moqui.search.SearchServices.delete#DataDocument">
-        <documents dataDocumentId="PopcProduct"/>
+        <documents dataDocumentId="PopcProduct" />
     </moqui.entity.feed.DataFeed>
 
     <!-- run index for search -->
-    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="MantleSearch"/>
-    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="PopCommerceSearch"/>
+    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="MantleSearch" />
+    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="PopCommerceSearch" />
 
 
     <mantle.product.store.ProductStore productStoreId="POPC_DEFAULT" storeName="Default Store"
-            organizationPartyId="_NA_" inventoryFacilityId="DEFAULT_WH" reservationOrderEnumId="AsResOrdFifoRec"
-            wikiSpaceId="DEFAULT_WS" defaultLocale="en_US" defaultCurrencyUomId="USD" taxGatewayConfigId="LOCAL"
-            requireInventory="Y" productDataDocumentId="PopcProduct">
+        organizationPartyId="_NA_" inventoryFacilityId="DEFAULT_WH"
+        reservationOrderEnumId="AsResOrdFifoRec"
+        wikiSpaceId="DEFAULT_WS" defaultLocale="en_US" defaultCurrencyUomId="USD"
+        taxGatewayConfigId="LOCAL"
+        requireInventory="Y" productDataDocumentId="PopcProduct">
 
-        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthGround" sequenceNum="1"/>
-        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthNextDay" sequenceNum="2"/>
-        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthPickUp" sequenceNum="3"/>
-        <shippingGateways carrierPartyId="_NA_" shippingGatewayConfigId="NA_LOCAL"/>
-        <paymentGateways paymentInstrumentEnumId="PiCreditCard" paymentGatewayConfigId="TEST_APPROVE"/>
+        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthGround" sequenceNum="1" />
+        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthNextDay" sequenceNum="2" />
+        <shipOptions carrierPartyId="_NA_" shipmentMethodEnumId="ShMthPickUp" sequenceNum="3" />
+        <shippingGateways carrierPartyId="_NA_" shippingGatewayConfigId="NA_LOCAL" />
+        <paymentGateways paymentInstrumentEnumId="PiCreditCard"
+            paymentGatewayConfigId="TEST_APPROVE" />
     </mantle.product.store.ProductStore>
 
     <!-- ecommerce and general root categories  -->
     <mantle.product.category.ProductCategory productCategoryId="PopcAllProducts" ownerPartyId="_NA_"
-        productCategoryTypeEnumId="PctRoot" categoryName="All Products Category"/><!-- general root category -->
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcAllProducts"
-        storeCategoryTypeEnumId="PsctSearch" fromDate="1265184000000" thruDate=""/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcAllProducts"
-        storeCategoryTypeEnumId="PsctPurchaseAllow" fromDate="1265184000000" thruDate=""/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcAllProducts"
-        storeCategoryTypeEnumId="PsctViewAllow" fromDate="1265184000000" thruDate=""/>
+        productCategoryTypeEnumId="PctRoot" categoryName="All Products Category" /><!-- general root
+    category -->
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcAllProducts"
+        storeCategoryTypeEnumId="PsctSearch" fromDate="1265184000000" thruDate="" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcAllProducts"
+        storeCategoryTypeEnumId="PsctPurchaseAllow" fromDate="1265184000000" thruDate="" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcAllProducts"
+        storeCategoryTypeEnumId="PsctViewAllow" fromDate="1265184000000" thruDate="" />
 
     <mantle.product.category.ProductCategory productCategoryId="PopcDeals" ownerPartyId="_NA_"
-        productCategoryTypeEnumId="PctCatalog" categoryName="Deals"/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcDeals"
-        storeCategoryTypeEnumId="PsctPromotions" fromDate="1265184000000" thruDate=""/>
+        productCategoryTypeEnumId="PctCatalog" categoryName="Deals" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcDeals"
+        storeCategoryTypeEnumId="PsctPromotions" fromDate="1265184000000" thruDate="" />
 
     <mantle.product.category.ProductCategory productCategoryId="PopcNew" ownerPartyId="_NA_"
         productCategoryTypeEnumId="PctCatalog" categoryName="New"
-        description="Used on the E-Commerce website, products in this category will appear in the 'new' section"/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcNew"
-        storeCategoryTypeEnumId="PsctNewProducts" fromDate="1265184000000" thruDate=""/>
+        description="Used on the E-Commerce website, products in this category will appear in the 'new' section" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcNew"
+        storeCategoryTypeEnumId="PsctNewProducts" fromDate="1265184000000" thruDate="" />
 
     <mantle.product.category.ProductCategory productCategoryId="PopcFeatured" ownerPartyId="_NA_"
         productCategoryTypeEnumId="PctCatalog" categoryName="Featured"
-        description="Used on the E-Commerce website, products in this category will appear in the 'featured' section"/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcFeatured"
-        storeCategoryTypeEnumId="PsctFeatured" fromDate="1265184000000" thruDate=""/>
+        description="Used on the E-Commerce website, products in this category will appear in the 'featured' section" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcFeatured"
+        storeCategoryTypeEnumId="PsctFeatured" fromDate="1265184000000" thruDate="" />
 
     <mantle.product.category.ProductCategory productCategoryId="PopcHome" ownerPartyId="_NA_"
         productCategoryTypeEnumId="PctCatalog" categoryName="Home"
-        description="Used on the E-Commerce website, products in this category will appear in the 'home' section"/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcHome"
-        storeCategoryTypeEnumId="PsctHomePage" fromDate="1265184000000" thruDate=""/>
+        description="Used on the E-Commerce website, products in this category will appear in the 'home' section" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcHome"
+        storeCategoryTypeEnumId="PsctHomePage" fromDate="1265184000000" thruDate="" />
 
     <mantle.product.category.ProductCategory productCategoryId="PopcBrowseRoot" ownerPartyId="_NA_"
         productCategoryTypeEnumId="PctCatalog" categoryName="Root"
-        description="Used on the E-Commerce website, products in this category will appear in the 'root' section"/>
-    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT" productCategoryId="PopcBrowseRoot"
-        storeCategoryTypeEnumId="PsctBrowseRoot" fromDate="1265184000000" thruDate=""/>
+        description="Used on the E-Commerce website, products in this category will appear in the 'root' section" />
+    <mantle.product.store.ProductStoreCategory productStoreId="POPC_DEFAULT"
+        productCategoryId="PopcBrowseRoot"
+        storeCategoryTypeEnumId="PsctBrowseRoot" fromDate="1265184000000" thruDate="" />
 
 
     <!-- product data -->
-    <mantle.product.feature.ProductFeature productFeatureId="SizeSmall" productFeatureTypeEnumId="PftSize" description="Small" abbrev="SM"/>
-    <mantle.product.feature.ProductFeature productFeatureId="SizeMedium" productFeatureTypeEnumId="PftSize" description="Medium" abbrev="MD"/>
-    <mantle.product.feature.ProductFeature productFeatureId="SizeLarge" productFeatureTypeEnumId="PftSize" description="Large" abbrev="LG"/>
-    <mantle.product.feature.ProductFeature productFeatureId="SizeXL" productFeatureTypeEnumId="PftSize" description="Extra Large" abbrev="XL"/>
+    <mantle.product.feature.ProductFeature productFeatureId="SizeSmall"
+        productFeatureTypeEnumId="PftSize" description="Small" abbrev="SM" />
+    <mantle.product.feature.ProductFeature productFeatureId="SizeMedium"
+        productFeatureTypeEnumId="PftSize" description="Medium" abbrev="MD" />
+    <mantle.product.feature.ProductFeature productFeatureId="SizeLarge"
+        productFeatureTypeEnumId="PftSize" description="Large" abbrev="LG" />
+    <mantle.product.feature.ProductFeature productFeatureId="SizeXL"
+        productFeatureTypeEnumId="PftSize" description="Extra Large" abbrev="XL" />
 
-    <mantle.product.feature.ProductFeature productFeatureId="ColorBlue" productFeatureTypeEnumId="PftColor" description="Blue" abbrev="BU"/>
-    <mantle.product.feature.ProductFeature productFeatureId="ColorBlack" productFeatureTypeEnumId="PftColor" description="Black" abbrev="BL"/>
-    <mantle.product.feature.ProductFeature productFeatureId="ColorRed" productFeatureTypeEnumId="PftColor" description="Red" abbrev="RD"/>
-    <mantle.product.feature.ProductFeature productFeatureId="ColorGreen" productFeatureTypeEnumId="PftColor" description="Green" abbrev="GR"/>
-    <mantle.product.feature.ProductFeature productFeatureId="ColorYellow" productFeatureTypeEnumId="PftColor" description="Yellow" abbrev="YL"/>
-    <mantle.product.feature.ProductFeature productFeatureId="ColorWhite" productFeatureTypeEnumId="PftColor" description="White" abbrev="WH"/>
+    <mantle.product.feature.ProductFeature productFeatureId="ColorBlue"
+        productFeatureTypeEnumId="PftColor" description="Blue" abbrev="BU" />
+    <mantle.product.feature.ProductFeature productFeatureId="ColorBlack"
+        productFeatureTypeEnumId="PftColor" description="Black" abbrev="BL" />
+    <mantle.product.feature.ProductFeature productFeatureId="ColorRed"
+        productFeatureTypeEnumId="PftColor" description="Red" abbrev="RD" />
+    <mantle.product.feature.ProductFeature productFeatureId="ColorGreen"
+        productFeatureTypeEnumId="PftColor" description="Green" abbrev="GR" />
+    <mantle.product.feature.ProductFeature productFeatureId="ColorYellow"
+        productFeatureTypeEnumId="PftColor" description="Yellow" abbrev="YL" />
+    <mantle.product.feature.ProductFeature productFeatureId="ColorWhite"
+        productFeatureTypeEnumId="PftColor" description="White" abbrev="WH" />
 
     <!-- poprest store data -->
-    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname" description="Product Store ID From Hostname" enumId="PsstHostname" enumTypeId="ProductStoreSettingType"/>
-    <moqui.basic.Enumeration enumCode="template_server_content" description="Template Server Content" enumId="PsstContentLocation" enumTypeId="ProductStoreSettingType"/>
+    <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
+        description="Product Store ID From Hostname" enumId="PsstHostname"
+        enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="template_server_content"
+        description="Template Server Content" enumId="PsstContentLocation"
+        enumTypeId="ProductStoreSettingType" />
 
     <dbResources resourceId="GROWERP_LOGO" filename="growerp_logo.jpg" isFile="Y"
-        parentResourceId="growerp_images" /> 
+        parentResourceId="growerp_images" />
     <moqui.resource.DbResourceFile resourceId="GROWERP_LOGO" rootVersionName="01"
         mimeType="image/jpeg" versionName="01">
         <fileData><![CDATA[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kpaKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/2f/hEPJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDQuNC4wLUV4aXYyIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOmV4aWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvIiB4bWxuczpHSU1QPSJodHRwOi8vd3d3LmdpbXAub3JnL3htcC8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ1dWlkOkRERjg2OUFFM0I5QzExRTE5OTZGRjY5MzdFNUJBRUNFIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjM0NTRlMWIzLTJkZGEtNDVhYS1iZTE0LWQzMTE0ZDBiMjVjOSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjMwMDU2MWFmLTJkOTQtNGM2OS05NTIzLTg2OTUwMjBmYWQ3MCIgZGM6Rm9ybWF0PSJpbWFnZS9qcGVnIiBleGlmOkNvbG9yU3BhY2U9IjEiIGV4aWY6TmF0aXZlRGlnZXN0PSIzNjg2NCw0MDk2MCw0MDk2MSwzNzEyMSwzNzEyMiw0MDk2Miw0MDk2MywzNzUxMCw0MDk2NCwzNjg2NywzNjg2OCwzMzQzNCwzMzQzNywzNDg1MCwzNDg1MiwzNDg1NSwzNDg1NiwzNzM3NywzNzM3OCwzNzM3OSwzNzM4MCwzNzM4MSwzNzM4MiwzNzM4MywzNzM4NCwzNzM4NSwzNzM4NiwzNzM5Niw0MTQ4Myw0MTQ4NCw0MTQ4Niw0MTQ4Nyw0MTQ4OCw0MTQ5Miw0MTQ5Myw0MTQ5NSw0MTcyOCw0MTcyOSw0MTczMCw0MTk4NSw0MTk4Niw0MTk4Nyw0MTk4OCw0MTk4OSw0MTk5MCw0MTk5MSw0MTk5Miw0MTk5Myw0MTk5NCw0MTk5NSw0MTk5Niw0MjAxNiwwLDIsNCw1LDYsNyw4LDksMTAsMTEsMTIsMTMsMTQsMTUsMTYsMTcsMTgsMjAsMjIsMjMsMjQsMjUsMjYsMjcsMjgsMzA7QzM5MEIxNDdDRjcwNkZDN0JCNUIzRjEyNjM2QzZBMDYiIGV4aWY6UGl4ZWxYRGltZW5zaW9uPSI0NTIiIGV4aWY6UGl4ZWxZRGltZW5zaW9uPSI1OTUiIEdJTVA6QVBJPSIyLjAiIEdJTVA6UGxhdGZvcm09IkxpbnV4IiBHSU1QOlRpbWVTdGFtcD0iMTY1NTMzNzU2ODAyOTk1OSIgR0lNUDpWZXJzaW9uPSIyLjEwLjI4IiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBwaG90b3Nob3A6SUNDUHJvZmlsZT0iQ29sb3IgTENEIiB4bXA6Q3JlYXRlRGF0ZT0iMjAxMi0wMS0wOFQxNToxMTozOS0wNTowMCIgeG1wOkNyZWF0b3JUb29sPSJHSU1QIDIuMTAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMTItMDEtMDhUMTU6MTE6MzktMDU6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDEyLTAxLTA4VDE1OjExOjM5LTA1OjAwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6QmFnPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0OmNoYW5nZWQ9Ii8iIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ZTQxY2E0NzEtMGI4Zi00MjJjLTliYzItM2M3ZWI1ZDcxNmIxIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJHaW1wIDIuMTAgKExpbnV4KSIgc3RFdnQ6d2hlbj0iKzA3OjAwIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6Y2hhbmdlZD0iLyIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpjYzRkYzA3OS01ZWExLTQxMDUtYTA4MC1hOWYwODY4MDliYTUiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkdpbXAgMi4xMCAoTGludXgpIiBzdEV2dDp3aGVuPSIyMDIyLTA2LTE2VDA2OjU5OjI4KzA3OjAwIi8+IDwvcmRmOkJhZz4gPC94bXBNTTpIaXN0b3J5PiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6ZG9jdW1lbnRJRD0idXVpZDoxNkQxNzU1NjNCOTIxMUUxOTk2RkY2OTM3RTVCQUVDRSIgc3RSZWY6aW5zdGFuY2VJRD0idXVpZDpEREY4NjlBQTNCOUMxMUUxOTk2RkY2OTM3RTVCQUVDRSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8P3hwYWNrZXQgZW5kPSJ3Ij8+/+ICsElDQ19QUk9GSUxFAAEBAAACoGxjbXMEMAAAbW50clJHQiBYWVogB+YABgAPABcAOgAbYWNzcEFQUEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1sY21zAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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]]></fileData>
-</moqui.resource.DbResourceFile>
+    </moqui.resource.DbResourceFile>
 
 </entity-facade-xml>
