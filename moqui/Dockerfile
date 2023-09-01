@@ -2,7 +2,7 @@
 FROM openjdk:11-jdk as build-env
 
 ARG PAT
-ARG BRANCH=master # currently either master or development we need to add existing
+ARG BRANCH=development # currently either master or development we need to add existing
 ARG TAG=?
 
 RUN echo "Tag version: $TAG"
