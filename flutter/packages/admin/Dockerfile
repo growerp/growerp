@@ -13,14 +13,14 @@
 #
 
 #Stage 1 - Install dependencies and build the app
-FROM mobiledevops/flutter-sdk-image AS build-env
+FROM growerp/flutter-sdk-image AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 USER root
 # Install linux dependencies
 RUN apt-get update && \
     apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
-        fonts-droid-fallback nano && \
+    fonts-droid-fallback nano && \
     apt-get clean
 
 # git security
