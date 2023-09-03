@@ -1,8 +1,8 @@
 version: "2"
 
 networks:
-    my-network:
-      driver: bridge
+  my-network:
+    driver: bridge
 
 services:
 
@@ -20,7 +20,7 @@ services:
       - ./certs:/etc/nginx/certs
       - ./nginx/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf
       #- ./logs/nginx:/var/log/nginx
-    #environment:
+      #environment:
       # change this for the default host to use when accessing directly by IP, etc
       # use SSL_POLICY to disable TLSv1.0, etc in nginx-proxy
       # - SSL_POLICY=AWS-TLS-1-1-2017-01
@@ -38,14 +38,14 @@ services:
       - moqui-database
       - elasticsearch
     volumes:
-     #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
-     #- ./runtime/lib:/opt/moqui/runtime/lib
-     #- ./runtime/classes:/opt/moqui/runtime/classes
-     #- ../moqui/runtime/component:/opt/moqui/runtime/component
-     #- ./runtime/log:/opt/moqui/runtime/log
-     #- ./runtime/txlog:/opt/moqui/runtime/txlog
+      #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
+      #- ./runtime/lib:/opt/moqui/runtime/lib
+      #- ./runtime/classes:/opt/moqui/runtime/classes
+      #- /home/hans/growerp/moqui/runtime/component:/opt/moqui/runtime/component
+      #- ./runtime/log:/opt/moqui/runtime/log
+      #- ./runtime/txlog:/opt/moqui/runtime/txlog
       - ./runtime/sessions:/opt/moqui/runtime/sessions
-     # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
+      # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
       - ./runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
     environment:
       - instance_purpose=test
@@ -57,13 +57,13 @@ services:
       - entity_ds_user=moqui
       - entity_ds_password=moqui
       - entity_ds_crypt_pass='MoquiDefaultPassword:CHANGEME'
-     # configuration for ElasticFacade.ElasticClient, make sure moqui-elasticsearch is NOT included in the Moqui build
+      # configuration for ElasticFacade.ElasticClient, make sure moqui-elasticsearch is NOT included in the Moqui build
       - elasticsearch_url=http://elasticsearch:9200
-     # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
-     # this can be a comma separate list of hosts like 'example.com,www.example.com'
+      # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
+      # this can be a comma separate list of hosts like 'example.com,www.example.com'
       - VIRTUAL_HOST=*.growerp.local
       - webapp_allow_origins=*
-     # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
+      # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
       - webapp_http_host=
       - webapp_http_port=80
       - webapp_https_port=443
@@ -88,17 +88,17 @@ services:
     container_name: postgres
     restart: always
     ports:
-     # change this as needed to bind to any address or even comment to not expose port outside containers
+      # change this as needed to bind to any address or even comment to not expose port outside containers
       - 127.0.0.1:5432:5432
     volumes:
-     # edit these as needed to map configuration and data storage
+      # edit these as needed to map configuration and data storage
       - ./db/postgres/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=moqui
       - POSTGRES_DB_SCHEMA=public
       - POSTGRES_USER=moqui
       - POSTGRES_PASSWORD=moqui
-     # PGDATA, POSTGRES_INITDB_ARGS
+    # PGDATA, POSTGRES_INITDB_ARGS
     networks:
       - my-network
 
@@ -121,7 +121,7 @@ services:
       - network.host=_site_
     networks:
       - my-network
-      
+
   chat:
     container_name: chat
     image: growerp/chat
@@ -142,7 +142,7 @@ services:
 
   # internet gateway required by chat to validate api_key with moqui
   internet_gateway:
-    image: alpine  # or any other suitable image
+    image: alpine # or any other suitable image
     container_name: gateway
     network_mode: host
     command: sh -c "sleep infinity"
@@ -160,7 +160,7 @@ services:
     volumes:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
-      - VIRTUAL_HOST=admin.growerp.local 
+      - VIRTUAL_HOST=admin.growerp.local
     networks:
       - my-network
 
@@ -177,6 +177,6 @@ services:
     volumes:
       - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
     environment:
-      - VIRTUAL_HOST=hotel.growerp.local 
+      - VIRTUAL_HOST=hotel.growerp.local
     networks:
       - my-network

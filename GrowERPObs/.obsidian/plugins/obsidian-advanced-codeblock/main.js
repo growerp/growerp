@@ -71,7 +71,7 @@ function extendLineNumberPlugin(Prism) {
   var PLUGIN_NAME = "line-numbers";
   var NEW_LINE_EXP = /\n(?!$)/g;
   var config = Prism.plugins.lineNumbers = {
-    getLine: function(element, number) {
+    getLine: function (element, number) {
       if (element.tagName !== "PRE" || !element.classList.contains(PLUGIN_NAME)) {
         return;
       }
@@ -90,13 +90,13 @@ function extendLineNumberPlugin(Prism) {
       var lineIndex = number - lineNumberStart;
       return lineNumberRows.children[lineIndex];
     },
-    resize: function(element) {
+    resize: function (element) {
       resizeElements([element]);
     },
     assumeViewportIndependence: true
   };
   function resizeElements(elements) {
-    elements = elements.filter(function(e) {
+    elements = elements.filter(function (e) {
       var codeStyles = getStyles(e);
       var whiteSpace = codeStyles["white-space"];
       return whiteSpace === "pre-wrap" || whiteSpace === "pre-line";
@@ -104,7 +104,7 @@ function extendLineNumberPlugin(Prism) {
     if (elements.length == 0) {
       return;
     }
-    var infos = elements.map(function(element) {
+    var infos = elements.map(function (element) {
       var codeElement = element.querySelector("code");
       var lineNumbersWrapper = element.querySelector(".line-numbers-rows");
       if (!codeElement || !lineNumbersWrapper) {
@@ -129,13 +129,13 @@ function extendLineNumberPlugin(Prism) {
         sizer: lineNumberSizer
       };
     }).filter(Boolean);
-    infos.forEach(function(info) {
+    infos.forEach(function (info) {
       var lineNumberSizer = info.sizer;
       var lines = info.lines;
       var lineHeights = info.lineHeights;
       var oneLinerHeight = info.oneLinerHeight;
       lineHeights[lines.length - 1] = void 0;
-      lines.forEach(function(line, index) {
+      lines.forEach(function (line, index) {
         if (line && line.length > 1) {
           var e = lineNumberSizer.appendChild(document.createElement("span"));
           e.style.display = "block";
@@ -145,7 +145,7 @@ function extendLineNumberPlugin(Prism) {
         }
       });
     });
-    infos.forEach(function(info) {
+    infos.forEach(function (info) {
       var lineNumberSizer = info.sizer;
       var lineHeights = info.lineHeights;
       var childIndex = 0;
@@ -155,12 +155,12 @@ function extendLineNumberPlugin(Prism) {
         }
       }
     });
-    infos.forEach(function(info) {
+    infos.forEach(function (info) {
       var lineNumberSizer = info.sizer;
       var wrapper = info.element.querySelector(".line-numbers-rows");
       lineNumberSizer.style.display = "none";
       lineNumberSizer.innerHTML = "";
-      info.lineHeights.forEach(function(height, lineNumber) {
+      info.lineHeights.forEach(function (height, lineNumber) {
         wrapper.children[lineNumber].style.height = height + "px";
       });
     });
@@ -171,7 +171,7 @@ function extendLineNumberPlugin(Prism) {
     }
     return window.getComputedStyle ? getComputedStyle(element) : element.currentStyle || null;
   }
-  Prism.hooks.add("complete", function(env) {
+  Prism.hooks.add("complete", function (env) {
     if (!env.code) {
       return;
     }
@@ -203,7 +203,7 @@ function extendLineNumberPlugin(Prism) {
     resizeElements([pre]);
     Prism.hooks.run("line-numbers", env);
   });
-  Prism.hooks.add("line-numbers", function(env) {
+  Prism.hooks.add("line-numbers", function (env) {
     env.plugins = env.plugins || {};
     env.plugins.lineNumbers = true;
   });
@@ -226,9 +226,9 @@ function extendLineHighlightPlugin(Prism) {
   function callFunction(func) {
     func();
   }
-  var isLineHeightRounded = function() {
+  var isLineHeightRounded = function () {
     var res;
-    return function() {
+    return function () {
       if (typeof res === "undefined") {
         var d = document.createElement("div");
         d.style.fontSize = "13px";
@@ -278,7 +278,7 @@ function extendLineHighlightPlugin(Prism) {
       var lineBreakMatch = codeElement.textContent.match(NEW_LINE_REGEX);
       var numberOfLines = lineBreakMatch ? lineBreakMatch.length + 1 : 1;
       var codePreOffset = !codeElement || parentElement == codeElement ? 0 : getContentBoxTopOffset(pre, codeElement);
-      ranges.forEach(function(currentRange) {
+      ranges.forEach(function (currentRange) {
         var range = currentRange.split("-");
         var start2 = +range[0];
         var end = +range[1] || start2;
@@ -286,7 +286,7 @@ function extendLineHighlightPlugin(Prism) {
         if (end < start2)
           return;
         var line = pre.querySelector('.line-highlight[data-range="' + currentRange + '"]') || document.createElement("div");
-        mutateActions.push(function() {
+        mutateActions.push(function () {
           line.setAttribute("aria-hidden", "true");
           line.setAttribute("data-range", currentRange);
           line.className = (classes || "") + " line-highlight";
@@ -296,18 +296,18 @@ function extendLineHighlightPlugin(Prism) {
           var endNode = Prism.plugins.lineNumbers.getLine(pre, end);
           if (startNode) {
             var top = startNode.offsetTop + codePreOffset + "px";
-            mutateActions.push(function() {
+            mutateActions.push(function () {
               line.style.top = top;
             });
           }
           if (endNode) {
             var height = endNode.offsetTop - startNode.offsetTop + endNode.offsetHeight + "px";
-            mutateActions.push(function() {
+            mutateActions.push(function () {
               line.style.height = height;
             });
           }
         } else {
-          mutateActions.push(function() {
+          mutateActions.push(function () {
             line.setAttribute("data-start", String(start2));
             if (end > start2) {
               line.setAttribute("data-end", String(end));
@@ -316,41 +316,41 @@ function extendLineHighlightPlugin(Prism) {
             line.textContent = new Array(end - start2 + 2).join(" \n");
           });
         }
-        mutateActions.push(function() {
+        mutateActions.push(function () {
           line.style.width = pre.scrollWidth + "px";
         });
-        mutateActions.push(function() {
+        mutateActions.push(function () {
           parentElement.appendChild(line);
         });
       });
       var id = pre.id;
       if (hasLineNumbers && Prism.util.isActive(pre, LINKABLE_LINE_NUMBERS_CLASS) && id) {
         if (!hasClass(pre, LINKABLE_LINE_NUMBERS_CLASS)) {
-          mutateActions.push(function() {
+          mutateActions.push(function () {
             pre.classList.add(LINKABLE_LINE_NUMBERS_CLASS);
           });
         }
         var start = parseInt(pre.getAttribute("data-start") || "1");
-        $$(".line-numbers-rows > span", pre).forEach(function(lineSpan, i) {
+        $$(".line-numbers-rows > span", pre).forEach(function (lineSpan, i) {
           var lineNumber = i + start;
-          lineSpan.onclick = function() {
+          lineSpan.onclick = function () {
             var hash = id + "." + lineNumber;
             scrollIntoView = false;
             location.hash = hash;
-            setTimeout(function() {
+            setTimeout(function () {
               scrollIntoView = true;
             }, 1);
           };
         });
       }
-      return function() {
+      return function () {
         mutateActions.forEach(callFunction);
       };
     }
   };
   function applyHash() {
     var hash = location.hash.slice(1);
-    $$(".temporary.line-highlight").forEach(function(line) {
+    $$(".temporary.line-highlight").forEach(function (line) {
       line.parentNode.removeChild(line);
     });
     var range = (hash.match(/\.([\d,-]+)$/) || [, ""])[1];
@@ -372,13 +372,13 @@ function extendLineHighlightPlugin(Prism) {
     }
   }
   var fakeTimer = 0;
-  Prism.hooks.add("before-sanity-check", function(env) {
+  Prism.hooks.add("before-sanity-check", function (env) {
     var pre = env.element.parentElement;
     if (!isActiveFor(pre)) {
       return;
     }
     var num = 0;
-    $$(".line-highlight", pre).forEach(function(line) {
+    $$(".line-highlight", pre).forEach(function (line) {
       num += line.textContent.length;
       line.parentNode.removeChild(line);
     });
@@ -430,7 +430,7 @@ function processParams(element, context, app) {
   return { pre, params };
 }
 function onMounted(element, onAttachCallback) {
-  const observer = new MutationObserver(function() {
+  const observer = new MutationObserver(function () {
     function isAttached(el) {
       if (el.parentNode === document) {
         return true;

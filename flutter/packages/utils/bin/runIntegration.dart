@@ -47,10 +47,8 @@ void main(List<String> arguments) async {
       '$home/growerpChat'
     ]);
   } else {
-    Process.runSync('git', ['stash'],
-        workingDirectory: '$home/growerpChat');
-    Process.runSync('git', ['pull'],
-        workingDirectory: '$home/growerpChat');
+    Process.runSync('git', ['stash'], workingDirectory: '$home/growerpChat');
+    Process.runSync('git', ['pull'], workingDirectory: '$home/growerpChat');
   }
   Process.runSync('./gradlew', ['appRun'],
       workingDirectory: '$home/growerpChat');

@@ -9,7 +9,9 @@
             "type": "dart",
             "request": "launch",
             "program": "bin/growerp.dart",
-            "args": ["install"],
+            "args": [
+                "install"
+            ],
         },
     ]
 }

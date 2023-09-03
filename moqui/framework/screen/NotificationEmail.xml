@@ -12,8 +12,10 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xml-screen-3.xsd">
-    <!-- for fields available see NotificationMessageImpl.getWrappedMessageMap(), this is generic so nothing from the 'message' Map within it -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="xml-screen-3.xsd">
+    <!-- for fields available see NotificationMessageImpl.getWrappedMessageMap(), this is generic so
+    nothing from the 'message' Map within it -->
     <actions>
         <if condition="link">
             <if condition="webHostName"><then>
@@ -21,7 +23,8 @@ along with this software (see the LICENSE.md file). If not, see
             </then><else>
                 <set field="rootUrl" from="org.moqui.impl.context.WebFacadeImpl.getWebappRootUrl(sri?.webappName ?: 'webroot', null, true, false, ec)"/>
                 <set field="linkUrl" from="rootUrl &amp;&amp; !rootUrl.contains('localhost') ? rootUrl + '/' + link : link"/>
-                <!-- <log level="warn" message="rootUrl ${rootUrl} link ${link} linkUrl ${linkUrl}"/> -->
+                    <!-- <log level="warn" message="rootUrl ${rootUrl} link ${link} linkUrl
+                    ${linkUrl}"/> -->
             </else></if>
         </if>
     </actions>

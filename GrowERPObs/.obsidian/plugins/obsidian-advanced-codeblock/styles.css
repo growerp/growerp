@@ -10,7 +10,7 @@ pre[class*="language-"].line-numbers {
 	white-space: pre-wrap;
 }
 
-pre[class*="language-"].line-numbers > code {
+pre[class*="language-"].line-numbers>code {
 	position: relative;
 	white-space: inherit;
 }
@@ -22,7 +22,8 @@ pre[class*="language-"].line-numbers > code {
 	margin-top: 1em;
 	font-size: 100%;
 	left: -3.8em;
-	width: 3em; /* works for line-numbers below 1000 lines */
+	width: 3em;
+	/* works for line-numbers below 1000 lines */
 	letter-spacing: -1px;
 	border-right: 1px solid #999;
 
@@ -32,12 +33,12 @@ pre[class*="language-"].line-numbers > code {
 	user-select: none;
 }
 
-.line-numbers-rows > span {
+.line-numbers-rows>span {
 	display: block;
 	counter-increment: linenumber;
 }
 
-.line-numbers-rows > span:before {
+.line-numbers-rows>span:before {
 	content: counter(linenumber);
 	color: #999;
 	display: block;
@@ -69,14 +70,13 @@ pre[data-line] {
 	left: 0;
 	right: 0;
 	padding: inherit 0;
-	margin-top: 1em; /* Same as .prism’s padding-top */
+	margin-top: 1em;
+	/* Same as .prism’s padding-top */
 
 	background: hsla(24, 20%, 50%, 0.08);
-	background: linear-gradient(
-		to right,
-		hsla(24, 20%, 50%, 0.1) 70%,
-		hsla(24, 20%, 50%, 0)
-	);
+	background: linear-gradient(to right,
+			hsla(24, 20%, 50%, 0.1) 70%,
+			hsla(24, 20%, 50%, 0));
 
 	pointer-events: none;
 
@@ -131,18 +131,18 @@ code .line-highlight {
 pre[id].linkable-line-numbers span.line-numbers-rows {
 	pointer-events: all;
 }
-pre[id].linkable-line-numbers span.line-numbers-rows > span:before {
+
+pre[id].linkable-line-numbers span.line-numbers-rows>span:before {
 	cursor: pointer;
 }
-pre[id].linkable-line-numbers span.line-numbers-rows > span:hover:before {
+
+pre[id].linkable-line-numbers span.line-numbers-rows>span:hover:before {
 	background-color: rgba(128, 128, 128, 0.2);
 }
 
 .HyperMD-codeblock-bg.live-preview-codeblock-highlight {
 	background: hsla(24, 20%, 50%, 0.08);
-	background: linear-gradient(
-		to right,
-		hsla(24, 20%, 50%, 0.1) 70%,
-		hsla(24, 20%, 50%, 0)
-	);	
+	background: linear-gradient(to right,
+			hsla(24, 20%, 50%, 0.1) 70%,
+			hsla(24, 20%, 50%, 0));
 }

@@ -1,5 +1,8 @@
 {
-    "appName": "", "packageName":"", "version": "", "build": "",
+    "appName": "",
+    "packageName": "",
+    "version": "",
+    "build": "",
     "classificationId": "AppAdmin",
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
