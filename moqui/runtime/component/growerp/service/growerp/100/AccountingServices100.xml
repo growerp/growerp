@@ -618,10 +618,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="glJournalId"
                     from="journalId" ignore-if-empty="true" />
                 <econdition field-name="isPosted" from="isPosted" ignore-if-empty="true" />
-                <econdition field-name="glJournalName" operator="like" ignore-case="true"
-                    from="search" ignore-if-empty="true" />
-                <econdition field-name="glJournalId" operator="like" ignore-case="true"
-                    from="search" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="glJournalName" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                    <econdition field-name="glJournalId" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                </econditions>
             </entity-find>
             <set field="ledgerJournalList" from="[]" />
             <iterate list="ledgerJournals" entry="journal">
@@ -667,6 +669,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="create#mantle.ledger.transaction.GlJournal"
                 in-map="[   organizationPartyId: companyPartyId,
+                            isPosted: 'N',
                             glJournalName: ledgerJournal.journalName,
                             glJournalTypeEnumId: ledgerJournal.error == true
                                 ? 'GLJRNL_ERROR'

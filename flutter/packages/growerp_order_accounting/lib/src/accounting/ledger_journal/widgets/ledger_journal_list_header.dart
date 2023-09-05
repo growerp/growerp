@@ -77,7 +77,8 @@ class _LedgerJournalListHeaderState extends State<LedgerJournalListHeader> {
                   const Expanded(
                       child: Text("Posted?", textAlign: TextAlign.center)),
                   const Expanded(
-                      child: Text("Error Journal?", textAlign: TextAlign.left)),
+                      child:
+                          Text("Error Journal?", textAlign: TextAlign.center)),
                 ]),
                 const Divider(),
               ]),

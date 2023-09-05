@@ -115,25 +115,25 @@ List<MenuOption> acctMenuOptions = [
         TabItem(
           form: const LedgerTreeForm(),
           label: "Ledger Tree",
-          icon: const Icon(Icons.home),
+          icon: const Icon(Icons.account_tree),
         ),
         TabItem(
           form: const GlAccountListForm(),
-          label: "Ledger Accounts",
-          icon: const Icon(Icons.home),
+          label: "Ledger Accnt",
+          icon: const Icon(Icons.format_list_bulleted),
         ),
         TabItem(
           form: const FinDocListForm(
               key: Key("Transaction"),
               sales: true,
               docType: FinDocType.transaction),
-          label: "Ledger Transactions",
-          icon: const Icon(Icons.home),
+          label: "Ledger Trnact",
+          icon: const Icon(Icons.view_list),
         ),
         TabItem(
           form: const LedgerJournalListForm(key: Key("LedgerJournal")),
           label: "Ledger Journals",
-          icon: const Icon(Icons.home),
+          icon: const Icon(Icons.checklist),
         ),
       ]),
   MenuOption(

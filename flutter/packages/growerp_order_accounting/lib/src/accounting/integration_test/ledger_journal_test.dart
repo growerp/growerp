@@ -83,7 +83,7 @@ class LedgerJournalTest {
       } else {
         await CommonTest.doSearch(tester,
             searchString: ledgerJournal.journalId);
-        await CommonTest.tapByKey(tester, 'code0');
+        await CommonTest.tapByKey(tester, 'name0');
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             ledgerJournal.journalId);
       }
@@ -99,15 +99,13 @@ class LedgerJournalTest {
       WidgetTester tester, List<LedgerJournal> ledgerJournals) async {
     List<LedgerJournal> newLedgerJournals = [];
     for (LedgerJournal ledgerJournal in ledgerJournals) {
-      await CommonTest.doSearch(tester, searchString: ledgerJournal.journalId);
-      expect(CommonTest.getTextField('code0'), equals(ledgerJournal.journalId));
+      await CommonTest.doSearch(tester,
+          searchString: ledgerJournal.journalName);
       expect(
           CommonTest.getTextField('name0'), equals(ledgerJournal.journalName));
       await CommonTest.tapByKey(tester, 'name0');
       expect(find.byKey(const Key('LedgerJournalDialog')), findsOneWidget);
       var id = CommonTest.getTextField('topHeader').split('#')[1];
-      expect(
-          CommonTest.getTextFormField('code'), equals(ledgerJournal.journalId));
       expect(CommonTest.getTextFormField('name'),
           equals(ledgerJournal.journalName));
       newLedgerJournals.add(ledgerJournal.copyWith(journalId: id));

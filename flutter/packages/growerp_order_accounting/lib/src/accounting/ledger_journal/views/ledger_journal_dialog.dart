@@ -143,6 +143,8 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
       column.add(widgets[i]);
+      // no space at the end
+      if (i < widgets.length - 1) column.add(const SizedBox(height: 10));
     }
 
     return Column(children: [

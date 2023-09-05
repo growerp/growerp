@@ -36,7 +36,7 @@ class LedgerJournalListItem extends StatelessWidget {
       ),
       title: Column(children: [
         if (ResponsiveBreakpoints.of(context).isMobile)
-          Text(ledgerJournal.journalName),
+          Text(ledgerJournal.journalName, key: Key('name$index')),
         Row(
           children: <Widget>[
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
@@ -55,7 +55,7 @@ class LedgerJournalListItem extends StatelessWidget {
                     key: Key('isPosted$index'), textAlign: TextAlign.center)),
             Expanded(
                 child: Text(ledgerJournal.isError == true ? 'Y' : 'N',
-                    key: Key('isError$index'), textAlign: TextAlign.left)),
+                    key: Key('isError$index'), textAlign: TextAlign.center)),
           ],
         )
       ]),
