@@ -6,6 +6,13 @@
             "request": "launch",
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart"
+        },
+        {
+            "name": "Flutter (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/growerp_order_accounting/example",
+            "program": "lib/main.dart"
         }
     ]
 }

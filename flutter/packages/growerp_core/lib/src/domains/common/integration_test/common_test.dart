@@ -369,7 +369,7 @@ class CommonTest {
     await tester
         .pumpAndSettle(Duration(seconds: waitTime)); // wait for search result
     await tester
-        .tap(find.textContaining(RegExp(value, caseSensitive: false)).last);
+        .tap(find.textContaining(RegExp(value, caseSensitive: false)).at(1));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
@@ -402,6 +402,8 @@ class CommonTest {
     if (tff.selectedItem is Category) return tff.selectedItem.categoryName;
     if (tff.selectedItem is Product) return tff.selectedItem.productName;
     if (tff.selectedItem is User) return tff.selectedItem.company.name;
+    if (tff.selectedItem is AccountClass) return tff.selectedItem.description;
+    if (tff.selectedItem is AccountType) return tff.selectedItem.description;
     return tff.selectedItem.toString();
   }
 

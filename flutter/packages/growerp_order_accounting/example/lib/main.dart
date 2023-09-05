@@ -86,6 +86,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/':
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: menuOptions));
+    case '/company':
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: menuOptions));
+    case '/user':
+      return MaterialPageRoute(
+          builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/orders':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -109,6 +115,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
+    case '/acctLedgerAccounts':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 1));
+    case '/acctLedgerTransactions':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 2));
+    case '/acctLedgerJournal':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 3));
     case '/acctReports':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

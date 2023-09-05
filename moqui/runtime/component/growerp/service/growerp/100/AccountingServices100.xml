@@ -666,12 +666,13 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="create#mantle.ledger.transaction.GlJournal"
-                in-map="[
+                in-map="[   organizationPartyId: companyPartyId,
                             glJournalName: ledgerJournal.journalName,
                             glJournalTypeEnumId: ledgerJournal.error == true
                                 ? 'GLJRNL_ERROR'
                                 : 'GLJRNL_MANUAL',
-                        ]" />
+                        ]"
+                out-map="context" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
                 in-map="[journalId: glJournalId]" out-map="context" />
         </actions>
@@ -816,6 +817,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
                     <parameter name="accountClassId" />
+                    <parameter name="description" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -833,20 +835,45 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="accountClassId" />
                     <parameter name="description" />
                 </parameter>
+                <parameter name="accountType" type="Map">
+                    <parameter name="accountTypeId" />
+                    <parameter name="description" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if
+                condition="!glAccount.accountClass.accountClassId &amp;&amp; !glAccount.accountClass.description">
+                <return error="true"
+                    message="Account class missing for account ${glAccount.accountCode}" />
+            </if>
+            <!-- get class from description -->
+            <if condition="!glAccount.accountClass?.accountClassId">
+                <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+                    <econdition field-name="enumTypeId" value="GlAccountClass" />
+                    <econdition field-name="description" from="glAccount.accountClass?.description" />
+                </entity-find>
+                <if condition="!enums">
+                    <return error="true"
+                        message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
+                </if>
+                <set field="accountClassId" from="enums[0].enumId" />
+                <else>
+                    <set field="accountClassId" from="glAccount.accountClass?.accountClassId" />
+                </else>
+            </if>
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
+            <!-- create account -->
             <service-call name="create#mantle.ledger.account.GlAccount"
                 in-map="[   accountCode: glAccount.accountCode,
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: glAccount.accountClass.accountClassId,
-                            glAccountTypeEnumId: glAccount.accountType.accountTypeId,
+                            glAccountClassEnumId: accountClassId,
+                            glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
                             isTemporary: 'N',
                         ]"
                 out-map="context" />
@@ -870,22 +897,28 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <log message="===input: $accountCode" />
             <script>
                 def List glAccounts;
                 def String newAccountCode;
-                def lastNumber = accountCode.indexOf('0')-1;
-                while(!glAccounts) {
+                def lastNumber = 0;
+                // get the last number in the code
+                for(def x = accountCode.size()-1; x&gt;0; x--) {
+                    if (accountCode[x] != '0') {
+                        lastNumber = x
+                        break;
+                    }
+                }
+                while(!glAccounts &amp;&amp; lastNumber &gt; 0 ) {
                     newAccountCode = accountCode.substring(0, lastNumber);
                     newAccountCode += ('0' * (accountCode.size() - lastNumber));
-                    //logger.info("=======$newAccountCode")
-                    if (newAccountcode == ('0' * accountCode.size())) return;
-
-                    // groovy code generated from commented code below 
                     glAccounts_xafind = ec.entity.find("mantle.ledger.account.GlAccountAndOrganization")
                     .condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("organizationPartyId", "equals", companyPartyId, null, null, false, false, false, "false")).condition((org.moqui.entity.EntityCondition) ec.entity.conditionFactory.makeActionConditionDirect("accountCode", "equals", newAccountCode, null, null, false, false, false, "false"))
                     glAccounts = glAccounts_xafind.list()
+                    lastNumber--;
                 }
-                parentGlAccountId = (glAccounts[0]?.glAccountId)    
+                if (glAccounts)
+                    parentGlAccountId = (glAccounts[0]?.glAccountId)    
             </script>
             <!--entity-find
             entity-name="mantle.ledger.account.GlAccountAndOrganization"
@@ -894,7 +927,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="accountCode" from="newAccountCode" />
             </entity-find>
             <set field="parentGlAccountId" from="glAccounts[0]?.glAccountId" /-->
-            <log message="=======$parentGlAccountId " />
         </actions>
     </service>
 

@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "2 End User documentation/7 Accounting/8 Account type reference.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "2 End User documentation/7 Accounting/8 Account type reference.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md",
+                "file": "2 End User documentation/7 Accounting/8 Account type reference.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "1 Introduction/5 Road Map and Releases.md"
+                "file": "2 End User documentation/7 Accounting/8 Account type reference.md"
               }
             }
           }
@@ -156,8 +156,28 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
-    "Stripe.md",
+    "2 End User documentation/7 Accounting/9 Account Class reference.md",
+    "2 End User documentation/1 Introduction/2 Getting Started.md",
+    "2 End User documentation/1 Introduction/3 General business flow.md",
+    "2 End User documentation/9 Authentication & users/2 Authentication.md",
+    "2 End User documentation/9 Authentication & users/2 Usertypes.md",
+    "2 End User documentation/9 Authentication & users",
+    "2 End User documentation/5 Order management/1 Introduction.md",
+    "2 End User documentation/5 Order management",
+    "2 End User documentation/2 Website/3 Publish products.md",
+    "2 End User documentation/6 inventory management/1 Introduction.md",
+    "2 End User documentation/6 inventory management",
+    "2 End User documentation/2 Website/2 Used fields.md",
+    "2 End User documentation/2 Website/1 Introduction.md",
+    "2 End User documentation/2 Website/Untitled.md",
+    "2 End User documentation/2 Website",
+    "2 End User documentation/7 Accounting.md",
+    "2 End User documentation/1 Introduction",
+    "2 End User documentation/7 Accounting/8 Account type reference.md",
+    "2 End User documentation/7 Accounting/1 getting started.md",
+    "2 End User documentation/7 Accounting",
     "1 Introduction/5 Road Map and Releases.md",
+    "Stripe.md",
     "1 Introduction/3 Feature list.md",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/1 Technical Introduction.md",
@@ -168,23 +188,9 @@
     "3 Technical documentation/7 Integration tests.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
     "4 Applications/1 Admin/1 Introduction.md",
-    "4 Applications/3 Freelance/1 Introduction.md",
-    "4 Applications/2 Hotel/1 Introduction.md",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
     "4 Applications/2 Hotel",
-    "4 Applications",
-    "3 Technical documentation/9 Andriod Playstore publication.md",
-    "3 Technical documentation/8 IOS AppStore publication.md",
-    "3 Technical documentation/5 HTML Website.md",
-    "3 Technical documentation/6 Stripe.md",
-    "1 Introduction/4 Getting started.md",
-    "1 Introduction/3 Getting started.md",
-    "1 Introduction/4 Releases.md",
-    "2 End User documentation/3 Website.md",
-    "2 End User documentation/2 Getting Started.md",
-    "2 End User documentation/1 Overview.md",
-    "1 Introduction/2 What is GrowERP.md",
-    "1 Introduction/1 Overview.md"
+    "4 Applications"
   ]
 }

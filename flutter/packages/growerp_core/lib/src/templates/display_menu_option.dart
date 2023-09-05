@@ -122,7 +122,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       // form key for testing
       displayMOFormKey =
           tabItems[i].form.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-      //debugPrint("==1= current form key: $displayMOFormKey");
+      debugPrint("==1= current form key: $displayMOFormKey");
       // form to display
       tabList.add(tabItems[i].form);
       // text of tabs at top of screen (tablet, web)
@@ -229,7 +229,7 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   Widget simplePage(Authenticate authenticate, bool isPhone) {
     displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    //debugPrint("==2-simple= current form key: $displayMOFormKey");
+    debugPrint("==2-simple= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(
@@ -248,7 +248,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     displayMOFormKey =
         tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
     Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
-    //debugPrint("==3-tab= current form key: $displayMOFormKey");
+    debugPrint("==3-tab= current form key: $displayMOFormKey");
     return Scaffold(
         key: Key(route),
         appBar: AppBar(

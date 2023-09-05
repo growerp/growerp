@@ -33,6 +33,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   final _accountCodeController = TextEditingController();
   final _classSearchBoxController = TextEditingController();
   final _typeSearchBoxController = TextEditingController();
+  final _postedBalanceController = TextEditingController();
   bool? debitSelected;
   AccountClass? classSelected;
   AccountType? typeSelected;
@@ -47,6 +48,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
+      _postedBalanceController.text = widget.glAccount.postedBalance.toString();
       debitSelected = widget.glAccount.isDebit;
       classSelected = widget.glAccount.accountClass;
       typeSelected = widget.glAccount.accountType;
@@ -83,7 +85,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                 child: popUp(
                     context: context,
                     title:
-                        "GlAccount #${widget.glAccount.glAccountId ?? " New"}",
+                        "GlAccount #${widget.glAccount.accountCode ?? " New"}",
                     width: columns.toDouble() * 350,
                     height: 600 / columns.toDouble(),
                     child: BlocBuilder<GlAccountBloc, GlAccountState>(
@@ -104,7 +106,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   Widget _glAccountForm(state) {
     List<Widget> widgets = [
       TextFormField(
-        key: const Key('id'),
+        key: const Key('code'),
         decoration: const InputDecoration(labelText: 'GlAccount Id'),
         controller: _accountCodeController,
         validator: (value) {
@@ -125,7 +127,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             canUpdate: false,
             onValueChanged: (debitSelected) {}),
       DropdownSearch<AccountClass>(
-        key: const Key('classesDropDown'),
+        key: const Key('class'),
         selectedItem: classSelected,
         popupProps: PopupProps.menu(
           showSearchBox: true,
@@ -142,7 +144,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
-            labelText: 'Class',
+            labelText: 'Accout Class',
             hintText: "Account Class",
           ),
         ),
@@ -154,7 +156,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         validator: (value) => value == null ? 'field required' : null,
       ),
       DropdownSearch<AccountType>(
-        key: const Key('typesDropDown'),
+        key: const Key('type'),
         selectedItem: typeSelected,
         popupProps: PopupProps.menu(
           showSearchBox: true,
@@ -171,7 +173,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
-            labelText: 'Type',
+            labelText: 'Account Type',
             hintText: "Account Type",
           ),
         ),
@@ -180,7 +182,11 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           typeSelected = newValue;
         },
         items: state.accountTypes,
-        validator: (value) => value == null ? 'field required' : null,
+      ),
+      TextFormField(
+        key: const Key('postedBalance'),
+        decoration: const InputDecoration(labelText: 'Posted Balance'),
+        controller: _postedBalanceController,
       ),
       ElevatedButton(
           key: const Key('update'),

@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:growerp_order_accounting/src/findoc/widgets/findoc_list_header_trans.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 
@@ -208,11 +209,17 @@ class FinDocListState extends State<FinDocList> {
     Widget finDocsPage() {
       bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
       return Column(children: [
-        FinDocListHeader(
-            isPhone: isPhone,
-            sales: widget.sales,
-            docType: widget.docType,
-            finDocBloc: _finDocBloc),
+        widget.docType == FinDocType.transaction
+            ? FinDocListHeaderTrans(
+                isPhone: isPhone,
+                sales: widget.sales,
+                docType: widget.docType,
+                finDocBloc: _finDocBloc)
+            : FinDocListHeader(
+                isPhone: isPhone,
+                sales: widget.sales,
+                docType: widget.docType,
+                finDocBloc: _finDocBloc),
         Expanded(
             child: RefreshIndicator(
                 onRefresh: (() async =>
@@ -246,33 +253,12 @@ class FinDocListState extends State<FinDocList> {
                                   value: _finDocBloc,
                                   child: RepositoryProvider.value(
                                       value: repos,
-                                      child: FinDocListItem(
-                                        finDoc: finDocs[index],
-                                        docType: widget.docType,
-                                        index: index,
-                                        isPhone: isPhone,
-                                        sales: widget.sales,
-                                        onlyRental: widget.onlyRental,
-                                        additionalItemButton:
-                                            widget.additionalItemButtonName !=
-                                                        null &&
-                                                    widget.additionalItemButtonRoute !=
-                                                        null
-                                                ? TextButton(
-                                                    key: Key('addButton$index'),
-                                                    child: Text(widget
-                                                        .additionalItemButtonName!),
-                                                    onPressed: () async {
-                                                      await Navigator.pushNamed(
-                                                          context,
-                                                          widget
-                                                              .additionalItemButtonRoute!,
-                                                          arguments:
-                                                              finDocs[index]);
-                                                    },
-                                                  )
-                                                : null,
-                                      ))));
+                                      child: widget.docType ==
+                                              FinDocType.transaction
+                                          ? getFinDocListItemTrans(
+                                              index, isPhone, context)
+                                          : getFinDocListItem(
+                                              index, isPhone, context))));
                     })))
       ]);
     }
@@ -392,6 +378,54 @@ class FinDocListState extends State<FinDocList> {
       return BlocConsumer<TransactionBloc, FinDocState>(
           listener: listener, builder: builder);
     });
+  }
+
+  FinDocListItem getFinDocListItem(
+      int index, bool isPhone, BuildContext context) {
+    return FinDocListItem(
+      finDoc: finDocs[index],
+      docType: widget.docType,
+      index: index,
+      isPhone: isPhone,
+      sales: widget.sales,
+      onlyRental: widget.onlyRental,
+      additionalItemButton: widget.additionalItemButtonName != null &&
+              widget.additionalItemButtonRoute != null
+          ? TextButton(
+              key: Key('addButton$index'),
+              child: Text(widget.additionalItemButtonName!),
+              onPressed: () async {
+                await Navigator.pushNamed(
+                    context, widget.additionalItemButtonRoute!,
+                    arguments: finDocs[index]);
+              },
+            )
+          : null,
+    );
+  }
+
+  FinDocListItem getFinDocListItemTrans(
+      int index, bool isPhone, BuildContext context) {
+    return FinDocListItem(
+      finDoc: finDocs[index],
+      docType: widget.docType,
+      index: index,
+      isPhone: isPhone,
+      sales: widget.sales,
+      onlyRental: widget.onlyRental,
+      additionalItemButton: widget.additionalItemButtonName != null &&
+              widget.additionalItemButtonRoute != null
+          ? TextButton(
+              key: Key('addButton$index'),
+              child: Text(widget.additionalItemButtonName!),
+              onPressed: () async {
+                await Navigator.pushNamed(
+                    context, widget.additionalItemButtonRoute!,
+                    arguments: finDocs[index]);
+              },
+            )
+          : null,
+    );
   }
 
   @override

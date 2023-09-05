@@ -9,3 +9,4 @@ export 'item_type_model.dart';
 export 'full_dates_product_rental_model.dart';
 export 'account_class_model.dart';
 export 'account_type_model.dart';
+export 'ledger_journal_model.dart';

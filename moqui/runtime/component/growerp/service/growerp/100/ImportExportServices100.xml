@@ -24,6 +24,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
+            <log message="====relcomp: $relComp" />
             <if condition="entities.companies">
                 <iterate list="entities.companies" entry="company">
                     <if condition="company.partyId == '_MOD_'">
@@ -58,6 +59,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
             </if>
             <if condition="entities.products">
+                <log message="process products:" />
                 <iterate list="entities.products" entry="product">
                     <!-- check if related category exist using name, if yes use these-->
                     <iterate list="product.categories" entry="category">
@@ -91,14 +93,15 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <message public="true" type="success">Locations Upload completed</message>
             </if>
-            <if condition="entities.glAccounts">
+            <if condition="entities.glAccounts || entities.glAccounts.size() == 0">
+                <log message="====process glAccounts: ${entities.glAccounts.size()}" />
                 <entity-find entity-name="GlAccountAndOrganization" list="glAccounts">
-                    <econdition field-name="organizationPartyId" from="relcomp.companyPartyId" />
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
                 </entity-find>
                 <entity-delete-by-condition
                     entity-name="mantle.ledger.account.GlAccountOrganization">
-                    <econdition field-name="organizationPartyid" from="relComp.companyPartyId" />
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                 </entity-delete-by-condition>
                 <entity-delete-by-condition
                     entity-name="mantle.ledger.account.GlAccount">
@@ -108,7 +111,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
                         in-map="[glAccount: glAccount]" />
                 </iterate>
-                <message public="true" type="success">ALedger accounts Upload completed</message>
+                <message public="true" type="success">${entities.glAccounts.size()} Ledger accounts Upload completed</message>
             </if>
         </actions>
     </service>

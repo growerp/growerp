@@ -36,12 +36,12 @@ class GlAccountListItem extends StatelessWidget {
       ),
       title: Column(children: [
         if (ResponsiveBreakpoints.of(context).isMobile)
-          Text(glAccount.accountName ?? ''),
+          Text(glAccount.accountName ?? '', key: Key('name$index')),
         Row(
           children: <Widget>[
             Expanded(
-                child: Text(glAccount.accountCode ?? '',
-                    key: Key('glAccountId$index'))),
+                child:
+                    Text(glAccount.accountCode ?? '', key: Key('code$index'))),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
               Expanded(
                   child: Text(glAccount.accountName ?? '',

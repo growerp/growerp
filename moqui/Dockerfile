@@ -1,7 +1,6 @@
 #stage 1 -get files and build
 FROM openjdk:11-jdk as build-env
 
-ARG PAT
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG TAG=?
 

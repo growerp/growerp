@@ -88,12 +88,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/company':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+          builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/user':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+          builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/catalog':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

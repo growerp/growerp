@@ -13,6 +13,7 @@ Let us know if you have suggestions at support@growerp.com
 	* Be able to maintain the automatic posting configuration.
 	* Access to the error journal of failed postings
 	* automatically add new timeperiod in new year
+	* Upload and maintain ledger organization
 * Extend the growerp.com website to offer growerp as a SAAS
 * Update the freelancer app
 * Create a manufacturing app

@@ -1,0 +1,66 @@
+Optional field, used for automatic posting. Will be matched against the order -> invoice item type 
+
+- Accounts Payable
+	- Accounts Payable - Unapplied
+	- Payable from Inventory Transferred In
+- Accounts Receivable
+	- Accounts Receivable - Unapplied
+	- Allowance for Bad Receivables
+	- Interest Income Receivables
+	- Merchant Account Settlement
+- Current Liability
+	- Accrued Expenses
+	- Commissions Accrued
+	- Customer Credits
+	- Supplier Deposits
+	- Unearned Revenue
+	- Uninvoiced Shipment Receipts
+- Current Asset
+	- Accrued Revenue
+	- Receivable from Inventory Transferred Out
+- Cost of Goods Sold
+	- COGS - Average Cost Adjustment
+- Expense
+	- Operating Expense
+		- Commission Expense
+	- Other Expense
+		- Foreign Exchange Gain/Loss
+			- Foreign Exchange Gain
+			- Foreign Exchange Loss
+		- Write Off
+			- Accounts Payables Write Off
+			- Accounts Receivables Write Off
+			- Commissions Payables Write Off
+			- Interest Income Write Off
+- Customer Deposits
+- Customer Returns
+- Discounts
+- Expense
+- Fixed Asset
+- Fixed Asset Accumulated Depreciation
+- Fixed Asset Depreciation
+- Fixed Asset Found
+- Fixed Asset Maintenance
+- Fixed Asset Shrinkage
+- Income
+	- Interest Income
+	- Other Income
+- Inventory
+	- Inventory Adjustment from Average Cost
+	- WIP Inventory
+- Inventory Found
+- Inventory Shrinkage
+- Inventory Value Adjustment
+- Long Term Liability
+- Owner's Equity
+- Prepaid Expenses
+- Prepaid Inventory
+- Profit Loss
+- Retained Earnings
+- Sales
+- Tax
+- Undeposited Receipts
+- Unissued Fixed Asset
+- Unreceived Fixed Asset
+- Unreceived Inventory
+

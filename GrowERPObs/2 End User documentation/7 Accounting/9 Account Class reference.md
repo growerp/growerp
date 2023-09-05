@@ -1,0 +1,89 @@
+mainly defines if the account is a debit or credit account	also used for reporting, mandatory field. It is a categorization of ledger Accounts. If you do not want to use this feature just use the 'Debit' or 'Credit' values.
+## Income Statement Classes 
+- Debit
+	- **Cost of Sales**
+		- Cost of Goods Sold
+			- Good and Material Cost
+			- Good Freight Cost
+			- Good Royalties Cost
+			- Inventory Shrinkage
+		- Cost of Services Sold
+	- **Operating Expense**
+		- Sales and Marketing Expense
+			- Advertising
+			- Promotional Materials
+			- Sales Compensation
+			- Sales Travel
+		- General and Administrative Expense
+			- Employee Compensation
+			- Non-Employee Compensation
+			- Professional Services
+			- Banking Service Charges
+			- Data Processing
+			- Dues and Subscriptions
+			- Education Expense
+			- Facility Expense
+			- Insurance Expense
+			- Miscellaneous Expense
+			- Office and Supplies
+			- Product Research (custom)
+			- Tax Expense - Income
+			- Tax Expense - Other
+			- Utilities Expense
+			- Vehicle Expense
+			- Travel and Entertainment
+		- Contributions
+		- Non-Cash Expense
+			- Amortization
+			- Bad Debt Expense
+			- Depreciation
+		- **Non-operating Expense**
+			- Interest Expense
+			- Company Owned Life Insurance
+			- Royalties Expense - Non-COGS
+- Credit
+	- **Revenue**
+		- Goods Revenue
+		- Services Revenue
+		- Other Revenue
+		- Discounts and Write-downs (contra)
+		- Customer Returns (contra)
+	- **Non-Operating Income**
+		- Cash Income
+		- Interest Income
+		- Non-Cash Income
+## Balance Sheet Classes
+ - Debit
+	- **Assets**
+		- Current Assets
+			- Cash and Equivalent
+			- Inventory Assets
+			- Accounts Receivable
+			- Loans Receivable
+			- Prepaid Expense (paid, not yet incurred)
+			- Prepaid Inventory (paid, not yet billed)
+			- Accrued Revenue (earned, not yet received)
+			- Allowance For Bad Debts (contra)
+		- Long Term Assets
+			- Land and Building
+			- Equipment
+			- Accumulated Depreciation (contra)
+		- Other Assets
+			- Intangible Assets
+			- Accumulated Amortization (contra)
+	- **Equity Distribution**
+		- Return of Capital
+		- Dividends
+- Credit
+	- **Liabilities**
+		- Current Liabilities
+			- Accounts Payable
+			- Loans Payable
+			- Accrued Expenses (incurred, not yet paid)
+			- Unearned Revenue (received, not yet earned)
+			- Third-Party Holdings
+		- Long Term Liabilities
+	- **Equity**
+		- Owners Equity
+		- Retained Earnings
+		- Treasury Stock (contra)

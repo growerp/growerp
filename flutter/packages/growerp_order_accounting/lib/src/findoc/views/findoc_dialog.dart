@@ -23,8 +23,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 
-import '../findoc.dart';
-
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
   const FinDocDialog({required this.finDoc, super.key});
@@ -49,6 +47,9 @@ class FinDocDialog extends StatelessWidget {
         BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(CatalogAPIRepository(
                 context.read<AuthBloc>().state.authenticate!.apiKey!))),
+        BlocProvider<GlAccountBloc>(
+            create: (context) => GlAccountBloc(AccountingAPIRepository(
+                context.read<AuthBloc>().state.authenticate!.apiKey!))),
       ], child: FinDocPage(finDoc));
     }
     return MultiBlocProvider(providers: [
@@ -66,6 +67,9 @@ class FinDocDialog extends StatelessWidget {
               Role.supplier)),
       BlocProvider<ProductBloc>(
           create: (context) => ProductBloc(CatalogAPIRepository(
+              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+      BlocProvider<GlAccountBloc>(
+          create: (context) => GlAccountBloc(AccountingAPIRepository(
               context.read<AuthBloc>().state.authenticate!.apiKey!))),
     ], child: FinDocPage(finDoc));
   }
@@ -85,6 +89,7 @@ class MyFinDocState extends State<FinDocPage> {
   late CartBloc _cartBloc;
   late UserBloc _userBloc;
   late ProductBloc _productBloc;
+  late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
   late String classificationId;
   late FinDoc finDocUpdated;
@@ -104,6 +109,8 @@ class MyFinDocState extends State<FinDocPage> {
     _finDocBloc = context.read<FinDocBloc>();
     _userBloc = context.read<UserBloc>();
     _userBloc.add(const UserFetch());
+    _glAccountBloc = context.read<GlAccountBloc>();
+    _glAccountBloc.add(const GlAccountFetch());
     _productBloc = context.read<ProductBloc>();
     _productBloc.add(const ProductFetch());
     _descriptionController.text = finDocUpdated.description ?? "";
@@ -144,9 +151,13 @@ class MyFinDocState extends State<FinDocPage> {
         case CartStatus.inProcess:
           finDocUpdated = state.finDoc;
           return Column(children: [
-            headerEntry(),
+            widget.finDoc.docType == FinDocType.transaction
+                ? headerEntryTransaction()
+                : headerEntry(),
             SizedBox(height: isPhone ? 110 : 50, child: updateButtons(state)),
-            finDocItemList(state),
+            widget.finDoc.docType == FinDocType.transaction
+                ? finDocItemListTransaction(state)
+                : finDocItemList(state),
             const SizedBox(height: 10),
             Center(
                 child: Text(
@@ -266,6 +277,84 @@ class MyFinDocState extends State<FinDocPage> {
                     children: isPhone ? widgets : [Row(children: widgets)]))));
   }
 
+  Widget headerEntryTransaction() {
+    List<Widget> widgets = [
+      if (widget.finDoc.docType != FinDocType.transaction)
+        Expanded(
+            child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+            switch (state.status) {
+              case UserStatus.failure:
+                return const FatalErrorForm(
+                    message: 'server connection problem');
+              case UserStatus.success:
+                return DropdownSearch<User>(
+                  selectedItem: _selectedUser,
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: TextFieldProps(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                          labelText:
+                              "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
+                      controller: _userSearchBoxController,
+                    ),
+                    title: popUp(
+                      context: context,
+                      title:
+                          "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}",
+                      height: 50,
+                    ),
+                  ),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: finDocUpdated.sales ? 'Customer' : 'Supplier',
+                    ),
+                  ),
+                  key: Key(
+                      finDocUpdated.sales == true ? 'customer' : 'supplier'),
+                  itemAsString: (User? u) =>
+                      "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                  asyncItems: (String filter) {
+                    _userBloc.add(UserFetch(searchString: filter));
+                    return Future.value(state.users);
+                  },
+                  onChanged: (User? newValue) {
+                    setState(() {
+                      _selectedUser = newValue;
+                      _selectedCompany = newValue!.company;
+                    });
+                  },
+                  validator: (value) => value == null
+                      ? "Select ${finDocUpdated.sales ? 'Customer' : 'Supplier'}!"
+                      : null,
+                );
+              default:
+                return const Center(child: CircularProgressIndicator());
+            }
+          }),
+        )),
+      Expanded(
+          child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: TextFormField(
+                key: const Key('description'),
+                decoration:
+                    InputDecoration(labelText: '${finDoc.docType} Description'),
+                controller: _descriptionController,
+              ))),
+    ];
+
+    return Center(
+        child: SizedBox(
+            height: isPhone ? 200 : 100,
+            child: Form(
+                key: _formKeyHeader,
+                child: Column(
+                    children: isPhone ? widgets : [Row(children: widgets)]))));
+  }
+
   Widget updateButtons(state) {
     List<Widget> buttons = [
       ElevatedButton(
@@ -286,7 +375,7 @@ class MyFinDocState extends State<FinDocPage> {
                   context, finDocUpdated.sales, state);
             } else {
               finDocItem = await addTransactionItemDialog(
-                  context, finDocUpdated.sales, state);
+                  context, finDocUpdated.sales, state, _glAccountBloc);
             }
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
@@ -451,8 +540,10 @@ class MyFinDocState extends State<FinDocPage> {
                         key: Key('empty'), textAlign: TextAlign.center));
               }
               final item = items[index - 1];
-              var itemType = state.itemTypes
-                  .firstWhere((e) => e.itemTypeId == item.itemType!.itemTypeId);
+              var itemType = item.itemType != null
+                  ? state.itemTypes.firstWhere(
+                      (e) => e.itemTypeId == item.itemType!.itemTypeId)
+                  : ItemType();
               return ListTile(
                   key: const Key('productItem'),
                   leading: !isPhone
@@ -480,7 +571,104 @@ class MyFinDocState extends State<FinDocPage> {
                     if (!isPhone)
                       Expanded(
                         key: Key('subTotal${index - 1}'),
-                        child: Text((item.price! * item.quantity!).toString(),
+                        child: Text(
+                            (item.price! *
+                                    (item.quantity ?? Decimal.parse('1')))
+                                .toString(),
+                            textAlign: TextAlign.center),
+                      ),
+                  ]),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_forever),
+                    key: Key("delete${index - 1}"),
+                    onPressed: () {
+                      _cartBloc.add(CartDeleteItem(index - 1));
+                    },
+                  ));
+            }));
+  }
+
+  Widget finDocItemListTransaction(CartState state) {
+    List<FinDocItem> items = finDocUpdated.items;
+
+    return Expanded(
+        child: ListView.builder(
+            itemCount: items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return ListTile(
+                  leading: !isPhone
+                      ? const CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                        )
+                      : null,
+                  title: Column(children: [
+                    Row(children: <Widget>[
+                      if (!isPhone)
+                        const Expanded(
+                            child:
+                                Text("Item Type", textAlign: TextAlign.center)),
+                      const Expanded(
+                          child:
+                              Text("Description", textAlign: TextAlign.center)),
+                      if (!isPhone)
+                        const Expanded(
+                            child:
+                                Text("    Qty", textAlign: TextAlign.center)),
+                      const Text("Price", textAlign: TextAlign.center),
+                      if (!isPhone)
+                        const Expanded(
+                            child:
+                                Text("SubTotal", textAlign: TextAlign.center)),
+                      const Expanded(
+                          child: Text(" ", textAlign: TextAlign.center)),
+                    ]),
+                    const Divider(),
+                  ]),
+                );
+              }
+              if (index == 1 && items.isEmpty) {
+                return const Center(
+                    heightFactor: 20,
+                    child: Text("no items found!",
+                        key: Key('empty'), textAlign: TextAlign.center));
+              }
+              final item = items[index - 1];
+              var itemType = item.itemType != null
+                  ? state.itemTypes.firstWhere(
+                      (e) => e.itemTypeId == item.itemType!.itemTypeId)
+                  : ItemType();
+              return ListTile(
+                  key: const Key('productItem'),
+                  leading: !isPhone
+                      ? CircleAvatar(
+                          backgroundColor: Colors.green,
+                          child: Text(item.itemSeqId.toString()),
+                        )
+                      : null,
+                  title: Row(children: <Widget>[
+                    if (!isPhone)
+                      Expanded(
+                          child: Text(itemType.itemTypeName,
+                              textAlign: TextAlign.left,
+                              key: Key('itemType${index - 1}'))),
+                    Expanded(
+                        child: Text("${item.description}",
+                            key: Key('itemDescription${index - 1}'),
+                            textAlign: TextAlign.left)),
+                    if (!isPhone)
+                      Expanded(
+                          child: Text("${item.quantity}",
+                              textAlign: TextAlign.center,
+                              key: Key('itemQuantity${index - 1}'))),
+                    Text("${item.price}", key: Key('itemPrice${index - 1}')),
+                    if (!isPhone)
+                      Expanded(
+                        key: Key('subTotal${index - 1}'),
+                        child: Text(
+                            (item.price! *
+                                    (item.quantity ?? Decimal.parse('1')))
+                                .toString(),
                             textAlign: TextAlign.center),
                       ),
                   ]),
@@ -592,82 +780,112 @@ Future addAnotherItemDialog(
   );
 }
 
-Future addTransactionItemDialog(
-    BuildContext context, bool sales, CartState state) async {
+Future addTransactionItemDialog(BuildContext context, bool sales,
+    CartState state, GlAccountBloc glAccountBloc) async {
   final priceController = TextEditingController();
   bool? isDebit;
-  List<GlAccount> glAccounts = [];
   GlAccount selectedGlAccount = GlAccount();
   return showDialog<FinDocItem>(
     context: context,
     barrierDismissible: true,
     builder: (BuildContext context) {
       var addOtherFormKey = GlobalKey<FormState>();
-      return Dialog(
-          key: const Key('addTransactionItemDialog'),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20))),
-          child: popUp(
-            context: context,
-            height: 520,
-            title: 'Add another transaction Item',
-            child: SizedBox(
-                child: Form(
-                    key: addOtherFormKey,
-                    child: SingleChildScrollView(
-                        key: const Key('listView2'),
-                        child: Column(children: <Widget>[
-                          DropdownButtonFormField<GlAccount>(
-                            key: const Key('glAccount'),
-                            decoration: const InputDecoration(
-                                labelText: 'Account number'),
-                            hint: const Text('Account number'),
-                            value: selectedGlAccount,
-                            validator: (value) =>
-                                value == null ? 'field required' : null,
-                            items: glAccounts.map((item) {
-                              return DropdownMenuItem<GlAccount>(
-                                  value: item,
-                                  child: Text(
-                                      "${item.accountName}[${item.glAccountId}]"));
-                            }).toList(),
-                            onChanged: (GlAccount? newValue) {
-                              selectedGlAccount = newValue ?? GlAccount();
-                            },
-                            isExpanded: true,
-                          ),
-                          const SizedBox(height: 20),
-                          BinaryRadioButton(
-                              isDebit: isDebit, onValueChanged: (isDebit) {}),
-                          const SizedBox(height: 20),
-                          TextFormField(
-                            key: const Key('price'),
-                            decoration:
-                                const InputDecoration(labelText: 'Amount'),
-                            controller: priceController,
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Enter Amount?';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            key: const Key('ok'),
-                            child: const Text('Ok'),
-                            onPressed: () {
-                              if (addOtherFormKey.currentState!.validate()) {
-                                Navigator.of(context).pop(FinDocItem(
+      return BlocProvider.value(
+          value: glAccountBloc,
+          child: Dialog(
+              key: const Key('addTransactionItemDialog'),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: popUp(
+                context: context,
+                height: 520,
+                title: 'Add another transaction Item',
+                child: SizedBox(
+                    child: Form(
+                        key: addOtherFormKey,
+                        child: SingleChildScrollView(
+                            key: const Key('listView2'),
+                            child: Column(children: <Widget>[
+                              BlocBuilder<GlAccountBloc, GlAccountState>(
+                                builder: (context, state) {
+                                  switch (state.status) {
+                                    case GlAccountStatus.failure:
+                                      return const FatalErrorForm(
+                                          message: 'server connection problem');
+                                    case GlAccountStatus.success:
+                                      return DropdownSearch<GlAccount>(
+                                        selectedItem: selectedGlAccount,
+                                        popupProps: PopupProps.menu(
+                                          showSearchBox: true,
+                                          searchFieldProps:
+                                              const TextFieldProps(
+                                            autofocus: true,
+                                            decoration: InputDecoration(
+                                                labelText: "Gl Account"),
+                                          ),
+                                          menuProps: MenuProps(
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0)),
+                                          title: popUp(
+                                            context: context,
+                                            title: 'Select GL Account',
+                                            height: 50,
+                                          ),
+                                        ),
+                                        dropdownDecoratorProps:
+                                            const DropDownDecoratorProps(
+                                                dropdownSearchDecoration:
+                                                    InputDecoration(
+                                                        labelText: 'Lead')),
+                                        key: const Key('lead'),
+                                        itemAsString: (GlAccount? u) =>
+                                            "${u?.accountCode} ${u?.accountName} ",
+                                        items: state.glAccounts,
+                                        onChanged: (GlAccount? newValue) {
+                                          selectedGlAccount = newValue!;
+                                        },
+                                      );
+                                    default:
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              BinaryRadioButton(
                                   isDebit: isDebit,
-                                  price: Decimal.parse(priceController.text),
-                                ));
-                              }
-                            },
-                          ),
-                        ])))),
-          ));
+                                  onValueChanged: (isDebit) {}),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                key: const Key('price'),
+                                decoration:
+                                    const InputDecoration(labelText: 'Amount'),
+                                controller: priceController,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Enter Amount?';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                key: const Key('ok'),
+                                child: const Text('Ok'),
+                                onPressed: () {
+                                  if (addOtherFormKey.currentState!
+                                      .validate()) {
+                                    Navigator.of(context).pop(FinDocItem(
+                                      isDebit: isDebit,
+                                      price:
+                                          Decimal.parse(priceController.text),
+                                    ));
+                                  }
+                                },
+                              ),
+                            ])))),
+              )));
     },
   );
 }

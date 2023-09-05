@@ -177,7 +177,7 @@ along with this software (see the LICENSE.md file). If not, see
         emailServerId="SYSTEM" webappName="webroot"
         fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
         subject="Export Ledger GlAccounts data"
-        bodyScreenLocation="component://growerp/screen/email/glAccountsExportBody.xml">
+        bodyScreenLocation="component://growerp/screen/email/GlAccountsExportBody.xml">
         <attachments fileName="glAccounts.csv"
             attachmentLocation="component://growerp/screen/email/GlAccountsExportAtt.xml"
             screenRenderMode="text" />

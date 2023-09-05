@@ -13,6 +13,7 @@
  */
 
 import 'dart:async';
+import 'package:decimal/decimal.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -184,25 +185,19 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     int line = 0;
     // import csv into glAccounts
     for (final row in result) {
-      if (line++ < 2 || row.length < 12) continue;
-      List<Category> categories = [];
-      if (row[9].isNotEmpty) categories.add(Category(categoryName: row[9]));
-      if (row[10].isNotEmpty) categories.add(Category(categoryName: row[10]));
-      if (row[11].isNotEmpty) categories.add(Category(categoryName: row[11]));
+      if (line++ < 2 || row.length < 3) continue;
+      AccountClass? accountClass;
+      if (row[3].isNotEmpty) accountClass = AccountClass(description: row[3]);
+      AccountType? accountType;
+      if (row[4].isNotEmpty) accountType = AccountType(description: row[4]);
 
-/*     glAccounts.add(GlAccount(
-        productName: row[0],
-        description: row[1],
-        productTypeId: row[2],
-        image: const Base64Decoder().convert(row[3]),
-        assetClassId: row[4],
-        listPrice: Decimal.parse(row[5]),
-        price: Decimal.parse(row[6]),
-        useWarehouse: row[7] == 'true' ? true : false,
-        assetCount: int.parse(row[8]),
-        categories: categories,
+      glAccounts.add(GlAccount(
+        accountCode: row[0],
+        accountName: row[1],
+        accountClass: accountClass,
+        accountType: accountType,
+        postedBalance: Decimal.tryParse(row[5]),
       ));
-*/
     }
 
     ApiResult<String> compResult = await repos.importGlAccounts(glAccounts);

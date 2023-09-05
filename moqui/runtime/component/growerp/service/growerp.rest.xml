@@ -116,9 +116,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.PartyServices100.delete#User" />
             </method>
         </resource>
-        <resource name="Categories" require-authentication="anonymous-all"> <!-- separate from
-            Category
-        for security reasons -->
+        <resource name="Categories" require-authentication="anonymous-all">
+            <!-- separate from Categoryfor security reasons -->
             <method type="get">
                 <service name="growerp.100.CatgProdServices100.get#ProductCategories" />
             </method>
@@ -135,9 +134,8 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!-- products -->
-        <resource name="Products" require-authentication="anonymous-all"><!-- separate from Product
-            for
-        security reasons -->
+        <resource name="Products" require-authentication="anonymous-all">
+            <!-- separate from Product for security reasons -->
             <method type="get">
                 <service name="growerp.100.CatgProdServices100.get#Products" />
             </method>
@@ -168,7 +166,7 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!--financial
-    docs: order, invoice payments -->
+        docs: order, invoice payments -->
         <resource name="FinDoc"><!-- get financial docs : order/invoice/payment -->
             <method type="get">
                 <service name="growerp.100.FinDocServices100.get#FinDoc" />
@@ -186,7 +184,7 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!--Warehouse
-    location -->
+        location -->
         <resource name="Location"><!-- get financial docs : order/invoice/payment -->
             <method type="get">
                 <service name="growerp.100.WarehouseServices100.get#Location" />

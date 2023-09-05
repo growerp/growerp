@@ -1114,3 +1114,98 @@ List<FinDoc> roomReservations = [
         quantity: Decimal.parse('1')) // nbr of days
   ]),
 ];
+
+List<GlAccount> glAccounts = [
+  // 1 Asset
+  GlAccount(
+      accountCode: "100",
+      accountName: "Asset",
+      accountClass: AccountClass(description: "Assets"),
+      postedBalance: Decimal.parse("11.11")),
+  GlAccount(
+      accountCode: "101",
+      accountName: "Cash",
+      accountClass: AccountClass(description: "Cash and Equivalent"),
+      postedBalance: Decimal.parse("22.22")),
+  GlAccount(
+      accountCode: "120",
+      accountName: "Accounts Receivable",
+      accountClass: AccountClass(description: "Cash and Equivalent"),
+      postedBalance: Decimal.parse("33.33")),
+  GlAccount(
+      accountCode: "150",
+      accountName: "Supplies",
+      accountClass: AccountClass(description: "Office and Supplies"),
+      postedBalance: Decimal.parse("44.44")),
+  GlAccount(
+      accountCode: "180",
+      accountName: "Equipment",
+      accountClass: AccountClass(description: "Assets")),
+  // 2 liability
+  GlAccount(
+      accountCode: "200",
+      accountName: "Notes Payable",
+      accountClass: AccountClass(description: "Liability")),
+  GlAccount(
+      accountCode: "210",
+      accountName: "Notes Payable",
+      accountClass: AccountClass(description: "Liability")),
+  GlAccount(
+      accountCode: "215",
+      accountName: "Accounts Payable",
+      accountClass: AccountClass(description: "Liability")),
+  GlAccount(
+      accountCode: "220",
+      accountName: "Wages Receivable",
+      accountClass: AccountClass(description: "Cash")),
+  GlAccount(
+      accountCode: "230",
+      accountName: "Interest Payable",
+      accountClass: AccountClass(description: "Liability")),
+  // Owner's Equity Accounts
+  GlAccount(
+      accountCode: "290",
+      accountName: "Investor",
+      accountClass: AccountClass(description: "Liability")),
+  // 3 Operating Revenue
+  GlAccount(
+      accountCode: "300",
+      accountName: "Revenue",
+      accountClass: AccountClass(description: "Liability")),
+  GlAccount(
+      accountCode: "310",
+      accountName: "Service revenues",
+      accountClass: AccountClass(description: "Liability")),
+  // operating expense
+  GlAccount(
+      accountCode: "500",
+      accountName: "Expenses",
+      accountClass: AccountClass(description: "Expenses")),
+  GlAccount(
+      accountCode: "510",
+      accountName: "Wages",
+      accountClass: AccountClass(description: "Expenses")),
+  GlAccount(
+      accountCode: "540",
+      accountName: "Supplies",
+      accountClass: AccountClass(description: "Expenses")),
+  GlAccount(
+      accountCode: "560",
+      accountName: "Rent",
+      accountClass: AccountClass(description: "Expenses")),
+];
+
+List<LedgerJournal> ledgerJournals = [
+  LedgerJournal(
+    journalName: "first journal",
+  ),
+  LedgerJournal(
+    journalName: "second journal",
+  ),
+  LedgerJournal(
+    journalName: "third journal",
+  ),
+  LedgerJournal(
+    journalName: "fourth journal",
+  ),
+];

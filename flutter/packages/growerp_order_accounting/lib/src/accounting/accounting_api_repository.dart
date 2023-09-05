@@ -205,10 +205,11 @@ class AccountingAPIRepository extends APIRepository {
 
   Future<ApiResult<String>> importGlAccounts(List<GlAccount> glAccounts) async {
     try {
+      print("========proc: ${glAccounts.length}");
       final response = await dioClient.post(
           'rest/s1/growerp/100/ImportExport', apiKey!,
           data: <String, dynamic>{
-            'glAccounts':
+            'entities':
                 '{"glAccounts":${jsonEncode(glAccounts.map((x) => x.toJson()).toList())}}',
             'classificationId': classificationId,
             'moquiSessionToken': sessionToken

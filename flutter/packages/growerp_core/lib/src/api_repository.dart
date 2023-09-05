@@ -106,7 +106,7 @@ class APIRepository {
   ) async {
     try {
       final response = await dioClient.post(
-        'rest/s1/growerp/100/Entities',
+        'rest/s1/growerp/100/ImportExport',
         apiKey,
         data: <String, dynamic>{
           'entities': entities,

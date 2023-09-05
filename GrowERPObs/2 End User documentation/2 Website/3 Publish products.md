@@ -1,6 +1,3 @@
-#  Marketing & Sales
-
-The marketing and Sales function defines the products and services the customer may need. Further, for product promotion, publishing of blogs and tutorials can be used. Use the social medium for regular announcements. Primary contact for customers. 
 
 ### Definition of product categories.
 

@@ -90,18 +90,19 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
       ),
       Row(
         children: [
-          ElevatedButton(
-              key: const Key('post'),
-              child: const Text('Post'),
-              onPressed: () {
-                if (_formKeyLedgerJournal.currentState!.validate()) {
-                  _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
-                    journalId: widget.ledgerJournal.journalId,
-                    journalName: _nameController.text,
-                    isPosted: true,
-                  )));
-                }
-              }),
+          if (widget.ledgerJournal.journalId.isNotEmpty)
+            ElevatedButton(
+                key: const Key('post'),
+                child: const Text('Post'),
+                onPressed: () {
+                  if (_formKeyLedgerJournal.currentState!.validate()) {
+                    _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(
+                      journalId: widget.ledgerJournal.journalId,
+                      journalName: _nameController.text,
+                      isPosted: true,
+                    )));
+                  }
+                }),
           const SizedBox(width: 10),
           Expanded(
             child: ElevatedButton(
@@ -152,13 +153,14 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
             padding: const EdgeInsets.all(20),
             child: Column(children: (rows.isEmpty ? column : rows)),
           )),
-      Flexible(
-        child: FinDocListForm(
-          sales: true,
-          docType: FinDocType.transaction,
-          journalId: widget.ledgerJournal.journalId,
-        ),
-      )
+      if (widget.ledgerJournal.journalId.isNotEmpty)
+        Flexible(
+          child: FinDocListForm(
+            sales: true,
+            docType: FinDocType.transaction,
+            journalId: widget.ledgerJournal.journalId,
+          ),
+        )
     ]);
   }
 }

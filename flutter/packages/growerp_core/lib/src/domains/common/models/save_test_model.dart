@@ -41,6 +41,9 @@ class SaveTest with _$SaveTest {
     @Default([]) List<Asset> assets,
     @Default([]) List<Product> products,
     @Default([]) List<Category> categories,
+    @Default([]) List<GlAccount> glAccounts,
+    @Default([]) List<FinDoc> transactions,
+    @Default([]) List<LedgerJournal> ledgerJournals,
   }) = _SaveTest;
   SaveTest._();
 
