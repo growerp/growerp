@@ -799,7 +799,7 @@ along with this software (see the LICENSE.md file). If not, see
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
                             description: glAccount.typeDescription],
                         isDebit: glAccount.isDebit == 'Y' ? true : false,
-                        postedBalance: glAccount.postedBalance,
+                        postedBalance: glAccount.postedBalance?.toString(),
                         )
                 </script>
             </iterate>

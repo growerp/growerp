@@ -49,6 +49,8 @@ class FinDoc with _$FinDoc {
     String? shipmentMethod,
     Address? address,
     String? telephoneNr,
+    bool? isPosted,
+    LedgerJournal? journal,
     @Default([]) List<FinDocItem> items,
   }) = _FinDoc;
 

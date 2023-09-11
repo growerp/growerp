@@ -15,10 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_order_accounting/src/findoc/widgets/findoc_list_header_trans.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
-
 import '../findoc.dart';
 
 /// listing financial documents and orders
@@ -404,9 +402,9 @@ class FinDocListState extends State<FinDocList> {
     );
   }
 
-  FinDocListItem getFinDocListItemTrans(
+  FinDocListItemTrans getFinDocListItemTrans(
       int index, bool isPhone, BuildContext context) {
-    return FinDocListItem(
+    return FinDocListItemTrans(
       finDoc: finDocs[index],
       docType: widget.docType,
       index: index,

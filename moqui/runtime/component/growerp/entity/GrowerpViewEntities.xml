@@ -346,6 +346,10 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="INV">
             <key-map field-name="invoiceId" />
         </member-entity>
+        <member-entity entity-alias="GLACCOUNT" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ITEM">
+            <key-map field-name="overrideGlAccountId" related="glAccountId" />
+        </member-entity>
         <member-entity entity-alias="OIB" entity-name="mantle.order.OrderItemBilling"
             join-from-alias="ITEM" join-optional="true">
             <key-map field-name="invoiceId" />
@@ -412,6 +416,9 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="itemTypeName" field="description" entity-alias="ITEMTYPE" />
         <alias name="quantity" entity-alias="ITEM" />
         <alias name="amount" entity-alias="ITEM" />
+        <alias name="glAccountId" entity-alias="GLACCOUNT" />
+        <alias name="accountCode" entity-alias="GLACCOUNT" />
+        <alias name="accountName" entity-alias="GLACCOUNT" />
         <alias name="description" entity-alias="ITEM"></alias>
         <alias name="orderId" entity-alias="OIB" />
         <alias name="shipmentId" entity-alias="OIB" />
@@ -441,9 +448,15 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="paymentId" />
         </member-entity>
+        <!-- itemtype glAccount -->
         <member-entity entity-alias="ACCOUNT" entity-name="mantle.ledger.account.GlAccount"
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="itemTypeGlAccountId" related="glAccountId" />
+        </member-entity>
+        <!-- override gl account -->
+        <member-entity entity-alias="OVACCOUNT" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="PAY" join-optional="true">
+            <key-map field-name="overrideGlAccountId" related="glAccountId" />
         </member-entity>
         <!-- supplier/vendor info (required?)-->
         <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
@@ -522,6 +535,10 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="itemTypeGlAccountId" entity-alias="PAY" /><!-- used for glAccountId-->
         <alias name="paymentTypeEnumId" entity-alias="PAY" /><!-- used for itemType-->
         <alias name="accountCode" entity-alias="ACCOUNT" /><!-- used for glAccountId-->
+        <alias name="accountName" entity-alias="ACCOUNT" /><!-- used for glAccountId-->
+        <alias name="overrideGlAccountId" field="glAccountId" entity-alias="OVACCOUNT" />
+        <alias name="overrideAccountCode" field="accountCode" entity-alias="OVACCOUNT" />
+        <alias name="overrideAccountName" field="accountName" entity-alias="OVACCOUNT" />
 
         <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
@@ -573,8 +590,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="invoiceId" entity-alias="ATX" />
         <alias name="paymentId" entity-alias="ATX" />
         <alias name="shipmentId" entity-alias="ATX" />
-        <alias name="assetId" entity-alias="ATX" />
-        <alias name="ownerPartyId" field="organizationPartyId" entity-alias="ATX" />
+        <alias name="transDescription" field="description" entity-alias="ATX" />
+        <alias name="companyPartyId" field="organizationPartyId" entity-alias="ATX" />
         <alias name="typeId" field="acctgTransTypeEnumId" entity-alias="ATX" />
         <alias name="transactionDate" entity-alias="ATX" />
         <alias name="isPosted" entity-alias="ATX" />
@@ -583,6 +600,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="entryId" field="acctgTransEntrySeqId" entity-alias="ATE" />
         <alias name="debitCreditFlag" entity-alias="ATE" />
         <alias name="productId" entity-alias="ATE" />
+        <alias name="assetId" entity-alias="ATE" />
         <alias name="description" entity-alias="ATE" />
         <alias name="glAccountId" entity-alias="ATE" />
         <alias name="accountCode" entity-alias="GLAC" />
@@ -1604,6 +1622,5 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="classDescription" field="description" entity-alias="GLCLASS" />
         <alias name="typeDescription" field="description" entity-alias="GLTYPE" />
     </view-entity>
-
 
 </entities>

@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../accounting/accounting.dart';
 import '../findoc.dart';
 
 class PaymentDialog extends StatelessWidget {
@@ -29,20 +30,30 @@ class PaymentDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (finDoc.sales) {
-      return BlocProvider<UserBloc>(
-          create: (context) => UserBloc(
-              CompanyUserAPIRepository(
-                  context.read<AuthBloc>().state.authenticate!.apiKey!),
-              Role.customer),
+      return MultiBlocProvider(
+          providers: [
+            BlocProvider<UserBloc>(
+                create: (context) => UserBloc(
+                    CompanyUserAPIRepository(
+                        context.read<AuthBloc>().state.authenticate!.apiKey!),
+                    Role.customer)),
+            BlocProvider<GlAccountBloc>(
+                create: (context) => GlAccountBloc(AccountingAPIRepository(
+                    context.read<AuthBloc>().state.authenticate!.apiKey!))),
+          ],
           child:
               PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
     }
-    return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(
-            CompanyUserAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!),
-            Role.supplier),
-        child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
+    return MultiBlocProvider(providers: [
+      BlocProvider<UserBloc>(
+          create: (context) => UserBloc(
+              CompanyUserAPIRepository(
+                  context.read<AuthBloc>().state.authenticate!.apiKey!),
+              Role.supplier)),
+      BlocProvider<GlAccountBloc>(
+          create: (context) => GlAccountBloc(AccountingAPIRepository(
+              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+    ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
   }
 }
 
@@ -61,9 +72,11 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   late FinDoc finDocUpdated;
   late FinDocBloc finDocBloc;
   User? _selectedUser;
+  GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
   ItemType? _selectedItemType;
   late UserBloc _userBloc;
+  late GlAccountBloc _accountBloc;
 
   late bool isPhone;
   late PaymentInstrument _paymentInstrument;
@@ -77,6 +90,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
     finDocBloc = context.read<FinDocBloc>();
     finDocUpdated = finDoc;
     _selectedUser = finDocUpdated.otherUser;
+    _selectedGlAccount = finDocUpdated.items[0].glAccount;
     _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
@@ -87,6 +101,8 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         : finDocUpdated.paymentInstrument!;
     _userBloc = context.read<UserBloc>();
     _userBloc.add(const UserFetch());
+    _accountBloc = context.read<GlAccountBloc>();
+    _accountBloc.add(const GlAccountFetch());
   }
 
   @override
@@ -327,6 +343,45 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                 isExpanded: true,
               ),
               const SizedBox(height: 20),
+              BlocBuilder<GlAccountBloc, GlAccountState>(
+                  builder: (context, state) {
+                switch (state.status) {
+                  case GlAccountStatus.failure:
+                    return const FatalErrorForm(
+                        message: 'server connection problem');
+                  case GlAccountStatus.success:
+                    return DropdownSearch<GlAccount>(
+                      selectedItem: _selectedGlAccount,
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: const TextFieldProps(
+                          autofocus: true,
+                          decoration: InputDecoration(labelText: 'Gl Account'),
+                        ),
+                        menuProps: MenuProps(
+                            borderRadius: BorderRadius.circular(20.0)),
+                        title: popUp(
+                          context: context,
+                          title: 'Select GL Account',
+                          height: 50,
+                        ),
+                      ),
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                          dropdownSearchDecoration:
+                              InputDecoration(labelText: 'GL Account')),
+                      key: const Key('glAccount'),
+                      itemAsString: (GlAccount? u) =>
+                          "${u?.accountCode} ${u?.accountName} ",
+                      items: state.glAccounts,
+                      onChanged: (GlAccount? newValue) {
+                        _selectedGlAccount = newValue!;
+                      },
+                    );
+                  default:
+                    return const Center(child: CircularProgressIndicator());
+                }
+              }),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   ElevatedButton(
@@ -350,7 +405,11 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                               otherCompany: _selectedUser!.company,
                               grandTotal: Decimal.parse(_amountController.text),
                               paymentInstrument: _paymentInstrument,
-                              items: [FinDocItem(itemType: _selectedItemType)],
+                              items: [
+                                FinDocItem(
+                                    itemType: _selectedItemType,
+                                    glAccount: _selectedGlAccount)
+                              ],
                             )));
                           }
                         }),

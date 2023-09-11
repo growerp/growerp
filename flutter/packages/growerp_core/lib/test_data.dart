@@ -1209,3 +1209,36 @@ List<LedgerJournal> ledgerJournals = [
     journalName: "fourth journal",
   ),
 ];
+
+List<FinDoc> transactions = [
+  FinDoc(
+    sales: false,
+    description: "first transaction, some revenue",
+    isPosted: false,
+    items: [
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "120"),
+          price: Decimal.parse('200'),
+          isDebit: true),
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "310"),
+          price: Decimal.parse('200'),
+          isDebit: false),
+    ],
+  ),
+  FinDoc(
+    sales: false,
+    description: "first transaction, some expenses",
+    isPosted: false,
+    items: [
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "215"),
+          price: Decimal.parse('100'),
+          isDebit: false),
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "540"),
+          price: Decimal.parse('100'),
+          isDebit: true),
+    ],
+  )
+];

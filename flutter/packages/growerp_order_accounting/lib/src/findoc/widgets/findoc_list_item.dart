@@ -203,37 +203,31 @@ class FinDocListItem extends StatelessWidget {
               finDocBloc.add(FinDocUpdate(finDoc.copyWith(
                   status: FinDocStatusVal.nextStatus(finDoc.status!))));
             }),
-        Visibility(
-            visible: [
-              FinDocType.order,
-              FinDocType.invoice,
-              FinDocType.payment,
-            ].contains(finDoc.docType),
-            child: IconButton(
-              icon: const Icon(Icons.edit),
-              key: Key('edit$index'),
-              tooltip: 'Edit ${finDoc.docType}',
-              onPressed: () async {
-                await showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return RepositoryProvider.value(
-                          value: repos,
-                          child: BlocProvider.value(
-                              value: finDocBloc,
-                              child: onlyRental == true
-                                  ? ReservationDialog(
-                                      finDoc: finDoc, original: finDoc)
-                                  : finDoc.docType == FinDocType.payment
-                                      ? PaymentDialog(
-                                          finDoc: finDoc,
-                                          paymentMethod: paymentMethod,
-                                        )
-                                      : FinDocDialog(finDoc: finDoc)));
-                    });
-              },
-            )),
+        IconButton(
+          icon: const Icon(Icons.edit),
+          key: Key('edit$index'),
+          tooltip: 'Edit ${finDoc.docType}',
+          onPressed: () async {
+            await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return RepositoryProvider.value(
+                      value: repos,
+                      child: BlocProvider.value(
+                          value: finDocBloc,
+                          child: onlyRental == true
+                              ? ReservationDialog(
+                                  finDoc: finDoc, original: finDoc)
+                              : finDoc.docType == FinDocType.payment
+                                  ? PaymentDialog(
+                                      finDoc: finDoc,
+                                      paymentMethod: paymentMethod,
+                                    )
+                                  : FinDocDialog(finDoc: finDoc)));
+                });
+          },
+        ),
       ]);
     }
     return null;
@@ -253,11 +247,16 @@ class FinDocListItem extends StatelessWidget {
                   title: Text(
                       finDoc.docType == FinDocType.order ||
                               finDoc.docType == FinDocType.invoice
-                          ? "ProductId: ${e.productId} Description: ${e.description} Quantity: ${e.quantity.toString()} Price: ${e.price.toString()} SubTotal: ${(e.quantity! * e.price!).toString()}${e.rentalFromDate == null ? '' : " Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
-                              "${e.rentalThruDate.toString().substring(0, 10)}"}"
+                          ? "ProductId: ${e.productId} Description: ${e.description} "
+                              "Quantity: ${e.quantity.toString()} "
+                              "Price: ${e.price.toString()} "
+                              "sGLAccount: ${e.glAccount?.accountCode} "
+                              "SubTotal: ${(e.quantity! * e.price!).toString()}${e.rentalFromDate == null ? '' : " "
+                                  "Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
+                                  "${e.rentalThruDate.toString().substring(0, 10)}"}"
                           : finDoc.docType == FinDocType.transaction
-                              ? "Type: ${e.itemType?.itemTypeId.substring(3)}\n"
-                                  "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}\n"
+                              ? // "Type: ${e.itemType?.itemTypeId.substring(3)}\n"
+                              "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}\n"
                                   "Amount: ${e.price} "
                               : finDoc.docType == FinDocType.shipment
                                   ? "ProductId: ${e.productId} "

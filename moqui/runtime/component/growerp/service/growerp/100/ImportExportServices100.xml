@@ -24,7 +24,6 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
-            <log message="====relcomp: $relComp" />
             <if condition="entities.companies">
                 <iterate list="entities.companies" entry="company">
                     <if condition="company.partyId == '_MOD_'">
@@ -93,8 +92,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <message public="true" type="success">Locations Upload completed</message>
             </if>
-            <if condition="entities.glAccounts || entities.glAccounts.size() == 0">
-                <log message="====process glAccounts: ${entities.glAccounts.size()}" />
+            <if condition="entities.glAccounts || entities.glAccounts?.size() == 0">
                 <entity-find entity-name="GlAccountAndOrganization" list="glAccounts">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
-class BinaryRadioButton extends StatefulWidget {
+class CreditDebitButton extends StatefulWidget {
   final bool? isDebit;
   final bool canUpdate;
   final Function(bool?) onValueChanged;
 
-  const BinaryRadioButton(
+  const CreditDebitButton(
       {super.key,
       required this.onValueChanged,
       required this.isDebit,
       this.canUpdate = true});
 
   @override
-  BinaryRadioButtonState createState() => BinaryRadioButtonState();
+  CreditDebitButtonState createState() => CreditDebitButtonState();
 }
 
-class BinaryRadioButtonState extends State<BinaryRadioButton> {
+class CreditDebitButtonState extends State<CreditDebitButton> {
   bool? _isSelected;
 
   @override
@@ -35,9 +35,7 @@ class BinaryRadioButtonState extends State<BinaryRadioButton> {
           groupValue: _isSelected,
           onChanged: widget.canUpdate
               ? (value) {
-                  setState(() {
-                    _isSelected = (value ?? false) as bool?;
-                  });
+                  onValueChanged((value ?? false) as bool);
                 }
               : null,
         ),
@@ -46,9 +44,7 @@ class BinaryRadioButtonState extends State<BinaryRadioButton> {
           groupValue: _isSelected,
           onChanged: widget.canUpdate
               ? (value) {
-                  setState(() {
-                    _isSelected = (value ?? false) as bool?;
-                  });
+                  onValueChanged((value ?? false) as bool);
                 }
               : null,
         ),

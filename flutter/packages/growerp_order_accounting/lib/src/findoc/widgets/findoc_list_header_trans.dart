@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
-import '../../l10n/generated/order_accounting_localizations.dart';
 import '../findoc.dart';
 
 class FinDocListHeaderTrans extends StatefulWidget {
@@ -40,7 +39,6 @@ class _FinDocListHeaderTransState extends State<FinDocListHeaderTrans> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
-    String classificationId = GlobalConfiguration().get("classificationId");
     return ListTile(
         leading: GestureDetector(
             key: const Key('search'),
@@ -71,33 +69,24 @@ class _FinDocListHeaderTransState extends State<FinDocListHeaderTrans> {
                     })
               ])
             : Row(children: <Widget>[
-                SizedBox(
-                    width: 80,
-                    child: Text("${widget.docType.toString()} Id"
-                        "${widget.isPhone ? '\n' : ' '}Date")),
+                const Expanded(child: Text("Transaction Id")),
                 const SizedBox(width: 10),
-                Expanded(
-                    child: Text('${widget.sales ? "Customer" : "Supplier"} '
-                        '${widget.isPhone ? '\n' : ' '}${OrderAccountingLocalizations.of(context)!.nameAndCompany}')),
-                if (!widget.isPhone && widget.docType != FinDocType.payment)
-                  const SizedBox(
-                      width: 80,
-                      child: Text("#items", textAlign: TextAlign.left)),
+                const Expanded(child: Text("description")),
+                if (!widget.isPhone) const SizedBox(width: 10),
+                if (!widget.isPhone) const Expanded(child: Text("Date")),
+                if (!widget.isPhone) const SizedBox(width: 10),
+                if (!widget.isPhone) const Expanded(child: Text("Posted?")),
+                if (!widget.isPhone) const SizedBox(width: 10),
+                if (!widget.isPhone) const Expanded(child: Text("#items")),
               ]),
-        subtitle: Row(children: <Widget>[
-          if (!widget.isPhone)
-            SizedBox(
-                width: 80,
-                child: Text(classificationId == 'AppHotel'
-                    ? 'Reserv. Date'
-                    : 'Creation Date')),
-          const SizedBox(width: 76, child: Text("Total")),
-          const SizedBox(width: 90, child: Text("Status")),
-          if (!widget.isPhone) const Expanded(child: Text("Email Address")),
-          if (!widget.isPhone)
-            Expanded(child: Text("${widget.docType} description")),
-          const Divider(),
-        ]),
+        subtitle: widget.isPhone
+            ? const Row(children: <Widget>[
+                Expanded(child: Text("Date")),
+                Expanded(child: Text("Total")),
+                Expanded(child: Text("Posted?")),
+                Divider(),
+              ])
+            : null,
         trailing: SizedBox(width: widget.isPhone ? 40 : 195));
   }
 }

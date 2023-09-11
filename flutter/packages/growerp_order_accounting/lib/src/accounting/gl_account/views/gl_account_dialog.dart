@@ -122,7 +122,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         },
       ),
       if (widget.glAccount.glAccountId != null)
-        BinaryRadioButton(
+        CreditDebitButton(
             isDebit: debitSelected,
             canUpdate: false,
             onValueChanged: (debitSelected) {}),

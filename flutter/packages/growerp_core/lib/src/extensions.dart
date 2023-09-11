@@ -36,6 +36,16 @@ extension StringExtension on String {
   }
 }
 
+extension StringTruncation on String? {
+  String truncate(int strLength) {
+    if (this == null) return '';
+    if (this!.length > strLength) {
+      return '${this!.substring(0, strLength)}...';
+    }
+    return this ?? '';
+  }
+}
+
 extension DateOnlyCompare on DateTime {
   bool isSameDate(DateTime other) {
     return day == other.day && month == other.month && year == other.year;
