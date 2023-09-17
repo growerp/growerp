@@ -26,6 +26,28 @@ import 'add_product_item_dialog.dart';
 import 'add_rental_item_dialog.dart';
 import 'add_transaction_item_dialog.dart';
 
+class ShowFinDocDialog extends StatelessWidget {
+  final FinDoc finDoc;
+  final bool dialog;
+  const ShowFinDocDialog(this.finDoc, {super.key, this.dialog = true});
+  @override
+  Widget build(BuildContext context) {
+    FinDocAPIRepository repos = FinDocAPIRepository(
+        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    return BlocProvider<FinDocBloc>(
+        create: (context) => FinDocBloc(repos, finDoc.sales, finDoc.docType!)
+          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+          if (state.status == FinDocStatus.success) {
+            return RepositoryProvider.value(
+                value: repos, child: FinDocDialog(finDoc: state.finDocs[0]));
+          } else {
+            return const LoadingIndicator();
+          }
+        }));
+  }
+}
+
 class FinDocDialog extends StatelessWidget {
   final FinDoc finDoc;
   const FinDocDialog({required this.finDoc, super.key});
@@ -97,7 +119,7 @@ class MyFinDocState extends State<FinDocPage> {
   late String classificationId;
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
-  bool _isPosted = false;
+  bool? _isPosted = false;
   User? _selectedUser;
   Company? _selectedCompany;
   late bool isPhone;
@@ -301,11 +323,12 @@ class MyFinDocState extends State<FinDocPage> {
                   Column(children: [
                     const Text("Post?"),
                     Radio(
-                        value: _isPosted,
-                        groupValue: true,
-                        onChanged: (_) {
+                        value: true,
+                        groupValue: _isPosted,
+                        toggleable: true,
+                        onChanged: (newValue) {
                           setState(() {
-                            _isPosted = !_isPosted;
+                            _isPosted = newValue;
                           });
                         }),
                   ])
@@ -327,7 +350,7 @@ class MyFinDocState extends State<FinDocPage> {
           }),
       ElevatedButton(
           key: const Key('addItem'),
-          child: Text('Add ${finDoc.docType}'),
+          child: const Text('Add other item'),
           onPressed: () async {
             final dynamic finDocItem;
             if (widget.finDoc.docType != FinDocType.transaction) {
@@ -570,13 +593,18 @@ class MyFinDocState extends State<FinDocPage> {
                 ],
                 rows: List.generate(items.length, (index) {
                   return DataRow(cells: [
-                    DataCell(Text(items[index].glAccount!.accountCode!)),
-                    DataCell(Text(items[index].isDebit!
-                        ? items[index].price.toString()
-                        : '')),
-                    DataCell(Text(!items[index].isDebit!
-                        ? items[index].price.toString()
-                        : '')),
+                    DataCell(Text(items[index].glAccount!.accountCode!,
+                        key: const Key('glAccount'))),
+                    DataCell(Text(
+                        items[index].isDebit!
+                            ? items[index].price.toString()
+                            : '',
+                        key: Key('debit$index'))),
+                    DataCell(Text(
+                        !items[index].isDebit!
+                            ? items[index].price.toString()
+                            : '',
+                        key: Key('credit$index'))),
                     DataCell(IconButton(
                       icon: const Icon(
                         Icons.delete_forever,

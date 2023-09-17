@@ -235,7 +235,7 @@ class InvoiceTest {
             : test.payments;
     for (FinDoc invoice in invoices) {
       await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
+      expect(CommonTest.getTextField('status0'), 'completed');
     }
   }
 }

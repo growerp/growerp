@@ -425,6 +425,11 @@ class CommonTest {
     return tff.value ?? false;
   }
 
+  static bool getRadio(String key) {
+    Radio tff = find.byKey(Key(key)).evaluate().single.widget as Radio;
+    return tff.value ?? false;
+  }
+
   static bool getCheckboxListTile(String text) {
     CheckboxListTile tff =
         find.text(text).evaluate().single.widget as CheckboxListTile;

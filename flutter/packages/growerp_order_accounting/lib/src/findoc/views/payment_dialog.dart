@@ -22,6 +22,28 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../accounting/accounting.dart';
 import '../findoc.dart';
 
+class ShowPaymentDialog extends StatelessWidget {
+  final FinDoc finDoc;
+  final bool dialog;
+  const ShowPaymentDialog(this.finDoc, {super.key, this.dialog = true});
+  @override
+  Widget build(BuildContext context) {
+    FinDocAPIRepository repos = FinDocAPIRepository(
+        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    return BlocProvider<FinDocBloc>(
+        create: (context) => FinDocBloc(repos, finDoc.sales, finDoc.docType!)
+          ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
+        child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
+          if (state.status == FinDocStatus.success) {
+            return RepositoryProvider.value(
+                value: repos, child: PaymentDialog(finDoc: state.finDocs[0]));
+          } else {
+            return const LoadingIndicator();
+          }
+        }));
+  }
+}
+
 class PaymentDialog extends StatelessWidget {
   final FinDoc finDoc;
   final PaymentMethod? paymentMethod;
@@ -29,6 +51,7 @@ class PaymentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FinDocBloc _finDocBloc = context.read<FinDocBloc>();
     if (finDoc.sales) {
       return MultiBlocProvider(
           providers: [
@@ -70,7 +93,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   final GlobalKey<FormState> paymentDialogFormKey = GlobalKey<FormState>();
   late FinDoc finDoc; // incoming finDoc
   late FinDoc finDocUpdated;
-  late FinDocBloc finDocBloc;
+  late FinDocBloc _finDocBloc;
   User? _selectedUser;
   GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
@@ -87,10 +110,11 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   void initState() {
     super.initState();
     finDoc = widget.finDoc;
-    finDocBloc = context.read<FinDocBloc>();
     finDocUpdated = finDoc;
     _selectedUser = finDocUpdated.otherUser;
-    _selectedGlAccount = finDocUpdated.items[0].glAccount;
+    _selectedGlAccount = finDocUpdated.items.isNotEmpty
+        ? finDocUpdated.items[0].glAccount
+        : null;
     _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
@@ -99,6 +123,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
+    _finDocBloc = context.read<FinDocBloc>();
     _userBloc = context.read<UserBloc>();
     _userBloc.add(const UserFetch());
     _accountBloc = context.read<GlAccountBloc>();
@@ -108,37 +133,39 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return Dialog(
-        key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
-        insetPadding: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: BlocConsumer<FinDocBloc, FinDocState>(
-          listenWhen: (previous, current) =>
-              previous.status == FinDocStatus.loading,
-          listener: (context, state) {
-            if (state.status == FinDocStatus.success) {
-              Navigator.of(context).pop();
-            }
-            if (state.status == FinDocStatus.failure) {
-              HelperFunctions.showMessage(
-                  context, '${state.message}', Colors.red);
-            }
-          },
-          builder: (context, state) {
-            return popUp(
-                context: context,
-                height: 750,
-                width: 400,
-                title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
-                    "Payment #${finDoc.paymentId ?? 'new'}",
-                child: SingleChildScrollView(
-                    key: const Key('listView2'),
-                    physics: const ClampingScrollPhysics(),
-                    child: paymentForm(state, paymentDialogFormKey)));
-          },
-        ));
+    return BlocProvider.value(
+        value: context.read<FinDocBloc>(),
+        child: Dialog(
+            key: Key("PaymentDialog${finDoc.sales ? 'Sales' : 'Purchase'}"),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: BlocConsumer<FinDocBloc, FinDocState>(
+              listenWhen: (previous, current) =>
+                  previous.status == FinDocStatus.loading,
+              listener: (context, state) {
+                if (state.status == FinDocStatus.success) {
+                  Navigator.of(context).pop();
+                }
+                if (state.status == FinDocStatus.failure) {
+                  HelperFunctions.showMessage(
+                      context, '${state.message}', Colors.red);
+                }
+              },
+              builder: (context, state) {
+                return popUp(
+                    context: context,
+                    height: 750,
+                    width: 400,
+                    title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
+                        "Payment #${finDoc.paymentId ?? 'new'}",
+                    child: SingleChildScrollView(
+                        key: const Key('listView2'),
+                        physics: const ClampingScrollPhysics(),
+                        child: paymentForm(state, paymentDialogFormKey)));
+              },
+            )));
   }
 
   Widget paymentForm(
@@ -330,7 +357,9 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                 hint: const Text('Payment Type'),
                 value: _selectedItemType,
                 validator: (value) =>
-                    value == null ? 'Enter a item type for posting?' : null,
+                    value == null && _selectedGlAccount == null
+                        ? 'Enter a item type for posting?'
+                        : null,
                 items: state.itemTypes.map((item) {
                   return DropdownMenuItem<ItemType>(
                       value: item,
@@ -388,7 +417,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                       key: const Key('cancelFinDoc'),
                       child: const Text('Cancel Payment'),
                       onPressed: () {
-                        finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                        _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
                           status: FinDocStatusVal.cancelled,
                         )));
                       }),
@@ -400,15 +429,16 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                             '${finDoc.idIsNull() ? 'Create ' : 'Update '}${finDocUpdated.docType}'),
                         onPressed: () {
                           if (paymentDialogFormKey.currentState!.validate()) {
-                            finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
+                            _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
                               otherUser: _selectedUser,
                               otherCompany: _selectedUser!.company,
                               grandTotal: Decimal.parse(_amountController.text),
                               paymentInstrument: _paymentInstrument,
                               items: [
                                 FinDocItem(
-                                    itemType: _selectedItemType,
-                                    glAccount: _selectedGlAccount)
+                                  itemType: _selectedItemType,
+                                  glAccount: _selectedGlAccount,
+                                )
                               ],
                             )));
                           }

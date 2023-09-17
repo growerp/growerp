@@ -59,7 +59,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       ApiResult<List<GlAccount>> compResult = await repos.getGlAccount(
         searchString: event.searchString,
         start: 0,
-        limit: _glAccountLimit,
+        limit: event.limit ?? _glAccountLimit,
       );
       return emit(compResult.when(
           success: (data) => state.copyWith(
@@ -76,8 +76,10 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
         (state.searchString.isNotEmpty &&
             event.searchString != state.searchString)) {
-      ApiResult<List<GlAccount>> compResult =
-          await repos.getGlAccount(searchString: event.searchString);
+      ApiResult<List<GlAccount>> compResult = await repos.getGlAccount(
+        searchString: event.searchString,
+        limit: event.limit ?? _glAccountLimit,
+      );
       return emit(compResult.when(
           success: (data) => state.copyWith(
                 status: GlAccountStatus.success,
@@ -91,9 +93,10 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     }
     // get next page also for search
     ApiResult<List<GlAccount>> compResult = await repos.getGlAccount(
-        searchString: event.searchString,
-        start: state.glAccounts.length,
-        limit: _glAccountLimit);
+      searchString: event.searchString,
+      start: state.glAccounts.length,
+      limit: event.limit ?? _glAccountLimit,
+    );
     return emit(compResult.when(
         success: (data) => state.copyWith(
               status: GlAccountStatus.success,

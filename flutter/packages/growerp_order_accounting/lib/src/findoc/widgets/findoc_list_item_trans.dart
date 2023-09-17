@@ -66,10 +66,31 @@ class FinDocListItemTrans extends StatelessWidget {
           if (!isPhone) const SizedBox(width: 10),
           if (!isPhone)
             Expanded(
-                child: Text(finDoc.isPosted == true ? 'Y' : 'N',
-                    key: Key("isPosted$index"))),
+                child: Text(
+              finDoc.isPosted == true ? 'Y' : 'N',
+              key: Key("isPosted$index"),
+              textAlign: TextAlign.center,
+            )),
           if (!isPhone) const SizedBox(width: 10),
-          if (!isPhone) Expanded(child: Text(finDoc.items.length.toString())),
+          if (!isPhone)
+            Expanded(
+                child:
+                    Text(finDoc.invoiceId ?? '', textAlign: TextAlign.center)),
+          if (!isPhone) const SizedBox(width: 10),
+          if (!isPhone)
+            Expanded(
+                child:
+                    Text(finDoc.paymentId ?? '', textAlign: TextAlign.center)),
+          if (!isPhone) const SizedBox(width: 10),
+          if (!isPhone)
+            Expanded(
+                child: Text(finDoc.grandTotal.toString(),
+                    textAlign: TextAlign.center)),
+          if (!isPhone) const SizedBox(width: 10),
+          if (!isPhone)
+            Expanded(
+                child: Text(finDoc.items.length.toString(),
+                    textAlign: TextAlign.center)),
         ]),
         subtitle: isPhone
             ? Row(children: <Widget>[
@@ -100,21 +121,11 @@ class FinDocListItemTrans extends StatelessWidget {
                 finDoc.copyWith(status: FinDocStatusVal.cancelled)));
           },
         ),
-      if (!isPhone)
-        IconButton(
-          key: Key('print$index'),
-          icon: const Icon(Icons.print),
-          tooltip: 'PDF/Print ${finDoc.docType}',
-          onPressed: () async {
-            await Navigator.pushNamed(context, '/printer', arguments: finDoc);
-          },
-        ),
       if (!isPhone && finDoc.isPosted == false)
         TextButton(
             key: Key('nextStatus$index'),
             onPressed: () {
-              finDocBloc.add(FinDocUpdate(finDoc.copyWith(
-                  status: FinDocStatusVal.nextStatus(finDoc.status!))));
+              finDocBloc.add(FinDocUpdate(finDoc.copyWith(isPosted: true)));
             },
             child: const Text('Post')),
       if (finDoc.isPosted == null || finDoc.isPosted == false)
@@ -158,8 +169,9 @@ class FinDocListItemTrans extends StatelessWidget {
                   child: Text(e.itemSeqId.toString()),
                 ),
                 title: Text(
-                    "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}\n"
-                    "Amount $debitCredit ${e.price}",
+                    "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}  "
+                    "${isPhone ? '\n' : ''}"
+                    "Amount: $debitCredit ${e.price}",
                     key: Key('itemLine$index'))))
       ]);
     }));

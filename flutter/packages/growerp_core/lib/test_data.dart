@@ -1217,11 +1217,11 @@ List<FinDoc> transactions = [
     isPosted: false,
     items: [
       FinDocItem(
-          glAccount: GlAccount(accountCode: "120"),
+          glAccount: GlAccount(accountCode: "12000"),
           price: Decimal.parse('200'),
           isDebit: true),
       FinDocItem(
-          glAccount: GlAccount(accountCode: "310"),
+          glAccount: GlAccount(accountCode: "31000"),
           price: Decimal.parse('200'),
           isDebit: false),
     ],
@@ -1232,11 +1232,11 @@ List<FinDoc> transactions = [
     isPosted: false,
     items: [
       FinDocItem(
-          glAccount: GlAccount(accountCode: "215"),
+          glAccount: GlAccount(accountCode: "21500"),
           price: Decimal.parse('100'),
           isDebit: false),
       FinDocItem(
-          glAccount: GlAccount(accountCode: "540"),
+          glAccount: GlAccount(accountCode: "54000"),
           price: Decimal.parse('100'),
           isDebit: true),
     ],

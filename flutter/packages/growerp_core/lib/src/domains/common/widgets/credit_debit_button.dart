@@ -31,6 +31,7 @@ class CreditDebitButtonState extends State<CreditDebitButton> {
       children: [
         const Text('Debit'),
         Radio(
+          key: const Key('debit'),
           value: true,
           groupValue: _isSelected,
           onChanged: widget.canUpdate
@@ -40,6 +41,7 @@ class CreditDebitButtonState extends State<CreditDebitButton> {
               : null,
         ),
         Radio(
+          key: const Key('credit'),
           value: false,
           groupValue: _isSelected,
           onChanged: widget.canUpdate

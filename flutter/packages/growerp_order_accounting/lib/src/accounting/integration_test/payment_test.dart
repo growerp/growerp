@@ -213,17 +213,14 @@ class PaymentTest {
             : test.payments;
     for (FinDoc payment in payments) {
       await CommonTest.doSearch(tester, searchString: payment.id()!);
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.inPreparation.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('status0') == 'in Preparation') {
+        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.created.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('status0') == 'created') {
+        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.approved.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('status0') == 'approved') {
+        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
     }
     await CommonTest.closeSearch(tester);
@@ -235,7 +232,7 @@ class PaymentTest {
     List<FinDoc> payments = test.orders.isEmpty ? test.payments : test.orders;
     for (FinDoc payment in payments) {
       await CommonTest.doSearch(tester, searchString: payment.paymentId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
+      expect(CommonTest.getTextField('status0'), 'completed');
     }
   }
 }

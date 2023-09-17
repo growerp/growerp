@@ -11,7 +11,7 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
-import 'package:flutter/material.dart';
+
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,7 +32,7 @@ class TransactionTest {
     for (FinDoc finDoc in finDocs) {
       await CommonTest.doSearch(tester, searchString: finDoc.chainId()!);
       await tester.pumpAndSettle();
-      expect(CommonTest.getTextField('status0'), 'Completed',
+      expect(CommonTest.getTextField('status0'), 'Y',
           reason: 'transaction status field check');
     }
   }
@@ -99,15 +99,12 @@ class TransactionTest {
         expect(CommonTest.getTextField('topHeader').split('#')[1],
             transaction.transactionId);
       }
-      await CommonTest.checkWidgetKey(tester,
-          "FinDocDialog${transaction.sales ? 'Sales' : 'Purchase'}Transaction");
-      // enter supplier/customer
-      await CommonTest.enterDropDownSearch(
-          tester,
-          transaction.sales ? 'customer' : 'supplier',
-          transaction.otherUser!.lastName!);
+      await CommonTest.checkWidgetKey(tester, "FinDocDialogSalesTransaction");
       await CommonTest.enterText(
           tester, 'description', transaction.description!);
+      if (transaction.isPosted!) {
+        await CommonTest.tapByKey(tester, 'isPosted');
+      }
       // delete existing transaction items
       SaveTest test = await PersistFunctions.getTest();
       if (test.transactions.isNotEmpty &&
@@ -119,14 +116,12 @@ class TransactionTest {
       }
       // items
       for (FinDocItem item in transaction.items) {
-        await CommonTest.tapByKey(tester, 'addProduct', seconds: 1);
-        await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
+        await CommonTest.tapByKey(tester, 'addItem', seconds: 1);
+        await CommonTest.checkWidgetKey(tester, 'addTransactionItemDialog');
         await CommonTest.enterDropDownSearch(
-            tester, 'product', item.description!);
-        await CommonTest.drag(tester, listViewName: 'listView3');
-        await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
-        await CommonTest.enterText(
-            tester, 'itemQuantity', item.quantity.toString());
+            tester, 'glAccount', item.glAccount!.accountCode!);
+        await CommonTest.tapByKey(tester, item.isDebit! ? 'debit' : 'credit');
+        await CommonTest.enterText(tester, 'price', item.price.toString());
         await CommonTest.tapByKey(tester, 'ok');
       }
       await CommonTest.drag(tester, seconds: 2);
@@ -134,18 +129,20 @@ class TransactionTest {
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
       // create new findoc with transactionId
-      FinDoc newFinDoc =
-          transaction.copyWith(transactionId: CommonTest.getTextField('id0'));
-      // get productId's
-      List<FinDocItem> newItems = [];
-      await CommonTest.tapByKey(tester, 'id0'); //open detail
-      for (FinDocItem item in transaction.items) {
-        FinDocItem newItem = item.copyWith(
-            productId: CommonTest.getTextField('itemLine0').split(' ')[1]);
-        newItems.add(newItem);
+      newTransactions.add(
+          transaction.copyWith(transactionId: CommonTest.getTextField('id0')));
+      await CommonTest.tapByKey(tester, 'edit0'); //open detail
+      expect(transaction.description, CommonTest.getTextField('description'));
+      expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
+      for (int x = 0; x < transaction.items.length; x++) {
+        expect(transaction.items[x].glAccount!.accountCode!,
+            CommonTest.getTextField('accountCode$x'));
+        expect(
+            transaction.items[x].price!.toString(),
+            CommonTest.getTextField(
+                "${transaction.items[x].isDebit! ? 'debit' : 'credit'}$x"));
       }
-      await CommonTest.tapByKey(tester, 'id0'); // close detail
-      newTransactions.add(newFinDoc.copyWith(items: newItems));
+      await CommonTest.tapByKey(tester, 'cancel'); // close detail
       await tester.pumpAndSettle(); // for the message to disappear
       index++;
     }
@@ -160,79 +157,30 @@ class TransactionTest {
           searchString: transaction.transactionId!);
       expect(CommonTest.getTextField('grandTotal0'),
           equals(transaction.grandTotal.toString()));
-      await CommonTest.tapByKey(tester, 'id0'); // open detail
-      // items
-      for (FinDocItem item in transaction.items) {
+      await CommonTest.tapByKey(tester, 'edit0'); //open detail
+      expect(transaction.description, CommonTest.getTextField('description'));
+      expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
+      for (int x = 0; x < transaction.items.length; x++) {
+        expect(transaction.items[x].glAccount!.accountCode!,
+            CommonTest.getTextField('accountCode$x'));
         expect(
-          CommonTest.getTextField('itemLine0').split(' ')[1],
-          item.productId,
-        );
-        await CommonTest.checkText(tester, item.description!);
+            transaction.items[x].price!.toString(),
+            CommonTest.getTextField(
+                "${transaction.items[x].isDebit! ? 'debit' : 'credit'}$x"));
       }
-      await CommonTest.tapByKey(tester, 'id0');
-      // detail dialog
-      await CommonTest.tapByKey(tester, 'edit0');
-      expect(
-          find.byKey(Key(
-              'FinDocDialog${transaction.sales == true ? "Sales" : "Purchase"}'
-              '${transaction.docType}')),
-          findsOneWidget);
-      expect(
-          CommonTest.getDropdownSearch(
-              transaction.sales == true ? "customer" : "supplier"),
-          contains(transaction.otherUser?.company!.name));
-      expect(CommonTest.getTextFormField('description'),
-          equals(transaction.description));
-      int index = 0;
-      for (FinDocItem item in transaction.items) {
-        expect(CommonTest.getTextField('itemDescription$index'),
-            equals(item.description));
-        expect(CommonTest.getTextField('itemPrice$index'),
-            equals(item.price.toString()));
-//        expect(CommonTest.getTextField('itemQuantity$index'),
-//          equals(item.quantity.toString()));
-        index++;
-      }
-      await CommonTest.tapByKey(tester, 'cancel');
+      await CommonTest.tapByKey(tester, 'cancel'); // close detail
+      await tester.pumpAndSettle(); // for the message to disappear
     }
     await CommonTest.closeSearch(tester);
   }
 
-  static Future<void> checkTransactions(WidgetTester tester) async {
-    SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> orders = test.orders;
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
-    List<FinDoc> finDocs = [];
-    for (FinDoc order in orders) {
-      await CommonTest.doSearch(tester, searchString: order.orderId!);
-      // save transaction Id with order
-      String transactionId = CommonTest.getTextField('id0');
-      finDocs.add(order.copyWith(transactionId: transactionId));
-      // check list
-      await CommonTest.tapByKey(tester, 'id0'); // open items
-      expect(order.items[0].productId,
-          CommonTest.getTextField('itemLine0').split(' ')[1]);
-      await CommonTest.tapByKey(tester, 'id0'); // close items
-    }
-    await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
-  }
-
   static Future<void> postTransactions(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
-    List<FinDoc> transactions = test.orders.isNotEmpty
-        ? test.orders
-        : test.transactions.isNotEmpty
-            ? test.transactions
-            : test.payments;
-    expect(transactions.isNotEmpty, true,
-        reason: 'This test needs transactions created in previous steps');
     for (FinDoc transaction in test.transactions) {
       await CommonTest.doSearch(tester,
           searchString: transaction.transactionId!);
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.inPreparation.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('isPosted') == 'N') {
+        await CommonTest.tapByKey(tester, 'ispost0', seconds: 5);
       }
       if (CommonTest.getTextField('status0') ==
           finDocStatusValues[FinDocStatusVal.created.toString()]) {
@@ -253,7 +201,7 @@ class TransactionTest {
     for (FinDoc transaction in transactions) {
       await CommonTest.doSearch(tester,
           searchString: transaction.transactionId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
+      expect(CommonTest.getTextField('status0'), 'completed');
     }
   }
 }

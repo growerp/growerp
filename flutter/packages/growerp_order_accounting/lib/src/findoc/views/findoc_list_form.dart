@@ -262,8 +262,7 @@ class FinDocListState extends State<FinDocList> {
     }
 
     return Builder(builder: (BuildContext context) {
-      // used in the blocbuilder below
-
+      // used in the blocConsumer below
       listener(context, state) {
         if (state.status == FinDocStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);

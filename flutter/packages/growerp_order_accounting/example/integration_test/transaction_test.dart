@@ -35,7 +35,6 @@ void main() {
         clear: true); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester);
-
     await TransactionTest.selectTransactions(tester);
     await TransactionTest.addTransactions(tester, transactions.sublist(0, 2));
     await TransactionTest.updateTransactions(

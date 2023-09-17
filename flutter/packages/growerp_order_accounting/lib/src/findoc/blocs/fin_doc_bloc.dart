@@ -150,7 +150,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     List<FinDoc> finDocs = List.from(state.finDocs);
     // need sort because were loaded at the top of the list:better seen by the user
     List<FinDocItem> items = List.from(event.finDoc.items);
-    if (docType != FinDocType.shipment) {
+    if (docType != FinDocType.shipment && docType != FinDocType.payment) {
       items.sort((a, b) => a.itemSeqId!.compareTo(b.itemSeqId!));
     }
     if (event.finDoc.idIsNull()) {

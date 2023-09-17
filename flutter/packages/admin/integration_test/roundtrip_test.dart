@@ -23,12 +23,12 @@ void main() {
 
   testWidgets('''GrowERP roundtrip Purchase test''', (tester) async {
     await CommonTest.startTestApp(
-      clear: true,
+      clear: true, // use data from previous run, ifnone same as true
       tester,
       router.generateRoute,
       menuOptions,
       extraDelegates,
-    ); // use data from previous run, ifnone same as true
+    );
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "products": products.sublist(0, 2), // will add categories too
       "users": suppliers.sublist(0, 2) + [customers[0]],
@@ -65,7 +65,7 @@ void main() {
     await CommonTest.gotoMainMenu(tester);
     await OrderTest.selectPurchaseOrders(tester);
     await OrderTest.checkPurchaseOrdersComplete(tester);
-  });
+  }, skip: false);
 
   testWidgets('''GrowERP roundtrip sales test''', (tester) async {
     // no clear because dependend on purchase test

@@ -21,9 +21,11 @@ abstract class GlAccountEvent extends Equatable {
 }
 
 class GlAccountFetch extends GlAccountEvent {
-  const GlAccountFetch({this.searchString = '', this.refresh = false});
+  const GlAccountFetch(
+      {this.limit = 999, this.searchString = '', this.refresh = false});
   final String searchString;
   final bool refresh;
+  final int? limit;
   @override
   List<Object> get props => [searchString, refresh];
 }

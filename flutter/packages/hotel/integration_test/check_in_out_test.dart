@@ -61,7 +61,7 @@ void main() {
     await createRoomReservation(tester, roomReservations.sublist(0));
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
-    expect(CommonTest.getTextField('status0'), equals('Created'));
+    expect(CommonTest.getTextField('status0'), equals('created'));
     await CommonTest.tapByKey(tester, 'id0');
     expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
     await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
@@ -81,7 +81,7 @@ void main() {
     );
     await selectCheckOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
-    expect(CommonTest.getTextField('status0'), equals('Checked In'));
+    expect(CommonTest.getTextField('status0'), equals('checked In'));
     await CommonTest.tapByKey(tester, 'id0');
     expect(CommonTest.getTextField('itemLine0'), contains(todayStringIntl));
     await CommonTest.tapByKey(tester, 'nextStatus0');

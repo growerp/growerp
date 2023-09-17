@@ -50,6 +50,7 @@ class OrderTest {
           tester, 'itemPrice', order.items[0].price.toString());
       await CommonTest.enterText(
           tester, 'itemQuantity', order.items[0].quantity.toString());
+      await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'ok');
       // create order
       await CommonTest.tapByKey(tester, 'update', seconds: 5);
@@ -85,10 +86,10 @@ class OrderTest {
         await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
         await CommonTest.enterDropDownSearch(
             tester, 'product', item.description!);
-        await CommonTest.drag(tester, listViewName: 'listView3');
         await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
         await CommonTest.enterText(
             tester, 'itemQuantity', item.quantity.toString());
+        await CommonTest.drag(tester, listViewName: 'listView3');
         await CommonTest.tapByKey(tester, 'ok');
       }
       // create order
@@ -202,7 +203,7 @@ class OrderTest {
     var intlFormat = DateFormat('yyyy-MM-dd');
     int x = 0;
     for (FinDoc order in test.orders) {
-      expect(CommonTest.getTextField('status$x'), equals('Created'));
+      expect(CommonTest.getTextField('status$x'), equals('created'));
       await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
       expect(CommonTest.getTextField('itemLine$x'),
           contains(intlFormat.format(order.items[0].rentalFromDate!)));
@@ -257,7 +258,7 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
       expect(CommonTest.getTextField('status0'),
-          equals(classificationId == 'AppHotel' ? 'Checked In' : 'Approved'));
+          equals(classificationId == 'AppHotel' ? 'checked In' : 'approved'));
     }
     await CommonTest.gotoMainMenu(tester);
   }
@@ -269,7 +270,7 @@ class OrderTest {
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
       expect(CommonTest.getTextField('status0'),
-          equals(classificationId == 'AppHotel' ? 'Checked Out' : 'Completed'));
+          equals(classificationId == 'AppHotel' ? 'checked Out' : 'completed'));
     }
   }
 
@@ -281,7 +282,7 @@ class OrderTest {
         reason: 'This test needs orders created in previous steps');
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      expect(CommonTest.getTextField('status0'), 'Completed');
+      expect(CommonTest.getTextField('status0'), 'completed');
     }
   }
 }

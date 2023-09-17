@@ -41,9 +41,9 @@ class InventoryTest {
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
       // check list
       await CommonTest.tapByKey(tester, 'id0'); // open items
-      expect(CommonTest.getTextField('itemLine0').split(' ')[1],
-          equals(order.items[0].productId),
-          reason: "checkin productId");
+      expect(CommonTest.getTextField('itemLine0'),
+          contains(order.items[0].productId),
+          reason: "checking productId");
       await CommonTest.tapByKey(tester, 'id0'); // close items
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
@@ -75,7 +75,7 @@ class InventoryTest {
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
       await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
-      expect(CommonTest.getTextField('status0'), equals('Completed'));
+      expect(CommonTest.getTextField('status0'), equals('completed'));
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
   }

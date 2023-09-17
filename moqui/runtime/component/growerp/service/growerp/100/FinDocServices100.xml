@@ -505,6 +505,7 @@ along with this software (see the LICENSE.md file). If not, see
                             id: item.orderId,
                             orderId: item.orderId,
                             paymentId: item.paymentId,
+                            invoiceId: item.invoiceId,
                             description: item.orderName,
                             salesChannel: item.salesChannel,
                             statusId: convertedStatusId,
@@ -548,7 +549,9 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="docType == 'Invoice'">
                 <set field="openStatusList"
                     from="['InvoiceInProcess', 'InvoiceFinalized', 'InvoiceApproved']" />
+                <set field="direction" value="I" />
                 <if condition="!sales">
+                    <set field="direction" value="O" />
                     <set field="openStatusList"
                         from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
                 </if>
@@ -560,6 +563,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="fromPartyId" from="companyPartyId" />
                             <econdition field-name="toPartyId" from="companyPartyId" />
                         </econditions>
+                        <econdition field-name="direction" from="direction" />
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
@@ -590,6 +595,8 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
+                            <econdition field-name="direction" from="direction" />
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
                             <order-by field-name="invoiceId,invoiceItemSeqId" />
                             <!--use-iterator/-->
                         </entity-find>
@@ -661,7 +668,9 @@ along with this software (see the LICENSE.md file). If not, see
                         itemSeqId: item.invoiceItemSeqId,
                         productId: item.productId,
                         itemType: [itemTypeId: item.itemTypeId,
-                                    itemTypeName: item.itemTypeName],
+                                    itemTypeName: item.itemTypeName,
+                                    accountCode: item.itAccountCode,
+                                    accountName: item.itAccountName],
                         description: item.description,
                         glAccount: [glAccountId: item.glAccountId,
                                     accountCode: item.accountCode,
@@ -691,6 +700,9 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="toPartyId" from="companyPartyId"
                                 ignore-if-empty="true" />
                         </econditions>
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="isPayable" value="Y" />
+                        <econdition field-name="isApplied" value="Y" />
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
@@ -721,6 +733,9 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <econdition field-name="isPayable" value="Y" />
+                            <econdition field-name="isApplied" value="Y" />
                             <order-by field-name="paymentId" />
                         </entity-find>
                     </else>
@@ -779,8 +794,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 accountName: item.overrideAccountName ?: item.accountName,
                                 ]" />
                             <set field="items"
-                                from="[[itemType: [itemTypeId: item.paymentTypeEnumId],
-                                            glAccount: glAccount]]"
+                                from="[[itemType: [itemTypeId: item.paymentTypeEnumId,
+                                                    itemTypeName: item.paymentTypeDescription,
+                                                    accountCode: item.accountCode,
+                                                    accountName: item.accountName],
+                                            glAccount: glAccount ]]"
                                 type="List" />
                         </if>
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
@@ -841,8 +859,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="openStatusList"
                     from="['ShipInput','ShipScheduled','ShipPicked',
                             'ShipPacked','ShipShipped']" />
-                <log
-                    message="======get shipment list customerPartyId $customerPartyId vendorPartyId: $vendorPartyId" />
                 <if condition="finDocId">
                     <entity-find
                         entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse" list="items">
@@ -1249,7 +1265,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="finDocId" from="paymentId" />
                 </else-if>
                 <else-if condition="finDoc.docType == 'Transaction'">
-                    <service-call name="create#mantle.ledger.transaction.AcctgTrans"
+                    <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   organizationPartyId: companyPartyId,
                                     description: finDoc.description,
                                     glJournalId: finDoc.journal?.journalId,
@@ -1258,7 +1274,7 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
                     <iterate list="finDoc.items" entry="item">
-                        <service-call name="create#mantle.ledger.transaction.AcctgTransEntry"
+                        <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: acctgTransId,
                                         glAccountId: item.glAccount.glAccountId,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
@@ -1738,6 +1754,7 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[finDocId: finDoc.paymentId,
                         docType: 'Payment', sales: finDoc.sales]" />
                 </else-if>
+                <!-- shipment -->
                 <else-if condition="finDoc.docType == 'Shipment'">
                     <entity-find entity-name="mantle.shipment.Shipment" list="check" limit="1">
                         <econdition field-name="shipmentId" from="finDoc.shipmentId" />
@@ -1806,7 +1823,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="acctgTransId" from="finDoc.transactionId" />
                     </entity-delete-by-condition>
                     <iterate list="finDoc.items" entry="item">
-                        <service-call name="create#mantle.ledger.transaction.AcctgTransEntry"
+                        <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
@@ -2166,16 +2183,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call in-map="context + [statusId: invStatusId]" out-map="context"
                         name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
                     <!-- create payment -->
-                    <entity-find entity-name="mantle.account.payment.Payment" list="payments">
-                        <econdition field-name="orderId" from="order.orderId" />
-                    </entity-find>
-                    <if condition="!payments"><!-- not already exist? credit card will...-->
-                        <set field="effectiveDate" from="ec.user.nowTimestamp" />
-                        <service-call in-map="context + [statusId: 'PmntAuthorized']"
-                            out-map="context"
-                            name="mantle.order.OrderServices.add#OrderPartPayment" />
-                    </if>
-                    <!-- create shipment  -->
+                    <log message="==tt=create payment" />
+                    <set field="effectiveDate" from="ec.user.nowTimestamp" />
+                    <service-call
+                        name="mantle.account.PaymentServices.create#InvoicePayment"
+                        in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
+                                statusId: 'PmntPromised', orderId: order.orderId]"
+                        out-map="context" />
+                    <!-- shipment -->
                     <entity-find entity-name="mantle.facility.Facility" list="facilities" limit="1">
                         <econdition field-name="ownerPartyId" from="companyPartyId" />
                     </entity-find>
@@ -2315,7 +2330,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="payment" required="true" type="Map" />
         </in-parameters>
         <actions>
-            <log message="=======update payment $payment" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="mantle.account.payment.Payment"
@@ -2346,7 +2360,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- if no glaccount found cannot be posted -->
             <if
-                condition="!paymentOld.itemTypeGlAccountId &amp;&amp; payment.items[0].glAccount?.glAccountId">
+                condition="!paymentOld.itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId">
                 <return error="true"
                     message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
             </if>
@@ -2387,8 +2401,10 @@ along with this software (see the LICENSE.md file). If not, see
                     value="Pi${payment.paymentInstrument}" />
             </if>
             <!-- override gl account -->
-            <set field="paymentOld.overrideGlAccountId"
-                from="payment.items[0].glAccount?.glAccountId" />
+            <if condition="payment.items[0].glAccount?.glAccountId">
+                <set field="paymentOld.overrideGlAccountId"
+                    from="payment.items[0].glAccount?.glAccountId" />
+            </if>
             <!-- finally update -->
             <entity-update value-field="paymentOld" />
             <!-- status updates -->
@@ -2449,6 +2465,8 @@ along with this software (see the LICENSE.md file). If not, see
                             glAccountId: paymentOld.itemTypeGlAccountId]" />
                     </if>
                 </iterate>
+                <log
+                    message="===posting payment ${payment.paymentId} transact: ${entries[0].acctgTransId}" />
                 <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                     in-map="[acctgTransId: entries[0].acctgTransId]" />
                 <service-call name="update#mantle.account.payment.Payment"

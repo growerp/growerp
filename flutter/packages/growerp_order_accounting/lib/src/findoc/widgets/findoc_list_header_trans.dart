@@ -13,8 +13,8 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
+
 import '../findoc.dart';
 
 class FinDocListHeaderTrans extends StatefulWidget {
@@ -39,6 +39,28 @@ class _FinDocListHeaderTransState extends State<FinDocListHeaderTrans> {
   bool search = false;
   @override
   Widget build(BuildContext context) {
+    List<Widget> fields = [
+      const Text("Trans.Id"),
+      const Expanded(child: SizedBox(width: 10)),
+      const Text("Descr.")
+    ];
+    if (!widget.isPhone) {
+      fields.addAll([
+        const Expanded(child: SizedBox(width: 10)),
+        const Text("Date"),
+        const Expanded(child: SizedBox(width: 10)),
+        const Text("Posted?"),
+        const Expanded(child: SizedBox(width: 10)),
+        const Text("Invoice"),
+        const Expanded(child: SizedBox(width: 10)),
+        const Text("Payment"),
+        const Expanded(child: SizedBox(width: 10)),
+        const Text("Total"),
+        const Expanded(child: SizedBox(width: 10)),
+        const Expanded(child: Text("#")),
+      ]);
+    }
+
     return ListTile(
         leading: GestureDetector(
             key: const Key('search'),
@@ -68,17 +90,7 @@ class _FinDocListHeaderTransState extends State<FinDocListHeaderTrans> {
                           .add(FinDocFetch(searchString: searchString));
                     })
               ])
-            : Row(children: <Widget>[
-                const Expanded(child: Text("Transaction Id")),
-                const SizedBox(width: 10),
-                const Expanded(child: Text("description")),
-                if (!widget.isPhone) const SizedBox(width: 10),
-                if (!widget.isPhone) const Expanded(child: Text("Date")),
-                if (!widget.isPhone) const SizedBox(width: 10),
-                if (!widget.isPhone) const Expanded(child: Text("Posted?")),
-                if (!widget.isPhone) const SizedBox(width: 10),
-                if (!widget.isPhone) const Expanded(child: Text("#items")),
-              ]),
+            : Row(children: fields),
         subtitle: widget.isPhone
             ? const Row(children: <Widget>[
                 Expanded(child: Text("Date")),
