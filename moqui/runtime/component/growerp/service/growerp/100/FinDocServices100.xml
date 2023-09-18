@@ -1580,7 +1580,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         productId: item.productId,
                                         quantity: item.quantity,
                                         description: item.description,
-                                        overrideGlAccountId: item.glAccount.glAccountId,
+                                        overrideGlAccountId: item.glAccount?.glAccountId,
                                         amount: item.price]"
                     out-map="context" />
             </iterate>

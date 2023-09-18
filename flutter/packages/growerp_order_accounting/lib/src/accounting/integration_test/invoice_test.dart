@@ -108,10 +108,10 @@ class InvoiceTest {
         await CommonTest.checkWidgetKey(tester, 'addProductItemDialog');
         await CommonTest.enterDropDownSearch(
             tester, 'product', item.description!);
-        await CommonTest.drag(tester, listViewName: 'listView3');
         await CommonTest.enterText(tester, 'itemPrice', item.price.toString());
         await CommonTest.enterText(
             tester, 'itemQuantity', item.quantity.toString());
+        await CommonTest.drag(tester, listViewName: 'listView3');
         await CommonTest.tapByKey(tester, 'ok');
       }
       await CommonTest.drag(tester, seconds: 2);
@@ -213,15 +213,13 @@ class InvoiceTest {
         reason: 'This test needs invoices created in previous steps');
     for (FinDoc invoice in test.invoices) {
       await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.inPreparation.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('status0') == 'inPreparation') {
+        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.created.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
+      if (CommonTest.getTextField('status0') == 'created') {
+        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      await CommonTest.checkText(tester, 'Approved');
+      await CommonTest.checkText(tester, 'approved');
     }
   }
 
