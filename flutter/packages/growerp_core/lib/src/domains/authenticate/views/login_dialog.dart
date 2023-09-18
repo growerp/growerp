@@ -247,6 +247,14 @@ class _LoginHeaderState extends State<LoginDialog> {
               ),
               const SizedBox(height: 20),
               TextFormField(
+                  onFieldSubmitted: (_) {
+                    if (_loginFormKey.currentState!.validate()) {
+                      context.read<AuthBloc>().add(AuthLogin(
+                          authenticate.company,
+                          _usernameController.text,
+                          _passwordController.text));
+                    }
+                  },
                   autofocus: _usernameController.text.isNotEmpty,
                   key: const Key('password'),
                   validator: (value) {
