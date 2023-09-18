@@ -29,9 +29,10 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP ledger test''', (tester) async {
+  testWidgets('''GrowERP transaction test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
+        title: "Transaction test",
         clear: true); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester);
@@ -40,5 +41,6 @@ void main() {
     await TransactionTest.updateTransactions(
         tester, transactions.sublist(2, 4));
     await TransactionTest.postTransactions(tester);
+    await TransactionTest.checkTransactionsComplete(tester);
   });
 }

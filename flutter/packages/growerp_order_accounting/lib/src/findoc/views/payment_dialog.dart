@@ -51,7 +51,6 @@ class PaymentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FinDocBloc _finDocBloc = context.read<FinDocBloc>();
     if (finDoc.sales) {
       return MultiBlocProvider(
           providers: [

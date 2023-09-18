@@ -323,6 +323,7 @@ class MyFinDocState extends State<FinDocPage> {
                   Column(children: [
                     const Text("Post?"),
                     Radio(
+                        key: const Key('isPosted'),
                         value: true,
                         groupValue: _isPosted,
                         toggleable: true,
@@ -339,8 +340,9 @@ class MyFinDocState extends State<FinDocPage> {
   Widget updateButtons(state) {
     List<Widget> buttons = [
       ElevatedButton(
+          key: const Key('header'),
           child: Text(
-              "Update ${widget.finDoc.docType == FinDocType.transaction ? 'description or posting' : 'header'}"),
+              "Update ${widget.finDoc.docType == FinDocType.transaction ? 'description or Postflag' : 'header'}"),
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
                 otherUser: _selectedUser,
@@ -350,7 +352,9 @@ class MyFinDocState extends State<FinDocPage> {
           }),
       ElevatedButton(
           key: const Key('addItem'),
-          child: const Text('Add other item'),
+          child: Text(widget.finDoc.docType == FinDocType.transaction
+              ? 'Add transaction'
+              : 'Add other item'),
           onPressed: () async {
             final dynamic finDocItem;
             if (widget.finDoc.docType != FinDocType.transaction) {
@@ -594,7 +598,7 @@ class MyFinDocState extends State<FinDocPage> {
                 rows: List.generate(items.length, (index) {
                   return DataRow(cells: [
                     DataCell(Text(items[index].glAccount!.accountCode!,
-                        key: const Key('glAccount'))),
+                        key: Key('accountCode$index'))),
                     DataCell(Text(
                         items[index].isDebit!
                             ? items[index].price.toString()
@@ -612,7 +616,7 @@ class MyFinDocState extends State<FinDocPage> {
                       ),
                       key: Key("delete$index"),
                       onPressed: () {
-                        _cartBloc.add(CartDeleteItem(index - 1));
+                        _cartBloc.add(CartDeleteItem(index));
                       },
                     )),
                   ]);

@@ -1266,7 +1266,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <else-if condition="finDoc.docType == 'Transaction'">
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
-                        in-map="[   organizationPartyId: companyPartyId,
+                        in-map="[   acctgTransTypeEnumId: 'AttInternal',
+                                    organizationPartyId: companyPartyId,
                                     description: finDoc.description,
                                     glJournalId: finDoc.journal?.journalId,
                                     isPosted: 'N'
@@ -1814,7 +1815,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <!-- update description -->
                     <if condition="transaction.description != finDoc.description">
-                        <service-call name="update#mantle.ledger.transaction.AcctgTransEntry"
+                        <service-call name="update#mantle.ledger.transaction.AcctgTrans"
                             in-map="[acctgTransId: finDoc.transactionId, description: finDoc.description]" />
                     </if>
                     <!-- update entries -->

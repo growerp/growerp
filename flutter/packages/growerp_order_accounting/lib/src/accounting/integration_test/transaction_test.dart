@@ -109,7 +109,6 @@ class TransactionTest {
       SaveTest test = await PersistFunctions.getTest();
       if (test.transactions.isNotEmpty &&
           test.transactions[index].items.isNotEmpty) {
-        await CommonTest.drag(tester, listViewName: 'listView1');
         for (int x = 0; x < test.transactions[index].items.length; x++) {
           await CommonTest.tapByKey(tester, 'delete0');
         }
@@ -132,7 +131,8 @@ class TransactionTest {
       newTransactions.add(
           transaction.copyWith(transactionId: CommonTest.getTextField('id0')));
       await CommonTest.tapByKey(tester, 'edit0'); //open detail
-      expect(transaction.description, CommonTest.getTextField('description'));
+      expect(
+          transaction.description, CommonTest.getTextFormField('description'));
       expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
       for (int x = 0; x < transaction.items.length; x++) {
         expect(transaction.items[x].glAccount!.accountCode!,
@@ -158,7 +158,8 @@ class TransactionTest {
       expect(CommonTest.getTextField('grandTotal0'),
           equals(transaction.grandTotal.toString()));
       await CommonTest.tapByKey(tester, 'edit0'); //open detail
-      expect(transaction.description, CommonTest.getTextField('description'));
+      expect(
+          transaction.description, CommonTest.getTextFormField('description'));
       expect(transaction.isPosted, CommonTest.getRadio('isPosted'));
       for (int x = 0; x < transaction.items.length; x++) {
         expect(transaction.items[x].glAccount!.accountCode!,
@@ -179,18 +180,13 @@ class TransactionTest {
     for (FinDoc transaction in test.transactions) {
       await CommonTest.doSearch(tester,
           searchString: transaction.transactionId!);
-      if (CommonTest.getTextField('isPosted') == 'N') {
-        await CommonTest.tapByKey(tester, 'ispost0', seconds: 5);
-      }
-      if (CommonTest.getTextField('status0') ==
-          finDocStatusValues[FinDocStatusVal.created.toString()]) {
-        await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
-      }
-      await CommonTest.checkText(tester, 'Approved');
+      await CommonTest.tapByKey(tester, 'edit0');
+      await CommonTest.tapByKey(tester, 'isPosted', seconds: 3);
+      await CommonTest.tapByKey(tester, 'header');
+      await CommonTest.tapByKey(tester, 'update');
     }
   }
 
-  /// check if the purchase process has been completed successfuly
   static Future<void> checkTransactionsComplete(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> transactions = test.orders.isNotEmpty
@@ -201,7 +197,8 @@ class TransactionTest {
     for (FinDoc transaction in transactions) {
       await CommonTest.doSearch(tester,
           searchString: transaction.transactionId!);
-      expect(CommonTest.getTextField('status0'), 'completed');
+      expect(CommonTest.getTextField('status0'), 'Y',
+          reason: "posted field should be Y now");
     }
   }
 }

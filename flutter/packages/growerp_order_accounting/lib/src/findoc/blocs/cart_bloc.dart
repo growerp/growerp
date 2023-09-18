@@ -154,9 +154,9 @@ class CartBloc extends Bloc<CartEvent, CartState>
     items.removeAt(event.index);
     Decimal grandTotal = Decimal.parse('0');
     int i = 0;
-    for (var x in items) {
+    for (var item in items) {
       items[i] = items[i].copyWith(itemSeqId: (1 + i++).toString());
-      grandTotal += x.quantity! * x.price!;
+      grandTotal += item.quantity ?? Decimal.parse('1') * item.price!;
     }
     var finDoc = state.finDoc.copyWith(grandTotal: grandTotal, items: items);
     // save cart

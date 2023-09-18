@@ -68,7 +68,7 @@ class FinDocListItemTrans extends StatelessWidget {
             Expanded(
                 child: Text(
               finDoc.isPosted == true ? 'Y' : 'N',
-              key: Key("isPosted$index"),
+              key: Key("status$index"),
               textAlign: TextAlign.center,
             )),
           if (!isPhone) const SizedBox(width: 10),

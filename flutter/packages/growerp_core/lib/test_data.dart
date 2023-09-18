@@ -1215,13 +1215,14 @@ List<FinDoc> transactions = [
     sales: false,
     description: "first transaction, some revenue",
     isPosted: false,
+    grandTotal: Decimal.parse('200'),
     items: [
       FinDocItem(
           glAccount: GlAccount(accountCode: "12000"),
           price: Decimal.parse('200'),
           isDebit: true),
       FinDocItem(
-          glAccount: GlAccount(accountCode: "31000"),
+          glAccount: GlAccount(accountCode: "33000"),
           price: Decimal.parse('200'),
           isDebit: false),
     ],
@@ -1230,14 +1231,47 @@ List<FinDoc> transactions = [
     sales: false,
     description: "first transaction, some expenses",
     isPosted: false,
+    grandTotal: Decimal.parse('100'),
     items: [
       FinDocItem(
           glAccount: GlAccount(accountCode: "21500"),
           price: Decimal.parse('100'),
           isDebit: false),
       FinDocItem(
-          glAccount: GlAccount(accountCode: "54000"),
+          glAccount: GlAccount(accountCode: "61100"),
           price: Decimal.parse('100'),
+          isDebit: true),
+    ],
+  ),
+  FinDoc(
+    sales: false,
+    description: "second transaction, some revenue",
+    isPosted: false,
+    grandTotal: Decimal.parse('300'),
+    items: [
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "12100"),
+          price: Decimal.parse('300'),
+          isDebit: true),
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "33100"),
+          price: Decimal.parse('300'),
+          isDebit: false),
+    ],
+  ),
+  FinDoc(
+    sales: false,
+    description: "second transaction, some expenses",
+    isPosted: false,
+    grandTotal: Decimal.parse('400'),
+    items: [
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "21600"),
+          price: Decimal.parse('400'),
+          isDebit: false),
+      FinDocItem(
+          glAccount: GlAccount(accountCode: "61300"),
+          price: Decimal.parse('400'),
           isDebit: true),
     ],
   )
