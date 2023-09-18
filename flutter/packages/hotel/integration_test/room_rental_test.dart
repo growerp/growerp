@@ -36,7 +36,7 @@ Future<void> selectRooms(WidgetTester tester) async {
 
 Future<void> selectUserCustomers(WidgetTester tester) async {
   await CommonTest.selectOption(
-      tester, '/reservations', 'UserListFormCustomerUser', '2');
+      tester, '/reservations', 'UserListFormCustomer', '2');
 }
 
 Future<void> selectCompanyCustomers(WidgetTester tester) async {
