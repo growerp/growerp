@@ -40,7 +40,6 @@ void main() {
       ],
       "users": suppliers.sublist(0, 2),
     });
-    // get above updated company
     await CommonTest.logout(tester);
     await CommonTest.login(tester);
     await PaymentTest.selectPurchasePayments(tester);

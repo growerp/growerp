@@ -118,13 +118,11 @@ class PaymentTest {
       await CommonTest.enterDropDown(tester, 'itemType',
           '${payment.items[0].itemType!.itemTypeName}\n ${payment.items[0].itemType!.accountName}');
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
-      await CommonTest.tapByKey(tester, 'update', seconds: 5);
+      await CommonTest.tapByKey(tester, 'update', seconds: 3);
       await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
-      if (payment.paymentId == null) {
-        payment = payment.copyWith(paymentId: CommonTest.getTextField('id0'));
-      }
-      newPayments.add(payment);
+      newPayments
+          .add(payment.copyWith(paymentId: CommonTest.getTextField('id0')));
     }
     await CommonTest.closeSearch(tester);
     return newPayments;
@@ -137,8 +135,7 @@ class PaymentTest {
           searchString: payment.paymentId!, seconds: 5);
       expect(CommonTest.getTextField('otherUser0'),
           contains(payment.otherUser?.company!.name));
-      expect(CommonTest.getTextField('status0'),
-          equals(finDocStatusValues[FinDocStatusVal.created.toString()]));
+      expect(CommonTest.getTextField('status0'), equals('created'));
       expect(CommonTest.getTextField('grandTotal0'),
           equals(payment.grandTotal.toString()));
       await CommonTest.tapByKey(tester, 'edit0');
@@ -213,7 +210,7 @@ class PaymentTest {
             : test.payments;
     for (FinDoc payment in payments) {
       await CommonTest.doSearch(tester, searchString: payment.id()!);
-      if (CommonTest.getTextField('status0') == 'in Preparation') {
+      if (CommonTest.getTextField('status0') == 'inPreparation') {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
       if (CommonTest.getTextField('status0') == 'created') {

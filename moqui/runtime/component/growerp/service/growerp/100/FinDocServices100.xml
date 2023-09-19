@@ -701,8 +701,11 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                         </econditions>
                         <econdition field-name="organizationPartyId" from="companyPartyId" />
-                        <econdition field-name="isPayable" value="Y" />
-                        <econdition field-name="isApplied" value="Y" />
+                        <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
+                        <econditions combine="or">
+                            <econdition field-name="isApplied" value="Y" /><!-- applied payment? -->
+                            <econdition field-name="isApplied" value="E" /><!-- either-->
+                        </econditions>
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
@@ -734,8 +737,11 @@ along with this software (see the LICENSE.md file). If not, see
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
                             <econdition field-name="organizationPartyId" from="companyPartyId" />
-                            <econdition field-name="isPayable" value="Y" />
-                            <econdition field-name="isApplied" value="Y" />
+                            <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
+                            <econditions combine="or">
+                                <econdition field-name="isApplied" value="Y" /><!-- applied payment? -->
+                                <econdition field-name="isApplied" value="E" /><!-- either-->
+                            </econditions>
                             <order-by field-name="paymentId" />
                         </entity-find>
                     </else>
@@ -2184,7 +2190,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call in-map="context + [statusId: invStatusId]" out-map="context"
                         name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
                     <!-- create payment -->
-                    <log message="==tt=create payment" />
                     <set field="effectiveDate" from="ec.user.nowTimestamp" />
                     <service-call
                         name="mantle.account.PaymentServices.create#InvoicePayment"
@@ -2466,8 +2471,6 @@ along with this software (see the LICENSE.md file). If not, see
                             glAccountId: paymentOld.itemTypeGlAccountId]" />
                     </if>
                 </iterate>
-                <log
-                    message="===posting payment ${payment.paymentId} transact: ${entries[0].acctgTransId}" />
                 <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                     in-map="[acctgTransId: entries[0].acctgTransId]" />
                 <service-call name="update#mantle.account.payment.Payment"
