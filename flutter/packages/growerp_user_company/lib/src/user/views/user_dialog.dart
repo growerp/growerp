@@ -349,7 +349,7 @@ class UserDialogState extends State<UserDialog> {
                       dropdownDecoratorProps: const DropDownDecoratorProps(
                           dropdownSearchDecoration:
                               InputDecoration(labelText: 'Company')),
-                      itemAsString: (Company? u) => "${u!.name}",
+                      itemAsString: (Company? u) => " ${u!.name}",
                       asyncItems: (String? filter) =>
                           getOwnedCompanies(_companySearchBoxController.text),
                       onChanged: (Company? newValue) {

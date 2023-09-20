@@ -91,7 +91,7 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                                                   'Product')),
                                               key: const Key('product'),
                                               itemAsString: (Product? u) =>
-                                                  "${u!.pseudoId}\n${u.productName}",
+                                                  " ${u!.productName}[${u.pseudoId}]}",
                                               asyncItems: (String filter) {
                                                 productBloc.add(ProductFetch(
                                                     searchString: filter,
@@ -204,7 +204,7 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                                                   'GL Account')),
                                               key: const Key('glAccount'),
                                               itemAsString: (GlAccount? u) =>
-                                                  "${u?.accountCode} ${u?.accountName} ",
+                                                  " ${u?.accountCode} ${u?.accountName} ",
                                               items: state.glAccounts,
                                               onChanged: (GlAccount? newValue) {
                                                 selectedGlAccount = newValue!;

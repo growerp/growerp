@@ -138,7 +138,7 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                 ),
                                               ),
                                               itemAsString: (Product? u) =>
-                                                  "${u!.productName}",
+                                                  " ${u!.productName}",
                                               asyncItems: (String filter) {
                                                 context.read<ProductBloc>().add(
                                                     ProductFetch(

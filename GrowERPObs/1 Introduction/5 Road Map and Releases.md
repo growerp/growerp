@@ -30,7 +30,14 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
-## # Fault fix release August 20 2023 (v1.1.0)
+## Ledger enhancement release September 30 2023(v1.2.0)
+1. Any ledger organization and numbering possible by upload or manual entry.
+2. Manual ledger transactions and posting added.
+3. Ledger journal function added
+4. Relation of order/invoice/payment/shipment documents now shown and clickable.
+5. Various fixes and interface enhancements.
+
+## Fault fix release August 20 2023 (v1.1.0)
 1. Separate apps can now be used with the same email address
 2. all packages upgraded in pub.dev
 3. Admin and Hotel app can now be used again with pub.dev packages

@@ -224,7 +224,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                                   : 'Supplier')),
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                       itemAsString: (User? u) =>
-                          "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                          " ${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                       asyncItems: (String filter) {
                         _userBloc.add(UserFetch(searchString: filter));
                         return Future.value(state.users);
@@ -399,7 +399,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                               InputDecoration(labelText: 'GL Account')),
                       key: const Key('glAccount'),
                       itemAsString: (GlAccount? u) =>
-                          "${u?.accountCode} ${u?.accountName} ",
+                          " ${u?.accountCode} ${u?.accountName} ",
                       items: state.glAccounts,
                       onChanged: (GlAccount? newValue) {
                         _selectedGlAccount = newValue!;

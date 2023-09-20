@@ -203,7 +203,7 @@ class OrderTest {
     var intlFormat = DateFormat('yyyy-MM-dd');
     int x = 0;
     for (FinDoc order in test.orders) {
-      expect(CommonTest.getTextField('status$x'), equals('created'));
+      expect(CommonTest.getTextField('status$x'), equals('Created'));
       await CommonTest.tapByKey(tester, 'id$x', seconds: 5);
       expect(CommonTest.getTextField('itemLine$x'),
           contains(intlFormat.format(order.items[0].rentalFromDate!)));
@@ -258,7 +258,7 @@ class OrderTest {
       await CommonTest.tapByKey(tester, 'nextStatus0',
           seconds: 5); // to approved
       expect(CommonTest.getTextField('status0'),
-          equals(classificationId == 'AppHotel' ? 'checked In' : 'approved'));
+          equals(classificationId == 'AppHotel' ? 'Checked In' : 'Approved'));
     }
     await CommonTest.gotoMainMenu(tester);
   }
@@ -270,7 +270,7 @@ class OrderTest {
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
       expect(CommonTest.getTextField('status0'),
-          equals(classificationId == 'AppHotel' ? 'checked Out' : 'completed'));
+          equals(classificationId == 'AppHotel' ? 'Checked Out' : 'Completed'));
     }
   }
 
@@ -282,7 +282,7 @@ class OrderTest {
         reason: 'This test needs orders created in previous steps');
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.orderId!);
-      expect(CommonTest.getTextField('status0'), 'completed');
+      expect(CommonTest.getTextField('status0'), 'Completed');
     }
   }
 }

@@ -209,7 +209,7 @@ class ReservationDialogState extends State<ReservationForm> {
                                   InputDecoration(labelText: 'Customer')),
                           key: const Key('customer'),
                           itemAsString: (User? u) =>
-                              "${u!.firstName} ${u.lastName}, ${u.company!.name}",
+                              " ${u!.firstName} ${u.lastName}, ${u.company!.name}",
                           asyncItems: (String filter) {
                             _userBloc.add(UserFetch(searchString: filter));
                             return Future.value(state.users);
@@ -259,7 +259,7 @@ class ReservationDialogState extends State<ReservationForm> {
                                 : 'Product',
                           )),
                           key: const Key('product'),
-                          itemAsString: (Product? u) => "${u!.productName}",
+                          itemAsString: (Product? u) => " ${u!.productName}",
                           asyncItems: (String filter) {
                             _productBloc.add(ProductFetch(
                                 searchString: filter,

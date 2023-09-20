@@ -104,7 +104,7 @@ class AssetDialogState extends State<AssetDialogFull> {
                       title: classificationId == 'AppHotel'
                           ? 'Room information'
                           : 'Asset Information',
-                      height: 400,
+                      height: 600,
                       width: 400,
                       child: _showForm(isPhone))));
         case AssetStatus.failure:
@@ -190,10 +190,10 @@ class AssetDialogState extends State<AssetDialogFull> {
                           labelText: classificationId == 'AppHotel'
                               ? 'Room Type'
                               : 'Product',
-                          hintText: "country in menu mode",
                         ),
                       ),
-                      itemAsString: (Product? u) => "${u!.productName}",
+                      itemAsString: (Product? u) =>
+                          " ${u!.productName}", // invisible char for test
                       onChanged: (Product? newValue) {
                         _selectedProduct = newValue;
                       },

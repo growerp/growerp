@@ -27,7 +27,7 @@ import '../../../../test_data.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
-  static int waitTime = 2;
+  static int waitTime = 3;
 
   static Future<void> startTestApp(
       WidgetTester tester,
@@ -368,8 +368,7 @@ class CommonTest {
     await tester.enterText(find.byType(TextField).last, value);
     await tester
         .pumpAndSettle(Duration(seconds: waitTime)); // wait for search result
-    await tester
-        .tap(find.textContaining(RegExp(value, caseSensitive: false)).at(1));
+    await tester.tap(find.textContaining(" $value").first); // hidden char!
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 

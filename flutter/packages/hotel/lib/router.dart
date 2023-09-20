@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 
 import 'acct_menu_option_data.dart';
@@ -82,6 +83,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
+    case '/printer':
+      return MaterialPageRoute(
+          builder: (context) =>
+              PrintingForm(finDocIn: settings.arguments as FinDoc));
     default:
       return coreRoute(settings);
   }

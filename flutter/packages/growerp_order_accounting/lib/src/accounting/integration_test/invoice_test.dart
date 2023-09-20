@@ -213,13 +213,13 @@ class InvoiceTest {
         reason: 'This test needs invoices created in previous steps');
     for (FinDoc invoice in test.invoices) {
       await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
-      if (CommonTest.getTextField('status0') == 'inPreparation') {
+      if (CommonTest.getTextField('status0') == 'in Preparation') {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      if (CommonTest.getTextField('status0') == 'created') {
+      if (CommonTest.getTextField('status0') == 'Created') {
         await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 3);
       }
-      await CommonTest.checkText(tester, 'approved');
+      await CommonTest.checkText(tester, 'Approved');
     }
   }
 
@@ -233,7 +233,7 @@ class InvoiceTest {
             : test.payments;
     for (FinDoc invoice in invoices) {
       await CommonTest.doSearch(tester, searchString: invoice.invoiceId!);
-      expect(CommonTest.getTextField('status0'), 'completed');
+      expect(CommonTest.getTextField('status0'), 'Completed');
     }
   }
 }

@@ -143,7 +143,7 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
       ),
       TextFormField(
         key: const Key('description'),
-        maxLines: 5,
+        maxLines: 3,
         decoration: const InputDecoration(labelText: 'Description'),
         controller: _descriptionController,
       ),
@@ -221,7 +221,7 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                     dropdownSearchDecoration:
                         InputDecoration(labelText: 'Lead')),
                 key: const Key('lead'),
-                itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
+                itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
                     "${u?.company!.name}",
                 asyncItems: (String filter) {
                   _leadBloc.add(UserFetch(searchString: filter));
@@ -262,7 +262,7 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                       dropdownSearchDecoration:
                           InputDecoration(labelText: 'Account Employee')),
                   key: const Key('employee'),
-                  itemAsString: (User? u) => "${u?.firstName} ${u?.lastName} "
+                  itemAsString: (User? u) => " ${u?.firstName} ${u?.lastName} "
                       "${u?.company!.name}",
                   asyncItems: (String filter) {
                     _employeeBloc.add(UserFetch(searchString: filter));

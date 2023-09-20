@@ -597,7 +597,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </econditions>
                             <econdition field-name="direction" from="direction" />
                             <econdition field-name="organizationPartyId" from="companyPartyId" />
-                            <order-by field-name="invoiceId,invoiceItemSeqId" />
+                            <order-by field-name="invoiceId,invoiceItemSeqId,rentalFromDate" />
                             <!--use-iterator/-->
                         </entity-find>
                     </else>
@@ -651,6 +651,7 @@ along with this software (see the LICENSE.md file). If not, see
                             sales: sales,
                             orderId: item.orderId,
                             invoiceId: item.invoiceId,
+                            paymentId: item.paymentId,
                             Id: item.invoiceId,
                             description: item.invoiceName,
                             statusId: convertedStatusId,
@@ -677,6 +678,10 @@ along with this software (see the LICENSE.md file). If not, see
                                     accountName: item.accountName],
                         quantity: item.quantity ? item.quantity.toString() : null,
                         price: item.amount ? item.amount.toString() : null,
+                        rentalFromDate: item.rentalFromDate
+                            ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd') : null,
+                        rentalThruDate: item.rentalThruDate
+                            ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
                         ]" />
                     <script>finDocItems.add(finDocItem)</script>
                     <set field="lastItem" from="item" />

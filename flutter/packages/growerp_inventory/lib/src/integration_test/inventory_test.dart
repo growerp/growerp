@@ -75,7 +75,7 @@ class InventoryTest {
       finDocs.add(order.copyWith(shipmentId: CommonTest.getTextField('id0')));
       await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
       await CommonTest.tapByKey(tester, 'nextStatus0', seconds: 5);
-      expect(CommonTest.getTextField('status0'), equals('completed'));
+      expect(CommonTest.getTextField('status0'), equals('Completed'));
     }
     await PersistFunctions.persistTest(test.copyWith(orders: finDocs));
   }

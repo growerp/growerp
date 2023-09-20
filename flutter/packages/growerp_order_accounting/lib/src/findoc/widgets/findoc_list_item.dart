@@ -53,14 +53,17 @@ class FinDocListItem extends StatelessWidget {
         Text(finDoc.id() ?? '', key: Key('id$index')),
         const Expanded(child: SizedBox(width: 10)),
         Text(classificationId == 'AppHotel'
-            ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+            ? finDoc.items[0].rentalFromDate != null
+                ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
+                : '???'
             : "${finDoc.creationDate?.toString().substring(0, 11)}"),
       ];
     } else {
       titleFields = [
         Text(finDoc.id() ?? '', key: Key('id$index')),
         const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel'
+        Text(classificationId == 'AppHotel' &&
+                finDoc.items[0].rentalFromDate != null
             ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
             : "${finDoc.creationDate?.toString().substring(0, 11)}"),
         const Expanded(child: SizedBox(width: 10)),
@@ -68,7 +71,7 @@ class FinDocListItem extends StatelessWidget {
         const Expanded(child: SizedBox(width: 10)),
         Text(finDoc.grandTotal.toString(), key: Key("grandTotal$index")),
         const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.status!.name, key: Key("status$index")),
+        Text(finDoc.displayStatus(classificationId)!, key: Key("status$index")),
         const Expanded(child: SizedBox(width: 10)),
         Text(finDoc.otherCompany!.email ?? ''),
       ];
@@ -83,10 +86,16 @@ class FinDocListItem extends StatelessWidget {
                 key: Key("otherUser$index")),
             Row(
               children: [
-                Text(finDoc.status != null ? finDoc.status!.name : '',
+                Text(
+                    finDoc.status != null
+                        ? finDoc.displayStatus(classificationId)!
+                        : '??',
                     key: Key("status$index")),
                 const SizedBox(width: 10),
-                Text(finDoc.grandTotal.toString(),
+                Text(
+                    finDoc.grandTotal != null
+                        ? finDoc.grandTotal.toString()
+                        : '',
                     key: Key("grandTotal$index")),
                 const SizedBox(width: 10),
                 Text(finDoc.items.length.toString(),
@@ -109,13 +118,14 @@ class FinDocListItem extends StatelessWidget {
     if (!isPhone) {
       fields.addAll([
         const Expanded(child: SizedBox(width: 10)),
-        Text(classificationId == 'AppHotel'
+        Text(classificationId == 'AppHotel' &&
+                finDoc.items[0].rentalFromDate != null
             ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
             : "${finDoc.creationDate?.toString().substring(0, 11)}"),
         const Expanded(child: SizedBox(width: 10)),
         Text("${finDoc.grandTotal}", key: Key("grandTotal$index")),
         const Expanded(child: SizedBox(width: 10)),
-        Text("${finDoc.displayName(classificationId)}",
+        Text("${finDoc.displayStatus(classificationId)}",
             key: Key("status$index")),
         const Expanded(child: SizedBox(width: 10)),
         Text(
@@ -203,7 +213,9 @@ class FinDocListItem extends StatelessWidget {
                   finDoc.copyWith(status: FinDocStatusVal.cancelled)));
             },
           ),
-        if (!isPhone)
+        if (!isPhone &&
+            finDoc.docType == FinDocType.order &&
+            finDoc.docType == FinDocType.invoice)
           IconButton(
             key: Key('print$index'),
             icon: const Icon(Icons.print),
@@ -290,8 +302,8 @@ class FinDocListItem extends StatelessWidget {
                                 ? "ProductId: ${e.productId} $r${e.description}$r"
                                     "Quantity: ${e.quantity.toString()} "
                                     "Price: ${e.price.toString()}$r"
-                                    "SubTotal: ${(e.quantity! * e.price!).toString()}${e.rentalFromDate == null ? '' : " "
-                                        "Rental: ${e.rentalFromDate.toString().substring(0, 10)} "
+                                    "SubTotal: ${(e.quantity! * e.price!).toString()}$r${e.rentalFromDate == null ? '' : " "
+                                        "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"
                                         "${e.rentalThruDate.toString().substring(0, 10)}"}\n"
                                     "${finDoc.docType == FinDocType.invoice ? 'Overr.GLAccount: ${e.glAccount?.accountCode ?? ''}' : ''}$r"
                                     "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}[${e.itemType!.accountCode}]' : ''}\n"

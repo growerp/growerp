@@ -155,7 +155,7 @@ class AddressDialogState extends State<AddressDialog> {
                   dropdownDecoratorProps: const DropDownDecoratorProps(
                       dropdownSearchDecoration:
                           InputDecoration(labelText: 'Country')),
-                  itemAsString: (Country? u) => u!.name,
+                  itemAsString: (Country? u) => " ${u!.name}",
                   items: countries,
                   validator: (value) {
                     if (value == null) {

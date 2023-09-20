@@ -148,7 +148,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             hintText: "Account Class",
           ),
         ),
-        itemAsString: (AccountClass? u) => "${u!.description}",
+        itemAsString: (AccountClass? u) => " ${u!.description}",
         onChanged: (AccountClass? newValue) {
           classSelected = newValue;
         },
@@ -177,7 +177,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             hintText: "Account Type",
           ),
         ),
-        itemAsString: (AccountType? u) => "${u!.description}",
+        itemAsString: (AccountType? u) => " ${u!.description}",
         onChanged: (AccountType? newValue) {
           typeSelected = newValue;
         },

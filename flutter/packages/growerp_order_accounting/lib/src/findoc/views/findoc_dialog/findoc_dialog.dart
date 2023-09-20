@@ -264,7 +264,7 @@ class MyFinDocState extends State<FinDocPage> {
                   key: Key(
                       finDocUpdated.sales == true ? 'customer' : 'supplier'),
                   itemAsString: (User? u) =>
-                      "${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                      " ${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
                   asyncItems: (String filter) {
                     _userBloc.add(UserFetch(searchString: filter));
                     return Future.value(state.users);

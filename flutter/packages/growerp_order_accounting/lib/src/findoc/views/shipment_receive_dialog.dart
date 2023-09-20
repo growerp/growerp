@@ -174,7 +174,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
                                                   InputDecoration(
                                                       labelText: 'Location')),
                                       itemAsString: (Location? u) =>
-                                          "${u?.locationName}",
+                                          " ${u?.locationName}",
 /*                                      asyncItems: (String? filter) async {
                                        ApiResult<List<Location>> result =
                                             await repos.getLocation(

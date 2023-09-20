@@ -40,7 +40,7 @@ List<Opportunity> opportunities = [
   Opportunity(
     opportunityName: 'Dummy Opp Name 3',
     description: 'Dummmy descr 3',
-    stageId: 'Demo',
+    stageId: 'Demo/Meeting',
     nextStep: 'testing3',
     employeeUser: administrators[0], // initial logged admin[0]
     leadUser: leads[0],

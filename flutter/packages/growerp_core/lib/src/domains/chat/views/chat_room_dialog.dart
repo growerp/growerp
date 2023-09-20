@@ -118,7 +118,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                 dropdownDecoratorProps: const DropDownDecoratorProps(
                     dropdownSearchDecoration:
                         InputDecoration(labelText: 'Chat partner')),
-                itemAsString: (User? u) => "${u!.firstName} ${u.lastName}",
+                itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
                   ApiResult<List<User>> result = await repos.lookUpUser(
                       filter: _chatRoomSearchBoxController.text);

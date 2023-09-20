@@ -78,7 +78,7 @@ Future addTransactionItemDialog(BuildContext context, bool sales,
                                                   labelText: 'GL Account')),
                                   key: const Key('glAccount'),
                                   itemAsString: (GlAccount? u) =>
-                                      "${u?.accountCode} ${u?.accountName} ",
+                                      " ${u?.accountCode} ${u?.accountName} ",
                                   items: state.glAccounts,
                                   onChanged: (GlAccount? newValue) {
                                     selectedGlAccount = newValue!;

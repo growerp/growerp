@@ -96,7 +96,7 @@ class FinDoc with _$FinDoc {
       "descr: ${items.isNotEmpty ? items[0].description : ''} ";
 //      "status: $status! otherUser: $otherUser! Items: ${items!.length}";
 
-  String? displayName(String classificationId) {
+  String? displayStatus(String classificationId) {
     if (docType != FinDocType.order) {
       return finDocStatusValues[status.toString()];
     }
