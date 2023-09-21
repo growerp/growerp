@@ -1,6 +1,8 @@
 #!/bin/bash
 set -x
 
+echo "current tag: $1"
+
 HOME_DIR=$PWD
 echo $HOME_DIR
 
