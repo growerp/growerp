@@ -34,7 +34,7 @@ class _LoginHeaderState extends State<LoginDialog> {
   String? companyPartyId;
   String? companyName;
   List<Company>? companies;
-//  Company? _companySelected;
+  Company? _companySelected;
   String? oldPassword;
   String? username;
   _LoginHeaderState();
@@ -89,8 +89,8 @@ class _LoginHeaderState extends State<LoginDialog> {
       Widget loginType;
       if (oldPassword != null && username != null) {
         loginType = _changePassword(username, oldPassword);
-        //    } else if (companyPartyId == null) {
-        //      loginType = _changeEcommerceCompany();
+      } else if (companyPartyId == null) {
+        loginType = _changeEcommerceCompany();
       } else {
         loginType = _loginToCurrentCompany();
       }
@@ -194,7 +194,6 @@ class _LoginHeaderState extends State<LoginDialog> {
         ));
   }
 
-/*
   Widget _changeEcommerceCompany() {
     final loginFormKey2 = GlobalKey<FormState>();
     return SizedBox(
@@ -227,7 +226,7 @@ class _LoginHeaderState extends State<LoginDialog> {
           ),
         ));
   }
-*/
+
   Widget _loginToCurrentCompany() {
     return popUp(
         height: 400,

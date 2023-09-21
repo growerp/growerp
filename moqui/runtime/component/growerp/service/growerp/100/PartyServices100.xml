@@ -323,6 +323,20 @@ along with this software (see the LICENSE.md file). If not, see
                                 currencyId: item.baseCurrencyUomId,
                                 description: item.curDescription]" />
                     </if>
+                    <!-- image -->
+                    <entity-find entity-name="mantle.party.PartyContent" list="contents">
+                        <econdition field-name="partyId" from="item.companyPartyId" />
+                        <econdition field-name="partyContentTypeEnumId"
+                            from="userPartyId? 'PcntImageMedium' : 'PcntImageSmall'" />
+                    </entity-find>
+                    <if condition="contents">
+                        <service-call name="growerp.100.ImageServices100.download#Image"
+                            in-map="[contentLocation: contents[0].contentLocation]"
+                            out-map="context" />
+                        <else>
+                            <set field="imageFile" from="null" />
+                        </else>
+                    </if>
 
                     <set field="company"
                         from="[

@@ -12,32 +12,34 @@ You should have received a copy of the CC0 Public Domaicrn Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
 
     <service verb="upload" noun="Image">
         <in-parameters>
-            <parameter name="type" required="true"/>
-            <parameter name="id" required="true"/>
-            <parameter name="file" type="org.apache.commons.fileupload.FileItem"/>
-            <parameter name="description"/>
-            <parameter name="base64"/>
+            <parameter name="type" required="true" />
+            <parameter name="id" required="true" />
+            <parameter name="file" type="org.apache.commons.fileupload.FileItem" />
+            <parameter name="description" />
+            <parameter name="base64" />
         </in-parameters>
         <out-parameters>
-            <parameter name="contentId"/>
+            <parameter name="contentId" />
         </out-parameters>
         <actions>
+            <log message="===uploading image ${base64?.size()}" />
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <set field="pagePath" value="/${type}/${id}/"/>
-            <set field="contentLocation" value="dbresource://C${companyPartyId}/images${pagePath}"/>
-            <set field="ec" from="context.ec"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="pagePath" value="/${type}/${id}/" />
+            <set field="contentLocation" value="dbresource://C${companyPartyId}/images${pagePath}" />
+            <set field="ec" from="context.ec" />
             <set field="attachmentReferenceLarge"
-                from="ec.resource.getLocationReference(contentLocation + 'large')"/>
+                from="ec.resource.getLocationReference(contentLocation + 'large')" />
             <set field="attachmentReferenceMedium"
-                from="ec.resource.getLocationReference(contentLocation + 'medium')"/>
+                from="ec.resource.getLocationReference(contentLocation + 'medium')" />
             <set field="attachmentReferenceSmall"
-                from="ec.resource.getLocationReference(contentLocation + 'small')"/>
+                from="ec.resource.getLocationReference(contentLocation + 'small')" />
             <script><![CDATA[
                 import static java.awt.RenderingHints.*
                 import java.awt.image.BufferedImage
@@ -107,93 +109,94 @@ along with this software (see the LICENSE.md file). If not, see
                 is.close()
                 fileStreamLarge.close()
                 ]]></script>
-                <if condition="type == 'user'  || type == 'company'">
-                    <entity-delete-by-condition
-                        entity-name="mantle.party.PartyContent">
-                        <econdition field-name="partyId" from="id"/>
-                    </entity-delete-by-condition>
-                    <service-call name="create#mantle.party.PartyContent"
-                        in-map="[
+            <if condition="type == 'user'  || type == 'company'">
+                <entity-delete-by-condition
+                    entity-name="mantle.party.PartyContent">
+                    <econdition field-name="partyId" from="id" />
+                </entity-delete-by-condition>
+                <service-call name="create#mantle.party.PartyContent"
+                    in-map="[
                             partyId: id,
                             partyContentTypeEnumId: 'PcntImageSmall',
                             contentLocation: contentLocation + 'small']" />
-                    <service-call name="create#mantle.party.PartyContent"
-                        in-map="[
+                <service-call name="create#mantle.party.PartyContent"
+                    in-map="[
                             partyId: id,
                             partyContentTypeEnumId: 'PcntImageMedium',
                             contentLocation: contentLocation + 'medium']" />
-                    <service-call name="create#mantle.party.PartyContent"
-                        in-map="[
+                <service-call name="create#mantle.party.PartyContent"
+                    in-map="[
                             partyId: id,
                             partyContentTypeEnumId: 'PcntImageLarge',
                             contentLocation: contentLocation + 'large']" />
-                    <if condition="type == 'company'">
-                        <service-call name="create#mantle.party.PartyContent"
-                            in-map="[
+                <if condition="type == 'company'">
+                    <service-call name="create#mantle.party.PartyContent"
+                        in-map="[
                                 partyId: id,
                                 partyContentTypeEnumId: 'PcntLogoImage',
                                 contentLocation: contentLocation + 'large']" />
-                    </if>
                 </if>
-                <if condition="type == 'product'">
-                    <entity-delete-by-condition 
-                        entity-name="mantle.product.ProductContent">
-                        <econdition field-name="productId" from="id"/>
-                    </entity-delete-by-condition>
-                    <service-call
-                        name="create#mantle.product.ProductContent"
-                        in-map="[
+            </if>
+            <if condition="type == 'product'">
+                <entity-delete-by-condition
+                    entity-name="mantle.product.ProductContent">
+                    <econdition field-name="productId" from="id" />
+                </entity-delete-by-condition>
+                <service-call
+                    name="create#mantle.product.ProductContent"
+                    in-map="[
                             productId: id,
                             productContentTypeEnumId: 'PcntImageSmall',
                             contentLocation: contentLocation + 'small']" />
-                    <service-call
-                        name="create#mantle.product.ProductContent"
-                        in-map="[
+                <service-call
+                    name="create#mantle.product.ProductContent"
+                    in-map="[
                             productId: id,
                             productContentTypeEnumId: 'PcntImageMedium',
                             contentLocation: contentLocation + 'medium']" />
-                    <service-call
-                        name="create#mantle.product.ProductContent" in-map="[
+                <service-call
+                    name="create#mantle.product.ProductContent"
+                    in-map="[
                             productId: id,
                             productContentTypeEnumId: 'PcntImageLarge',
                             contentLocation: contentLocation + 'large']" />
-                </if>
-                <if condition="type == 'category'">
-                    <entity-delete-by-condition
-                        entity-name="mantle.product.category.ProductCategoryContent">
-                        <econdition field-name="productCategoryId" from="id"/>
-                    </entity-delete-by-condition>
-                    <service-call
-                        name="create#mantle.product.category.ProductCategoryContent"
-                        in-map="[
+            </if>
+            <if condition="type == 'category'">
+                <entity-delete-by-condition
+                    entity-name="mantle.product.category.ProductCategoryContent">
+                    <econdition field-name="productCategoryId" from="id" />
+                </entity-delete-by-condition>
+                <service-call
+                    name="create#mantle.product.category.ProductCategoryContent"
+                    in-map="[
                             productCategoryId: id,
                             categoryContentTypeEnumId: 'PcctImageThumbNail',
                             contentLocation: contentLocation + 'small']" />
-                    <service-call
-                        name="create#mantle.product.category.ProductCategoryContent"
-                        in-map="[
+                <service-call
+                    name="create#mantle.product.category.ProductCategoryContent"
+                    in-map="[
                             productCategoryId: id,
                             categoryContentTypeEnumId: 'PcctImageMedium',
                             contentLocation: contentLocation + 'medium']" />
-                    <service-call
-                        name="create#mantle.product.category.ProductCategoryContent"
-                        in-map="[
+                <service-call
+                    name="create#mantle.product.category.ProductCategoryContent"
+                    in-map="[
                             productCategoryId: id,
                             categoryContentTypeEnumId: 'PcctImageLarge',
                             contentLocation: contentLocation + 'large']" />
-                </if>
-                <if condition="type == 'productStore'">
-                    
-                    <service-call name="create#growerp.store.ProductStoreContent"
-                        out-map="context"
-                        in-map="[
+            </if>
+            <if condition="type == 'productStore'">
+
+                <service-call name="create#growerp.store.ProductStoreContent"
+                    out-map="context"
+                    in-map="[
                             productStoreId: id,
                             description: description,
                             contentTypeEnumId: 'PrstImageLarge',
                             contentLocation: contentLocation + 'large']" />
-                    <set field="contentId" from="productStoreContentId"/>
-                </if>
-            </actions>
+                <set field="contentId" from="productStoreContentId" />
+            </if>
+        </actions>
     </service>
 
     <service verb="download" noun="Image">
@@ -201,19 +204,21 @@ along with this software (see the LICENSE.md file). If not, see
             download an image from the content store
         </description>
         <in-parameters>
-            <parameter name="contentLocation" required="true"/>
+            <parameter name="contentLocation" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="imageFile" default-value=""/>
+            <parameter name="imageFile" default-value="" />
         </out-parameters>
         <actions>
-            <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)"/>
+            <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)" />
             <if condition="!resourceReference || !resourceReference.getExists()">
-                <log level="info" message="Could not find resource at [${contentLocation}]"/>
-            <else>
-                <set field="inputStream" from="resourceReference.openStream()"/>
-                <set field="docBytes" from="org.apache.commons.io.IOUtils.toByteArray(inputStream)"/>
-                <set field="imageFile" from="org.apache.commons.codec.binary.Base64.encodeBase64String(docBytes)"/>
+                <log level="info" message="Could not find resource at [${contentLocation}]" />
+                <else>
+                    <set field="inputStream" from="resourceReference.openStream()" />
+                    <set field="docBytes"
+                        from="org.apache.commons.io.IOUtils.toByteArray(inputStream)" />
+                    <set field="imageFile"
+                        from="org.apache.commons.codec.binary.Base64.encodeBase64String(docBytes)" />
                 </else>
             </if>
         </actions>
@@ -224,18 +229,20 @@ along with this software (see the LICENSE.md file). If not, see
             update an image send as base64 as part of a model update =====experimental!======
         </description>
         <in-parameters>
-            <parameter name="contentLocation" required="true"/>
-            <parameter name="imageFile"/>
+            <parameter name="contentLocation" required="true" />
+            <parameter name="imageFile" />
         </in-parameters>
         <actions>
+            <log message="===updating image ${imageFile?.size()}" />
             <script>byte[] base64Decoded = Base64.getMimeDecoder().decode(imageFile)</script>
             <if condition="base64Decoded == null || base64Decoded.size() == 0">
-                <return error="true" message="No valid base64 decoded image file found"/></if>
-            <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)"/>
+                <return error="true" message="No valid base64 decoded image file found" />
+            </if>
+            <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)" />
             <if condition="!resourceReference || !resourceReference.getExists()">
-                <log level="info" message="Could not find resource at [${contentLocation}]"/>
-            <else>
-                <script>
+                <log level="info" message="Could not find resource at [${contentLocation}]" />
+                <else>
+                    <script>
                     fileStream = new ByteArrayInputStream(base64Decoded);
                     try { resourceReference.putStream(fileStream) } finally { fileStream.close() }
                 </script>
@@ -243,7 +250,8 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
 
 
-            <!--script>byte[] base64Decoded = Base64.getMimeDecoder().decode(contentFile)</script>
+            <!--script>byte[]
+            base64Decoded = Base64.getMimeDecoder().decode(contentFile)</script>
             <if condition="base64Decoded == null || base64Decoded.size() == 0">
                 <return error="true" message="No valid base64 decoded image file found"/></if>
             <set field="docRr" from="ec.resource.getLocationReference(contentLocation)"/>
@@ -259,16 +267,19 @@ along with this software (see the LICENSE.md file). If not, see
             Get a pdf document
         </description>
         <in-parameters>
-            <parameter name="type" required="true"/><!-- order and more to follow -->
-            <parameter name="id" required="true"/>
+            <parameter name="type" required="true" /><!-- order and more to follow -->
+            <parameter name="id" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="imageFile"/>
+            <parameter name="imageFile" />
         </out-parameters>
         <actions>
-            <service-call name="mantle.account.InvoiceServices.get#InvoicePrintInfo" in-map="[invoiceId:invoiceId]" out-map="context"/>
+            <service-call name="mantle.account.InvoiceServices.get#InvoicePrintInfo"
+                in-map="[invoiceId:invoiceId]" out-map="context" />
             <if condition="!templateLocation">
-                <set field="templateLocation" value="component://SimpleScreens/template/account/Invoice.xsl-fo.ftl"/></if>
-            </actions>
+                <set field="templateLocation"
+                    value="component://SimpleScreens/template/account/Invoice.xsl-fo.ftl" />
+            </if>
+        </actions>
     </service>
 </services>
