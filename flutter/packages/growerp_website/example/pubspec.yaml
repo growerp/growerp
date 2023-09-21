@@ -27,6 +27,8 @@ flutter:
     - assets/images/
     - assets/cfg/
     - ./
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/info.png
     - packages/growerp_core/images/infoGrey.png
     - packages/growerp_core/images/chat.png

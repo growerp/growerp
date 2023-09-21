@@ -25,3 +25,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/cfg/
+    - packages/growerp_core/images/growerp.jpg
+    - packages/growerp_core/images/growerpDark.jpg
+

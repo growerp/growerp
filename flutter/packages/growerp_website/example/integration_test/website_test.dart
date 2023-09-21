@@ -43,5 +43,6 @@ void main() {
 
     await selectWebsite(tester);
     await WebsiteTest.updateWebsite(tester);
+    await CommonTest.gotoMainMenu(tester);
   });
 }

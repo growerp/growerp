@@ -29,7 +29,7 @@ class TopApp extends StatelessWidget {
     Key? key,
     required this.dbServer,
     required this.chatServer,
-    this.title = 'GrowERP',
+    this.title = '',
     required this.router,
     required this.menuOptions,
     this.extraDelegates = const [],

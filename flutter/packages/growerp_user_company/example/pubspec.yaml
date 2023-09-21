@@ -25,7 +25,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/cfg/
-    - packages/growerp_core/images/dashBoardGrey.png
-    - packages/growerp_core/images/dashBoard.png
-    - packages/growerp_core/images/companyGrey.png
-    - packages/growerp_core/images/company.png
+    - packages/growerp_core/images/

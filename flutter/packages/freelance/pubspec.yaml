@@ -33,13 +33,6 @@ dev_dependencies:
     sdk: flutter
   build_runner:
   bdd_widget_test: ^1.2.0 
-  utils:
-#    path: ../packages/utils
-    git:
-      url: https://github.com/growerp/growerp.git
-      ref: packages
-      path: utils
-
   mockito: ^5.0.2
   very_good_analysis: ^2.0.0
 

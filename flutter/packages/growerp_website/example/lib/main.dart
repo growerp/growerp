@@ -23,11 +23,12 @@ import 'package:growerp_website/growerp_website.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
+
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
     dbServer: APIRepository(),
     chatServer: ChatServer(),
-    title: 'GrowERP.',
+    title: "GrowERP Website",
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [WebsiteLocalizations.delegate],

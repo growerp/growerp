@@ -136,6 +136,16 @@
                 "file": "1 Introduction/5 Road Map and Releases.md"
               }
             }
+          },
+          {
+            "id": "90026260372962aa",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency"
+              }
+            }
           }
         ]
       }

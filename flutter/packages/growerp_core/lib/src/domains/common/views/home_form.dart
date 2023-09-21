@@ -13,20 +13,25 @@
  */
 
 import 'package:flutter/foundation.dart';
-
-import '../../../l10n/generated/core_localizations.dart';
-import '../../domains.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../../../templates/templates.dart';
 import 'package:global_configuration/global_configuration.dart';
+
+import '../../../l10n/generated/core_localizations.dart';
+import '../../../templates/templates.dart';
+import '../../domains.dart';
 
 class HomeForm extends StatefulWidget {
   final List<MenuOption> menuOptions;
   final String title;
+  final String? launcherImage;
 
-  const HomeForm({Key? key, required this.menuOptions, this.title = "GrowERP"})
+  const HomeForm(
+      {Key? key,
+      required this.menuOptions,
+      this.title = "",
+      this.launcherImage})
       : super(key: key);
   @override
   HomeFormState createState() => HomeFormState();
@@ -42,11 +47,13 @@ class HomeFormState extends State<HomeForm> {
     Widget appInfo = Center(
         child: Align(
             alignment: Alignment.bottomCenter,
-            child: Text(
-                "${GlobalConfiguration().get("appName")} "
-                "V${GlobalConfiguration().get("version")} "
-                "#${GlobalConfiguration().get("build")}",
-                style: const TextStyle(fontSize: 10))));
+            child: GlobalConfiguration().get("appName") != ''
+                ? Text(
+                    "${GlobalConfiguration().get("appName")} "
+                    "V${GlobalConfiguration().get("version")} "
+                    "#${GlobalConfiguration().get("build")}",
+                    style: const TextStyle(fontSize: 10))
+                : const Text('')));
 
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
@@ -85,6 +92,7 @@ class HomeFormState extends State<HomeForm> {
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           Authenticate authenticate = state.authenticate!;
+          ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
           return Column(children: [
             Expanded(
                 child: Scaffold(
@@ -95,12 +103,19 @@ class HomeFormState extends State<HomeForm> {
                         title: appBarTitle(
                           context,
                           authenticate,
-                          'Login${singleCompany.isEmpty ? ' / New company' : ''}',
+                          'Login / New company',
                           isPhone,
                         )),
                     body: Center(
                         child: Column(children: <Widget>[
-                      const SizedBox(height: 80),
+                      const SizedBox(height: 20),
+                      Image(
+                          image: AssetImage(themeMode == ThemeMode.light
+                              ? 'packages/growerp_core/images/growerp.jpg'
+                              : 'packages/growerp_core/images/growerpDark.jpg'),
+                          height: 100,
+                          width: 100),
+                      if (widget.title.isNotEmpty) const SizedBox(height: 40),
                       InkWell(
                           onLongPress: () async {
                             await showDialog(
@@ -114,7 +129,7 @@ class HomeFormState extends State<HomeForm> {
                               style: TextStyle(
                                   fontSize: isPhone ? 15 : 25,
                                   fontWeight: FontWeight.bold))),
-                      const SizedBox(height: 40),
+                      if (widget.title.isNotEmpty) const SizedBox(height: 40),
                       authenticate.company?.partyId != null
                           ? ElevatedButton(
                               key: const Key('loginButton'),
@@ -129,26 +144,23 @@ class HomeFormState extends State<HomeForm> {
                                     });
                               })
                           : const Text('No companies yet, create one!'),
-                      const SizedBox(height: 100),
-                      Visibility(
-                          visible: singleCompany.isEmpty,
-                          child: ElevatedButton(
-                              key: const Key('newCompButton'),
-                              child:
-                                  const Text('Create a new company and admin'),
-                              onPressed: () async {
-                                await showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return NewCompanyDialog(
-                                          formArguments: FormArguments(
-                                              object: authenticate.copyWith(
-                                                  company: null)));
-                                    });
-                              })),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                          key: const Key('newCompButton'),
+                          child: const Text('Create a new company and admin'),
+                          onPressed: () async {
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return NewCompanyDialog(
+                                      formArguments: FormArguments(
+                                          object: authenticate.copyWith(
+                                              company: null)));
+                                });
+                          }),
                     ])))),
-            appInfo
+            Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);
         default:
           return const LoadingIndicator();
