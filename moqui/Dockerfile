@@ -2,9 +2,9 @@
 FROM openjdk:11-jdk as build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
-ARG TAG=?
 
 RUN echo "Tag version: $TAG"
+RUN echo "DockerTag version: $DOCKER_TAG"
 
 RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https && \
@@ -17,6 +17,7 @@ RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 # antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui
+RUN git log
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/data
 RUN mkdir runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
@@ -50,7 +51,7 @@ EXPOSE 5701
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
 RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
 WORKDIR /opt/moqui
-ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh", "$TAG"]
+ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh", "$DOCKER_TAG"]
 #ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
