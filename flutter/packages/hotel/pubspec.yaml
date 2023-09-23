@@ -43,6 +43,8 @@ flutter_icons:
 flutter: 
   uses-material-design: true
   assets: 
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/growerp.jpg
     - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/single-bedGrey.png

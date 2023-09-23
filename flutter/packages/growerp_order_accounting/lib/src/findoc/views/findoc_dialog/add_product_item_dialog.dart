@@ -91,7 +91,7 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                                                   'Product')),
                                               key: const Key('product'),
                                               itemAsString: (Product? u) =>
-                                                  " ${u!.productName}[${u.pseudoId}]}",
+                                                  " ${u!.productName}[${u.pseudoId}]",
                                               asyncItems: (String filter) {
                                                 productBloc.add(ProductFetch(
                                                     searchString: filter,

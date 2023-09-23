@@ -21,7 +21,7 @@ dependencies:
   pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
   core:
-    path: ../core
+    path: ../growerp_core
   package_info_plus: ^3.1.2
 
 dev_dependencies:
@@ -91,6 +91,8 @@ flutter:
     - packages/growerp_core/images/export.png
     - packages/growerp_core/images/growerp.jpg
     - packages/growerp_core/images/growerpDark.jpg
+    - packages/growerp_core/images/growerp100.png
+    - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/myInfo.png
     - packages/growerp_core/images/search.png
     - packages/growerp_core/images/chat.png

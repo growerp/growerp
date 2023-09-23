@@ -94,11 +94,10 @@ class CompanyListItem extends StatelessWidget {
                 Expanded(
                     child: Text(company.email ?? '',
                         key: const Key("companyEmail"))),
-                Expanded(
-                    child: Text(
+                Text(
                   company.employees.length.toString(),
                   key: Key('employees$index'),
-                )),
+                ),
                 if (role == null)
                   Expanded(
                       child: Text(

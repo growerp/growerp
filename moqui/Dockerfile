@@ -51,10 +51,10 @@ EXPOSE 5701
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
 RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
 WORKDIR /opt/moqui
-ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh", "$DOCKER_TAG"]
+ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh"]
 #ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
 # specify this as a default parameter if none are specified with docker exec/run, ie run production by default
-CMD ["conf=conf/MoquiProductionConf.xml"]
+CMD ["conf=conf/MoquiProductionConf.xml","$DOCKER_TAG"]
 

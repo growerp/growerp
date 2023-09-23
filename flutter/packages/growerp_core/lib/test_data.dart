@@ -712,7 +712,9 @@ List<FinDoc> salesPayments = [
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.22"),
     items: [
-      FinDocItem(itemType: ItemType(itemTypeName: 'Refund', accountName: 'Acc'))
+      FinDocItem(
+          itemType: ItemType(
+              itemTypeName: 'Pre Payment - Expense', accountName: 'Acc'))
     ],
   ),
   FinDoc(

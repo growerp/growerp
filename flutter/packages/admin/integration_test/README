@@ -11,7 +11,7 @@ on chrome
 ---------
 
 Download chromedriver and install in path:
-https://flutter.dev/docs/cookbook/testing/integration/introduction#6b-web
+https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/117.0.5938.92/linux64/chromedriver-linux64.zip
 
 start in a terminal: ./chromedriver --port=4444
 

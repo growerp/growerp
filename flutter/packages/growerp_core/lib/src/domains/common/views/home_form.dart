@@ -111,8 +111,8 @@ class HomeFormState extends State<HomeForm> {
                       const SizedBox(height: 20),
                       Image(
                           image: AssetImage(themeMode == ThemeMode.light
-                              ? 'packages/growerp_core/images/growerp.jpg'
-                              : 'packages/growerp_core/images/growerpDark.jpg'),
+                              ? 'packages/growerp_core/images/growerp100.png'
+                              : 'packages/growerp_core/images/growerpDark100.png'),
                           height: 100,
                           width: 100),
                       if (widget.title.isNotEmpty) const SizedBox(height: 40),
@@ -144,7 +144,7 @@ class HomeFormState extends State<HomeForm> {
                                     });
                               })
                           : const Text('No companies yet, create one!'),
-                      const SizedBox(height: 20),
+                      const Expanded(child: SizedBox(height: 130)),
                       ElevatedButton(
                           key: const Key('newCompButton'),
                           child: const Text('Create a new company and admin'),
@@ -159,6 +159,7 @@ class HomeFormState extends State<HomeForm> {
                                               company: null)));
                                 });
                           }),
+                      const SizedBox(height: 50)
                     ])))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);

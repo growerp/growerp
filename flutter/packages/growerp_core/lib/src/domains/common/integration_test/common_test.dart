@@ -364,7 +364,7 @@ class CommonTest {
   static Future<void> enterDropDownSearch(
       WidgetTester tester, String key, String value,
       {int seconds = 1}) async {
-    await tapByKey(tester, key);
+    await tapByKey(tester, key); // open search dropdown
     await tester.enterText(find.byType(TextField).last, value);
     await tester
         .pumpAndSettle(Duration(seconds: waitTime)); // wait for search result

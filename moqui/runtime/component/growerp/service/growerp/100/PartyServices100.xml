@@ -2929,6 +2929,7 @@ along with this software (see the LICENSE.md file). If not, see
                     list="customers">
                     <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     <econdition field-name="companyRole" value="Customer" />
+                    <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </entity-find>
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                     list="suppliers">

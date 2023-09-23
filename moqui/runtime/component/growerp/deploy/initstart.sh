@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-echo "current tag: $1"
+echo "params 1: $1 2: $2"
 
 HOME_DIR=$PWD
 echo $HOME_DIR
