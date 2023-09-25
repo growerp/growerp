@@ -12,26 +12,27 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:core/api_repository.dart';
-import 'package:core/services/chat_server.dart';
-import 'menuOption_data.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'generated/l10n.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:core/styles/themes.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_website/growerp_website.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'menu_options.dart';
+import 'package:flutter/material.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
-import 'package:core/domains/domains.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
+
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   GlobalConfiguration().updateValue('appName', packageInfo.appName);
   GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
@@ -57,102 +58,23 @@ Future main() async {
       print('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
-
-  BlocOverrides.runZoned(
-    () => runApp(TopApp(dbServer: APIRepository(), chatServer: ChatServer())),
-    blocObserver: AppBlocObserver(),
-  );
+  Bloc.observer = AppBlocObserver();
+  runApp(TopApp(
+    dbServer: APIRepository(),
+    chatServer: ChatServer(),
+    title: 'GrowERP Freelance.',
+    router: router.generateRoute,
+    menuOptions: menuOptions,
+    extraDelegates: extraDelegates,
+  ));
 }
 
-class TopApp extends StatelessWidget {
-  const TopApp({Key? key, required this.dbServer, required this.chatServer})
-      : super(key: key);
-
-  final APIRepository dbServer;
-  final ChatServer chatServer;
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => dbServer),
-        RepositoryProvider(create: (context) => chatServer),
-      ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthBloc>(
-              create: (context) =>
-                  AuthBloc(dbServer, chatServer)..add(AuthLoad())),
-          BlocProvider<ChatRoomBloc>(
-            create: (context) => ChatRoomBloc(
-                dbServer, chatServer, BlocProvider.of<AuthBloc>(context))
-              ..add(ChatRoomFetch()),
-          ),
-          BlocProvider<ChatMessageBloc>(
-              create: (context) => ChatMessageBloc(
-                  dbServer, chatServer, BlocProvider.of<AuthBloc>(context))),
-        ],
-        child: MyApp(),
-      ),
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  static String title = 'GrowERP Freelance administrator.';
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        // close keyboard
-        onTap: () {
-          final currentFocus = FocusScope.of(context);
-
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
-        },
-        child: MaterialApp(
-            title: title,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            builder: (context, child) => ResponsiveBreakpoints.builder(
-                  child: child!,
-                  breakpoints: [
-                    const Breakpoint(start: 0, end: 450, name: MOBILE),
-                    const Breakpoint(start: 451, end: 800, name: TABLET),
-                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                    const Breakpoint(
-                        start: 1921, end: double.infinity, name: '4K'),
-                  ],
-                ),
-            theme: Themes.formTheme,
-            onGenerateRoute: router.generateRoute,
-            home: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state.status == AuthStatus.failure) {
-                  return const FatalErrorForm('server connection problem');
-                }
-                if (state.status == AuthStatus.authenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
-                }
-                if (state.status == AuthStatus.unAuthenticated) {
-                  return HomeForm(
-                      message: state.message,
-                      menuOptions: menuOptions,
-                      title: title);
-                }
-                if (state.status == AuthStatus.changeIp) return ChangeIpForm();
-                return SplashForm();
-              },
-            )));
-  }
-}
+List<LocalizationsDelegate<dynamic>> extraDelegates = const [
+  UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  InventoryLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
+  MarketingLocalizations.delegate,
+  InventoryLocalizations.delegate,
+];

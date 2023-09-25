@@ -29,12 +29,12 @@ class TaskDialogState extends State<TaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
 
-  String _status = 'In Planning';
+  late String _statusId;
 
   @override
   void initState() {
     super.initState();
-    _status = widget.task.status!;
+    _statusId = widget.task.statusId ?? 'In Planning';
     _nameController.text = widget.task.taskName ?? '';
   }
 
@@ -91,9 +91,7 @@ class TaskDialogState extends State<TaskDialog> {
                   child: Text(
                       "Task${widget.task.taskId == null ? "New" : "${widget.task.taskId}"}",
                       style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold))),
+                          fontSize: 10, fontWeight: FontWeight.bold))),
               const SizedBox(height: 30),
               TextFormField(
                 key: const Key('name'),
@@ -109,7 +107,7 @@ class TaskDialogState extends State<TaskDialog> {
                 key: const Key('statusDropDown'),
                 decoration: const InputDecoration(labelText: 'Status'),
                 hint: const Text('Status'),
-                value: _status,
+                value: _statusId,
                 validator: (value) => value == null ? 'field required' : null,
                 items: taskStatusValues
                     .map((label) => DropdownMenuItem<String>(
@@ -119,7 +117,7 @@ class TaskDialogState extends State<TaskDialog> {
                     .toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _status = newValue!;
+                    _statusId = newValue!;
                   });
                 },
                 isExpanded: true,
@@ -155,7 +153,7 @@ class TaskDialogState extends State<TaskDialog> {
                                   Task(
                                     taskId: widget.task.taskId,
                                     taskName: _nameController.text,
-                                    status: _status,
+                                    statusId: _statusId,
                                   ),
                                 ));
                           }

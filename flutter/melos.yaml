@@ -4,6 +4,7 @@ repository: https://github.com/growerp/growerp
 packages:
   - packages/admin
   - packages/hotel
+  - packages/freelance
   - packages/growerp*
   - packages/growerp*/*example
 

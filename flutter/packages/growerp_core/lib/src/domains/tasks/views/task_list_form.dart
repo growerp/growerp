@@ -23,8 +23,7 @@ class TaskListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) =>
-          TaskBloc(context.read<APIRepository>())..add(const TaskFetch()),
+      create: (BuildContext context) => TaskBloc(context.read<APIRepository>()),
       child: const TasksList(),
     );
   }
@@ -39,11 +38,14 @@ class TasksList extends StatefulWidget {
 
 class TasksListState extends State<TasksList> {
   final _scrollController = ScrollController();
+  late TaskBloc _taskBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _taskBloc = context.read<TaskBloc>();
+    _taskBloc.add(const TaskFetch());
   }
 
   @override
@@ -64,8 +66,7 @@ class TasksListState extends State<TasksList> {
                           context: context,
                           builder: (BuildContext context) {
                             return BlocProvider.value(
-                                value: context.read<TaskBloc>(),
-                                child: TaskDialog(Task()));
+                                value: _taskBloc, child: TaskDialog(Task()));
                           });
                     },
                     tooltip: 'Add New',

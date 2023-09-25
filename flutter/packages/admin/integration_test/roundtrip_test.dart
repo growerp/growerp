@@ -1,5 +1,5 @@
 import 'package:admin/main.dart';
-import 'package:admin/menu_option_data.dart';
+import 'package:admin/menu_options.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';

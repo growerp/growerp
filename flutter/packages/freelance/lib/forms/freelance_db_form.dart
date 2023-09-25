@@ -14,59 +14,44 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:core/domains/domains.dart';
+import 'package:growerp_core/growerp_core.dart';
 
-import '../menuOption_data.dart';
+import '../menu_options.dart';
 
 class FreelanceDbForm extends StatelessWidget {
+  const FreelanceDbForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem(
-            'dbCompany',
-            context,
-            menuOptions[1],
+          makeDashboardItem('dbCompany', context, menuOptions[1], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",
             "All open tasks: ${authenticate.stats?.allTasks ?? 0}",
             "Not Invoiced hours: ${authenticate.stats?.notInvoicedHours ?? 0}",
-            "",
-          ),
-          makeDashboardItem(
-            'dbCrm',
-            context,
-            menuOptions[2],
+          ]),
+          makeDashboardItem('dbCrm', context, menuOptions[2], [
             "All Opportunities: ${authenticate.stats?.opportunities ?? 0}",
             "My Opportunities: ${authenticate.stats?.myOpportunities ?? 0}",
             "Leads: ${authenticate.stats?.leads ?? 0}",
             "Customers: ${authenticate.stats?.customers ?? 0}",
-          ),
-          makeDashboardItem(
-            'dbCatalog',
-            context,
-            menuOptions[3],
+          ]),
+          makeDashboardItem('dbCatalog', context, menuOptions[3], [
             "Categories: ${authenticate.stats?.categories ?? 0}",
             "Products: ${authenticate.stats?.products ?? 0}",
             "Assets: ${authenticate.stats?.products ?? 0}",
-            "",
-          ),
-          makeDashboardItem(
-            'dbOrders',
-            context,
-            menuOptions[4],
+          ]),
+          makeDashboardItem('dbOrders', context, menuOptions[4], [
             "Sales Orders: ${authenticate.stats?.openSlsOrders ?? 0}",
             "Customers: ${authenticate.stats?.customers ?? 0}",
             "Purchase Orders: ${authenticate.stats?.openPurOrders ?? 0}",
             "Suppliers: ${authenticate.stats?.suppliers ?? 0}",
-          ),
-          makeDashboardItem(
-            'dbAccounting',
-            context,
-            menuOptions[6],
+          ]),
+          makeDashboardItem('dbAccounting', context, menuOptions[6], [
             "Sales open invoices: \n"
                 "${authenticate.company!.currency!.currencyId} "
                 "${authenticate.stats?.salesInvoicesNotPaidAmount ?? '0.00'} "
@@ -75,21 +60,11 @@ class FreelanceDbForm extends StatelessWidget {
                 "${authenticate.company!.currency!.currencyId} "
                 "${authenticate.stats?.purchInvoicesNotPaidAmount ?? '0.00'} "
                 "(${authenticate.stats?.purchInvoicesNotPaidCount ?? 0})",
-            "",
-            "",
-          ),
-          makeDashboardItem(
-            'dbWebsite',
-            context,
-            menuOptions[5],
-            "",
-            "",
-            "",
-            "",
-          ),
+          ]),
+          makeDashboardItem('dbWebsite', context, menuOptions[5], []),
         ]);
       }
-      return LoadingIndicator();
+      return const LoadingIndicator();
     });
   }
 }

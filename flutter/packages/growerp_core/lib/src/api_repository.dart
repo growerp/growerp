@@ -364,7 +364,7 @@ class APIRepository {
             'search': searchString
           });
       return getResponseList<Task>(
-          "tasks", response, (json) => Task.fromJson(json));
+          "taskList", response, (json) => Task.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -374,7 +374,7 @@ class APIRepository {
     try {
       final response = await dioClient.post('rest/s1/growerp/100/Task', apiKey!,
           data: <String, dynamic>{
-            'task': jsonEncode(taskToJson(task)),
+            'task': jsonEncode(task.toJson()),
             'moquiSessionToken': sessionToken
           });
       return getResponse<Task>("task", response, (json) => Task.fromJson(json));
@@ -387,7 +387,7 @@ class APIRepository {
     try {
       final response = await dioClient.patch(
           'rest/s1/growerp/100/Task', apiKey!, data: <String, dynamic>{
-        'task': jsonEncode(taskToJson(task)),
+        'task': jsonEncode(task.toJson()),
         'moquiSessionToken': sessionToken
       });
       return getResponse<Task>("task", response, (json) => Task.fromJson(json));
@@ -401,7 +401,7 @@ class APIRepository {
       final response = await dioClient.delete(
           'rest/s1/growerp/100/TimeEntry', apiKey!,
           queryParameters: <String, dynamic>{
-            'timeEntry': jsonEncode(timeEntryToJson(timeEntry)),
+            'timeEntry': jsonEncode(timeEntry.toJson()),
             'moquiSessionToken': sessionToken
           });
       return getResponse<TimeEntry>(
@@ -414,11 +414,10 @@ class APIRepository {
   Future<ApiResult<TimeEntry>> createTimeEntry(TimeEntry timeEntry) async {
     try {
       final response = await dioClient.post(
-          'rest/s1/growerp/100/TimeEntry', apiKey!,
-          data: <String, dynamic>{
-            'timeEntry': jsonEncode(timeEntryToJson(timeEntry)),
-            'moquiSessionToken': sessionToken
-          });
+          'rest/s1/growerp/100/TimeEntry', apiKey!, data: <String, dynamic>{
+        'timeEntry': jsonEncode(timeEntry.toJson()),
+        'moquiSessionToken': sessionToken
+      });
       return getResponse<TimeEntry>(
           "timeEntry", response, (json) => TimeEntry.fromJson(json));
     } on Exception catch (e) {
@@ -429,11 +428,10 @@ class APIRepository {
   Future<ApiResult<TimeEntry>> updateTimeEntry(TimeEntry timeEntry) async {
     try {
       final response = await dioClient.patch(
-          'rest/s1/growerp/100/TimeEntry', apiKey!,
-          data: <String, dynamic>{
-            'timeEntry': jsonEncode(timeEntryToJson(timeEntry)),
-            'moquiSessionToken': sessionToken
-          });
+          'rest/s1/growerp/100/TimeEntry', apiKey!, data: <String, dynamic>{
+        'timeEntry': jsonEncode(timeEntry.toJson()),
+        'moquiSessionToken': sessionToken
+      });
       return getResponse<TimeEntry>(
           "timeEntry", response, (json) => TimeEntry.fromJson(json));
     } on Exception catch (e) {

@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../services/json_converters.dart';
@@ -21,20 +20,13 @@ import '../../domains.dart';
 part 'task_model.freezed.dart';
 part 'task_model.g.dart';
 
-Task taskFromJson(String str) => Task.fromJson(json.decode(str)["task"]);
-// ignore: prefer_interpolation_to_compose_strings
-String taskToJson(Task data) => '{"task":' + json.encode(data.toJson()) + "}";
-
-List<Task> tasksFromJson(String str) =>
-    List<Task>.from(json.decode(str)["taskList"].map((x) => Task.fromJson(x)));
-
 @freezed
 class Task with _$Task {
   Task._();
   factory Task({
     String? taskId,
     String? parentTaskId,
-    String? status,
+    String? statusId,
     String? taskName,
     String? description,
     User? customerUser,

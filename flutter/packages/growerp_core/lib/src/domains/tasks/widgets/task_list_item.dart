@@ -26,6 +26,7 @@ class TaskListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final taskBloc = context.read<TaskBloc>();
     return ListTile(
         leading: CircleAvatar(
             backgroundColor: Colors.green,
@@ -33,7 +34,7 @@ class TaskListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(child: Text("${task.taskName}", key: Key('name$index'))),
-            Expanded(child: Text("${task.status}", key: Key('status$index'))),
+            Expanded(child: Text("${task.statusId}", key: Key('status$index'))),
             Text(task.unInvoicedHours!.toString(),
                 key: Key('unInvoicedHours$index')),
             if (!ResponsiveBreakpoints.of(context).isMobile)
@@ -53,7 +54,7 @@ class TaskListItem extends StatelessWidget {
               context: context,
               builder: (BuildContext context) {
                 return BlocProvider.value(
-                    value: context.read<TaskBloc>(), child: TaskDialog(task));
+                    value: taskBloc, child: TaskDialog(task));
               });
         },
         trailing: IconButton(
@@ -62,7 +63,7 @@ class TaskListItem extends StatelessWidget {
             onPressed: () {
               context
                   .read<TaskBloc>()
-                  .add(TaskUpdate(task.copyWith(status: 'Closed')));
+                  .add(TaskUpdate(task.copyWith(statusId: 'Closed')));
             }));
   }
 }
