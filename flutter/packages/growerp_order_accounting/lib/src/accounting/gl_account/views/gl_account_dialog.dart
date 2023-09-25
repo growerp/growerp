@@ -48,7 +48,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
-      _postedBalanceController.text = widget.glAccount.postedBalance.toString();
+      _postedBalanceController.text = widget.glAccount.postedBalance == null
+          ? '0'
+          : widget.glAccount.postedBalance.toString();
       debitSelected = widget.glAccount.isDebit;
       classSelected = widget.glAccount.accountClass;
       typeSelected = widget.glAccount.accountType;
@@ -86,8 +88,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     context: context,
                     title:
                         "GlAccount #${widget.glAccount.accountCode ?? " New"}",
-                    width: columns.toDouble() * 350,
-                    height: 600 / columns.toDouble(),
+                    width: columns.toDouble() * 400,
+                    height: 1 / columns.toDouble() * 800,
                     child: BlocBuilder<GlAccountBloc, GlAccountState>(
                         builder: (context, state) {
                       switch (state.status) {

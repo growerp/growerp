@@ -32,7 +32,9 @@ class GlAccountListItem extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
-        child: Text(glAccount.accountName == null ? '?' : ''),
+        child: Text(glAccount.accountCode == null
+            ? '?'
+            : glAccount.accountCode!.substring(0, 3)),
       ),
       title: Column(children: [
         if (ResponsiveBreakpoints.of(context).isMobile)

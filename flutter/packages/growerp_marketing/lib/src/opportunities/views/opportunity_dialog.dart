@@ -127,7 +127,7 @@ class OpportunityDialogState extends State<OpportunityDialogFull> {
                     title:
                         "Opportunity #${widget.opportunity.opportunityId.isEmpty ? " New" : widget.opportunity.opportunityId}",
                     width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 1200,
+                    height: 1 / columns.toDouble() * 1000,
                     child: _opportunityForm()))));
   }
 
