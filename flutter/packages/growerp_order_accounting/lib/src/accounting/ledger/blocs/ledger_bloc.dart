@@ -15,7 +15,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 
 import '../../accounting.dart';
 

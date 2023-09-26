@@ -20,6 +20,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import 'add_another_item_dialog.dart';
 import 'add_product_item_dialog.dart';

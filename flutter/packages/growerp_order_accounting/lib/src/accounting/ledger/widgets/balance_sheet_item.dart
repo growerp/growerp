@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 class BalanceSheetItem extends StatelessWidget {
   const BalanceSheetItem(

@@ -16,10 +16,10 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
-import '../../domains.dart';
-import '../../../services/api_result.dart';
-import '../../../services/network_exceptions.dart';
+
 import '../../../api_repository.dart';
 
 part 'task_event.dart';

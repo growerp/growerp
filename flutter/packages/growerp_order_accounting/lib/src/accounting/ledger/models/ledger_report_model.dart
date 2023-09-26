@@ -13,7 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import 'models.dart';
 

@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../../../domains/domains.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../common/integration_test/common_test.dart';
 
 class AuthTest {

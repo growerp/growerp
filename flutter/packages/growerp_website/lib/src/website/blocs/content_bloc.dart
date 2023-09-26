@@ -14,10 +14,10 @@
 
 import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 import '../../../growerp_website.dart';
 
 part 'content_event.dart';

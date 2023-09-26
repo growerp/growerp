@@ -21,6 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
 
 /// a class to start the <CompanyDialog> from anywhere

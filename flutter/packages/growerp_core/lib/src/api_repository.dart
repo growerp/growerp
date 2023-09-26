@@ -16,11 +16,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'services/api_result.dart';
-import 'services/dio_client.dart';
-import 'services/network_exceptions.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'dart:io' show Platform;
-import 'domains/domains.dart';
+
+import 'package:growerp_rest/growerp_rest.dart';
 
 class APIRepository {
   String? apiKey;

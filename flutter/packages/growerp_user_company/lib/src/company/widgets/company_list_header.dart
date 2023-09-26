@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../../growerp_user_company.dart';
 
 class CompanyListHeader extends StatefulWidget {

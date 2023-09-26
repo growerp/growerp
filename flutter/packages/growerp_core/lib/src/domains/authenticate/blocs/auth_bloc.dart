@@ -15,12 +15,12 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_rest/growerp_rest.dart';
+import 'package:growerp_models/growerp_models.dart';
+
 import '../../../api_repository.dart';
-import '../../common/functions/functions.dart';
-import '../../../services/api_result.dart';
 import '../../../services/chat_server.dart';
-import '../../../services/network_exceptions.dart';
-import '../../../domains/domains.dart';
+import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';

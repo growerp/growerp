@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:growerp_models/growerp_models.dart';
+
 import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import '../../../services/chat_server.dart';

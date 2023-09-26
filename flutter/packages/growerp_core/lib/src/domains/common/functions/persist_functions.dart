@@ -14,8 +14,8 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domains.dart';
 
 T getJsonObject<T>(
     String result, T Function(Map<String, dynamic> json) fromJson) {

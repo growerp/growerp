@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'package:growerp_core/growerp_core.dart';
 import 'opportunities/models/models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 
 class MarketingAPIRepository extends APIRepository {
   MarketingAPIRepository(super.apiKey);

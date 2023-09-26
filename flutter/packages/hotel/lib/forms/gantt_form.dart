@@ -20,6 +20,7 @@ import 'package:collection/collection.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 const day = 1, week = 2, month = 3; // columnPeriod values
 

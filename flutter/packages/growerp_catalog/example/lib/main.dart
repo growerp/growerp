@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

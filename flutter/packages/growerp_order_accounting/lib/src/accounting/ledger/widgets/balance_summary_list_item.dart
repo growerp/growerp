@@ -15,7 +15,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 
 class BalanceSummaryListItem extends StatelessWidget {

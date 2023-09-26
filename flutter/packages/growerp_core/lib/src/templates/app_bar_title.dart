@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import '../domains/domains.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 Widget appBarTitle(BuildContext context, Authenticate authenticate,
     String title, bool isPhone) {

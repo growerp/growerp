@@ -15,8 +15,7 @@
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_core/growerp_core.dart';
-
+import 'package:growerp_models/growerp_models.dart';
 part 'content_model.freezed.dart';
 part 'content_model.g.dart';
 

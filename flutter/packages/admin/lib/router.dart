@@ -13,17 +13,17 @@
  */
 
 import 'package:growerp_core/growerp_core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
-import 'package:growerp_core/growerp_core.dart' as cat;
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'acct_menu_options.dart';
 import 'menu_options.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  if (kDebugMode) {
+  if (debug.kDebugMode) {
     print('>>>NavigateTo { ${settings.name} '
         'with: ${settings.arguments.toString()} }');
   }
@@ -52,8 +52,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/category':
       return MaterialPageRoute(
-          builder: (context) =>
-              CategoryDialog(settings.arguments as cat.Category));
+          builder: (context) => CategoryDialog(settings.arguments as Category));
     case '/orders':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

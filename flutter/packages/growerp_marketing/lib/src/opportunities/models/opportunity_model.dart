@@ -14,7 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 part 'opportunity_model.freezed.dart';
 part 'opportunity_model.g.dart';

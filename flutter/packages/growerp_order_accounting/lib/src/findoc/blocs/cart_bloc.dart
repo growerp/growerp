@@ -17,6 +17,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 
 import '../findoc.dart';
 

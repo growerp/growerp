@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 class LedgerJournalTest {
   static Future<void> selectLedgerJournal(WidgetTester tester) async {

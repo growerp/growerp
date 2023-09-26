@@ -42,6 +42,8 @@ dependencies:
   fast_csv: ^0.1.44
   dropdown_search: ^5.0.6
   growerp_core: ^1.1.1
+  growerp_models: 
+    path: ../growerp_models
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 

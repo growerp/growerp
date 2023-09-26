@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
-import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../findoc.dart';
 
 class FinDocListHeader extends StatefulWidget {

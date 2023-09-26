@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../domains.dart';
 import '../../common/functions/helper_functions.dart';
 

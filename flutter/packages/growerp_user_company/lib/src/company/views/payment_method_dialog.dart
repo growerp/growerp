@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final PaymentMethod? paymentMethod;

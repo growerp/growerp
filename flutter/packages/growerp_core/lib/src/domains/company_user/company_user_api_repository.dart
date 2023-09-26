@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 
 class CompanyUserAPIRepository extends APIRepository {
   CompanyUserAPIRepository(super.apiKey);

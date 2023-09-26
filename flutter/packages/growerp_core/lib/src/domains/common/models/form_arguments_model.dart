@@ -12,7 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../common.dart';
+import 'menu_option_model.dart';
 
 class FormArguments {
   final String? message;

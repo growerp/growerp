@@ -14,9 +14,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../common/functions/persist_functions.dart';
 import '../../common/integration_test/common_test.dart';
-import '../../domains.dart';
 
 class ChatTest {
   static Future<void> selectChatRoom(WidgetTester tester) async {

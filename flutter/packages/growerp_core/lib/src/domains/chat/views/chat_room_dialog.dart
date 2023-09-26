@@ -12,15 +12,15 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domains.dart';
 import '../../common/functions/helper_functions.dart';
-import '../../../services/api_result.dart';
 import '../../../api_repository.dart';
 
 class ChatRoomDialog extends StatefulWidget {

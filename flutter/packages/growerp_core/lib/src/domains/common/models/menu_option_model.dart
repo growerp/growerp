@@ -13,7 +13,9 @@
  */
 
 import 'package:flutter/material.dart';
-import '../../domains.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+import 'models.dart';
 
 /// item on the main menu, containing tabitems on a lower level.
 class MenuOption {

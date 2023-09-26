@@ -26,6 +26,7 @@ Let us know if you have suggestions at support@growerp.com
 * Move flutter chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
+* make lists scrollable in two dimensions: https://pub.dev/packages/two_dimensional_scrollables
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases

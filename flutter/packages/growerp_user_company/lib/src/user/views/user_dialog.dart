@@ -21,6 +21,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 
 import '../../company/views/views.dart';
 

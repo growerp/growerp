@@ -1,3 +1,7 @@
+## 1.2.0
+
+- Now everything in a single repository.
+
 ## 0.1.0-dev.10
 
 - upgrade internal packages.

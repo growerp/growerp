@@ -57,6 +57,8 @@ dependencies:
   flutter_test: 
     sdk: flutter
   growerp_core: ^1.1.0
+  growerp_models:
+    path: ../growerp_models
   scrollable_positioned_list: ^0.3.8
 dependency_overrides: 
   intl: ^0.18.0
@@ -68,7 +70,6 @@ dev_dependencies:
   mockito: ^5.0.2
   very_good_analysis: ^3.0.0
   bloc_test: ^9.0.1
-  build_runner: ^2.1.11
   mobx_codegen: ^2.0.4
   json_serializable: ^6.2.0
   dependency_validator: ^3.2.0

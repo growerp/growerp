@@ -14,8 +14,6 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
   flutter: '>=1.17.0'
 dependencies: 
-  flutter: 
-    sdk: flutter
   flutter_localizations: 
     sdk: flutter
   decimal: ^2.1.0
@@ -41,7 +39,6 @@ dependencies:
   json_annotation: ^4.7.0
   dio: ^5.0.2
   freezed_annotation: ^2.0.3
-  freezed: ^2.0.3
   credit_card_validator: ^2.0.1
   url_launcher: ^6.1.4
   flutter_colorpicker: ^1.0.3
@@ -53,6 +50,8 @@ dependencies:
   flutter_test: 
     sdk: flutter
   growerp_core: ^1.1.0
+  growerp_models:
+    path: ../growerp_models
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 
@@ -66,6 +65,7 @@ dev_dependencies:
   build_runner: ^2.1.11
   mobx_codegen: ^2.0.4
   json_serializable: ^6.2.0
+  freezed: ^2.0.3
   dependency_validator: ^3.2.0
 flutter: 
   uses-material-design: true

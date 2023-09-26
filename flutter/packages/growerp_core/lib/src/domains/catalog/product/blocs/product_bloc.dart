@@ -19,6 +19,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 

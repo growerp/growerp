@@ -13,7 +13,7 @@
  */
 
 import 'package:decimal/decimal.dart';
-import 'src/domains/domains.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 Company initialCompany = Company(
   name: "Main Company",

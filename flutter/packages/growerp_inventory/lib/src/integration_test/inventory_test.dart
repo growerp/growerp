@@ -14,6 +14,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 class InventoryTest {
   static Future<void> selectIncomingShipments(WidgetTester tester) async {

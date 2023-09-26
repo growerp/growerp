@@ -25,6 +25,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:intl/intl.dart';
 import 'package:hotel/router.dart' as router;
 import 'package:hotel/main.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 Future<void> selectRoomTypes(WidgetTester tester) async {
   await CommonTest.selectOption(tester, '/rooms', 'ProductListForm', '2');
