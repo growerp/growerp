@@ -1,6 +1,15 @@
 {
     "configurations": [
         {
+            "name": "Dart",
+            "type": "dart",
+            "request": "launch",
+            "program": "flutter/packages/growerp/bin/growerp.dart",
+            "args": [
+                "import"
+            ]
+        },
+        {
             "name": "Flutter (lib/main.dart)",
             "type": "dart",
             "request": "launch",

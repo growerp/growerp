@@ -1,0 +1,29 @@
+name: growerp_models_new
+version: 1.2.0
+description: GrowERP models for general use
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
+platforms: 
+  linux:
+  macos:
+  web:
+environment: 
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter_localizations: 
+    sdk: flutter
+  decimal: ^2.3.3
+  equatable: ^2.0.5
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  dio: ^5.0.1
+  retrofit: '>=4.0.0 <5.0.0'
+  pretty_dio_logger: ^1.3.1
+
+dev_dependencies: 
+  lint_hard: ^1.0.0
+  build_runner: ^2.1.11
+  json_serializable: ^6.7.1
+  retrofit_generator: '>=5.0.0 <6.0.0'
+  
+

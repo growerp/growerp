@@ -12,15 +12,16 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   dcli: ^2.1.0
-  logger: ^1.3.0
-  fast_csv: ^0.2.0
   dio: ^5.0.1
-  growerp_rest:
-    path: ../growerp_rest
-  growerp_models:
-    path: ../growerp_models
-  global_configuration: ^2.0.0-nullsafety.1
-dependency_overrides: 
-  intl: ^0.18.0
-dev_dependencies: 
-   lint_hard: ^1.0.0
+  fast_csv: ^0.2.0
+  get_it: ^7.6.4
+  growerp_models_new:
+    path: ../growerp_models_new
+  logger: any
+  retrofit: '>=4.0.0 <5.0.0'
+
+dev_dependencies:
+  lint_hard: ^1.0.0
+  build_runner: ^2.1.11
+  retrofit_generator: '>=5.0.0 <6.0.0'
+

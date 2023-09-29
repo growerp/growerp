@@ -3,10 +3,20 @@
 import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
-import 'package:growerp_rest/growerp_rest.dart';
-import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_models_new/growerp_models_new.dart';
+import 'package:logger/logger.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 
-import 'api_repository.dart';
+import '../dio_client.dart';
+import '../get_dio_error.dart';
+
+class MyFilter extends LogFilter {
+  @override
+  bool shouldLog(LogEvent event) {
+    return true;
+  }
+}
 
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerpTest';
@@ -73,7 +83,29 @@ Future<void> main(List<String> args) async {
         }
         break;
       case 'import':
-        if (modifiedArgs[0].isEmpty || !exists(modifiedArgs[0])) {
+        var logger = Logger(filter: MyFilter());
+        final dio =
+            buildDioClient('http://localhost:8080/'); // Provide a dio instance
+        dio.options.headers["Demo-Header"] =
+            "demo header"; // config your dio headers globally
+        final client = RestClient(dio);
+        String username = 'test104@example.com';
+        String password = 'qqqqqq9!';
+        Authenticate result = Authenticate();
+        try {
+          // register
+          result = await client.register(username, 'q$username', password,
+              'Hans', 'Jansen', 'test company', 'USD', 'AppAdmin', false);
+          logger.i("Result: owner: ${result.ownerPartyId} "
+              "user: ${result.user} company: ${result.company}");
+          // login to get apiKey
+          result = await client.login(username, password, 'AppAdmin');
+          logger.i(result.apiKey);
+        } on DioException catch (e) {
+          logger.e(getDioError(e));
+        }
+
+      /*       if (modifiedArgs[0].isEmpty || !exists(modifiedArgs[0])) {
           print("Missing or not found csv filename");
           exit(1);
         }
@@ -83,24 +115,7 @@ Future<void> main(List<String> args) async {
         for (final row in result) {
           print('$row[0] $row[1] $row[2] $row[3] $row[4] ');
         }
-
-        final APIRepository repos = APIRepository();
-        Authenticate auth = Authenticate();
-        ApiResult<Authenticate> apiResult = await repos.register(
-            companyName: "test Company",
-            currencyId: "USD",
-            firstName: "Jan",
-            lastName: "Jansen",
-            email: "test44@example.com",
-            demoData: true);
-
-        apiResult.when(
-            success: (Authenticate data) {
-              auth = data;
-            },
-            failure: (NetworkExceptions error) =>
-                print(NetworkExceptions.getErrorMessage(error)));
-        print(auth.toString());
+*/
     }
   }
 }
