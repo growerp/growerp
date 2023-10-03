@@ -2,14 +2,16 @@
 
 import 'dart:io';
 import 'package:dcli/dcli.dart';
-import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:growerp_models_new/growerp_models_new.dart';
 import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
+import 'package:hive/hive.dart';
 
-import '../dio_client.dart';
+import '../build_dio_client.dart';
+import '../file_type_model.dart';
 import '../get_dio_error.dart';
+import '../get_file_type.dart';
+import '../get_files.dart';
 
 class MyFilter extends LogFilter {
   @override
@@ -22,17 +24,24 @@ Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerpTest';
   String validCommands = "valid commands are:'install | import'";
   String branch = 'master';
+  String inputFile = '';
+  Hive.init('growerp');
+  var box = await Hive.openBox('growerp');
+
   if (args.isEmpty) {
     print('Please enter a GrowERP command? $validCommands');
   } else {
     final modifiedArgs = <String>[];
-    for (final arg in args) {
-      switch (arg) {
+    for (int i = 0; i < args.length; i++) {
+      switch (args[i]) {
         case '-dev':
           branch = 'development';
           break;
+        case '-i':
+          inputFile = args[++i];
+          break;
         default:
-          modifiedArgs.add(arg);
+          modifiedArgs.add(args[i]);
       }
     }
 
@@ -84,38 +93,46 @@ Future<void> main(List<String> args) async {
         break;
       case 'import':
         var logger = Logger(filter: MyFilter());
+        List<String> files = getFiles(inputFile);
+        if (files.isEmpty) exit(1);
+
+        // talk to backend
         final dio =
             buildDioClient('http://localhost:8080/'); // Provide a dio instance
-        dio.options.headers["Demo-Header"] =
-            "demo header"; // config your dio headers globally
-        final client = RestClient(dio);
-        String username = 'test104@example.com';
+        final client = RestClient(await dio);
+        String username = 'test200@example.com';
         String password = 'qqqqqq9!';
-        Authenticate result = Authenticate();
         try {
           // register
-          result = await client.register(username, 'q$username', password,
-              'Hans', 'Jansen', 'test company', 'USD', 'AppAdmin', false);
-          logger.i("Result: owner: ${result.ownerPartyId} "
-              "user: ${result.user} company: ${result.company}");
+//          await client.register(username, 'q$username', password, 'Hans',
+//              'Jansen', 'test company', 'USD', 'AppAdmin', false);
           // login to get apiKey
-          result = await client.login(username, password, 'AppAdmin');
-          logger.i(result.apiKey);
+//          Authenticate authenticate =
+//              await client.login(username, password, 'AppAdmin');
+//          logger.i("auth: ${authenticate}");
+          // save key
+//          box.put('apiKey', authenticate.apiKey);
+          // import
+          for (String file in files) {
+            FileType fileType = getFileType(file);
+            String csvFile = File(file).readAsStringSync();
+            var json = [];
+            switch (fileType) {
+              case FileType.glAccount:
+                json = GlAccountCsvToJson(csvFile);
+                break;
+              default:
+                print("FileType ${fileType.name} not implemented yet");
+                exit(1);
+            }
+            var result = await client.import({
+              'entities': {'${fileType.name}s': json}
+            });
+            logger.i("file: $file result: $result");
+          }
         } on DioException catch (e) {
           logger.e(getDioError(e));
         }
-
-      /*       if (modifiedArgs[0].isEmpty || !exists(modifiedArgs[0])) {
-          print("Missing or not found csv filename");
-          exit(1);
-        }
-        var config = File(modifiedArgs[0]);
-        String csv = await config.readAsString();
-        final result = fast_csv.parse(csv);
-        for (final row in result) {
-          print('$row[0] $row[1] $row[2] $row[3] $row[4] ');
-        }
-*/
     }
   }
 }

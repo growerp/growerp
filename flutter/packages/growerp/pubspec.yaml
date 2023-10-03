@@ -17,11 +17,13 @@ dependencies:
   get_it: ^7.6.4
   growerp_models_new:
     path: ../growerp_models_new
+  hive: ^2.2.3
   logger: any
   retrofit: '>=4.0.0 <5.0.0'
 
 dev_dependencies:
   lint_hard: ^1.0.0
-  build_runner: ^2.1.11
+  build_runner: ^2.4.6
   retrofit_generator: '>=5.0.0 <6.0.0'
+
 

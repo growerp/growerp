@@ -29,6 +29,9 @@ abstract class RestClient {
   Future<Authenticate> login(
       @Field() String username, @Field() password, @Field() classificationId);
 
+  @POST("rest/s1/growerp/100/ImportExport")
+  Future<String> import(@Body() Map<String, dynamic> entities);
+
   @GET("rest/s1/growerp/100/Category")
   Future<List<Category>> getCategory();
 

@@ -654,7 +654,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <view-entity entity-name="OwnerPersonDetailAndCompany" package="growerp.party">
         <description>get all people related to a certain companyId = PR = toPartyId</description>
-        <!-- owner to company (is removed in single company usage)-->
+        <!-- owner -->
         <member-entity entity-alias="PTYOWNER" entity-name="mantle.party.Party">
             <entity-condition>
                 <econdition field-name="partyTypeEnumId" value="PtyOwner" />
@@ -716,10 +716,10 @@ along with this software (see the LICENSE.md file). If not, see
         <member-entity entity-alias="PERSONTOCOMPANY" entity-name="mantle.party.PartyRelationship"
             join-from-alias="PERSON" join-optional="true">
             <key-map field-name="partyId" related="fromPartyId" />
-            <entity-condition>
+            <!--entity-condition>
                 <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
                 <date-filter from-field-name="userFromDate" thru-field-name="userThruDate" />
-            </entity-condition>
+            </entity-condition-->
         </member-entity>
         <member-entity entity-alias="ORGCOMPANYPARTY" entity-name="mantle.party.Party"
             join-from-alias="PERSONTOCOMPANY" join-optional="true">

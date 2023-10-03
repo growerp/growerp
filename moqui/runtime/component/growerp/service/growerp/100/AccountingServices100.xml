@@ -887,6 +887,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccountId]" out-map="context" />
+            <log message="===output creation GlAccount: $glAccount" />
         </actions>
     </service>
 

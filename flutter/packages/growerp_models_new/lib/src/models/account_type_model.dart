@@ -12,26 +12,19 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-part 'address_model.freezed.dart';
-part 'address_model.g.dart';
+part 'account_type_model.g.dart';
 
-@freezed
-class Address with _$Address {
-  Address._();
-  factory Address({
-    String? addressId, // contactMechId in backend
-    String? address1,
-    String? address2,
-    String? postalCode,
-    String? city,
-    String? province,
-    String? provinceId,
-    String? country,
-    String? countryId,
-  }) = _Address;
+@JsonSerializable()
+class AccountType {
+  String? accountTypeId;
+  String? parentTypeId;
+  String? description;
 
-  factory Address.fromJson(Map<String, dynamic> json) =>
-      _$AddressFromJson(json);
+  AccountType({this.accountTypeId, this.parentTypeId, this.description});
+
+  factory AccountType.fromJson(Map<String, dynamic> json) =>
+      _$AccountTypeFromJson(json);
+  Map<String, dynamic> toJson() => _$AccountTypeToJson(this);
 }
