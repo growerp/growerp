@@ -1,12 +1,25 @@
 {
     "configurations": [
         {
-            "name": "Dart",
+            "name": "export new comp",
             "type": "dart",
             "request": "launch",
             "program": "flutter/packages/growerp/bin/growerp.dart",
             "args": [
-                "import"
+                "export",
+                "-p",
+                "qqqqqq9!",
+                "-u",
+                "test315@example.com"
+            ]
+        },
+        {
+            "name": "export ext comp",
+            "type": "dart",
+            "request": "launch",
+            "program": "flutter/packages/growerp/bin/growerp.dart",
+            "args": [
+                "export",
             ]
         },
         {

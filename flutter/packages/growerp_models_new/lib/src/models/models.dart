@@ -13,5 +13,6 @@ export 'role_model.dart';
 export 'user_group_model.dart';
 export 'gl_account_model.dart';
 export 'account_type_model.dart';
+export 'file_type_model.dart';
 
 export '../json_converters.dart';

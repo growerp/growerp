@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import 'models/models.dart';
 
@@ -30,14 +31,23 @@ abstract class RestClient {
       @Field() String username, @Field() password, @Field() classificationId);
 
   @POST("rest/s1/growerp/100/ImportExport")
-  Future<String> import(@Body() Map<String, dynamic> entities);
+  Future<String> import(@Field() Map<String, dynamic> entities);
 
-  @GET("rest/s1/growerp/100/Category")
-  Future<List<Category>> getCategory();
+  @GET("rest/s1/growerp/100/GlAccount")
+  Future<GlAccountList> getGlAccount(@Query('limit') String limit);
+}
 
-  @GET("rest/s1/growerp/100/AccountClass")
-  Future<List<AccountClass>> getAccountClass();
+GlAccountList deserializeGlAccountList(Map<String, dynamic> json) =>
+    GlAccountList.fromJson(json);
 
-  @GET("rest/s1/growerp/100/Product")
-  Future<List<Product>> getProduct();
+@JsonSerializable()
+class GlAccountList {
+  const GlAccountList({required this.glAccountList});
+
+  final List<GlAccount> glAccountList;
+
+  factory GlAccountList.fromJson(Map<String, dynamic> json) =>
+      _$GlAccountListFromJson(json);
+
+  List<GlAccount> toList() => this.glAccountList.toList();
 }

@@ -749,24 +749,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="postedCredits" />
                 <parameter name="postedBalance" />
             </parameter>
-            <parameter name="glAccount" type="Map">
-                <parameter name="glAccountId" />
-                <parameter name="accountCode" />
-                <parameter name="accountName" />
-                <parameter name="isDebit" type="Boolean" />
-                <parameter name="accountClass" type="Map">
-                    <parameter name="accountClassId" />
-                    <parameter name="description" />
-                </parameter>
-                <parameter name="accountType" type="Map">
-                    <parameter name="accountTypeId" />
-                    <parameter name="description" />
-                </parameter>
-                <parameter name="beginningBalance" />
-                <parameter name="postedDebits" />
-                <parameter name="postedCredits" />
-                <parameter name="postedBalance" />
-            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -803,13 +785,6 @@ along with this software (see the LICENSE.md file). If not, see
                         )
                 </script>
             </iterate>
-            <if condition="glAccountId">
-                <set field="glAccount" from="glAccountList[0]" />
-                <set field="glAccountList" from="null" />
-                <else>
-                    <set field="glAccount" from="null" />
-                </else>
-            </if>
         </actions>
     </service>
 
@@ -887,7 +862,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccountId]" out-map="context" />
-            <log message="===output creation GlAccount: $glAccount" />
+            <set field="glAccount" from="glAccountList[0]" />
         </actions>
     </service>
 
@@ -984,6 +959,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />
+            <set field="glAccount" from="glAccountList[0]" />
         </actions>
     </service>
 

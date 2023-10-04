@@ -18,6 +18,7 @@ import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
+import '../create_csv_row.dart';
 import 'models.dart';
 
 part 'gl_account_model.g.dart';
@@ -65,7 +66,6 @@ List<String> GlAccountCsvToJson(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    print("===1===${row.toString()}");
     glAccounts.add(jsonEncode(GlAccount(
             accountCode: row[0],
             accountName: row[1],
@@ -73,9 +73,26 @@ List<String> GlAccountCsvToJson(String csvFile) {
                 row[2].isNotEmpty ? AccountClass(description: row[2]) : null,
             accountType:
                 row[3].isNotEmpty ? AccountType(description: row[3]) : null,
-            postedBalance: row[4].isNotEmpty ? Decimal.parse(row[4]) : null)
+            postedBalance: Decimal.parse(row[4].isNotEmpty ? row[4] : '0'))
         .toJson()));
   }
 
   return glAccounts;
+}
+
+String CsvFromGlAccounts(List<GlAccount> glAccounts) {
+//  final l = json.decode(result)['glAccounts'] as Iterable;
+//  List<GlAccount> glAccounts = List<GlAccount>.from(
+//      l.map((e) => GlAccount.fromJson(e as Map<String, dynamic>)));
+  var csv = [];
+  for (GlAccount glAccount in glAccounts) {
+    csv.add(createCsvRow([
+      glAccount.accountCode ?? '',
+      glAccount.accountName ?? '',
+      glAccount.accountClass!.description ?? '',
+      glAccount.accountType!.description ?? '',
+      glAccount.postedBalance == null ? '' : glAccount.postedBalance.toString(),
+    ]));
+  }
+  return csv.join();
 }

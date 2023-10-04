@@ -14,8 +14,6 @@ import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:growerp_models_new/growerp_models_new.dart';
-import '../file_type_model.dart';
-import '../get_file_type.dart';
 import '../get_files.dart';
 
 String outputDirectory = 'growerp';
@@ -73,19 +71,6 @@ void main(List<String> args) {
   createDir(outputDirectory);
 
   for (String fileInput in files) {
-    String createCsvRow(List<String> rows) {
-      // convert to csv format
-      String result = '';
-      for (String row in rows) {
-        if (result.isNotEmpty) {
-          result += ',';
-        }
-        result += '\"${row.replaceAll('"', '""')}\"';
-      }
-      result += '\r\n';
-      return result;
-    }
-
     // parse raw csv file string
     String lines = File(fileInput).readAsStringSync();
     FileType fileType = getFileType(fileInput);
