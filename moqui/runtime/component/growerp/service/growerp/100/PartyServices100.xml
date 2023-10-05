@@ -235,7 +235,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- get records -->
-            <log message="=====getting company: ${companyPartyId} ${ownerPartyId}" />
             <entity-find offset="start" limit="limit" list="items"
                 entity-name="growerp.party.OwnerCompanyDetailAndEmployee">
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
@@ -270,7 +269,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="companyName^,lastName^,firstName^" />
             </entity-find>
-            <log message="=====company records found: ${items?.size()}" />
             <set field="companies" from="[]" />
             <set field="lastItem" from="null" />
             <set field="employees" from="[]" />
@@ -375,7 +373,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="companyEmailContactMechId" from="items[0].companyEmailContactMechId" />
                 <set field="companyTelContactMechId" from="items[0].companyTelContactMechId" />
             </if>
-            <log message="====output get companies: $companies" />
         </actions>
     </service>
 
@@ -983,7 +980,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="companyRole" from="null" />
             </if>
             <!-- get records -->
-            <log message="===inp get user, userpartyId: $userPartyId ownerPartyId: $ownerPartyId" />
             <entity-find offset="start" limit="limit" list="userInfos"
                 entity-name="growerp.party.OwnerPersonDetailAndCompany">
                 <econdition field-name="companyPartyId" operator="is-null"
@@ -1023,9 +1019,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="lastName^,firstName^,companyName^" />
             </entity-find>
-            <log
-                message="====users found ${userInfos?.size()} owner: $ownerPartyId user: ${userInfos[0]} looking for:
-            $companyRole $customerStatusId $userGroupId" />
             <iterate entry="userInfo" list="userInfos">
                 <!-- adjust role -->
                 <if
@@ -1113,7 +1106,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="userPartyId">
                 <set field="personToCompanyId" from="userInfos[0]?.personToCompanyId" />
             </if>
-            <log message="===outp get user user: $users" />
         </actions>
     </service>
 
@@ -1464,13 +1456,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.PartyServices100.create#Company"
                     in-map="[company: user.company, ownerPartyId: ownerPartyId]"
                     out-map="context" />
-                <log message="====created company: $company" />
                 <set field="companyPartyId" from="company.partyId" />
                 <else><!-- existing company -->
                     <set field="companyPartyId" from="user.company?.partyId" />
                 </else>
             </if>
-            <log message="====create company ${companyPartyId} ${ownerPartyId}" />
             <!-- add new user to company  -->
             <service-call name="create#mantle.party.PartyRelationship"
                 in-map="[   
@@ -1500,7 +1490,6 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="OwnerPersonDetailAndCompany" list="results">
                 <econdition field-name="userPartyId" from="userPartyId" />
             </entity-find>
-            <log message="===!!==created user , company: ${results[0].companyPartyId}" />
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId]" out-map="userInfo" />
             <set field="user" from="userInfo.users?[0]" />
@@ -1991,8 +1980,6 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[user: user, password: newPassword,
                     ownerPartyId: owner.partyId]"
                 out-map="context" />
-            <log
-                message="=====owener: ${owner.partyId} ===returning create user user: ${user.partyId} comp: ${user.company.partyId}" />
             <!-- initialize accounting with defaults -->
             <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
                 in-map="[sourcePartyId: 'DefaultSettings',

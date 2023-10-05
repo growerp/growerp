@@ -18,7 +18,7 @@ dependencies:
   growerp_models_new:
     path: ../growerp_models_new
   hive: ^2.2.3
-  logger: any
+  logger: ^2.0.2+1
   retrofit: '>=4.0.0 <5.0.0'
 
 dev_dependencies:

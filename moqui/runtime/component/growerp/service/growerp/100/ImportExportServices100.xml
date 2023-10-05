@@ -106,7 +106,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="glAccountId" operator="in" from="glAccounts" />
                 </entity-delete-by-condition>
                 <iterate list="entities.glAccounts" entry="glAccount">
-                    <log message="======creating: $glAccount" />
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
                         in-map="[glAccount: glAccount]" />
                 </iterate>

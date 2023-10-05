@@ -49,8 +49,8 @@ class MyFilter extends LogFilter {
 }
 
 Future<void> main(List<String> args) async {
-  String growerpPath = '$HOME/growerpTest';
-  String validCommands = "valid commands are:'install | import'";
+  String growerpPath = '$HOME/growerpInstall';
+  String validCommands = "valid commands are:'install | import | export'";
   String branch = 'master';
   String inputFile = '';
   String username = '';
@@ -61,7 +61,8 @@ Future<void> main(List<String> args) async {
   var box = await Hive.openBox('growerp');
 
   if (args.isEmpty) {
-    print('Please enter a GrowERP command? $validCommands');
+    logger.e('Please enter a GrowERP command? $validCommands');
+    exit(1);
   } else {
     final modifiedArgs = <String>[];
     for (int i = 0; i < args.length; i++) {
@@ -85,8 +86,8 @@ Future<void> main(List<String> args) async {
           modifiedArgs.add(args[i]);
       }
     }
-    logger.i(
-        "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
+    //logger.i(
+    //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
 
     void createNewCompany(RestClient client) async {
       await client.register(username, 'q$username', password, 'Hans', 'Jansen',
@@ -96,24 +97,28 @@ Future<void> main(List<String> args) async {
           await client.login(username, password, 'AppAdmin');
       logger.i("apiKey: ${authenticate.apiKey}");
       // save key
-      box.put('apiKey', authenticate.apiKey);
+      await box.put('apiKey', authenticate.apiKey);
     }
 
     // commands
     switch (modifiedArgs[0].toLowerCase()) {
       case 'install':
+        logger.i(
+            'installing GrowERP: chat,backend and starting the flutter admin app');
         if (exists(growerpPath)) {
           if (!exists('$growerpPath/flutter')) {
-            print("growerp directory exist but is not a GrowERP repository!");
+            logger.e(
+                "$growerpPath directory exist but is not a GrowERP repository!");
             exit(1);
           }
-          print("growerp directory already exist, will upgrade it");
+          logger.i("growerp directory already exist, will upgrade it");
           run('git stash', workingDirectory: '$growerpPath');
           run('git pull', workingDirectory: '$growerpPath');
           run('git stash pop', workingDirectory: '$growerpPath');
         } else {
-          'git clone -b $branch https://github.com/growerp/moqui-framework.git '
-              '$growerpPath';
+          run('git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
+              workingDirectory: '$HOME');
+          run('./gradlew downloadel', workingDirectory: '$growerpPath/moqui');
         }
         run('gnome-terminal -- bash -c "cd $growerpPath/chat && ./gradlew apprun"');
         if (!exists('$growerpPath/moqui/moqui.war')) {
@@ -121,33 +126,36 @@ Future<void> main(List<String> args) async {
           run('java -jar moqui.war load types=seed,seed-initial,install',
               workingDirectory: '$growerpPath/moqui');
         }
-        run('./gradlew downloadel', workingDirectory: '$growerpPath/moqui');
-        run('java -jar moqui.war', workingDirectory: '$growerpPath/moqui');
-        run('gnome-terminal -- bash -c "cd $growerpPath/flutter"');
-        if (branch != 'master' &&
-            !exists(
-                "$growerpPath/flutter/packages/admin/pubspec_overrides.yaml")) {
-          run("dart pub global activate melos");
-          String path = "$PATH";
-          if (!path.contains("$HOME/.pub-cache/bin")) {
-            print("To run melos add $HOME/.pub-cache/bin to your path");
-            run("PATH=$HOME/.pub-cache/bin");
+        run('gnome-terminal -- bash -c "cd $growerpPath/moqui && java -jar moqui.war"');
+        if (branch != 'master') {
+          if (!exists(
+              "$growerpPath/flutter/packages/admin/pubspec_overrides.yaml")) {
+            run('dart pub global activate melos',
+                workingDirectory: '$growerpPath/flutter');
+            String path = "$PATH";
+            if (!path.contains("$HOME/.pub-cache/bin")) {
+              run("PATH=$HOME/.pub-cache/bin");
+            }
+            run('melos bootstrap', workingDirectory: '$growerpPath/flutter');
           }
-          run('melos bootstrap');
+          if (!exists(
+              "$growerpPath/flutter/packages/growerp_core/lib/src/models/account_class_model.freezed.dart")) {
+            run('melos build_all --no-select',
+                workingDirectory: '$growerpPath/flutter');
+          }
+          if (!exists(
+              "$growerpPath/flutter/packages/growerp_core/lib/src/l10n/generated")) {
+            run('melos l10n --no-select',
+                workingDirectory: '$growerpPath/flutter');
+          }
         }
-        if (branch != 'master' &&
-            !exists(
-                "$growerpPath/flutter/packages/growerp_core/lib/src/models/account_class_model.freezed.dart")) {
-          run("melos build_all --no-select");
-        }
-        if (branch != 'master' &&
-            !exists(
-                "$growerpPath/flutter/packages/growerp_core/lib/src/l10n/generated")) {
-          run("melos l10n --no-select");
-        }
+        logger.i("Install successfull, now starting the admin app with chrome");
+        run('flutter run',
+            workingDirectory: '$growerpPath/flutter/packages/admin');
         break;
       case 'import':
         List<String> files = getFiles(inputFile);
+        logger.e("no files found to process, use the -i directive?");
         if (files.isEmpty) exit(1);
 
         // talk to backend
@@ -168,7 +176,7 @@ Future<void> main(List<String> args) async {
                 json = GlAccountCsvToJson(csvFile);
                 break;
               default:
-                print("FileType ${fileType.name} not implemented yet");
+                logger.e("FileType ${fileType.name} not implemented yet");
                 exit(1);
             }
             var result = await client.import({'${fileType.name}s': json});
@@ -191,7 +199,7 @@ Future<void> main(List<String> args) async {
           var result = await client.getGlAccount('999');
           String csvContent = CsvFromGlAccounts(result.toList());
           if (isDirectory(outputDirectory)) {
-            print(
+            logger.e(
                 "output directory $outputDirectory already exists, do not overwrite");
             exit(1);
           }
