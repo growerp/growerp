@@ -55,7 +55,7 @@ Future<void> main(List<String> args) async {
   String inputFile = '';
   String username = '';
   String password = '';
-  String outputDirectory = 'growerp';
+  String outputDirectory = 'growerpCsv';
   Hive.init('growerpDB');
   var logger = Logger(filter: MyFilter());
   var box = await Hive.openBox('growerp');
@@ -155,9 +155,10 @@ Future<void> main(List<String> args) async {
         break;
       case 'import':
         List<String> files = getFiles(inputFile);
-        logger.e("no files found to process, use the -i directive?");
-        if (files.isEmpty) exit(1);
-
+        if (files.isEmpty) {
+          logger.e("no files found to process, use the -i directive?");
+          exit(1);
+        }
         // talk to backend
         final dio =
             buildDioClient('http://localhost:8080/'); // Provide a dio instance
@@ -194,18 +195,43 @@ Future<void> main(List<String> args) async {
           if (username.isNotEmpty && password.isNotEmpty) {
             createNewCompany(client);
           }
-          // export glAccount
-          var fileType = FileType.glAccount;
-          var result = await client.getGlAccount('999');
-          String csvContent = CsvFromGlAccounts(result.toList());
           if (isDirectory(outputDirectory)) {
             logger.e(
                 "output directory $outputDirectory already exists, do not overwrite");
             exit(1);
           }
           createDir(outputDirectory);
-          final file = File("$outputDirectory/${fileType.name}.csv");
-          file.writeAsStringSync(csvContent);
+          var fileType = FileType.glAccount;
+          String csvContent = '';
+          // export glAccount
+          var result1 = await client.getGlAccount('999');
+          csvContent = CsvFromGlAccounts(result1.toList());
+          final file1 = File("$outputDirectory/${fileType.name}.csv");
+          file1.writeAsStringSync(csvContent);
+          // export company
+          fileType = FileType.company;
+          var result2 = await client.getCompanies('999');
+          csvContent = CsvFromCompanies(result2.toList());
+          final file2 = File("$outputDirectory/${fileType.name}.csv");
+          file2.writeAsStringSync(csvContent);
+          // export users
+          fileType = FileType.user;
+          var result3 = await client.getUsers('999');
+          csvContent = CsvFromUsers(result3.toList());
+          final file3 = File("$outputDirectory/${fileType.name}.csv");
+          file3.writeAsStringSync(csvContent);
+          // export products
+          fileType = FileType.product;
+          var result4 = await client.getProducts('999');
+          csvContent = CsvFromProducts(result4.toList());
+          final file4 = File("$outputDirectory/${fileType.name}.csv");
+          file4.writeAsStringSync(csvContent);
+          // export categories
+          fileType = FileType.category;
+          var result5 = await client.getCategories('999');
+          csvContent = CsvFromCategories(result5.toList());
+          final file5 = File("$outputDirectory/${fileType.name}.csv");
+          file5.writeAsStringSync(csvContent);
         } on DioException catch (e) {
           logger.e(getDioError(e));
         }

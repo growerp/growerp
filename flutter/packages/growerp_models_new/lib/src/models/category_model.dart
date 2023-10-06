@@ -11,8 +11,12 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
+
+import '../create_csv_row.dart';
 import 'models.dart';
 
 part 'category_model.g.dart';
@@ -43,4 +47,40 @@ class Category {
 
   @override
   String toString() => '$categoryName[$categoryId]';
+}
+
+String CategoryCsvFormat() =>
+    "category Id, Category Name*, Description*, image\r\n";
+
+List<String> CategoryCsvToJson(String csvFile) {
+  List<String> categories = [];
+  final result = fast_csv.parse(csvFile);
+  for (final row in result) {
+    if (row == result.first) continue;
+    categories.add(jsonEncode(Category(
+            categoryId: row[0],
+            categoryName: row[1],
+            description: row[1],
+            image:
+                row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null)
+        .toJson()));
+  }
+
+  return categories;
+}
+
+String CsvFromCategories(List<Category> categories) {
+//  final l = json.decode(result)['categories'] as Iterable;
+//  List<Category> categories = List<Category>.from(
+//      l.map((e) => Category.fromJson(e as Map<String, dynamic>)));
+  var csv = [];
+  for (Category category in categories) {
+    csv.add(createCsvRow([
+      category.categoryId,
+      category.categoryName,
+      category.description,
+      category.image != null ? category.image!.toList().toString() : '',
+    ]));
+  }
+  return csv.join();
 }

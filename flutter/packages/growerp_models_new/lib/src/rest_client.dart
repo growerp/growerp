@@ -35,6 +35,18 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/GlAccount")
   Future<GlAccountList> getGlAccount(@Query('limit') String limit);
+
+  @GET("rest/s1/growerp/100/Categories")
+  Future<Categories> getCategories(@Query('limit') String limit);
+
+  @GET("rest/s1/growerp/100/Products")
+  Future<Products> getProducts(@Query('limit') String limit);
+
+  @GET("rest/s1/growerp/100/User")
+  Future<Users> getUsers(@Query('limit') String limit);
+
+  @GET("rest/s1/growerp/100/Company")
+  Future<Companies> getCompanies(@Query('limit') String limit);
 }
 
 GlAccountList deserializeGlAccountList(Map<String, dynamic> json) =>
@@ -50,4 +62,62 @@ class GlAccountList {
       _$GlAccountListFromJson(json);
 
   List<GlAccount> toList() => this.glAccountList.toList();
+}
+
+Categories deserializeCategories(Map<String, dynamic> json) =>
+    Categories.fromJson(json);
+
+@JsonSerializable()
+class Categories {
+  const Categories({required this.categories});
+
+  final List<Category> categories;
+
+  factory Categories.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesFromJson(json);
+
+  List<Category> toList() => this.categories.toList();
+}
+
+Products deserializeProducts(Map<String, dynamic> json) =>
+    Products.fromJson(json);
+
+@JsonSerializable()
+class Products {
+  const Products({required this.products});
+
+  final List<Product> products;
+
+  factory Products.fromJson(Map<String, dynamic> json) =>
+      _$ProductsFromJson(json);
+
+  List<Product> toList() => this.products.toList();
+}
+
+Companies deserializeCompanies(Map<String, dynamic> json) =>
+    Companies.fromJson(json);
+
+@JsonSerializable()
+class Companies {
+  const Companies({required this.companies});
+
+  final List<Company> companies;
+
+  factory Companies.fromJson(Map<String, dynamic> json) =>
+      _$CompaniesFromJson(json);
+
+  List<Company> toList() => this.companies.toList();
+}
+
+Users deserializeUsers(Map<String, dynamic> json) => Users.fromJson(json);
+
+@JsonSerializable()
+class Users {
+  const Users({required this.users});
+
+  final List<User> users;
+
+  factory Users.fromJson(Map<String, dynamic> json) => _$UsersFromJson(json);
+
+  List<User> toList() => this.users.toList();
 }
