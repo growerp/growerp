@@ -69,7 +69,7 @@ class TimeConverter implements JsonConverter<TimeOfDay?, String?> {
   }
 }
 */
-/*
+
 class FinDocTypeConverter implements JsonConverter<FinDocType?, String?> {
   const FinDocTypeConverter();
 
@@ -102,7 +102,7 @@ class PaymentInstrumentConverter
     return object.toString();
   }
 }
-*/
+
 class UserGroupConverter implements JsonConverter<UserGroup?, String?> {
   const UserGroupConverter();
 
@@ -119,7 +119,6 @@ class UserGroupConverter implements JsonConverter<UserGroup?, String?> {
   }
 }
 
-/*
 class FinDocStatusValConverter
     implements JsonConverter<FinDocStatusVal?, String?> {
   const FinDocStatusValConverter();
@@ -136,7 +135,7 @@ class FinDocStatusValConverter
     return object.toString();
   }
 }
-*/
+
 class RoleConverter implements JsonConverter<Role?, String?> {
   const RoleConverter();
 

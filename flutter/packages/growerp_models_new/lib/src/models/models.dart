@@ -13,5 +13,14 @@ export 'role_model.dart';
 export 'user_group_model.dart';
 export 'gl_account_model.dart';
 export 'account_type_model.dart';
+export 'findoc_model.dart';
+export 'findoc_type_model.dart';
+export 'findoc_status_val_model.dart';
+export 'ledger_journal_model.dart';
+export 'findoc_item_model.dart';
+export 'item_type_model.dart';
+export 'location_model.dart';
+export 'asset_model.dart';
+export 'payment_instrument_model.dart';
 
 export '../json_converters.dart';

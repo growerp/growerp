@@ -77,6 +77,14 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
   }
 }
 
+String convertFile(FileType fileType, String string) {
+  string = string
+      .replaceFirst('48000","Income', '48000","Income (contra)')
+      .replaceFirst('49000","Income', '49000","Income (contra)')
+      .replaceFirst('89500","Cost of Sales', '89500","Cost of Sales (contra)');
+  return string;
+}
+
 void main(List<String> args) {
   var logger = Logger(filter: MyFilter());
   if (args.isEmpty) {
@@ -99,14 +107,31 @@ void main(List<String> args) {
 
   for (String fileInput in files) {
     // parse raw csv file string
-    String lines = File(fileInput).readAsStringSync();
+    String contentString = File(fileInput).readAsStringSync();
     fileType = fileType ?? getFileType(fileInput);
-    final csvFile = fast_csv.parse(lines);
+    // general changes in content
+    contentString = convertFile(fileType, contentString);
+    final csvFile = fast_csv.parse(contentString);
     final file = File("$outputDirectory/${fileType.name}.csv");
     List<String> fileContent = [];
     switch (fileType) {
       case FileType.glAccount:
         fileContent.add(GlAccountCsvFormat());
+        break;
+      case FileType.category:
+        fileContent.add(CategoryCsvFormat());
+        break;
+      case FileType.product:
+        fileContent.add(ProductCsvFormat());
+        break;
+      case FileType.company:
+        fileContent.add(CompanyCsvFormat());
+        break;
+      case FileType.user:
+        fileContent.add(UserCsvFormat());
+        break;
+      case FileType.finDocTransaction:
+        fileContent.add(FinDocTransactionCsvFormat());
         break;
       default:
         fileContent.add(" ${fileType.name} not supported yet");
