@@ -1050,9 +1050,13 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
                 <set field="lastItem" from="null" />
+                <set field="transactionTotal" value="0" type="BigDecimal" />
                 <iterate entry="item" list="items">
                     <if condition="lastItem &amp;&amp; lastItem.transactionId != item.transactionId">
                         <set field="finDocOut.items" from="finDocItems" />
+                        <set
+                            field="finDocOut.grandTotal"
+                            from="transactionTotal ? transactionTotal.toString(): null" />
                         <script>finDocs.add(finDocOut)</script>
                     </if>
                     <if condition="!lastItem || lastItem.transactionId != item.transactionId">
@@ -1084,7 +1088,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 ? item.transactionDate.toString().substring(0,19) + 'Z' : null,
                             otherUser: userOut,
                             otherCompany: company,
-                            grandTotal: item.amount ? item.amount.toString(): null,
                             isPosted: item.isPosted == 'Y' ? true : false,
                             ledgerJournal: [journalId: item.journalId,
                                             journalName: item.journalName],
@@ -1104,12 +1107,21 @@ along with this software (see the LICENSE.md file). If not, see
                                 ],
                             productId: item.productId,
                             assetId: item.assetId,
+                            invoiceId: item.invoiceId,
+                            paymentId: item.paymentId,
+                            shipmentId: item.shipmentId,
                         ]" />
                     <script>finDocItems.add(finDocItem)</script>
+                    <if condition="item.debitCreditFlag == 'D'">
+                        <set field="transactionTotal" from="transactionTotal.add(item.amount)" />
+                    </if>
                     <set field="lastItem" from="item" />
                 </iterate>
                 <if condition="lastItem">
                     <set field="finDocOut.items" from="finDocItems" />
+                    <set
+                        field="finDocOut.grandTotal"
+                        from="transactionTotal ? transactionTotal.toString(): null" />
                     <script>finDocs.add(finDocOut)</script>
                 </if>
             </if>
@@ -1297,6 +1309,13 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.isPosted == true">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: acctgTransId]"></service-call>
+                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                            value-field="acctgTrans" />
+                        <if condition="acctgTrans.isPosted == 'Y'">
+                            <service-call
+                                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
+                                in-map="[organizationPartyId: companyPartyId]" />
+                        </if>
                     </if>
 
                 </else-if>
@@ -1846,6 +1865,15 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="finDoc.isPosted == true &amp;&amp; transaction.isPosted == 'N'">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: finDoc.transactionId]"></service-call>
+                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                            value-field="acctgTrans">
+                            <field-map field-name="acctgTransId" from="finDoc.transactionId" />
+                        </entity-find-one>
+                        <if condition="acctgTrans.isPosted == 'Y'">
+                            <service-call
+                                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
+                                in-map="[organizationPartyId: companyPartyId]" />
+                        </if>
                     </if>
                     <set field="inMap"
                         from="[finDocId: finDoc.transactionId,
