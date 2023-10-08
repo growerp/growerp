@@ -70,10 +70,9 @@ List<String> GlAccountCsvToJson(String csvFile) {
             accountCode: row[0],
             accountName: row[1],
             accountClass:
-                row[2].isNotEmpty ? AccountClass(description: row[2]) : null,
-            accountType:
-                row[3].isNotEmpty ? AccountType(description: row[3]) : null,
-            postedBalance: Decimal.parse(row[4].isNotEmpty ? row[4] : '0'))
+                row[2] != '' ? AccountClass(description: row[2]) : null,
+            accountType: row[3] != '' ? AccountType(description: row[3]) : null,
+            postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null)
         .toJson()));
   }
 

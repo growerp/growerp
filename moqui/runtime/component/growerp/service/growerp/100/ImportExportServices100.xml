@@ -92,7 +92,25 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <message public="true" type="success">Locations Upload completed</message>
             </if>
-            <if condition="entities.glAccounts || entities.glAccounts?.size() == 0">
+            <if condition="entities.glAccounts">
+                <!-- delete existing transactions only initial if present-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-find>
+                <if condition="transList.size() &gt; 1">
+                    <return error="true"
+                        message="Can only delete ledger when when not more than the initial settiung of posted balance." />
+                </if>
+                <if condition="transList.size() &gt; 0">
+                    <entity-delete-by-condition
+                        entity-name="mantle.ledger.transaction.AcctgTransEntry">
+                        <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                    </entity-delete-by-condition>
+                    <entity-delete-by-condition entity-name="mantle.ledger.transaction.AcctgTrans">
+                        <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                    </entity-delete-by-condition>
+                </if>
+                <!-- delete existing ledger -->
                 <entity-find entity-name="GlAccountAndOrganization" list="glAccounts">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
@@ -105,11 +123,38 @@ along with this software (see the LICENSE.md file). If not, see
                     entity-name="mantle.ledger.account.GlAccount">
                     <econdition field-name="glAccountId" operator="in" from="glAccounts" />
                 </entity-delete-by-condition>
-                <iterate list="entities.glAccounts" entry="glAccount">
+                <!-- create new accounts and collect posted balances for new transactions-->
+                <set field="transactions" from="[]" />
+                <log message="==first glAccount: ${entities.glAccounts[0].toString()}" />
+                <iterate list="entities.glAccounts" entry="newGlAccount">
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
-                        in-map="[glAccount: glAccount]" />
+                        in-map="[glAccount: newGlAccount]"
+                        out-map="createdGlAccount" />
+                    <!-- collect posted balances -->
+                    <!-- cannot get postalBalance from newGlAccount because newGlAccount is String
+                    but should be Map-->
+                    <!-- temp solution, get it as a String -->
+                    <set field="postedBalance"
+                        from="newGlAccount.split('postedBalance')[1]" />
+                    <set field="postedBalance"
+                        from="postedBalance.substring(2,postedBalance.indexOf('}')).replace('&quot;','')" />
+                    <if condition="postedBalance != 'null'">
+                        <script>transactions.add([
+                            isDebit: createdGlAccount.glAccount.isDebit,
+                            price: postedBalance,
+                            glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
+                        ])</script>
+                    </if>
                 </iterate>
-                <message public="true" type="success">${entities.glAccounts.size()} Ledger accounts Upload completed</message>
+                <!-- create unposted balance in initial transaction-->
+                <if condition="transactions.size() &gt; 0">
+                    <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                        in-map="finDoc: [docType: 'Transaction', sales: 'true',
+                                description: 'Initial balance',
+                                items: transactions]"
+                        out-map="context" />
+                </if>
+                <message public="true" type="success">${entities.glAccounts.size()} Ledger accounts with ${transactions.size()} initial transactions Upload completed</message>
             </if>
         </actions>
     </service>

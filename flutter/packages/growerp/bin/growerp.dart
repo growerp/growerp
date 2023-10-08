@@ -38,15 +38,10 @@ import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 
 import '../build_dio_client.dart';
-import '../get_dio_error.dart';
+import '../file_type_model.dart';
+import '../get_file_type.dart';
 import '../get_files.dart';
-
-class MyFilter extends LogFilter {
-  @override
-  bool shouldLog(LogEvent event) {
-    return true;
-  }
-}
+import '../logger.dart';
 
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerpInstall';
@@ -56,6 +51,7 @@ Future<void> main(List<String> args) async {
   String username = '';
   String password = '';
   String outputDirectory = 'growerpCsv';
+  FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
   var logger = Logger(filter: MyFilter());
   var box = await Hive.openBox('growerp');
@@ -82,6 +78,9 @@ Future<void> main(List<String> args) async {
         case '-o':
           outputDirectory = args[++i];
           break;
+        case '-f':
+          overrideFileType = getFileType(args[++i]);
+          break;
         default:
           modifiedArgs.add(args[i]);
       }
@@ -97,7 +96,7 @@ Future<void> main(List<String> args) async {
           await client.login(username, password, 'AppAdmin');
       logger.i("apiKey: ${authenticate.apiKey}");
       // save key
-      await box.put('apiKey', authenticate.apiKey);
+      box.put('apiKey', authenticate.apiKey);
     }
 
     // commands
@@ -154,7 +153,8 @@ Future<void> main(List<String> args) async {
             workingDirectory: '$growerpPath/flutter/packages/admin');
         break;
       case 'import':
-        List<String> files = getFiles(inputFile);
+        List<String> files =
+            getFiles(inputFile, overrrideFileType: overrideFileType);
         if (files.isEmpty) {
           logger.e("no files found to process, use the -i directive?");
           exit(1);
@@ -169,6 +169,7 @@ Future<void> main(List<String> args) async {
           }
           // import
           for (String file in files) {
+            logger.i("Importing file: $file with user: $username");
             FileType fileType = getFileType(file);
             String csvFile = File(file).readAsStringSync();
             var json = [];
