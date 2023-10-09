@@ -1665,4 +1665,32 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="typeDescription" field="description" entity-alias="GLTYPE" />
     </view-entity>
 
+    <view-entity entity-name="GlAccountClassAndLevels" package="growerp.ledger.account">
+        <member-entity entity-alias="TOP1" entity-name="moqui.basic.Enumeration">
+        </member-entity>
+        <member-entity
+            entity-alias="MIDDLE1" entity-name="moqui.basic.Enumeration"
+            join-from-alias="TOP1" join-optional="true">
+            <key-map field-name="enumId" related="parentEnumId" />
+        </member-entity>
+        <member-entity
+            entity-alias="BOTTOM1" entity-name="moqui.basic.Enumeration"
+            join-from-alias="MIDDLE1" join-optional="true">
+            <key-map field-name="enumId" related="parentEnumId" />
+        </member-entity>
+        <alias name="topEnumTypeId" field="enumTypeId" entity-alias="TOP1" />
+        <alias name="topDescription" field="description" entity-alias="TOP1" />
+        <alias
+            name="topEnumId" field="enumId" entity-alias="TOP1" />
+        <alias
+            name="middleDescription" field="description" entity-alias="MIDDLE1" />
+        <alias name="middleEnumId" field="enumId" entity-alias="MIDDLE1" />
+        <alias name="bottomDescription" field="description" entity-alias="BOTTOM1" />
+        <alias name="bottomEnumId" field="enumId" entity-alias="BOTTOM1" />
+        <alias name="bottomContra" field="optionIndicator" entity-alias="BOTTOM1" />
+        <entity-condition>
+            <econdition field-name="enumTypeId" value="GlAccountClass" entity-alias="TOP1" />
+            <econdition field-name="parentEnumId" value="null" entity-alias="TOP1" />
+        </entity-condition>
+    </view-entity>
 </entities>
