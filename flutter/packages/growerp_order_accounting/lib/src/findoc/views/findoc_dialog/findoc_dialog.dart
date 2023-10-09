@@ -457,7 +457,7 @@ class MyFinDocState extends State<FinDocPage> {
                 key: const Key('update'),
                 child: Text(
                     "${finDoc.idIsNull() ? CoreLocalizations.of(context)!.create : CoreLocalizations.of(context)!.update} "
-                    "${FinDocType.translated(context, finDocUpdated.docType!)}"),
+                    "${finDocUpdated.docType!}"),
                 onPressed: () {
                   finDocUpdated = finDocUpdated.copyWith(
                       // set order to created, others not. inprep only used by website.
@@ -477,7 +477,7 @@ class MyFinDocState extends State<FinDocPage> {
                         context,
                         'A ${finDocUpdated.sales ? CoreLocalizations.of(context)!.customer : CoreLocalizations.of(context)!.supplier} '
                         '${CoreLocalizations.of(context)!.andAtLeastOne} '
-                        '${FinDocType.translated(context, finDocUpdated.docType!)} '
+                        '${finDocUpdated.docType!} '
                         '${CoreLocalizations.of(context)!.itemIsRequired}',
                         Colors.red);
                   }

@@ -972,16 +972,18 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
-                <econdition field-name="enumTypeId" value="GlAccountClass" />
-            </entity-find>
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums" />
             <set field="accountClassList" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
                     accountClassList.add(
-                        accountClassId: enumEntry.enumId,
-                        parentClassId: enumEntry.parentEnumId,
-                        description: enumEntry.description,
+                        topClassId: enumEntry.topEnumId,
+                        topDescription: enumEntry.topDescription,
+                        parentClassId: enumEntry.middleEnumId,
+                        parentDescription: enumEntry.middleDescription,
+                        accountClassId: enumEntry.bottomEnumId,
+                        description: enumEntry.bottomDescription,
+                        contra: enumEntry.bottomContra == 'Y' ? true : false,
                     );
                 </script>
             </iterate>

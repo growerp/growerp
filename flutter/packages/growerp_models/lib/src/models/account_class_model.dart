@@ -20,9 +20,13 @@ part 'account_class_model.g.dart';
 class AccountClass with _$AccountClass {
   AccountClass._();
   factory AccountClass({
-    String? accountClassId,
+    String? topClassId,
+    String? topDescription,
     String? parentClassId,
+    String? parentDescription,
+    String? classId,
     String? description,
+    bool? contra,
   }) = _AccountClass;
 
   factory AccountClass.fromJson(Map<String, dynamic> json) =>
