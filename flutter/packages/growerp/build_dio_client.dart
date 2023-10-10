@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:hive/hive.dart';
+//import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Future<Dio> buildDioClient(String base) async {
@@ -14,10 +14,10 @@ Future<Dio> buildDioClient(String base) async {
       compact: true,
       maxWidth: 90));
 
-  var box = await Hive.openBox('growerp');
-  String _apiKey = box.get('apiKey') ?? '';
+//  var box = await Hive.openBox('growerp');
+//  String _apiKey = box.get('apiKey') ?? '';
 
-  dio.interceptors.add(AppendApiKeyInterceptor(_apiKey));
+//  dio.interceptors.add(AppendApiKeyInterceptor(_apiKey));
   return dio;
 }
 

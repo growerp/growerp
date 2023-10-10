@@ -12,149 +12,157 @@ You should have received a copy of the CC0 Public Domaicrn Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="get" noun="Products" authenticate="false">
         <description> get a single, or all products</description>
         <in-parameters>
-            <parameter name="classificationId" default="AppAdmin"/><!-- AppHotel AppXXXXX-->
-            <parameter name="companyPartyId"/>
-            <parameter name="categoryId"/>
-            <parameter name="productId"/>
-            <parameter name="productTypeId"/>
-            <parameter name="assetClassId"/>
-            <parameter name="start" default-value="0" type="Integer"/>
-            <parameter name="limit" default-value="20" type="Integer"/>
-            <parameter name="filter" default="null"/>
-            <parameter name="search" default="null"/>
+            <parameter name="classificationId" default="AppAdmin" /><!-- AppHotel AppXXXXX-->
+            <parameter name="ownerPartyId" />
+            <parameter name="categoryId" />
+            <parameter name="productId" />
+            <parameter name="productTypeId" />
+            <parameter name="assetClassId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="filter" default="null" />
+            <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="product" type="Map">
-                <parameter name="productId"/>
-                <parameter name="pseudoId"/>
-                <parameter name="productName"/>
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
+                <parameter name="productId" />
+                <parameter name="pseudoId" />
+                <parameter name="productName" />
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="description" />
+                <parameter name="price" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="image" />
             </parameter>
             <parameter name="products" type="List">
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="productTypeId"/>
-                    <parameter name="assetClassId"/>
-                    <parameter name="productName"/>
-                    <parameter name="description"/>
-                    <parameter name="price"/>
+                    <parameter name="productId" />
+                    <parameter name="productTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="price" />
                     <parameter name="categories" type="List">
                         <parameter name="category" type="Map">
-                            <parameter name="categoryId"/>
-                            <parameter name="categoryName"/>
+                            <parameter name="categoryId" />
+                            <parameter name="categoryName" />
                         </parameter>
                     </parameter>
-                    <parameter name="useWarehouse" type="Boolean"/>
-                    <parameter name="assetCount"/>
-                    <parameter name="image"/>
-                </parameter>  
+                    <parameter name="useWarehouse" type="Boolean" />
+                    <parameter name="assetCount" />
+                    <parameter name="image" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <if condition="!companyPartyId">
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!ownerPartyId">
                 <!-- if not provided and not logged in use the one which was first created -->
                 <entity-find entity-name="mantle.party.Organization" list="parties" limit="1">
-                    <order-by field-name="partyId"/></entity-find>
-                <set field="companyPartyId" from="parties[0].partyId"/>
+                    <order-by field-name="partyId" />
+                </entity-find>
+                <set field="ownerPartyId" from="parties[0].partyId" />
             </if>
             <if condition="categoryId == '###first one###'">
                 <!-- for ecommerce startup we only need products in the first alphabetical category
                     but do not know which one that is -->
                 <entity-find
                     entity-name="mantle.product.category.ProductCategory" list="catList" limit="1">
-                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                    <econdition field-name="productCategoryTypeEnumId" operator="not-equals" value="PsctBrowseRoot"/>
-                    <order-by field-name="categoryName"/>
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="productCategoryTypeEnumId" operator="not-equals"
+                        value="PsctBrowseRoot" />
+                    <order-by field-name="categoryName" />
                 </entity-find>
-                <set field="categoryId" from="catList[0].productCategoryId"/>
-                </if>
+                <set field="categoryId" from="catList[0].productCategoryId" />
+            </if>
             <if condition="filter != null">
-                <set field="filter" value="%${filter}%"/></if>
+                <set field="filter" value="%${filter}%" />
+            </if>
             <if condition="search != null">
-                <set field="search" value="%${search}%"/></if>
+                <set field="search" value="%${search}%" />
+            </if>
             <!-- convert AssetClassId -->
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass"/>
+                in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass" />
             <!-- convert ProductTypeId -->
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'product', statusId: productTypeId]" out-map="productType"/>
+                in-map="[docType: 'product', statusId: productTypeId]" out-map="productType" />
             <!-- get products , ignore allProducts category-->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <entity-find offset="start" limit="limit*3"
-                    entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
-                        list="productList">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
+                list="productList">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productTypeEnumId"
-                    from="productType.convertedStatusId" ignore-if-empty="true"/>
+                    from="productType.convertedStatusId" ignore-if-empty="true" />
                 <econdition field-name="assetClassEnumId"
-                    from="assetClass.convertedStatusId" ignore-if-empty="true"/>
-                <econdition field-name="categoryId" ignore-if-empty="true"/>
-                <!--econdition field-name="productId" operator="is-not-null"/-->
-                <econdition field-name="productId" ignore-if-empty="true"/>
+                    from="assetClass.convertedStatusId" ignore-if-empty="true" />
+                <econdition field-name="categoryId" ignore-if-empty="true" />
+                <!--econdition
+                field-name="productId" operator="is-not-null"/-->
+                <econdition field-name="productId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true"/>
+                        from="filter" ignore-if-empty="true" ignore-case="true" />
                     <econdition field-name="productId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true"/>
+                        from="filter" ignore-if-empty="true" ignore-case="true" />
                     <econdition field-name="productName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true"/>
+                        from="filter" ignore-if-empty="true" ignore-case="true" />
                 </econditions>
                 <econditions combine="or">
                     <econdition field-name="productId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="productName" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="description" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <!--econdition field-name="listPrice" operator="is-not-null"/-->
+                <!--econdition
+                field-name="listPrice" operator="is-not-null"/-->
                 <date-filter from-field-name="productFromDate"
-                    thru-field-name="productThruDate"/>
-                <date-filter/><!-- product from/thrudate on category-->
+                    thru-field-name="productThruDate" />
+                <date-filter /><!-- product from/thrudate on category-->
                 <date-filter from-field-name="listPriceFromDate"
-                    thru-field-name="listPriceThruDate"/>
+                    thru-field-name="listPriceThruDate" />
                 <date-filter from-field-name="priceFromDate"
-                    thru-field-name="priceThruDate"/>
-                <order-by field-name="productName"/>
+                    thru-field-name="priceThruDate" />
+                <order-by field-name="productName" />
             </entity-find>
             <!-- create product list -->
-            <set field="products" from="[]"/>
-            <set field="categories" from="[]"/>
-            <set field="lastItem" from="null"/>
+            <set field="products" from="[]" />
+            <set field="categories" from="[]" />
+            <set field="lastItem" from="null" />
             <!-- get root category, do not display -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <if condition="!catgs">
-                <return error="true" message="Internal data error; mandatory root category not found for company $companyPartyId"/>
+                <return error="true"
+                    message="Internal data error; mandatory root category not found for owner $ownerPartyId" />
             </if>
             <iterate entry="product" list="productList">
                 <if condition="lastItem &amp;&amp; lastItem.productId != product.productId">
-                    <set field="productOut.categories" from="categories"/>
+                    <set field="productOut.categories" from="categories" />
                     <script>products.add(productOut)</script>
-                    <set field="categories" from="[]"/>
+                    <set field="categories" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.productId != product.productId">
                     <if condition="filter != null">
@@ -167,42 +175,54 @@ along with this software (see the LICENSE.md file). If not, see
                             listPrice: product.listPrice ? product.listPrice.toString() : '',
                             ])
                         </script>
-                        <continue/>
+                        <continue />
                     </if>
                     <!-- assets for hotel not using moqui inventory -->
                     <if condition="classificationId == 'AppHotel'">
-                        <entity-find-count entity-name="mantle.product.asset.Asset" count-field="assetCount">
-                            <econdition field-name="productId" from="product.productId"/>
+                        <entity-find-count entity-name="mantle.product.asset.Asset"
+                            count-field="assetCount">
+                            <econdition field-name="productId" from="product.productId" />
                         </entity-find-count>
                         <else>
                             <!-- assets totalled by quantityOnHand -->
-                            <entity-find entity-name="growerp.mobile.asset.ProductAssetSummary"  list="assetCountList">
-                                <econdition field-name="productId" from="product.productId"/>
-                                <econdition field-name="ownerPartyId" from="companyPartyId"/>
-                                <econdition field-name="statusId" operator="not-equals" value="AstDeactivated"/>
-                                <!--econdition field-name="classEnumId" from="product.assetClassEnumId" ignore-if-empty="true"/>
+                            <entity-find entity-name="growerp.mobile.asset.ProductAssetSummary"
+                                list="assetCountList">
+                                <econdition field-name="productId" from="product.productId" />
+                                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                                <econdition field-name="statusId" operator="not-equals"
+                                    value="AstDeactivated" />
+                                <!--econdition
+                                field-name="classEnumId" from="product.assetClassEnumId"
+                                ignore-if-empty="true"/>
                                 <econdition field-name="assetTypeEnumId" from="product.assetTypeEnumId" ignore-if-empty="true"/-->
                             </entity-find>
-                            <set field="assetCount" from="assetCountList ? (int) assetCountList[0].totalAssets : null"/>
+                            <set field="assetCount"
+                                from="assetCountList ? (int) assetCountList[0].totalAssets : null" />
                         </else>
                     </if>
 
 
                     <!-- content -->
-                    <entity-find entity-name="mantle.product.ProductContent" list="contents" limit="1">
-                        <econdition field-name="productId" from="product.productId"/>
+                    <entity-find entity-name="mantle.product.ProductContent" list="contents"
+                        limit="1">
+                        <econdition field-name="productId" from="product.productId" />
                         <econditions combine="or">
-                            <econdition field-name="productContentTypeEnumId" value="PcntImageSmall"/>
+                            <econdition field-name="productContentTypeEnumId" value="PcntImageSmall" />
                         </econditions>
                     </entity-find>
                     <if condition="contents">
                         <service-call name="growerp.100.ImageServices100.download#Image"
-                            in-map="[contentLocation: contents[0].contentLocation]" out-map="context"/>
-                    <else>
-                        <set field="imageFile" from="null"/></else></if>
+                            in-map="[contentLocation: contents[0].contentLocation]"
+                            out-map="context" />
+                        <else>
+                            <set field="imageFile" from="null" />
+                        </else>
+                    </if>
                     <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                        in-map="[docType: 'product', statusId: product.productTypeEnumId]" out-map="prodConvert"/>
-                    <set field="productOut" from="[
+                        in-map="[docType: 'product', statusId: product.productTypeEnumId]"
+                        out-map="prodConvert" />
+                    <set field="productOut"
+                        from="[
                         productId: product.productId,
                         pseudoId: product.pseudoId,
                         productName: product.productName ?: '',
@@ -213,26 +233,27 @@ along with this software (see the LICENSE.md file). If not, see
                         listPrice: product.listPrice ? product.listPrice.toString() : null,
                         useWarehouse: product.requireInventory == 'Y' ? true : false,
                         assetCount: assetCount ? assetCount : null,
-                        image: imageFile]"/>
+                        image: imageFile]" />
                 </if>
-                <if condition="product.categoryId &amp;&amp; 
+                <if
+                    condition="product.categoryId &amp;&amp; 
                         product.categoryId != catgs[0].productCategoryId">
                     <script><!-- ignore root category allProducts -->
                         categories.add([categoryId: product.categoryId,
                                 categoryName: product.categoryName])
                     </script>
                 </if>
-                <set field="lastItem" from="product"/>
+                <set field="lastItem" from="product" />
             </iterate>
             <if condition="lastItem">
-                <set field="productOut.categories" from="categories"/>
+                <set field="productOut.categories" from="categories" />
                 <script>products.add(productOut)</script>
             </if>
             <if condition="productId">
-                <set field="product" from="productOut"/>
-                <set field="products" from="[]"/>
+                <set field="product" from="productOut" />
+                <set field="products" from="[]" />
                 <else>
-                    <set field="product" from="[:]"/>
+                    <set field="product" from="[:]" />
                 </else>
             </if>
         </actions>
@@ -241,57 +262,58 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="Product">
         <description> Create a Product with a price in a category</description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="classificationId" required="true" />
             <parameter name="product" required="true" type="Map">
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="productName"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
-                <parameter name="listPrice"/>
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="productName" />
+                <parameter name="description" />
+                <parameter name="price" />
+                <parameter name="listPrice" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
-                        <parameter name="description"/>
-                        <parameter name="image"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
+                        <parameter name="description" />
+                        <parameter name="image" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="image" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="product" type="Map">
-                <parameter name="productId"/>
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="productName"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
-                <parameter name="listPrice"/>
+                <parameter name="productId" />
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="productName" />
+                <parameter name="description" />
+                <parameter name="price" />
+                <parameter name="listPrice" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="assetCount" />
+                <parameter name="image" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <set field="quantityUomId" value="OTH_ea"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="quantityUomId" value="OTH_ea" />
             <!-- convert AssetClassId and product type-->
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: product.assetClassId]" out-map="context"/>
+                in-map="[docType: 'asset', statusId: product.assetClassId]" out-map="context" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert"/>
-                <!-- product -->
-            <service-call name="create#mantle.product.Product" in-map="[
+                in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert" />
+            <!-- product -->
+            <service-call name="create#mantle.product.Product"
+                in-map="[
                 productName: product.productName,
                 description: product.description,
                 salesIntroductionDate: ec.user.nowTimestamp,
@@ -300,71 +322,76 @@ along with this software (see the LICENSE.md file). If not, see
                 assetTypeEnumId: 'AstTpInventory',
                 requireInventory: product.useWarehouse == true ? 'Y' : 'N',
                 assetClassEnumId: convertedStatusId ? 
-                    convertedStatusId : 'AsClsInventoryFin']" out-map="context"/>
+                    convertedStatusId : 'AsClsInventoryFin']"
+                out-map="context" />
             <!-- product price and currency -->
             <entity-find-one value-field="pref"
                 entity-name="mantle.ledger.config.PartyAcctgPreference">
-                <field-map field-name="organizationPartyId" from="companyPartyId"/>
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
             </entity-find-one>
-            <set field="priceMap" from="[productId: productId,
+            <set field="priceMap"
+                from="[productId: productId,
                         priceTypeEnumId: 'PptList',
                         priceUomId: pref.baseCurrencyUomId,
                         price: product.listPrice,
                         quantityUomId: 'OTH_ea',
                         fromDate: ec.user.nowTimestamp,
-                        pricePurposeEnumId: 'PppPurchase']"/>
-            <service-call name="create#mantle.product.ProductPrice" 
-                in-map="priceMap"/>
-            <service-call name="create#mantle.product.ProductPrice" 
+                        pricePurposeEnumId: 'PppPurchase']" />
+            <service-call name="create#mantle.product.ProductPrice"
+                in-map="priceMap" />
+            <service-call name="create#mantle.product.ProductPrice"
                 in-map="priceMap + [priceTypeEnumId: 'PptCurrent',
                                     price: product.price,
-                                    ]"/>
+                                    ]" />
             <!-- related categories -->
             <iterate list="product.categories" entry="category">
                 <!-- add if no id's -->
                 <if condition="!category.categoryId">
                     <!-- check if exist not required, already done in entity import -->
                     <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
-                        in-map="[category: category]" out-map="categoryResult"/>
-                    <set field="categoryId" from="categoryResult.category.categoryId"/>
+                        in-map="[category: category]" out-map="categoryResult" />
+                    <set field="categoryId" from="categoryResult.category.categoryId" />
                     <else>
-                        <set field="categoryId" from="category.categoryId"/>
+                        <set field="categoryId" from="category.categoryId" />
                     </else>
                 </if>
                 <!-- add to category member -->
                 <service-call name="create#mantle.product.category.ProductCategoryMember"
                     in-map="[   productId: productId,
                                 productCategoryId: categoryId,
-                                fromDate: ec.user.nowTimestamp]"/>
+                                fromDate: ec.user.nowTimestamp]" />
             </iterate>
             <!-- always connect product to category allProducts -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <!-- add allProducts to category member -->
             <service-call name="create#mantle.product.category.ProductCategoryMember"
                 in-map="[   productId: productId,
                             productCategoryId: catgs[0].productCategoryId,
-                            fromDate: ec.user.nowTimestamp]"/>
+                            fromDate: ec.user.nowTimestamp]" />
             <!-- asset count -->
-            <if condition="product.assetCount != null &amp;&amp; Integer.parseInt(product.assetCount) > 0">
-                <set field="newProduct" from="[productId: productId]"/>
-                <set field="inMap" from="[assetName: 'set by productDialog',
+            <if
+                condition="product.assetCount != null &amp;&amp; Integer.parseInt(product.assetCount) > 0">
+                <set field="newProduct" from="[productId: productId]" />
+                <set field="inMap"
+                    from="[assetName: 'set by productDialog',
                         quantityOnHand: product.assetCount,
                         product: newProduct,
-                        statusId: 'Available']"/>
+                        statusId: 'Available']" />
                 <service-call name="growerp.100.CatgProdServices100.create#Asset"
-                    in-map="[asset: inMap, classificationId: classificationId]"/></if>
+                    in-map="[asset: inMap, classificationId: classificationId]" />
+            </if>
             <!-- product Image -->
             <if condition="product.image">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
                     in-map="[type: 'product', id: productId,
-                        base64: product.image]"/>
+                        base64: product.image]" />
             </if>
             <!-- return created product -->
             <service-call name="growerp.100.CatgProdServices100.get#Products"
-                in-map="[productId: productId]" out-map="context"/>
+                in-map="[productId: productId]" out-map="context" />
         </actions>
     </service>
 
@@ -372,157 +399,173 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Update an existing Product</description>
         <in-parameters>
             <parameter name="product" required="true" type="Map">
-                <parameter name="productId"/>
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="productName"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
-                <parameter name="listPrice"/>
+                <parameter name="productId" />
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="productName" />
+                <parameter name="description" />
+                <parameter name="price" />
+                <parameter name="listPrice" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="image" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="product" type="Map">
-                <parameter name="productId"/>
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="productName"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
-                <parameter name="listPrice"/>
+                <parameter name="productId" />
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="productName" />
+                <parameter name="description" />
+                <parameter name="price" />
+                <parameter name="listPrice" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="assetCount" />
+                <parameter name="image" />
             </parameter>
         </out-parameters>
         <actions>
-            <if condition="!product.productId"><return error="true" message="ProductId required"/></if>
+            <if condition="!product.productId">
+                <return error="true" message="ProductId required" />
+            </if>
             <!-- for update no owner needed in single company use -->
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <entity-find list="prods" entity-name="mantle.product.Product" for-update="true" limit="1">
-                <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
-            <if condition="!prods"><return error="true" message="product ${product.productId} not found!}"/></if>
-            <set field="oldProduct" from="prods[0]"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="prods" entity-name="mantle.product.Product" for-update="true"
+                limit="1">
+                <econdition field-name="productId" from="product.productId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <if condition="!prods">
+                <return error="true" message="product ${product.productId} not found!}" />
+            </if>
+            <set field="oldProduct" from="prods[0]" />
             <!-- require inventory flag -->
-            <set field="requireInventory" from="product.useWarehouse == true ? 'Y' : 'N'"/>
+            <set field="requireInventory" from="product.useWarehouse == true ? 'Y' : 'N'" />
             <!-- product fields -->
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert"/>
-            <if condition="(product.productName &amp;&amp; product.productName != oldProduct.productName)
+                in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert" />
+            <if
+                condition="(product.productName &amp;&amp; product.productName != oldProduct.productName)
                 || (product.description &amp;&amp; product.description != oldProduct.description)
                 || (prodConvert.convertedStatusId &amp;&amp;
                     product.productTypeEnumId != prodConvert.convertedStatusId)
                 || (product.useWarehouse &amp;&amp; product.requireInventory != requireInventory)">
-                <set field="oldProduct.productName" from="product.productName"/>
-                <set field="oldProduct.description" from="product.description"/>
-                <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId"/>
-                <set field="oldProduct.requireInventory" from="requireInventory"/>
-                <entity-update value-field="oldProduct"/></if>
+                <set field="oldProduct.productName" from="product.productName" />
+                <set field="oldProduct.description" from="product.description" />
+                <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />
+                <set field="oldProduct.requireInventory" from="requireInventory" />
+                <entity-update value-field="oldProduct" />
+            </if>
             <!-- prices -->
             <entity-find-one value-field="pref"
                 entity-name="mantle.ledger.config.PartyAcctgPreference">
-                <field-map field-name="organizationPartyId" from="companyPartyId"/>
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
             </entity-find-one>
-            <set field="priceMap" from="[productId: product.productId,
+            <set field="priceMap"
+                from="[productId: product.productId,
                         priceTypeEnumId: 'PptCurrent',
                         priceUomId: pref.baseCurrencyUomId,
                         price: product.price,
                         quantityUomId: 'OTH_ea',
                         fromDate: ec.user.nowTimestamp,
-                        pricePurposeEnumId: 'PppPurchase']"/>
+                        pricePurposeEnumId: 'PppPurchase']" />
             <entity-find entity-name="growerp.mobile.product.ProductAndPrices"
-                    list="productPrices">
-                <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                list="productPrices">
+                <econdition field-name="productId" from="product.productId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="productPrices &amp;&amp; productPrices[0].price != product.price">
                 <!-- existing current price -->
                 <entity-find-one value-field="productPrice"
-                        entity-name="mantle.product.ProductPrice" for-update="true">
-                        <field-map field-name="productPriceId"
-                            from="productPrices[0].productPriceId"/></entity-find-one>
-                    <set field="productPrice.thruDate" from="ec.user.nowTimestamp"/>
-                    <entity-update value-field="productPrice"/>
-                    <service-call name="create#mantle.product.ProductPrice"
-                        in-map=" productPrice + [ productPriceId: null,
+                    entity-name="mantle.product.ProductPrice" for-update="true">
+                    <field-map field-name="productPriceId"
+                        from="productPrices[0].productPriceId" />
+                </entity-find-one>
+                <set field="productPrice.thruDate" from="ec.user.nowTimestamp" />
+                <entity-update value-field="productPrice" />
+                <service-call name="create#mantle.product.ProductPrice"
+                    in-map=" productPrice + [ productPriceId: null,
                                                 price: product.price,
-                                                thruDate: null]"/>
+                                                thruDate: null]" />
             </if>
             <if condition="!productPrices &amp;&amp; product.price">
                 <service-call name="create#mantle.product.ProductPrice"
-                    in-map="priceMap"/></if>
+                    in-map="priceMap" />
+            </if>
             <if condition="productPrices &amp;&amp; productPrices[0].listPrice != product.listPrice">
                 <!-- existing list price -->
                 <entity-find-one value-field="listProductPrice"
                     entity-name="mantle.product.ProductPrice" for-update="true">
                     <field-map field-name="productPriceId"
-                        from="productPrices[0].listProductPriceId"/></entity-find-one>
-                <set field="listProductPrice.thruDate" from="ec.user.nowTimestamp"/>
-                <entity-update value-field="listProductPrice"/>
+                        from="productPrices[0].listProductPriceId" />
+                </entity-find-one>
+                <set field="listProductPrice.thruDate" from="ec.user.nowTimestamp" />
+                <entity-update value-field="listProductPrice" />
                 <service-call name="create#mantle.product.ProductPrice"
                     in-map=" listProductPrice + [ productPriceId: null, 
                                                 price: product.listPrice,
-                                                thruDate: null]"/></if>
+                                                thruDate: null]" />
+            </if>
             <if condition="!productPrices &amp;&amp; product.listPrice">
                 <service-call name="create#mantle.product.ProductPrice"
                     in-map="priceMap + [priceTypeEnumId: 'PptList',
                                     price: product.listPrice,
-                                    ]"/></if>
+                                    ]" />
+            </if>
             <!-- get root catg -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
             <!-- related categories  delete all and add all with root category -->
             <entity-delete-by-condition entity-name="mantle.product.category.ProductCategoryMember">
-                <econdition field-name="productId" from="product.productId"/>
+                <econdition field-name="productId" from="product.productId" />
             </entity-delete-by-condition>
             <if condition="product.categories">
                 <script>product.categories.add([categoryId: catgs[0].productCategoryId])</script>
                 <else>
-                    <set field="product.categories" from="[[categoryId: catgs[0].productCategoryId]]"/>
+                    <set field="product.categories"
+                        from="[[categoryId: catgs[0].productCategoryId]]" />
                 </else>
             </if>
             <iterate list="product.categories" entry="category">
                 <service-call name="create#mantle.product.category.ProductCategoryMember"
                     in-map="[   productId: product.productId,
                                 productCategoryId: category.categoryId,
-                                fromDate: ec.user.nowTimestamp]"/>
+                                fromDate: ec.user.nowTimestamp]" />
             </iterate>
             <!-- asset count -->
             <entity-find entity-name="mantle.product.asset.Asset" list="assets" for-update="true">
-                <econdition field-name="productId" from="product.productId"/>
+                <econdition field-name="productId" from="product.productId" />
             </entity-find>
             <if condition="product.assetCount">
                 <if condition="assets">
                     <if condition="product.assetCount != assets[0].quantityOnHandTotal.toString()">
-                        <set field="assets[0].quantityOnHandTotal" from="product.assetCount"/>
-                        <entity-update value-field="assets[0]"/>
+                        <set field="assets[0].quantityOnHandTotal" from="product.assetCount" />
+                        <entity-update value-field="assets[0]" />
                     </if>
                     <else>
-                        <set field="newProduct" from="[productId: product.productId]"/>
-                        <set field="asset" from="[assetName: 'set by productDialog',
+                        <set field="newProduct" from="[productId: product.productId]" />
+                        <set field="asset"
+                            from="[assetName: 'set by productDialog',
                             quantityOnHand: Integer.parseInt(product.assetCount),
                             product: newProduct,
-                            statusId: 'Available']"/>
+                            statusId: 'Available']" />
                         <service-call name="growerp.100.CatgProdServices100.create#Asset"
-                            in-map="[asset: asset]"/>
+                            in-map="[asset: asset]" />
                     </else>
                 </if>
             </if>
@@ -530,10 +573,10 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="product.image">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
                     in-map="[type: 'product', id: product.productId,
-                        base64: product.image]"/>
+                        base64: product.image]" />
             </if>
             <service-call name="growerp.100.CatgProdServices100.get#Products"
-                in-map="[productId: product.productId]" out-map="context"/>
+                in-map="[productId: product.productId]" out-map="context" />
         </actions>
     </service>
 
@@ -541,123 +584,131 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Delete a Product </description>
         <in-parameters>
             <parameter name="product" type="Map" required="true">
-                <parameter name="productId"/>
+                <parameter name="productId" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="product" type="Map">
-                <parameter name="productId"/>
-                <parameter name="productTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="productName"/>
-                <parameter name="description"/>
-                <parameter name="price"/>
+                <parameter name="productId" />
+                <parameter name="productTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="productName" />
+                <parameter name="description" />
+                <parameter name="price" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
-                        <parameter name="categoryId"/>
-                        <parameter name="categoryName"/>
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
                     </parameter>
                 </parameter>
-                <parameter name="useWarehouse" type="Boolean"/>
-                <parameter name="assetCount"/>
-                <parameter name="image"/>
+                <parameter name="useWarehouse" type="Boolean" />
+                <parameter name="assetCount" />
+                <parameter name="image" />
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <entity-find list="prods" entity-name="mantle.product.Product" for-update="true" limit="1">
-                <econdition field-name="productId" from="product.productId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
-            <set field="prods[0].salesDiscontinuationDate" from="ec.user.nowTimestamp"/>
-            <entity-update value-field="prods[0]"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find list="prods" entity-name="mantle.product.Product" for-update="true"
+                limit="1">
+                <econdition field-name="productId" from="product.productId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <set field="prods[0].salesDiscontinuationDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="prods[0]" />
             <service-call name="growerp.100.CatgProdServices100.get#Products"
-                in-map="[productId: product.productId]" out-map="context"/>
+                in-map="[productId: product.productId]" out-map="context" />
         </actions>
     </service>
 
     <service verb="get" noun="Assets">
         <description> get a single, or all assets</description>
         <in-parameters>
-            <parameter name="companyPartyId"/>
-            <parameter name="productId"/>
-            <parameter name="assetId"/>
-            <parameter name="assetClassId"/>
-            <parameter name="start" default-value="0" type="Integer"/>
-            <parameter name="limit" default-value="20" type="Integer"/>
-            <parameter name="filter" default="null"/>
-            <parameter name="search" default="null"/>
+            <parameter name="companyPartyId" />
+            <parameter name="productId" />
+            <parameter name="assetId" />
+            <parameter name="assetClassId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="filter" default="null" />
+            <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="asset" type="Map">
-                <parameter name="assetId"/>
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="assetId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="pseudoId"/>
-                    <parameter name="productName"/>
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
                 </parameter>
             </parameter>
             <parameter name="assets" type="List">
                 <parameter name="asset" type="Map">
-                    <parameter name="assetId"/>
-                    <parameter name="statusId"/>
-                    <parameter name="assetTypeId"/>
-                    <parameter name="assetClassId"/>
-                    <parameter name="assetName"/>
-                    <parameter name="quantityOnHand"/>
-                    <parameter name="availableToPromise"/>
-                    <parameter name="receivedDate"/>
-                    <parameter name="expectedEndOfLifeDate"/>
+                    <parameter name="assetId" />
+                    <parameter name="statusId" />
+                    <parameter name="assetTypeId" />
+                    <parameter name="assetClassId" />
+                    <parameter name="assetName" />
+                    <parameter name="quantityOnHand" />
+                    <parameter name="availableToPromise" />
+                    <parameter name="receivedDate" />
+                    <parameter name="expectedEndOfLifeDate" />
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
-                        <parameter name="pseudoId"/>
-                        <parameter name="productName"/>
+                        <parameter name="productId" />
+                        <parameter name="pseudoId" />
+                        <parameter name="productName" />
                     </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="filter != null">
-               <set field="filter" value="%${filter}%"/></if>
+                <set field="filter" value="%${filter}%" />
+            </if>
             <if condition="search != null">
-                <set field="search" value="%${search}%"/></if>
-            <if condition="!assetId &amp;&amp; !search"><!--single asset and search always show, list only active assets-->
-                <set field="activated" value="AstDeactivated"/></if>
+                <set field="search" value="%${search}%" />
+            </if>
+            <if condition="!assetId &amp;&amp; !search"><!--single
+                asset and search always show, list only active assets-->
+                <set field="activated" value="AstDeactivated" />
+            </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass"/>
+                in-map="[docType: 'asset', statusId: assetClassId]" out-map="assetClass" />
             <entity-find offset="start" limit="limit" list="assetList"
                 entity-name="mantle.product.asset.AssetAndProduct">
-                <econdition field-name="assetId" ignore-if-empty="true"/>
-                <!--econdition field-name="statusId"
+                <econdition field-name="assetId" ignore-if-empty="true" />
+                <!--econdition
+                field-name="statusId"
                     operator="not-equals" from="activated" ignore-if-empty="true"/-->
                 <econdition field-name="classEnumId"
-                    from="assetClass.convertedStatusId" ignore-if-empty="true"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
-                <econdition field-name="productId" ignore-if-empty="true"/>
+                    from="assetClass.convertedStatusId" ignore-if-empty="true" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="productId" ignore-if-empty="true" />
                 <econdition field-name="assetName" operator="like" ignore-case="true"
-                    from="filter" ignore-if-empty="true"/>
+                    from="filter" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="assetId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="assetName" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="productName" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <order-by field-name="assetName"/>
+                <order-by field-name="assetName" />
             </entity-find>
             <if condition="!assetId">
-                <set field="assets" from="[]"/></if>
+                <set field="assets" from="[]" />
+            </if>
             <iterate entry="item" list="assetList">
                 <if condition="filter != null">
                     <script>
@@ -669,13 +720,14 @@ along with this software (see the LICENSE.md file). If not, see
                             productId: item.productId
                                 ])
                     </script>
-                    <continue/>
+                    <continue />
                 </if>
                 <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                    in-map="[docType: 'asset', statusId: item.statusId]" out-map="status"/>
+                    in-map="[docType: 'asset', statusId: item.statusId]" out-map="status" />
                 <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                    in-map="[docType: 'asset', statusId: item.classEnumId]" out-map="assetClass"/>
-                <set field="assetOut" from="[
+                    in-map="[docType: 'asset', statusId: item.classEnumId]" out-map="assetClass" />
+                <set field="assetOut"
+                    from="[
                     assetId: item.assetId,
                     statusId: status.convertedStatusId,
                     assetTypeId: item.assetTypeEnumId,
@@ -687,9 +739,9 @@ along with this software (see the LICENSE.md file). If not, see
                     expectedEndOfLifeDate: item.expectedEndOfLife ? item.expectedEndOfLife.toString().substring(0,19) + 'Z' : null,
                     product: [productId: item.productId, pseudoId: item.pseudoId,
                     productName: item.productName],
-                    ]"/>
+                    ]" />
                 <if condition="assetId">
-                    <set field="asset" from="assetOut"/>
+                    <set field="asset" from="assetOut" />
                     <else>
                         <script>assets.add(assetOut)</script>
                     </else>
@@ -701,78 +753,78 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="create" noun="Asset">
         <description> Create a Asset </description>
         <in-parameters>
-            <parameter name="classificationId" required="true"/>
+            <parameter name="classificationId" required="true" />
             <parameter name="asset" type="Map" required="true">
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="productTypeId"/>
-                    <parameter name="assetClassId" default-value="Hotel Room"/>
-                    <parameter name="productName"/>
-                    <parameter name="description"/>
-                    <parameter name="price"/>
-                    <parameter name="listPrice"/>
+                    <parameter name="productId" />
+                    <parameter name="productTypeId" />
+                    <parameter name="assetClassId" default-value="Hotel Room" />
+                    <parameter name="productName" />
+                    <parameter name="description" />
+                    <parameter name="price" />
+                    <parameter name="listPrice" />
                     <parameter name="categories" type="List">
                         <parameter name="category" type="Map">
-                            <parameter name="categoryId"/>
-                            <parameter name="categoryName"/>
-                            <parameter name="description"/>
-                            <parameter name="image"/>
+                            <parameter name="categoryId" />
+                            <parameter name="categoryName" />
+                            <parameter name="description" />
+                            <parameter name="image" />
                         </parameter>
                     </parameter>
-                    <parameter name="useWarehouse" type="Boolean"/>
-                    <parameter name="image"/>
+                    <parameter name="useWarehouse" type="Boolean" />
+                    <parameter name="image" />
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="asset" type="Map">
-                <parameter name="assetId"/>
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="assetId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="pseudoId"/>
-                    <parameter name="productName"/>
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status"/>
+                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass"/>
+                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass" />
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
-                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
             </entity-find>
             <if condition="!asset.product?.productId &amp;&amp; asset.product?.productName">
                 <!-- check first if exist by name -->
                 <entity-find entity-name="mantle.product.Product" list="checkProducts" limit="1">
-                    <econdition field-name="productName" from="asset.product?.productName"/>
-                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                    <econdition field-name="productName" from="asset.product?.productName" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 </entity-find>
                 <if condition="checkProducts">
-                    <set field="asset.product.productId" from="checkProducts[0].productId"/>
+                    <set field="asset.product.productId" from="checkProducts[0].productId" />
                     <else>
                         <service-call name="growerp.100.CatgProdServices100.create#Product"
                             in-map="[product: asset.product,classificationId: classificationId]"
-                            out-map="productResult"/>
-                        <set field="asset.product.productId" from="productResult.product.productId"/>
+                            out-map="productResult" />
+                        <set field="asset.product.productId" from="productResult.product.productId" />
                     </else>
                 </if>
             </if>
@@ -787,14 +839,14 @@ along with this software (see the LICENSE.md file). If not, see
                     availableToPromiseTotal: asset.quantityOnHand,
                     facilityId: stores[0].inventoryFacilityId,
                     assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
-                out-map="context"/>
+                out-map="context" />
             <service-call name="create#mantle.product.asset.AssetDetail"
                 in-map="[assetId: assetId, quantityOnHandDiff: asset.quantityOnHand,
                             availableToPromiseDiff: asset.quantityOnHand,
                                 effdateDate: ec.user.nowTimestamp,
-                                productId: asset.product.productId]"/>
+                                productId: asset.product.productId]" />
             <service-call name="growerp.100.CatgProdServices100.get#Assets"
-                in-map="[assetId: assetId]" out-map="context"/>
+                in-map="[assetId: assetId]" out-map="context" />
         </actions>
     </service>
 
@@ -802,130 +854,136 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Update an existing Asset</description>
         <in-parameters>
             <parameter name="asset" type="Map" required="true">
-                <parameter name="assetId"/>
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="assetId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="pseudoId"/>
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="asset" type="Map">
-                <parameter name="assetId"/>
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="assetId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="pseudoId"/>
-                    <parameter name="productName"/>
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <!-- for update no owner needed in single company use -->
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="assets" limit="1"
-                    entity-name="mantle.product.asset.Asset" for-update="true">
-                <econdition field-name="assetId" from="asset.assetId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
-            <set field="assetOld" from="assets[0]"/> 
-            <if condition="!assetOld"><return error="true" message="asset ${asset.assetId} not found!}"/></if>
+                entity-name="mantle.product.asset.Asset" for-update="true">
+                <econdition field-name="assetId" from="asset.assetId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <set field="assetOld" from="assets[0]" />
+            <if condition="!assetOld">
+                <return error="true" message="asset ${asset.assetId} not found!}" />
+            </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status"/>
+                in-map="[docType: 'asset', statusId: asset.statusId]" out-map="status" />
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass"/>
-            <if condition=" assetOld.assetName != asset.assetName || 
+                in-map="[docType: 'asset', statusId: asset.assetClassId]" out-map="assetClass" />
+            <if
+                condition=" assetOld.assetName != asset.assetName || 
                             assetOld.quantityOnHandTotal != asset.quantityOnHand ||
                             assetOld.statusId != status.convertedStatusId ||
                             assetOld.classEnumId != assetClass.convertedStatusId ||
                             assetOld.productId != asset.product.productId">
-                <set field="assetOld.assetName" from="asset.assetName"/>
-                <set field="assetOld.quantityOnHandTotal" from="asset.quantityOnHand"/>
-                <set field="assetOld.statusId" from="status.convertedStatusId"/>
-                <set field="assetOld.classEnumId" from="assetClass.convertedStatusId"/>
-                <set field="assetOld.productId" from="asset.product.productId"/>
-                <entity-update value-field="assetOld"/></if>
+                <set field="assetOld.assetName" from="asset.assetName" />
+                <set field="assetOld.quantityOnHandTotal" from="asset.quantityOnHand" />
+                <set field="assetOld.statusId" from="status.convertedStatusId" />
+                <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
+                <set field="assetOld.productId" from="asset.product.productId" />
+                <entity-update value-field="assetOld" />
+            </if>
             <service-call name="growerp.100.CatgProdServices100.get#Assets"
-                in-map="[assetId: asset.assetId]" out-map="context"/>
-            </actions>
+                in-map="[assetId: asset.assetId]" out-map="context" />
+        </actions>
     </service>
 
     <service verb="delete" noun="Asset">
         <description> Delete a Asset </description>
         <in-parameters>
             <parameter name="asset" type="Map" required="true">
-                <parameter name="assetId"/>
+                <parameter name="assetId" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="asset" type="Map">
-                <parameter name="assetId"/>
-                <parameter name="statusId"/>
-                <parameter name="assetTypeId"/>
-                <parameter name="assetClassId"/>
-                <parameter name="assetName"/>
-                <parameter name="quantityOnHand"/>
-                <parameter name="availableToPromise"/>
-                <parameter name="receivedDate"/>
-                <parameter name="expectedEndOfLifeDate"/>
+                <parameter name="assetId" />
+                <parameter name="statusId" />
+                <parameter name="assetTypeId" />
+                <parameter name="assetClassId" />
+                <parameter name="assetName" />
+                <parameter name="quantityOnHand" />
+                <parameter name="availableToPromise" />
+                <parameter name="receivedDate" />
+                <parameter name="expectedEndOfLifeDate" />
                 <parameter name="product" type="Map">
-                    <parameter name="productId"/>
-                    <parameter name="pseudoId"/>
-                    <parameter name="productName"/>
+                    <parameter name="productId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="productName" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
-            <service-call  out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="assets" limit="1"
-                    entity-name="mantle.product.asset.Asset" for-update="true">
-                <econdition field-name="assetId" from="asset.assetId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
-            <set field="assets[0].statusId" value="AstDeactivated"/>
-            <entity-update value-field="assets[0]"/>
+                entity-name="mantle.product.asset.Asset" for-update="true">
+                <econdition field-name="assetId" from="asset.assetId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <set field="assets[0].statusId" value="AstDeactivated" />
+            <entity-update value-field="assets[0]" />
             <service-call name="growerp.100.CatgProdServices100.get#Assets"
-                in-map="[assetId: asset.assetId]" out-map="context"/>
+                in-map="[assetId: asset.assetId]" out-map="context" />
         </actions>
     </service>
-    
+
     <service verb="get" noun="ProductCategories" authenticate="false">
         <description> get a single or all categories to group products</description>
         <in-parameters>
-            <parameter name="companyPartyId"/>
-            <parameter name="categoryId"/>
-            <parameter name="start" default-value="0" type="Integer"/>
-            <parameter name="limit" default-value="20" type="Integer"/>
-            <parameter name="filter" default="null"/>
-            <parameter name="search" default="null"/>
+            <parameter name="companyPartyId" />
+            <parameter name="categoryId" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="filter" default="null" />
+            <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="categories" type="List">
                 <parameter name="category" type="Map">
-                    <parameter name="categoryId"/>
-                    <parameter name="categoryName"/>
-                    <parameter name="description"/>
-                    <parameter name="image"/>
-                    <parameter name="nbrOfProducts"/>
+                    <parameter name="categoryId" />
+                    <parameter name="categoryName" />
+                    <parameter name="description" />
+                    <parameter name="image" />
+                    <parameter name="nbrOfProducts" />
                     <parameter name="products" type="List">
                         <parameter name="product" type="Map">
-                            <parameter name="productId"/>
-                            <parameter name="productName"/>
+                            <parameter name="productId" />
+                            <parameter name="productName" />
                         </parameter>
                     </parameter>
                 </parameter>
@@ -933,89 +991,98 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <if condition="!companyPartyId">
-                <service-call  out-map="context"
-                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             </if>
             <if condition="!companyPartyId">
                 <!-- if not provided and not logged in use the one which was first created -->
                 <entity-find entity-name="mantle.party.Organization" list="parties" limit="1">
-                    <order-by field-name="partyId"/></entity-find>
-                <set field="companyPartyId" from="parties[0].partyId"/>
+                    <order-by field-name="partyId" />
+                </entity-find>
+                <set field="companyPartyId" from="parties[0].partyId" />
             </if>
             <!-- root category -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
             <if condition="!rootList">
-                <return error="true" message="Root category not found for companyId: $companyPartyId"/></if>
-            <set field="parentProductCategoryId" from="rootList[0].productCategoryId"/>
+                <return error="true"
+                    message="Root category not found for ownerPartyId: $ownerPartyId" />
+            </if>
+            <set field="parentProductCategoryId" from="rootList[0].productCategoryId" />
             <if condition="filter != null">
-                <set field="filter" value="%${filter}%"/></if>
+                <set field="filter" value="%${filter}%" />
+            </if>
             <if condition="search != null">
-                <set field="search" value="%${search}%"/></if>
-            <entity-find  offset="start" limit="limit" list="groups"
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find offset="start" limit="limit" list="groups"
                 entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="parentProductCategoryId"
-                    from="parentProductCategoryId"/>
+                    from="parentProductCategoryId" />
                 <econdition field-name="productCategoryId"
-                    from="categoryId" ignore-if-empty="true"/>
+                    from="categoryId" ignore-if-empty="true" />
                 <econdition field-name="categoryName" operator="like"
-                    from="filter" ignore-if-empty="true" ignore-case="true"/>
+                    from="filter" ignore-if-empty="true" ignore-case="true" />
                 <econditions combine="or">
                     <econdition field-name="productCategoryId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="categoryName" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="description" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <date-filter ignore="categoryId"/>
-                <order-by field-name="categoryName"/>
+                <date-filter ignore="categoryId" />
+                <order-by field-name="categoryName" />
             </entity-find>
-            <set field="categories" from="[]"/>
-            <set field="lastItem" from="null"/>
+            <set field="categories" from="[]" />
+            <set field="lastItem" from="null" />
             <iterate entry="group" list="groups">
                 <!-- number of products -->
                 <entity-find-count entity-name="mantle.product.category.ProductCategoryMember"
-                        count-field="nbrOfProducts">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId"/>
-                    <date-filter/>
+                    count-field="nbrOfProducts">
+                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
+                    <date-filter />
                 </entity-find-count>
                 <!-- content -->
-                <entity-find entity-name="mantle.product.category.ProductCategoryContent" list="contents">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId"/>
+                <entity-find entity-name="mantle.product.category.ProductCategoryContent"
+                    list="contents">
+                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
                     <econdition field-name="categoryContentTypeEnumId"
                         from="categoryId? 'PcctImageMedium' : 'PcctImageThumbNail'" />
-                    <date-filter/>
+                    <date-filter />
                 </entity-find>
                 <if condition="contents">
                     <service-call name="growerp.100.ImageServices100.download#Image"
-                        in-map="[contentLocation: contents[0].contentLocation]" out-map="context"/>
+                        in-map="[contentLocation: contents[0].contentLocation]" out-map="context" />
                     <else>
-                        <set field="imageFile" from="null"/>
+                        <set field="imageFile" from="null" />
                     </else>
                 </if>
                 <!-- first 10 products -->
-                <entity-find entity-name="growerp.mobile.party.category.ProductCategoryMemberAndProduct"
-                        limit="10" list="productList">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId"/>
+                <entity-find
+                    entity-name="growerp.mobile.party.category.ProductCategoryMemberAndProduct"
+                    limit="10" list="productList">
+                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
                 </entity-find>
-                <set field="products" from="[]"/>
+                <set field="products" from="[]" />
                 <iterate list="productList" entry="product">
                     <script>products.add([productName: product.productName,
                             productId: product.productId])
                     </script>
                 </iterate>
                 <!-- output -->
-                <set field="groupOut" from="[
+                <set field="groupOut"
+                    from="[
                         categoryId: group.productCategoryId,
                         categoryName: group.categoryName,
                         description: group.description,
                         nbrOfProducts: nbrOfProducts,
                         products: products,
                         image: imageFile,
-                        ]"/>
+                        ]" />
                 <script>categories.add(groupOut)</script>
             </iterate>
         </actions>
@@ -1026,138 +1093,148 @@ along with this software (see the LICENSE.md file). If not, see
                                             salads, deserts etc</description>
         <in-parameters>
             <parameter name="category" type="Map" required="true">
-                <parameter name="categoryName"/>
-                <parameter name="description"/>
-                <parameter name="image"/>
+                <parameter name="categoryName" />
+                <parameter name="description" />
+                <parameter name="image" />
                 <parameter name="products" type="List">
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
+                        <parameter name="productId" />
                     </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="category" type="Map">
-                <parameter name="categoryId"/>
-                <parameter name="categoryName"/>
-                <parameter name="description"/>
-                <parameter name="image"/>
+                <parameter name="categoryId" />
+                <parameter name="categoryName" />
+                <parameter name="description" />
+                <parameter name="image" />
                 <parameter name="products" type="List">
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
-                        <parameter name="productName"/>
+                        <parameter name="productId" />
+                        <parameter name="productName" />
                     </parameter>
                 </parameter>
-        </parameter>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- get root category -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
             <if condition="!rootList">
-                <return error="true" message="Root category not found for companyId: $companyPartyId"/></if>
-            <set field="rootProductCategoryId" from="rootList[0].productCategoryId"/>
+                <return error="true"
+                    message="Root category not found for companyId: $companyPartyId" />
+            </if>
+            <set field="rootProductCategoryId" from="rootList[0].productCategoryId" />
             <!-- create -->
             <service-call name="create#mantle.product.category.ProductCategory"
                 in-map="[categoryName: category.categoryName,
                     description: category.description,
                     productCategoryTypeEnumId: 'PctCatalog',
-                    ownerPartyId: ownerPartyId]" out-map="context"/>
+                    ownerPartyId: ownerPartyId]"
+                out-map="context" />
             <!-- add to root category -->
             <service-call
                 name="create#mantle.product.category.ProductCategoryRollup"
-                    in-map="[parentProductCategoryId: rootProductCategoryId,
-                        productCategoryId: productCategoryId]"/>
+                in-map="[parentProductCategoryId: rootProductCategoryId,
+                        productCategoryId: productCategoryId]" />
             <!-- image -->
             <if condition="category.image != null">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
                     in-map="[type: 'category',
-                        id: productCategoryId, base64: category.image]"/>
+                        id: productCategoryId, base64: category.image]" />
             </if>
             <!-- related products -->
             <iterate list="category.products" entry="product">
                 <service-call name="create#mantle.product.category.ProductCategoryMember"
-                in-map="[productCategoryId: productCategoryId,
+                    in-map="[productCategoryId: productCategoryId,
                             productId: product.productId,
-                            fromDate: ec.user.nowTimestamp]"/>
+                            fromDate: ec.user.nowTimestamp]" />
             </iterate>
             <!-- get added category -->
             <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
-                in-map="[categoryId: productCategoryId]" out-map="context"/>
-            <set field="category" from="categories[0]"/>
-            </actions>
+                in-map="[categoryId: productCategoryId]" out-map="context" />
+            <set field="category" from="categories[0]" />
+        </actions>
     </service>
 
     <service verb="update" noun="ProductCategory">
         <description> Update a category to group products by drinks , salads, deserts etc</description>
         <in-parameters>
             <parameter name="category" type="Map" required="true">
-                <parameter name="categoryId" required="true"/>
-                <parameter name="categoryName"/>
-                <parameter name="description"/>
-                <parameter name="image"/>
+                <parameter name="categoryId" required="true" />
+                <parameter name="categoryName" />
+                <parameter name="description" />
+                <parameter name="image" />
                 <parameter name="products" type="List">
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
+                        <parameter name="productId" />
                     </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="category" type="Map">
-                <parameter name="categoryId"/>
-                <parameter name="categoryName"/>
-                <parameter name="description"/>
-                <parameter name="image"/>
+                <parameter name="categoryId" />
+                <parameter name="categoryName" />
+                <parameter name="description" />
+                <parameter name="image" />
                 <parameter name="products" type="List">
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
-                        <parameter name="productName"/>
+                        <parameter name="productId" />
+                        <parameter name="productName" />
                     </parameter>
                 </parameter>
-        </parameter>
+            </parameter>
         </out-parameters>
         <actions>
-            <service-call  out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <entity-find for-update="true"  list="productCategories" limit="1"
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find for-update="true" list="productCategories" limit="1"
                 entity-name="mantle.product.category.ProductCategory">
-                <econdition field-name="productCategoryId" from="category.categoryId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
+                <econdition field-name="productCategoryId" from="category.categoryId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
             <if condition="!productCategories">
-                <return error="true" message="Category: ${category.categoryId} not found"/></if>
-            <set field="productCategory" from="productCategories[0]"/>
+                <return error="true" message="Category: ${category.categoryId} not found" />
+            </if>
+            <set field="productCategory" from="productCategories[0]" />
             <if condition="category.categoryName">
-                <set field="productCategory.categoryName" from="category.categoryName"/></if>
+                <set field="productCategory.categoryName" from="category.categoryName" />
+            </if>
             <if condition="category.description">
-                <set field="productCategory.description" from="category.description"/></if>
+                <set field="productCategory.description" from="category.description" />
+            </if>
             <if condition="category.preparationAreaId">
-                <set field="productCategory.preparationAreaId" from="category.preparationAreaId"/></if>
-            <entity-update value-field="productCategory"/>
+                <set field="productCategory.preparationAreaId" from="category.preparationAreaId" />
+            </if>
+            <entity-update value-field="productCategory" />
             <!-- related products  delete all and add all -->
             <if condition="category.products != null">
-                <entity-delete-by-condition entity-name="mantle.product.category.ProductCategoryMember">
-                    <econdition field-name="productCategoryId" from="category.categoryId"/>
+                <entity-delete-by-condition
+                    entity-name="mantle.product.category.ProductCategoryMember">
+                    <econdition field-name="productCategoryId" from="category.categoryId" />
                 </entity-delete-by-condition>
                 <iterate list="category.products" entry="product">
                     <service-call name="create#mantle.product.category.ProductCategoryMember"
                         in-map="[   productId: product.productId,
                                     productCategoryId: category.categoryId,
-                                    fromDate: ec.user.nowTimestamp]"/>
+                                    fromDate: ec.user.nowTimestamp]" />
                 </iterate>
             </if>
             <!-- update image -->
             <if condition="category.image">
                 <service-call name="growerp.100.ImageServices100.upload#Image"
-                    in-map="[type: 'category', id: category.categoryId, base64: category.image]"/>
+                    in-map="[type: 'category', id: category.categoryId, base64: category.image]" />
             </if>
             <!-- return category information -->
             <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
-                in-map="[categoryId: category.categoryId]" out-map="context"/>
-                <set field="category" from="categories[0]"/>
+                in-map="[categoryId: category.categoryId]" out-map="context" />
+            <set field="category" from="categories[0]" />
         </actions>
     </service>
 
@@ -1165,50 +1242,55 @@ along with this software (see the LICENSE.md file). If not, see
         <description> delete a category to group products</description>
         <in-parameters>
             <parameter name="category" type="Map" required="true">
-                <parameter name="categoryId"/>
+                <parameter name="categoryId" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="category" type="Map" required="true">
-                <parameter name="categoryId"/>
-                <parameter name="categoryName"/>
-                <parameter name="description"/>
-                <parameter name="image"/>
+                <parameter name="categoryId" />
+                <parameter name="categoryName" />
+                <parameter name="description" />
+                <parameter name="image" />
                 <parameter name="products" type="List">
                     <parameter name="product" type="Map">
-                        <parameter name="productId"/>
-                        <parameter name="productName"/>
+                        <parameter name="productId" />
+                        <parameter name="productName" />
                     </parameter>
                 </parameter>
-        </parameter>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="productCategories"
-                    entity-name="mantle.product.category.ProductCategory" limit="1">
-                <econdition field-name="productCategoryId" from="category.categoryId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/></entity-find>
-            <set field="productCategory" from="productCategories[0]"/>
+                entity-name="mantle.product.category.ProductCategory" limit="1">
+                <econdition field-name="productCategoryId" from="category.categoryId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+            </entity-find>
+            <set field="productCategory" from="productCategories[0]" />
             <!-- disable category in categoryRollUp entity -->
             <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
-                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot"/></entity-find>
-            <entity-find entity-name="mantle.product.category.ProductCategoryRollup" 
-                    list="rollUpList" for-update="true" limit="1">
-                <econdition field-name="productCategoryId" from="category.categoryId"/>
-                <econdition field-name="parentProductCategoryId" from="rootList[0].productCategoryId"/>
-                <date-filter/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+            </entity-find>
+            <entity-find entity-name="mantle.product.category.ProductCategoryRollup"
+                list="rollUpList" for-update="true" limit="1">
+                <econdition field-name="productCategoryId" from="category.categoryId" />
+                <econdition field-name="parentProductCategoryId"
+                    from="rootList[0].productCategoryId" />
+                <date-filter />
             </entity-find>
             <if condition="rollUpList">
-                <set field="rollUpList[0].thruDate" from="ec.user.nowTimestamp"/>
-                <entity-update value-field="rollUpList[0]"/>
-            <else>
-                <return error="true"
-                    message="could not find rollup for category: ${category.categoryId}"/></else></if>
+                <set field="rollUpList[0].thruDate" from="ec.user.nowTimestamp" />
+                <entity-update value-field="rollUpList[0]" />
+                <else>
+                    <return error="true"
+                        message="could not find rollup for category: ${category.categoryId}" />
+                </else>
+            </if>
             <service-call name="growerp.100.CatgProdServices100.get#ProductCategories"
-                in-map="[categoryId: category.categoryId]" out-map="context"/>
-            <set field="category" from="categories[0]"/>
+                in-map="[categoryId: category.categoryId]" out-map="context" />
+            <set field="category" from="categories[0]" />
         </actions>
     </service>
 

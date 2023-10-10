@@ -32,20 +32,26 @@ abstract class RestClient {
       @Field() String username, @Field() password, @Field() classificationId);
 
   @POST("rest/s1/growerp/100/ImportExport")
-  Future<String> import(@Field() Map<String, dynamic> entities);
+  Future<String> import(
+      @Header('api_key') String apiKey, @Field() Map<String, dynamic> entities);
 
   @GET("rest/s1/growerp/100/GlAccount")
-  Future<GlAccounts> getGlAccount(@Query('limit') String limit);
+  Future<GlAccounts> getGlAccount(
+      @Header('api_key') String apiKey, @Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Categories")
-  Future<Categories> getCategories(@Query('limit') String limit);
+  Future<Categories> getCategories(
+      @Header('api_key') String apiKey, @Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Products")
-  Future<Products> getProducts(@Query('limit') String limit);
+  Future<Products> getProducts(
+      @Header('api_key') String apiKey, @Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/User")
-  Future<Users> getUsers(@Query('limit') String limit);
+  Future<Users> getUsers(
+      @Header('api_key') String apiKey, @Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Company")
-  Future<Companies> getCompanies(@Query('limit') String limit);
+  Future<Companies> getCompanies(
+      @Header('api_key') String apiKey, @Query('limit') String limit);
 }

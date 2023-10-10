@@ -89,21 +89,17 @@ Future<void> main(List<String> args) async {
     //logger.i(
     //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
 
-    void login(RestClient client) async {
-      logger.e("===start loggin in");
+    Future<void> login(RestClient client) async {
       String result = await client.checkEmail(username);
       if (jsonDecode(result.toString())['ok'] != 'ok') {
-        logger.d('email not found so register');
         await client.register(username, 'q$username', password, 'Hans',
             'Jansen', 'test company', 'USD', 'AppAdmin', true);
       }
-      logger.e("=======================logging in");
       Authenticate authenticate =
           await client.login(username, password, 'AppAdmin');
-      logger.d("apiKey: ${authenticate}");
-      logger.d("apiKey: ${authenticate.apiKey}");
       // save key
       box.put('apiKey', authenticate.apiKey);
+//      box.put('moquiSessionToken', authenticate.moquiSessionToken);
     }
 
     // commands
@@ -172,7 +168,7 @@ Future<void> main(List<String> args) async {
         final client = RestClient(await dio);
         try {
           if (username.isNotEmpty && password.isNotEmpty) {
-            login(client);
+            await login(client);
           }
           // import
           for (String file in files) {
@@ -188,7 +184,9 @@ Future<void> main(List<String> args) async {
                 logger.e("FileType ${fileType.name} not implemented yet");
                 exit(1);
             }
-            var result = await client.import({'${fileType.name}s': json});
+            var result = await client.import(box.get('apiKey'), {
+              '${fileType.name}s': json,
+            });
             logger.i("file: $file result: $result");
           }
         } on DioException catch (e) {
@@ -207,37 +205,37 @@ Future<void> main(List<String> args) async {
           }
           createDir(outputDirectory);
           if (username.isNotEmpty && password.isNotEmpty) {
-            login(client);
+            await login(client);
           }
           var fileType = FileType.glAccount;
           String csvContent = '';
           var result;
           // export glAccount
-          result = await client.getGlAccount('999');
+          result = await client.getGlAccount(box.get('apiKey'), '999');
           csvContent = CsvFromGlAccounts(result.toList());
           final file1 = File("$outputDirectory/${fileType.name}.csv");
           file1.writeAsStringSync(csvContent);
           // export company
           fileType = FileType.company;
-          result = await client.getCompanies('999');
+          result = await client.getCompanies(box.get('apiKey'), '999');
           csvContent = CsvFromCompanies(result.toList());
           final file2 = File("$outputDirectory/${fileType.name}.csv");
           file2.writeAsStringSync(csvContent);
           // export users
           fileType = FileType.user;
-          result = await client.getUsers('999');
+          result = await client.getUsers(box.get('apiKey'), '999');
           csvContent = CsvFromUsers(result.toList());
           final file3 = File("$outputDirectory/${fileType.name}.csv");
           file3.writeAsStringSync(csvContent);
           // export products
           fileType = FileType.product;
-          result = await client.getProducts('999');
+          result = await client.getProducts(box.get('apiKey'), '999');
           csvContent = CsvFromProducts(result.toList());
           final file4 = File("$outputDirectory/${fileType.name}.csv");
           file4.writeAsStringSync(csvContent);
           // export categories
           fileType = FileType.category;
-          result = await client.getCategories('999');
+          result = await client.getCategories(box.get('apiKey'), '999');
           csvContent = CsvFromCategories(result.toList());
           final file5 = File("$outputDirectory/${fileType.name}.csv");
           file5.writeAsStringSync(csvContent);
