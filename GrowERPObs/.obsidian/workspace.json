@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md"
+                "file": "2 End User documentation/1 Introduction/3 General business flow.md"
               }
             }
           },
@@ -166,14 +166,15 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
-    "2 End User documentation/7 Accounting/1 getting started.md",
+    "2 End User documentation/1 Introduction/1 Overview.md",
+    "2 End User documentation/1 Introduction/2 Getting Started.md",
     "2 End User documentation/7 Accounting/9 Account Class reference.md",
+    "2 End User documentation/7 Accounting/1 getting started.md",
     "2 End User documentation/7 Accounting/8 Account type reference.md",
     "3 Technical documentation/8 Deployment.md",
     "1 Introduction/5 Road Map and Releases.md",
     "GrowERP documentation.md",
     "Stripe.md",
-    "2 End User documentation/1 Introduction/2 Getting Started.md",
     "2 End User documentation/1 Introduction/3 General business flow.md",
     "2 End User documentation/9 Authentication & users/2 Authentication.md",
     "2 End User documentation/9 Authentication & users/2 Usertypes.md",
@@ -197,7 +198,6 @@
     "3 Technical documentation/4 Chat Server.md",
     "3 Technical documentation/7 Integration tests.md",
     "3 Technical documentation/9 GrowERP Flutter Application and plugins.md",
-    "4 Applications/1 Admin/1 Introduction.md",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
     "4 Applications/2 Hotel",

@@ -731,7 +731,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="search" />
         </in-parameters>
         <out-parameters>
-            <parameter name="glAccountList" type="List">
+            <parameter name="glAccounts" type="List">
                 <parameter name="glAccountId" />
                 <parameter name="accountCode" />
                 <parameter name="accountName" />
@@ -757,7 +757,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="search" value="%$search%" />
             </if>
             <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
-                limit="limit" offset="start" list="glAccounts">
+                limit="limit" offset="start" list="glAccountList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="glAccountId"
                     from="glAccountId" ignore-if-empty="true" />
@@ -769,10 +769,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="accountCode" />
             </entity-find>
-            <set field="glAccountList" from="[]" />
-            <iterate list="glAccounts" entry="glAccount">
+            <set field="glAccounts" from="[]" />
+            <iterate list="glAccountList" entry="glAccount">
                 <script>
-                    glAccountList.add(
+                    glAccounts.add(
                         glAccountId: glAccount.glAccountId,
                         accountCode: glAccount.accountCode,
                         accountName: glAccount.accountName,

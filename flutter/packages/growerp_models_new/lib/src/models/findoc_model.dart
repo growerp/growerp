@@ -156,3 +156,46 @@ Map<String, String> finDocStatusValuesHotel = {
   'FinDocCompleted': 'Checked Out',
   'FinDocCancelled': 'Cancelled'
 };
+
+String FinDocCsvFormat() => "finDoc Id, FinDoc Name*, Description*, image\r\n";
+
+List<String> FinDocCsvToJson(String csvFile) {
+  List<String> finDocs = [];
+  final result = fast_csv.parse(csvFile);
+  FinDoc finDoc = FinDoc();
+  List<FinDocItem> items = [];
+  for (int index = 0; index < result.length; index++) {
+    if (index == 0) continue;
+    List<String> row = result[index];
+
+    items.add(FinDocItem(
+        itemSeqId: row[30],
+        description: row[31],
+        price: Decimal.parse(row[32])));
+
+    finDoc = FinDoc(transactionId: row[0], description: row[1], items: items);
+//    if (findoc)
+    finDocs.add(jsonEncode(finDoc.toJson()));
+  }
+
+  return finDocs;
+}
+
+String CsvFromFinDocs(List<FinDoc> finDocs) {
+//  final l = json.decode(result)['finDocs'] as Iterable;
+//  List<FinDoc> finDocs = List<FinDoc>.from(
+//      l.map((e) => FinDoc.fromJson(e as Map<String, dynamic>)));
+  var csv = [];
+  for (FinDoc finDoc in finDocs) {
+    for (FinDocItem item in finDoc.items) {
+      csv.add(createCsvRow([
+        finDoc.id() ?? '',
+        finDoc.description ?? '',
+        item.itemSeqId.toString(),
+        item.description ?? '',
+        item.price.toString()
+      ]));
+    }
+  }
+  return csv.join();
+}

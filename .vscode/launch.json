@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "export new comp",
+            "name": "export with user",
             "type": "dart",
             "request": "launch",
             "program": "flutter/packages/growerp/bin/growerp.dart",
@@ -10,11 +10,11 @@
                 "-p",
                 "qqqqqq9!",
                 "-u",
-                "test315@example.com"
+                "test17@example.com"
             ]
         },
         {
-            "name": "export ext comp",
+            "name": "export",
             "type": "dart",
             "request": "launch",
             "program": "flutter/packages/growerp/bin/growerp.dart",

@@ -285,10 +285,10 @@ packages:
     dependency: "direct main"
     description:
       name: fast_csv
-      sha256: "1bdd4b6cf01c4c718817bd6449300431bb7876ebe8391c6368635db882f13b6b"
+      sha256: d2f05793e7723c2cd9dfe44c5e2858ed789da0ac44d73048f61cb6af2f8027f2
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.6"
   ffi:
     dependency: transitive
     description:
@@ -313,16 +313,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  flutter:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   freezed_annotation:
     dependency: transitive
     description:
@@ -379,10 +369,10 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.1"
-  growerp_models_new:
+  growerp_models:
     dependency: "direct main"
     description:
-      path: "../growerp_models_new"
+      path: "../growerp_models"
       relative: true
     source: path
     version: "1.2.0"
@@ -498,14 +488,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.16"
-  material_color_utilities:
-    dependency: transitive
-    description:
-      name: material_color_utilities
-      sha256: "9528f2f296073ff54cb9fee677df673ace1218163c3bc7628093e7eed5203d41"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
   meta:
     dependency: transitive
     description:
@@ -698,11 +680,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  sky_engine:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.99"
   source_gen:
     dependency: transitive
     description:
@@ -855,14 +832,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  vector_math:
-    dependency: transitive
-    description:
-      name: vector_math
-      sha256: "80b3257d1492ce4d091729e3a67a60407d227c27241d6927be0130c98e741803"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.4"
   vm_service:
     dependency: transitive
     description:
@@ -879,14 +848,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  web:
-    dependency: transitive
-    description:
-      name: web
-      sha256: dc8ccd225a2005c1be616fe02951e2e342092edf968cf0844220383757ef8f10
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.4-beta"
   web_socket_channel:
     dependency: transitive
     description:
@@ -920,4 +881,4 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.1.0-185.0.dev <4.0.0"
+  dart: ">=3.0.0 <4.0.0"

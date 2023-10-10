@@ -23,6 +23,9 @@ abstract class RestClient {
     @Field() bool demoData,
   );
 
+  @GET("rest/s1/growerp/100/CheckEmail")
+  Future<String> checkEmail(@Query('email') String email);
+
   @POST("rest/s1/growerp/100/Login")
   @FormUrlEncoded()
   Future<Authenticate> login(
@@ -32,17 +35,17 @@ abstract class RestClient {
   Future<String> import(@Field() Map<String, dynamic> entities);
 
   @GET("rest/s1/growerp/100/GlAccount")
-  Future<List<GlAccount>> getGlAccount(@Query('limit') String limit);
+  Future<GlAccounts> getGlAccount(@Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Categories")
-  Future<List<Category>> getCategories(@Query('limit') String limit);
+  Future<Categories> getCategories(@Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Products")
-  Future<List<Product>> getProducts(@Query('limit') String limit);
+  Future<Products> getProducts(@Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/User")
-  Future<List<User>> getUsers(@Query('limit') String limit);
+  Future<Users> getUsers(@Query('limit') String limit);
 
   @GET("rest/s1/growerp/100/Company")
-  Future<List<Company>> getCompanies(@Query('limit') String limit);
+  Future<Companies> getCompanies(@Query('limit') String limit);
 }

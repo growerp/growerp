@@ -31,7 +31,8 @@ class GlAccount {
   int? level;
   AccountClass? accountClass;
   AccountType? accountType;
-  bool? isDebit;
+  bool? isDebit; // set by selection of account class
+  bool? isContra; // change isDebit field for contra accounts.
   Decimal? rollUp;
   Decimal? beginningBalance;
   Decimal? postedDebits;
@@ -46,6 +47,7 @@ class GlAccount {
     this.accountClass,
     this.accountType,
     this.isDebit,
+    this.isContra,
     this.rollUp,
     this.beginningBalance,
     this.postedDebits,
@@ -59,7 +61,7 @@ class GlAccount {
 }
 
 String GlAccountCsvFormat() =>
-    "Account Code*, Account Name*, Class Description*, Type Description, Posted Balance\r\n";
+    "Account Code*, Account Name*, Class Description*, Contra, Type Description, Posted Balance\r\n";
 
 List<String> GlAccountCsvToJson(String csvFile) {
   List<String> glAccounts = [];
@@ -71,8 +73,9 @@ List<String> GlAccountCsvToJson(String csvFile) {
             accountName: row[1],
             accountClass:
                 row[2] != '' ? AccountClass(description: row[2]) : null,
-            accountType: row[3] != '' ? AccountType(description: row[3]) : null,
-            postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null)
+            isContra: row[3] == 'true' ? true : null,
+            accountType: row[4] != '' ? AccountType(description: row[4]) : null,
+            postedBalance: row[5] != '' ? Decimal.parse(row[5]) : null)
         .toJson()));
   }
 
@@ -89,6 +92,7 @@ String CsvFromGlAccounts(List<GlAccount> glAccounts) {
       glAccount.accountCode ?? '',
       glAccount.accountName ?? '',
       glAccount.accountClass!.description ?? '',
+      glAccount.isContra == null ? '' : glAccount.isContra.toString(),
       glAccount.accountType!.description ?? '',
       glAccount.postedBalance == null ? '' : glAccount.postedBalance.toString(),
     ]));

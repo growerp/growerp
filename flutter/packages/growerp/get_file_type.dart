@@ -1,5 +1,3 @@
-import 'package:growerp_models_new/growerp_models_new.dart';
-
 import 'file_type_model.dart';
 
 FileType getFileType(String param) {

@@ -47,7 +47,6 @@ class TopApp extends StatelessWidget {
 
   final List<LocalizationsDelegate> localizationsDelegates = [
     CoreLocalizations.delegate,
-    ModelLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,

@@ -147,11 +147,13 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
-            labelText: 'Accout Class',
+            labelText: 'Account Class',
             hintText: "Account Class",
           ),
         ),
-        itemAsString: (AccountClass? u) => " ${u!.description}",
+        itemAsString: (AccountClass? u) =>
+            " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
+            "${u.description} ${u.contra == true ? '(Contra)' : ''}",
         onChanged: (AccountClass? newValue) {
           classSelected = newValue;
         },

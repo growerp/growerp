@@ -18,7 +18,7 @@
 import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
-import 'package:growerp_models_new/growerp_models_new.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import '../file_type_model.dart';
 import '../get_file_type.dart';
@@ -131,7 +131,7 @@ void main(List<String> args) {
         fileContent.add(UserCsvFormat());
         break;
       case FileType.finDocTransaction:
-        fileContent.add(FinDocTransactionCsvFormat());
+        fileContent.add(FinDocCsvFormat());
         break;
       default:
         fileContent.add(" ${fileType.name} not supported yet");

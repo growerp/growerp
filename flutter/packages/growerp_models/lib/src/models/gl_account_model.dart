@@ -12,8 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:convert';
+
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
+import '../create_csv_row.dart';
 import 'models.dart';
 part 'gl_account_model.freezed.dart';
 part 'gl_account_model.g.dart';
@@ -39,4 +43,39 @@ class GlAccount with _$GlAccount {
 
   factory GlAccount.fromJson(Map<String, dynamic> json) =>
       _$GlAccountFromJson(json);
+}
+
+String GlAccountCsvFormat() =>
+    "Account Code*, Account Name*, Class Description*, Type Description, Posted Balance\r\n";
+
+List<String> GlAccountCsvToJson(String csvFile) {
+  List<String> glAccounts = [];
+  final result = fast_csv.parse(csvFile);
+  for (final row in result) {
+    if (row == result.first) continue;
+    glAccounts.add(jsonEncode(GlAccount(
+            accountCode: row[0],
+            accountName: row[1],
+            accountClass:
+                row[2] != '' ? AccountClass(description: row[2]) : null,
+            accountType: row[3] != '' ? AccountType(description: row[3]) : null,
+            postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null)
+        .toJson()));
+  }
+
+  return glAccounts;
+}
+
+String CsvFromGlAccounts(List<GlAccount> glAccounts) {
+  var csv = [GlAccountCsvFormat()];
+  for (GlAccount glAccount in glAccounts) {
+    csv.add(createCsvRow([
+      glAccount.accountCode ?? '',
+      glAccount.accountName ?? '',
+      glAccount.accountClass!.description ?? '',
+      glAccount.accountType!.description ?? '',
+      glAccount.postedBalance == null ? '' : glAccount.postedBalance.toString(),
+    ]));
+  }
+  return csv.join();
 }

@@ -73,6 +73,12 @@ class APIRepository {
         data: fromJson(json.decode(result)[name] as Map<String, dynamic>));
   }
 
+  ApiResult<T> getResponseNoName<T>(
+      String result, T Function(Map<String, dynamic> json) fromJson) {
+    return ApiResult.success(
+        data: fromJson(json.decode(result) as Map<String, dynamic>));
+  }
+
   Future<ApiResult<bool>> getConnected() async {
     try {
       final response = await dioClient.get('growerp/moquiSessionToken', null);
@@ -93,8 +99,8 @@ class APIRepository {
     try {
       final response =
           await dioClient.get('rest/s1/growerp/100/Authenticate', apiKey!);
-      return getResponse<Authenticate>(
-          "authenticate", response, (json) => Authenticate.fromJson(json));
+      return getResponseNoName<Authenticate>(
+          response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -176,8 +182,8 @@ class APIRepository {
           'demoData': demoData.toString()
         },
       );
-      return getResponse<Authenticate>(
-          "authenticate", response, (json) => Authenticate.fromJson(json));
+      return getResponseNoName<Authenticate>(
+          response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -193,8 +199,8 @@ class APIRepository {
         'moquiSessionToken': sessionToken,
         'classificationId': classificationId,
       });
-      return getResponse<Authenticate>(
-          "authenticate", response, (json) => Authenticate.fromJson(json));
+      return getResponseNoName<Authenticate>(
+          response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -225,8 +231,8 @@ class APIRepository {
         'newPassword': newPassword,
         'moquiSessionToken': sessionToken
       });
-      return getResponse<Authenticate>(
-          "authenticate", response, (json) => Authenticate.fromJson(json));
+      return getResponseNoName<Authenticate>(
+          response, (json) => Authenticate.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }

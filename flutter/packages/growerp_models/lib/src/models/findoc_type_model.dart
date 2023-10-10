@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../growerp_models.dart';
-
 /// financial document (FinDoc) types
 enum FinDocType {
   order('Order'),
@@ -40,23 +38,6 @@ enum FinDocType {
         return transaction;
     }
     return unknown;
-  }
-
-  static String translated(context, FinDocType val) {
-    switch (val) {
-      case FinDocType.order:
-        return ModelLocalizations.of(context)!.order;
-      case FinDocType.invoice:
-        return ModelLocalizations.of(context)!.invoice;
-      case FinDocType.payment:
-        return ModelLocalizations.of(context)!.payment;
-      case FinDocType.shipment:
-        return ModelLocalizations.of(context)!.shipment;
-      case FinDocType.transaction:
-        return ModelLocalizations.of(context)!.transaction;
-      default:
-        return ModelLocalizations.of(context)!.unknown;
-    }
   }
 
   @override

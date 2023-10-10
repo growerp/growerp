@@ -30,9 +30,10 @@
 ///   -p password : required for new company
 ///   -o outputDirectory : directory used for exported csv output files,default: growerp
 ///
+import 'dart:convert';
 import 'dart:io';
 import 'package:dcli/dcli.dart';
-import 'package:growerp_models_new/growerp_models_new.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
@@ -88,13 +89,19 @@ Future<void> main(List<String> args) async {
     //logger.i(
     //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
 
-    void createNewCompany(RestClient client) async {
-      await client.register(username, 'q$username', password, 'Hans', 'Jansen',
-          'test company', 'USD', 'AppAdmin', false);
-      // login to get apiKey
+    void login(RestClient client) async {
+      logger.e("===start loggin in");
+      String result = await client.checkEmail(username);
+      if (jsonDecode(result.toString())['ok'] != 'ok') {
+        logger.d('email not found so register');
+        await client.register(username, 'q$username', password, 'Hans',
+            'Jansen', 'test company', 'USD', 'AppAdmin', true);
+      }
+      logger.e("=======================logging in");
       Authenticate authenticate =
           await client.login(username, password, 'AppAdmin');
-      logger.i("apiKey: ${authenticate.apiKey}");
+      logger.d("apiKey: ${authenticate}");
+      logger.d("apiKey: ${authenticate.apiKey}");
       // save key
       box.put('apiKey', authenticate.apiKey);
     }
@@ -165,7 +172,7 @@ Future<void> main(List<String> args) async {
         final client = RestClient(await dio);
         try {
           if (username.isNotEmpty && password.isNotEmpty) {
-            createNewCompany(client);
+            login(client);
           }
           // import
           for (String file in files) {
@@ -193,44 +200,45 @@ Future<void> main(List<String> args) async {
             buildDioClient('http://localhost:8080/'); // Provide a dio instance
         final client = RestClient(await dio);
         try {
-          if (username.isNotEmpty && password.isNotEmpty) {
-            createNewCompany(client);
-          }
           if (isDirectory(outputDirectory)) {
             logger.e(
                 "output directory $outputDirectory already exists, do not overwrite");
             exit(1);
           }
           createDir(outputDirectory);
+          if (username.isNotEmpty && password.isNotEmpty) {
+            login(client);
+          }
           var fileType = FileType.glAccount;
           String csvContent = '';
+          var result;
           // export glAccount
-          var result1 = await client.getGlAccount('999');
-          csvContent = CsvFromGlAccounts(result1.toList());
+          result = await client.getGlAccount('999');
+          csvContent = CsvFromGlAccounts(result.toList());
           final file1 = File("$outputDirectory/${fileType.name}.csv");
           file1.writeAsStringSync(csvContent);
           // export company
           fileType = FileType.company;
-          var result2 = await client.getCompanies('999');
-          csvContent = CsvFromCompanies(result2.toList());
+          result = await client.getCompanies('999');
+          csvContent = CsvFromCompanies(result.toList());
           final file2 = File("$outputDirectory/${fileType.name}.csv");
           file2.writeAsStringSync(csvContent);
           // export users
           fileType = FileType.user;
-          var result3 = await client.getUsers('999');
-          csvContent = CsvFromUsers(result3.toList());
+          result = await client.getUsers('999');
+          csvContent = CsvFromUsers(result.toList());
           final file3 = File("$outputDirectory/${fileType.name}.csv");
           file3.writeAsStringSync(csvContent);
           // export products
           fileType = FileType.product;
-          var result4 = await client.getProducts('999');
-          csvContent = CsvFromProducts(result4.toList());
+          result = await client.getProducts('999');
+          csvContent = CsvFromProducts(result.toList());
           final file4 = File("$outputDirectory/${fileType.name}.csv");
           file4.writeAsStringSync(csvContent);
           // export categories
           fileType = FileType.category;
-          var result5 = await client.getCategories('999');
-          csvContent = CsvFromCategories(result5.toList());
+          result = await client.getCategories('999');
+          csvContent = CsvFromCategories(result.toList());
           final file5 = File("$outputDirectory/${fileType.name}.csv");
           file5.writeAsStringSync(csvContent);
         } on DioException catch (e) {

@@ -1,5 +1,4 @@
 import 'package:dcli/dcli.dart';
-import 'package:growerp_models_new/growerp_models_new.dart';
 
 import 'file_type_model.dart';
 import 'get_file_type.dart';

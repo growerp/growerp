@@ -16,9 +16,17 @@ scripts:
   analyze:
     exec: dart analyze .
     description: Analyse all packages for possible problems.
-  build_all:
+  build:
     description: build_runner build all modules.
     run: "flutter pub run build_runner build --delete-conflicting-outputs"
+    exec:
+      concurrency: 1
+      orderDependents: true
+    packageFilters:
+      dependsOn: build_runner     
+  buildclean:
+    description: build_runner clean.
+    run: "flutter pub run build_runner clean"
     exec:
       concurrency: 1
       orderDependents: true
@@ -41,7 +49,7 @@ scripts:
     packageFilters:
       dirExists: "integration_test"
       scope: "*_example"
-  test_all:
+  test:
     description: run all app and package tests.
     run: "flutter test integration_test"
     exec:

@@ -52,7 +52,7 @@ dependencies:
   from_css_color: ^2.0.0
   path_provider: ^2.0.11
   file_picker: ^5.0.1
-  fast_csv: ^0.1.44
+  fast_csv: ^0.2.6
   archive: ^3.3.0
   flutter_test: 
     sdk: flutter

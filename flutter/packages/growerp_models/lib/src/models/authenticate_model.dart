@@ -31,5 +31,5 @@ class Authenticate with _$Authenticate {
   }) = _Authenticate;
 
   factory Authenticate.fromJson(Map<String, dynamic> json) =>
-      _$AuthenticateFromJson(json);
+      _$AuthenticateFromJson(json['authenticate']);
 }

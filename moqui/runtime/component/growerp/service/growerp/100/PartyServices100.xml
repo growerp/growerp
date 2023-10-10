@@ -1985,7 +1985,9 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[sourcePartyId: 'DefaultSettings',
                         organizationPartyId: user.company.partyId, baseCurrencyUomId: currencyId]" />
             <!-- login -->
+            <log message="======= looging in with username $username" />
             <script>ec.user.internalLoginUser(username)</script>
+            <log message="=====logged in" />
             <!-- create productStore and other setup data.-->
             <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
                 in-map="[ownerPartyId: owner.partyId, userPartyId: user.partyId,

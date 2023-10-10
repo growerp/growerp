@@ -13,10 +13,10 @@ environment:
 dependencies: 
   dcli: ^2.1.0
   dio: ^5.0.1
-  fast_csv: ^0.2.0
+  fast_csv: ^0.2.6
   get_it: ^7.6.4
-  growerp_models_new:
-    path: ../growerp_models_new
+  growerp_models:
+    path: ../growerp_models
   hive: ^2.2.3
   logger: ^2.0.2+1
   retrofit: '>=4.0.0 <5.0.0'

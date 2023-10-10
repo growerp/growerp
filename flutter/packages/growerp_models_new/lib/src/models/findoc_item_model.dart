@@ -12,13 +12,9 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
-import '../create_csv_row.dart';
 import 'models.dart';
 
 part 'findoc_item_model.g.dart';
@@ -30,7 +26,7 @@ class FinDocItem {
   String? productId;
   String? description;
   Decimal? quantity;
-  Decimal? price;
+  Decimal? price; // amount
   GlAccount? glAccount;
   bool? isDebit;
   String? assetId;
