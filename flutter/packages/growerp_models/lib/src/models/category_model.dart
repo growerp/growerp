@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -51,18 +50,19 @@ class Category extends Equatable with _$Category {
 String CategoryCsvFormat() =>
     "category Id, Category Name*, Description*, image\r\n";
 
-List<String> CategoryCsvToJson(String csvFile) {
-  List<String> categories = [];
+List<Category> CsvToCategories(String csvFile) {
+  List<Category> categories = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    categories.add(jsonEncode(Category(
-            categoryId: row[0],
-            categoryName: row[1],
-            description: row[1],
-            image:
-                row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null)
-        .toJson()));
+    categories.add(
+      Category(
+          categoryId: row[0],
+          categoryName: row[1],
+          description: row[1],
+          image:
+              row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null),
+    );
   }
 
   return categories;

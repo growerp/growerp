@@ -31,9 +31,25 @@ abstract class RestClient {
   Future<Authenticate> login(
       @Field() String username, @Field() password, @Field() classificationId);
 
-  @POST("rest/s1/growerp/100/ImportExport")
-  Future<String> import(
-      @Header('api_key') String apiKey, @Field() Map<String, dynamic> entities);
+  @POST("rest/s1/growerp/100/ImportExport/glAccounts")
+  Future<void> importGlAccounts(@Header('api_key') String apiKey,
+      @Field() List<GlAccount> glAccounts, @Field() String classificationId);
+
+  @POST("rest/s1/growerp/100/ImportExport/companies")
+  Future<void> importCompanies(@Header('api_key') String apiKey,
+      @Field() List<Company> companies, @Field() String classificationId);
+
+  @POST("rest/s1/growerp/100/ImportExport/users")
+  Future<void> importUsers(@Header('api_key') String apiKey,
+      @Field() List<User> users, @Field() String classificationId);
+
+  @POST("rest/s1/growerp/100/ImportExport/products")
+  Future<void> importProducts(@Header('api_key') String apiKey,
+      @Field() List<Product> products, @Field() String classificationId);
+
+  @POST("rest/s1/growerp/100/ImportExport/categories")
+  Future<void> importCategories(@Header('api_key') String apiKey,
+      @Field() List<Category> categories, @Field() String classificationId);
 
   @GET("rest/s1/growerp/100/GlAccount")
   Future<GlAccounts> getGlAccount(
@@ -45,7 +61,9 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/Products")
   Future<Products> getProducts(
-      @Header('api_key') String apiKey, @Query('limit') String limit);
+    @Header('api_key') String apiKey,
+    @Query('limit') String limit,
+  );
 
   @GET("rest/s1/growerp/100/User")
   Future<Users> getUsers(

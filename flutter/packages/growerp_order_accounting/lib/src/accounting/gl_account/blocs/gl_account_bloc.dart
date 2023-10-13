@@ -185,22 +185,15 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     emit(state.copyWith(status: GlAccountStatus.loading));
     List<GlAccount> glAccounts = [];
     final result = fast_csv.parse(event.file);
-    int line = 0;
     // import csv into glAccounts
     for (final row in result) {
-      if (line++ < 2 || row.length < 3) continue;
-      AccountClass? accountClass;
-      if (row[3].isNotEmpty) accountClass = AccountClass(description: row[3]);
-      AccountType? accountType;
-      if (row[4].isNotEmpty) accountType = AccountType(description: row[4]);
-
+      if (row == result.first) continue;
       glAccounts.add(GlAccount(
-        accountCode: row[0],
-        accountName: row[1],
-        accountClass: accountClass,
-        accountType: accountType,
-        postedBalance: Decimal.tryParse(row[5]),
-      ));
+          accountCode: row[0],
+          accountName: row[1],
+          accountClass: row[2] != '' ? AccountClass(description: row[2]) : null,
+          accountType: row[3] != '' ? AccountType(description: row[3]) : null,
+          postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null));
     }
 
     ApiResult<String> compResult = await repos.importGlAccounts(glAccounts);

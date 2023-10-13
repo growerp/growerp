@@ -7,10 +7,11 @@
             "program": "flutter/packages/growerp/bin/growerp.dart",
             "args": [
                 "export",
+                "glAccount",
                 "-p",
                 "qqqqqq9!",
                 "-u",
-                "test19@example.com"
+                "test75@example.com"
             ]
         },
         {
@@ -20,6 +21,18 @@
             "program": "flutter/packages/growerp/bin/growerp.dart",
             "args": [
                 "export",
+                "glAccount"
+            ]
+        },
+        {
+            "name": "import",
+            "type": "dart",
+            "request": "launch",
+            "program": "flutter/packages/growerp/bin/growerp.dart",
+            "args": [
+                "import",
+                "-i",
+                "growerpCsv"
             ]
         },
         {

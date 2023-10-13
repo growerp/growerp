@@ -14,8 +14,6 @@ class GlAccounts with _$GlAccounts {
 
   factory GlAccounts.fromJson(Map<String, dynamic> json) =>
       _$GlAccountsFromJson(json);
-
-  List<GlAccount> toList() => this.glAccounts.toList();
 }
 
 @freezed
@@ -27,8 +25,6 @@ class Categories with _$Categories {
 
   factory Categories.fromJson(Map<String, dynamic> json) =>
       _$CategoriesFromJson(json);
-
-  List<Category> toList() => this.categories.toList();
 }
 
 @freezed
@@ -40,7 +36,6 @@ class Products with _$Products {
 
   factory Products.fromJson(Map<String, dynamic> json) =>
       _$ProductsFromJson(json);
-  List<Product> toList() => this.products.toList();
 }
 
 @freezed
@@ -51,8 +46,6 @@ class Users with _$Users {
   Users._();
 
   factory Users.fromJson(Map<String, dynamic> json) => _$UsersFromJson(json);
-
-  List<User> toList() => this.users.toList();
 }
 
 @freezed
@@ -64,5 +57,4 @@ class Companies with _$Companies {
 
   factory Companies.fromJson(Map<String, dynamic> json) =>
       _$CompaniesFromJson(json);
-  List<Company> toList() => this.companies.toList();
 }

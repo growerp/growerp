@@ -143,7 +143,7 @@ class AccountingAPIRepository extends APIRepository {
             'search': searchString
           });
       return getResponseList<GlAccount>(
-          "glAccountList", response, (json) => GlAccount.fromJson(json));
+          "glAccounts", response, (json) => GlAccount.fromJson(json));
     } on Exception catch (e) {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
@@ -205,7 +205,6 @@ class AccountingAPIRepository extends APIRepository {
 
   Future<ApiResult<String>> importGlAccounts(List<GlAccount> glAccounts) async {
     try {
-      print("========proc: ${glAccounts.length}");
       final response = await dioClient.post(
           'rest/s1/growerp/100/ImportExport', apiKey!,
           data: <String, dynamic>{

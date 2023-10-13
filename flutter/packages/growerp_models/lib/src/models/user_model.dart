@@ -64,25 +64,27 @@ class User with _$User {
 
 String UserCsvFormat() =>
     'User Id, First Name*, Last Name*, Email, Login Name, Telephone Number '
-    'User Group, language, image, Company Name\r\n';
+    'User Group, language, image, Company Name, Company Role\r\n';
 
-List<String> UserCsvToJson(String csvFile) {
-  List<String> users = [];
+List<User> CsvToUsers(String csvFile) {
+  List<User> users = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    users.add(jsonEncode(User(
-      pseudoId: row[0],
-      firstName: row[1],
-      lastName: row[2],
-      email: row[3],
-      loginName: row[4],
-      telephoneNr: row[5],
-      userGroup: UserGroup.getByValue(row[6]),
-      language: row[7],
-      image: row[8].isNotEmpty ? Uint8List.fromList(row[8].codeUnits) : null,
-      company: Company(name: row[9]),
-    ).toJson()));
+    users.add(
+      User(
+        pseudoId: row[0],
+        firstName: row[1],
+        lastName: row[2],
+        email: row[3],
+        loginName: row[4],
+        telephoneNr: row[5],
+        userGroup: UserGroup.getByValue(row[6]),
+        language: row[7],
+        image: row[8].isNotEmpty ? base64.decode(row[8]) : null,
+        company: Company(name: row[9], role: Role.getByValue(row[10])),
+      ),
+    );
   }
 
   return users;
@@ -100,8 +102,9 @@ String CsvFromUsers(List<User> users) {
       user.telephoneNr ?? '',
       user.userGroup.toString(),
       user.language,
-      user.image != null ? user.image!.toList().toString() : '',
+      user.image != null ? base64.encode(user.image!) : '',
       user.company?.name ?? '',
+      user.company!.role.toString(),
     ]));
   }
   return csv.join();

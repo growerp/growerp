@@ -862,7 +862,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccountId]" out-map="context" />
-            <set field="glAccount" from="glAccountList[0]" />
+            <set field="glAccount" from="glAccounts[0]" />
         </actions>
     </service>
 
@@ -959,7 +959,7 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />
-            <set field="glAccount" from="glAccountList[0]" />
+            <set field="glAccount" from="glAccounts[0]" />
         </actions>
     </service>
 

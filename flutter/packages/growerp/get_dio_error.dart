@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
 String getDioError(e) {
-/*  DioException exception =
+  DioException exception =
       DioException(response: e.response, requestOptions: e.requestOptions);
   late String expression;
   switch (exception.type) {
@@ -33,6 +33,5 @@ String getDioError(e) {
       expression = "Connection error";
       break;
   }
-*/
-  return "error: ${e.response}";
+  return "exception: $expression error: ${e.response}";
 }

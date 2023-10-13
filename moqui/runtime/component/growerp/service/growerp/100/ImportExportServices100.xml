@@ -15,6 +15,158 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="import" noun="GlAccounts">
+        <description> Import GlAccounts</description>
+        <in-parameters>
+            <parameter name="glAccounts" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relComp" />
+            <!-- delete existing transactions only initial if present-->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
+                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+            </entity-find>
+            <if condition="transList.size() &gt; 1">
+                <return error="true"
+                    message="Can only delete ledger when when not more than the initial settiung of posted balance." />
+            </if>
+            <if condition="transList.size() &gt; 0">
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.transaction.AcctgTransEntry">
+                    <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition entity-name="mantle.ledger.transaction.AcctgTrans">
+                    <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                </entity-delete-by-condition>
+            </if>
+            <!-- delete existing ledger -->
+            <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                list="glAccountsOrg">
+                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                <select-field field-name="glAccountId" />
+            </entity-find>
+            <entity-delete-by-condition
+                entity-name="mantle.ledger.account.GlAccountOrganization">
+                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition
+                entity-name="mantle.ledger.account.GlAccount">
+                <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
+            </entity-delete-by-condition>
+            <!-- create new accounts and collect posted balances for new transactions-->
+            <set field="transactions" from="[]" />
+            <iterate list="glAccounts" entry="newGlAccount">
+                <service-call name="growerp.100.AccountingServices100.create#GlAccount"
+                    in-map="[glAccount: newGlAccount]"
+                    out-map="createdGlAccount" />
+                <!-- collect posted balances -->
+                <if condition="newGlAccount.postedBalance">
+                    <script>transactions.add([
+                                        isDebit: createdGlAccount.glAccount.isDebit,
+                                        price: newGlAccount.postedBalance,
+                                        glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
+                                    ])</script>
+                </if>
+            </iterate>
+            <!-- create unposted balance in initial transaction-->
+            <if condition="transactions.size() &gt; 0">
+                <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                    in-map="finDoc: [docType: 'Transaction', sales: 'true',
+                                            description: 'Initial balance',
+                                            items: transactions]"
+                    out-map="context" />
+            </if>
+            <!--message
+            public="true" type="success">${glAccounts.size()} Ledger accounts with
+            ${transactions.size()} initial transactions Upload completed</message-->
+        </actions>
+    </service>
+
+    <service verb="import" noun="Companies">
+        <in-parameters>
+            <parameter name="companies" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <iterate list="companies" entry="company">
+                <if condition="company.partyId == '_MOD_'">
+                    <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
+                        list="parties">
+                        <econdition field-name="ownerPartyId" from="relComp.ownerPartyId" />
+                        <econdition field-name="companyName" operator="like"
+                            value="${company.name}%" />
+                    </entity-find>
+                    <if condition="parties">
+                        <set field="company.partyId" from="parties[0].companyPartyId" />
+                        <service-call name="growerp.100.PartyServices100.update#Company"
+                            in-map="[company: company]" />
+                    </if>
+                    <else>
+                        <service-call name="growerp.100.PartyServices100.create#Company"
+                            in-map="[company: company]" />
+                    </else>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="Users">
+        <in-parameters>
+            <parameter name="users" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <iterate list="users" entry="user">
+                <service-call name="growerp.100.PartyServices100.create#User"
+                    in-map="[user: user]" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="Products">
+        <in-parameters>
+            <parameter name="products" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relComp" />
+            <iterate list="products" entry="product">
+                <!-- check if related category exist using name, if yes use these-->
+                <iterate list="product.categories" entry="category">
+                    <entity-find entity-name="mantle.product.category.ProductCategory"
+                        list="foundCategories">
+                        <econdition field-name="categoryName" from="category.categoryName" />
+                        <econdition field-name="ownerPartyId" from="relComp.ownerPartyId" />
+                    </entity-find>
+                    <if condition="foundCategories">
+                        <set field="category.categoryId"
+                            from="foundCategories[0].productCategoryId" />
+                    </if>
+                </iterate>
+                <service-call name="growerp.100.CatgProdServices100.create#Product"
+                    out-map="result"
+                    in-map="[product: product, classificationId: classificationId]" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="import" noun="Categories">
+        <in-parameters>
+            <parameter name="categories" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <iterate list="categories" entry="category">
+                <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
+                    in-map="[category: category, classificationId: classificationId]" />
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- depreciated, just used by the screens-->
     <service verb="import" noun="Entities">
         <description> Import general entities</description>
         <in-parameters>
@@ -58,7 +210,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
             </if>
             <if condition="entities.products">
-                <log message="process products:" />
                 <iterate list="entities.products" entry="product">
                     <!-- check if related category exist using name, if yes use these-->
                     <iterate list="product.categories" entry="category">
@@ -111,7 +262,8 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-delete-by-condition>
                 </if>
                 <!-- delete existing ledger -->
-                <entity-find entity-name="GlAccountAndOrganization" list="glAccounts">
+                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                    list="glAccounts">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
                 </entity-find>
@@ -129,18 +281,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
                         in-map="[glAccount: newGlAccount]"
                         out-map="createdGlAccount" />
-                    <!-- collect posted balances -->
-                    <!-- cannot get postalBalance from newGlAccount because newGlAccount is String
-                    but should be Map-->
-                    <!-- temp solution, get it as a String -->
-                    <set field="postedBalance"
-                        from="newGlAccount.split('postedBalance')[1]" />
-                    <set field="postedBalance"
-                        from="postedBalance.substring(2,postedBalance.indexOf('}')).replace('&quot;','')" />
-                    <if condition="postedBalance != 'null'">
+                    <if condition="newGlAccount.postedBalance">
                         <script>transactions.add([
                             isDebit: createdGlAccount.glAccount.isDebit,
-                            price: postedBalance,
+                            price: newGlAccount.postedBalance,
                             glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
                         ])</script>
                     </if>

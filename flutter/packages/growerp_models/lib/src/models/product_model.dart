@@ -59,12 +59,12 @@ String ProductCsvFormat() =>
     'product Id, Type*, Name*, Description*, List Price*, Sales price*, '
     'Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
 
-List<String> ProductCsvToJson(String csvFile) {
-  List<String> products = [];
+List<Product> CsvToProducts(String csvFile) {
+  List<Product> products = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    products.add(jsonEncode(Product(
+    products.add(Product(
       pseudoId: row[0],
       productTypeId: row[1],
       productName: row[2],
@@ -77,8 +77,8 @@ List<String> ProductCsvToJson(String csvFile) {
         Category(categoryName: row[8]),
         Category(categoryName: row[9])
       ],
-      image: row[10].isNotEmpty ? Uint8List.fromList(row[10].codeUnits) : null,
-    ).toJson()));
+      image: row[10].isNotEmpty ? base64.decode(row[10]) : null,
+    ));
   }
   return products;
 }
@@ -94,10 +94,10 @@ String CsvFromProducts(List<Product> products) {
       product.listPrice.toString(),
       product.price.toString(),
       product.useWarehouse.toString(),
-      product.categories[0].categoryName,
-      product.categories[1].categoryName,
-      product.categories[2].categoryName,
-      product.image != null ? product.image!.toList().toString() : '',
+      product.categories.length == 1 ? product.categories[0].categoryName : '',
+      product.categories.length == 2 ? product.categories[1].categoryName : '',
+      product.categories.length == 3 ? product.categories[2].categoryName : '',
+      product.image != null ? base64.encode(product.image!) : '',
     ]));
   }
   return csv.join();

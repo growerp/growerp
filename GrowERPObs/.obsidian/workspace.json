@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/1 Introduction/3 General business flow.md",
+                "file": "1 Introduction/5 Road Map and Releases.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/1 Introduction/3 General business flow.md"
+                "file": "1 Introduction/5 Road Map and Releases.md"
               }
             }
           },
@@ -166,6 +166,7 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "2 End User documentation/1 Introduction/3 General business flow.md",
     "2 End User documentation/1 Introduction/1 Overview.md",
     "2 End User documentation/1 Introduction/2 Getting Started.md",
     "2 End User documentation/7 Accounting/9 Account Class reference.md",
@@ -175,7 +176,6 @@
     "1 Introduction/5 Road Map and Releases.md",
     "GrowERP documentation.md",
     "Stripe.md",
-    "2 End User documentation/1 Introduction/3 General business flow.md",
     "2 End User documentation/9 Authentication & users/2 Authentication.md",
     "2 End User documentation/9 Authentication & users/2 Usertypes.md",
     "2 End User documentation/9 Authentication & users",

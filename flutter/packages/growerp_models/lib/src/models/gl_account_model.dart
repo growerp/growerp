@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
-
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -48,19 +46,19 @@ class GlAccount with _$GlAccount {
 String GlAccountCsvFormat() =>
     "Account Code*, Account Name*, Class Description*, Type Description, Posted Balance\r\n";
 
-List<String> GlAccountCsvToJson(String csvFile) {
-  List<String> glAccounts = [];
+List<GlAccount> CsvToGlAccounts(String csvFile) {
+  List<GlAccount> glAccounts = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    glAccounts.add(jsonEncode(GlAccount(
-            accountCode: row[0],
-            accountName: row[1],
-            accountClass:
-                row[2] != '' ? AccountClass(description: row[2]) : null,
-            accountType: row[3] != '' ? AccountType(description: row[3]) : null,
-            postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null)
-        .toJson()));
+    glAccounts.add(
+      GlAccount(
+          accountCode: row[0],
+          accountName: row[1],
+          accountClass: row[2] != '' ? AccountClass(description: row[2]) : null,
+          accountType: row[3] != '' ? AccountType(description: row[3]) : null,
+          postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null),
+    );
   }
 
   return glAccounts;

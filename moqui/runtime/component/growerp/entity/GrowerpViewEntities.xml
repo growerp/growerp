@@ -755,6 +755,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="ownerDisabled" field="disabled" entity-alias="PTYOWNER" />
         <alias name="userDisabled" field="disabled" entity-alias="PTYPERSON" />
         <alias name="userPartyId" field="partyId" entity-alias="PERSON" />
+        <alias name="userPseudoId" field="partyId" entity-alias="PTYPERSON" />
         <alias name="firstName" entity-alias="PERSON" />
         <alias name="lastName" entity-alias="PERSON" />
         <!-- userlogin -->
@@ -954,6 +955,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="companyThruDate" field="thruDate" entity-alias="COMPANYTOOWNER" />
         <!-- Company -->
         <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
         <alias name="vatPerc" entity-alias="ORGCOMPANYPARTY" />
         <alias name="salesPerc" entity-alias="ORGCOMPANYPARTY" />
@@ -1242,6 +1244,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="baseCurrencyUomId" related="uomId" />
         </member-entity>
         <alias name="partyId" entity-alias="PARTY" />
+        <alias name="pseudoId" entity-alias="PARTY" />
         <alias name="ownerPartyId" entity-alias="PARTY" />
         <alias name="disabled" entity-alias="PARTY" />
         <alias name="vatPerc" entity-alias="PARTY" />

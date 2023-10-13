@@ -19,9 +19,14 @@
 ///   will upload data like ledger, customers products etc from the terminal
 ///   Also has a helper program csvToCsv to convert your csv files to the
 ///     GrowERP format.
+///   Parameters:
+///     -i input file or directory
+///     -u -p optional
 /// Export:
 ///   will create CSV files for growerp entities in the current 'growerp'
 ///   directory, if not exist will create it.
+///   Parameters:
+///     1. optional file type
 ///
 /// flags:
 ///   -dev if present uses development branch by installation
@@ -40,6 +45,7 @@ import 'package:hive/hive.dart';
 
 import '../build_dio_client.dart';
 import '../file_type_model.dart';
+import '../get_dio_error.dart';
 import '../get_file_type.dart';
 import '../get_files.dart';
 import '../logger.dart';
@@ -93,7 +99,7 @@ Future<void> main(List<String> args) async {
       String result = await client.checkEmail(username);
       if (jsonDecode(result.toString())['ok'] != 'ok') {
         await client.register(username, 'q$username', password, 'Hans',
-            'Jansen', 'test company', 'USD', 'AppAdmin', true);
+            'Jansen', 'test company', 'USD', 'AppAdmin', false);
       }
       Authenticate authenticate =
           await client.login(username, password, 'AppAdmin');
@@ -175,25 +181,48 @@ Future<void> main(List<String> args) async {
             logger.i("Importing file: $file with user: $username");
             FileType fileType = getFileType(file);
             String csvFile = File(file).readAsStringSync();
-            var json = [];
             switch (fileType) {
               case FileType.glAccount:
-                json = GlAccountCsvToJson(csvFile);
+                await client.importGlAccounts(
+                    box.get('apiKey'), CsvToGlAccounts(csvFile), 'AppAdmin');
                 break;
+              case FileType.product:
+                await client.importProducts(
+                    box.get('apiKey'), CsvToProducts(csvFile), 'AppAdmin');
+                break;
+              case FileType.category:
+                await client.importCategories(
+                    box.get('apiKey'), CsvToCategories(csvFile), 'AppAdmin');
+                break;
+              case FileType.company:
+                await client.importCompanies(
+                    box.get('apiKey'), CsvToCompanies(csvFile), 'AppAdmin');
+                break;
+              case FileType.user:
+                await client.importUsers(
+                    box.get('apiKey'), CsvToUsers(csvFile), 'AppAdmin');
+                break;
+
               default:
                 logger.e("FileType ${fileType.name} not implemented yet");
                 exit(1);
             }
-            var result = await client.import(box.get('apiKey'), {
-              '${fileType.name}s': json,
-            });
-            logger.i("file: $file result: $result");
           }
         } on DioException catch (e) {
           logger.e(getDioError(e));
         }
         break;
       case 'export':
+        FileType fileType = FileType.unknown;
+        if (modifiedArgs.length > 1) {
+          try {
+            fileType = FileType.values.byName(modifiedArgs[1]);
+          } catch (e) {
+            logger.e(
+                "invalid file type: ${modifiedArgs[1]}, valid types: ${FileType.values.join().replaceAll('FileType.', ',').replaceAll(',unknown', '')}");
+            exit(1);
+          }
+        }
         final dio =
             buildDioClient('http://localhost:8080/'); // Provide a dio instance
         final client = RestClient(await dio);
@@ -207,38 +236,48 @@ Future<void> main(List<String> args) async {
           if (username.isNotEmpty && password.isNotEmpty) {
             await login(client);
           }
-          var fileType = FileType.glAccount;
           String csvContent = '';
-          var result;
           // export glAccount
-          result = await client.getGlAccount(box.get('apiKey'), '999');
-          csvContent = CsvFromGlAccounts(result.toList());
-          final file1 = File("$outputDirectory/${fileType.name}.csv");
-          file1.writeAsStringSync(csvContent);
+          if (fileType == FileType.unknown || fileType == FileType.glAccount) {
+            GlAccounts result =
+                await client.getGlAccount(box.get('apiKey'), '999');
+            csvContent = CsvFromGlAccounts(result.glAccounts);
+            final file1 =
+                File("$outputDirectory/${FileType.glAccount.name}.csv");
+            file1.writeAsStringSync(csvContent);
+          }
           // export company
-          fileType = FileType.company;
-          result = await client.getCompanies(box.get('apiKey'), '999');
-          csvContent = CsvFromCompanies(result.toList());
-          final file2 = File("$outputDirectory/${fileType.name}.csv");
-          file2.writeAsStringSync(csvContent);
+          if (fileType == FileType.unknown || fileType == FileType.company) {
+            Companies result =
+                await client.getCompanies(box.get('apiKey'), '999');
+            csvContent = CsvFromCompanies(result.companies);
+            final file2 = File("$outputDirectory/${FileType.company.name}.csv");
+            file2.writeAsStringSync(csvContent);
+          }
           // export users
-          fileType = FileType.user;
-          result = await client.getUsers(box.get('apiKey'), '999');
-          csvContent = CsvFromUsers(result.toList());
-          final file3 = File("$outputDirectory/${fileType.name}.csv");
-          file3.writeAsStringSync(csvContent);
+          if (fileType == FileType.unknown || fileType == FileType.user) {
+            Users result = await client.getUsers(box.get('apiKey'), '999');
+            csvContent = CsvFromUsers(result.users);
+            final file3 = File("$outputDirectory/${FileType.user.name}.csv");
+            file3.writeAsStringSync(csvContent);
+          }
           // export products
-          fileType = FileType.product;
-          result = await client.getProducts(box.get('apiKey'), '999');
-          csvContent = CsvFromProducts(result.toList());
-          final file4 = File("$outputDirectory/${fileType.name}.csv");
-          file4.writeAsStringSync(csvContent);
-          // export categories
-          fileType = FileType.category;
-          result = await client.getCategories(box.get('apiKey'), '999');
-          csvContent = CsvFromCategories(result.toList());
-          final file5 = File("$outputDirectory/${fileType.name}.csv");
-          file5.writeAsStringSync(csvContent);
+          if (fileType == FileType.unknown || fileType == FileType.product) {
+            Products result =
+                await client.getProducts(box.get('apiKey'), '999');
+            csvContent = CsvFromProducts(result.products);
+            final file4 = File("$outputDirectory/${FileType.product.name}.csv");
+            file4.writeAsStringSync(csvContent);
+          } // export categories
+          if (fileType == FileType.unknown || fileType == FileType.category) {
+            fileType = FileType.category;
+            Categories result =
+                await client.getCategories(box.get('apiKey'), '999');
+            csvContent = CsvFromCategories(result.categories);
+            final file5 =
+                File("$outputDirectory/${FileType.category.name}.csv");
+            file5.writeAsStringSync(csvContent);
+          }
         } on DioException catch (e) {
           logger.e(getDioError(e));
         }
