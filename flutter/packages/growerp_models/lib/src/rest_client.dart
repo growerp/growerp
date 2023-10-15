@@ -1,4 +1,5 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' hide Headers;
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'models/models.dart';
@@ -11,65 +12,83 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/UserAndCompany")
   @FormUrlEncoded()
-  Future<Authenticate> register(
-    @Field() String emailAddress,
-    @Field() String companyEmailAddress,
-    @Field() String newPassword,
-    @Field() String firstName,
-    @Field() String lastName,
-    @Field() String companyName,
-    @Field() String currencyId,
-    @Field() String classificationId,
-    @Field() bool demoData,
-  );
+  Future<Authenticate> register({
+    @Field() required String emailAddress,
+    @Field() required String companyEmailAddress,
+    @Field() required String firstName,
+    @Field() required String lastName,
+    @Field() required String companyName,
+    @Field() required String currencyId,
+    @Field() required bool demoData,
+    @Field() String? classificationId,
+    @Field() String? newPassword,
+  });
 
   @GET("rest/s1/growerp/100/CheckEmail")
   Future<String> checkEmail(@Query('email') String email);
 
+  @GET("rest/s1/growerp/100/Company")
+  Future<Companies> getCompany({
+    @Query('companyPartyId') String? companyPartyId,
+    @Query('companyName') String? companyName,
+    @Query('userpartyId') String? userpartyId,
+    @Query('role') Role? role,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('filter') String? filter,
+    @Query('firstName') String? firstName,
+    @Query('lastName') String? lastName,
+    @Query('searchString') Role? searchString,
+  });
+
+  @GET("rest/s1/growerp/100/Companies")
+  Future<Companies> getCompanies({
+    @Query('companyPartyId') String? companyPartyId,
+  });
+
+  @GET("rest/s1/growerp/100/Authenticate")
+  Future<Authenticate> getAuthenticate();
+
   @POST("rest/s1/growerp/100/Login")
   @FormUrlEncoded()
-  Future<Authenticate> login(
-      @Field() String username, @Field() password, @Field() classificationId);
+  Future<Authenticate> login(@Field() String username, @Field() String password,
+      {@Field() String classificationId = 'AppAdmin'});
 
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
-  Future<void> importGlAccounts(@Header('api_key') String apiKey,
-      @Field() List<GlAccount> glAccounts, @Field() String classificationId);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importGlAccounts(@Field() List<GlAccount> glAccounts);
 
   @POST("rest/s1/growerp/100/ImportExport/companies")
-  Future<void> importCompanies(@Header('api_key') String apiKey,
-      @Field() List<Company> companies, @Field() String classificationId);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importCompanies(@Field() List<Company> companies);
 
   @POST("rest/s1/growerp/100/ImportExport/users")
-  Future<void> importUsers(@Header('api_key') String apiKey,
-      @Field() List<User> users, @Field() String classificationId);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importUsers(@Field() List<User> users);
 
   @POST("rest/s1/growerp/100/ImportExport/products")
-  Future<void> importProducts(@Header('api_key') String apiKey,
-      @Field() List<Product> products, @Field() String classificationId);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importProducts(@Field() List<Product> products);
 
   @POST("rest/s1/growerp/100/ImportExport/categories")
-  Future<void> importCategories(@Header('api_key') String apiKey,
-      @Field() List<Category> categories, @Field() String classificationId);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importCategories(@Field() List<Category> categories);
 
   @GET("rest/s1/growerp/100/GlAccount")
-  Future<GlAccounts> getGlAccount(
-      @Header('api_key') String apiKey, @Query('limit') String limit);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<GlAccounts> getGlAccount({@Query('limit') int? limit});
 
   @GET("rest/s1/growerp/100/Categories")
-  Future<Categories> getCategories(
-      @Header('api_key') String apiKey, @Query('limit') String limit);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Categories> getCategories({@Query('limit') int? limit});
 
   @GET("rest/s1/growerp/100/Products")
-  Future<Products> getProducts(
-    @Header('api_key') String apiKey,
-    @Query('limit') String limit,
-  );
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Products> getProducts({
+    @Query('limit') int? limit,
+  });
 
   @GET("rest/s1/growerp/100/User")
-  Future<Users> getUsers(
-      @Header('api_key') String apiKey, @Query('limit') String limit);
-
-  @GET("rest/s1/growerp/100/Company")
-  Future<Companies> getCompanies(
-      @Header('api_key') String apiKey, @Query('limit') String limit);
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Users> getUsers(@Query('limit') String limit);
 }

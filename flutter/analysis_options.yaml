@@ -18,6 +18,7 @@ analyzer:
     - "packages/growerp_select_dialog/**"
   errors:
     invalid_annotation_target: ignore
+    depend_on_referenced_packages: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the

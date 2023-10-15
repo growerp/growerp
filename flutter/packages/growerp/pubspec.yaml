@@ -12,18 +12,18 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   dcli: ^2.1.0
-  dio: ^5.0.1
+  dio: ^5.3.3
   fast_csv: ^0.2.6
   get_it: ^7.6.4
   growerp_models:
     path: ../growerp_models
   hive: ^2.2.3
   logger: ^2.0.2+1
-  retrofit: '>=4.0.0 <5.0.0'
+  retrofit: ^4.0.3
 
 dev_dependencies:
-  lint_hard: ^1.0.0
+  lint_hard: ^4.0.0
   build_runner: ^2.4.6
-  retrofit_generator: '>=5.0.0 <6.0.0'
+  retrofit_generator: ^8.0.1
 
 

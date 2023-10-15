@@ -25,8 +25,7 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/Login")
   @FormUrlEncoded()
-  Future<Authenticate> login(
-      @Field() String username, @Field() password, @Field() classificationId);
+  Future<Authenticate> login(@Field() String username, @Field() password);
 
   @POST("rest/s1/growerp/100/ImportExport")
   Future<String> import(@Field() Map<String, dynamic> entities);

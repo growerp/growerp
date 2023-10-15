@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
@@ -21,11 +22,14 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'acct_menu_options.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_models/growerp_models.dart' as cat;
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
-    print('>>>NavigateTo { ${settings.name} '
-        'with: ${settings.arguments.toString()} }');
+    if (kDebugMode) {
+      print('>>>NavigateTo { ${settings.name} '
+          'with: ${settings.arguments.toString()} }');
+    }
   }
   switch (settings.name) {
     case '/':
@@ -52,7 +56,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/category':
       return MaterialPageRoute(
-          builder: (context) => CategoryDialog(settings.arguments as Category));
+          builder: (context) =>
+              CategoryDialog(settings.arguments as cat.Category));
     case '/orders':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

@@ -43,7 +43,7 @@ dependencies:
   stream_transform: ^2.1.0
   collection: ^1.16.0
   json_annotation: ^4.7.0
-  dio: ^5.0.2
+  dio: ^5.3.3
   freezed_annotation: ^2.0.3
   freezed: ^2.0.3
   credit_card_validator: ^2.0.1

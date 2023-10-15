@@ -28,6 +28,7 @@ import '../../../l10n/generated/core_localizations.dart';
 class TopApp extends StatelessWidget {
   TopApp({
     Key? key,
+    required this.restClient,
     required this.dbServer,
     required this.chatServer,
     this.title = '',
@@ -37,6 +38,7 @@ class TopApp extends StatelessWidget {
     this.blocProviders = const [],
   }) : super(key: key);
 
+  final RestClient restClient;
   final APIRepository dbServer;
   final ChatServer chatServer;
   final String title;
@@ -54,6 +56,7 @@ class TopApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
           providers: [
+            RepositoryProvider(create: (context) => restClient),
             RepositoryProvider(create: (context) => dbServer),
             RepositoryProvider(create: (context) => chatServer),
           ],
@@ -64,7 +67,8 @@ class TopApp extends StatelessWidget {
                       create: (context) => ThemeBloc()..add(ThemeSwitch())),
                 BlocProvider<AuthBloc>(
                     create: (context) =>
-                        AuthBloc(dbServer, chatServer)..add(AuthLoad())),
+                        AuthBloc(dbServer, chatServer, restClient)
+                          ..add(AuthLoad())),
                 BlocProvider<ChatRoomBloc>(
                   create: (context) => ChatRoomBloc(
                       dbServer, chatServer, context.read<AuthBloc>())

@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 T getJsonObject<T>(
@@ -31,15 +32,15 @@ class PersistFunctions {
   static Future<void> persistAuthenticate(
     Authenticate authenticate,
   ) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('authenticate', jsonEncode(authenticate.toJson()));
+    var box = await Hive.openBox('growerp');
+    box.put('authenticate', jsonEncode(authenticate.toJson()));
   }
 
   static Future<Authenticate?> getAuthenticate() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     // ignore informaton with a bad format
     try {
-      String? result = prefs.getString('authenticate');
+      var box = await Hive.openBox('growerp');
+      String? result = box.get('authenticate');
       if (result != null) {
         return getJsonObject<Authenticate>(
             result, (json) => Authenticate.fromJson(json));

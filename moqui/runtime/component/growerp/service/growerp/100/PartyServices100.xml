@@ -126,6 +126,8 @@ along with this software (see the LICENSE.md file). If not, see
                     or-null="true" />
                 <econdition field-name="organizationName" from="searchString"
                     ignore-if-empty="true" ignore-case="true" />
+                <econdition field-name="companyPartyId" from="searchString"
+                    ignore-if-empty="true" />
                 <order-by field-name="organizationName" />
             </entity-find>
             <set field="companies" from="[]" />

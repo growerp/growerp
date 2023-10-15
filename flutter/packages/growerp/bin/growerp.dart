@@ -96,16 +96,24 @@ Future<void> main(List<String> args) async {
     //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
 
     Future<void> login(RestClient client) async {
+      // email exists?
       String result = await client.checkEmail(username);
       if (jsonDecode(result.toString())['ok'] != 'ok') {
-        await client.register(username, 'q$username', password, 'Hans',
-            'Jansen', 'test company', 'USD', 'AppAdmin', false);
+        // no so register new
+        await client.register(
+            emailAddress: username,
+            companyEmailAddress: 'q$username',
+            newPassword: password,
+            firstName: 'Hans',
+            lastName: 'Jansen',
+            companyName: 'test company',
+            currencyId: 'USD',
+            demoData: false);
       }
-      Authenticate authenticate =
-          await client.login(username, password, 'AppAdmin');
+      // login for key
+      Authenticate authenticate = await client.login(username, password);
       // save key
       box.put('apiKey', authenticate.apiKey);
-//      box.put('moquiSessionToken', authenticate.moquiSessionToken);
     }
 
     // commands
@@ -169,8 +177,8 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         // talk to backend
-        final dio =
-            buildDioClient('http://localhost:8080/'); // Provide a dio instance
+        final dio = buildDioClient(
+            'http://localhost:8080/', 'AppAdmin'); // Provide a dio instance
         final client = RestClient(await dio);
         try {
           if (username.isNotEmpty && password.isNotEmpty) {
@@ -183,24 +191,19 @@ Future<void> main(List<String> args) async {
             String csvFile = File(file).readAsStringSync();
             switch (fileType) {
               case FileType.glAccount:
-                await client.importGlAccounts(
-                    box.get('apiKey'), CsvToGlAccounts(csvFile), 'AppAdmin');
+                await client.importGlAccounts(CsvToGlAccounts(csvFile));
                 break;
               case FileType.product:
-                await client.importProducts(
-                    box.get('apiKey'), CsvToProducts(csvFile), 'AppAdmin');
+                await client.importProducts(CsvToProducts(csvFile));
                 break;
               case FileType.category:
-                await client.importCategories(
-                    box.get('apiKey'), CsvToCategories(csvFile), 'AppAdmin');
+                await client.importCategories(CsvToCategories(csvFile));
                 break;
               case FileType.company:
-                await client.importCompanies(
-                    box.get('apiKey'), CsvToCompanies(csvFile), 'AppAdmin');
+                await client.importCompanies(CsvToCompanies(csvFile));
                 break;
               case FileType.user:
-                await client.importUsers(
-                    box.get('apiKey'), CsvToUsers(csvFile), 'AppAdmin');
+                await client.importUsers(CsvToUsers(csvFile));
                 break;
 
               default:
@@ -223,8 +226,8 @@ Future<void> main(List<String> args) async {
             exit(1);
           }
         }
-        final dio =
-            buildDioClient('http://localhost:8080/'); // Provide a dio instance
+        final dio = buildDioClient(
+            'http://localhost:8080/', 'AppAdmin'); // Provide a dio instance
         final client = RestClient(await dio);
         try {
           if (isDirectory(outputDirectory)) {
@@ -239,8 +242,7 @@ Future<void> main(List<String> args) async {
           String csvContent = '';
           // export glAccount
           if (fileType == FileType.unknown || fileType == FileType.glAccount) {
-            GlAccounts result =
-                await client.getGlAccount(box.get('apiKey'), '999');
+            GlAccounts result = await client.getGlAccount(limit: 999);
             csvContent = CsvFromGlAccounts(result.glAccounts);
             final file1 =
                 File("$outputDirectory/${FileType.glAccount.name}.csv");
@@ -248,31 +250,28 @@ Future<void> main(List<String> args) async {
           }
           // export company
           if (fileType == FileType.unknown || fileType == FileType.company) {
-            Companies result =
-                await client.getCompanies(box.get('apiKey'), '999');
+            Companies result = await client.getCompany(limit: 999);
             csvContent = CsvFromCompanies(result.companies);
             final file2 = File("$outputDirectory/${FileType.company.name}.csv");
             file2.writeAsStringSync(csvContent);
           }
           // export users
           if (fileType == FileType.unknown || fileType == FileType.user) {
-            Users result = await client.getUsers(box.get('apiKey'), '999');
+            Users result = await client.getUsers('999');
             csvContent = CsvFromUsers(result.users);
             final file3 = File("$outputDirectory/${FileType.user.name}.csv");
             file3.writeAsStringSync(csvContent);
           }
           // export products
           if (fileType == FileType.unknown || fileType == FileType.product) {
-            Products result =
-                await client.getProducts(box.get('apiKey'), '999');
+            Products result = await client.getProducts(limit: 999);
             csvContent = CsvFromProducts(result.products);
             final file4 = File("$outputDirectory/${FileType.product.name}.csv");
             file4.writeAsStringSync(csvContent);
           } // export categories
           if (fileType == FileType.unknown || fileType == FileType.category) {
             fileType = FileType.category;
-            Categories result =
-                await client.getCategories(box.get('apiKey'), '999');
+            Categories result = await client.getCategories(limit: 999);
             csvContent = CsvFromCategories(result.categories);
             final file5 =
                 File("$outputDirectory/${FileType.category.name}.csv");

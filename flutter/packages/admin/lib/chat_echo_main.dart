@@ -31,13 +31,22 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
 
   Bloc.observer = AppBlocObserver();
-  runApp(ChatApp(dbServer: APIRepository(), chatServer: ChatServer()));
+  runApp(ChatApp(
+      restClient: RestClient(
+          await buildDioClient('http://localhost:8080/', 'AppAdmin')),
+      dbServer: APIRepository(),
+      chatServer: ChatServer()));
 }
 
 class ChatApp extends StatelessWidget {
-  const ChatApp({Key? key, required this.dbServer, required this.chatServer})
+  const ChatApp(
+      {Key? key,
+      required this.restClient,
+      required this.dbServer,
+      required this.chatServer})
       : super(key: key);
 
+  final RestClient restClient;
   final APIRepository dbServer;
   final ChatServer chatServer;
 
@@ -52,7 +61,7 @@ class ChatApp extends StatelessWidget {
         providers: [
           BlocProvider<AuthBloc>(
               create: (context) =>
-                  AuthBloc(dbServer, chatServer)..add(AuthLoad()),
+                  AuthBloc(dbServer, chatServer, restClient)..add(AuthLoad()),
               lazy: false),
           BlocProvider<ChatRoomBloc>(
             create: (context) =>

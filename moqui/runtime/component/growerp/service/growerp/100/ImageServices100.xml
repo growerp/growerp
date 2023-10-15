@@ -28,7 +28,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="contentId" />
         </out-parameters>
         <actions>
-            <log message="===uploading image ${base64?.size()}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="pagePath" value="/${type}/${id}/" />

@@ -12,13 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:fast_csv/fast_csv.dart' as fast_csv;
-
-import '../create_csv_row.dart';
-import 'models.dart';
 
 part 'item_type_model.g.dart';
 

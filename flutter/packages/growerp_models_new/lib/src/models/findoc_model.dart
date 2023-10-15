@@ -13,7 +13,6 @@
  */
 
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;

@@ -12,6 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +20,10 @@ import 'menu_options.dart';
 import 'acct_menu_options.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  print(">>>NavigateTo { ${settings.name} "
-      "with: ${settings.arguments.toString()} }");
+  if (kDebugMode) {
+    print(">>>NavigateTo { ${settings.name} "
+        "with: ${settings.arguments.toString()} }");
+  }
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(

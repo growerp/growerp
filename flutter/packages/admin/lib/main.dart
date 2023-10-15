@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -63,6 +64,8 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    restClient:
+        RestClient(await buildDioClient('http://localhost:8080/', 'AppAdmin')),
     dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP administrator.',

@@ -11,12 +11,9 @@
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
-import '../create_csv_row.dart';
+import 'package:json_annotation/json_annotation.dart';
+
 import 'models.dart';
 
 part 'location_model.g.dart';
