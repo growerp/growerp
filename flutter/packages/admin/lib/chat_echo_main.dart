@@ -32,8 +32,7 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
-      restClient: RestClient(
-          await buildDioClient('http://localhost:8080/', 'AppAdmin')),
+      restClient: RestClient(await buildDioClient('http://localhost:8080/')),
       dbServer: APIRepository(),
       chatServer: ChatServer()));
 }
@@ -61,7 +60,8 @@ class ChatApp extends StatelessWidget {
         providers: [
           BlocProvider<AuthBloc>(
               create: (context) =>
-                  AuthBloc(dbServer, chatServer, restClient)..add(AuthLoad()),
+                  AuthBloc(dbServer, chatServer, restClient, 'AppAdmin')
+                    ..add(AuthLoad()),
               lazy: false),
           BlocProvider<ChatRoomBloc>(
             create: (context) =>
@@ -157,7 +157,7 @@ class ChatRooms extends StatefulWidget {
 class ChatRoomsEchoState extends State<ChatRooms> {
   late ChatRoomBloc _chatRoomBloc;
   List<ChatMessage> messages = [];
-  Authenticate authenticate = Authenticate();
+  late Authenticate authenticate;
   late ChatMessageBloc _chatMessageBloc;
   List<ChatRoom> chatRooms = [];
   int limit = 20;

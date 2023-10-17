@@ -44,7 +44,7 @@ class LocationList extends StatefulWidget {
 class LocationListState extends State<LocationList> {
   final _scrollController = ScrollController();
   late LocationBloc _locationBloc;
-  Authenticate authenticate = Authenticate();
+  late Authenticate authenticate;
   int limit = 20;
   String? searchString;
 

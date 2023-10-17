@@ -43,9 +43,7 @@ import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 
-import '../build_dio_client.dart';
 import '../file_type_model.dart';
-import '../get_dio_error.dart';
 import '../get_file_type.dart';
 import '../get_files.dart';
 import '../logger.dart';
@@ -108,10 +106,12 @@ Future<void> main(List<String> args) async {
             lastName: 'Jansen',
             companyName: 'test company',
             currencyId: 'USD',
-            demoData: false);
+            demoData: false,
+            classificationId: 'AppAdmin');
       }
       // login for key
-      Authenticate authenticate = await client.login(username, password);
+      Authenticate authenticate = await client.login(
+          username: username, password: password, classificationId: 'AppAdmin');
       // save key
       box.put('apiKey', authenticate.apiKey);
     }
@@ -177,8 +177,8 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         // talk to backend
-        final dio = buildDioClient(
-            'http://localhost:8080/', 'AppAdmin'); // Provide a dio instance
+        final dio =
+            buildDioClient('http://localhost:8080/'); // Provide a dio instance
         final client = RestClient(await dio);
         try {
           if (username.isNotEmpty && password.isNotEmpty) {
@@ -226,8 +226,8 @@ Future<void> main(List<String> args) async {
             exit(1);
           }
         }
-        final dio = buildDioClient(
-            'http://localhost:8080/', 'AppAdmin'); // Provide a dio instance
+        final dio =
+            buildDioClient('http://localhost:8080/'); // Provide a dio instance
         final client = RestClient(await dio);
         try {
           if (isDirectory(outputDirectory)) {

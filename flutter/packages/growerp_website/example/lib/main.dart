@@ -27,6 +27,8 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: "GrowERP Website",

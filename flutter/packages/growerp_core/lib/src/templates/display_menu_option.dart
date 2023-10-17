@@ -188,25 +188,16 @@ class MenuOptionState extends State<DisplayMenuOption>
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    Authenticate authenticate = Authenticate();
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      switch (state.status) {
-        case AuthStatus.authenticated:
-        case AuthStatus.unAuthenticated:
-          authenticate = state.authenticate!;
-          break;
-        default:
-          authenticate = Authenticate();
-      }
       if (tabItems.isEmpty) {
         // show simple page
         if (isPhone) {
-          return simplePage(authenticate, isPhone);
+          return simplePage(state.authenticate!, isPhone);
         } else {
           return myNavigationRail(
             context,
-            authenticate,
-            simplePage(authenticate, isPhone),
+            state.authenticate!,
+            simplePage(state.authenticate!, isPhone),
             widget.menuIndex,
             widget.menuList,
           );
@@ -214,12 +205,12 @@ class MenuOptionState extends State<DisplayMenuOption>
       } else {
         // show tabbar page
         if (isPhone) {
-          return tabPage(authenticate, isPhone);
+          return tabPage(state.authenticate!, isPhone);
         } else {
           return myNavigationRail(
             context,
-            authenticate,
-            tabPage(authenticate, isPhone),
+            state.authenticate!,
+            tabPage(state.authenticate!, isPhone),
             widget.menuIndex,
             widget.menuList,
           );

@@ -272,9 +272,13 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="Authenticate">
         <description>Get userlogin information when a proper Apikey is provided in the header</description>
+        <in-parameters>
+            <parameter name="classificationId" required="true" />
+        </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId" />
+                <parameter name="classificationId" />
                 <parameter name="user" type="Map">
                     <parameter name="partyId" />
                     <parameter name="email" />
@@ -367,7 +371,8 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="authenticate" from="[ownerPartyId: ownerPartyId]" />
+            <set field="authenticate"
+                from="[ownerPartyId: ownerPartyId,classificationId: classificationId]" />
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: userPartyId]" out-map="userInfo" />
             <set field="authenticate.user" from="userInfo.users[0]" />
@@ -447,17 +452,18 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="login" noun="User" authenticate="anonymous-all">
         <description>service to return an apikey and user information if user/password ok, when not check for a reset password</description>
         <in-parameters>
-            <parameter name="classificationId" required="true" />
             <parameter name="username" required="true">
                 <description>any name, can also be the entered email address</description>
             </parameter>
             <parameter name="password" required="true">
                 <description>A password which contains at least a numeric and special character</description>
             </parameter>
+            <parameter name="classificationId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId" />
+                <parameter name="classificationId" />
                 <parameter name="user" type="Map">
                     <parameter name="partyId" />
                     <parameter name="email" />
@@ -584,6 +590,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <script>ec.user.loginUser(username, password)</script>
                     <service-call name="growerp.100.GeneralServices100.get#Authenticate"
+                        in-map="classificationId: classificationId"
                         out-map="context" />
                     <!-- check if specific app already logged in before -->
                     <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
@@ -726,6 +733,7 @@ along with this software (see the LICENSE.md file). If not, see
                     successiveFailedLogins:0]" />
             <script>ec.user.loginUser(username, newPassword)</script>
             <service-call name="growerp.100.GeneralServices100.get#Authenticate"
+                in-map="classificationId: classificationId"
                 out-map="context" />
         </actions>
     </service>

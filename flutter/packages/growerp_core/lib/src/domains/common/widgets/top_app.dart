@@ -29,6 +29,7 @@ class TopApp extends StatelessWidget {
   TopApp({
     Key? key,
     required this.restClient,
+    required this.classificationId,
     required this.dbServer,
     required this.chatServer,
     this.title = '',
@@ -39,6 +40,7 @@ class TopApp extends StatelessWidget {
   }) : super(key: key);
 
   final RestClient restClient;
+  final String classificationId;
   final APIRepository dbServer;
   final ChatServer chatServer;
   final String title;
@@ -59,6 +61,7 @@ class TopApp extends StatelessWidget {
             RepositoryProvider(create: (context) => restClient),
             RepositoryProvider(create: (context) => dbServer),
             RepositoryProvider(create: (context) => chatServer),
+            RepositoryProvider(create: (context) => classificationId),
           ],
           child: MultiBlocProvider(
               providers: [
@@ -66,9 +69,9 @@ class TopApp extends StatelessWidget {
                   BlocProvider<ThemeBloc>(
                       create: (context) => ThemeBloc()..add(ThemeSwitch())),
                 BlocProvider<AuthBloc>(
-                    create: (context) =>
-                        AuthBloc(dbServer, chatServer, restClient)
-                          ..add(AuthLoad())),
+                    create: (context) => AuthBloc(
+                        dbServer, chatServer, restClient, classificationId)
+                      ..add(AuthLoad())),
                 BlocProvider<ChatRoomBloc>(
                   create: (context) => ChatRoomBloc(
                       dbServer, chatServer, context.read<AuthBloc>())

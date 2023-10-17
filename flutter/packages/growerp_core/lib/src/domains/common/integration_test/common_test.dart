@@ -49,8 +49,8 @@ class CommonTest {
     }
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
-      restClient: RestClient(
-          await buildDioClient('http://localhost:8080/', 'AppAdmin')),
+      classificationId: 'AppAdmin',
+      restClient: RestClient(await buildDioClient('http://localhost:8080/')),
       dbServer: APIRepository(),
       chatServer: ChatServer(),
       router: router,

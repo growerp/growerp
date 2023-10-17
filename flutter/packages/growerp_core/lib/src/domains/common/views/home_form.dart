@@ -59,14 +59,14 @@ class HomeFormState extends State<HomeForm> {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-          Authenticate authenticate = state.authenticate!;
+//          Authenticate authenticate = state.authenticate!;
           return Column(children: [
             Expanded(
                 child: DisplayMenuOption(
                     menuList: widget.menuOptions,
                     menuIndex: 0,
                     actions: <Widget>[
-                  if (authenticate.apiKey != null &&
+                  if (state.authenticate?.apiKey != null &&
                       widget.menuOptions[0].route == '/')
                     IconButton(
                         key: const Key('logoutButton'),
@@ -144,22 +144,26 @@ class HomeFormState extends State<HomeForm> {
                                       return const LoginDialog();
                                     });
                               })
-                          : const Text('No companies yet, create one!'),
+                          : state.status == AuthStatus.failure
+                              ? const Text("could not connect to server",
+                                  style: TextStyle(color: Colors.red))
+                              : const Text('No companies yet, create one!'),
                       const Expanded(child: SizedBox(height: 130)),
-                      ElevatedButton(
-                          key: const Key('newCompButton'),
-                          child: const Text('Create a new company and admin'),
-                          onPressed: () async {
-                            await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return NewCompanyDialog(
-                                      formArguments: FormArguments(
-                                          object: authenticate.copyWith(
-                                              company: null)));
-                                });
-                          }),
+                      if (state.status != AuthStatus.failure)
+                        ElevatedButton(
+                            key: const Key('newCompButton'),
+                            child: const Text('Create a new company and admin'),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return NewCompanyDialog(
+                                        formArguments: FormArguments(
+                                            object: authenticate.copyWith(
+                                                company: null)));
+                                  });
+                            }),
                       const SizedBox(height: 50)
                     ])))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),

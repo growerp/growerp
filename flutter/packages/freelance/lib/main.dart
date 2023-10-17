@@ -17,6 +17,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
@@ -62,6 +63,8 @@ Future main() async {
   }
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    classificationId: 'AppFreelance',
     dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP Freelance.',

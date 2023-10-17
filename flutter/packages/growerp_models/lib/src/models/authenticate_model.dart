@@ -23,6 +23,7 @@ class Authenticate with _$Authenticate {
   Authenticate._();
   factory Authenticate({
     final String? apiKey,
+    required String classificationId, // appname
     String? moquiSessionToken,
     String? ownerPartyId,
     Company? company, //postall address not used here, use user comp address

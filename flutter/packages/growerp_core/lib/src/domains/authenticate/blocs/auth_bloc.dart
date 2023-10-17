@@ -23,7 +23,6 @@ import 'package:hive/hive.dart';
 
 import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
-import '../../../services/rest_server/get_dio_error.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -35,7 +34,8 @@ part 'auth_state.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 ///
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.repos, this.chat, this.restClient) : super(const AuthState()) {
+  AuthBloc(this.repos, this.chat, this.restClient, this.classificationId)
+      : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
 //    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
@@ -48,37 +48,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final APIRepository repos;
   final ChatServer chat;
   final RestClient restClient;
+  final String classificationId;
 
   Future<void> _onAuthLoad(
     AuthLoad event,
     Emitter<AuthState> emit,
   ) async {
+    Authenticate defaultAuthenticate =
+        Authenticate(classificationId: classificationId);
     try {
-      // get session data from last time
-      var localAuthenticate = await PersistFunctions.getAuthenticate();
       // check connection with default company
-      Companies? companies = await restClient.getCompanies();
-      Company defaultCompany = companies.companies[0]; // use dummy class
+      Companies? companies = await restClient.getCompanies(limit: 1);
+      defaultAuthenticate = Authenticate(
+          company: companies.companies[0], classificationId: classificationId);
+      // get session data from last time
+      Authenticate? localAuthenticate =
+          await PersistFunctions.getAuthenticate();
       if (localAuthenticate != null &&
           localAuthenticate.apiKey != null &&
           localAuthenticate.company?.partyId != null) {
         // check if company still valid
-        Companies? companies = await restClient.getCompany(
-            companyPartyId: localAuthenticate.company!.partyId!);
-        if (companies.companies[0].partyId == null) {
-          emit(state.copyWith(
+        Companies? companies = await restClient.getCompanies(
+            limit: 1, searchString: localAuthenticate.company!.partyId!);
+        if (companies.companies.isEmpty) {
+          return emit(state.copyWith(
               status: AuthStatus.unAuthenticated,
-              authenticate: Authenticate(company: defaultCompany)));
+              authenticate: defaultAuthenticate));
         }
         // test apiKey and get Authenticate
         repos.setApiKey(
             localAuthenticate.apiKey!, localAuthenticate.moquiSessionToken!);
-        Authenticate authResult = await restClient.getAuthenticate();
+        Authenticate authResult = await restClient.getAuthenticate(
+            classificationId: classificationId);
+        // UnAuthenticated
         if (authResult.apiKey == null) {
           emit(state.copyWith(
               status: AuthStatus.unAuthenticated,
-              authenticate: Authenticate(company: defaultCompany)));
+              authenticate: defaultAuthenticate));
         } else {
+          //Authenticated
           emit(state.copyWith(
               status: AuthStatus.authenticated, authenticate: authResult));
           await PersistFunctions.persistAuthenticate(state.authenticate!);
@@ -88,14 +96,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         }
       } else {
-        await PersistFunctions.persistAuthenticate(
-            Authenticate(company: defaultCompany));
+        // UnAuthenticated with default company
+        await PersistFunctions.persistAuthenticate(defaultAuthenticate);
         emit(state.copyWith(
             status: AuthStatus.unAuthenticated,
-            authenticate: Authenticate(company: defaultCompany)));
+            authenticate: defaultAuthenticate));
       }
     } on DioException catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
+      emit(state.copyWith(
+          status: AuthStatus.failure,
+          authenticate: defaultAuthenticate,
+          message: getDioError(e)));
     }
   }
 
@@ -113,6 +124,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         lastName: event.user.lastName!,
         companyEmailAddress: event.user.email!,
         demoData: event.demoData,
+        classificationId: classificationId,
+        // when debug mode password is always qqqqqq9!
         newPassword: kReleaseMode ? null : 'qqqqqq9!',
       );
       emit(state.copyWith(
@@ -173,19 +186,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      Authenticate auth = await restClient.login(
-        event.username,
-        event.password,
+      Authenticate authenticate = await restClient.login(
+        username: event.username,
+        password: event.password,
+        classificationId: classificationId,
       );
-      if (auth.apiKey == 'passwordChange') {
+      if (authenticate.apiKey == 'passwordChange') {
         emit(state.copyWith(
             status: AuthStatus.passwordChange,
-            authenticate: state.authenticate,
+            authenticate: authenticate,
             message: 'need to change password'));
       } else {
         emit(state.copyWith(
             status: AuthStatus.authenticated,
-            authenticate: auth,
+            authenticate: authenticate,
             message: 'You are logged in now...'));
       }
       if (state.status == AuthStatus.authenticated) {
@@ -195,7 +209,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         chat.connect(
             state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         var box = await Hive.openBox('growerp');
-        box.put('apiKey', auth.apiKey);
+        box.put('apiKey', authenticate.apiKey);
       }
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));

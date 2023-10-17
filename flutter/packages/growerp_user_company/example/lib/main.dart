@@ -25,6 +25,8 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP package: growerp_user_company.',

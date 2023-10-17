@@ -26,12 +26,14 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP Package Inventory.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [CatalogLocalizations.delegate],
+    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
   ));
 }
 

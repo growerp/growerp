@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart' hide Headers;
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'models/models.dart';
@@ -9,6 +8,9 @@ part 'rest_client.g.dart';
 @RestApi(baseUrl: "http://localhost:8080/")
 abstract class RestClient {
   factory RestClient(Dio dio, {String baseUrl}) = _RestClient;
+
+  @GET("rest/s1/growerp/100/CheckEmail")
+  Future<String> checkEmail(@Query('email') String email);
 
   @POST("rest/s1/growerp/100/UserAndCompany")
   @FormUrlEncoded()
@@ -20,14 +22,37 @@ abstract class RestClient {
     @Field() required String companyName,
     @Field() required String currencyId,
     @Field() required bool demoData,
-    @Field() String? classificationId,
+    @Field() required String classificationId,
     @Field() String? newPassword,
   });
 
-  @GET("rest/s1/growerp/100/CheckEmail")
-  Future<String> checkEmail(@Query('email') String email);
+  @POST("rest/s1/growerp/100/Login")
+  @FormUrlEncoded()
+  Future<Authenticate> login({
+    @Field() required String username,
+    @Field() required String password,
+    @Field() required String classificationId,
+  });
+
+  @POST("rest/s1/growerp/100/Logout")
+  Future<Authenticate> logout();
+
+  @GET("rest/s1/growerp/100/Companies")
+  Future<Companies> getCompanies({
+    @Query('mainCompanies') bool? mainCompanies,
+    @Query('searchString') String? searchString,
+    @Query('filter') String? filter,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/Authenticate")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Authenticate> getAuthenticate(
+      {@Query('classificationId') required String classificationId});
 
   @GET("rest/s1/growerp/100/Company")
+  @Headers(<String, dynamic>{'requireApiKey': true})
   Future<Companies> getCompany({
     @Query('companyPartyId') String? companyPartyId,
     @Query('companyName') String? companyName,
@@ -41,19 +66,6 @@ abstract class RestClient {
     @Query('searchString') Role? searchString,
   });
 
-  @GET("rest/s1/growerp/100/Companies")
-  Future<Companies> getCompanies({
-    @Query('companyPartyId') String? companyPartyId,
-  });
-
-  @GET("rest/s1/growerp/100/Authenticate")
-  Future<Authenticate> getAuthenticate();
-
-  @POST("rest/s1/growerp/100/Login")
-  @FormUrlEncoded()
-  Future<Authenticate> login(@Field() String username, @Field() String password,
-      {@Field() String classificationId = 'AppAdmin'});
-
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Headers(<String, dynamic>{'requireApiKey': true})
   Future<void> importGlAccounts(@Field() List<GlAccount> glAccounts);
@@ -63,7 +75,7 @@ abstract class RestClient {
   Future<void> importCompanies(@Field() List<Company> companies);
 
   @POST("rest/s1/growerp/100/ImportExport/users")
-  @Headers(<String, dynamic>{'requireApiKey': true})
+  @Headers(<String, dynamic>{'requireApiKey': 'true'})
   Future<void> importUsers(@Field() List<User> users);
 
   @POST("rest/s1/growerp/100/ImportExport/products")

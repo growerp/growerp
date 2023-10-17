@@ -36,11 +36,17 @@
             ]
         },
         {
-            "name": "Admin (lib/main.dart)",
+            "name": "Admin chrome (lib/main.dart)",
             "type": "dart",
             "request": "launch",
             "cwd": "flutter/packages/admin",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "5555"
+            ]
         },
     ]
 }

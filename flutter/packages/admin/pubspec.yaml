@@ -25,6 +25,9 @@ dependencies:
   intl: ^0.17.0
   shared_preferences: ^2.0.6
   package_info_plus: ^3.1.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 

@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,8 +33,12 @@ class PersistFunctions {
   static Future<void> persistAuthenticate(
     Authenticate authenticate,
   ) async {
-    var box = await Hive.openBox('growerp');
-    box.put('authenticate', jsonEncode(authenticate.toJson()));
+    try {
+      var box = await Hive.openBox('growerp');
+      await box.put('authenticate', jsonEncode(authenticate.toJson()));
+    } catch (e) {
+      debugPrint("????????persist????????? box error: $e");
+    }
   }
 
   static Future<Authenticate?> getAuthenticate() async {
@@ -42,11 +47,11 @@ class PersistFunctions {
       var box = await Hive.openBox('growerp');
       String? result = box.get('authenticate');
       if (result != null) {
-        return getJsonObject<Authenticate>(
-            result, (json) => Authenticate.fromJson(json));
+        return Authenticate.fromJson({'authenticate': jsonDecode(result)});
       }
       return null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint("????????get????????? box error: $e");
       return null;
     }
   }
