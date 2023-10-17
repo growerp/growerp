@@ -2962,10 +2962,12 @@ along with this software (see the LICENSE.md file). If not, see
                                     vendorPartyId: companyPartyId,
                                 ]"
                                 out-map="context" />
-                            <service-call name="create#mantle.order.OrderPartParty"
-                                in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId,
+                            <if condition="customers[index%2].personPartyId">
+                                <service-call name="create#mantle.order.OrderPartParty"
+                                    in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId,
                                     partyId: customers[index%2].personPartyId,
                                     roleTypeId: 'CustomerContactPerson']" />
+                            </if>
                         </else>
                     </if>
                     <entity-find entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"

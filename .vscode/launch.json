@@ -48,5 +48,12 @@
                 "5555"
             ]
         },
+        {
+            "name": "Admin mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/admin",
+            "program": "lib/main.dart",
+        },
     ]
 }

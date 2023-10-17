@@ -14,6 +14,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -21,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,9 +63,18 @@ Future main() async {
       print('===$ip does not respond...not updating databaseUrl: $error');
     }
   }
+
+  await Hive.initFlutter();
+  String databaseUrl = GlobalConfiguration().get('databaseUrl');
+  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
+
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    restClient: RestClient(await buildDioClient(kReleaseMode
+        ? '$databaseUrl/'
+        : databaseUrlDebug.isNotEmpty
+            ? '$databaseUrlDebug/'
+            : null)),
     classificationId: 'AppFreelance',
     dbServer: APIRepository(),
     chatServer: ChatServer(),

@@ -24,7 +24,7 @@ public class RestClient {
     
     public Boolean validate(String apiKey) {
         Boolean result = false;
-        String fullUrl = urlString + "Authenticate";
+        String fullUrl = urlString + "Authenticate?classificationId=chat";
         try {
             URL url = new URL(fullUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();

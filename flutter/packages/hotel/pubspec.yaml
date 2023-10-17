@@ -23,6 +23,9 @@ dependencies:
   date_utils: ^0.2.0
   flutter_bloc: ^8.1.1
   intl: ^0.17.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 

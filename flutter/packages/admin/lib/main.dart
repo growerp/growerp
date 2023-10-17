@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
@@ -64,10 +65,16 @@ Future main() async {
   }
 
   await Hive.initFlutter();
+  String databaseUrl = GlobalConfiguration().get('databaseUrl');
+  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    restClient: RestClient(await buildDioClient(kReleaseMode
+        ? '$databaseUrl/'
+        : databaseUrlDebug.isNotEmpty
+            ? '$databaseUrlDebug/'
+            : null)),
     classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),

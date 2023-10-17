@@ -369,8 +369,17 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <if condition="classificationId == 'chat'">
+                <set field="authenticate" value="dummy" />
+                <!-- used by chat to see if apiKey is valid -->
+                <return />
+            </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- if switching apps need to check of all basic data is present-->
+            <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
+                in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId,
+                 companyPartyId: companyPartyId, classificationId: classificationId]" />
             <set field="authenticate"
                 from="[ownerPartyId: ownerPartyId,classificationId: classificationId]" />
             <service-call name="growerp.100.PartyServices100.get#User"

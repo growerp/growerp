@@ -18,8 +18,19 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "b97f901863be8fb8",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.4.16"
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -164,7 +175,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "ee481afbef6892fd",
+  "active": "b97f901863be8fb8",
   "lastOpenFiles": [
     "2 End User documentation/1 Introduction/3 General business flow.md",
     "2 End User documentation/1 Introduction/1 Overview.md",

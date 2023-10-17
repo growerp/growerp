@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -21,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -64,10 +66,21 @@ Future main() async {
   }
   // set dates for rental testing
   CustomizableDateTime.customTime = DateTime.now().add(const Duration(days: 0));
+
   Bloc.observer = AppBlocObserver();
   debugPrint("=== current date: ${CustomizableDateTime.current}");
+
+  await Hive.initFlutter();
+  String databaseUrl = GlobalConfiguration().get('databaseUrl');
+  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
+
+  Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    restClient: RestClient(await buildDioClient(kReleaseMode
+        ? '$databaseUrl/'
+        : databaseUrlDebug.isNotEmpty
+            ? '$databaseUrlDebug/'
+            : null)),
     classificationId: 'AppHotel',
     dbServer: APIRepository(),
     chatServer: ChatServer(),

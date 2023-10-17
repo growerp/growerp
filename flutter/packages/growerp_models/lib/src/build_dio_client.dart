@@ -1,9 +1,19 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-Future<Dio> buildDioClient(String base) async {
-  final dio = Dio()..options = BaseOptions(baseUrl: base);
+Future<Dio> buildDioClient(String? base) async {
+  final dio = Dio()
+    ..options = BaseOptions(
+        baseUrl: base == null
+            ? (Platform.isAndroid)
+                ? 'http://10.0.2.2:8080/'
+                : 'http://localhost:8080/'
+            : base)
+    ..options.connectTimeout = const Duration(milliseconds: 5000)
+    ..options.receiveTimeout = const Duration(milliseconds: 5000);
 
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
@@ -36,7 +46,6 @@ class AppendApiKeyInterceptor extends Interceptor {
       String? apiKey = await _box?.get('apiKey');
       if (apiKey != null) options.headers['api_key'] = apiKey;
     }
-    options.headers['Access-Control-Allow-Origin'] = '*';
 
     return super.onRequest(options, handler);
   }
