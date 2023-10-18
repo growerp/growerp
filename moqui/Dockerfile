@@ -56,5 +56,5 @@ ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
 # specify this as a default parameter if none are specified with docker exec/run, ie run production by default
-CMD ["conf=conf/MoquiProductionConf.xml","$DOCKER_TAG"]
+CMD ["conf=conf/MoquiProductionConf.xml"]
 

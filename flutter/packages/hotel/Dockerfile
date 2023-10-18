@@ -41,7 +41,7 @@ RUN melos bootstrap
 # localization
 RUN melos l10n --no-select
 # build
-RUN melos build_all --no-select
+RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/growerp/flutter/packages/hotel
 RUN flutter build web --release
