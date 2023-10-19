@@ -106,7 +106,7 @@ Future<void> main(List<String> args) async {
             lastName: 'Jansen',
             companyName: 'test company',
             currencyId: 'USD',
-            demoData: false,
+            demoData: true,
             classificationId: 'AppAdmin');
       }
       // login for key
@@ -194,7 +194,7 @@ Future<void> main(List<String> args) async {
                 await client.importGlAccounts(CsvToGlAccounts(csvFile));
                 break;
               case FileType.product:
-                await client.importProducts(CsvToProducts(csvFile));
+                await client.importProducts(CsvToProducts(csvFile), 'AppAdmin');
                 break;
               case FileType.category:
                 await client.importCategories(CsvToCategories(csvFile));

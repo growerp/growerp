@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -77,8 +78,13 @@ List<User> CsvToUsers(String csvFile) {
         pseudoId: row[0],
         firstName: row[1],
         lastName: row[2],
-        email: row[3],
-        loginName: row[4],
+        email: row[3].contains('@example.com') // avoid duplicated emails
+            ? (Random().nextInt(1000).toString() + row[3])
+            : row[3],
+        loginName: row[4].contains('@@') ||
+                row[4].contains('@example.com') // avoid duplicated usernames
+            ? (Random().nextInt(1000).toString() + row[4])
+            : row[4],
         telephoneNr: row[5],
         userGroup: UserGroup.getByValue(row[6]),
         language: row[7],
@@ -87,7 +93,6 @@ List<User> CsvToUsers(String csvFile) {
       ),
     );
   }
-
   return users;
 }
 

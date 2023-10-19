@@ -132,20 +132,22 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="Users">
         <in-parameters>
             <parameter name="users" required="true" type="List" />
-            <parameter name="classificationId" />
         </in-parameters>
         <actions>
             <iterate list="users" entry="user">
                 <service-call name="growerp.100.PartyServices100.create#User"
                     in-map="[user: user]" />
             </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${users.size()} users imported</message>
+            </if>
         </actions>
     </service>
 
     <service verb="import" noun="Products">
         <in-parameters>
             <parameter name="products" required="true" type="List" />
-            <parameter name="classificationId" />
+            <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -167,6 +169,9 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="result"
                     in-map="[product: product, classificationId: classificationId]" />
             </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${products.size()} products imported</message>
+            </if>
         </actions>
     </service>
 
@@ -180,6 +185,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
                     in-map="[category: category, classificationId: classificationId]" />
             </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${categories.size()} categories imported</message>
+            </if>
+
         </actions>
     </service>
 

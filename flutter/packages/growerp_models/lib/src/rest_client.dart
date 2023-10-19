@@ -75,12 +75,13 @@ abstract class RestClient {
   Future<void> importCompanies(@Field() List<Company> companies);
 
   @POST("rest/s1/growerp/100/ImportExport/users")
-  @Headers(<String, dynamic>{'requireApiKey': 'true'})
+  @Headers(<String, dynamic>{'requireApiKey': true})
   Future<void> importUsers(@Field() List<User> users);
 
   @POST("rest/s1/growerp/100/ImportExport/products")
   @Headers(<String, dynamic>{'requireApiKey': true})
-  Future<void> importProducts(@Field() List<Product> products);
+  Future<void> importProducts(
+      @Field() List<Product> products, @Field() String classificationId);
 
   @POST("rest/s1/growerp/100/ImportExport/categories")
   @Headers(<String, dynamic>{'requireApiKey': true})

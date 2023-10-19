@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -70,7 +71,9 @@ List<Company> CsvToCompanies(String csvFile) {
       pseudoId: row[1],
       role: Role.getByValue(row[2]),
       name: row[3],
-      email: row[4],
+      email: row[4].contains('@example.com') // avoid duplicated emails
+          ? (Random().nextInt(1000).toString() + row[4])
+          : row[4],
       telephoneNr: row[5],
       currency: Currency(currencyId: row[6]),
       image: row[7].isNotEmpty ? base64.decode(row[6]) : null,
