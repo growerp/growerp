@@ -12,8 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'dart:convert';
-
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
@@ -130,35 +128,27 @@ Map<String, String> finDocStatusValuesHotel = {
   'FinDocCancelled': 'Cancelled'
 };
 
-String FinDocCsvFormat() => "finDoc Id, FinDoc Name*, Description*, image\r\n";
+String finDocCsvFormat = "finDoc Id, FinDoc Name*, Description*, image\r\n";
+int finDocCsvLength = finDocCsvFormat.split(',').length;
 
-List<String> FinDocCsvToJson(String csvFile) {
-  List<String> finDocs = [];
+List<FinDoc> CsvToFinDocs(String csvFile) {
+  List<FinDoc> finDocs = [];
   final result = fast_csv.parse(csvFile);
-  FinDoc finDoc = FinDoc();
-  List<FinDocItem> items = [];
-  for (int index = 0; index < result.length; index++) {
-    if (index == 0) continue;
-    List<String> row = result[index];
-
-    items.add(FinDocItem(
-        itemSeqId: row[30],
-        description: row[31],
-        price: Decimal.parse(row[32])));
-
-    finDoc = FinDoc(transactionId: row[0], description: row[1], items: items);
-//    if (findoc)
-    finDocs.add(jsonEncode(finDoc.toJson()));
+  for (final row in result) {
+    if (row == result.first) continue;
+    finDocs.add(FinDoc(items: [
+      FinDocItem(
+          itemSeqId: row[30],
+          description: row[31],
+          price: Decimal.parse(row[32]))
+    ]));
   }
 
   return finDocs;
 }
 
 String CsvFromFinDocs(List<FinDoc> finDocs) {
-//  final l = json.decode(result)['finDocs'] as Iterable;
-//  List<FinDoc> finDocs = List<FinDoc>.from(
-//      l.map((e) => FinDoc.fromJson(e as Map<String, dynamic>)));
-  var csv = [];
+  var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
     for (FinDocItem item in finDoc.items) {
       csv.add(createCsvRow([
@@ -167,7 +157,7 @@ String CsvFromFinDocs(List<FinDoc> finDocs) {
         item.itemSeqId.toString(),
         item.description ?? '',
         item.price.toString()
-      ]));
+      ], finDocCsvLength));
     }
   }
   return csv.join();

@@ -25,6 +25,8 @@ import '../get_file_type.dart';
 import '../get_files.dart';
 import '../logger.dart';
 
+var logger = Logger(filter: MyFilter());
+List<String> ids = []; //keep id's to avoid duplicates
 String outputDirectory = 'growerpOutput';
 // convert accountclass, the field that specifies debit/credit
 // Debit and Credit are accepted values.
@@ -88,16 +90,10 @@ String convertFile(FileType fileType, String string) {
 void main(List<String> args) {
   var logger = Logger(filter: MyFilter());
   if (args.isEmpty) {
-    logger.e("Specify a filename or directory");
+    logger.e("Specify a directory?");
     exit(1);
   }
-  FileType? fileType;
-  if (args[1].isNotEmpty) {
-    fileType = getFileType(args[1]);
-  }
-  List<String> files =
-      getFiles(args[0], overrrideFileType: getFileType(args[1]));
-  if (files.isEmpty) exit(1);
+
   if (isDirectory(outputDirectory)) {
     logger.e(
         "output directory $outputDirectory already exists, cannot overwrite");
@@ -105,41 +101,77 @@ void main(List<String> args) {
   }
   createDir(outputDirectory);
 
-  for (String fileInput in files) {
-    // parse raw csv file string
-    String contentString = File(fileInput).readAsStringSync();
-    fileType = fileType ?? getFileType(fileInput);
-    // general changes in content
-    contentString = convertFile(fileType, contentString);
-    final csvFile = fast_csv.parse(contentString);
-    final file = File("$outputDirectory/${fileType.name}.csv");
+  for (var fileType in FileType.values) {
+    ids = [];
     List<String> fileContent = [];
+    print("processing filetype: ${fileType.name}");
+    // define search file name for every filetype
+    String searchFile = '';
     switch (fileType) {
       case FileType.glAccount:
-        fileContent.add(GlAccountCsvFormat());
-        break;
-      case FileType.category:
-        fileContent.add(CategoryCsvFormat());
-        break;
-      case FileType.product:
-        fileContent.add(ProductCsvFormat());
-        break;
-      case FileType.company:
-        fileContent.add(CompanyCsvFormat());
-        break;
-      case FileType.user:
-        fileContent.add(UserCsvFormat());
-        break;
-      case FileType.finDocTransaction:
-        fileContent.add(FinDocCsvFormat());
+        searchFile = '4-1-chart_of_accounts_list.csv';
         break;
       default:
-        fileContent.add(" ${fileType.name} not supported yet");
+        searchFile = '0b*.csv';
     }
-    for (final row in csvFile) {
-      if (row == csvFile.first || row[0].isEmpty) continue;
-      fileContent.add(createCsvRow(convertRow(fileType, row)));
+    if (searchFile.isEmpty) continue;
+    List<String> files = find(searchFile, workingDirectory: args[0]).toList();
+    if (files.isEmpty) {
+      logger.e("No $searchFile csv files found in directory ${args[0]}");
+      exit(1);
     }
+    int csvLength = 0;
+    // add header in output file
+    switch (fileType) {
+      case FileType.glAccount:
+        fileContent.add(glAccountCsvFormat);
+        csvLength = glAccountCsvLength;
+        break;
+      case FileType.category:
+        fileContent.add(categoryCsvFormat);
+        csvLength = categoryCsvLength;
+        break;
+      case FileType.product:
+        fileContent.add(productCsvFormat);
+        csvLength = productCsvLength;
+        break;
+      case FileType.company:
+        fileContent.add(companyCsvFormat);
+        csvLength = companyCsvLength;
+        break;
+      case FileType.user:
+        fileContent.add(userCsvFormat);
+        csvLength = userCsvLength;
+        break;
+      case FileType.finDocTransaction:
+        fileContent.add(finDocCsvFormat);
+        csvLength = finDocCsvLength;
+        break;
+      default:
+    }
+    for (String fileInput in files) {
+      print("processing file: ${fileInput}");
+      // parse raw csv file string
+      String contentString = File(fileInput).readAsStringSync();
+
+      // general changes in content
+      contentString = convertFile(fileType, contentString);
+
+      // parse input file
+      final inputCsvFile = fast_csv.parse(contentString);
+
+      // convert rows
+      int index = 0;
+      for (final row in inputCsvFile) {
+        if (++index % 10000 == 0) print("processing row: $index");
+        if (row == inputCsvFile.first) continue;
+        var convertedRow = convertRow(fileType, row);
+        if (convertedRow.isNotEmpty) {
+          fileContent.add(createCsvRow(convertedRow, csvLength));
+        }
+      }
+    }
+    final file = File("$outputDirectory/${fileType.name}.csv");
     file.writeAsStringSync(fileContent.join());
   }
   exit(0);

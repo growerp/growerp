@@ -62,9 +62,10 @@ class User with _$User {
       'company: ${company!.name}[${company!.partyId}] size: ${image?.length}';
 }
 
-String UserCsvFormat() =>
+String userCsvFormat =
     'User Id, First Name*, Last Name*, Email, Login Name, Telephone Number '
     'User Group, language, image, Company Name, Company Role\r\n';
+int userCsvLength = userCsvFormat.split(',').length;
 
 List<User> CsvToUsers(String csvFile) {
   List<User> users = [];
@@ -91,7 +92,7 @@ List<User> CsvToUsers(String csvFile) {
 }
 
 String CsvFromUsers(List<User> users) {
-  var csv = [UserCsvFormat()];
+  var csv = [userCsvFormat];
   for (User user in users) {
     csv.add(createCsvRow([
       user.pseudoId ?? '',
@@ -105,7 +106,7 @@ String CsvFromUsers(List<User> users) {
       user.image != null ? base64.encode(user.image!) : '',
       user.company?.name ?? '',
       user.company!.role.toString(),
-    ]));
+    ], userCsvLength));
   }
   return csv.join();
 }

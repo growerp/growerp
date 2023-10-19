@@ -91,7 +91,7 @@ along with this software (see the LICENSE.md file). If not, see
         </in-parameters>
         <actions>
             <iterate list="companies" entry="company">
-                <if condition="company.partyId == '_MOD_'">
+                <if condition="company.partyId == '_MOD_'"><!-- used in automated test-->
                     <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                         list="parties">
                         <econdition field-name="ownerPartyId" from="relComp.ownerPartyId" />
@@ -104,11 +104,28 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[company: company]" />
                     </if>
                     <else>
-                        <service-call name="growerp.100.PartyServices100.create#Company"
-                            in-map="[company: company]" />
+                        <if condition="!company.role">
+                            <then>
+                                <message type="danger">Company id: ${company.pseudoId} ${company.name} not processed, role is missing!\r\n</message>
+                            </then>
+                            <else-if condition="!company.name">
+                                <message type="danger">Company id: ${company.pseudoId} ${company.name} not processed, name is missing!\r\n</message>
+                            </else-if>
+                            <else-if
+                                condition="company.email &amp;&amp; company.email != '' &amp;&amp; !org.apache.commons.validator.routines.EmailValidator.getInstance().isValid(company.email)">
+                                <message type="danger">Company id: ${company.pseudoId} ${company.name} not processed, email: ${company.email} is not valid!\r\n</message>
+                            </else-if>
+                            <else>
+                                <service-call name="growerp.100.PartyServices100.create#Company"
+                                    in-map="[company: company]" />
+                            </else>
+                        </if>
                     </else>
                 </if>
             </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${companies.size()} companies imported</message>
+            </if>
         </actions>
     </service>
 

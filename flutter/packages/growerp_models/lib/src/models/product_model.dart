@@ -55,9 +55,10 @@ class Product extends Equatable with _$Product {
 
 List<String> productTypes = ['Physical Good', 'Service', 'Rental'];
 
-String ProductCsvFormat() =>
+String productCsvFormat =
     'product Id, Type*, Name*, Description*, List Price*, Sales price*, '
     'Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
+int productCsvLength = productCsvFormat.split(',').length;
 
 List<Product> CsvToProducts(String csvFile) {
   List<Product> products = [];
@@ -84,7 +85,7 @@ List<Product> CsvToProducts(String csvFile) {
 }
 
 String CsvFromProducts(List<Product> products) {
-  var csv = [ProductCsvFormat()];
+  var csv = [productCsvFormat];
   for (Product product in products) {
     csv.add(createCsvRow([
       product.pseudoId,
@@ -98,7 +99,7 @@ String CsvFromProducts(List<Product> products) {
       product.categories.length == 2 ? product.categories[1].categoryName : '',
       product.categories.length == 3 ? product.categories[2].categoryName : '',
       product.image != null ? base64.encode(product.image!) : '',
-    ]));
+    ], productCsvLength));
   }
   return csv.join();
 }

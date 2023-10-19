@@ -47,8 +47,9 @@ class Category extends Equatable with _$Category {
   String toString() => '$categoryName[$categoryId]';
 }
 
-String CategoryCsvFormat() =>
+String categoryCsvFormat =
     "category Id, Category Name*, Description*, image\r\n";
+int categoryCsvLength = categoryCsvFormat.split(',').length;
 
 List<Category> CsvToCategories(String csvFile) {
   List<Category> categories = [];
@@ -69,14 +70,14 @@ List<Category> CsvToCategories(String csvFile) {
 }
 
 String CsvFromCategories(List<Category> categories) {
-  var csv = [CategoryCsvFormat()];
+  var csv = [categoryCsvFormat];
   for (Category category in categories) {
     csv.add(createCsvRow([
       category.categoryId,
       category.categoryName,
       category.description,
       category.image != null ? category.image!.toList().toString() : '',
-    ]));
+    ], categoryCsvLength));
   }
   return csv.join();
 }

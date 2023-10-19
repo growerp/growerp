@@ -43,8 +43,10 @@ class GlAccount with _$GlAccount {
       _$GlAccountFromJson(json);
 }
 
-String GlAccountCsvFormat() =>
-    "Account Code*, Account Name*, Class Description*, Type Description, Posted Balance\r\n";
+String glAccountCsvFormat =
+    'Account Code*, Account Name*, Class Description*, Type Description,'
+    ' Posted Balance\r\n';
+int glAccountCsvLength = glAccountCsvFormat.split(',').length;
 
 List<GlAccount> CsvToGlAccounts(String csvFile) {
   List<GlAccount> glAccounts = [];
@@ -65,7 +67,7 @@ List<GlAccount> CsvToGlAccounts(String csvFile) {
 }
 
 String CsvFromGlAccounts(List<GlAccount> glAccounts) {
-  var csv = [GlAccountCsvFormat()];
+  var csv = [glAccountCsvFormat];
   for (GlAccount glAccount in glAccounts) {
     csv.add(createCsvRow([
       glAccount.accountCode ?? '',
@@ -73,7 +75,7 @@ String CsvFromGlAccounts(List<GlAccount> glAccounts) {
       glAccount.accountClass!.description ?? '',
       glAccount.accountType!.description ?? '',
       glAccount.postedBalance == null ? '' : glAccount.postedBalance.toString(),
-    ]));
+    ], glAccountCsvLength));
   }
   return csv.join();
 }

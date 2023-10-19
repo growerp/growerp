@@ -1906,6 +1906,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="authenticate" type="Map">
                 <parameter name="ownerPartyId" />
+                <parameter name="classificationId" />
                 <parameter name="company" type="Map">
                     <parameter name="partyId" />
                     <parameter name="name" />
@@ -2045,6 +2046,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- owner -->
             <set field="authenticate.ownerPartyId" from="owner.partyId" />
+            <set field="authenticate.classificationId" from="classificationId" />
         </actions>
     </service>
     <service verb="verifyAndGet" noun="ProductStore">

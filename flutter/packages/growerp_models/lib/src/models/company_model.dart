@@ -53,11 +53,12 @@ class Company with _$Company {
       '#Empl: ${employees.length}';
 }
 
-String CompanyCsvFormat() =>
-    'System Id, PseudoId, Role, Company Name*, Email, Telephone, Currency id, Image '
-    'Postal Address 1, Address 2, Postal Code, City, Province, Country '
+String companyCsvFormat =
+    'System Id, PseudoId, Role, Company Name*, Email, Telephone, Currency id,'
+    'Image,Postal Address 1, Address 2, Postal Code, City, Province, Country '
     'Credit Card Description, Number, Type, Expire month, Year, '
     'Vat perc, Sales Perc\r\n';
+int companyCsvLength = companyCsvFormat.split(',').length;
 
 List<Company> CsvToCompanies(String csvFile) {
   List<Company> companies = [];
@@ -72,7 +73,7 @@ List<Company> CsvToCompanies(String csvFile) {
       email: row[4],
       telephoneNr: row[5],
       currency: Currency(currencyId: row[6]),
-      image: row[6].isNotEmpty ? base64.decode(row[6]) : null,
+      image: row[7].isNotEmpty ? base64.decode(row[6]) : null,
       address: Address(
           address1: row[8],
           address2: row[9],
@@ -85,8 +86,8 @@ List<Company> CsvToCompanies(String csvFile) {
           creditCardType: CreditCardType.getByValue(row[15]),
           expireMonth: row[16],
           expireYear: row[17]),
-      vatPerc: Decimal.parse(row[18]),
-      salesPerc: Decimal.parse(row[19]),
+      vatPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
+      salesPerc: row[19] != '' ? Decimal.parse(row[19]) : null,
     ));
   }
 
@@ -94,7 +95,7 @@ List<Company> CsvToCompanies(String csvFile) {
 }
 
 String CsvFromCompanies(List<Company> companies) {
-  var csv = [CompanyCsvFormat()];
+  var csv = [companyCsvFormat];
   for (Company company in companies) {
     csv.add(createCsvRow([
       company.partyId ?? '',
@@ -117,7 +118,7 @@ String CsvFromCompanies(List<Company> companies) {
       company.paymentMethod?.expireYear ?? '',
       company.vatPerc.toString(),
       company.salesPerc.toString(),
-    ]));
+    ], companyCsvLength));
   }
   return csv.join();
 }
