@@ -2,9 +2,13 @@
 FROM openjdk:11-jdk as build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
+ARG TAG=NOTSET1
+ARG DOCKER_TAG=NOTSET2
+ARG PAT=NOTSET3
 
 RUN echo "Tag version: $TAG"
 RUN echo "DockerTag version: $DOCKER_TAG"
+RUN echo "Pat: $PAT"
 
 RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https && \

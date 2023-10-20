@@ -20,7 +20,8 @@ Future<Dio> buildDioClient(String? base) async {
                 : 'http://localhost:8080/'
             : base)
     ..options.connectTimeout = const Duration(milliseconds: 5000)
-    ..options.receiveTimeout = const Duration(milliseconds: 5000);
+    ..options.receiveTimeout = const Duration(milliseconds: 5000)
+    ..httpClientAdapter;
 
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
@@ -31,10 +32,14 @@ Future<Dio> buildDioClient(String? base) async {
       compact: true,
       maxWidth: 133));
 
-  dio.options.headers["Content-Type"] = 'application/json; charset=UTF-8';
+  dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
   dio.options.responseType = ResponseType.plain;
+
   var box = await Hive.openBox('growerp');
   dio.interceptors.add(KeyInterceptor(box));
+
+  // ignore: avoid_print
+  print('Using base moqui backend url: $base');
 
   return dio;
 }
