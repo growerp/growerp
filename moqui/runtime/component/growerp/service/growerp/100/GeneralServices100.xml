@@ -370,7 +370,7 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <if condition="classificationId == 'chat'">
-                <set field="authenticate" value="dummy" />
+                <set field="authenticate" value="[:]" />
                 <!-- used by chat to see if apiKey is valid -->
                 <return />
             </if>
@@ -597,14 +597,13 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="passwordChange">
                 <set field="authenticate" from="[apiKey: 'passwordChange']" />
                 <else>
+                    <!-- normal login -->
                     <script>ec.user.loginUser(username, password)</script>
                     <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                         in-map="classificationId: classificationId"
                         out-map="context" />
                     <!-- check if specific app already logged in before -->
-                    <service-call name="growerp.100.PartyServices100.verifyAndGet#ProductStore"
-                        in-map="[ownerPartyId: authenticate.ownerPartyId, userPartyId: authenticate.user.partyId,
-                             companyPartyId: authenticate.company.partyId, classificationId: classificationId]" />
+                    <!-- already done in get#authenticate -->
                 </else>
             </if>
         </actions>

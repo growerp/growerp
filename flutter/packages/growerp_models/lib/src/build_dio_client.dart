@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Future<Dio> buildDioClient(String? base) async {
+  print('Using base moqui backend url: $base');
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -23,6 +24,12 @@ Future<Dio> buildDioClient(String? base) async {
     ..options.receiveTimeout = const Duration(milliseconds: 5000)
     ..httpClientAdapter;
 
+  dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
+  dio.options.responseType = ResponseType.plain;
+
+  var box = await Hive.openBox('growerp');
+  dio.interceptors.add(KeyInterceptor(box));
+
   dio.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
@@ -31,15 +38,6 @@ Future<Dio> buildDioClient(String? base) async {
       error: true,
       compact: true,
       maxWidth: 133));
-
-  dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
-  dio.options.responseType = ResponseType.plain;
-
-  var box = await Hive.openBox('growerp');
-  dio.interceptors.add(KeyInterceptor(box));
-
-  // ignore: avoid_print
-  print('Using base moqui backend url: $base');
 
   return dio;
 }
@@ -68,7 +66,7 @@ class KeyInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    await _box?.put('moquiSessionToken', response.headers['moquiSessionToken']);
+    await _box?.put('moquiSessionToken', response.headers['moquisessiontoken']);
     super.onResponse(response, handler);
   }
 }
