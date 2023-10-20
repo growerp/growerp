@@ -31,8 +31,8 @@ Future<Dio> buildDioClient(String? base) async {
       compact: true,
       maxWidth: 133));
 
-  dio.options.headers["content-type"] = "application/json";
-
+  dio.options.headers["Content-Type"] = 'application/json; charset=UTF-8';
+  dio.options.responseType = ResponseType.plain;
   var box = await Hive.openBox('growerp');
   dio.interceptors.add(KeyInterceptor(box));
 
