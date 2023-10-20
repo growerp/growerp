@@ -81,7 +81,7 @@ List<User> CsvToUsers(String csvFile) {
         email: row[3].contains('@example.com') // avoid duplicated emails
             ? (Random().nextInt(1000).toString() + row[3])
             : row[3],
-        loginName: row[4].contains('@@') ||
+        loginName: row[4].contains('@@') || // demo username
                 row[4].contains('@example.com') // avoid duplicated usernames
             ? (Random().nextInt(1000).toString() + row[4])
             : row[4],

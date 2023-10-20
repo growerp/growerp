@@ -1,14 +1,21 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Future<Dio> buildDioClient(String? base) async {
+  bool android = false;
+  try {
+    if (Platform.isAndroid) {
+      android = true;
+    }
+  } catch (e) {}
+
   final dio = Dio()
     ..options = BaseOptions(
         baseUrl: base == null
-            ? (Platform.isAndroid)
+            ? (android == true)
                 ? 'http://10.0.2.2:8080/'
                 : 'http://localhost:8080/'
             : base)
@@ -19,7 +26,7 @@ Future<Dio> buildDioClient(String? base) async {
       requestHeader: true,
       requestBody: true,
       responseBody: true,
-      responseHeader: false,
+      responseHeader: true,
       error: true,
       compact: true,
       maxWidth: 133));
@@ -27,13 +34,13 @@ Future<Dio> buildDioClient(String? base) async {
   dio.options.headers["content-type"] = "application/json";
 
   var box = await Hive.openBox('growerp');
-  dio.interceptors.add(AppendApiKeyInterceptor(box));
+  dio.interceptors.add(KeyInterceptor(box));
 
   return dio;
 }
 
-class AppendApiKeyInterceptor extends Interceptor {
-  AppendApiKeyInterceptor(this._box);
+class KeyInterceptor extends Interceptor {
+  KeyInterceptor(this._box);
 
   Box? _box;
 
@@ -43,10 +50,20 @@ class AppendApiKeyInterceptor extends Interceptor {
 //    print(
 //        "=====interceptor key: ${_box?.get('apiKey')} ${options.headers['requireApiKey']}");
     if (options.headers['requireApiKey'] == true) {
-      String? apiKey = await _box?.get('apiKey');
-      if (apiKey != null) options.headers['api_key'] = apiKey;
+      options.headers['api_key'] = await _box?.get('apiKey');
+    }
+
+    if (options.method != 'GET') {
+      options.headers['moquiSessionToken'] =
+          await _box?.get('moquiSessionToken');
     }
 
     return super.onRequest(options, handler);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) async {
+    await _box?.put('moquiSessionToken', response.headers['moquiSessionToken']);
+    super.onResponse(response, handler);
   }
 }

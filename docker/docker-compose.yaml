@@ -6,6 +6,20 @@ networks:
 
 services:
 
+  watch:
+    image: containrrr/watchtower
+    container_name: watch
+    mem_limit: 100m
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Bangkok
+      - WATCHTOWER_DEBUG
+      # check every 5mins
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_CLEANUP=true
+
   nginx-proxy:
     # For documentation on SSL and other settings see:
     # https://github.com/jwilder/nginx-proxy
