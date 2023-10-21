@@ -2,7 +2,7 @@
 FROM openjdk:11-jdk as build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
-ARG TAG=NOTSET1
+ARG DOCKER_TAG=NOTSET1
 ARG PAT=NOTSET2
 
 RUN echo "DockerTag version: $DOCKER_TAG"
