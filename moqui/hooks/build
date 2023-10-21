@@ -3,6 +3,7 @@
 docker build \
     --build-arg PAT=$PAT \
     --build-arg DOCKER_TAG=$DOCKER_TAG \
+    --no-cache \
     -t $IMAGE_NAME \
-    -t $DOCKER_REPO:latest \
+    -t $DOCKER_REPO \
     -f $DOCKERFILE_PATH .
