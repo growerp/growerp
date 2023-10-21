@@ -38,6 +38,7 @@ class DioClient {
       ..options.receiveTimeout =
           const Duration(milliseconds: _defaultReceiveTimeout)
       ..options.responseType = ResponseType.plain
+      ..options.followRedirects = false
       ..httpClientAdapter
       ..options.headers = {'Content-Type': 'application/json; charset=UTF-8'};
     if (interceptors?.isNotEmpty ?? false) {

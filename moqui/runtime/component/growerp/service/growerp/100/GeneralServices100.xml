@@ -369,6 +369,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="===auth input class: $classificationId" />
             <if condition="classificationId == 'chat'">
                 <set field="authenticate" value="[:]" />
                 <!-- used by chat to see if apiKey is valid -->
@@ -394,6 +395,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="authenticate.moquiSessionToken" from="ec.web.sessionToken" />
             <service-call name="growerp.100.GeneralServices100.get#Stats"
                 out-map="authenticate" />
+            <log message="===auth output class: ${authenticate.classificationId}" />
         </actions>
     </service>
 
@@ -555,6 +557,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="===login input class: $classificationId" />
             <entity-find-one entity-name="moqui.security.UserAccount"
                 value-field="userAccount" cache="false">
                 <field-map field-name="username" />
@@ -599,9 +602,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <!-- normal login -->
                     <script>ec.user.loginUser(username, password)</script>
+                    <log message="===login call auth: $classificationId" />
                     <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                         in-map="classificationId: classificationId"
                         out-map="context" />
+                    <log message="===login return auth: ${authenticate.classificationId}" />
                     <!-- check if specific app already logged in before -->
                     <!-- already done in get#authenticate -->
                 </else>
