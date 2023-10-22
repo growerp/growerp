@@ -53,7 +53,8 @@ EXPOSE 5701
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
 RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
 WORKDIR /opt/moqui
-ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh","$DOCKER_TAG"]
+
+ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh $DOCKER_TAG"]
 #ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
