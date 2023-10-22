@@ -1,12 +1,12 @@
 #!/bin/bash
 
+# create latest tag
 docker build \
     --build-arg PAT=$PAT \
     --build-arg DOCKER_TAG=$DOCKER_TAG \
-    --no-cache \
     -t $DOCKER_REPO \
     -f $DOCKERFILE_PATH .
 
-# create latest tag
+# create version tag
 docker tag $DOCKER_REPO $IMAGE_NAME
-docker push $DOCKER_NAME
+docker push $IMAGE_NAME
