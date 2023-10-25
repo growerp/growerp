@@ -59,9 +59,7 @@ class _LoginHeaderState extends State<LoginDialog> {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/', ModalRoute.withName('/'),
-              arguments: FormArguments(message: state.message));
+          Navigator.pop(context, state.message);
           break;
         case AuthStatus.failure:
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
@@ -252,9 +250,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                   onFieldSubmitted: (_) {
                     if (_loginFormKey.currentState!.validate()) {
                       context.read<AuthBloc>().add(AuthLogin(
-                          authenticate.company,
-                          _usernameController.text,
-                          _passwordController.text));
+                          _usernameController.text, _passwordController.text));
                     }
                   },
                   autofocus: _usernameController.text.isNotEmpty,
@@ -287,7 +283,6 @@ class _LoginHeaderState extends State<LoginDialog> {
                         onPressed: () {
                           if (_loginFormKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(AuthLogin(
-                                authenticate.company,
                                 _usernameController.text,
                                 _passwordController.text));
                           }
@@ -298,77 +293,22 @@ class _LoginHeaderState extends State<LoginDialog> {
                   child: GestureDetector(
                       child: const Text('forgot/change password?'),
                       onTap: () async {
-                        String? username = authenticate.user?.loginName ??
+                        String username = authenticate.user?.loginName ??
                             (kReleaseMode ? '' : 'test@example.com');
-                        username =
-                            await _sendResetPasswordDialog(context, username);
-                        if (username != null) {
-                          _authBloc.add(AuthResetPassword(username: username));
-                          // ignore: use_build_context_synchronously
-                          HelperFunctions.showMessage(
-                              context,
-                              'An email with password has been '
-                              'send to $username',
-                              Colors.green);
+                        var message = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _authBloc,
+                                  child: SendResetPasswordDialog(username));
+                            });
+                        if (message != null) {
+                          await Future.delayed(
+                              const Duration(milliseconds: 200),
+                              () => _authBloc.add(AuthLastMessage(message)));
                         }
                       })),
             ])));
-  }
-
-  _sendResetPasswordDialog(BuildContext context, String? username) async {
-    return showDialog<String>(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return Dialog(
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(32.0))),
-              child: Stack(clipBehavior: Clip.none, children: [
-                SizedBox(
-                    width: 400,
-                    height: 250,
-                    child: Column(children: [
-                      Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColorDark,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              )),
-                          child: const Center(
-                              child: Text(
-                                  'Email you registered with?\nWe will send you a reset password',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)))),
-                      Expanded(
-                        child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(children: [
-                              const SizedBox(height: 20),
-                              TextFormField(
-                                  initialValue: username,
-                                  autofocus: true,
-                                  decoration: const InputDecoration(
-                                      labelText: 'Email:'),
-                                  onChanged: (value) {
-                                    username = value;
-                                  }),
-                              const SizedBox(height: 20),
-                              ElevatedButton(
-                                child: const Text('Ok'),
-                                onPressed: () {
-                                  Navigator.of(context).pop(username);
-                                },
-                              ),
-                            ])),
-                      ),
-                    ])),
-                const Positioned(top: 10, right: 10, child: DialogCloseButton())
-              ]));
-        });
   }
 }

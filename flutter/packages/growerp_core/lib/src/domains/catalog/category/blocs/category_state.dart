@@ -1,5 +1,3 @@
-part of 'category_bloc.dart';
-
 /*
  * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
@@ -13,6 +11,8 @@ part of 'category_bloc.dart';
  * along with this software (see the LICENSE.md file). If not, see
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+
+part of 'category_bloc.dart';
 
 enum CategoryStatus { initial, loading, success, failure }
 

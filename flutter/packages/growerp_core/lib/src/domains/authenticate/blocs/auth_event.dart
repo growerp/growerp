@@ -22,6 +22,11 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
+class AuthLastMessage extends AuthEvent {
+  final String message;
+  const AuthLastMessage(this.message);
+}
+
 class AuthRegisterCompanyAndAdmin extends AuthEvent {
   final User user;
   final String currencyId;
@@ -29,30 +34,23 @@ class AuthRegisterCompanyAndAdmin extends AuthEvent {
   const AuthRegisterCompanyAndAdmin(this.user, this.currencyId,
       [this.demoData = true]);
   @override
-  String toString() => 'Register Company Admin User: $user';
+  List<Object> get props => [user, currencyId, demoData];
 }
 
 class AuthRegisterUserEcommerce extends AuthEvent {
   final User user;
   const AuthRegisterUserEcommerce(this.user);
-  @override
-  String toString() => 'Register Customer User: $user';
 }
 
 class AuthLogin extends AuthEvent {
-  final Company? company;
   final String username;
   final String password;
-  const AuthLogin(this.company, this.username, this.password);
-  @override
-  String toString() => 'Auth Logged in with $company and $username';
+  const AuthLogin(this.username, this.password);
 }
 
 class AuthResetPassword extends AuthEvent {
   final String username;
   const AuthResetPassword({required this.username});
-  @override
-  String toString() => 'ResetPassword with $username';
 }
 
 class AuthChangePassword extends AuthEvent {
@@ -60,8 +58,6 @@ class AuthChangePassword extends AuthEvent {
   final String oldPassword;
   final String newPassword;
   const AuthChangePassword(this.username, this.oldPassword, this.newPassword);
-  @override
-  String toString() => 'Change Password with $username';
 }
 
 class AuthLoggedOut extends AuthEvent {

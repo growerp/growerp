@@ -26,8 +26,6 @@ class AssetFetch extends AssetEvent {
   final String searchString;
   final bool refresh;
   final String assetClassId;
-  @override
-  List<Object> get props => [searchString, refresh];
 }
 
 class AssetDelete extends AssetEvent {

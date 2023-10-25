@@ -22,6 +22,7 @@ import 'package:global_configuration/global_configuration.dart';
 import '../../../l10n/generated/core_localizations.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
+import '../functions/helper_functions.dart';
 
 class HomeForm extends StatefulWidget {
   final List<MenuOption> menuOptions;
@@ -41,6 +42,14 @@ class HomeForm extends StatefulWidget {
 class HomeFormState extends State<HomeForm> {
   String singleCompany = GlobalConfiguration().get("singleCompany");
 
+  late AuthBloc _authBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = context.read<AuthBloc>();
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
@@ -56,10 +65,17 @@ class HomeFormState extends State<HomeForm> {
                     style: const TextStyle(fontSize: 10))
                 : const Text('')));
 
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+      switch (state.status) {
+        case AuthStatus.failure:
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          break;
+        default:
+          HelperFunctions.showMessage(context, state.message, Colors.green);
+      }
+    }, builder: (context, state) {
       switch (state.status) {
         case AuthStatus.authenticated:
-//          Authenticate authenticate = state.authenticate!;
           return Column(children: [
             Expanded(
                 child: DisplayMenuOption(
@@ -74,9 +90,7 @@ class HomeFormState extends State<HomeForm> {
                             key: Key('HomeFormAuth')),
                         tooltip: 'Logout',
                         onPressed: () => {
-                              context
-                                  .read<AuthBloc>()
-                                  .add(const AuthLoggedOut()),
+                              _authBloc.add(const AuthLoggedOut()),
                             }),
                 ])),
             // hidden text be able to load demo data
@@ -119,12 +133,18 @@ class HomeFormState extends State<HomeForm> {
                       if (widget.title.isNotEmpty) const SizedBox(height: 40),
                       InkWell(
                           onLongPress: () async {
-                            await showDialog(
+                            var message = await showDialog(
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return const ChangeIpForm();
                                 });
+                            if (message != null) {
+                              await Future.delayed(
+                                  const Duration(milliseconds: 200),
+                                  () =>
+                                      _authBloc.add(AuthLastMessage(message)));
+                            }
                           },
                           child: Text(widget.title,
                               style: TextStyle(
@@ -137,33 +157,42 @@ class HomeFormState extends State<HomeForm> {
                               child: Text(CoreLocalizations.of(context)!
                                   .loginWithExistingUserName),
                               onPressed: () async {
-                                await showDialog(
+                                var message = await showDialog(
                                     barrierDismissible: true,
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return const LoginDialog();
+                                      return BlocProvider.value(
+                                          value: _authBloc,
+                                          child: const LoginDialog());
                                     });
+                                if (message != null) {
+                                  await Future.delayed(
+                                      const Duration(milliseconds: 200),
+                                      () => _authBloc
+                                          .add(AuthLastMessage(message)));
+                                }
                               })
-                          : state.status == AuthStatus.failure
-                              ? const Text("could not connect to server",
-                                  style: TextStyle(color: Colors.red))
-                              : const Text('No companies yet, create one!'),
+                          : const Text('No companies yet, create one!'),
                       const Expanded(child: SizedBox(height: 130)),
-                      if (state.status != AuthStatus.failure)
-                        ElevatedButton(
-                            key: const Key('newCompButton'),
-                            child: const Text('Create a new company and admin'),
-                            onPressed: () async {
-                              await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return NewCompanyDialog(
-                                        formArguments: FormArguments(
-                                            object: authenticate.copyWith(
-                                                company: null)));
-                                  });
-                            }),
+                      ElevatedButton(
+                          key: const Key('newCompButton'),
+                          child: const Text('Create a new company and admin'),
+                          onPressed: () async {
+                            var message = await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _authBloc,
+                                      child: const NewCompanyDialog(true));
+                                });
+                            if (message != null) {
+                              await Future.delayed(
+                                  const Duration(milliseconds: 200),
+                                  () =>
+                                      _authBloc.add(AuthLastMessage(message)));
+                            }
+                          }),
                       const SizedBox(height: 50)
                     ])))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),

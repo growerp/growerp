@@ -35,7 +35,11 @@ class PersistFunctions {
   ) async {
     try {
       var box = await Hive.openBox('growerp');
+      await box.delete('authenticate');
       await box.put('authenticate', jsonEncode(authenticate.toJson()));
+      if (authenticate.apiKey == null || authenticate.apiKey == '') {
+        await box.delete('apiKey');
+      }
     } catch (e) {
       debugPrint("????????persist????????? box error: $e");
     }

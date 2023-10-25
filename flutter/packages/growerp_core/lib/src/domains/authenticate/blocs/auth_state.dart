@@ -17,7 +17,6 @@ part of 'auth_bloc.dart';
 enum AuthStatus {
   initial,
   loading,
-  registered,
   authenticated,
   unAuthenticated,
   failure,

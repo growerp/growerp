@@ -14,6 +14,7 @@
 
 import 'dart:io';
 import 'dart:math';
+import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../../growerp_core.dart';
@@ -69,15 +69,18 @@ class CommonTest {
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
     // check if email address already exist
-    APIRepository repos = APIRepository();
+    final restClient = RestClient(await buildDioClient(null));
     var exist = true;
     var times = 0;
     while (exist) {
-      ApiResult result =
-          await repos.checkEmail(admin.email!.replaceFirst('XXX', '${++seq}'));
-      exist = result.when(success: (data) => data, failure: (_) => false);
-      expect(times++, lessThan(20),
-          reason: "Could not find free email address");
+      try {
+        exist = await restClient.checkEmail(
+            email: admin.email!.replaceFirst('XXX', '${++seq}'));
+        expect(times++, lessThan(20),
+            reason: "Could not find free email address");
+      } on DioException catch (e) {
+        debugPrint("error checking email: ${getDioError(e)}");
+      }
     }
 
     await CommonTest.tapByKey(tester, 'newCompButton');

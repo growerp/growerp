@@ -19,31 +19,16 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../domains.dart';
 import '../../common/functions/helper_functions.dart';
 
-class NewCompanyDialog extends StatelessWidget {
-  final FormArguments formArguments;
-  const NewCompanyDialog({Key? key, required this.formArguments})
-      : super(key: key);
+class NewCompanyDialog extends StatefulWidget {
+  const NewCompanyDialog(this.admin, {super.key});
+
+  final bool admin;
 
   @override
-  Widget build(BuildContext context) {
-    return NewCompanyHeader(
-        message: formArguments.message,
-        authenticate: formArguments.object as Authenticate);
-  }
+  State<NewCompanyDialog> createState() => _NewCompanyDialogState();
 }
 
-class NewCompanyHeader extends StatefulWidget {
-  final String? message;
-  final Authenticate authenticate;
-  const NewCompanyHeader({super.key, this.message, required this.authenticate});
-
-  @override
-  // ignore: no_logic_in_create_state
-  State<NewCompanyHeader> createState() => _NewCompanyHeaderState(message);
-}
-
-class _NewCompanyHeaderState extends State<NewCompanyHeader> {
-  final String? message;
+class _NewCompanyDialogState extends State<NewCompanyDialog> {
   final _formKey = GlobalKey<FormState>();
   final _companyController = TextEditingController();
   final _firstNameController = TextEditingController();
@@ -51,15 +36,10 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
   final _emailController = TextEditingController();
   late bool _demoData;
   late Currency _currencySelected;
-  _NewCompanyHeaderState(this.message);
+  late AuthBloc _authBloc;
 
   @override
   void initState() {
-    Future<void>.delayed(const Duration(milliseconds: 0), () {
-      if (message != null) {
-        HelperFunctions.showMessage(context, '$message', Colors.green);
-      }
-    });
     super.initState();
     _companyController.text = kReleaseMode ? '' : 'Demo company from John Doe';
     _firstNameController.text = kReleaseMode ? '' : 'John';
@@ -67,41 +47,43 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
     _emailController.text = kReleaseMode ? '' : 'test@example.com';
     _demoData = kReleaseMode ? false : true;
     _currencySelected = currencies[1];
+    _authBloc = context.read<AuthBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(listener: (context, state) {
+    return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
       if (state.status == AuthStatus.failure) {
         HelperFunctions.showMessage(context, state.message, Colors.red);
       }
-      if (state.status == AuthStatus.registered) {
-        Navigator.pop(context);
+      if (state.status == AuthStatus.unAuthenticated) {
+        Navigator.pop(context, state.message);
       }
-    }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state.status == AuthStatus.loading) return const LoadingIndicator();
-      return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Dialog(
-              insetPadding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Stack(clipBehavior: Clip.none, children: [
-                popUp(
+    }, builder: (context, state) {
+      if (state.status == AuthStatus.loading) {
+        return const LoadingIndicator();
+      } else {
+        return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Dialog(
+                insetPadding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: popUp(
                     context: context,
-                    child: _registerForm(widget.authenticate, state),
-                    title: widget.authenticate.company != null
+                    child: _registerForm(_authBloc.state.authenticate!),
+                    title: widget.admin
                         ? "Enter a new customer for company\n "
-                            "${widget.authenticate.company!.name}"
+                            "${_authBloc.state.authenticate!.company!.name}"
                         : "Enter a new company with admin",
                     height: 700,
-                    width: 400)
-              ])));
-    }));
+                    width: 400)));
+      }
+    });
   }
 
-  Widget _registerForm(Authenticate authenticate, AuthState state) {
+  Widget _registerForm(Authenticate authenticate) {
     return Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -162,7 +144,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
                 },
               ),
               Visibility(
-                  visible: authenticate.company?.partyId != null,
+                  visible: !widget.admin,
                   child: Column(children: [
                     const SizedBox(height: 20),
                     Row(children: [
@@ -190,7 +172,7 @@ class _NewCompanyHeaderState extends State<NewCompanyHeader> {
               const SizedBox(height: 20),
               Visibility(
                   // register new company and admin
-                  visible: authenticate.company == null,
+                  visible: widget.admin,
                   child: Column(children: [
                     DropdownButtonFormField<Currency>(
                       key: const Key('currency'),

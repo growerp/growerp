@@ -79,6 +79,7 @@ class APIRepository {
         data: fromJson(json.decode(result) as Map<String, dynamic>));
   }
 
+/*
   Future<ApiResult<bool>> getConnected() async {
     try {
       final response = await dioClient.get('growerp/moquiSessionToken', null);
@@ -89,12 +90,13 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   void setApiKey(String apiKey, String sessionToken) {
     this.apiKey = apiKey;
     this.sessionToken = sessionToken;
   }
 
+/*
   Future<ApiResult<Authenticate>> getAuthenticate() async {
     try {
       final response =
@@ -105,7 +107,7 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   Future<ApiResult<bool>> upLoadEntities(
     Map entities,
   ) async {
@@ -126,6 +128,7 @@ class APIRepository {
     }
   }
 
+/*
   Future<ApiResult<bool>> checkCompany(String partyId) async {
     try {
       // no apykey required, if not valid will report no company
@@ -151,7 +154,7 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   /// The demo store can only register as a customer.
   /// Any other store it depends on the person logging in.
   Future<ApiResult<Authenticate>> register({
@@ -189,6 +192,7 @@ class APIRepository {
     }
   }
 
+/*
   Future<ApiResult<Authenticate>> login(
       {required String username, required String password}) async {
     try {
@@ -246,7 +250,7 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   Future<ApiResult<List<ChatRoom>>> getChatRooms(
       {int? start,
       int? limit,
