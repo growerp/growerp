@@ -36,7 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.repos, this.chat, this.restClient, this.classificationId)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
-    on<AuthLastMessage>(_onAuthLastMessage);
+    on<AuthMessage>(_onAuthMessage);
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
 //    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
     on<AuthLoggedOut>(_onAuthLoggedOut);
@@ -50,13 +50,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RestClient restClient;
   final String classificationId;
 
-  void _onAuthLastMessage(
-    AuthLastMessage event,
+  void _onAuthMessage(
+    AuthMessage event,
     Emitter<AuthState> emit,
   ) {
-    AuthStatus lastStatus = state.status; // not change current status
+    AuthStatus lastStatus = state.status; // save current status
     emit(state.copyWith(status: AuthStatus.loading));
-    emit(state.copyWith(status: lastStatus, message: event.message));
+    return emit(state.copyWith(status: lastStatus, message: event.message));
   }
 
   Future<void> _onAuthLoad(
@@ -140,7 +140,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: authenticate,
-          message: 'Register Company and Admin successful,\n'
+          message: 'Register Company and Admin successful,'
               'you can now login with the password sent by email'));
       await PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {

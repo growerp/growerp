@@ -142,8 +142,7 @@ class HomeFormState extends State<HomeForm> {
                             if (message != null) {
                               await Future.delayed(
                                   const Duration(milliseconds: 200),
-                                  () =>
-                                      _authBloc.add(AuthLastMessage(message)));
+                                  () => _authBloc.add(AuthMessage(message)));
                             }
                           },
                           child: Text(widget.title,
@@ -168,8 +167,8 @@ class HomeFormState extends State<HomeForm> {
                                 if (message != null) {
                                   await Future.delayed(
                                       const Duration(milliseconds: 200),
-                                      () => _authBloc
-                                          .add(AuthLastMessage(message)));
+                                      () =>
+                                          _authBloc.add(AuthMessage(message)));
                                 }
                               })
                           : const Text('No companies yet, create one!'),
@@ -189,8 +188,7 @@ class HomeFormState extends State<HomeForm> {
                             if (message != null) {
                               await Future.delayed(
                                   const Duration(milliseconds: 200),
-                                  () =>
-                                      _authBloc.add(AuthLastMessage(message)));
+                                  () => _authBloc.add(AuthMessage(message)));
                             }
                           }),
                       const SizedBox(height: 50)

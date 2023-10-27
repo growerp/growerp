@@ -29,7 +29,7 @@ import '../../../../test_data.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
-  static int waitTime = 3;
+  static int waitTime = 5;
 
   static Future<void> startTestApp(
       WidgetTester tester,
@@ -41,7 +41,6 @@ class CommonTest {
       String title = "Growerp testing..."}) async {
     int seq = Random.secure().nextInt(1024);
     SaveTest test = await PersistFunctions.getTest();
-    // debugPrint("====startapp seq: $seq");
     if (clear == true) {
       await PersistFunctions.persistTest(SaveTest(sequence: seq));
     } else {
@@ -50,7 +49,7 @@ class CommonTest {
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
       classificationId: 'AppAdmin',
-      restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+      restClient: RestClient(await buildDioClient(null)),
       dbServer: APIRepository(),
       chatServer: ChatServer(),
       router: router,
@@ -74,8 +73,9 @@ class CommonTest {
     var times = 0;
     while (exist) {
       try {
-        exist = await restClient.checkEmail(
+        final Map result = await restClient.checkEmail(
             email: admin.email!.replaceFirst('XXX', '${++seq}'));
+        exist = result['ok'];
         expect(times++, lessThan(20),
             reason: "Could not find free email address");
       } on DioException catch (e) {
@@ -99,7 +99,7 @@ class CommonTest {
     if (demoData == false) {
       await CommonTest.tapByKey(tester, 'demoData');
     } // no demo data
-    await CommonTest.tapByKey(tester, 'newCompany', seconds: 3);
+    await CommonTest.tapByKey(tester, 'newCompany', seconds: 5);
     // start with clean saveTest
     await PersistFunctions.persistTest(SaveTest(
       sequence: ++seq,

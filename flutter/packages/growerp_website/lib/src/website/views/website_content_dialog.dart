@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -19,9 +20,8 @@ class WebsiteContentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) =>
-          ContentBloc(context.read<WebsiteAPIRepository>())
-            ..add(ContentFetch(websiteId, content)),
+      create: (BuildContext context) => ContentBloc(context.read<RestClient>())
+        ..add(ContentFetch(websiteId, content)),
       child: WebsiteContent(websiteId, content));
 }
 

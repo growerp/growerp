@@ -423,7 +423,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="fileText" />
         </out-parameters>
         <actions>
-            <script>logger.warn("getting glAccounts")</script>
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[limit: 999]"
                 out-map="context" />
@@ -481,6 +480,84 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <message public="true" type="success">A GlAccount CSV file was sent by email to ${userAccount.emailAddress}.</message>
             </if>
+        </actions>
+    </service>
+
+    <service verb="export" noun="Website">
+        <out-parameters>
+            <parameter name="website" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.WebsiteServices100.get#Website"
+                out-map="context" />
+            <set field="websiteContent" from="[]" />
+            <iterate list="website.websiteContent" entry="wsContent">
+                <service-call name="growerp.100.WebsiteServices100.get#WebsiteContent"
+                    in-map="content: [path: wsContent.path, text: wsContent.text]"
+                    out-map="context" />
+                <script>
+                    websiteContent.add(content)
+                </script>
+            </iterate>
+            <set field="website.websiteContent" from="websiteContent" />
+        </actions>
+    </service>
+
+    <service verb="import" noun="Website">
+        <in-parameters>
+            <parameter name="website" type="Map" required="true">
+                <parameter name="id" required="true" />
+                <parameter name="title" />
+                <parameter name="hostName" />
+                <parameter name="websiteContent" type="List">
+                    <parameter name="content" type="Map">
+                        <parameter name="path" />
+                        <parameter name="title" /><!-- if path found and title empty, page will be
+                        deleted -->
+                        <parameter name="text" />
+                        <parameter name="seqId" type="Integer" />
+                    </parameter>
+                </parameter>
+                <parameter name="websiteCategories" type="List">
+                    <parameter name="websiteCategory" type="Map">
+                        <parameter name="categoryId" />
+                        <parameter name="categoryName" />
+                        <parameter name="products" type="List" />
+                        <parameter name="product" type="Map">
+                            <parameter name="productId" />
+                            <parameter name="productName" />
+                        </parameter>
+                    </parameter>
+                </parameter>
+                <parameter name="productCategories" type="List">
+                    <parameter name="productCategory" type="Map">
+                        <parameter name="categoryId" />
+                    </parameter>
+                </parameter>
+                <parameter name="colorJson" />
+                <parameter name="obsidianName" />
+                <parameter name="measurementId" />
+            </parameter>
+            <parameter name="webContents" type="List">
+                <parameter name="path" />
+                <parameter name="title" />
+                <parameter name="text" />
+                <parameter name="image" />
+                <parameter name="seqId" type="Integer" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="website" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.WebsiteServices100.update#Website"
+                in-map="website: website"
+                out-map="context" />
+            <iterate list="websiteContents" entry="webSiteContent">
+                <service-call name="growerp.100.WebsiteServices100.upload#WebsiteContent"
+                    in-map="content: websiteContent"
+                    out-map="context" />
+            </iterate>
         </actions>
     </service>
 

@@ -245,8 +245,9 @@ along with this software (see the LICENSE.md file). If not, see
     </moqui.entity.feed.DataFeed>
 
     <!-- run index for search -->
-    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="MantleSearch" />
-    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="PopCommerceSearch" />
+    <!--org.moqui.search.SearchServices.indexDataFeedDocuments
+    dataFeedId="MantleSearch" />
+    <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="PopCommerceSearch" /-->
 
 
     <mantle.product.store.ProductStore productStoreId="POPC_DEFAULT" storeName="Default Store"

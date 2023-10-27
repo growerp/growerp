@@ -30,6 +30,8 @@ RUN ./gradlew addRunTime
 # unzip war file
 WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
+# run elastic search locally
+RUN ./gradlew downloadel
 # stage 2 create image
 FROM openjdk:11-jdk
 RUN apt-get update && apt-get install -y apt-transport-https nano && apt-get clean
@@ -43,18 +45,18 @@ VOLUME ["/opt/moqui/runtime/log", "/opt/moqui/runtime/txlog", "/opt/moqui/runtim
 # Main Servlet Container Port
 EXPOSE 80
 # ElasticSearch HTTP Port
-EXPOSE 9200
+# EXPOSE 9200
 # ElasticSearch Cluster (TCP Transport) Port
-EXPOSE 9300
+# EXPOSE 9300
 # Hazelcast Cluster Port
-EXPOSE 5701
+# EXPOSE 5701
 
 # this is to run from the war file directly, preferred approach unzips war file in advance
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
 RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
 WORKDIR /opt/moqui
 
-ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh $DOCKER_TAG"]
+ENTRYPOINT ["/bin/bash", "-c", "'./initstart.sh $DOCKER_TAG'"]
 #ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1

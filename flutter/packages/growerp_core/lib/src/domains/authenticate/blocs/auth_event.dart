@@ -22,9 +22,9 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
-class AuthLastMessage extends AuthEvent {
+class AuthMessage extends AuthEvent {
   final String message;
-  const AuthLastMessage(this.message);
+  const AuthMessage(this.message);
 }
 
 class AuthRegisterCompanyAndAdmin extends AuthEvent {

@@ -10,7 +10,7 @@ abstract class RestClient {
   factory RestClient(Dio dio, {String baseUrl}) = _RestClient;
 
   @GET("rest/s1/growerp/100/CheckEmail")
-  Future<String> checkEmail(@Query('email') String email);
+  Future<Map<String, bool>> checkEmail({@Query('email') required String email});
 
   @POST("rest/s1/growerp/100/UserAndCompany")
   @FormUrlEncoded()
@@ -35,7 +35,19 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/Logout")
-  Future<Authenticate> logout();
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<String> logout();
+
+  @POST("rest/s1/growerp/100/ResetPassword")
+  Future<String> resetPassword({@Field() required String username});
+
+  @POST("rest/s1/growerp/100/Password")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Authenticate> updatePassword({
+    @Field() required String username,
+    @Field() required String oldPassword,
+    @Field() required String newPassword,
+  });
 
   @GET("rest/s1/growerp/100/Companies")
   Future<Companies> getCompanies({
@@ -66,6 +78,37 @@ abstract class RestClient {
     @Query('searchString') Role? searchString,
   });
 
+  // Website ======
+  @GET("rest/s1/growerp/100/Website")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Website> getWebsite();
+
+  @GET("rest/s1/growerp/100/WebsiteContent")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Content> getWebsiteContent(
+      {@Query('content') required Content content});
+
+  @PATCH("rest/s1/growerp/100/Website")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Website> updateWebsite({@Field() required Website website});
+
+  @POST("rest/s1/growerp/100/WebsiteContent")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Content> uploadWebsiteContent({@Field() required Content content});
+
+  @POST("rest/s1/growerp/100/Obsidian")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Website> obsUpload({@Field() required Obsidian obsidian});
+
+  @POST("rest/s1/growerp/100/ImportExport/website")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<void> importWebsite(@Field() Website website);
+
+  @GET("rest/s1/growerp/100/ImportExport/website")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Website> exportWebsite();
+
+  // import / export ========
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Headers(<String, dynamic>{'requireApiKey': true})
   Future<void> importGlAccounts(@Field() List<GlAccount> glAccounts);

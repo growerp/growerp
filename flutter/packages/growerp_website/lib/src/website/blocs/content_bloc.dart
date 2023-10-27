@@ -13,12 +13,12 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:equatable/equatable.dart';
-import 'package:growerp_rest/growerp_rest.dart';
-import '../../../growerp_website.dart';
 
 part 'content_event.dart';
 part 'content_state.dart';
@@ -30,35 +30,29 @@ EventTransformer<E> websiteContentDroppable<E>(Duration duration) {
 }
 
 class ContentBloc extends Bloc<ContentEvent, ContentState> {
-  ContentBloc(this.repos) : super(const ContentState()) {
+  ContentBloc(this.restClient) : super(const ContentState()) {
     on<ContentFetch>(_onContentFetch,
         transformer:
             websiteContentDroppable(const Duration(milliseconds: 100)));
     on<ContentUpdate>(_onContentUpdate);
   }
 
-  final WebsiteAPIRepository repos;
+  final RestClient restClient;
 
   Future<void> _onContentFetch(
     ContentFetch event,
     Emitter<ContentState> emit,
   ) async {
-    emit(state.copyWith(status: ContentStatus.loading));
-    if (event.content.path.isNotEmpty || event.content.title.isNotEmpty) {
-      ApiResult result = await repos.getWebsiteContent(event.content);
-      return emit(result.when(
-          success: (data) {
-            return state.copyWith(
-              status: ContentStatus.success,
-              content: data,
-            );
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: ContentStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      return emit(state.copyWith(
-          status: ContentStatus.success, content: event.content));
+    try {
+      Content result = event.content;
+      emit(state.copyWith(status: ContentStatus.loading));
+      if (event.content.path.isNotEmpty || event.content.title.isNotEmpty) {
+        result = await restClient.getWebsiteContent(content: event.content);
+      }
+      emit(state.copyWith(status: ContentStatus.success, content: result));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: ContentStatus.failure, message: getDioError(e)));
     }
   }
 
@@ -66,18 +60,17 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     ContentUpdate event,
     Emitter<ContentState> emit,
   ) async {
-    emit(state.copyWith(status: ContentStatus.updating));
-    ApiResult result =
-        await repos.uploadWebsiteContent(event.websiteId, event.content);
-    return emit(result.when(
-        success: (data) {
-          return state.copyWith(
-              content: data,
-              status: ContentStatus.success,
-              message: 'Content Content updated');
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: ContentStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: ContentStatus.updating));
+      final Content result =
+          await restClient.uploadWebsiteContent(content: event.content);
+      emit(state.copyWith(
+          content: result,
+          status: ContentStatus.success,
+          message: 'Content ${event.content.title} updated'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: ContentStatus.failure, message: getDioError(e)));
+    }
   }
 }

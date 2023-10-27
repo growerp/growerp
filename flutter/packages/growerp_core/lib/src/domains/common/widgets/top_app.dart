@@ -55,108 +55,107 @@ class TopApp extends StatelessWidget {
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
   ];
-  @override
-  Widget build(BuildContext context) => MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider(create: (context) => restClient),
-            RepositoryProvider(create: (context) => dbServer),
-            RepositoryProvider(create: (context) => chatServer),
-            RepositoryProvider(create: (context) => classificationId),
-          ],
-          child: MultiBlocProvider(
-              providers: [
-                if (blocProviders.isNotEmpty)
-                  BlocProvider<ThemeBloc>(
-                      create: (context) => ThemeBloc()..add(ThemeSwitch())),
-                BlocProvider<AuthBloc>(
-                    create: (context) => AuthBloc(
-                        dbServer, chatServer, restClient, classificationId)
-                      ..add(AuthLoad())),
-                BlocProvider<ChatRoomBloc>(
-                  create: (context) => ChatRoomBloc(
-                      dbServer, chatServer, context.read<AuthBloc>())
-                    ..add(ChatRoomFetch()),
-                ),
-                BlocProvider<ChatMessageBloc>(
-                    create: (context) => ChatMessageBloc(
-                        dbServer, chatServer, context.read<AuthBloc>())),
-              ],
-              child: Builder(builder: (context) {
-                return MultiBlocProvider(
-                    // this list cannot be empty
-                    providers: blocProviders.isNotEmpty
-                        ? blocProviders
-                        : [
-                            BlocProvider<ThemeBloc>(
-                                create: (context) =>
-                                    ThemeBloc()..add(ThemeSwitch()))
-                          ],
-                    child: BlocBuilder<ThemeBloc, ThemeState>(
-                        builder: (context, state) {
-                      localizationsDelegates.addAll(extraDelegates);
-                      return GestureDetector(
-                          onTap: () {
-                            FocusScopeNode currentFocus =
-                                FocusScope.of(context);
 
-                            if (!currentFocus.hasPrimaryFocus) {
-                              currentFocus.unfocus();
-                            }
-                          },
-                          child: MaterialApp(
-                              title: title,
-                              supportedLocales: const [
-                                Locale('en'),
-                                Locale('th')
-                              ],
-                              scrollBehavior:
-                                  const MaterialScrollBehavior().copyWith(
-                                dragDevices: {
-                                  PointerDeviceKind.mouse,
-                                  PointerDeviceKind.touch,
-                                },
-                              ),
-                              debugShowCheckedModeBanner: false,
-                              localizationsDelegates: localizationsDelegates,
-                              builder: (context, child) =>
-                                  ResponsiveBreakpoints.builder(
-                                      child: child!,
-                                      breakpoints: [
-                                        const Breakpoint(
-                                            start: 0, end: 500, name: MOBILE),
-                                        const Breakpoint(
-                                            start: 451, end: 800, name: TABLET),
-                                        const Breakpoint(
-                                            start: 801,
-                                            end: 1920,
-                                            name: DESKTOP),
-                                        const Breakpoint(
-                                            start: 1921,
-                                            end: double.infinity,
-                                            name: '4K'),
-                                      ]),
-                              themeMode: state.themeMode,
-                              theme: ThemeData(
-                                  useMaterial3: true,
-                                  colorScheme: lightColorScheme),
-                              darkTheme: ThemeData(
-                                  useMaterial3: true,
-                                  colorScheme: darkColorScheme),
-                              onGenerateRoute: router,
-                              home: BlocBuilder<AuthBloc, AuthState>(
-                                builder: (context, state) {
-                                  switch (state.status) {
-                                    case AuthStatus.loading:
-                                      return const SplashForm();
-                                    case AuthStatus.changeIp:
-                                      return const ChangeIpForm();
-                                    default:
-                                      return HomeForm(
-                                          menuOptions: menuOptions,
-                                          title: title);
-                                  }
-                                },
-                              )));
-                    }));
-              })));
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider(create: (context) => restClient),
+          RepositoryProvider(create: (context) => dbServer),
+          RepositoryProvider(create: (context) => chatServer),
+          RepositoryProvider(create: (context) => classificationId),
+        ],
+        child: MultiBlocProvider(
+            providers: [
+              if (blocProviders.isNotEmpty)
+                BlocProvider<ThemeBloc>(
+                    create: (context) => ThemeBloc()..add(ThemeSwitch())),
+              BlocProvider<AuthBloc>(
+                  create: (context) => AuthBloc(
+                      dbServer, chatServer, restClient, classificationId)
+                    ..add(AuthLoad())),
+              BlocProvider<ChatRoomBloc>(
+                create: (context) =>
+                    ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
+                      ..add(ChatRoomFetch()),
+              ),
+              BlocProvider<ChatMessageBloc>(
+                  create: (context) => ChatMessageBloc(
+                      dbServer, chatServer, context.read<AuthBloc>())),
+            ],
+            child: Builder(builder: (context) {
+              return MultiBlocProvider(
+                  // this list cannot be empty
+                  providers: blocProviders.isNotEmpty
+                      ? blocProviders
+                      : [
+                          BlocProvider<ThemeBloc>(
+                              create: (context) =>
+                                  ThemeBloc()..add(ThemeSwitch()))
+                        ],
+                  child: BlocBuilder<ThemeBloc, ThemeState>(
+                      builder: (context, state) {
+                    localizationsDelegates.addAll(extraDelegates);
+                    return GestureDetector(
+                        onTap: () {
+                          FocusScopeNode currentFocus = FocusScope.of(context);
+
+                          if (!currentFocus.hasPrimaryFocus) {
+                            currentFocus.unfocus();
+                          }
+                        },
+                        child: MaterialApp(
+                            title: title,
+                            supportedLocales: const [
+                              Locale('en'),
+                              Locale('th')
+                            ],
+                            scrollBehavior:
+                                const MaterialScrollBehavior().copyWith(
+                              dragDevices: {
+                                PointerDeviceKind.mouse,
+                                PointerDeviceKind.touch,
+                              },
+                            ),
+                            debugShowCheckedModeBanner: false,
+                            localizationsDelegates: localizationsDelegates,
+                            builder: (context, child) =>
+                                ResponsiveBreakpoints.builder(
+                                    child: child!,
+                                    breakpoints: [
+                                      const Breakpoint(
+                                          start: 0, end: 500, name: MOBILE),
+                                      const Breakpoint(
+                                          start: 451, end: 800, name: TABLET),
+                                      const Breakpoint(
+                                          start: 801, end: 1920, name: DESKTOP),
+                                      const Breakpoint(
+                                          start: 1921,
+                                          end: double.infinity,
+                                          name: '4K'),
+                                    ]),
+                            themeMode: state.themeMode,
+                            theme: ThemeData(
+                                useMaterial3: true,
+                                colorScheme: lightColorScheme),
+                            darkTheme: ThemeData(
+                                useMaterial3: true,
+                                colorScheme: darkColorScheme),
+                            onGenerateRoute: router,
+                            home: BlocBuilder<AuthBloc, AuthState>(
+                              builder: (context, state) {
+                                switch (state.status) {
+                                  case AuthStatus.loading:
+                                    return const SplashForm();
+                                  case AuthStatus.changeIp:
+                                    return const ChangeIpForm();
+                                  default:
+                                    return HomeForm(
+                                        menuOptions: menuOptions, title: title);
+                                }
+                              },
+                            )));
+                  }));
+            })));
+  }
 }

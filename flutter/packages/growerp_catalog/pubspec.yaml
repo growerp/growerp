@@ -81,6 +81,8 @@ flutter:
     - packages/growerp_core/images/chatGrey.png
     - packages/growerp_core/images/dashBoardGrey.png
     - packages/growerp_core/images/growerp512x512.png
+    - packages/growerp_core/images/growerpDark100.png
+    - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/info.png
     - packages/growerp_core/images/productsGrey.png
     - packages/growerp_core/images/usersGrey.png

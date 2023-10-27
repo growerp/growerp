@@ -33,4 +33,7 @@ class Authenticate with _$Authenticate {
 
   factory Authenticate.fromJson(Map<String, dynamic> json) =>
       _$AuthenticateFromJson(json['authenticate']);
+
+  @override
+  String toString() => "CompName: ${company!.name}, Usr: ${user!.lastName}";
 }

@@ -771,13 +771,29 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="glAccounts" from="[]" />
             <iterate list="glAccountList" entry="glAccount">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econditions combine="or">
+                        <econdition field-name="topDescription" from="glAccount.classDescription" />
+                        <econdition field-name="middleDescription" from="glAccount.classDescription" />
+                        <econdition field-name="bottomDescription" from="glAccount.classDescription" />
+                        <econdition field-name="basicDescription" from="glAccount.classDescription" />
+                    </econditions>
+                </entity-find>
                 <script>
                     glAccounts.add(
                         glAccountId: glAccount.glAccountId,
                         accountCode: glAccount.accountCode,
                         accountName: glAccount.accountName,
-                        accountClass: [accountClassId: glAccount.glAccountClassEnumId,
-                            description: glAccount.classDescription],
+                        accountClass: [
+                            topClassId: classes[0].topEnumId,
+                            topDescription: classes[0].topDescription,
+                            parentClassId: classes[0].middleEnumId,
+                            parentDescription: classes[0].middleDescription,
+                            accountClassId: classes[0].bottomEnumId,
+                            description: classes[0].bottomDescription,
+                            contra: classes[0].bottomContra == 'Y' ? true : false,
+                        ],
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
                             description: glAccount.typeDescription],
                         isDebit: glAccount.isDebit == 'Y' ? true : false,

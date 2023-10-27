@@ -20,7 +20,7 @@ import '../growerp_website.dart';
 
 class WebsiteAPIRepository extends APIRepository {
   WebsiteAPIRepository(super.apiKey);
-
+/*
   Future<ApiResult<Website>> getWebsite() async {
     try {
       final response = await dioClient.get(
@@ -91,7 +91,7 @@ class WebsiteAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   Future<ApiResult<List<Category>>> getCategory(
       {int? start,
       int? limit,

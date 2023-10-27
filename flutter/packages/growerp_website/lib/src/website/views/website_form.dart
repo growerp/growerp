@@ -37,9 +37,9 @@ class WebsiteForm extends StatelessWidget {
           context.read<AuthBloc>().state.authenticate!.apiKey!),
       child: MultiBlocProvider(providers: [
         BlocProvider<WebsiteBloc>(
-            create: (BuildContext context) =>
-                WebsiteBloc(context.read<WebsiteAPIRepository>())
-                  ..add(WebsiteFetch())),
+          create: (BuildContext context) =>
+              WebsiteBloc(context.read<RestClient>())..add(WebsiteFetch()),
+        ),
       ], child: const WebsitePage()));
 }
 
@@ -52,6 +52,7 @@ class WebsitePage extends StatefulWidget {
 
 class WebsiteFormState extends State<WebsitePage> {
   late WebsiteBloc _websiteBloc;
+  late RestClient restClient;
   late WebsiteAPIRepository _websiteProvider;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
@@ -122,9 +123,7 @@ class WebsiteFormState extends State<WebsitePage> {
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return RepositoryProvider.value(
-                      value: _websiteProvider,
-                      child: WebsiteContentDialog(state.website!.id, content));
+                  return WebsiteContentDialog(state.website!.id, content);
                 });
             if (updContent != null) {
               setState(() {
@@ -161,10 +160,8 @@ class WebsiteFormState extends State<WebsitePage> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return RepositoryProvider.value(
-                    value: _websiteProvider,
-                    child: WebsiteContentDialog(
-                        state.website!.id, Content(text: '# ')));
+                return WebsiteContentDialog(
+                    state.website!.id, Content(text: '# '));
               });
 
           if (updContent != null) {
@@ -188,9 +185,7 @@ class WebsiteFormState extends State<WebsitePage> {
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return RepositoryProvider.value(
-                      value: _websiteProvider,
-                      child: WebsiteContentDialog(state.website!.id, content));
+                  return WebsiteContentDialog(state.website!.id, content);
                 });
             if (updContent != null) {
               setState(() {
@@ -228,9 +223,7 @@ class WebsiteFormState extends State<WebsitePage> {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return RepositoryProvider.value(
-                    value: _websiteProvider,
-                    child: WebsiteContentDialog(state.website!.id, Content()));
+                return WebsiteContentDialog(state.website!.id, Content());
               });
           if (updContent != null) {
             setState(() {

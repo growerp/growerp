@@ -65,6 +65,7 @@ Future main() async {
   }
 
   await Hive.initFlutter();
+
   String databaseUrl = GlobalConfiguration().get('databaseUrl');
   String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
 

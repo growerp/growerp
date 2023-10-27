@@ -48,6 +48,7 @@ String glAccountCsvFormat =
     ' Posted Balance\r\n';
 int glAccountCsvLength = glAccountCsvFormat.split(',').length;
 
+// import
 List<GlAccount> CsvToGlAccounts(String csvFile) {
   List<GlAccount> glAccounts = [];
   final result = fast_csv.parse(csvFile);
@@ -66,6 +67,7 @@ List<GlAccount> CsvToGlAccounts(String csvFile) {
   return glAccounts;
 }
 
+// export
 String CsvFromGlAccounts(List<GlAccount> glAccounts) {
   var csv = [glAccountCsvFormat];
   for (GlAccount glAccount in glAccounts) {

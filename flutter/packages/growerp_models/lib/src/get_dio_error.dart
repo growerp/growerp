@@ -27,11 +27,11 @@ String getDioError(e) {
       expression = "Request cancelled:";
       break;
     case DioExceptionType.unknown:
-      expression = "Exception unknown:";
+      expression = "Exception unknown:  ${exception.error}";
       break;
     default:
       expression = "Connection error";
       break;
   }
-  return "exception: $expression error: ${e.response}";
+  return "exception: $expression ${exception.message} error: ${e.response}";
 }

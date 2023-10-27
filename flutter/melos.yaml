@@ -32,6 +32,14 @@ scripts:
       orderDependents: true
     packageFilters:
       dependsOn: build_runner     
+  watch:
+    description: watch package.
+    run: "dart run build_runner watch"
+    exec:
+      concurrency: 1
+      orderDependents: true
+    packageFilters:
+      dependsOn: build_runner     
   l10n:
     description: Generates l10n for all app packages.
     run: "flutter gen-l10n"

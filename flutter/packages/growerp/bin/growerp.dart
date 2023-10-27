@@ -35,7 +35,7 @@
 ///   -p password : required for new company
 ///   -o outputDirectory : directory used for exported csv output files,default: growerp
 ///
-import 'dart:convert';
+///
 import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -49,7 +49,7 @@ import '../get_files.dart';
 import '../logger.dart';
 
 Future<void> main(List<String> args) async {
-  String growerpPath = '$HOME/growerpInstall';
+  String growerpPath = '$HOME/growerp';
   String validCommands = "valid commands are:'install | import | export'";
   String branch = 'master';
   String inputFile = '';
@@ -95,8 +95,8 @@ Future<void> main(List<String> args) async {
 
     Future<void> login(RestClient client) async {
       // email exists?
-      String result = await client.checkEmail(username);
-      if (jsonDecode(result.toString())['ok'] != 'ok') {
+      Map result = await client.checkEmail(email: username);
+      if (result['ok'] == false) {
         // no so register new
         await client.register(
             emailAddress: username,
@@ -177,9 +177,7 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         // talk to backend
-        final dio =
-            buildDioClient('http://localhost:8080/'); // Provide a dio instance
-        final client = RestClient(await dio);
+        final client = RestClient(await buildDioClient(null));
         try {
           if (username.isNotEmpty && password.isNotEmpty) {
             await login(client);
@@ -205,6 +203,9 @@ Future<void> main(List<String> args) async {
               case FileType.user:
                 await client.importUsers(CsvToUsers(csvFile));
                 break;
+              case FileType.website:
+                await client.importWebsite(CsvToWebsite(csvFile));
+                break;
 
               default:
                 logger.e("FileType ${fileType.name} not implemented yet");
@@ -226,9 +227,7 @@ Future<void> main(List<String> args) async {
             exit(1);
           }
         }
-        final dio =
-            buildDioClient('http://localhost:8080/'); // Provide a dio instance
-        final client = RestClient(await dio);
+        final client = RestClient(await buildDioClient(null));
         try {
           if (isDirectory(outputDirectory)) {
             logger.e(
@@ -276,6 +275,14 @@ Future<void> main(List<String> args) async {
             final file5 =
                 File("$outputDirectory/${FileType.category.name}.csv");
             file5.writeAsStringSync(csvContent);
+          }
+          // export website
+          if (fileType == FileType.unknown || fileType == FileType.website) {
+            fileType = FileType.website;
+            Website result = await client.exportWebsite();
+            csvContent = CsvFromWebsite(result);
+            final file6 = File("$outputDirectory/${FileType.website.name}.csv");
+            file6.writeAsStringSync(csvContent);
           }
         } on DioException catch (e) {
           logger.e(getDioError(e));

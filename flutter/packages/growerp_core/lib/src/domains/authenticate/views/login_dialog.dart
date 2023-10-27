@@ -306,7 +306,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                         if (message != null) {
                           await Future.delayed(
                               const Duration(milliseconds: 200),
-                              () => _authBloc.add(AuthLastMessage(message)));
+                              () => _authBloc.add(AuthMessage(message)));
                         }
                       })),
             ])));

@@ -16,12 +16,12 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="check" noun="Email">
-        <description>Check if a particular emaill address exists of a party</description>
+        <description>Check if a particular email address exists of a party</description>
         <in-parameters>
             <parameter name="email" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="ok" />
+            <parameter name="ok" type="boolean" />
         </out-parameters>
         <actions>
             <entity-find entity-name="mantle.party.contact.PartyContactMechInfo"
@@ -45,7 +45,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </iterate>
             <if condition="partyIds.size() &gt; 0">
-                <set field="ok" value="ok" />
+                <set field="ok" value="true" type="Boolean" />
+                <else>
+                    <set field="ok" value="false" type="Boolean" />
+                </else>
             </if>
         </actions>
     </service>

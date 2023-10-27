@@ -24,7 +24,7 @@ Future<Dio> buildDioClient(String? base) async {
     ..options.receiveTimeout = const Duration(milliseconds: 5000)
     ..httpClientAdapter;
 
-  dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
+  //dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
   dio.options.responseType = ResponseType.plain;
 
   var box = await Hive.openBox('growerp');
@@ -50,14 +50,12 @@ class KeyInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-//    print(
-//        "=====interceptor key: ${_box?.get('apiKey')} ${options.headers['requireApiKey']}");
     if (options.headers['requireApiKey'] == true) {
       options.headers['api_key'] = await _box?.get('apiKey');
     }
 
     //if (options.method != 'GET') {
-    //  options.headers['moquiSessionToken'] =
+    //  options.headers['moquisessiontoken'] =
     //      await _box?.get('moquiSessionToken');
     //}
 
@@ -67,6 +65,9 @@ class KeyInterceptor extends Interceptor {
   //@override
   //void onResponse(Response response, ResponseInterceptorHandler handler) async {
   //  await _box?.put('moquiSessionToken', response.headers['moquisessiontoken']);
-  //  super.onResponse(response, handler);
+
+  //  response.headers.removeAll('set-cookie');
+
+  //  return super.onResponse(response, handler);
   //}
 }

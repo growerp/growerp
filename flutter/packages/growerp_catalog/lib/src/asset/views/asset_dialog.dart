@@ -76,8 +76,7 @@ class AssetDialogState extends State<AssetDialogFull> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return BlocConsumer<AssetBloc, AssetState>(
-        listener: (context, state) async {
+    return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
       switch (state.status) {
         case AssetStatus.success:
           Navigator.of(context).pop();

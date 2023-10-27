@@ -12,10 +12,12 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        require-authentication="false" track-artifact-hit="false" default-menu-include="false">
- 
-        <!--transition name="uploadImage" method="post">
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+
+    <!--transition
+    name="uploadImage" method="post">
             <service-call name="growerp.100.ImageServices100.upload#Image"/>
             <default-response type="none"/>
         </transition-->
@@ -27,12 +29,15 @@ along with this software (see the LICENSE.md file). If not, see
             </script></actions>
             <default-response type="none"/>
         </transition>
-        <!-- Get a session token for clients that are not authenticated (no api_key) to use for all request methods other than GET -->
-        <transition name="moquiSessionToken" begin-transaction="false">
+    <!-- Get a session token for clients that are not authenticated (no api_key) to use for all
+    request methods other than GET -->
+    <!--transition
+    name="moquiSessionToken" begin-transaction="false">
             <actions><script>ec.web.sendTextResponse(ec.web.sessionToken)</script></actions>
             <default-response type="none"/>
-        </transition>
-        <!-- REST API calls from a browser or session aware client will have an active session, use this for explicit logout and terminate session -->
+        </transition-->
+    <!-- REST API calls from a browser or session aware client will have an active session, use this
+    for explicit logout and terminate session -->
         <transition name="logout" begin-transaction="false">
             <actions><script>
                 if (ec.user.username) { ec.user.logoutUser(); ec.web.sendTextResponse("successful") }
@@ -41,5 +46,6 @@ along with this software (see the LICENSE.md file). If not, see
             <default-response type="none"/>
         </transition>
     
-        <widgets><!-- this should never be viewed... --></widgets>
+        <widgets><!--
+        this should never be viewed... --></widgets>
 </screen>
