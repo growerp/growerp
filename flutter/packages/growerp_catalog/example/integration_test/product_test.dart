@@ -20,12 +20,14 @@ import 'package:integration_test/integration_test.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:catalog_example/main.dart';
 import 'package:growerp_core/test_data.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
+    await Hive.initFlutter();
   });
 
   testWidgets('''GrowERP product test''', (tester) async {

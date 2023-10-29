@@ -1,3 +1,21 @@
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
+
+// this file contains dummy models required by the retrofit package in order
+// to be able to request lists in a map from the backend.
+// [Map<String,List>]
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'models.dart';
@@ -67,4 +85,15 @@ class Companies with _$Companies {
 
   factory Companies.fromJson(Map<String, dynamic> json) =>
       _$CompaniesFromJson(json);
+}
+
+@freezed // list of rentalFullDates
+class RentalFullDates with _$RentalFullDates {
+  factory RentalFullDates({
+    @Default(const []) List<String> rentalFullDates,
+  }) = _RentalFullDates;
+  RentalFullDates._();
+
+  factory RentalFullDates.fromJson(Map<String, dynamic> json) =>
+      _$RentalFullDatesFromJson(json);
 }

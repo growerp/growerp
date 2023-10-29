@@ -30,23 +30,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
-            <parameter name="product" type="Map">
-                <parameter name="productId" />
-                <parameter name="pseudoId" />
-                <parameter name="productName" />
-                <parameter name="productTypeId" />
-                <parameter name="assetClassId" />
-                <parameter name="description" />
-                <parameter name="price" />
-                <parameter name="categories" type="List">
-                    <parameter name="category" type="Map">
-                        <parameter name="categoryId" />
-                        <parameter name="categoryName" />
-                    </parameter>
-                </parameter>
-                <parameter name="useWarehouse" type="Boolean" />
-                <parameter name="image" />
-            </parameter>
             <parameter name="products" type="List">
                 <parameter name="product" type="Map">
                     <parameter name="productId" />
@@ -249,13 +232,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="productOut.categories" from="categories" />
                 <script>products.add(productOut)</script>
             </if>
-            <if condition="productId">
-                <set field="product" from="productOut" />
-                <set field="products" from="[]" />
-                <else>
-                    <set field="product" from="[:]" />
-                </else>
-            </if>
         </actions>
     </service>
 
@@ -392,6 +368,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- return created product -->
             <service-call name="growerp.100.CatgProdServices100.get#Products"
                 in-map="[productId: productId]" out-map="context" />
+            <set field="product" from="products[0]" />
         </actions>
     </service>
 
@@ -577,6 +554,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.CatgProdServices100.get#Products"
                 in-map="[productId: product.productId]" out-map="context" />
+            <set field="product" from="products[0]" />
         </actions>
     </service>
 
@@ -618,6 +596,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-update value-field="prods[0]" />
             <service-call name="growerp.100.CatgProdServices100.get#Products"
                 in-map="[productId: product.productId]" out-map="context" />
+            <set field="product" from="products[0]" />
         </actions>
     </service>
 

@@ -109,6 +109,7 @@ abstract class RestClient {
   Future<Website> exportWebsite();
 
   // catalog
+  // asset
   @GET("rest/s1/growerp/100/Asset")
   @Headers(<String, dynamic>{'requireApiKey': true})
   Future<Assets> getAsset(
@@ -133,6 +134,7 @@ abstract class RestClient {
       {@Field() required Asset asset,
       @Field() required String classificationId});
 
+  // categories
   @GET("rest/s1/growerp/100/Categories")
   @Headers(<String, dynamic>{'requireApiKey': true})
   Future<Categories> getCategory({
@@ -172,6 +174,61 @@ abstract class RestClient {
     @Query('entityName') String entityName = 'Category',
     @Query('classificationId') String? classificationId,
   });
+
+  // products
+  @GET("rest/s1/growerp/100/Products")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Products> getProduct({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('companyPartyId') String? companyPartyId,
+    @Query('filter') String? filter,
+    @Query('search') String? searchString,
+    @Query('classificationId') String? classificationId,
+    @Query('categoryId') String? categoryId,
+    @Query('productId') String? productId,
+    @Query('productTypeId') String? productTypeId,
+    @Query('assetClassId') String? assetClassId,
+  });
+
+  @POST("rest/s1/growerp/100/Product")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Product> createProduct(
+      {@Field() required Product product,
+      @Field() required String classificationId});
+
+  @PATCH("rest/s1/growerp/100/Product")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Product> updateProduct(
+      {@Field() required Product product,
+      @Field() required String classificationId});
+
+  @DELETE("rest/s1/growerp/100/Product")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Product> deleteProduct({@Field() required Product product});
+
+  @POST("rest/s1/growerp/100/ImportExport")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<String> importScreenProducts(
+      {@Field() required List products,
+      @Field() required String classificationId});
+
+  @GET("rest/s1/growerp/100/ImportExport")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<String> exportScreenProducts({
+    @Query('entityName') String entityName = 'Product',
+    @Query('classificationId') required String classificationId,
+  });
+
+  // rental
+  @GET("rest/s1/growerp/100/RentalOccupancy")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<RentalFullDates> getRentalOccupancy({
+    @Query('productId') required String productId,
+  });
+  @GET("rest/s1/growerp/100/RentalOccupancy")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Products> getRentalAllOccupancy();
 
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")

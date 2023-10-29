@@ -73,7 +73,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                 child: popUp(
                     context: context,
                     child: _registerForm(_authBloc.state.authenticate!),
-                    title: widget.admin
+                    title: !widget.admin
                         ? "Enter a new customer for company\n "
                             "${_authBloc.state.authenticate!.company!.name}"
                         : "Enter a new company with admin",

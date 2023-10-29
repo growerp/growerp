@@ -26,7 +26,7 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    restClient: RestClient(await buildDioClient(null)),
     classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),

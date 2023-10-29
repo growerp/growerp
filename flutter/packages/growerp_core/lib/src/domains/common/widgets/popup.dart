@@ -13,16 +13,18 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_breakpoints.dart';
 import '../../domains.dart';
 
 Widget popUp(
     {Widget? child,
     String title = '',
     double height = 400,
-    double width = 350,
-    bool? isPhone,
+    double? width,
     required BuildContext context}) {
-  if (isPhone != null) isPhone ? width = 350 : width = 700;
+  if (width == null) {
+    ResponsiveBreakpoints.of(context).isMobile ? width = 350 : width = 700;
+  }
   return Stack(clipBehavior: Clip.none, children: [
     SizedBox(
         width: width,

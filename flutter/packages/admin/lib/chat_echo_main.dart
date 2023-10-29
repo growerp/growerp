@@ -24,15 +24,17 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'router.dart' as router;
+import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
+  await Hive.initFlutter();
 
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
-      restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+      restClient: RestClient(await buildDioClient(null)),
       dbServer: APIRepository(),
       chatServer: ChatServer()));
 }

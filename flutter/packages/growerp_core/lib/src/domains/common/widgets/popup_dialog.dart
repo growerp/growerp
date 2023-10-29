@@ -37,7 +37,7 @@ Widget popUpDialog({
               Container(
                   height: 50,
                   decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColorDark,
+                      color: Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),

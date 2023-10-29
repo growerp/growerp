@@ -25,8 +25,8 @@ class ProductListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<ProductBloc>(
-      create: (BuildContext context) => ProductBloc(CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!)),
+      create: (BuildContext context) =>
+          ProductBloc(context.read<RestClient>(), context.read<String>()),
       child: const ProductList());
 }
 

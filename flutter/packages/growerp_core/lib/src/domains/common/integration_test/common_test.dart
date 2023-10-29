@@ -29,7 +29,7 @@ import '../../../../test_data.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
-  static int waitTime = 5;
+  static int waitTime = 3;
 
   static Future<void> startTestApp(
       WidgetTester tester,

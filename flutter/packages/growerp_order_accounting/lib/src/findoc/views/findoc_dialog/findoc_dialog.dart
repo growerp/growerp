@@ -71,8 +71,8 @@ class FinDocDialog extends StatelessWidget {
                     context.read<AuthBloc>().state.authenticate!.apiKey!),
                 Role.customer)),
         BlocProvider<ProductBloc>(
-            create: (context) => ProductBloc(CatalogAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+            create: (context) => ProductBloc(
+                context.read<RestClient>(), context.read<String>())),
         BlocProvider<GlAccountBloc>(
             create: (context) => GlAccountBloc(AccountingAPIRepository(
                 context.read<AuthBloc>().state.authenticate!.apiKey!))),
@@ -92,8 +92,8 @@ class FinDocDialog extends StatelessWidget {
                   context.read<AuthBloc>().state.authenticate!.apiKey!),
               Role.supplier)),
       BlocProvider<ProductBloc>(
-          create: (context) => ProductBloc(CatalogAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+          create: (context) =>
+              ProductBloc(context.read<RestClient>(), context.read<String>())),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(AccountingAPIRepository(
               context.read<AuthBloc>().state.authenticate!.apiKey!))),

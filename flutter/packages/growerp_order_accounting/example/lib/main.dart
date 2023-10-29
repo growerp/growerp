@@ -21,13 +21,15 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'acct_menu_option_data.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
+  await Hive.initFlutter();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient('http://localhost:8080/')),
+    restClient: RestClient(await buildDioClient(null)),
     classificationId: 'AppAdmin',
     dbServer: APIRepository(),
     chatServer: ChatServer(),

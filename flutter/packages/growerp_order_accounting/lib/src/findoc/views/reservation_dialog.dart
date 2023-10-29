@@ -36,8 +36,8 @@ class ReservationDialog extends StatelessWidget {
                 context.read<AuthBloc>().state.authenticate!.apiKey!),
             Role.customer),
         child: BlocProvider<ProductBloc>(
-            create: (context) => ProductBloc(CatalogAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!)),
+            create: (context) =>
+                ProductBloc(context.read<RestClient>(), context.read<String>()),
             child: ReservationForm(finDoc: finDoc, original: original)));
   }
 }

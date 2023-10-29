@@ -19,10 +19,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
-import 'package:growerp_core/growerp_core.dart';
 
 part 'category_event.dart';
 part 'category_state.dart';
@@ -128,10 +126,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       emit(state.copyWith(status: CategoryStatus.loading));
       List<Category> categories = List.from(state.categories);
 
-      Category compResult =
-          await restClient.deleteCategory(category: event.category);
-      int index = categories
-          .indexWhere((element) => element.categoryId == compResult.categoryId);
+      await restClient.deleteCategory(category: event.category);
+      int index = categories.indexWhere(
+          (element) => element.categoryId == event.category.categoryId);
       categories.removeAt(index);
       emit(state.copyWith(
           status: CategoryStatus.success,

@@ -41,10 +41,11 @@ class Product extends Equatable with _$Product {
     @Default(false) bool useWarehouse,
     int? assetCount,
     @Uint8ListConverter() Uint8List? image,
+    @Default([]) List<String> fullDates,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>
-      _$ProductFromJson(json);
+      _$ProductFromJson(json['product'] ?? json);
 
   @override
   List<Object?> get props => [productId];

@@ -28,7 +28,7 @@ class ProductState extends Equatable {
     this.status = ProductStatus.initial,
     this.products = const <Product>[],
     this.occupancyDates = const <String>[], // format YYYY-MM-DD
-    this.fullDates = const <FullDatesProductRental>[],
+    this.productFullDates = const <Product>[],
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
@@ -38,7 +38,7 @@ class ProductState extends Equatable {
   final String? message;
   final List<Product> products;
   final List<String> occupancyDates;
-  final List<FullDatesProductRental> fullDates;
+  final List<Product> productFullDates;
   final bool hasReachedMax;
   final String searchString;
 
@@ -47,7 +47,7 @@ class ProductState extends Equatable {
     String? message,
     List<Product>? products,
     List<String>? occupancyDates,
-    List<FullDatesProductRental>? fullDates,
+    List<Product>? productFullDates,
     bool error = false,
     bool? hasReachedMax,
     String? searchString,
@@ -56,7 +56,7 @@ class ProductState extends Equatable {
       status: status ?? this.status,
       products: products ?? this.products,
       occupancyDates: occupancyDates ?? this.occupancyDates,
-      fullDates: fullDates ?? this.fullDates,
+      productFullDates: productFullDates ?? this.productFullDates,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
@@ -67,6 +67,7 @@ class ProductState extends Equatable {
   List<Object?> get props => [status, message, products, hasReachedMax];
 
   @override
-  String toString() => '$status { #products: ${products.length}, '
+  String toString() =>
+      '$status { #products: ${products.length}, fullDates: $occupancyDates '
       'hasReachedMax: $hasReachedMax message $message}';
 }

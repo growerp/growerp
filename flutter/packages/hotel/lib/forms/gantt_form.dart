@@ -38,8 +38,8 @@ class GanttForm extends StatelessWidget {
             create: (context) =>
                 AssetBloc(context.read<RestClient>(), context.read<String>())),
         BlocProvider<ProductBloc>(
-            create: (context) => ProductBloc(CatalogAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+            create: (context) => ProductBloc(
+                context.read<RestClient>(), context.read<String>())),
         BlocProvider<FinDocBloc>(
             create: (context) => FinDocBloc(
                 FinDocAPIRepository(
@@ -484,7 +484,7 @@ class GanttChart extends StatelessWidget {
     List<Asset> assets = [];
     List<FinDoc> finDocs = [];
     List<FinDoc> reservations = [];
-    List<FullDatesProductRental> fullDates = [];
+    List<Product> productFullDates = [];
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
       return BlocBuilder<FinDocBloc, FinDocState>(
           builder: (context, finDocState) {
@@ -497,12 +497,12 @@ class GanttChart extends StatelessWidget {
               return const Center(child: Text("No Rooms found!"));
             }
             assets = assetState.assets;
-            fullDates = productState.fullDates;
+            productFullDates = productState.productFullDates;
             finDocs = finDocState.finDocs;
             reservations = [];
 
             // all open reservations combined by Room type(product) in the server
-            for (var fullDate in fullDates) {
+            for (var fullDate in productFullDates) {
               reservations.add(FinDoc(items: [
                 FinDocItem(
                     assetId: fullDate.productId,

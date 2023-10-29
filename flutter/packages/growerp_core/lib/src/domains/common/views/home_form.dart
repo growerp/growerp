@@ -136,7 +136,7 @@ class HomeFormState extends State<HomeForm> {
                               height: 100,
                               width: 100),
                           if (widget.title.isNotEmpty)
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 30),
                           InkWell(
                               onLongPress: () async {
                                 await showDialog(
