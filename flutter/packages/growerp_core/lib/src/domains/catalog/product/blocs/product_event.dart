@@ -33,8 +33,6 @@ class ProductFetch extends ProductEvent {
   final String assetClassId;
   final String searchString;
   final bool refresh;
-  @override
-  List<Object> get props => [categoryId, companyPartyId, searchString, refresh];
 }
 
 /// delete an existing product

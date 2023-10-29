@@ -176,6 +176,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: AuthStatus.loading));
       await restClient.logout();
       emit(state.copyWith(
           authenticate: state.authenticate!.copyWith(apiKey: null),

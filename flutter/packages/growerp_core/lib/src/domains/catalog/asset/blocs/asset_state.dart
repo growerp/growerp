@@ -53,5 +53,5 @@ class AssetState extends Equatable {
 
   @override
   String toString() => '$status { #assets: ${assets.length}, '
-      'hasReachedMax: $hasReachedMax message $message}';
+      'hasReachedMax: $hasReachedMax message: $message}';
 }

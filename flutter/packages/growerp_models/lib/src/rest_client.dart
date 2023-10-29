@@ -108,6 +108,71 @@ abstract class RestClient {
   @Headers(<String, dynamic>{'requireApiKey': true})
   Future<Website> exportWebsite();
 
+  // catalog
+  @GET("rest/s1/growerp/100/Asset")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Assets> getAsset(
+      {@Query('start') int? start,
+      @Query('limit') int? limit,
+      @Query('companyPartyId') String? companyPartyId,
+      @Query('assetClassId') String? assetClassId,
+      @Query('assetId') String? assetId,
+      @Query('productId') String? productId,
+      @Query('filter') String? filter,
+      @Query('search') String? search});
+
+  @POST("rest/s1/growerp/100/Asset")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Asset> createAsset(
+      {@Field() required Asset asset,
+      @Field() required String classificationId});
+
+  @PATCH("rest/s1/growerp/100/Asset")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Asset> updateAsset(
+      {@Field() required Asset asset,
+      @Field() required String classificationId});
+
+  @GET("rest/s1/growerp/100/Categories")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Categories> getCategory({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('companyPartyId') String? companyPartyId,
+    @Query('filter') String? filter,
+    @Query('search') String? searchString,
+    @Query('classificationId') String? classificationId,
+  });
+
+  @POST("rest/s1/growerp/100/Category")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Category> createCategory(
+      {@Field() required Category category,
+      @Field() required String classificationId});
+
+  @PATCH("rest/s1/growerp/100/Category")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Category> updateCategory(
+      {@Field() required Category category,
+      @Field() required String classificationId});
+
+  @DELETE("rest/s1/growerp/100/Category")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<Category> deleteCategory({@Field() required Category category});
+
+  @POST("rest/s1/growerp/100/ImportExport")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<String> importScreenCategories(
+      {@Field() required List categories,
+      @Field() required String classificationId});
+
+  @GET("rest/s1/growerp/100/ImportExport")
+  @Headers(<String, dynamic>{'requireApiKey': true})
+  Future<String> exportScreenCategories({
+    @Query('entityName') String entityName = 'Category',
+    @Query('classificationId') String? classificationId,
+  });
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Headers(<String, dynamic>{'requireApiKey': true})

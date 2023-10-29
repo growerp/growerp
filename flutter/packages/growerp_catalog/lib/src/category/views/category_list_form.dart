@@ -23,8 +23,8 @@ class CategoryListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<CategoryBloc>(
-      create: (BuildContext context) => CategoryBloc(CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!)),
+      create: (BuildContext context) =>
+          CategoryBloc(context.read<RestClient>(), context.read<String>()),
       child: const CategoryList());
 }
 

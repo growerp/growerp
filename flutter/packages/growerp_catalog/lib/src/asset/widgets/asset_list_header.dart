@@ -65,12 +65,12 @@ class _AssetListHeaderState extends State<AssetListHeader> {
                 Row(children: <Widget>[
                   const Expanded(
                       child: Text("Name", textAlign: TextAlign.center)),
-                  const Expanded(
-                      child: Text("Act.", textAlign: TextAlign.center)),
                   Expanded(
                       child: Text(
                           classificationId == 'AppHotel' ? 'Type' : 'Product',
                           textAlign: TextAlign.center)),
+                  const Expanded(
+                      child: Text("Act.", textAlign: TextAlign.center)),
                 ]),
                 const Divider(),
               ]),

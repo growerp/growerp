@@ -130,6 +130,7 @@ class CatalogAPIRepository extends APIRepository {
     }
   }
 
+/*
   Future<ApiResult<List<Asset>>> getAsset(
       {int? start,
       int? limit,
@@ -305,7 +306,7 @@ class CatalogAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   Future<ApiResult<List<String>>> getRentalOccupancy(
       {required String productId}) async {
     try {

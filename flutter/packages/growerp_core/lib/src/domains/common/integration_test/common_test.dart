@@ -58,6 +58,7 @@ class CommonTest {
       extraDelegates: extraDelegates,
       blocProviders: blocProviders ?? [],
     ));
+    await tester.pump(const Duration());
     await tester.pumpAndSettle(Duration(seconds: waitTime));
   }
 
@@ -107,6 +108,7 @@ class CommonTest {
       admin: admin.copyWith(email: email, loginName: email),
       company: initialCompany.copyWith(email: email, name: companyName),
     ));
+    await Future.delayed(const Duration(seconds: 5));
     await CommonTest.login(tester, testData: testData);
   }
 

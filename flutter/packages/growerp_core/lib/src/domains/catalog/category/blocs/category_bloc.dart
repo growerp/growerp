@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -35,7 +36,10 @@ EventTransformer<E> categoryDroppable<E>(Duration duration) {
 }
 
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
-  CategoryBloc(this.repos) : super(const CategoryState()) {
+  CategoryBloc(
+    this.restClient,
+    this.classificationId,
+  ) : super(const CategoryState()) {
     on<CategoryFetch>(_onCategoryFetch,
         transformer: categoryDroppable(const Duration(milliseconds: 100)));
     on<CategoryUpdate>(_onCategoryUpdate);
@@ -44,7 +48,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryDownload>(_onCategoryDownload);
   }
 
-  final CatalogAPIRepository repos;
+  final RestClient restClient;
+  final String classificationId;
 
   Future<void> _onCategoryFetch(
     CategoryFetch event,
@@ -54,93 +59,64 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       return;
     }
     // start from record zero for initial and refresh
-    if (state.status == CategoryStatus.initial || event.refresh) {
+    try {
       emit(state.copyWith(status: CategoryStatus.loading));
-      ApiResult<List> compResult = await repos.getCategory(
-          companyPartyId: event.companyPartyId,
-          searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) {
-            return state.copyWith(
-              status: CategoryStatus.success,
-              categories: data as List<Category>,
-              hasReachedMax: data.length < _categoryLimit ? true : false,
-              searchString: '',
-              message: event.refresh == true ? 'List refreshed....' : null,
-            );
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List> compResult = await repos.getCategory(
-          companyPartyId: event.companyPartyId,
-          searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: CategoryStatus.success,
-                categories: data as List<Category>,
-                hasReachedMax: data.length < _categoryLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get next page also for search
 
-    ApiResult<List> compResult = await repos.getCategory(
-        companyPartyId: event.companyPartyId, searchString: event.searchString);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: CategoryStatus.success,
-              categories: List.of(state.categories)
-                ..addAll(data as List<Category>),
-              hasReachedMax: data.length < _categoryLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: CategoryStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+      Categories compResult = await restClient.getCategory(
+          companyPartyId: event.companyPartyId,
+          searchString: event.searchString);
+
+      emit(state.copyWith(
+        status: CategoryStatus.success,
+        categories: compResult.categories,
+        hasReachedMax:
+            compResult.categories.length < _categoryLimit ? true : false,
+        searchString: '',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CategoryStatus.failure,
+          categories: [],
+          message: getDioError(e)));
+    }
   }
 
   Future<void> _onCategoryUpdate(
     CategoryUpdate event,
     Emitter<CategoryState> emit,
   ) async {
-    List<Category> categories = List.from(state.categories);
-    if (event.category.categoryId.isNotEmpty) {
-      ApiResult compResult = await repos.updateCategory(event.category);
-      return emit(compResult.when(
-          success: (data) {
-            int index = categories.indexWhere(
-                (element) => element.categoryId == event.category.categoryId);
-            categories[index] = data;
-            return state.copyWith(
-                status: CategoryStatus.success,
-                categories: categories,
-                message: 'Category ${event.category.categoryName} updated!');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult compResult = await repos.createCategory(event.category);
-      return emit(compResult.when(
-          success: (data) {
-            categories.insert(0, data);
-            return state.copyWith(
-                status: CategoryStatus.success,
-                categories: categories,
-                message: 'Category ${event.category.categoryName} added!');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: CategoryStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: CategoryStatus.loading));
+
+      List<Category> categories = List.from(state.categories);
+      if (event.category.categoryId.isNotEmpty) {
+        Category compResult = await restClient.updateCategory(
+            category: event.category, classificationId: classificationId);
+
+        int index = categories.indexWhere(
+            (element) => element.categoryId == event.category.categoryId);
+        categories[index] = compResult;
+
+        emit(state.copyWith(
+            status: CategoryStatus.success,
+            categories: categories,
+            message: 'Category ${event.category.categoryName} updated!'));
+      } else {
+        // add
+        Category compResult = await restClient.createCategory(
+            category: event.category, classificationId: classificationId);
+
+        categories.insert(0, compResult);
+        emit(state.copyWith(
+            status: CategoryStatus.success,
+            categories: categories,
+            message: 'Category ${event.category.categoryName} added!'));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CategoryStatus.failure,
+          categories: [],
+          message: getDioError(e)));
     }
   }
 
@@ -148,67 +124,77 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     CategoryDelete event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(state.copyWith(status: CategoryStatus.loading));
-    List<Category> categories = List.from(state.categories);
-    ApiResult compResult = await repos.deleteCategory(event.category);
-    return emit(compResult.when(
-        success: (data) {
-          int index = categories.indexWhere(
-              (element) => element.categoryId == event.category.categoryId);
-          categories.removeAt(index);
-          return state.copyWith(
-              status: CategoryStatus.success,
-              categories: categories,
-              message: 'Category ${event.category.categoryName} deleted!');
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: CategoryStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: CategoryStatus.loading));
+      List<Category> categories = List.from(state.categories);
+
+      Category compResult =
+          await restClient.deleteCategory(category: event.category);
+      int index = categories
+          .indexWhere((element) => element.categoryId == compResult.categoryId);
+      categories.removeAt(index);
+      emit(state.copyWith(
+          status: CategoryStatus.success,
+          categories: categories,
+          message: 'Category ${event.category.categoryName} deleted!'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CategoryStatus.failure,
+          categories: [],
+          message: getDioError(e)));
+    }
   }
 
   Future<void> _onCategoryUpload(
     CategoryUpload event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(state.copyWith(status: CategoryStatus.loading));
-    List<Category> categories = [];
-    final result = fast_csv.parse(event.file);
-    int line = 0;
-    // import csv into categories
-    for (final row in result) {
-      if (line++ < 2) continue;
-      if (row.length > 1) {
-        categories.add(Category(
-            categoryName: row[0],
-            description: row[1],
-            image: const Base64Decoder().convert(row[2])));
+    try {
+      emit(state.copyWith(status: CategoryStatus.loading));
+      List<Category> categories = [];
+      final result = fast_csv.parse(event.file);
+      int line = 0;
+      // import csv into categories
+      for (final row in result) {
+        if (line++ < 2) continue;
+        if (row.length > 1) {
+          categories.add(Category(
+              categoryName: row[0],
+              description: row[1],
+              image: const Base64Decoder().convert(row[2])));
+        }
       }
+      String compResult = await restClient.importScreenCategories(
+          categories: categories, classificationId: classificationId);
+
+      emit(state.copyWith(status: CategoryStatus.success, message: compResult));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CategoryStatus.failure,
+          categories: [],
+          message: getDioError(e)));
     }
-    ApiResult<String> compResult = await repos.importCategories(categories);
-    return emit(compResult.when(
-        success: (data) {
-          return state.copyWith(status: CategoryStatus.success, message: data);
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: CategoryStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onCategoryDownload(
     CategoryDownload event,
     Emitter<CategoryState> emit,
   ) async {
-    emit(state.copyWith(status: CategoryStatus.loading));
-    ApiResult<String> compResult = await repos.exportCategories();
-    return emit(compResult.when(
-        success: (data) {
-          return state.copyWith(
-              status: CategoryStatus.success,
-              message:
-                  "The request is scheduled and the email be be sent shortly");
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: CategoryStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: CategoryStatus.loading));
+
+      await restClient.exportScreenCategories(
+          classificationId: classificationId);
+
+      emit(state.copyWith(
+          status: CategoryStatus.success,
+          message:
+              "The request is scheduled and the email be be sent shortly"));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: CategoryStatus.failure,
+          categories: [],
+          message: getDioError(e)));
+    }
   }
 }

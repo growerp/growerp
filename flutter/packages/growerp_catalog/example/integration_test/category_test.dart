@@ -35,7 +35,6 @@ void main() {
         CatalogLocalizations.localizationsDelegates,
         title: "Category test",
         clear: true); // use data from previous run, ifnone same as true
-
     await CommonTest.createCompanyAndAdmin(tester);
     await CategoryTest.selectCategories(tester);
     await CategoryTest.addCategories(tester, categories);

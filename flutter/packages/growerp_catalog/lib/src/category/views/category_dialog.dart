@@ -21,9 +21,6 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-final GlobalKey<ScaffoldMessengerState> categoryDialogKey =
-    GlobalKey<ScaffoldMessengerState>();
-
 class CategoryDialog extends StatelessWidget {
   final Category category;
   const CategoryDialog(this.category, {super.key});
@@ -115,8 +112,8 @@ class CategoryDialogState extends State<CategoryDialogFull> {
           Navigator.of(context).pop();
           break;
         case CategoryStatus.failure:
-          categoryDialogKey.currentState!
-              .showSnackBar(snackBar(context, Colors.red, state.message ?? ''));
+          HelperFunctions.showMessage(
+              context, 'Error: ${state.message}', Colors.red);
           break;
         default:
       }
@@ -146,7 +143,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                   child: listChild(productState),
                   title: 'Category Information',
                   height: 650,
-                  width: 400));
+                  width: 350));
         }
       });
     });
@@ -234,7 +231,6 @@ class CategoryDialogState extends State<CategoryDialogFull> {
     ));
 
     return ScaffoldMessenger(
-        key: categoryDialogKey,
         child: Scaffold(
             backgroundColor: Colors.transparent,
             floatingActionButton:
@@ -318,23 +314,13 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                           onPressed: () async {
                             if (_categoryDialogFormKey.currentState!
                                 .validate()) {
-                              updatedCategory = Category(
+                              _categoryBloc.add(CategoryUpdate(Category(
                                   categoryId: widget.category.categoryId,
                                   categoryName: _nameController.text,
                                   description: _descrController.text,
                                   products: _selectedProducts,
                                   image: await HelperFunctions.getResizedImage(
-                                      _imageFile?.path));
-                              if (!mounted) return;
-                              if (_imageFile?.path != null &&
-                                  updatedCategory.image == null) {
-                                HelperFunctions.showMessage(
-                                    context, "Image upload error!", Colors.red);
-                              } else {
-                                _categoryBloc.add(CategoryUpdate(
-                                  updatedCategory,
-                                ));
-                              }
+                                      _imageFile?.path))));
                             }
                           }),
                     ])))));

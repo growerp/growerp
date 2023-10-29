@@ -22,8 +22,8 @@ class AssetListForm extends StatelessWidget {
   const AssetListForm({super.key});
   @override
   Widget build(BuildContext context) => BlocProvider<AssetBloc>(
-        create: (context) => AssetBloc(CatalogAPIRepository(
-            context.read<AuthBloc>().state.authenticate!.apiKey!)),
+        create: (context) =>
+            AssetBloc(context.read<RestClient>(), context.read<String>()),
         child: const AssetList(),
       );
 }

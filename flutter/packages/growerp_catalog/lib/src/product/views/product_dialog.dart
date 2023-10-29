@@ -34,9 +34,9 @@ class ProductDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => CategoryBloc(CatalogAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const CategoryFetch()),
+      create: (BuildContext context) =>
+          CategoryBloc(context.read<RestClient>(), context.read<String>())
+            ..add(const CategoryFetch()),
       child: ProductDialogFull(product),
     );
   }

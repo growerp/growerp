@@ -19,8 +19,10 @@ Widget popUp(
     {Widget? child,
     String title = '',
     double height = 400,
-    double width = 400,
+    double width = 350,
+    bool? isPhone,
     required BuildContext context}) {
+  if (isPhone != null) isPhone ? width = 350 : width = 700;
   return Stack(clipBehavior: Clip.none, children: [
     SizedBox(
         width: width,

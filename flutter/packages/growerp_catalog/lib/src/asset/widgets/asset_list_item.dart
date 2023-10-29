@@ -37,11 +37,11 @@ class AssetListItem extends StatelessWidget {
           children: <Widget>[
             Expanded(child: Text("${asset.assetName}", key: Key('name$index'))),
             Expanded(
-                child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
-                    key: Key('status$index'), textAlign: TextAlign.center)),
-            Expanded(
                 child: Text("${asset.product!.productName}",
                     key: Key('product$index'), textAlign: TextAlign.center)),
+            Expanded(
+                child: Text(asset.statusId == 'Deactivated' ? 'N' : 'Y',
+                    key: Key('status$index'), textAlign: TextAlign.center)),
           ],
         ),
         onTap: () async {
@@ -51,12 +51,21 @@ class AssetListItem extends StatelessWidget {
               builder: (BuildContext context) => BlocProvider.value(
                   value: assetBloc, child: AssetDialog(asset)));
         },
-        trailing: IconButton(
-          key: Key('delete$index'),
-          icon: const Icon(Icons.delete_forever),
-          onPressed: () {
-            assetBloc.add(AssetDelete(asset));
-          },
-        ));
+        trailing: asset.statusId == 'Available' || asset.statusId == 'In Use'
+            ? IconButton(
+                key: Key('delete$index'),
+                icon: const Icon(Icons.delete_forever),
+                onPressed: () {
+                  assetBloc.add(
+                      AssetUpdate(asset.copyWith(statusId: 'Deactivated')));
+                })
+            : IconButton(
+                key: Key('delete$index'),
+                icon: const Icon(Icons.event_available),
+                onPressed: () {
+                  assetBloc
+                      .add(AssetUpdate(asset.copyWith(statusId: 'Available')));
+                },
+              ));
   }
 }

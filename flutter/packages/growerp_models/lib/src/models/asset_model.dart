@@ -40,7 +40,8 @@ class Asset with _$Asset {
   }) = _Asset;
   Asset._();
 
-  factory Asset.fromJson(Map<String, dynamic> json) => _$AssetFromJson(json);
+  factory Asset.fromJson(Map<String, dynamic> json) =>
+      _$AssetFromJson(json['asset'] ?? json);
 
   @override
   String toString() => 'Asset name: $assetName[$assetId] '

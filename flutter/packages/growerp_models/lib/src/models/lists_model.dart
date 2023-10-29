@@ -39,6 +39,16 @@ class Products with _$Products {
 }
 
 @freezed
+class Assets with _$Assets {
+  factory Assets({
+    @Default(const []) List<Asset> assets,
+  }) = _Assets;
+  Assets._();
+
+  factory Assets.fromJson(Map<String, dynamic> json) => _$AssetsFromJson(json);
+}
+
+@freezed
 class Users with _$Users {
   factory Users({
     @Default(const []) List<User> users,

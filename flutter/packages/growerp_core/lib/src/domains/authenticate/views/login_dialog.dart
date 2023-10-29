@@ -85,27 +85,18 @@ class _LoginHeaderState extends State<LoginDialog> {
       if (_passwordController.text.isEmpty && !kReleaseMode) {
         _passwordController.text = 'qqqqqq9!';
       }
-      Widget loginType;
-      if (oldPassword != null && username != null) {
-        loginType = _changePassword(username, oldPassword);
-      } else if (companyPartyId == null) {
-        loginType = _changeEcommerceCompany();
-      } else {
-        loginType = _loginToCurrentCompany();
-      }
-      return GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Builder(
-                  builder: (context) => GestureDetector(
-                      onTap: () {},
-                      child: Dialog(
-                          insetPadding: const EdgeInsets.all(10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: loginType)))));
+      return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Dialog(
+              insetPadding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: oldPassword != null && username != null
+                  ? _changePassword(username, oldPassword)
+                  : companyPartyId == null
+                      ? _changeEcommerceCompany()
+                      : _loginToCurrentCompany()));
     });
   }
 
@@ -303,11 +294,12 @@ class _LoginHeaderState extends State<LoginDialog> {
                                   value: _authBloc,
                                   child: SendResetPasswordDialog(username));
                             });
-                        if (message != null) {
+/*                        if (message != null) {
                           await Future.delayed(
                               const Duration(milliseconds: 200),
                               () => _authBloc.add(AuthMessage(message)));
                         }
+*/
                       })),
             ])));
   }

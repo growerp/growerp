@@ -35,8 +35,8 @@ class GanttForm extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AssetBloc>(
-            create: (context) => AssetBloc(CatalogAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+            create: (context) =>
+                AssetBloc(context.read<RestClient>(), context.read<String>())),
         BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(CatalogAPIRepository(
                 context.read<AuthBloc>().state.authenticate!.apiKey!))),

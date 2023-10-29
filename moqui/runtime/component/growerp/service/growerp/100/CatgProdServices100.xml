@@ -634,22 +634,6 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
-            <parameter name="asset" type="Map">
-                <parameter name="assetId" />
-                <parameter name="statusId" />
-                <parameter name="assetTypeId" />
-                <parameter name="assetClassId" />
-                <parameter name="assetName" />
-                <parameter name="quantityOnHand" />
-                <parameter name="availableToPromise" />
-                <parameter name="receivedDate" />
-                <parameter name="expectedEndOfLifeDate" />
-                <parameter name="product" type="Map">
-                    <parameter name="productId" />
-                    <parameter name="pseudoId" />
-                    <parameter name="productName" />
-                </parameter>
-            </parameter>
             <parameter name="assets" type="List">
                 <parameter name="asset" type="Map">
                     <parameter name="assetId" />
@@ -706,19 +690,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="assetName" />
             </entity-find>
-            <if condition="!assetId">
-                <set field="assets" from="[]" />
-            </if>
+            <set field="assets" from="[]" />
             <iterate entry="item" list="assetList">
                 <if condition="filter != null">
                     <script>
                         assets.add([
-                            assetId: item.assetId,
-                            assetName: item.assetName,
-                            receivedDate: item.receivedDate,
-                            productName: item.productName,
-                            productId: item.productId
-                                ])
+                        assetId: item.assetId,
+                        assetName: item.assetName,
+                        receivedDate: item.receivedDate,
+                        productName: item.productName,
+                        productId: item.productId
+                        ])
                     </script>
                     <continue />
                 </if>
@@ -740,12 +722,7 @@ along with this software (see the LICENSE.md file). If not, see
                     product: [productId: item.productId, pseudoId: item.pseudoId,
                     productName: item.productName],
                     ]" />
-                <if condition="assetId">
-                    <set field="asset" from="assetOut" />
-                    <else>
-                        <script>assets.add(assetOut)</script>
-                    </else>
-                </if>
+                <script>assets.add(assetOut)</script>
             </iterate>
         </actions>
     </service>
@@ -847,6 +824,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 productId: asset.product.productId]" />
             <service-call name="growerp.100.CatgProdServices100.get#Assets"
                 in-map="[assetId: assetId]" out-map="context" />
+            <set field="asset" from="assets[0]" />
         </actions>
     </service>
 
@@ -919,46 +897,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.CatgProdServices100.get#Assets"
                 in-map="[assetId: asset.assetId]" out-map="context" />
-        </actions>
-    </service>
-
-    <service verb="delete" noun="Asset">
-        <description> Delete a Asset </description>
-        <in-parameters>
-            <parameter name="asset" type="Map" required="true">
-                <parameter name="assetId" />
-            </parameter>
-        </in-parameters>
-        <out-parameters>
-            <parameter name="asset" type="Map">
-                <parameter name="assetId" />
-                <parameter name="statusId" />
-                <parameter name="assetTypeId" />
-                <parameter name="assetClassId" />
-                <parameter name="assetName" />
-                <parameter name="quantityOnHand" />
-                <parameter name="availableToPromise" />
-                <parameter name="receivedDate" />
-                <parameter name="expectedEndOfLifeDate" />
-                <parameter name="product" type="Map">
-                    <parameter name="productId" />
-                    <parameter name="pseudoId" />
-                    <parameter name="productName" />
-                </parameter>
-            </parameter>
-        </out-parameters>
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find list="assets" limit="1"
-                entity-name="mantle.product.asset.Asset" for-update="true">
-                <econdition field-name="assetId" from="asset.assetId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-            </entity-find>
-            <set field="assets[0].statusId" value="AstDeactivated" />
-            <entity-update value-field="assets[0]" />
-            <service-call name="growerp.100.CatgProdServices100.get#Assets"
-                in-map="[assetId: asset.assetId]" out-map="context" />
+            <set field="asset" from="assets[0]" />
         </actions>
     </service>
 

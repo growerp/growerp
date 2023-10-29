@@ -19,7 +19,6 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:global_configuration/global_configuration.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -56,7 +55,7 @@ class AssetDialogState extends State<AssetDialogFull> {
   late AssetBloc _assetBloc;
   late ProductBloc _productBloc;
   Product? _selectedProduct;
-  String? _statusId = 'Available';
+  late String _statusId;
 
   @override
   void initState() {
@@ -64,13 +63,13 @@ class AssetDialogState extends State<AssetDialogFull> {
     _assetBloc = context.read<AssetBloc>();
     _productBloc = context.read<ProductBloc>();
     _productBloc.add(const ProductFetch());
-    _statusId = widget.asset.statusId;
+    _statusId = widget.asset.statusId ?? 'Available';
     _nameController.text = widget.asset.assetName ?? '';
     _quantityOnHandController.text = widget.asset.quantityOnHand == null
         ? ''
         : widget.asset.quantityOnHand.toString();
     _selectedProduct = widget.asset.product;
-    classificationId = GlobalConfiguration().get("classificationId");
+    classificationId = context.read<String>();
   }
 
   @override
@@ -104,8 +103,8 @@ class AssetDialogState extends State<AssetDialogFull> {
                       title: classificationId == 'AppHotel'
                           ? 'Room information'
                           : 'Asset Information',
-                      height: 600,
-                      width: 400,
+                      height: 500,
+                      width: 350,
                       child: _showForm(isPhone))));
         case AssetStatus.failure:
           return const FatalErrorForm(message: 'Asset load problem');
@@ -221,7 +220,7 @@ class AssetDialogState extends State<AssetDialogFull> {
                     .toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _statusId = newValue;
+                    _statusId = newValue!;
                   });
                 },
                 isExpanded: true,
