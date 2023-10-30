@@ -27,11 +27,11 @@ RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/servic
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
 # build Moqui system
 RUN ./gradlew addRunTime
+# run elastic search locally
+RUN ./gradlew downloadel
 # unzip war file
 WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
-# run elastic search locally
-RUN ./gradlew downloadel
 # stage 2 create image
 FROM openjdk:11-jdk
 RUN apt-get update && apt-get install -y apt-transport-https nano && apt-get clean
