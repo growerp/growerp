@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-echo "params 1: $1 2: $2"
+echo "params 1: $1 2: $2 3: $3"
 
 HOME_DIR=$PWD
 echo $HOME_DIR
@@ -52,7 +52,7 @@ if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
     fi
 fi
 # no need for elastsicsearch in docker environment, will be loaded in seperate container
-rm -rf runtime/elasticsearch
+# rm -rf runtime/elasticsearch
 
 # start moqui
 java -cp . MoquiStart port=80 conf=$CONF_FILE
