@@ -47,7 +47,7 @@ class _SendResetPasswordDialogState extends State<SendResetPasswordDialog> {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
           break;
         case AuthStatus.unAuthenticated:
-          Navigator.pop(context, state.message);
+          Navigator.pop(context);
         default:
           HelperFunctions.showMessage(context, state.message, Colors.green);
       }

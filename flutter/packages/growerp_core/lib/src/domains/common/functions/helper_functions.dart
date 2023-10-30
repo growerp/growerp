@@ -21,10 +21,11 @@ import 'package:http/http.dart' show get;
 import '../../domains.dart';
 
 class HelperFunctions {
-  static showMessage(BuildContext context, String? message, dynamic colors) {
+  static showMessage(BuildContext context, String? message, dynamic colors,
+      {int? seconds}) {
     if (message != null && message != "null") {
       ScaffoldMessenger.of(context)
-          .showSnackBar(snackBar(context, colors, message));
+          .showSnackBar(snackBar(context, colors, message, seconds: seconds));
     }
   }
 

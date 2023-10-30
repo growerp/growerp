@@ -57,7 +57,9 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
         HelperFunctions.showMessage(context, state.message, Colors.red);
       }
       if (state.status == AuthStatus.unAuthenticated) {
-        Navigator.pop(context, state.message);
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green,
+            seconds: 10);
+        Navigator.pop(context);
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) {

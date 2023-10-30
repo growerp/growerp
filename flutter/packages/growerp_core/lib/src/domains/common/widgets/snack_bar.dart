@@ -14,13 +14,16 @@
 
 import 'package:flutter/material.dart';
 
-SnackBar snackBar(BuildContext context, Color colors, String message) {
+SnackBar snackBar(BuildContext context, Color colors, String message,
+    {int? seconds}) {
   var screenWidth = MediaQuery.of(context).size.width;
   return SnackBar(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
     ),
-    duration: Duration(milliseconds: colors == Colors.red ? 5000 : 2000),
+    duration: seconds == null
+        ? Duration(milliseconds: colors == Colors.red ? 5000 : 2000)
+        : Duration(seconds: seconds),
     content: Container(
         padding: const EdgeInsets.all(16.0),
         width: screenWidth < 800 ? screenWidth * 0.8 : 500,

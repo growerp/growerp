@@ -57,9 +57,10 @@ class LoginDialogState extends State<LoginDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
-      print("=====login dialog status: ${state.status}");
       switch (state.status) {
         case AuthStatus.authenticated:
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
           Navigator.of(context).pop();
           break;
         case AuthStatus.failure:
