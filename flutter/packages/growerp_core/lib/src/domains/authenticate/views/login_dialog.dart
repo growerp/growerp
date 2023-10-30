@@ -25,10 +25,10 @@ class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
 
   @override
-  State<LoginDialog> createState() => _LoginHeaderState();
+  LoginDialogState createState() => LoginDialogState();
 }
 
-class _LoginHeaderState extends State<LoginDialog> {
+class LoginDialogState extends State<LoginDialog> {
   final _loginFormKey = GlobalKey<FormState>();
   late Authenticate authenticate;
   bool _obscureText = true;
@@ -38,7 +38,7 @@ class _LoginHeaderState extends State<LoginDialog> {
   Company? _companySelected;
   String? oldPassword;
   String? username;
-  _LoginHeaderState();
+  LoginDialogState();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _loginFormKey1 = GlobalKey<FormState>();
@@ -57,14 +57,18 @@ class _LoginHeaderState extends State<LoginDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+      print("=====login dialog status: ${state.status}");
       switch (state.status) {
         case AuthStatus.authenticated:
-          Navigator.pop(context, state.message);
+          Navigator.of(context).pop();
           break;
         case AuthStatus.failure:
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
           break;
         default:
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
+          break;
       }
     }, builder: (context, state) {
       if (state.status == AuthStatus.loading) return const LoadingIndicator();
@@ -204,7 +208,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                 );
               }).toList(),
               onChanged: (Company? newValue) {},
-/*                context.read<AuthBloc>().add(AuthUpdateCompany(newValue!));
+/*                _authBloc.add(AuthUpdateCompany(newValue!));
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/', ModalRoute.withName('/'),
                     arguments:
@@ -238,12 +242,6 @@ class _LoginHeaderState extends State<LoginDialog> {
               ),
               const SizedBox(height: 20),
               TextFormField(
-                  onFieldSubmitted: (_) {
-                    if (_loginFormKey.currentState!.validate()) {
-                      context.read<AuthBloc>().add(AuthLogin(
-                          _usernameController.text, _passwordController.text));
-                    }
-                  },
                   autofocus: _usernameController.text.isNotEmpty,
                   key: const Key('password'),
                   validator: (value) {
@@ -273,8 +271,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                         child: const Text('Login'),
                         onPressed: () {
                           if (_loginFormKey.currentState!.validate()) {
-                            context.read<AuthBloc>().add(AuthLogin(
-                                _usernameController.text,
+                            _authBloc.add(AuthLogin(_usernameController.text,
                                 _passwordController.text));
                           }
                         }))
@@ -286,7 +283,7 @@ class _LoginHeaderState extends State<LoginDialog> {
                       onTap: () async {
                         String username = authenticate.user?.loginName ??
                             (kReleaseMode ? '' : 'test@example.com');
-                        var message = await showDialog(
+                        await showDialog(
                             barrierDismissible: true,
                             context: context,
                             builder: (BuildContext context) {
@@ -294,12 +291,6 @@ class _LoginHeaderState extends State<LoginDialog> {
                                   value: _authBloc,
                                   child: SendResetPasswordDialog(username));
                             });
-/*                        if (message != null) {
-                          await Future.delayed(
-                              const Duration(milliseconds: 200),
-                              () => _authBloc.add(AuthMessage(message)));
-                        }
-*/
                       })),
             ])));
   }

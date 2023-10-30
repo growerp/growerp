@@ -16,6 +16,7 @@ part of 'auth_bloc.dart';
 
 enum AuthStatus {
   initial,
+  sendPassword,
   loading,
   authenticated,
   unAuthenticated,
@@ -54,5 +55,6 @@ class AuthState extends Equatable {
   String toString() =>
       "$status { owner: ${authenticate?.ownerPartyId} company: ${authenticate?.company?.name} "
       "user: ${authenticate?.user?.lastName!} "
-      "ApiKey: ${authenticate?.apiKey?.substring(0, 10)}....";
+      //    "ApiKey: ${authenticate?.apiKey?.substring(0, 10)}...."
+      " message: $message";
 }

@@ -55,6 +55,7 @@ class AssetListState extends State<AssetList> {
         listenWhen: (previous, current) =>
             previous.status == AssetStatus.loading,
         listener: (context, state) {
+          print("=====asset list status: ${state.status}");
           if (state.status == AssetStatus.failure) {
             HelperFunctions.showMessage(
                 context, '${state.message}', Colors.red);

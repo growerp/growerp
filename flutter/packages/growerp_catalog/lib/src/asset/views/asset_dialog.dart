@@ -76,6 +76,7 @@ class AssetDialogState extends State<AssetDialogFull> {
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocConsumer<AssetBloc, AssetState>(listener: (context, state) {
+      print("=====asset dialog status: ${state.status}");
       switch (state.status) {
         case AssetStatus.success:
           Navigator.of(context).pop();

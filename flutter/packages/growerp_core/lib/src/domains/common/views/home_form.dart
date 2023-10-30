@@ -43,32 +43,35 @@ class HomeFormState extends State<HomeForm> {
   String singleCompany = GlobalConfiguration().get("singleCompany");
 
   late AuthBloc _authBloc;
+  late ThemeMode? themeMode;
 
   @override
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    themeMode = context.read<ThemeBloc>().state.themeMode;
   }
+
+  Widget appInfo = Center(
+      child: Align(
+          alignment: Alignment.bottomCenter,
+          child: GlobalConfiguration().get("appName") != ''
+              ? Text(
+                  "${GlobalConfiguration().get("appName")} "
+                  "V${GlobalConfiguration().get("version")} "
+                  "#${GlobalConfiguration().get("build")}",
+                  style: const TextStyle(fontSize: 10))
+              : const Text('')));
 
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
-    Widget appInfo = Center(
-        child: Align(
-            alignment: Alignment.bottomCenter,
-            child: GlobalConfiguration().get("appName") != ''
-                ? Text(
-                    "${GlobalConfiguration().get("appName")} "
-                    "V${GlobalConfiguration().get("version")} "
-                    "#${GlobalConfiguration().get("build")}",
-                    style: const TextStyle(fontSize: 10))
-                : const Text('')));
-
     return BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (previous, current) =>
             previous.status == AuthStatus.loading,
         listener: (context, state) {
+          print("=====home====status: ${state.status}");
           switch (state.status) {
             case AuthStatus.failure:
               HelperFunctions.showMessage(
@@ -112,7 +115,6 @@ class HomeFormState extends State<HomeForm> {
             case AuthStatus.failure:
             case AuthStatus.unAuthenticated:
               Authenticate authenticate = state.authenticate!;
-              ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
               return Column(children: [
                 Expanded(
                     child: Scaffold(

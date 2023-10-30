@@ -199,18 +199,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
         classificationId: classificationId,
       );
-      if (authenticate.apiKey == 'passwordChange') {
-        emit(state.copyWith(
-            status: AuthStatus.passwordChange,
-            authenticate: authenticate,
-            message: 'need to change password'));
-      } else {
+      if (authenticate.apiKey != null) {
+        if (authenticate.apiKey == 'passwordChange') {
+          return emit(state.copyWith(
+              status: AuthStatus.passwordChange,
+              authenticate: authenticate,
+              message: 'need to change password'));
+        }
         emit(state.copyWith(
             status: AuthStatus.authenticated,
             authenticate: authenticate,
             message: 'You are logged in now...'));
-      }
-      if (state.status == AuthStatus.authenticated) {
         repos.setApiKey(state.authenticate!.apiKey!,
             state.authenticate!.moquiSessionToken!);
         PersistFunctions.persistAuthenticate(state.authenticate!);
@@ -218,6 +217,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
         var box = await Hive.openBox('growerp');
         box.put('apiKey', authenticate.apiKey);
+      } else {
+        emit(state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: authenticate,
+            message: 'Login did not work...'));
       }
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));
@@ -229,7 +233,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: AuthStatus.loading));
+      emit(state.copyWith(status: AuthStatus.sendPassword));
       await restClient.resetPassword(username: event.username);
       emit(state.copyWith(
           status: AuthStatus.unAuthenticated,
