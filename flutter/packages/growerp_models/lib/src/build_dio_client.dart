@@ -50,7 +50,7 @@ class KeyInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    if (options.headers['requireApiKey'] == true) {
+    if (options.extra['requireApiKey'] == true) {
       options.headers['api_key'] = await _box?.get('apiKey');
     }
 
