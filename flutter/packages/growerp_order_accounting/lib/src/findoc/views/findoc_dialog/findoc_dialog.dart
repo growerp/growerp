@@ -342,8 +342,7 @@ class MyFinDocState extends State<FinDocPage> {
     List<Widget> buttons = [
       ElevatedButton(
           key: const Key('header'),
-          child: Text(
-              "Update ${widget.finDoc.docType == FinDocType.transaction ? 'description or Postflag' : 'header'}"),
+          child: const Text("Update"),
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
                 otherUser: _selectedUser,
@@ -586,41 +585,44 @@ class MyFinDocState extends State<FinDocPage> {
     return Expanded(
         child: items.isEmpty
             ? const Text("no items yet")
-            : DataTable(
-                dividerThickness: 0.0,
-                dataRowMaxHeight: 25,
-                dataRowMinHeight: 15,
-                columns: const [
-                  DataColumn(label: Expanded(child: Text('Account'))),
-                  DataColumn(label: Expanded(child: Text('Debit'))),
-                  DataColumn(label: Expanded(child: Text('Credit'))),
-                  DataColumn(label: Expanded(child: Text(''))),
-                ],
-                rows: List.generate(items.length, (index) {
-                  return DataRow(cells: [
-                    DataCell(Text(items[index].glAccount!.accountCode!,
-                        key: Key('accountCode$index'))),
-                    DataCell(Text(
-                        items[index].isDebit!
-                            ? items[index].price.toString()
-                            : '',
-                        key: Key('debit$index'))),
-                    DataCell(Text(
-                        !items[index].isDebit!
-                            ? items[index].price.toString()
-                            : '',
-                        key: Key('credit$index'))),
-                    DataCell(IconButton(
-                      icon: const Icon(
-                        Icons.delete_forever,
-                        size: 15,
-                      ),
-                      key: Key("delete$index"),
-                      onPressed: () {
-                        _cartBloc.add(CartDeleteItem(index));
-                      },
-                    )),
-                  ]);
-                })));
+            : SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: DataTable(
+                    dividerThickness: 0.0,
+                    dataRowMaxHeight: 25,
+                    dataRowMinHeight: 15,
+                    columns: const [
+                      DataColumn(label: Expanded(child: Text('Account'))),
+                      DataColumn(label: Expanded(child: Text('Debit'))),
+                      DataColumn(label: Expanded(child: Text('Credit'))),
+                      DataColumn(label: Expanded(child: Text(''))),
+                    ],
+                    rows: List.generate(items.length, (index) {
+                      return DataRow(cells: [
+                        DataCell(Text(items[index].glAccount!.accountCode!,
+                            key: Key('accountCode$index'))),
+                        DataCell(Text(
+                            items[index].isDebit!
+                                ? items[index].price.toString()
+                                : '',
+                            key: Key('debit$index'))),
+                        DataCell(Text(
+                            !items[index].isDebit!
+                                ? items[index].price.toString()
+                                : '',
+                            key: Key('credit$index'))),
+                        DataCell(IconButton(
+                          icon: const Icon(
+                            Icons.delete_forever,
+                            size: 15,
+                          ),
+                          key: Key("delete$index"),
+                          onPressed: () {
+                            _cartBloc.add(CartDeleteItem(index));
+                          },
+                        )),
+                      ]);
+                    })),
+              ));
   }
 }

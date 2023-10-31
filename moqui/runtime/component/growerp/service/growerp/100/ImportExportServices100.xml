@@ -63,11 +63,15 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="createdGlAccount" />
                 <!-- collect posted balances -->
                 <if condition="newGlAccount.postedBalance">
+                    <set field="isPositive" value="true" type="Boolean" />
+                    <if condition="newGlAccount.postedBalance.startsWith('-')">
+                        <set field="isPositive" value="false" type="Boolean" />
+                    </if>
                     <script>transactions.add([
-                                        isDebit: createdGlAccount.glAccount.isDebit,
-                                        price: newGlAccount.postedBalance,
-                                        glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
-                                    ])</script>
+                        isDebit: createdGlAccount.glAccount.isDebit == isPositive ? createdGlAccount.glAccount.isDebit : !createdGlAccount.glAccount.isDebit,
+                        price: new BigDecimal(newGlAccount.postedBalance.replace('-','')),
+                        glAccount: [glAccountId: createdGlAccount.glAccount.glAccountId],
+                        ])</script>
                 </if>
             </iterate>
             <!-- create unposted balance in initial transaction-->
@@ -307,18 +311,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.AccountingServices100.create#GlAccount"
                         in-map="[glAccount: newGlAccount]"
                         out-map="createdGlAccount" />
-                    <!-- collect posted balances -->
-                    <!-- cannot get postalBalance from newGlAccount because newGlAccount is String
-                    but should be Map-->
-                    <!-- temp solution, get it as a String -->
-                    <!--log
-                    message="==ng==$newGlAccount" />
-                    <set field="postedBalance"
-                        from="newGlAccount.split('postedBalance')[1]" />
-                    <log message="=1==create posted balance ${postedBalance}" />
-                    <set field="postedBalance"
-                        from="postedBalance.substring(2,postedBalance.indexOf('}')).replace('&quot;','')" />
-                    <log message="=2==create posted balance ${postedBalance}" /-->
                     <if condition="newGlAccount.postedBalance">
                         <script>transactions.add([
                             isDebit: createdGlAccount.glAccount.isDebit,

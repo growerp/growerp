@@ -5,14 +5,10 @@
 /// required conversion in the process
 ///
 /// input parameter:
-/// 1. the input filename or directory
-/// the filename determines the type of data.
-/// if a directory, all csv filenames in that directory will be processed
-/// 2. if a filename is provided an optional filetype can be given when
-/// the system cannot get the fileType from the filename
+/// 1. the input directory with the filenames defined in this program
 ///
 /// run this program with:
-///   dart run ~/growerp/flutter/packages/growerp/bin/csvToCsv.dart input
+///   dart run ~/growerp/flutter/packages/growerp/bin/csvToCsv.dart inputDir
 ///   will create a new directory: growerpOutput with the converted file.
 
 import 'dart:io';
@@ -26,49 +22,139 @@ import '../logger.dart';
 var logger = Logger(filter: MyFilter());
 List<String> ids = []; //keep id's to avoid duplicates
 String outputDirectory = 'growerpOutput';
+//SAGA50 account types
 // convert accountclass, the field that specifies debit/credit
 // Debit and Credit are accepted values.
 // this map first value is converted to the second value
 // with convertClass[inputvalue] gives: outputValue
+/*
+10 Accounts Payable
+1 Accounts Receivable
+6 Accumulated Depreciation
+24 Expenses
+5 Fixed Assets
+21 Income
+0 Cash
+2 Inventory
+23 Cost of Sales
+14 Long term liabilities
+16 Equity - doesn't close (Corporation)
+8 Other assets
+19 Equity - gets closed (Proprietorship)
+4 Other current assets
+18 Equity - Retained Earnings
+12 Other current liabilities
+*/
 Map convertClass = {
-  'Accounts Payable': 'Accounts Payable',
+  '1': 'Accounts Receivable',
   'Accounts Receivable': 'Accounts Receivable',
-  'Accumulated Depreciation': 'Accumulated Depreciation',
-  'Expenses': 'Operating Expense',
-  'Fixed Assets': 'Land and Building',
-  'Income': 'Cash Income',
-  'Income (contra)': 'Discounts and Write-downs',
-  'Cash': 'Cash and Equivalent',
+  '2': 'Inventory Assets',
   'Inventory': 'Inventory Assets',
-  'Cost of Sales': 'Cost of Sales',
-  'Cost of Sales (contra)': 'Goods Revenue',
-  'Long Term Liabilities': 'Long Term Liabilities',
-  'Equity - doesn\'t close (Corporation)': 'Owners Equity',
-  'Other Assets': 'Other Assets',
-  'Equity-gets closed': 'Equity Distribution',
+  '4': 'Other Assets',
   'Other Current Assets': 'Other Assets',
-  'Equity-Retained Earnings': 'Retained Earnings',
+  '5': 'Land and Building',
+  'Fixed Assets': 'Land and Building',
+  '6': 'Accumulated Depreciation',
+  'Accumulated Depreciation': 'Accumulated Depreciation',
+  '8': 'Other Assets',
+  'Other Assets': 'Other Assets',
+  '10': 'Accounts Payable',
+  'Accounts Payable': 'Accounts Payable',
+  '12': 'Current Liabilities',
   'Other Current Liabilities': 'Current Liabilities',
-  'Payables Retainage (Sage 50 Quantum Accounting)': '',
-  'Receivables Retainage (Sage 50 Quantum Accounting)': '',
-  'Sales Returns and Allowances': 'Customer Returns',
+  '14': 'Long Term Liabilities',
+  'Long Term Liabilities': 'Long Term Liabilities',
+  '18': 'Retained Earnings',
+  'Equity-Retained Earnings': 'Retained Earnings',
+  '19': 'Equity Distribution',
+  'Equity-gets closed': 'Equity Distribution',
+  '21': 'Cash Income',
+  'Income': 'Cash Income',
+  '23': 'Cost of Sales',
+  'Cost of Sales': 'Cost of Sales',
+  '24': 'Operating Expense',
+  'Expenses': 'Operating Expense',
+  '98': 'Discounts and Write-downs',
+  '0': 'Cash and Equivalent',
+  'Cash': 'Cash and Equivalent',
+  '99': 'Goods Revenue',
+  '16': 'Owners Equity',
+  '97': 'Customer Returns',
   'Sales Discounts': 'Discounts and Write-downs',
 };
 List<String> convertRow(FileType fileType, List<String> columnsFrom) {
   List<String> columnsTo = [];
   switch (fileType) {
     case FileType.glAccount:
+      if (columnsFrom[0] == '' || ids.contains(columnsFrom[0])) return [];
+      ids.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[0]); //0 accountCode
       columnsTo.add(columnsFrom[2]); //1 account name
+      // need to revers column name for different files
+      // this one for Trial_Balan...
+      print("=====looking for: ${columnsFrom[0]} ${columnsFrom[1]}");
       columnsTo.add(convertClass[columnsFrom[1]]); //2 class
-//      columnsTo.add(columnsFrom[1]); //2 class
       columnsTo.add(''); //3 type empty
-      if (columnsFrom.length > 2) {
-        columnsTo.add(columnsFrom[3].isNotEmpty //4 balance
-            ? columnsFrom[3].replaceAll(',', '')
-            : columnsFrom[4].replaceAll(',', ''));
+      if (columnsFrom.length > 2 && columnsFrom[3] != '') {
+        columnsTo.add(columnsFrom[3].replaceAll(',', ''));
+      } else {
+        if (columnsFrom.length > 3 && columnsFrom[4] != '') {
+          columnsTo.add("-${columnsFrom[4].replaceAll(',', '')}");
+        }
       }
       return columnsTo;
+
+    case FileType.product:
+      if (columnsFrom[18] != '' && !ids.contains(columnsFrom[18])) {
+        ids.add(columnsFrom[18]);
+        columnsTo.add(columnsFrom[18]); // id
+        columnsTo.add('Physical Good'); // type
+        columnsTo.add(columnsFrom[19]); // name
+        columnsTo.add(''); // description
+        columnsTo.add(''); // list price
+        columnsTo.add(''); // sales price
+        columnsTo.add(''); // cost price
+        columnsTo.add('true'); // use warehouse
+        if (columnsFrom[12] != '') {
+          columnsTo.add('sales product');
+        } // category
+        if (columnsFrom[14] != '') {
+          columnsTo.add('purchase product'); // category
+        }
+      }
+      return columnsTo;
+
+    case FileType.company:
+      if (columnsFrom[11].isEmpty && columnsFrom[13].isEmpty) return [];
+      // ignore when already exist
+      columnsTo.add('');
+      if (columnsFrom[11].isNotEmpty) {
+        if (ids.contains(columnsFrom[11])) return [];
+        ids.add(columnsFrom[11]);
+        columnsTo.add(columnsFrom[11]);
+        columnsTo.add(Role.customer.value);
+        columnsTo.add(columnsFrom[12]);
+      }
+      if (columnsFrom[13].isNotEmpty) {
+        if (ids.contains(columnsFrom[13])) return [];
+        ids.add(columnsFrom[13]);
+        columnsTo.add(columnsFrom[13]);
+        if (columnsFrom[13] == 'ACCUGEO LINER, INC.') {
+          columnsTo.add(Role.company.value);
+          columnsTo.add("AccuGeo Liner, Inc.");
+        } else {
+          columnsTo.add(Role.supplier.value);
+          columnsTo.add(columnsFrom[14]);
+        }
+      }
+      if (columnsTo[1] == 'customerId') {
+        return [];
+      }
+      return columnsTo;
+
+    case FileType.user:
+      return columnsTo;
+
     //
     // do some conversion here, depending on filetype.
     //
@@ -78,11 +164,25 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
 }
 
 String convertFile(FileType fileType, String string) {
-  string = string
-      .replaceFirst('48000","Income', '48000","Income (contra)')
-      .replaceFirst('49000","Income', '49000","Income (contra)')
-      .replaceFirst('89500","Cost of Sales', '89500","Cost of Sales (contra)');
-  return string;
+  switch (fileType) {
+    case FileType.glAccount:
+      string = string
+          .replaceFirst('48000,Sales Returns and Allowances,21',
+              '48000,Sales Returns and Allowances,97')
+          .replaceFirst('49000,Sales Discounts,21', '49000,Sales Discounts,98')
+          .replaceFirst('89500,Discount for Early Payment,23',
+              '89500,Discount for Early Payment,99');
+      string = string
+          .replaceFirst('48000","Income","Sales Returns and Allowances',
+              '48000","97","Sales Returns and Allowances')
+          .replaceFirst('49000","Income","Sales Discounts',
+              '49000","98","Sales Discounts')
+          .replaceFirst('89500","Cost of Sales","Discount for Early Payment',
+              '89500","99","Discount for Early Payment');
+      return string;
+    default:
+      return string;
+  }
 }
 
 void main(List<String> args) {
@@ -100,14 +200,14 @@ void main(List<String> args) {
   createDir(outputDirectory);
 
   for (var fileType in FileType.values) {
-    ids = [];
     List<String> fileContent = [];
     print("processing filetype: ${fileType.name}");
     // define search file name for every filetype
     String searchFile = '';
     switch (fileType) {
       case FileType.glAccount:
-        searchFile = '4-1-chart_of_accounts_list.csv';
+        // searchFile = '4-1-chart_of_accounts_list.csv';
+        searchFile = 'Trial_Balance_2020-06-07.csv';
         break;
       default:
         searchFile = '0b*.csv';
