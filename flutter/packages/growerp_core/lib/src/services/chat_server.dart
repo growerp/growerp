@@ -16,6 +16,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:logger/logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:io' show Platform;
 
@@ -23,6 +24,14 @@ class ChatServer {
   late WebSocketChannel channel;
   late String chatUrl;
   late StreamController streamController;
+
+  var logger = Logger(
+    filter: null, // Use the default LogFilter (-> only log in debug mode)
+    printer: PrettyPrinter(
+        lineLength: 133,
+        methodCount: 0), // Use the PrettyPrinter to format and print log
+    output: null, // Use the default LogOutput (-> send everything to console)
+  );
 
   ChatServer() {
     if (kReleaseMode) {
@@ -35,11 +44,11 @@ class ChatServer {
     } else if (Platform.isAndroid) {
       chatUrl = 'ws://10.0.2.2:8081';
     }
-    debugPrint('Using base chat backend url: $chatUrl');
+    logger.i('Using base chat backend url: $chatUrl');
   }
 
   connect(String apiKey, String userId) {
-    debugPrint("WS connect url/userId/apikey: $chatUrl/$userId/$apiKey");
+    logger.i("WS connect url/userId/apikey: $chatUrl/$userId/$apiKey");
     channel = WebSocketChannel.connect(Uri.parse('$chatUrl/$userId/$apiKey'));
     streamController = StreamController.broadcast()..addStream(channel.stream);
   }
