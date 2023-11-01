@@ -72,6 +72,12 @@ class CompanyListItem extends StatelessWidget {
               )),
             if (!isPhone)
               Expanded(
+                  child: Text(
+                company.address?.city ?? '',
+                key: Key('city$index'),
+              )),
+            if (!isPhone)
+              Expanded(
                   child: Center(
                 child: Text(
                   company.vatPerc != Decimal.parse("0")

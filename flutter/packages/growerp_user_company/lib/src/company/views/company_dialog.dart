@@ -431,7 +431,7 @@ class CompanyFormState extends State<CompanyDialog> {
                             company.address?.address1 != null &&
                                     company.address?.address2 != "_DELETE_"
                                 ? "${company.address?.city} "
-                                    "${company.address?.country!}"
+                                    "${company.address?.country ?? ''}"
                                 : "No postal address yet",
                             key: const Key('addressLabel')),
                       ),

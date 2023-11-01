@@ -82,9 +82,11 @@ Map convertClass = {
   '97': 'Customer Returns',
   'Sales Discounts': 'Discounts and Write-downs',
 };
-List<String> convertRow(FileType fileType, List<String> columnsFrom) {
+List<String> convertRow(
+    FileType fileType, List<String> columnsFrom, String fileName) {
   List<String> columnsTo = [];
   switch (fileType) {
+    /// convert to [glAccountCsvFormat]
     case FileType.glAccount:
       if (columnsFrom[0] == '' || ids.contains(columnsFrom[0])) return [];
       ids.add(columnsFrom[0]);
@@ -92,7 +94,6 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
       columnsTo.add(columnsFrom[2]); //1 account name
       // need to revers column name for different files
       // this one for Trial_Balan...
-      print("=====looking for: ${columnsFrom[0]} ${columnsFrom[1]}");
       columnsTo.add(convertClass[columnsFrom[1]]); //2 class
       columnsTo.add(''); //3 type empty
       if (columnsFrom.length > 2 && columnsFrom[3] != '') {
@@ -104,6 +105,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
       }
       return columnsTo;
 
+    /// convert to [productCsvFormat]
     case FileType.product:
       if (columnsFrom[18] != '' && !ids.contains(columnsFrom[18])) {
         ids.add(columnsFrom[18]);
@@ -124,37 +126,77 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
       }
       return columnsTo;
 
+    /// convert to [companyCsvFormat]
     case FileType.company:
-      if (columnsFrom[11].isEmpty && columnsFrom[13].isEmpty) return [];
-      // ignore when already exist
-      columnsTo.add('');
-      if (columnsFrom[11].isNotEmpty) {
-        if (ids.contains(columnsFrom[11])) return [];
-        ids.add(columnsFrom[11]);
-        columnsTo.add(columnsFrom[11]);
-        columnsTo.add(Role.customer.value);
-        columnsTo.add(columnsFrom[12]);
+      if (fileName.contains('customer')) {
+        // 0:partyId,partyType,Customer ID,Customer Name,Inactive,
+        // 5:Bill to Address-Line One,Bill to Address-Line Two,Bill to City,
+        // 8:Bill to State,Bill to Zip,Bill to Country,Bill to Sales Tax ID,
+        // 12:Telephone 1,Telephone 2,Fax Number,Customer E-mail,
+        // 16:Resale Number,Discount Days,Discount Percent,Customer Web Site
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[2]); // id
+        columnsTo.add(Role.customer.value); //role
+        columnsTo.add(columnsFrom[3]); //name
+        columnsTo.add(columnsFrom[15]); //email
+        columnsTo.add(columnsFrom[12]); // teleph
+        columnsTo.add('USD'); //curr
+        columnsTo.add(''); //image
+        columnsTo.add(columnsFrom[5]); //address1
+        columnsTo.add(columnsFrom[6]); //address2
+        columnsTo.add(columnsFrom[9]); //postal
+        columnsTo.add(columnsFrom[7]); //city
+        columnsTo.add(columnsFrom[8]); //state,prov
+        columnsTo.add('United States'); //country
       }
-      if (columnsFrom[13].isNotEmpty) {
-        if (ids.contains(columnsFrom[13])) return [];
-        ids.add(columnsFrom[13]);
-        columnsTo.add(columnsFrom[13]);
-        if (columnsFrom[13] == 'ACCUGEO LINER, INC.') {
-          columnsTo.add(Role.company.value);
-          columnsTo.add("AccuGeo Liner, Inc.");
-        } else {
+
+      if (fileName.contains('vendor')) {
+        // 0:partyId,partyType,Vendor ID,Vendor Name,Inactive,Contact,
+        // 6:Address-Line One,Address-Line Two,City,State,Zip,Country,
+        // 12:Remit to 1 Name,Remit to 1 Address Line 1,
+        // 14:Remit to 1 Address Line 2,Remit to 1 City,Remit to 1 State,
+        // 17:Remit to 1 Zip,Remit to 1 Country,Telephone 1,Telephone 2,
+        // 21:Fax Number,Vendor E-mail,Vendor Web Site,Account Number,
+        // 25:Due Days,Discount Days,Discount Percent
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[2]); //id
+        columnsTo.add(Role.supplier.value); // role
+        columnsTo.add(columnsFrom[3]); //name
+        columnsTo.add(columnsFrom[22]); //email
+        columnsTo.add(columnsFrom[19]); // teleph
+        columnsTo.add('USD'); //curr
+        columnsTo.add(''); //image
+        columnsTo.add(columnsFrom[6]); //address1
+        columnsTo.add(columnsFrom[7]); //address2
+        columnsTo.add(columnsFrom[10]); //postal
+        columnsTo.add(columnsFrom[8]); //city
+        columnsTo.add(columnsFrom[9]); //state,prov
+        columnsTo.add(columnsFrom[10]); //country
+      }
+
+      // from ledger spreadsheet
+      if (fileName.startsWith('0b')) {
+        if (columnsFrom[11].isEmpty && columnsFrom[13].isEmpty) return [];
+        columnsTo.add('');
+        if (columnsFrom[11].isNotEmpty) {
+          if (ids.contains(columnsFrom[11])) return [];
+          ids.add(columnsFrom[11]);
+          columnsTo.add(columnsFrom[11]);
+          columnsTo.add(Role.customer.value);
+          columnsTo.add(columnsFrom[12]);
+        }
+        if (columnsFrom[13].isNotEmpty) {
+          if (ids.contains(columnsFrom[13])) return [];
+          ids.add(columnsFrom[13]);
+          columnsTo.add(columnsFrom[13]);
           columnsTo.add(Role.supplier.value);
           columnsTo.add(columnsFrom[14]);
         }
-      }
-      if (columnsTo[1] == 'customerId') {
-        return [];
+        if (columnsTo[1] == 'customerId') {
+          return [];
+        }
       }
       return columnsTo;
-
-    case FileType.user:
-      return columnsTo;
-
     //
     // do some conversion here, depending on filetype.
     //
@@ -163,7 +205,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom) {
   }
 }
 
-String convertFile(FileType fileType, String string) {
+String convertFile(FileType fileType, String string, String fileName) {
   switch (fileType) {
     case FileType.glAccount:
       string = string
@@ -179,10 +221,10 @@ String convertFile(FileType fileType, String string) {
               '49000","98","Sales Discounts')
           .replaceFirst('89500","Cost of Sales","Discount for Early Payment',
               '89500","99","Discount for Early Payment');
-      return string;
+      break;
     default:
-      return string;
   }
+  return string;
 }
 
 void main(List<String> args) {
@@ -200,22 +242,31 @@ void main(List<String> args) {
   createDir(outputDirectory);
 
   for (var fileType in FileType.values) {
+    if (fileType == FileType.unknown) continue;
     List<String> fileContent = [];
     print("processing filetype: ${fileType.name}");
-    // define search file name for every filetype
-    String searchFile = '';
+    // define search file names for every filetype
+    List<String> searchFiles = [];
     switch (fileType) {
       case FileType.glAccount:
         // searchFile = '4-1-chart_of_accounts_list.csv';
-        searchFile = 'Trial_Balance_2020-06-07.csv';
+        searchFiles.add('Trial_Balance_2020-06-07.csv');
+        break;
+      case FileType.company:
+        searchFiles.add('1-3-customer_list.csv');
+        searchFiles.add('2-3-vendor_list.csv');
         break;
       default:
-        searchFile = '0b*.csv';
+        searchFiles.add('0b*.csv');
     }
-    if (searchFile.isEmpty) continue;
-    List<String> files = find(searchFile, workingDirectory: args[0]).toList();
+    if (searchFiles.isEmpty) continue;
+    List<String> files = [];
+    for (String searchFile in searchFiles) {
+      files.addAll(find(searchFile, workingDirectory: args[0]).toList());
+    }
     if (files.isEmpty) {
-      logger.e("No $searchFile csv files found in directory ${args[0]}");
+      logger.e(
+          "No ${searchFiles.join()} csv files found in directory ${args[0]}");
       exit(1);
     }
     int csvLength = 0;
@@ -251,26 +302,27 @@ void main(List<String> args) {
       print("processing file: ${fileInput}");
       // parse raw csv file string
       String contentString = File(fileInput).readAsStringSync();
-
       // general changes in content
-      contentString = convertFile(fileType, contentString);
+      contentString = convertFile(fileType, contentString, fileInput);
 
       // parse input file
-      final inputCsvFile = fast_csv.parse(contentString);
+      List<List<String>> inputCsvFile = fast_csv.parse(contentString);
 
       // convert rows
       int index = 0;
       for (final row in inputCsvFile) {
         if (++index % 10000 == 0) print("processing row: $index");
         if (row == inputCsvFile.first) continue;
-        var convertedRow = convertRow(fileType, row);
+        var convertedRow = convertRow(fileType, row, fileInput);
         if (convertedRow.isNotEmpty) {
           fileContent.add(createCsvRow(convertedRow, csvLength));
         }
       }
     }
-    final file = File("$outputDirectory/${fileType.name}.csv");
-    file.writeAsStringSync(fileContent.join());
+    if (fileContent.length > 1) {
+      final file = File("$outputDirectory/${fileType.name}.csv");
+      file.writeAsStringSync(fileContent.join());
+    }
   }
   exit(0);
 }

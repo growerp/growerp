@@ -66,13 +66,14 @@ List<Product> CsvToProducts(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
+    print("======product row: ${row.join()}");
     products.add(Product(
       pseudoId: row[0],
       productTypeId: row[1],
       productName: row[2],
       description: row[3],
-      listPrice: Decimal.parse(row[4]),
-      price: Decimal.parse(row[5]),
+      listPrice: row[4] != '' ? Decimal.parse(row[4]) : null,
+      price: row[5] != '' ? Decimal.parse(row[5]) : null,
       useWarehouse: row[6] == 'true' ? true : false,
       categories: [
         Category(categoryName: row[7]),

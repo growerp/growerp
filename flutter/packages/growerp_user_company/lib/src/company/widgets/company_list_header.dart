@@ -81,7 +81,6 @@ class _CompanyListHeaderState extends State<CompanyListHeader> {
                   if (!widget.isPhone)
                     const Expanded(child: Text("telephoneNr")),
                   if (!widget.isPhone) const Expanded(child: Text("City")),
-                  if (!widget.isPhone) const Expanded(child: Text("Curr.")),
                   if (!widget.isPhone)
                     const Expanded(child: Text("VAT/salesPerc")),
                   if (!widget.isPhone)
