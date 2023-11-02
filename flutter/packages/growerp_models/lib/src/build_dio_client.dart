@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
+import 'package:growerp_models/src/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Future<Dio> buildDioClient(String? base) async {
-  print('Using base moqui backend url: $base');
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -38,6 +38,8 @@ Future<Dio> buildDioClient(String? base) async {
       error: true,
       compact: true,
       maxWidth: 133));
+
+  logger.i("accessing backend at ${dio.options.baseUrl}");
 
   return dio;
 }

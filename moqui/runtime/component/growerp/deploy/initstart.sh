@@ -51,8 +51,6 @@ if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
         java -cp . MoquiStart load types=seed conf=$CONF_FILE
     fi
 fi
-# no need for elastsicsearch in docker environment, will be loaded in seperate container
-# rm -rf runtime/elasticsearch
 
 # start moqui
 java -cp . MoquiStart port=80 conf=$CONF_FILE

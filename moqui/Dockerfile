@@ -19,12 +19,13 @@ RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
 # antwebsystems website TODO: need to be removed
 WORKDIR /root/growerp/moqui
-RUN git log
 RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml runtime/component/growerp/data
 RUN mkdir runtime/component/growerp/service/growerp/website
 RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/service/growerp/website
 # Postgresql driver
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
+# get elasticsearch
+RUN ./gradlew downloadel
 # build Moqui system
 RUN ./gradlew addRunTime
 # run elastic search locally
