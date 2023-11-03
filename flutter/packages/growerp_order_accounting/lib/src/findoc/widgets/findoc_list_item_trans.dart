@@ -45,7 +45,7 @@ class FinDocListItemTrans extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
-    FinDocAPIRepository repos = context.read<FinDocAPIRepository>();
+    RestClient repos = context.read<RestClient>();
     DateTime date = finDoc.placedDate ?? finDoc.creationDate ?? DateTime.now();
     return ExpansionTile(
         leading: CircleAvatar(
@@ -110,7 +110,7 @@ class FinDocListItemTrans extends StatelessWidget {
   }
 
   Widget itemButtons(BuildContext context, PaymentMethod? paymentMethod,
-      FinDocBloc finDocBloc, FinDocAPIRepository repos) {
+      FinDocBloc finDocBloc, RestClient repos) {
     return Row(children: [
       if (finDoc.isPosted == false)
         IconButton(

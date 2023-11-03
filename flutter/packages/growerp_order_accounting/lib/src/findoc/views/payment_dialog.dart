@@ -29,10 +29,10 @@ class ShowPaymentDialog extends StatelessWidget {
   const ShowPaymentDialog(this.finDoc, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    FinDocAPIRepository repos = FinDocAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient repos = context.read<RestClient>();
     return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(repos, finDoc.sales, finDoc.docType!)
+        create: (context) => FinDocBloc(
+            repos, finDoc.sales, finDoc.docType!, context.read<String>())
           ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
         child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
           if (state.status == FinDocStatus.success) {

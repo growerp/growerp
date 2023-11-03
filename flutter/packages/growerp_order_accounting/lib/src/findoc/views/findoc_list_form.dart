@@ -43,10 +43,10 @@ class FinDocListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FinDocAPIRepository finDocAPIRepository = FinDocAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient restClient = context.read<RestClient>();
+    String classificationId = context.read<String>();
     Widget finDocList = RepositoryProvider.value(
-        value: finDocAPIRepository,
+        value: restClient,
         child: FinDocList(
           key: key,
           sales: sales,
@@ -62,59 +62,59 @@ class FinDocListForm extends StatelessWidget {
         if (sales) {
           return BlocProvider<SalesOrderBloc>(
               create: (context) =>
-                  FinDocBloc(finDocAPIRepository, sales, docType)
+                  FinDocBloc(restClient, sales, docType, classificationId)
                     ..add(const FinDocFetch()),
               child: finDocList);
         }
         return BlocProvider<PurchaseOrderBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(finDocAPIRepository, sales, docType)
+                FinDocBloc(restClient, sales, docType, classificationId)
                   ..add(const FinDocFetch()),
             child: finDocList);
       case FinDocType.invoice:
         if (sales) {
           return BlocProvider<SalesInvoiceBloc>(
               create: (context) =>
-                  FinDocBloc(finDocAPIRepository, sales, docType)
+                  FinDocBloc(restClient, sales, docType, classificationId)
                     ..add(const FinDocFetch()),
               child: finDocList);
         }
         return BlocProvider<PurchaseInvoiceBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(finDocAPIRepository, sales, docType)
+                FinDocBloc(restClient, sales, docType, classificationId)
                   ..add(const FinDocFetch()),
             child: finDocList);
       case FinDocType.payment:
         if (sales) {
           return BlocProvider<SalesPaymentBloc>(
               create: (context) =>
-                  FinDocBloc(finDocAPIRepository, sales, docType)
+                  FinDocBloc(restClient, sales, docType, classificationId)
                     ..add(const FinDocFetch()),
               child: finDocList);
         }
         return BlocProvider<PurchasePaymentBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(finDocAPIRepository, sales, docType)
+                FinDocBloc(restClient, sales, docType, classificationId)
                   ..add(const FinDocFetch()),
             child: finDocList);
       case FinDocType.shipment:
         if (sales) {
           return BlocProvider<OutgoingShipmentBloc>(
               create: (context) =>
-                  FinDocBloc(finDocAPIRepository, sales, docType)
+                  FinDocBloc(restClient, sales, docType, classificationId)
                     ..add(const FinDocFetch()),
               child: finDocList);
         }
         return BlocProvider<IncomingShipmentBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(finDocAPIRepository, sales, docType)
+                FinDocBloc(restClient, sales, docType, classificationId)
                   ..add(const FinDocFetch()),
             child: finDocList);
       case FinDocType.transaction:
         return BlocProvider<TransactionBloc>(
-            create: (context) => FinDocBloc(finDocAPIRepository, sales, docType,
-                journalId: journalId ?? '')
-              ..add(const FinDocFetch()),
+            create: (context) =>
+                FinDocBloc(restClient, sales, docType, classificationId)
+                  ..add(const FinDocFetch()),
             child: finDocList);
       default:
         return Center(child: Text("FinDoc type: ${docType.name} not allowed"));
@@ -163,7 +163,7 @@ class FinDocListState extends State<FinDocList> {
   bool isLoading = true;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
-  late FinDocAPIRepository repos;
+  late RestClient repos;
 
   @override
   void initState() {
@@ -173,7 +173,7 @@ class FinDocListState extends State<FinDocList> {
             ? 'Reservation'
             : widget.docType.toString();
     _scrollController.addListener(_onScroll);
-    repos = context.read<FinDocAPIRepository>();
+    repos = context.read<RestClient>();
     switch (widget.docType) {
       case FinDocType.order:
         widget.sales

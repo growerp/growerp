@@ -45,7 +45,7 @@ class FinDocListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
-    FinDocAPIRepository repos = context.read<FinDocAPIRepository>();
+    RestClient repos = context.read<RestClient>();
     String classificationId = GlobalConfiguration().get("classificationId");
     List<Widget> titleFields = [];
     if (isPhone) {
@@ -198,7 +198,7 @@ class FinDocListItem extends StatelessWidget {
   }
 
   Widget? itemButtons(BuildContext context, PaymentMethod? paymentMethod,
-      FinDocBloc finDocBloc, FinDocAPIRepository repos) {
+      FinDocBloc finDocBloc, RestClient repos) {
     if (finDoc.salesChannel != 'Web' ||
         (finDoc.salesChannel == 'Web' &&
             finDoc.status != FinDocStatusVal.inPreparation)) {

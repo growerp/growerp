@@ -33,15 +33,16 @@ class ShowFinDocDialog extends StatelessWidget {
   const ShowFinDocDialog(this.finDoc, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    FinDocAPIRepository repos = FinDocAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient restClient = context.read<RestClient>();
     return BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(repos, finDoc.sales, finDoc.docType!)
+        create: (context) => FinDocBloc(
+            restClient, finDoc.sales, finDoc.docType!, context.read<String>())
           ..add(FinDocFetch(finDocId: finDoc.id()!, docType: finDoc.docType!)),
         child: BlocBuilder<FinDocBloc, FinDocState>(builder: (context, state) {
           if (state.status == FinDocStatus.success) {
             return RepositoryProvider.value(
-                value: repos, child: FinDocDialog(finDoc: state.finDocs[0]));
+                value: restClient,
+                child: FinDocDialog(finDoc: state.finDocs[0]));
           } else {
             return const LoadingIndicator();
           }
@@ -56,6 +57,7 @@ class FinDocDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FinDocBloc finDocBloc = context.read<FinDocBloc>();
+    RestClient restClient = context.read<RestClient>();
     if (finDoc.sales) {
       return MultiBlocProvider(providers: [
         BlocProvider<SalesCartBloc>(
@@ -63,7 +65,7 @@ class FinDocDialog extends StatelessWidget {
                 docType: finDoc.docType!,
                 sales: true,
                 finDocBloc: finDocBloc,
-                repos: context.read<FinDocAPIRepository>())
+                restClient: restClient)
               ..add(CartFetch(finDoc))),
         BlocProvider<UserBloc>(
             create: (context) => UserBloc(
@@ -84,7 +86,7 @@ class FinDocDialog extends StatelessWidget {
               docType: finDoc.docType!,
               sales: false,
               finDocBloc: finDocBloc,
-              repos: context.read<FinDocAPIRepository>())
+              restClient: restClient)
             ..add(CartFetch(finDoc))),
       BlocProvider<UserBloc>(
           create: (context) => UserBloc(

@@ -18,7 +18,6 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 
 import '../findoc.dart';
 
@@ -31,7 +30,7 @@ mixin SalesCartBloc on Bloc<CartEvent, CartState> {}
 class CartBloc extends Bloc<CartEvent, CartState>
     with PurchaseCartBloc, SalesCartBloc {
   CartBloc(
-      {required this.repos,
+      {required this.restClient,
       required this.sales,
       required this.docType,
       required this.finDocBloc})
@@ -47,7 +46,7 @@ class CartBloc extends Bloc<CartEvent, CartState>
     on<CartClear>(_onCartClear);
   }
 
-  final FinDocAPIRepository repos;
+  final RestClient restClient;
   final bool sales;
   final FinDocType docType;
   final FinDocBloc finDocBloc;
@@ -64,15 +63,11 @@ class CartBloc extends Bloc<CartEvent, CartState>
             event.finDoc.sales, event.finDoc.docType!);
       }
       // get item types
-      ApiResult<List<ItemType>> result = await repos.getItemTypes(sales: sales);
-      return emit(result.when(
-          success: (data) => state.copyWith(
-              status: CartStatus.inProcess,
-              itemTypes: data,
-              finDoc: resultFinDoc ?? event.finDoc),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: CartStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+      ItemTypes result = await restClient.getItemTypes(sales: sales);
+      return emit(state.copyWith(
+          status: CartStatus.inProcess,
+          itemTypes: result.itemTypes,
+          finDoc: resultFinDoc ?? event.finDoc));
     }
   }
 

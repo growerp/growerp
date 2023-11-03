@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:date_utils/date_utils.dart' as utils;
 import 'package:flutter_bloc/flutter_bloc.dart';
-// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
@@ -41,11 +40,8 @@ class GanttForm extends StatelessWidget {
             create: (context) => ProductBloc(
                 context.read<RestClient>(), context.read<String>())),
         BlocProvider<FinDocBloc>(
-            create: (context) => FinDocBloc(
-                FinDocAPIRepository(
-                    context.read<AuthBloc>().state.authenticate!.apiKey),
-                true,
-                FinDocType.order)),
+            create: (context) => FinDocBloc(context.read<RestClient>(), true,
+                FinDocType.order, context.read<String>())),
       ],
       child: const GanttFormFull(),
     );

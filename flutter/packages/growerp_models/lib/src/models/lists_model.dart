@@ -97,3 +97,25 @@ class RentalFullDates with _$RentalFullDates {
   factory RentalFullDates.fromJson(Map<String, dynamic> json) =>
       _$RentalFullDatesFromJson(json);
 }
+
+@freezed // list of rentalFullDates
+class FinDocs with _$FinDocs {
+  factory FinDocs({
+    @Default(const []) List<FinDoc> finDocs,
+  }) = _FinDocs;
+  FinDocs._();
+
+  factory FinDocs.fromJson(Map<String, dynamic> json) =>
+      _$FinDocsFromJson(json);
+}
+
+@freezed // list of rentalFullDates
+class ItemTypes with _$ItemTypes {
+  factory ItemTypes({
+    @Default(const []) List<ItemType> itemTypes,
+  }) = _ItemTypes;
+  ItemTypes._();
+
+  factory ItemTypes.fromJson(Map<String, dynamic> json) =>
+      _$ItemTypesFromJson(json);
+}

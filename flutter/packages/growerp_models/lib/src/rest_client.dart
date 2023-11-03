@@ -230,6 +230,45 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<Products> getRentalAllOccupancy();
 
+  // FINDOC
+  @GET("rest/s1/growerp/100/FinDoc")
+  @Extra({'requireApiKey': true})
+  Future<FinDocs> getFinDoc({
+    @Query('sales') bool? sales,
+    @Query('docType') FinDocType? docType,
+    @Query('companyPartyId') String? companyPartyId,
+    @Query('search') String? searchString,
+    @Query('journalId') String? journalId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/FinDoc")
+  @Extra({'requireApiKey': true})
+  Future<FinDoc> createFinDoc({
+    @Field() required FinDoc finDoc,
+  });
+
+  @PATCH("rest/s1/growerp/100/FinDoc")
+  @Extra({'requireApiKey': true})
+  Future<FinDoc> updateFinDoc({@Field() required FinDoc finDoc});
+
+  @PATCH("rest/s1/growerp/100/FinDoc")
+  @Extra({'requireApiKey': true})
+  Future<FinDoc> receiveShipment({@Field() required FinDoc finDoc});
+
+  @GET("rest/s1/growerp/100/ItemTypes")
+  @Extra({'requireApiKey': true})
+  Future<ItemTypes> getItemTypes({
+    @Query('sales') bool? sales,
+  });
+
+  @GET("rest/s1/growerp/100/PaymentTypes")
+  @Extra({'requireApiKey': true})
+  Future<ItemTypes> getPaymentTypes({
+    @Query('sales') bool? sales,
+  });
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Extra({'requireApiKey': true})
