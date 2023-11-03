@@ -791,8 +791,8 @@ along with this software (see the LICENSE.md file). If not, see
                     productId: asset.product.productId,
                     ownerPartyId: companyPartyId,
                     statusId: status.convertedStatusId,
-                    quantityOnHandTotal: asset.quantityOnHand,
-                    availableToPromiseTotal: asset.quantityOnHand,
+                    quantityOnHandTotal: new BigDecimal(asset.quantityOnHand),
+                    availableToPromiseTotal: new BigDecimal(asset.quantityOnHand),
                     facilityId: stores[0].inventoryFacilityId,
                     assetTypeEnumId: classificationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
                 out-map="context" />
@@ -868,7 +868,8 @@ along with this software (see the LICENSE.md file). If not, see
                             assetOld.classEnumId != assetClass.convertedStatusId ||
                             assetOld.productId != asset.product.productId">
                 <set field="assetOld.assetName" from="asset.assetName" />
-                <set field="assetOld.quantityOnHandTotal" from="asset.quantityOnHand" />
+                <set field="assetOld.quantityOnHandTotal"
+                    from="new BigDecimal(asset.quantityOnHand)" />
                 <set field="assetOld.statusId" from="status.convertedStatusId" />
                 <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
                 <set field="assetOld.productId" from="asset.product.productId" />
