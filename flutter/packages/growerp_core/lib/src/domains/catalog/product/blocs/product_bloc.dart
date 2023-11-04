@@ -51,6 +51,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   final RestClient restClient;
   final String classificationId;
+  int start = 0;
 
   Future<void> _onProductFetch(
     ProductFetch event,
@@ -61,13 +62,25 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
     try {
       emit(state.copyWith(status: ProductStatus.loading));
+
+      if (state.status == ProductStatus.initial ||
+          event.refresh ||
+          event.searchString != '') {
+        start = 0;
+      } else {
+        start = state.products.length;
+      }
       Products compResult = await restClient.getProduct(
-          searchString: event.searchString, assetClassId: event.assetClassId);
+          searchString: event.searchString,
+          assetClassId: event.assetClassId,
+          start: start,
+          limit: event.limit);
       emit(state.copyWith(
         status: ProductStatus.success,
-        products: compResult.products,
-        hasReachedMax:
-            compResult.products.length < _productLimit ? true : false,
+        products: start == 0
+            ? compResult.products
+            : (List.of(state.products)..addAll(compResult.products)),
+        hasReachedMax: compResult.products.length < event.limit ? true : false,
         searchString: event.searchString,
       ));
     } on DioException catch (e) {

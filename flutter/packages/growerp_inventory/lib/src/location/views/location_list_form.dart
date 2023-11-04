@@ -28,9 +28,9 @@ class LocationListForm extends StatelessWidget {
       create: (context) => InventoryAPIRepository(
           context.read<AuthBloc>().state.authenticate!.apiKey!),
       child: BlocProvider<LocationBloc>(
-          create: (BuildContext context) => LocationBloc(InventoryAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))
-            ..add(const LocationFetch()),
+          create: (BuildContext context) =>
+              LocationBloc(context.read<RestClient>())
+                ..add(const LocationFetch()),
           child: const LocationList()));
 }
 
@@ -45,7 +45,7 @@ class LocationListState extends State<LocationList> {
   final _scrollController = ScrollController();
   late LocationBloc _locationBloc;
   late Authenticate authenticate;
-  int limit = 20;
+  late int limit;
   String? searchString;
 
   @override
@@ -58,6 +58,7 @@ class LocationListState extends State<LocationList> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    limit = (MediaQuery.of(context).size.height / 100).round();
     return BlocBuilder<LocationBloc, LocationState>(
       builder: (context, state) {
         switch (state.status) {
@@ -131,7 +132,7 @@ class LocationListState extends State<LocationList> {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<LocationBloc>().add(const LocationFetch());
+    if (_isBottom) _locationBloc.add(LocationFetch(limit: limit));
   }
 
   bool get _isBottom {

@@ -45,10 +45,8 @@ class _LocationListHeaderState extends State<LocationListHeader> {
         leading: GestureDetector(
             key: const Key('search'),
             onTap: (() {
-              setState(() => search ? search = false : search = true);
-              if (search == false) {
-                locationBloc.add(const LocationFetch(refresh: true));
-              }
+              if (search) locationBloc.add(const LocationFetch(refresh: true));
+              setState(() => search = !search);
             }),
             child: const Icon(Icons.search_sharp, size: 40)),
         title: search
@@ -79,7 +77,7 @@ class _LocationListHeaderState extends State<LocationListHeader> {
               ])
             : const Row(children: <Widget>[
                 Expanded(child: Text("Loc.Name[ID]")),
-                SizedBox(width: 80, child: Text("Quantity\nOn Hand")),
+                SizedBox(width: 80, child: Text("QOH")),
               ]),
         subtitle: Text(InventoryLocalizations.of(context)!.productName),
         trailing: const SizedBox(width: 50));

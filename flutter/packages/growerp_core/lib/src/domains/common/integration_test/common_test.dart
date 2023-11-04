@@ -207,10 +207,9 @@ class CommonTest {
         .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
     int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
-      APIRepository repos = APIRepository();
-      repos.setApiKey(apiKey, moquiSessionToken);
+      final restClient = RestClient(await buildDioClient(null));
       // replace XXX strings
-      Map parsed = {};
+      Map<String, dynamic> parsed = {};
       testData.forEach((k, v) {
         List newList = [];
         v.forEach((item) {
@@ -230,7 +229,8 @@ class CommonTest {
         });
         parsed[k] = newList;
       });
-      await repos.upLoadEntities(parsed);
+      await restClient.uploadEntities(
+          entities: parsed, classificationId: 'AppAdmin');
     }
     await PersistFunctions.persistTest(
         test.copyWith(sequence: seq, testDataLoaded: true));

@@ -77,7 +77,7 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
                 <set field="convertedStatusId" from="assetStatusValues[statusId]" />
             </if>
-            <if condition="docType == 'Order'">
+            <if condition="docType == 'order'">
                 <set field="orderStatusValues"
                     from="[
                     OrderOpen: 'FinDocPrep',
@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
                 ]" />
                 <set field="convertedStatusId" from="orderStatusValues[statusId]" />
             </if>
-            <if condition="docType == 'Shipment'">
+            <if condition="docType == 'shipment'">
                 <set field="orderStatusValues"
                     from="[
                     ShipInput: 'FinDocPrep',
@@ -104,12 +104,14 @@ along with this software (see the LICENSE.md file). If not, see
                     FinDocApproved: 'ShipPacked',
                     ShipShipped: 'FinDocCompleted',
                     FinDocCompleted: 'ShipShipped',
+                    ShipDelivered: 'FinDocCompleted',
+                    FinDocCompleted: 'ShipDelivered',
                     ShipCancelled: 'FinDocCancelled',
                     FinDocCancelled:'ShipCancelled'
                 ]" />
                 <set field="convertedStatusId" from="orderStatusValues[statusId]" />
             </if>
-            <if condition="docType == 'Invoice'">
+            <if condition="docType == 'invoice'">
                 <if condition="sales == true">
                     <set field="invoiceStatusValues"
                         from="[
@@ -143,7 +145,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <set field="convertedStatusId" from="invoiceStatusValues[statusId]" />
             </if>
-            <if condition="docType == 'Payment'">
+            <if condition="docType == 'payment'">
                 <set field="paymentStatusValues"
                     from="[
                         PmntProposed: 'FinDocPrep',
@@ -160,7 +162,7 @@ along with this software (see the LICENSE.md file). If not, see
                     ]" />
                 <set field="convertedStatusId" from="paymentStatusValues[statusId]" />
             </if>
-            <if condition="docType == 'Transaction'">
+            <if condition="docType == 'transaction'">
                 <set field="transactionStatusValues"
                     from="[
                         NotPosted: 'FinDocPrep',
@@ -182,7 +184,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <description>depending on type can be invoice/payment/order</description>
             </parameter>
             <parameter name="sales" type="Boolean" required="true" />
-            <parameter name="docType" required="true" />
+            <parameter name="docType" />
             <parameter name="open" type="Boolean" default-value="true" />
             <parameter name="startDate">
                 <description>Format should be YYYY-MM-DD</description>
@@ -268,77 +270,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="finDoc" type="Map">
-                <parameter name="docType" />
-                <parameter name="sales" type="Boolean" />
-                <parameter name="id" />
-                <parameter name="orderId" />
-                <parameter name="shipmentId" />
-                <parameter name="invoiceId" />
-                <parameter name="paymentId" />
-                <parameter name="transactionId" />
-                <parameter name="isPosted" type="boolean" />
-                <parameter name="paymentInstrument" />
-                <parameter name="statusId" />
-                <parameter name="creationDate" />
-                <parameter name="placedDate" />
-                <parameter name="description" />
-                <parameter name="otherUser" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="firstName" />
-                    <parameter name="lastName" />
-                    <parameter name="email" />
-                </parameter>
-                <parameter name="otherCompany" type="Map">
-                    <parameter name="partyId" />
-                    <parameter name="name" />
-                    <parameter name="paymentMethod" type="Map">
-                        <parameter name="ccPaymentMethodId" />
-                        <parameter name="ccDescription" />
-                    </parameter>
-                </parameter>
-                <parameter name="address" type="Map">
-                    <parameter name="addressId" />
-                    <parameter name="address1" />
-                    <parameter name="address2" />
-                    <parameter name="postalCode" />
-                    <parameter name="city" />
-                    <parameter name="province" />
-                    <parameter name="country" />
-                </parameter>
-                <parameter name="telephoneNr" />
-                <parameter name="grandTotal" />
-                <parameter name="classificationId" />
-                <parameter name="journal">
-                    <parameter name="journalId" />
-                    <parameter name="journalName" />
-                </parameter>
-                <parameter name="items" type="List">
-                    <parameter name="itemSeqId" />
-                    <parameter name="itemType" type="Map">
-                        <parameter name="itemTypeId" />
-                        <parameter name="itemTypeName" />
-                    </parameter>
-                    <parameter name="productId" />
-                    <parameter name="description" />
-                    <parameter name="quantity" />
-                    <parameter name="price" />
-                    <parameter name="isDebit" type="Boolean" />
-                    <parameter name="glAccount">
-                        <parameter name="glAccountId" />
-                        <parameter name="accountCode" />
-                        <parameter name="accountName" />
-                    </parameter>
-                    <parameter name="assetId" />
-                    <parameter name="assetName" />
-                    <parameter name="location" type="Map">
-                        <parameter name="locationId" />
-                        <parameter name="locationName" />
-                    </parameter>
-                    <parameter name="rentalFromDate" />
-                    <parameter name="rentalThruDate" />
-                </parameter>
-            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -366,7 +297,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="current" value="0" type="Integer" />
             <!-- order -->
-            <if condition="docType == 'Order'">
+            <if condition="docType == 'order'">
                 <if condition="search">
                     <entity-find list="items" offset="start" limit="limit"
                         entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
@@ -546,7 +477,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- invoice -->
-            <if condition="docType == 'Invoice'">
+            <if condition="docType == 'invoice'">
                 <set field="openStatusList"
                     from="['InvoiceInProcess', 'InvoiceFinalized', 'InvoiceApproved']" />
                 <set field="direction" value="I" />
@@ -692,7 +623,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <!-- payment -->
-            <if condition="docType == 'Payment'">
+            <if condition="docType == 'payment'">
                 <set field="openStatusList"
                     from="['PmntProposed','PmntPromised','PmntAuthorized']" />
                 <if condition="finDocId">
@@ -866,7 +797,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>finDocs.add(finDocOut)</script>
                 </if>
             </if>
-            <if condition="docType == 'Shipment'">
+            <if condition="docType == 'shipment'">
                 <set field="openStatusList"
                     from="['ShipInput','ShipScheduled','ShipPicked',
                             'ShipPacked','ShipShipped']" />
@@ -1007,7 +938,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <script>finDocs.add(finDocOut)</script>
                 </if>
             </if>
-            <if condition="docType == 'Transaction'">
+            <if condition="docType == 'transaction'">
                 <if condition="isPosted == true">
                     <set field="isPosted" value="Y" />
                 </if>
@@ -1070,12 +1001,12 @@ along with this software (see the LICENSE.md file). If not, see
                             company: company,
                         ]" />
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[docType: 'Transaction', 
+                            in-map="[docType: 'transaction', 
                                 statusId: item.isPosted == 'Y'? 'Posted' : 'NotPosted']"
                             out-map="context" />
                         <set field="finDocOut"
                             from="[
-                            docType: 'Transaction',
+                            docType: 'transaction',
                             sales: sales,
                             description: item.transDescription,
                             paymentId: item.paymentId,
@@ -1124,10 +1055,6 @@ along with this software (see the LICENSE.md file). If not, see
                         from="transactionTotal ? transactionTotal.toString(): null" />
                     <script>finDocs.add(finDocOut)</script>
                 </if>
-            </if>
-            <if condition="finDocId">
-                <set field="finDoc" from="finDocOut" />
-                <set field="finDocs" from="[]" />
             </if>
         </actions>
     </service>
@@ -1267,27 +1194,27 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if
-                condition="finDoc.docType != 'Transaction' &amp;&amp; (!finDoc.otherCompany || !finDoc.otherCompany.partyId)">
+                condition="finDoc.docType != 'transaction' &amp;&amp; (!finDoc.otherCompany || !finDoc.otherCompany.partyId)">
                 <return error="true" message="Other company required with valid companyPartyId" />
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
-            <if condition="finDoc.docType == 'Order'">
+            <if condition="finDoc.docType == 'order'">
                 <service-call name="growerp.100.FinDocServices100.create#Order"
                     in-map="[order: finDoc]" out-map="context" />
                 <set field="finDocId" from="orderId" />
-                <else-if condition="finDoc.docType == 'Invoice'">
+                <else-if condition="finDoc.docType == 'invoice'">
                     <service-call name="growerp.100.FinDocServices100.create#Invoice"
                         in-map="[invoice: finDoc]" out-map="context" />
                     <set field="finDocId" from="invoiceId" />
                 </else-if>
-                <else-if condition="finDoc.docType == 'Payment'">
+                <else-if condition="finDoc.docType == 'payment'">
                     <service-call name="growerp.100.FinDocServices100.create#Payment"
                         in-map="[payment: finDoc]" out-map="context" />
                     <set field="finDocId" from="paymentId" />
                 </else-if>
-                <else-if condition="finDoc.docType == 'Transaction'">
+                <else-if condition="finDoc.docType == 'transaction'">
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   acctgTransTypeEnumId: 'AttInternal',
                                     organizationPartyId: companyPartyId,
@@ -1326,6 +1253,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                 in-map="[finDocId: finDocId, docType: finDoc.docType, sales: finDoc.sales]" />
+            <set field="finDoc" from="finDocs[0]" />
         </actions>
     </service>
 
@@ -1733,7 +1661,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
             <!-- order -->
-            <if condition="finDoc.docType == 'Order'">
+            <if condition="finDoc.docType == 'order'">
                 <entity-find entity-name="mantle.order.OrderHeaderAndPart" list="check" limit="1">
                     <econdition field-name="orderId" from="finDoc.orderId" />
                     <econditions combine="or">
@@ -1748,9 +1676,9 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[order: finDoc]" />
                 <set field="inMap"
                     from="[finDocId: finDoc.orderId, 
-                                            docType: 'Order', sales: finDoc.sales]" />
+                                            docType: 'order', sales: finDoc.sales]" />
                 <!-- invoice -->
-                <else-if condition="finDoc.docType == 'Invoice'">
+                <else-if condition="finDoc.docType == 'invoice'">
                     <entity-find entity-name="mantle.account.invoice.Invoice" list="check" limit="1">
                         <econdition field-name="invoiceId" from="finDoc.invoiceId" />
                         <econditions combine="or">
@@ -1765,10 +1693,10 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[invoice: finDoc]" />
                     <set field="inMap"
                         from="[finDocId: finDoc.invoiceId,
-                            docType: 'Invoice', sales: finDoc.sales]" />
+                            docType: 'invoice', sales: finDoc.sales]" />
                 </else-if>
                 <!-- payment -->
-                <else-if condition="finDoc.docType == 'Payment'">
+                <else-if condition="finDoc.docType == 'payment'">
                     <entity-find entity-name="mantle.account.payment.Payment" list="check" limit="1">
                         <econdition field-name="paymentId" from="finDoc.paymentId" />
                         <econditions combine="or">
@@ -1783,10 +1711,10 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[payment: finDoc]" />
                     <set field="inMap"
                         from="[finDocId: finDoc.paymentId,
-                        docType: 'Payment', sales: finDoc.sales]" />
+                        docType: 'payment', sales: finDoc.sales]" />
                 </else-if>
                 <!-- shipment -->
-                <else-if condition="finDoc.docType == 'Shipment'">
+                <else-if condition="finDoc.docType == 'shipment'">
                     <entity-find entity-name="mantle.shipment.Shipment" list="check" limit="1">
                         <econdition field-name="shipmentId" from="finDoc.shipmentId" />
                         <econditions combine="or">
@@ -1828,9 +1756,9 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="[shipmentId: finDoc.shipmentId, statusId: finDoc.statusId]" />
                     <set field="inMap"
                         from="[finDocId: finDoc.shipmentId,
-                                    docType: 'Shipment', sales: finDoc.sales]" />
+                                    docType: 'shipment', sales: finDoc.sales]" />
                 </else-if>
-                <else-if condition="finDoc.docType == 'Transaction'">
+                <else-if condition="finDoc.docType == 'transaction'">
                     <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
                         value-field="transaction">
                         <field-map field-name="acctgTransId" from="finDoc.transactionId" />
@@ -1877,7 +1805,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <set field="inMap"
                         from="[finDocId: finDoc.transactionId,
-                                    docType: 'Transaction', sales: true]" />
+                                    docType: 'transaction', sales: true]" />
                 </else-if>
                 <else>
                     <return error="true" message="doctype ${finDoc.docType} not supported!" />
@@ -1885,6 +1813,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                 in-map="inMap" out-map="context" />
+            <set field="finDoc" from="finDocs[0]" />
         </actions>
     </service>
 
@@ -2588,9 +2517,10 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context" in-map="[shipmentId:finDoc.shipmentId]"
                 name="mantle.shipment.ShipmentServices.deliver#Shipment" />
             <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                in-map="[finDocId: finDoc.shipmentId, docType: 'Shipment',
+                in-map="[finDocId: finDoc.shipmentId, docType: 'shipment',
                                 sales: finDoc.sales]"
                 out-map="context" />
+            <set field="finDoc" from="finDocs[0]" />
         </actions>
     </service>
 </services>

@@ -107,7 +107,7 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-*/
+
   Future<ApiResult<bool>> upLoadEntities(
     Map entities,
   ) async {
@@ -127,7 +127,7 @@ class APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
 /*
   Future<ApiResult<bool>> checkCompany(String partyId) async {
     try {

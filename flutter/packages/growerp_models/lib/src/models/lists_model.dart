@@ -87,7 +87,7 @@ class Companies with _$Companies {
       _$CompaniesFromJson(json);
 }
 
-@freezed // list of rentalFullDates
+@freezed
 class RentalFullDates with _$RentalFullDates {
   factory RentalFullDates({
     @Default(const []) List<String> rentalFullDates,
@@ -98,7 +98,7 @@ class RentalFullDates with _$RentalFullDates {
       _$RentalFullDatesFromJson(json);
 }
 
-@freezed // list of rentalFullDates
+@freezed
 class FinDocs with _$FinDocs {
   factory FinDocs({
     @Default(const []) List<FinDoc> finDocs,
@@ -109,7 +109,7 @@ class FinDocs with _$FinDocs {
       _$FinDocsFromJson(json);
 }
 
-@freezed // list of rentalFullDates
+@freezed
 class ItemTypes with _$ItemTypes {
   factory ItemTypes({
     @Default(const []) List<ItemType> itemTypes,
@@ -118,4 +118,15 @@ class ItemTypes with _$ItemTypes {
 
   factory ItemTypes.fromJson(Map<String, dynamic> json) =>
       _$ItemTypesFromJson(json);
+}
+
+@freezed
+class Locations with _$Locations {
+  factory Locations({
+    @Default(const []) List<Location> locations,
+  }) = _Locations;
+  Locations._();
+
+  factory Locations.fromJson(Map<String, dynamic> json) =>
+      _$LocationsFromJson(json);
 }

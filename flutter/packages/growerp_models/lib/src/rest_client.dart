@@ -253,7 +253,7 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<FinDoc> updateFinDoc({@Field() required FinDoc finDoc});
 
-  @PATCH("rest/s1/growerp/100/FinDoc")
+  @PATCH("rest/s1/growerp/100/FinDocShipment")
   @Extra({'requireApiKey': true})
   Future<FinDoc> receiveShipment({@Field() required FinDoc finDoc});
 
@@ -269,7 +269,35 @@ abstract class RestClient {
     @Query('sales') bool? sales,
   });
 
+  // Inventory locations
+  @GET("rest/s1/growerp/100/Location")
+  @Extra({'requireApiKey': true})
+  Future<Locations> getLocation({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('filter') String? filter,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/Location")
+  @Extra({'requireApiKey': true})
+  Future<Location> createLocation({@Field() required Location location});
+
+  @PATCH("rest/s1/growerp/100/Location")
+  @Extra({'requireApiKey': true})
+  Future<Location> updateLocation({@Field() required Location location});
+
+  @DELETE("rest/s1/growerp/100/Location")
+  @Extra({'requireApiKey': true})
+  Future<Location> deleteLocation({@Field() required Location location});
+
   // import / export ========
+  @POST("rest/s1/growerp/100/ImportExport")
+  @Extra({'requireApiKey': true})
+  Future<void> uploadEntities(
+      {@Field() required Map<String, dynamic> entities,
+      @Field() required String classificationId});
+
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Extra({'requireApiKey': true})
   Future<void> importGlAccounts(@Field() List<GlAccount> glAccounts);

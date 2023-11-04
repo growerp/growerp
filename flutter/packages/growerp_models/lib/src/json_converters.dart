@@ -69,6 +69,7 @@ class TimeConverter implements JsonConverter<TimeOfDay?, String?> {
   }
 }
 */
+/*
 class FinDocTypeConverter implements JsonConverter<FinDocType?, String?> {
   const FinDocTypeConverter();
 
@@ -84,7 +85,7 @@ class FinDocTypeConverter implements JsonConverter<FinDocType?, String?> {
     return object.toString();
   }
 }
-
+*/
 class PaymentInstrumentConverter
     implements JsonConverter<PaymentInstrument?, String?> {
   const PaymentInstrumentConverter();

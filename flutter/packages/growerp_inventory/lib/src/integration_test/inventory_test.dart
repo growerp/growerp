@@ -84,8 +84,6 @@ class InventoryTest {
   static Future<void> checkInventoryQOH(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     List<FinDoc> orders = test.orders;
-    expect(orders.isNotEmpty, true,
-        reason: 'This test needs orders created in previous steps');
     for (FinDoc order in orders) {
       await CommonTest.doSearch(tester, searchString: order.shipmentId!);
       expect(

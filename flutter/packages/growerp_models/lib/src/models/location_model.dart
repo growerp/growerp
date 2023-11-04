@@ -24,7 +24,7 @@ class Location with _$Location {
   factory Location({
     final String? locationId,
     final String? locationName,
-    final List<Asset>? assets,
+    @Default([]) final List<Asset> assets,
   }) = _Location;
 
   factory Location.fromJson(Map<String, dynamic> json) =>

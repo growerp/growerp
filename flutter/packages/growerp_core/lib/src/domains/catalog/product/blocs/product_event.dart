@@ -27,12 +27,14 @@ class ProductFetch extends ProductEvent {
       this.assetClassId = '',
       this.companyPartyId = '',
       this.searchString = '',
-      this.refresh = false});
+      this.refresh = false,
+      this.limit = 20});
   final String companyPartyId;
   final String categoryId;
   final String assetClassId;
   final String searchString;
   final bool refresh;
+  final int limit;
 }
 
 /// delete an existing product

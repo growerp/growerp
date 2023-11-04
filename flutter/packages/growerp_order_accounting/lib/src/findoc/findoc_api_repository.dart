@@ -19,7 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class FinDocAPIRepository extends APIRepository {
   FinDocAPIRepository(super.apiKey);
-
+/*
   Future<ApiResult<FinDoc>> updateFinDoc(FinDoc finDoc) async {
     try {
       final response = await dioClient.patch(
@@ -62,7 +62,7 @@ class FinDocAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
-
+*/
   /*Future<ApiResult<FinDoc>> confirmPurchasePayment(String paymentId) async {
     try {
       final response = await dioClient.patch(
@@ -77,7 +77,7 @@ class FinDocAPIRepository extends APIRepository {
     }
   }
 */
-  Future<ApiResult<List<FinDoc>>> getFinDoc(
+/*  Future<ApiResult<List<FinDoc>>> getFinDoc(
       {int? start,
       int? limit,
       bool? open,
@@ -142,4 +142,5 @@ class FinDocAPIRepository extends APIRepository {
       return ApiResult.failure(error: NetworkExceptions.getDioException(e));
     }
   }
+*/
 }

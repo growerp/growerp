@@ -13,18 +13,15 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:equatable/equatable.dart';
 
 part 'location_event.dart';
 part 'location_state.dart';
-
-const _locationLimit = 20;
 
 EventTransformer<E> locationDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -33,14 +30,16 @@ EventTransformer<E> locationDroppable<E>(Duration duration) {
 }
 
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
-  LocationBloc(this.repos) : super(const LocationState()) {
+  LocationBloc(this.restClient) : super(const LocationState()) {
     on<LocationFetch>(_onLocationFetch,
         transformer: locationDroppable(const Duration(milliseconds: 100)));
     on<LocationUpdate>(_onLocationUpdate);
     on<LocationDelete>(_onLocationDelete);
   }
 
-  final InventoryAPIRepository repos;
+  final RestClient restClient;
+  int start = 0;
+
   Future<void> _onLocationFetch(
     LocationFetch event,
     Emitter<LocationState> emit,
@@ -48,86 +47,64 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
-    // start from record zero for initial and refresh
-    if (state.status == LocationStatus.initial || event.refresh) {
+    try {
+      // start from record zero for initial and refresh
       emit(state.copyWith(status: LocationStatus.loading));
-      ApiResult<List<Location>> compResult =
-          await repos.getLocation(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: LocationStatus.success,
-                locations: data,
-                hasReachedMax: data.length < _locationLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List<Location>> compResult =
-          await repos.getLocation(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: LocationStatus.success,
-                locations: data,
-                hasReachedMax: data.length < _locationLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get next page also for search
 
-    ApiResult<List<Location>> compResult =
-        await repos.getLocation(searchString: event.searchString);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: LocationStatus.success,
-              locations: List.of(state.locations)..addAll(data),
-              hasReachedMax: data.length < _locationLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: LocationStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+      if (state.status == LocationStatus.initial ||
+          event.refresh ||
+          event.searchString != '') {
+        start = 0;
+      } else {
+        start = state.locations.length;
+      }
+
+      Locations compResult = await restClient.getLocation(
+          start: start, searchString: event.searchString, limit: event.limit);
+
+      return emit(state.copyWith(
+        status: LocationStatus.success,
+        locations: start == 0
+            ? compResult.locations
+            : (List.of(state.locations)..addAll(compResult.locations)),
+        hasReachedMax: compResult.locations.length < event.limit ? true : false,
+        searchString: '',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LocationStatus.failure,
+          locations: [],
+          message: getDioError(e)));
+    }
   }
 
   Future<void> _onLocationUpdate(
     LocationUpdate event,
     Emitter<LocationState> emit,
   ) async {
-    List<Location> locations = List.from(state.locations);
-    if (event.location.locationId != null) {
-      ApiResult<Location> compResult =
-          await repos.updateLocation(event.location);
-      return emit(compResult.when(
-          success: (data) {
-            int index = locations.indexWhere(
-                (element) => element.locationId == event.location.locationId);
-            locations[index] = data;
-            return state.copyWith(
-                status: LocationStatus.success, locations: locations);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult<Location> compResult =
-          await repos.createLocation(event.location);
-      return emit(compResult.when(
-          success: (data) {
-            locations.insert(0, data);
-            return state.copyWith(
-                status: LocationStatus.success, locations: locations);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LocationStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<Location> locations = List.from(state.locations);
+      if (event.location.locationId != null) {
+        Location compResult =
+            await restClient.updateLocation(location: event.location);
+        int index = locations.indexWhere(
+            (element) => element.locationId == event.location.locationId);
+        locations[index] = compResult;
+        return emit(state.copyWith(
+            status: LocationStatus.success, locations: locations));
+      } else {
+        // add
+        Location compResult =
+            await restClient.createLocation(location: event.location);
+        locations.insert(0, compResult);
+        return emit(state.copyWith(
+            status: LocationStatus.success, locations: locations));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LocationStatus.failure,
+          locations: [],
+          message: getDioError(e)));
     }
   }
 
@@ -135,18 +112,19 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     LocationDelete event,
     Emitter<LocationState> emit,
   ) async {
-    List<Location> locations = List.from(state.locations);
-    ApiResult<Location> compResult = await repos.deleteLocation(event.location);
-    return emit(compResult.when(
-        success: (data) {
-          int index = locations.indexWhere(
-              (element) => element.locationId == event.location.locationId);
-          locations.removeAt(index);
-          return state.copyWith(
-              status: LocationStatus.success, locations: locations);
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: LocationStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<Location> locations = List.from(state.locations);
+      await restClient.deleteLocation(location: event.location);
+      int index = locations.indexWhere(
+          (element) => element.locationId == event.location.locationId);
+      locations.removeAt(index);
+      return emit(
+          state.copyWith(status: LocationStatus.success, locations: locations));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LocationStatus.failure,
+          locations: [],
+          message: getDioError(e)));
+    }
   }
 }

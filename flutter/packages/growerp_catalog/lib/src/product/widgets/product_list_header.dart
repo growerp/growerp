@@ -45,8 +45,10 @@ class _ProductListHeaderState extends State<ProductListHeader> {
       return ListTile(
           leading: GestureDetector(
             key: const Key('search'),
-            onTap: (() =>
-                setState(() => search ? search = false : search = true)),
+            onTap: (() {
+              if (search) productBloc.add(const ProductFetch(refresh: true));
+              setState(() => search = !search);
+            }),
             child: const Icon(Icons.search_sharp, size: 40),
           ),
           title: search
@@ -83,9 +85,12 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                       })
                 ])
               : Column(children: [
+                  if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+                    const Text("Name", textAlign: TextAlign.left),
                   Row(children: <Widget>[
-                    const Expanded(
-                        child: Text("Name", textAlign: TextAlign.center)),
+                    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                      const Expanded(
+                          child: Text("Name", textAlign: TextAlign.center)),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Expanded(
                           child:

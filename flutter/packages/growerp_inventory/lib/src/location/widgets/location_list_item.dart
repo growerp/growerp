@@ -35,10 +35,10 @@ class LocationListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locationBloc = context.read<LocationBloc>();
-    d(String s) => Decimal.parse(s);
-    Decimal qohTotal = d('0');
-    for (Asset asset in location.assets!) {
-      qohTotal += asset.quantityOnHand ?? d('0');
+    //d(String s) => Decimal.parse(s);
+    Decimal qohTotal = Decimal.zero;
+    for (Asset asset in location.assets) {
+      qohTotal += asset.quantityOnHand ?? Decimal.zero;
     }
     return ExpansionTile(
         key: Key("$index"),
@@ -87,7 +87,7 @@ class LocationListItem extends StatelessWidget {
 
   List<Widget> items(Location location, int index) {
     int assetCount = 1;
-    return List.from(location.assets!.map(
+    return List.from(location.assets.map(
         (e) => Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               const SizedBox(width: 50),
               Expanded(
@@ -104,7 +104,7 @@ class LocationListItem extends StatelessWidget {
                     ]),
                     subtitle: Text("QOH: ${e.quantityOnHand?.toString()} "
                         "ATP: ${e.availableToPromise?.toString()} "
-                        "Received:${e.receivedDate}")),
+                        "Receive Date:${e.receivedDate ?? ''}")),
               )
             ])));
   }

@@ -42,6 +42,7 @@ class ProductListState extends State<ProductList> {
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   late bool started;
+  late int limit;
 
   @override
   void initState() {
@@ -54,105 +55,111 @@ class ProductListState extends State<ProductList> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<ProductBloc, ProductState>(
-      listenWhen: (previous, current) =>
-          previous.status == ProductStatus.loading,
-      listener: (context, state) {
-        if (state.status == ProductStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-        }
-        if (state.status == ProductStatus.success) {
-          started = true;
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-      },
-      builder: (context, state) {
-        switch (state.status) {
-          case ProductStatus.failure:
-            return Center(
-                child: Text('failed to fetch product: ${state.message}'));
-          case ProductStatus.success:
-            return Scaffold(
-                floatingActionButton:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  FloatingActionButton(
-                      heroTag: 'productFiles',
-                      key: const Key("upDownload"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: const ProductFilesDialog());
-                            });
-                      },
-                      tooltip: 'products up/download',
-                      child: const Icon(Icons.file_copy)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      heroTag: 'productNew',
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _productBloc,
-                                  child: ProductDialog(Product()));
-                            });
-                      },
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add))
-                ]),
-                body: Column(children: [
-                  const ProductListHeader(),
-                  Expanded(
-                      child: RefreshIndicator(
-                          onRefresh: () async => _productBloc
-                              .add(const ProductFetch(refresh: true)),
-                          child: ListView.builder(
-                              key: const Key('listView'),
-                              shrinkWrap: true,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount: state.hasReachedMax
-                                  ? state.products.length + 1
-                                  : state.products.length + 2,
-                              controller: _scrollController,
-                              itemBuilder: (BuildContext context, int index) {
-                                if (index == 0) {
-                                  return Visibility(
-                                      visible: state.products.isEmpty,
-                                      child: Center(
-                                          heightFactor: 20,
-                                          child: Text(
-                                              started
-                                                  ? classificationId ==
-                                                          'AppHotel'
-                                                      ? 'No Room Types found'
-                                                      : 'No Products found'
-                                                  : '',
-                                              key: const Key('empty'),
-                                              textAlign: TextAlign.center)));
-                                }
-                                index--;
-                                return index >= state.products.length
-                                    ? const BottomLoader()
-                                    : Dismissible(
-                                        key: const Key('productItem'),
-                                        direction: DismissDirection.startToEnd,
-                                        child: ProductListItem(
-                                            product: state.products[index],
-                                            index: index));
-                              })))
-                ]));
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      });
+  Widget build(BuildContext context) {
+    limit = (MediaQuery.of(context).size.height / 100).round();
+    return BlocConsumer<ProductBloc, ProductState>(
+        listenWhen: (previous, current) =>
+            previous.status == ProductStatus.loading,
+        listener: (context, state) {
+          if (state.status == ProductStatus.failure) {
+            HelperFunctions.showMessage(
+                context, '${state.message}', Colors.red);
+          }
+          if (state.status == ProductStatus.success) {
+            started = true;
+            HelperFunctions.showMessage(
+                context, '${state.message}', Colors.green);
+          }
+        },
+        builder: (context, state) {
+          switch (state.status) {
+            case ProductStatus.failure:
+              return Center(
+                  child: Text('failed to fetch product: ${state.message}'));
+            case ProductStatus.success:
+              return Scaffold(
+                  floatingActionButton: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton(
+                            heroTag: 'productFiles',
+                            key: const Key("upDownload"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _productBloc,
+                                        child: const ProductFilesDialog());
+                                  });
+                            },
+                            tooltip: 'products up/download',
+                            child: const Icon(Icons.file_copy)),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                            heroTag: 'productNew',
+                            key: const Key("addNew"),
+                            onPressed: () async {
+                              await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                        value: _productBloc,
+                                        child: ProductDialog(Product()));
+                                  });
+                            },
+                            tooltip: CoreLocalizations.of(context)!.addNew,
+                            child: const Icon(Icons.add))
+                      ]),
+                  body: Column(children: [
+                    const ProductListHeader(),
+                    Expanded(
+                        child: RefreshIndicator(
+                            onRefresh: () async => _productBloc
+                                .add(const ProductFetch(refresh: true)),
+                            child: ListView.builder(
+                                key: const Key('listView'),
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: state.hasReachedMax
+                                    ? state.products.length + 1
+                                    : state.products.length + 2,
+                                controller: _scrollController,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index == 0) {
+                                    return Visibility(
+                                        visible: state.products.isEmpty,
+                                        child: Center(
+                                            heightFactor: 20,
+                                            child: Text(
+                                                started
+                                                    ? classificationId ==
+                                                            'AppHotel'
+                                                        ? 'No Room Types found'
+                                                        : 'No Products found'
+                                                    : '',
+                                                key: const Key('empty'),
+                                                textAlign: TextAlign.center)));
+                                  }
+                                  index--;
+                                  return index >= state.products.length
+                                      ? const BottomLoader()
+                                      : Dismissible(
+                                          key: const Key('productItem'),
+                                          direction:
+                                              DismissDirection.startToEnd,
+                                          child: ProductListItem(
+                                              product: state.products[index],
+                                              index: index));
+                                })))
+                  ]));
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        });
+  }
 
   @override
   void dispose() {
@@ -163,7 +170,9 @@ class ProductListState extends State<ProductList> {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<ProductBloc>().add(const ProductFetch());
+    if (_isBottom) {
+      _productBloc.add(ProductFetch(limit: limit));
+    }
   }
 
   bool get _isBottom {

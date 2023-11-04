@@ -28,7 +28,7 @@ part 'findoc_model.g.dart';
 class FinDoc with _$FinDoc {
   FinDoc._();
   factory FinDoc({
-    @FinDocTypeConverter() FinDocType? docType, // order, invoice, payment etc
+    FinDocType? docType, // order, invoice, payment etc
     @Default(true) bool sales,
     String? orderId,
     String? shipmentId,
@@ -56,7 +56,8 @@ class FinDoc with _$FinDoc {
     @Default([]) List<FinDocItem> items,
   }) = _FinDoc;
 
-  factory FinDoc.fromJson(Map<String, dynamic> json) => _$FinDocFromJson(json);
+  factory FinDoc.fromJson(Map<String, dynamic> json) =>
+      _$FinDocFromJson(json['finDoc'] ?? json);
 
   bool idIsNull() => (invoiceId == null &&
           orderId == null &&

@@ -41,31 +41,39 @@ class ProductListItem extends StatelessWidget {
                 )
               : Text(product.productName![0]),
         ),
-        title: Row(
-          children: <Widget>[
-            Expanded(
-                child: Text("${product.productName}", key: Key('name$index'))),
-            if (!ResponsiveBreakpoints.of(context).isMobile)
-              Expanded(
-                  child: Text("${product.description}",
-                      key: Key('description$index'),
-                      textAlign: TextAlign.center)),
-            Expanded(
-                child: Text("${product.price ?? product.listPrice}",
-                    key: Key('price$index'), textAlign: TextAlign.center)),
-            if (classificationId != 'AppHotel')
-              Expanded(
-                  child: Text(
-                      "${product.categories.isEmpty ? '0' : product.categories.length > 1 ? product.categories.length : product.categories[0].categoryName}",
-                      key: Key('categoryName$index'),
-                      textAlign: TextAlign.center)),
-            Expanded(
-                child: Text(
-                    product.assetCount != null
-                        ? product.assetCount.toString()
-                        : '0',
-                    key: Key('assetCount$index'),
-                    textAlign: TextAlign.center)),
+        title: Column(
+          children: [
+            if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+              Text("${product.productName}", key: Key('name$index')),
+            Row(
+              children: <Widget>[
+                if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                  Expanded(
+                      child: Text("${product.productName}",
+                          key: Key('name$index'))),
+                if (!ResponsiveBreakpoints.of(context).isMobile)
+                  Expanded(
+                      child: Text("${product.description}",
+                          key: Key('description$index'),
+                          textAlign: TextAlign.center)),
+                Expanded(
+                    child: Text("${product.price ?? product.listPrice ?? ''}",
+                        key: Key('price$index'), textAlign: TextAlign.center)),
+                if (classificationId != 'AppHotel')
+                  Expanded(
+                      child: Text(
+                          "${product.categories.isEmpty ? '0' : product.categories.length > 1 ? product.categories.length : product.categories[0].categoryName}",
+                          key: Key('categoryName$index'),
+                          textAlign: TextAlign.center)),
+                Expanded(
+                    child: Text(
+                        product.assetCount != null
+                            ? product.assetCount.toString()
+                            : '0',
+                        key: Key('assetCount$index'),
+                        textAlign: TextAlign.center)),
+              ],
+            ),
           ],
         ),
         onTap: () async {

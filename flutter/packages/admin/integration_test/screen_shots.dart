@@ -5,6 +5,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:admin/router.dart' as router;
 import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding();
@@ -12,6 +13,7 @@ void main() {
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset("app_settings");
+    await Hive.initFlutter();
   });
 
   testWidgets('''Make screenshots''', (tester) async {
