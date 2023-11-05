@@ -29,7 +29,7 @@ import '../../../../test_data.dart';
 
 class CommonTest {
   String classificationId = GlobalConfiguration().get("classificationId");
-  static int waitTime = 3;
+  static const int waitTime = 3;
 
   static Future<void> startTestApp(
       WidgetTester tester,
@@ -356,10 +356,10 @@ class CommonTest {
 
   /// [lowLevel]
   static Future<void> refresh(WidgetTester tester,
-      {int? seconds, String listViewName = 'listView'}) async {
-    seconds ??= waitTime;
+      {int seconds = waitTime, String listViewName = 'listView'}) async {
     await tester.drag(find.byKey(Key(listViewName)).last, const Offset(0, 400));
     await tester.pump(Duration(seconds: seconds));
+    await tester.pumpAndSettle();
   }
 
   static Future<void> enterText(

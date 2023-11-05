@@ -54,7 +54,6 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <log message="======search: $search" />
             <entity-find offset="start" limit="limit" list="locationsRead"
                 entity-name="growerp.warehouse.LocationAssetAndProductUomDetail">
                 <econdition
@@ -77,7 +76,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <order-by field-name="productId" />
                 <order-by field-name="assetId" />
             </entity-find>
-            <log message="=======${locationsRead?.size()}" />
             <set field="lastItem" from="null" />
             <set field="assets" from="[]" />
             <set field="locations" from="[]" />
@@ -234,7 +232,7 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.facility.Facility" list="facilities">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />
             </entity-find>
-            <entity-find entity-name="mantle.facility.FacilityLocation" list="locations"
+            <entity-find entity-name="mantle.facility.FacilityLocation" list="locationList"
                 for-update="true" limit="1">
                 <econdition field-name="facilityId" from="facilities[0].facilityId" />
                 <econdition field-name="locationSeqId" from="location.locationId" />
@@ -243,7 +241,7 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[facilityId: facilities[0].facilityId,
                              locationId: location.locationId]"
                 out-map="context" />
-            <entity-delete value-field="locations[0]" />
+            <entity-delete value-field="locationList[0]" />
             <set field="location" from="locations[0]" />
         </actions>
     </service>

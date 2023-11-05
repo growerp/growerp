@@ -28,5 +28,5 @@ class Location with _$Location {
   }) = _Location;
 
   factory Location.fromJson(Map<String, dynamic> json) =>
-      _$LocationFromJson(json);
+      _$LocationFromJson(json['location'] ?? json);
 }

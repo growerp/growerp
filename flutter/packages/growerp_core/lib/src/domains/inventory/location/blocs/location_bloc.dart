@@ -44,7 +44,9 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     LocationFetch event,
     Emitter<LocationState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
+      return;
+    }
     if (state.status == LocationStatus.initial ||
         event.refresh ||
         event.searchString != '') {

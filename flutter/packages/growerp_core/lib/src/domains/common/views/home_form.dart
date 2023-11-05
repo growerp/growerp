@@ -130,7 +130,7 @@ class HomeFormState extends State<HomeForm> {
                               : 'packages/growerp_core/images/growerpDark100.png'),
                           height: 100,
                           width: 100),
-                      if (widget.title.isNotEmpty) const SizedBox(height: 40),
+                      if (widget.title.isNotEmpty) const SizedBox(height: 30),
                       InkWell(
                           onLongPress: () async {
                             var message = await showDialog(
@@ -149,7 +149,7 @@ class HomeFormState extends State<HomeForm> {
                               style: TextStyle(
                                   fontSize: isPhone ? 15 : 25,
                                   fontWeight: FontWeight.bold))),
-                      if (widget.title.isNotEmpty) const SizedBox(height: 40),
+                      if (widget.title.isNotEmpty) const SizedBox(height: 30),
                       authenticate.company?.partyId != null
                           ? ElevatedButton(
                               key: const Key('loginButton'),

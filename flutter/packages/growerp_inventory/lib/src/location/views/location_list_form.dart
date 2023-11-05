@@ -25,8 +25,7 @@ class LocationListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => InventoryAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
+      create: (context) => context.read<RestClient>(),
       child: BlocProvider<LocationBloc>(
           create: (BuildContext context) =>
               LocationBloc(context.read<RestClient>())

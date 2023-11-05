@@ -82,6 +82,7 @@ class LocationTest {
       WidgetTester tester, int numberOfDeletes) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.locations.length;
+    await CommonTest.refresh(tester);
     expect(find.byKey(const Key('locationItem')), findsNWidgets(count));
     await CommonTest.tapByKey(tester, 'delete${count - 1}', seconds: 5);
     expect(find.byKey(const Key('locationItem')), findsNWidgets(count - 1));
