@@ -44,20 +44,17 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     LocationFetch event,
     Emitter<LocationState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
+    if (state.hasReachedMax) return;
+    if (state.status == LocationStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.locations.length;
     }
     try {
       // start from record zero for initial and refresh
       emit(state.copyWith(status: LocationStatus.loading));
-
-      if (state.status == LocationStatus.initial ||
-          event.refresh ||
-          event.searchString != '') {
-        start = 0;
-      } else {
-        start = state.locations.length;
-      }
 
       Locations compResult = await restClient.getLocation(
           start: start, searchString: event.searchString, limit: event.limit);

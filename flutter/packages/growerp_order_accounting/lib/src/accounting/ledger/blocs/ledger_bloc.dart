@@ -13,32 +13,31 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:growerp_rest/growerp_rest.dart';
-
-import '../../accounting.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 part 'ledger_event.dart';
 part 'ledger_state.dart';
 
 class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
-  LedgerBloc(this.repos) : super(const LedgerState()) {
+  LedgerBloc(this.restClient) : super(const LedgerState()) {
     on<LedgerFetch>(_onLedgerFetch);
     on<LedgerTimePeriods>(_onLedgerTimePeriods);
   }
 
-  final AccountingAPIRepository repos;
+  final RestClient restClient;
 
-  Future<ApiResult<LedgerReport>> callApi(ReportType reportType,
+  Future<LedgerReport> callApi(ReportType reportType,
       {String periodName = ''}) async {
     switch (reportType) {
       case ReportType.ledger:
-        return await repos.getLedger();
+        return await restClient.getLedger();
       case ReportType.sheet:
-        return await repos.getBalanceSheet(periodName);
+        return await restClient.getBalanceSheet(periodName: periodName);
       case ReportType.summary:
-        return await repos.getBalanceSummary(periodName);
+        return await restClient.getBalanceSummary(periodName: periodName);
       default:
         // ignore: null_argument_to_non_null_type
         return Future.value(null);
@@ -49,34 +48,37 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     LedgerFetch event,
     Emitter<LedgerState> emit,
   ) async {
-    // start from record zero for initial and refresh
-    emit(state.copyWith(status: LedgerStatus.loading));
+    try {
+      // start from record zero for initial and refresh
+      emit(state.copyWith(status: LedgerStatus.loading));
 
-    if (state.timePeriods.isEmpty) {
-      add(LedgerTimePeriods());
+      if (state.timePeriods.isEmpty) {
+        add(LedgerTimePeriods());
+      }
+
+      final compResult =
+          await callApi(event.reportType, periodName: event.periodName);
+
+      return emit(state.copyWith(
+        status: LedgerStatus.success,
+        ledgerReport: compResult,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerStatus.failure, message: getDioError(e)));
     }
-
-    final compResult =
-        await callApi(event.reportType, periodName: event.periodName);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: LedgerStatus.success,
-              ledgerReport: data,
-            ),
-        failure: (error) => state.copyWith(
-            status: LedgerStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onLedgerTimePeriods(
     LedgerTimePeriods event,
     Emitter<LedgerState> emit,
   ) async {
-    ApiResult<List<TimePeriod>> periodResult = await repos.getTimePeriods();
-    return emit(periodResult.when(
-        success: (data) => state.copyWith(timePeriods: data),
-        failure: (error) => state.copyWith(
-            status: LedgerStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      TimePeriods result = await restClient.getTimePeriods();
+      return emit(state.copyWith(timePeriods: result.timePeriods));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerStatus.failure, message: getDioError(e)));
+    }
   }
 }

@@ -30,8 +30,7 @@ class BalanceSheetForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LedgerBloc(AccountingAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!)),
+      create: (context) => LedgerBloc(context.read<RestClient>()),
       child: const BalanceSheetListForm(),
     );
   }

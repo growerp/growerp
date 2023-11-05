@@ -130,3 +130,47 @@ class Locations with _$Locations {
   factory Locations.fromJson(Map<String, dynamic> json) =>
       _$LocationsFromJson(json);
 }
+
+@freezed
+class TimePeriods with _$TimePeriods {
+  factory TimePeriods({
+    @Default(const []) List<TimePeriod> timePeriods,
+  }) = _TimePeriods;
+  TimePeriods._();
+
+  factory TimePeriods.fromJson(Map<String, dynamic> json) =>
+      _$TimePeriodsFromJson(json);
+}
+
+@freezed
+class LedgerJournals with _$LedgerJournals {
+  factory LedgerJournals({
+    @Default(const []) List<LedgerJournal> ledgerJournals,
+  }) = _LedgerJournals;
+  LedgerJournals._();
+
+  factory LedgerJournals.fromJson(Map<String, dynamic> json) =>
+      _$LedgerJournalsFromJson(json);
+}
+
+@freezed
+class AccountClasses with _$AccountClasses {
+  factory AccountClasses({
+    @Default(const []) List<AccountClass> accountClasses,
+  }) = _AccountClasses;
+  AccountClasses._();
+
+  factory AccountClasses.fromJson(Map<String, dynamic> json) =>
+      _$AccountClassesFromJson(json);
+}
+
+@freezed
+class AccountTypes with _$AccountTypes {
+  factory AccountTypes({
+    @Default(const []) List<AccountType> accountTypes,
+  }) = _AccountTypes;
+  AccountTypes._();
+
+  factory AccountTypes.fromJson(Map<String, dynamic> json) =>
+      _$AccountTypesFromJson(json);
+}

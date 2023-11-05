@@ -13,14 +13,12 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_transform/stream_transform.dart';
-
-import '../../accounting.dart';
 
 part 'ledger_journal_event.dart';
 part 'ledger_journal_state.dart';
@@ -34,106 +32,79 @@ EventTransformer<E> ledgerJournalDroppable<E>(Duration duration) {
 }
 
 class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
-  LedgerJournalBloc(this.repos) : super(const LedgerJournalState()) {
+  LedgerJournalBloc(this.restClient) : super(const LedgerJournalState()) {
     on<LedgerJournalFetch>(_onLedgerJournalFetch,
         transformer: ledgerJournalDroppable(const Duration(milliseconds: 100)));
     on<LedgerJournalUpdate>(_onLedgerJournalUpdate);
   }
 
-  final AccountingAPIRepository repos;
+  final RestClient restClient;
+  late int start;
+
   Future<void> _onLedgerJournalFetch(
     LedgerJournalFetch event,
     Emitter<LedgerJournalState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
+    if (state.hasReachedMax) return;
+    if (state.status == LedgerJournalStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.ledgerJournals.length;
     }
-    // start from record zero for initial and refresh
-    if (state.status == LedgerJournalStatus.initial || event.refresh) {
-      ApiResult<List<LedgerJournal>> compResult =
-          await repos.getLedgerJournal(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: LedgerJournalStatus.success,
-                ledgerJournals: data,
-                hasReachedMax: data.length < _ledgerJournalLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LedgerJournalStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      LedgerJournals result = await restClient.getLedgerJournal(
+          start: start, searchString: event.searchString, limit: event.limit);
+      return emit(state.copyWith(
+        status: LedgerJournalStatus.success,
+        ledgerJournals: start == 0
+            ? result.ledgerJournals
+            : (List.of(state.ledgerJournals)..addAll(result.ledgerJournals)),
+        hasReachedMax:
+            result.ledgerJournals.length < _ledgerJournalLimit ? true : false,
+        searchString: '',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerJournalStatus.failure,
+          ledgerJournals: [],
+          message: getDioError(e)));
     }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List<LedgerJournal>> compResult =
-          await repos.getLedgerJournal(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: LedgerJournalStatus.success,
-                ledgerJournals: data,
-                hasReachedMax: data.length < _ledgerJournalLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LedgerJournalStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get next page also for search
-    ApiResult<List<LedgerJournal>> compResult = await repos.getLedgerJournal(
-        searchString: event.searchString,
-        start: state.ledgerJournals.length,
-        limit: _ledgerJournalLimit);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: LedgerJournalStatus.success,
-              ledgerJournals: List.of(state.ledgerJournals)..addAll(data),
-              hasReachedMax: data.length < _ledgerJournalLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: LedgerJournalStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onLedgerJournalUpdate(
     LedgerJournalUpdate event,
     Emitter<LedgerJournalState> emit,
   ) async {
-    List<LedgerJournal> ledgerJournals = List.from(state.ledgerJournals);
-    if (event.ledgerJournal.journalId.isNotEmpty) {
-      ApiResult<LedgerJournal> compResult =
-          await repos.updateLedgerJournal(event.ledgerJournal);
-      return emit(compResult.when(
-          success: (data) {
-            int index = ledgerJournals.indexWhere((element) =>
-                element.journalId == event.ledgerJournal.journalId);
-            ledgerJournals[index] = data;
-            return state.copyWith(
-                status: LedgerJournalStatus.success,
-                ledgerJournals: ledgerJournals,
-                message:
-                    "ledgerJournal ${event.ledgerJournal.journalName} updated");
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LedgerJournalStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult<LedgerJournal> compResult =
-          await repos.createLedgerJournal(event.ledgerJournal);
-      return emit(compResult.when(
-          success: (data) {
-            ledgerJournals.insert(0, data);
-            return state.copyWith(
-                status: LedgerJournalStatus.success,
-                ledgerJournals: ledgerJournals,
-                message:
-                    "ledgerJournal ${event.ledgerJournal.journalName} added");
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: LedgerJournalStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<LedgerJournal> ledgerJournals = List.from(state.ledgerJournals);
+      if (event.ledgerJournal.journalId.isNotEmpty) {
+        LedgerJournal compResult = await restClient.updateLedgerJournal(
+            ledgerJournal: event.ledgerJournal);
+        int index = ledgerJournals.indexWhere(
+            (element) => element.journalId == event.ledgerJournal.journalId);
+        ledgerJournals[index] = compResult;
+        return emit(state.copyWith(
+            status: LedgerJournalStatus.success,
+            ledgerJournals: ledgerJournals,
+            message:
+                "ledgerJournal ${event.ledgerJournal.journalName} updated"));
+      } else {
+        // add
+        LedgerJournal compResult = await restClient.createLedgerJournal(
+            ledgerJournal: event.ledgerJournal);
+        ledgerJournals.insert(0, compResult);
+        return emit(state.copyWith(
+            status: LedgerJournalStatus.success,
+            ledgerJournals: ledgerJournals,
+            message: "ledgerJournal ${event.ledgerJournal.journalName} added"));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerJournalStatus.failure,
+          ledgerJournals: [],
+          message: getDioError(e)));
     }
   }
 }

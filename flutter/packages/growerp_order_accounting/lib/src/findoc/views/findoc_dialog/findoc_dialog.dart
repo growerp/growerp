@@ -76,8 +76,7 @@ class FinDocDialog extends StatelessWidget {
             create: (context) => ProductBloc(
                 context.read<RestClient>(), context.read<String>())),
         BlocProvider<GlAccountBloc>(
-            create: (context) => GlAccountBloc(AccountingAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!))),
+            create: (context) => GlAccountBloc(context.read<RestClient>())),
       ], child: FinDocPage(finDoc));
     }
     return MultiBlocProvider(providers: [
@@ -97,8 +96,7 @@ class FinDocDialog extends StatelessWidget {
           create: (context) =>
               ProductBloc(context.read<RestClient>(), context.read<String>())),
       BlocProvider<GlAccountBloc>(
-          create: (context) => GlAccountBloc(AccountingAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+          create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: FinDocPage(finDoc));
   }
 }
@@ -344,7 +342,7 @@ class MyFinDocState extends State<FinDocPage> {
     List<Widget> buttons = [
       ElevatedButton(
           key: const Key('header'),
-          child: const Text("Update"),
+          child: const Text("Update Header"),
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
                 otherUser: _selectedUser,

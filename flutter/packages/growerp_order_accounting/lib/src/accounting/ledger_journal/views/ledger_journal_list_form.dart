@@ -24,10 +24,9 @@ class LedgerJournalListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) => LedgerJournalBloc(
-          AccountingAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const LedgerJournalFetch()),
+      create: (BuildContext context) =>
+          LedgerJournalBloc(context.read<RestClient>())
+            ..add(const LedgerJournalFetch()),
       child: const LedgerJournalList());
 }
 

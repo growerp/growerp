@@ -5,7 +5,8 @@ import 'package:growerp_models/src/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-Future<Dio> buildDioClient(String? base) async {
+Future<Dio> buildDioClient(String? base,
+    {Duration timeout = const Duration(seconds: 5)}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -20,8 +21,8 @@ Future<Dio> buildDioClient(String? base) async {
                 ? 'http://10.0.2.2:8080/'
                 : 'http://localhost:8080/'
             : base)
-    ..options.connectTimeout = const Duration(milliseconds: 5000)
-    ..options.receiveTimeout = const Duration(milliseconds: 5000)
+    ..options.connectTimeout = const Duration(seconds: 5)
+    ..options.receiveTimeout = timeout
     ..httpClientAdapter;
 
   //dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';

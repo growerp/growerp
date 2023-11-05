@@ -61,8 +61,7 @@ class PaymentDialog extends StatelessWidget {
                         context.read<AuthBloc>().state.authenticate!.apiKey!),
                     Role.customer)),
             BlocProvider<GlAccountBloc>(
-                create: (context) => GlAccountBloc(AccountingAPIRepository(
-                    context.read<AuthBloc>().state.authenticate!.apiKey!))),
+                create: (context) => GlAccountBloc(context.read<RestClient>())),
           ],
           child:
               PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
@@ -74,8 +73,7 @@ class PaymentDialog extends StatelessWidget {
                   context.read<AuthBloc>().state.authenticate!.apiKey!),
               Role.supplier)),
       BlocProvider<GlAccountBloc>(
-          create: (context) => GlAccountBloc(AccountingAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!))),
+          create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
   }
 }

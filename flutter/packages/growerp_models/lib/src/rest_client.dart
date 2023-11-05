@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' hide Headers;
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'models/models.dart';
@@ -291,6 +292,76 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<Location> deleteLocation({@Field() required Location location});
 
+  // accounting
+  @GET("rest/s1/growerp/100/Ledger")
+  @Extra({'requireApiKey': true})
+  Future<LedgerReport> getLedger();
+
+  @GET("rest/s1/growerp/100/GlAccount")
+  @Extra({'requireApiKey': true})
+  Future<GlAccounts> getGlAccount({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
+
+  @GET("rest/s1/growerp/100/Timeperiod")
+  @Extra({'requireApiKey': true})
+  Future<TimePeriods> getTimePeriods();
+
+  @GET("rest/s1/growerp/100/LedgerJournal")
+  @Extra({'requireApiKey': true})
+  Future<LedgerJournals> getLedgerJournal({
+    @Query('ledgerJournalId') String? ledgerJournalId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/GlAccount")
+  @Extra({'requireApiKey': true})
+  Future<GlAccount> createGlAccount({
+    @Field() required GlAccount glAccount,
+  });
+
+  @PATCH("rest/s1/growerp/100/GlAccount")
+  @Extra({'requireApiKey': true})
+  Future<GlAccount> updateGlAccount({
+    @Field() required GlAccount glAccount,
+  });
+
+  @POST("rest/s1/growerp/100/LedgerJournal")
+  @Extra({'requireApiKey': true})
+  Future<LedgerJournal> createLedgerJournal({
+    @Field() required LedgerJournal ledgerJournal,
+  });
+
+  @PATCH("rest/s1/growerp/100/LedgerJournal")
+  @Extra({'requireApiKey': true})
+  Future<LedgerJournal> updateLedgerJournal({
+    @Field() required LedgerJournal ledgerJournal,
+  });
+
+  @GET("rest/s1/growerp/100/BalanceSheet")
+  @Extra({'requireApiKey': true})
+  Future<LedgerReport> getBalanceSheet({
+    @Query('periodName') String? periodName,
+  });
+
+  @GET("rest/s1/growerp/100/BalanceSummary")
+  @Extra({'requireApiKey': true})
+  Future<LedgerReport> getBalanceSummary({
+    @Query('periodName') String? periodName,
+  });
+
+  @GET("rest/s1/growerp/100/AccountClass")
+  @Extra({'requireApiKey': true})
+  Future<AccountClasses> getAccountClass();
+
+  @GET("rest/s1/growerp/100/AccountClass")
+  @Extra({'requireApiKey': true})
+  Future<AccountTypes> getAccountType();
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
   @Extra({'requireApiKey': true})
@@ -300,7 +371,12 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Extra({'requireApiKey': true})
-  Future<void> importGlAccounts(@Field() List<GlAccount> glAccounts);
+  Future<String> importGlAccounts(@Field() List<GlAccount> glAccounts);
+
+  @GET("rest/s1/growerp/100/exportGlAccounts")
+  @Extra({'requireApiKey': true})
+  Future<String> exportGlAccounts(
+      {@Query('entityName') String entityName = 'glAccount'});
 
   @POST("rest/s1/growerp/100/ImportExport/companies")
   @Extra({'requireApiKey': true})
@@ -318,10 +394,6 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport/categories")
   @Extra({'requireApiKey': true})
   Future<void> importCategories(@Field() List<Category> categories);
-
-  @GET("rest/s1/growerp/100/GlAccount")
-  @Extra({'requireApiKey': true})
-  Future<GlAccounts> getGlAccount({@Query('limit') int? limit});
 
   @GET("rest/s1/growerp/100/Categories")
   @Extra({'requireApiKey': true})

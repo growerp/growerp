@@ -16,6 +16,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../accounting.dart';
@@ -25,11 +26,10 @@ class BalanceSummaryListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => AccountingAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
+      create: (context) => context.read<RestClient>(),
       child: BlocProvider<LedgerBloc>(
-          create: (BuildContext context) => LedgerBloc(AccountingAPIRepository(
-              context.read<AuthBloc>().state.authenticate!.apiKey!)),
+          create: (BuildContext context) =>
+              LedgerBloc(context.read<RestClient>()),
           child: const BalanceSummaryList()));
 }
 

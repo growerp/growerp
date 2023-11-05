@@ -21,9 +21,11 @@ abstract class LedgerJournalEvent extends Equatable {
 }
 
 class LedgerJournalFetch extends LedgerJournalEvent {
-  const LedgerJournalFetch({this.searchString = '', this.refresh = false});
+  const LedgerJournalFetch(
+      {this.searchString = '', this.refresh = false, this.limit = 20});
   final String searchString;
   final bool refresh;
+  final int limit;
   @override
   List<Object> get props => [searchString, refresh];
 }

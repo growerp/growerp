@@ -36,6 +36,7 @@
 ///   -o outputDirectory : directory used for exported csv output files,default: growerp
 ///
 ///
+import 'dart:convert';
 import 'dart:io';
 import 'package:dcli/dcli.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -58,6 +59,7 @@ Future<void> main(List<String> args) async {
   String outputDirectory = 'growerpCsv';
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
+  late Authenticate authenticate;
   var logger = Logger(filter: MyFilter());
   var box = await Hive.openBox('growerp');
 
@@ -94,26 +96,39 @@ Future<void> main(List<String> args) async {
     //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
 
     Future<void> login(RestClient client) async {
-      // email exists?
-      Map result = await client.checkEmail(email: username);
-      if (result['ok'] == false) {
-        // no so register new
-        await client.register(
-            emailAddress: username,
-            companyEmailAddress: 'q$username',
-            newPassword: password,
-            firstName: 'Hans',
-            lastName: 'Jansen',
-            companyName: 'test company',
-            currencyId: 'USD',
-            demoData: true,
+      if (username.isNotEmpty && password.isNotEmpty) {
+        // email exists?
+        Map result = await client.checkEmail(email: username);
+        if (result['ok'] == false) {
+          // no so register new
+          await client.register(
+              emailAddress: username,
+              companyEmailAddress: 'q$username',
+              newPassword: password,
+              firstName: 'Hans',
+              lastName: 'Jansen',
+              companyName: 'test company',
+              currencyId: 'USD',
+              demoData: true,
+              classificationId: 'AppAdmin');
+        }
+        // login for key
+        authenticate = await client.login(
+            username: username,
+            password: password,
             classificationId: 'AppAdmin');
+        // save key
+        box.put('apiKey', authenticate.apiKey);
+        await box.put('authenticate', jsonEncode(authenticate.toJson()));
+      } else {
+        // get authenticate
+        String? result = box.get('authenticate');
+        if (result != null) {
+          print("======777===========$result");
+          authenticate =
+              Authenticate.fromJson({'authenticate': jsonDecode(result)});
+        }
       }
-      // login for key
-      Authenticate authenticate = await client.login(
-          username: username, password: password, classificationId: 'AppAdmin');
-      // save key
-      box.put('apiKey', authenticate.apiKey);
     }
 
     // commands
@@ -177,14 +192,14 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         // talk to backend
-        final client = RestClient(await buildDioClient(null));
+        final client = RestClient(
+            await buildDioClient(null, timeout: Duration(seconds: 20)));
         try {
-          if (username.isNotEmpty && password.isNotEmpty) {
-            await login(client);
-          }
+          await login(client);
           // import
           for (String file in files) {
-            logger.i("Importing file: $file with user: $username");
+            logger.i("Importing file: $file with admin user: "
+                "${authenticate.user?.email}");
             FileType fileType = getFileType(file);
             String csvFile = File(file).readAsStringSync();
             switch (fileType) {

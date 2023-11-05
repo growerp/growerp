@@ -68,13 +68,19 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final bool sales;
   final FinDocType docType;
   final String journalId;
+  int start = 0;
 
   Future<void> _onFinDocFetch(
     FinDocFetch event,
     Emitter<FinDocState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
+    if (state.hasReachedMax) return;
+    if (state.status == FinDocStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.finDocs.length;
     }
     // start from record zero for initial and refresh
     try {
@@ -92,9 +98,11 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
 
       return emit(state.copyWith(
           status: FinDocStatus.success,
-          finDocs: result.finDocs,
+          finDocs: start == 0
+              ? result.finDocs
+              : (List.of(state.finDocs)..addAll(result.finDocs)),
           hasReachedMax: result.finDocs.length < _finDocLimit ? true : false,
-          searchString: event.searchString,
+          searchString: '',
           message: event.refresh ? '${docType}s reloaded' : null));
     } on DioException catch (e) {
       emit(state.copyWith(

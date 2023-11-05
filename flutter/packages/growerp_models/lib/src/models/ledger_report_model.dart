@@ -32,5 +32,5 @@ class LedgerReport with _$LedgerReport {
   }) = _LedgerReport;
 
   factory LedgerReport.fromJson(Map<String, dynamic> json) =>
-      _$LedgerReportFromJson(json);
+      _$LedgerReportFromJson(json['ledgerReport'] ?? json);
 }

@@ -259,6 +259,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!periods">
                 <return error="true" message="Period $periodName not found!" />
             </if>
+            <log message="============period: $periodName" />
             <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail"
                 list="postedBalanceSummary" limit="150">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -591,14 +592,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="search" />
         </in-parameters>
         <out-parameters>
-            <parameter name="ledgerJournalList" type="List">
-                <parameter name="journalId" />
-                <parameter name="journalName" />
-                <parameter name="isError" type="Boolean" />
-                <parameter name="postedDate" />
-                <parameter name="isPosted" type="Boolean" />
-            </parameter>
-            <parameter name="ledgerJournal" type="Map">
+            <parameter name="ledgerJournals" type="List">
                 <parameter name="journalId" />
                 <parameter name="journalName" />
                 <parameter name="isError" type="Boolean" />
@@ -613,7 +607,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="search" value="%$search%" />
             </if>
             <entity-find entity-name="mantle.ledger.transaction.GlJournal"
-                limit="limit" offset="start" list="ledgerJournals">
+                limit="limit" offset="start" list="ledgerJournalList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="glJournalId"
                     from="journalId" ignore-if-empty="true" />
@@ -625,10 +619,10 @@ along with this software (see the LICENSE.md file). If not, see
                         from="search" ignore-if-empty="true" />
                 </econditions>
             </entity-find>
-            <set field="ledgerJournalList" from="[]" />
-            <iterate list="ledgerJournals" entry="journal">
+            <set field="ledgerJournals" from="[]" />
+            <iterate list="ledgerJournalList" entry="journal">
                 <script>
-                    ledgerJournalList.add(
+                    ledgerJournals.add(
                         journalId: journal.glJournalId,
                         journalName: journal.glJournalName,
                         isError: journal.glJournalTypeEnumId == 'GLJRNL_ERROR'
@@ -639,10 +633,6 @@ along with this software (see the LICENSE.md file). If not, see
                         )
                 </script>
             </iterate>
-            <if condition="journalId">
-                <set field="ledgerJournal" from="ledgerJournalList[0]" />
-                <set field="ledgerJournalList" from="null" />
-            </if>
         </actions>
     </service>
 
@@ -678,6 +668,7 @@ along with this software (see the LICENSE.md file). If not, see
                 out-map="context" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
                 in-map="[journalId: glJournalId]" out-map="context" />
+            <set field="ledgerJournal" from="ledgerJournals" />
         </actions>
     </service>
 
@@ -704,7 +695,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
-                in-map="[journalId: ledgerJournal.journalId]" out-map="old" />
+                in-map="[journalId: ledgerJournal[0].journalId]" out-map="old" />
             <if condition="ledgerJournal.journalName != old.journalName">
                 <service-call name="update#mantle.ledger.transaction.GlJournal"
                     in-map="[
@@ -720,6 +711,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
                 in-map="[journalId: ledgerJournal.journalId]" out-map="context" />
+            <set field="ledgerJournal" from="ledgerJournals" />
         </actions>
     </service>
 

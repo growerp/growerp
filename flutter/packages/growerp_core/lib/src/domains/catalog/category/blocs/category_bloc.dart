@@ -53,10 +53,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     CategoryFetch event,
     Emitter<CategoryState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
-      return;
-    }
-    // start from record zero for initial and refresh
     try {
       emit(state.copyWith(status: CategoryStatus.loading));
 

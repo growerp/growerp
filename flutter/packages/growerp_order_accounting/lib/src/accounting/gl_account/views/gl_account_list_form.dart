@@ -24,9 +24,9 @@ class GlAccountListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) => GlAccountBloc(AccountingAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const GlAccountFetch()),
+      create: (BuildContext context) =>
+          GlAccountBloc(context.read<RestClient>())
+            ..add(const GlAccountFetch()),
       child: const GlAccountList());
 }
 
