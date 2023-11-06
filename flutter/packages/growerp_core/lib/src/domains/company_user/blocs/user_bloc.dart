@@ -13,15 +13,12 @@
  */
 
 import 'dart:async';
-//import 'dart:html';
+import 'package:dio/dio.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
-import 'package:equatable/equatable.dart';
-
-import '../../../domains/domains.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -41,122 +38,91 @@ EventTransformer<E> userDroppable<E>(Duration duration) {
 
 class UserBloc extends Bloc<UserEvent, UserState>
     with LeadBloc, CustomerBloc, EmployeeBloc, SupplierBloc {
-  UserBloc(this.repos, this.role) : super(const UserState()) {
+  UserBloc(this.restClient, this.role) : super(const UserState()) {
     on<UserFetch>(_onUserFetch,
         transformer: userDroppable(const Duration(milliseconds: 100)));
     on<UserUpdate>(_onUserUpdate);
     on<UserDelete>(_onUserDelete);
   }
 
-  final CompanyUserAPIRepository repos;
+  final RestClient restClient;
   final Role? role;
+  int start = 0;
 
   Future<void> _onUserFetch(
     UserFetch event,
     Emitter<UserState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
-    // start from record zero for initial and refresh
-    if (state.status == UserStatus.initial || event.refresh) {
-      emit(state.copyWith(status: UserStatus.loading));
-      ApiResult<List<User>> compResult = await repos.getUser(
-          start: 0,
-          limit: _userLimit,
-          role: role,
-          searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: UserStatus.success,
-                users: data,
-                hasReachedMax: data.length < _userLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    if (state.status == UserStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.users.length;
     }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      emit(state.copyWith(status: UserStatus.loading));
-      ApiResult<List<User>> compResult = await repos.getUser(
-          start: 0,
-          limit: _userLimit,
-          role: role,
-          searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: UserStatus.success,
-                users: data,
-                hasReachedMax: data.length < _userLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-      // get next page also for search
+    try {
+      // start from record zero for initial and refresh
+      if (state.status == UserStatus.initial || event.refresh) {
+        emit(state.copyWith(status: UserStatus.loading));
+        Users compResult = await restClient.getUser(
+            start: 0,
+            limit: event.limit,
+            role: role,
+            searchString: event.searchString);
+        return emit(state.copyWith(
+          status: UserStatus.success,
+          users: start == 0
+              ? compResult.users
+              : (List.of(state.users)..addAll(compResult.users)),
+          hasReachedMax: compResult.users.length < _userLimit ? true : false,
+          searchString: '',
+        ));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: UserStatus.failure, users: [], message: getDioError(e)));
     }
-    emit(state.copyWith(status: UserStatus.loading));
-    ApiResult<List<User>> compResult = await repos.getUser(
-        start: state.users.length,
-        limit: _userLimit,
-        role: role,
-        searchString: event.searchString);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: UserStatus.success,
-              users: List.of(state.users)..addAll(data),
-              hasReachedMax: data.length < _userLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: UserStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onUserUpdate(
     UserUpdate event,
     Emitter<UserState> emit,
   ) async {
-    emit(state.copyWith(status: UserStatus.loading));
-    List<User> users = List.from(state.users);
-    if (event.user.partyId != null) {
-      ApiResult<User> compResult = await repos.updateUser(event.user);
-      return emit(compResult.when(
-          success: (data) {
-            if (users.isNotEmpty) {
-              int index = users.indexWhere(
-                  (element) => element.partyId == event.user.partyId);
-              users[index] = data;
-            } else {
-              users.add(data);
-            }
-            return state.copyWith(
-                searchString: '',
-                status: UserStatus.success,
-                users: users,
-                message: 'user ${data.firstName} ${data.lastName} updated...');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult<User> compResult = await repos.createUser(event.user);
-      return emit(compResult.when(
-          success: (data) {
-            users.insert(0, data);
-            return state.copyWith(
-                searchString: '',
-                status: UserStatus.success,
-                users: users,
-                message: 'user ${data.firstName} ${data.lastName} added...');
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: UserStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: UserStatus.loading));
+      List<User> users = List.from(state.users);
+      if (event.user.partyId != null) {
+        User compResult = await restClient.updateUser(user: event.user);
+        if (users.isNotEmpty) {
+          int index = users
+              .indexWhere((element) => element.partyId == event.user.partyId);
+          users[index] = compResult;
+        } else {
+          users.add(compResult);
+        }
+        return emit(state.copyWith(
+            searchString: '',
+            status: UserStatus.success,
+            users: users,
+            message:
+                'user ${compResult.firstName} ${compResult.lastName} updated...'));
+      } else {
+        // add
+        User compResult = await restClient.createUser(user: event.user);
+        users.insert(0, compResult);
+        return emit(state.copyWith(
+            searchString: '',
+            status: UserStatus.success,
+            users: users,
+            message:
+                'user ${compResult.firstName} ${compResult.lastName} added...'));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: UserStatus.failure, users: [], message: getDioError(e)));
     }
   }
 
@@ -164,22 +130,21 @@ class UserBloc extends Bloc<UserEvent, UserState>
     UserDelete event,
     Emitter<UserState> emit,
   ) async {
-    List<User> users = List.from(state.users);
-    ApiResult<User> compResult =
-        await repos.deleteUser(event.user.partyId!, false);
-    return emit(compResult.when(
-        success: (data) {
-          int index = users
-              .indexWhere((element) => element.partyId == event.user.partyId);
-          users.removeAt(index);
-          return state.copyWith(
-              searchString: '',
-              status: UserStatus.success,
-              users: users,
-              message: 'User ${event.user.firstName} is deleted now..');
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: UserStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<User> users = List.from(state.users);
+      await restClient.deleteUser(
+          partyId: event.user.partyId!, deleteCompanyToo: false);
+      int index =
+          users.indexWhere((element) => element.partyId == event.user.partyId);
+      users.removeAt(index);
+      return emit(state.copyWith(
+          searchString: '',
+          status: UserStatus.success,
+          users: users,
+          message: 'User ${event.user.firstName} is deleted now..'));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: UserStatus.failure, users: [], message: getDioError(e)));
+    }
   }
 }

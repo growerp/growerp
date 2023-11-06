@@ -30,11 +30,9 @@ class UserListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CompanyUserAPIRepository companyUserAPIRepository =
-        CompanyUserAPIRepository(
-            context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient restClient = context.read<RestClient>();
     Widget userList = RepositoryProvider.value(
-        value: companyUserAPIRepository,
+        value: restClient,
         child: UserList(
           key: key,
           role: role,
@@ -42,28 +40,28 @@ class UserListForm extends StatelessWidget {
     switch (role) {
       case Role.lead:
         return BlocProvider<LeadBloc>(
-            create: (context) => UserBloc(companyUserAPIRepository, role)
-              ..add(const UserFetch()),
+            create: (context) =>
+                UserBloc(restClient, role)..add(const UserFetch()),
             child: userList);
       case Role.customer:
         return BlocProvider<CustomerBloc>(
-            create: (context) => UserBloc(companyUserAPIRepository, role)
-              ..add(const UserFetch()),
+            create: (context) =>
+                UserBloc(restClient, role)..add(const UserFetch()),
             child: userList);
       case Role.supplier:
         return BlocProvider<SupplierBloc>(
-            create: (context) => UserBloc(companyUserAPIRepository, role)
-              ..add(const UserFetch()),
+            create: (context) =>
+                UserBloc(restClient, role)..add(const UserFetch()),
             child: userList);
       case Role.company:
         return BlocProvider<EmployeeBloc>(
-            create: (context) => UserBloc(companyUserAPIRepository, role)
-              ..add(const UserFetch()),
+            create: (context) =>
+                UserBloc(restClient, role)..add(const UserFetch()),
             child: userList);
       default:
         return BlocProvider<UserBloc>(
-            create: (context) => UserBloc(companyUserAPIRepository, role)
-              ..add(const UserFetch()),
+            create: (context) =>
+                UserBloc(restClient, role)..add(const UserFetch()),
             child: userList);
     }
   }
@@ -82,7 +80,7 @@ class UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
-  late CompanyUserAPIRepository repos;
+  late RestClient repos;
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
@@ -94,7 +92,7 @@ class UserListState extends State<UserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    repos = context.read<CompanyUserAPIRepository>();
+    repos = context.read<RestClient>();
     switch (widget.role) {
       case Role.company:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;

@@ -68,10 +68,8 @@ class FinDocDialog extends StatelessWidget {
                 restClient: restClient)
               ..add(CartFetch(finDoc))),
         BlocProvider<UserBloc>(
-            create: (context) => UserBloc(
-                CompanyUserAPIRepository(
-                    context.read<AuthBloc>().state.authenticate!.apiKey!),
-                Role.customer)),
+            create: (context) =>
+                UserBloc(context.read<RestClient>(), Role.customer)),
         BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(
                 context.read<RestClient>(), context.read<String>())),
@@ -88,10 +86,8 @@ class FinDocDialog extends StatelessWidget {
               restClient: restClient)
             ..add(CartFetch(finDoc))),
       BlocProvider<UserBloc>(
-          create: (context) => UserBloc(
-              CompanyUserAPIRepository(
-                  context.read<AuthBloc>().state.authenticate!.apiKey!),
-              Role.supplier)),
+          create: (context) =>
+              UserBloc(context.read<RestClient>(), Role.supplier)),
       BlocProvider<ProductBloc>(
           create: (context) =>
               ProductBloc(context.read<RestClient>(), context.read<String>())),

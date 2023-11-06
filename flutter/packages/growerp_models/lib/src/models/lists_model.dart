@@ -174,3 +174,46 @@ class AccountTypes with _$AccountTypes {
   factory AccountTypes.fromJson(Map<String, dynamic> json) =>
       _$AccountTypesFromJson(json);
 }
+
+@freezed
+class ChatRooms with _$ChatRooms {
+  factory ChatRooms({
+    @Default(const []) List<ChatRoom> chatRooms,
+  }) = _ChatRooms;
+  ChatRooms._();
+
+  factory ChatRooms.fromJson(Map<String, dynamic> json) =>
+      _$ChatRoomsFromJson(json);
+}
+
+@freezed
+class ChatMessages with _$ChatMessages {
+  factory ChatMessages({
+    @Default(const []) List<ChatMessage> chatMessages,
+  }) = _ChatMessages;
+  ChatMessages._();
+
+  factory ChatMessages.fromJson(Map<String, dynamic> json) =>
+      _$ChatMessagesFromJson(json);
+}
+
+@freezed
+class Tasks with _$Tasks {
+  factory Tasks({
+    @Default(const []) List<Task> tasks,
+  }) = _Tasks;
+  Tasks._();
+
+  factory Tasks.fromJson(Map<String, dynamic> json) => _$TasksFromJson(json);
+}
+
+@freezed
+class Opportunities with _$Opportunities {
+  factory Opportunities({
+    @Default(const []) List<Opportunity> opportunities,
+  }) = _Opportunities;
+  Opportunities._();
+
+  factory Opportunities.fromJson(Map<String, dynamic> json) =>
+      _$OpportunitiesFromJson(json);
+}

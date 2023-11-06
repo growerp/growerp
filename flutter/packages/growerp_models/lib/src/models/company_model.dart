@@ -31,7 +31,7 @@ class Company with _$Company {
   factory Company({
     String? partyId,
     String? pseudoId,
-    @RoleConverter() Role? role,
+    Role? role,
     String? name,
     String? email,
     String? telephoneNr,
@@ -45,7 +45,7 @@ class Company with _$Company {
   }) = _Company;
 
   factory Company.fromJson(Map<String, dynamic> json) =>
-      _$CompanyFromJson(json);
+      _$CompanyFromJson(json["company"] ?? json);
 
   @override
   String toString() => 'Company name: $name[$partyId] '

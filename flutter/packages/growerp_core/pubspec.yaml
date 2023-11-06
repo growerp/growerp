@@ -16,8 +16,6 @@ environment:
 dependencies:
   growerp_models:
     path: ../growerp_models
-  growerp_rest:
-    path: ../growerp_rest
   flutter: 
     sdk: flutter
   flutter_localizations: 

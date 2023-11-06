@@ -14,7 +14,6 @@
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -55,8 +54,6 @@ class AddressDialogState extends State<AddressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var repos = context.read<APIRepository>();
-
     return Dialog(
       key: const Key('AddressDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -70,11 +67,11 @@ class AddressDialogState extends State<AddressDialog> {
               : "Company Address #${address!.addressId}",
           height: 700,
           width: 350,
-          child: _editAddress(context, repos)),
+          child: _editAddress(context)),
     );
   }
 
-  Widget _editAddress(BuildContext context, repos) {
+  Widget _editAddress(BuildContext context) {
     return Form(
         key: _formKey,
         child: SingleChildScrollView(

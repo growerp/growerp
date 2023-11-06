@@ -30,11 +30,9 @@ class CompanyListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CompanyUserAPIRepository companyUserAPIRepository =
-        CompanyUserAPIRepository(
-            context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient restClient = context.read<RestClient>();
     Widget companyList = RepositoryProvider.value(
-        value: companyUserAPIRepository,
+        value: restClient,
         child: CompanyList(
           key: key,
           role: role,
@@ -44,28 +42,25 @@ class CompanyListForm extends StatelessWidget {
       case Role.lead:
         return BlocProvider<CompanyLeadBloc>(
             create: (context) => CompanyBloc(
-                  companyUserAPIRepository,
+                  restClient,
                   role,
                   authBloc,
                 )..add(const CompanyFetch()),
             child: companyList);
       case Role.customer:
         return BlocProvider<CompanyCustomerBloc>(
-            create: (context) =>
-                CompanyBloc(companyUserAPIRepository, role, authBloc)
-                  ..add(const CompanyFetch()),
+            create: (context) => CompanyBloc(restClient, role, authBloc)
+              ..add(const CompanyFetch()),
             child: companyList);
       case Role.supplier:
         return BlocProvider<CompanySupplierBloc>(
-            create: (context) =>
-                CompanyBloc(companyUserAPIRepository, role, authBloc)
-                  ..add(const CompanyFetch()),
+            create: (context) => CompanyBloc(restClient, role, authBloc)
+              ..add(const CompanyFetch()),
             child: companyList);
       default:
         return BlocProvider<CompanyBloc>(
-            create: (context) =>
-                CompanyBloc(companyUserAPIRepository, role, authBloc)
-                  ..add(const CompanyFetch()),
+            create: (context) => CompanyBloc(restClient, role, authBloc)
+              ..add(const CompanyFetch()),
             child: companyList);
     }
   }
@@ -84,7 +79,7 @@ class CompanyListState extends State<CompanyList> {
   final ScrollController _scrollController = ScrollController();
   final double _scrollThreshold = 200.0;
   late CompanyBloc _companyBloc;
-  late CompanyUserAPIRepository repos;
+  late RestClient repos;
   List<Company> companies = const <Company>[];
   bool showSearchField = false;
   String searchString = '';
@@ -96,7 +91,7 @@ class CompanyListState extends State<CompanyList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    repos = context.read<CompanyUserAPIRepository>();
+    repos = context.read<RestClient>();
     switch (widget.role) {
       case Role.supplier:
         _companyBloc = context.read<CompanySupplierBloc>() as CompanyBloc;

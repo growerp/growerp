@@ -31,5 +31,5 @@ class ChatMessage with _$ChatMessage {
   }) = _ChatMessage;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) =>
-      _$ChatMessageFromJson(json);
+      _$ChatMessageFromJson(json['chatMessage'] ?? json);
 }

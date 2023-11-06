@@ -56,10 +56,8 @@ class PaymentDialog extends StatelessWidget {
       return MultiBlocProvider(
           providers: [
             BlocProvider<UserBloc>(
-                create: (context) => UserBloc(
-                    CompanyUserAPIRepository(
-                        context.read<AuthBloc>().state.authenticate!.apiKey!),
-                    Role.customer)),
+                create: (context) =>
+                    UserBloc(context.read<RestClient>(), Role.customer)),
             BlocProvider<GlAccountBloc>(
                 create: (context) => GlAccountBloc(context.read<RestClient>())),
           ],
@@ -68,10 +66,8 @@ class PaymentDialog extends StatelessWidget {
     }
     return MultiBlocProvider(providers: [
       BlocProvider<UserBloc>(
-          create: (context) => UserBloc(
-              CompanyUserAPIRepository(
-                  context.read<AuthBloc>().state.authenticate!.apiKey!),
-              Role.supplier)),
+          create: (context) =>
+              UserBloc(context.read<RestClient>(), Role.supplier)),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));

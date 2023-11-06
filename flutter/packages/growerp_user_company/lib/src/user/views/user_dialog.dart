@@ -22,7 +22,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 
 import '../../company/views/views.dart';
 
@@ -31,8 +30,7 @@ class ShowUserDialog extends StatelessWidget {
   const ShowUserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    CompanyUserAPIRepository repos = CompanyUserAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient repos = context.read<RestClient>();
     return BlocProvider<UserBloc>(
         create: (context) => UserBloc(repos, Role.company),
         child: RepositoryProvider.value(value: repos, child: UserDialog(user)));
@@ -65,7 +63,7 @@ class UserDialogState extends State<UserDialog> {
   dynamic _pickImageError;
   String? _retrieveDataError;
   late User updatedUser;
-  late CompanyUserAPIRepository repos;
+  late RestClient repos;
   final ImagePicker _picker = ImagePicker();
   late UserBloc _userBloc;
   bool _isLoginDisabled = false;
@@ -99,7 +97,7 @@ class UserDialogState extends State<UserDialog> {
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
-    repos = context.read<CompanyUserAPIRepository>();
+    repos = context.read<RestClient>();
   }
 
   @override
@@ -236,11 +234,9 @@ class UserDialogState extends State<UserDialog> {
     }
 
     Future<List<Company>> getOwnedCompanies(filter) async {
-      ApiResult<List<Company>> result = await repos.getCompanies(
+      Companies result = await repos.getCompanies(
           filter: _companySearchBoxController.text, mainCompanies: false);
-      return result.when(
-          success: (data) => data,
-          failure: (_) => [Company(name: 'get data error!')]);
+      return result.companies;
     }
 
     List<Widget> widgets = [

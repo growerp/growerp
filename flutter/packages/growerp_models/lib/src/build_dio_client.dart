@@ -61,7 +61,7 @@ Future<Dio> buildDioClient(String? base,
     allowPostMethod: false,
   );
 
-  dio.interceptors.add(DioCacheInterceptor(options: customCacheOptions));
+  // dio.interceptors.add(DioCacheInterceptor(options: customCacheOptions));
 
   logger.i("accessing backend at ${dio.options.baseUrl}");
 

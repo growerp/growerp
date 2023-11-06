@@ -14,7 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:growerp_core/test_data.dart';
-import '../models/opportunity_model.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 List<Opportunity> opportunities = [
   Opportunity(

@@ -36,8 +36,7 @@ class ShowCompanyDialog extends StatelessWidget {
   const ShowCompanyDialog(this.company, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    CompanyUserAPIRepository repos = CompanyUserAPIRepository(
-        context.read<AuthBloc>().state.authenticate!.apiKey!);
+    RestClient repos = context.read<RestClient>();
     return BlocProvider<CompanyBloc>(
         create: (context) =>
             CompanyBloc(repos, company.role, context.read<AuthBloc>())

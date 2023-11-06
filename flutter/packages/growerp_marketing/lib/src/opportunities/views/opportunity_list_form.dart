@@ -15,9 +15,8 @@
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../marketing_api_repository.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../bloc/opportunity_bloc.dart';
-import '../models/opportunity_model.dart';
 import '../widgets/widgets.dart';
 import 'opportunity_dialog.dart';
 
@@ -26,9 +25,9 @@ class OpportunityListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) => OpportunityBloc(MarketingAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!))
-        ..add(const OpportunityFetch()),
+      create: (BuildContext context) =>
+          OpportunityBloc(context.read<RestClient>())
+            ..add(const OpportunityFetch()),
       child: const OpportunityList());
 }
 

@@ -25,7 +25,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
 import 'package:growerp_select_dialog/growerp_select_dialog.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
+
 import '../../../growerp_website.dart';
 
 class WebsiteForm extends StatelessWidget {
@@ -33,8 +33,7 @@ class WebsiteForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RepositoryProvider(
-      create: (context) => WebsiteAPIRepository(
-          context.read<AuthBloc>().state.authenticate!.apiKey!),
+      create: (context) => context.read<RestClient>(),
       child: MultiBlocProvider(providers: [
         BlocProvider<WebsiteBloc>(
           create: (BuildContext context) =>
@@ -53,7 +52,7 @@ class WebsitePage extends StatefulWidget {
 class WebsiteFormState extends State<WebsitePage> {
   late WebsiteBloc _websiteBloc;
   late RestClient restClient;
-  late WebsiteAPIRepository _websiteProvider;
+  late RestClient _restClient;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
   final _urlController = TextEditingController();
@@ -69,7 +68,7 @@ class WebsiteFormState extends State<WebsitePage> {
   void initState() {
     super.initState();
     _websiteBloc = context.read<WebsiteBloc>();
-    _websiteProvider = context.read<WebsiteAPIRepository>();
+    _restClient = context.read<RestClient>();
   }
 
   @override
@@ -257,11 +256,8 @@ class WebsiteFormState extends State<WebsitePage> {
       });
 
       Future<List<Product>> getProduct(String filter) async {
-        ApiResult<List<Product>> result =
-            await _websiteProvider.lookUpProduct(searchString: filter);
-        return result.when(
-            success: (data) => data,
-            failure: (_) => [Product(productName: 'get data error!')]);
+        Products result = await _restClient.getProduct(searchString: filter);
+        return result.products;
       }
 
       productWidgets.add(IconButton(
@@ -343,11 +339,8 @@ class WebsiteFormState extends State<WebsitePage> {
     });
 
     Future<List<Category>> getCategory(String filter) async {
-      ApiResult<List<Category>> result =
-          await _websiteProvider.getCategory(searchString: filter);
-      return result.when(
-          success: (data) => data,
-          failure: (_) => [Category(categoryName: 'get data error!')]);
+      Categories result = await _restClient.getCategory(searchString: filter);
+      return result.categories;
     }
 
     browseCatButtons.add(IconButton(

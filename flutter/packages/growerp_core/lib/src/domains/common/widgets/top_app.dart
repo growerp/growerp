@@ -19,7 +19,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
@@ -30,7 +29,6 @@ class TopApp extends StatelessWidget {
     Key? key,
     required this.restClient,
     required this.classificationId,
-    required this.dbServer,
     required this.chatServer,
     this.title = '',
     required this.router,
@@ -41,7 +39,7 @@ class TopApp extends StatelessWidget {
 
   final RestClient restClient;
   final String classificationId;
-  final APIRepository dbServer;
+
   final ChatServer chatServer;
   final String title;
   final Route<dynamic> Function(RouteSettings) router;
@@ -61,7 +59,6 @@ class TopApp extends StatelessWidget {
     return MultiRepositoryProvider(
         providers: [
           RepositoryProvider(create: (context) => restClient),
-          RepositoryProvider(create: (context) => dbServer),
           RepositoryProvider(create: (context) => chatServer),
           RepositoryProvider(create: (context) => classificationId),
         ],
@@ -71,17 +68,19 @@ class TopApp extends StatelessWidget {
                 BlocProvider<ThemeBloc>(
                     create: (context) => ThemeBloc()..add(ThemeSwitch())),
               BlocProvider<AuthBloc>(
-                  create: (context) => AuthBloc(
-                      dbServer, chatServer, restClient, classificationId)
-                    ..add(AuthLoad())),
+                  create: (context) =>
+                      AuthBloc(chatServer, restClient, classificationId)
+                        ..add(AuthLoad())),
               BlocProvider<ChatRoomBloc>(
-                create: (context) =>
-                    ChatRoomBloc(dbServer, chatServer, context.read<AuthBloc>())
-                      ..add(ChatRoomFetch()),
+                create: (context) => ChatRoomBloc(context.read<RestClient>(),
+                    chatServer, context.read<AuthBloc>())
+                  ..add(ChatRoomFetch()),
               ),
               BlocProvider<ChatMessageBloc>(
                   create: (context) => ChatMessageBloc(
-                      dbServer, chatServer, context.read<AuthBloc>())),
+                      context.read<RestClient>(),
+                      chatServer,
+                      context.read<AuthBloc>())),
             ],
             child: Builder(builder: (context) {
               return MultiBlocProvider(

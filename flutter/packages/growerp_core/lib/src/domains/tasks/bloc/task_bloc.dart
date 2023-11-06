@@ -13,14 +13,12 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
-
-import '../../../api_repository.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
@@ -34,7 +32,7 @@ EventTransformer<E> taskDroppable<E>(Duration duration) {
 }
 
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
-  TaskBloc(this.repos) : super(const TaskState()) {
+  TaskBloc(this.restClient) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
     on<TaskUpdate>(_onTaskUpdate);
@@ -42,89 +40,63 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<TaskTimeEntryDelete>(_onTimeEntryDelete);
   }
 
-  final APIRepository repos;
+  final RestClient restClient;
+  int start = 0;
+
   Future<void> _onTaskFetch(
     TaskFetch event,
     Emitter<TaskState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
-    // start from record zero for initial and refresh
-    if (state.status == TaskStatus.initial || event.refresh) {
-      ApiResult<List<Task>> compResult =
-          await repos.getTask(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: TaskStatus.success,
-                tasks: data,
-                hasReachedMax: data.length < _taskLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    if (state.status == TaskStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.tasks.length;
     }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List<Task>> compResult =
-          await repos.getTask(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: TaskStatus.success,
-                tasks: data,
-                hasReachedMax: data.length < _taskLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      emit(state.copyWith(status: TaskStatus.loading));
+      Tasks compResult = await restClient.getTask(
+          start: start, searchString: event.searchString, limit: event.limit);
+      return emit(state.copyWith(
+        status: TaskStatus.success,
+        tasks: start == 0
+            ? compResult.tasks
+            : (List.of(state.tasks)..addAll(compResult.tasks)),
+        hasReachedMax: compResult.tasks.length < _taskLimit ? true : false,
+        searchString: '',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
     }
-    // get next page also for search
-
-    ApiResult<List<Task>> compResult =
-        await repos.getTask(searchString: event.searchString);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: TaskStatus.success,
-              tasks: List.of(state.tasks)..addAll(data),
-              hasReachedMax: data.length < _taskLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: TaskStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onTaskUpdate(
     TaskUpdate event,
     Emitter<TaskState> emit,
   ) async {
-    List<Task> tasks = List.from(state.tasks);
-    if (event.task.taskId != null) {
-      ApiResult<Task> compResult = await repos.updateTask(event.task);
-      return emit(compResult.when(
-          success: (data) {
-            int index = tasks
-                .indexWhere((element) => element.taskId == event.task.taskId);
-            tasks[index] = data;
-            return state.copyWith(status: TaskStatus.success, tasks: tasks);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult<Task> compResult = await repos.createTask(event.task);
-      return emit(compResult.when(
-          success: (data) {
-            tasks.insert(0, data);
-            return state.copyWith(status: TaskStatus.success, tasks: tasks);
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: TaskStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<Task> tasks = List.from(state.tasks);
+      emit(state.copyWith(status: TaskStatus.loading));
+      if (event.task.taskId != null) {
+        Task compResult = await restClient.updateTask(task: event.task);
+        int index =
+            tasks.indexWhere((element) => element.taskId == event.task.taskId);
+        tasks[index] = compResult;
+        return emit(state.copyWith(status: TaskStatus.success, tasks: tasks));
+      } else {
+        // add
+        Task compResult = await restClient.createTask(task: event.task);
+        tasks.insert(0, compResult);
+        return emit(state.copyWith(status: TaskStatus.success, tasks: tasks));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
     }
   }
 
@@ -132,53 +104,53 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     TaskTimeEntryUpdate event,
     Emitter<TaskState> emit,
   ) async {
-    ApiResult<TimeEntry> compResult;
-    if (event.timeEntry.timeEntryId != null) {
-      compResult = await repos.updateTimeEntry(event.timeEntry);
-    } else {
-      compResult = await repos.createTimeEntry(event.timeEntry);
-    }
+    try {
+      TimeEntry compResult;
+      if (event.timeEntry.timeEntryId != null) {
+        compResult =
+            await restClient.updateTimeEntry(timeEntry: event.timeEntry);
+      } else {
+        compResult =
+            await restClient.createTimeEntry(timeEntry: event.timeEntry);
+      }
+      List<Task> tasks = List.from(state.tasks);
+      int index =
+          tasks.indexWhere((element) => element.taskId == compResult.taskId);
+      if (event.timeEntry.timeEntryId == null) {
+        tasks[index].timeEntries.add(compResult);
+      } else {
+        int indexTe = tasks[index].timeEntries.indexWhere(
+            (element) => element.timeEntryId == compResult.timeEntryId);
+        tasks[index].timeEntries[indexTe] = compResult;
+      }
 
-    emit(compResult.when(
-        success: (data) {
-          List<Task> tasks = List.from(state.tasks);
-          int index =
-              tasks.indexWhere((element) => element.taskId == data.taskId);
-          if (event.timeEntry.timeEntryId == null) {
-            tasks[index].timeEntries.add(data);
-          } else {
-            int indexTe = tasks[index].timeEntries.indexWhere(
-                (element) => element.timeEntryId == data.timeEntryId);
-            tasks[index].timeEntries[indexTe] = data;
-          }
-          return state.copyWith(tasks: tasks);
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: TaskStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+      emit(state.copyWith(tasks: tasks));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+    }
   }
 
   Future<void> _onTimeEntryDelete(
     TaskTimeEntryDelete event,
     Emitter<TaskState> emit,
   ) async {
-    ApiResult<TimeEntry> teApiResult =
-        await repos.deleteTimeEntry(event.timeEntry);
+    try {
+      TimeEntry teApiResult =
+          await restClient.deleteTimeEntry(timeEntry: event.timeEntry);
+      List<Task> tasks = List.from(state.tasks);
+      int index =
+          tasks.indexWhere((element) => element.taskId == teApiResult.taskId);
+      tasks[index].timeEntries.removeWhere(
+          (element) => element.timeEntryId == teApiResult.timeEntryId);
 
-    emit(teApiResult.when(
-        success: (data) {
-          List<Task> tasks = List.from(state.tasks);
-          int index =
-              tasks.indexWhere((element) => element.taskId == data.taskId);
-          tasks[index].timeEntries.removeWhere(
-              (element) => element.timeEntryId == data.timeEntryId);
-          return state.copyWith(
-            status: TaskStatus.success,
-            tasks: tasks,
-          );
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: TaskStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+      emit(state.copyWith(
+        status: TaskStatus.success,
+        tasks: tasks,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+    }
   }
 }

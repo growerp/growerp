@@ -20,7 +20,6 @@ import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
 
-import '../../../api_repository.dart';
 import '../../../services/chat_server.dart';
 import '../../common/functions/functions.dart';
 
@@ -33,7 +32,7 @@ part 'auth_state.dart';
 /// keeps the token and apiKey in the [Authenticate] class.
 ///
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this.repos, this.chat, this.restClient, this.classificationId)
+  AuthBloc(this.chat, this.restClient, this.classificationId)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
     on<AuthMessage>(_onAuthMessage);
@@ -45,9 +44,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthChangePassword>(_onAuthChangePassword);
   }
 
-  final APIRepository repos;
-  final ChatServer chat;
   final RestClient restClient;
+  final ChatServer chat;
   final String classificationId;
 
   void _onAuthMessage(
@@ -88,8 +86,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               authenticate: defaultAuthenticate));
         }
         // test apiKey and get Authenticate
-        repos.setApiKey(
-            localAuthenticate.apiKey!, localAuthenticate.moquiSessionToken!);
         Authenticate authResult = await restClient.getAuthenticate(
             classificationId: classificationId);
         // Api key invalid or not present: UnAuthenticated
@@ -100,8 +96,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(
             status: AuthStatus.authenticated, authenticate: authResult));
         await PersistFunctions.persistAuthenticate(state.authenticate!);
-        repos.setApiKey(state.authenticate!.apiKey!,
-            state.authenticate!.moquiSessionToken!);
         chat.connect(
             state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
       } else {
@@ -125,7 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      Authenticate authenticate = await restClient.register(
+      Authenticate authenticate = await restClient.registerCompanyAdmin(
         emailAddress: event.user.email!,
         companyName: event.user.company!.name!,
         currencyId: event.currencyId,
@@ -152,7 +146,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthRegisterUserEcommerce event,
     Emitter<AuthState> emit,
   ) async {
-    ApiResult<List<User>> apiResult = await repos.registerUser(
+    ApiResult<List<User>> apiResult = await restClient.registerUser(
         event.user.copyWith(userGroup: UserGroup.customer),
         state.authenticate!.company!.partyId!);
     emit(apiResult.when(
@@ -210,8 +204,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             status: AuthStatus.authenticated,
             authenticate: authenticate,
             message: 'You are logged in now...'));
-        repos.setApiKey(state.authenticate!.apiKey!,
-            state.authenticate!.moquiSessionToken!);
         PersistFunctions.persistAuthenticate(state.authenticate!);
         chat.connect(
             state.authenticate!.apiKey!, state.authenticate!.user!.userId!);
@@ -259,8 +251,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           authenticate: result,
           message:
               'password successfully changed for user: ${event.username}'));
-      repos.setApiKey(
-          state.authenticate!.apiKey!, state.authenticate!.moquiSessionToken!);
       PersistFunctions.persistAuthenticate(state.authenticate!);
       chat.connect(
           state.authenticate!.apiKey!, state.authenticate!.user!.userId!);

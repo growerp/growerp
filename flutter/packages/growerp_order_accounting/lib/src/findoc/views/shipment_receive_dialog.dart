@@ -30,7 +30,7 @@ class ShipmentReceiveDialog extends StatefulWidget {
 }
 
 class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
-  late APIRepository repos;
+  late RestClient repos;
   late bool isPhone;
   final List<TextEditingController> _locationSearchBoxControllers = [];
   final List<TextEditingController> _newLocationControllers = [];
@@ -41,7 +41,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
   @override
   void initState() {
     super.initState();
-    repos = context.read<APIRepository>();
+    repos = context.read<RestClient>();
     for (var _ in widget.finDoc.items) {
       _locationSearchBoxControllers.add(TextEditingController());
       _newLocationControllers.add(TextEditingController());

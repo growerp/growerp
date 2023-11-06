@@ -8,6 +8,8 @@ import 'package:growerp_core/test_data.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'package:growerp_marketing/src/opportunities/integration_test/data.dart';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 

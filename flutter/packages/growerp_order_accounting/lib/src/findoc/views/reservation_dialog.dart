@@ -31,10 +31,8 @@ class ReservationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(
-            CompanyUserAPIRepository(
-                context.read<AuthBloc>().state.authenticate!.apiKey!),
-            Role.customer),
+        create: (context) =>
+            UserBloc(context.read<RestClient>(), Role.customer),
         child: BlocProvider<ProductBloc>(
             create: (context) =>
                 ProductBloc(context.read<RestClient>(), context.read<String>()),

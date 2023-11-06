@@ -36,5 +36,5 @@ class Opportunity with _$Opportunity {
   }) = _Opportunity;
 
   factory Opportunity.fromJson(Map<String, dynamic> json) =>
-      _$OpportunityFromJson(json);
+      _$OpportunityFromJson(json['opportunity'] ?? json);
 }

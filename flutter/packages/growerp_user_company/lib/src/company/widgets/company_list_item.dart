@@ -36,7 +36,7 @@ class CompanyListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
+    RestClient repos = context.read<RestClient>();
     CompanyBloc companyBloc = context.read<CompanyBloc>();
     return ListTile(
         leading: CircleAvatar(

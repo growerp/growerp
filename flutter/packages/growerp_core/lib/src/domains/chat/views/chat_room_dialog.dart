@@ -13,7 +13,7 @@
  */
 
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
+
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +21,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domains.dart';
 import '../../common/functions/helper_functions.dart';
-import '../../../api_repository.dart';
 
 class ChatRoomDialog extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -50,7 +49,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    var repos = context.read<APIRepository>();
+    var repos = context.read<RestClient>();
     return BlocConsumer<ChatRoomBloc, ChatRoomState>(
         listener: (context, state) {
       if (state.status == ChatRoomStatus.failure) {
@@ -120,11 +119,9 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                         InputDecoration(labelText: 'Chat partner')),
                 itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
-                  ApiResult<List<User>> result = await repos.lookUpUser(
+                  Users result = await repos.lookUpUser(
                       filter: _chatRoomSearchBoxController.text);
-                  return result.when(
-                      success: (data) => data,
-                      failure: (_) => [User(lastName: 'get data error!')]);
+                  return result.users;
                 },
                 validator: (value) =>
                     _nameController.text.isEmpty && value == null

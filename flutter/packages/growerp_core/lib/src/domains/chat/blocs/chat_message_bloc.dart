@@ -14,15 +14,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:stream_transform/stream_transform.dart';
 import '../../authenticate/blocs/auth_bloc.dart';
 import '../../../services/chat_server.dart';
-import '../../../api_repository.dart';
 
 part 'chat_message_event.dart';
 part 'chat_message_state.dart';
@@ -36,7 +35,7 @@ EventTransformer<E> chatMessageDroppable<E>(Duration duration) {
 }
 
 class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
-  ChatMessageBloc(this.repos, this.chatServer, this.authBloc)
+  ChatMessageBloc(this.restClient, this.chatServer, this.authBloc)
       : super(const ChatMessageState()) {
     on<ChatMessageFetch>(_onChatMessageFetch,
         transformer: chatMessageDroppable(const Duration(milliseconds: 100)));
@@ -44,9 +43,10 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     on<ChatMessageSendWs>(_onChatMessageSendWs);
   }
 
-  final APIRepository repos;
+  final RestClient restClient;
   final ChatServer chatServer;
   final AuthBloc authBloc;
+  int start = 0;
 
   Future<void> _onChatMessageFetch(
     ChatMessageFetch event,
@@ -61,51 +61,32 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       final subscription = myStream.listen((data) =>
           add(ChatMessageReceiveWs(WsChatMessage.fromJson(jsonDecode(data)))));
     }
-    // start from record zero for initial and refresh
-    if (state.status == ChatMessageStatus.initial || event.refresh) {
-      ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
+    try {
+      // start from record zero for initial and refresh
+      if (state.status == ChatMessageStatus.initial ||
+          event.refresh ||
+          event.searchString != '') {
+        start = 0;
+      } else {
+        start = state.chatMessages.length;
+      }
+      ChatMessages compResult = await restClient.getChatMessages(
           chatRoomId: event.chatRoomId, searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: ChatMessageStatus.success,
-                chatMessages: data,
-                hasReachedMax: data.length < _chatMessageLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: ChatMessageStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+      return emit(state.copyWith(
+        status: ChatMessageStatus.success,
+        chatMessages: start == 0
+            ? compResult.chatMessages
+            : (List.of(state.chatMessages)..addAll(compResult.chatMessages)),
+        hasReachedMax:
+            compResult.chatMessages.length < _chatMessageLimit ? true : false,
+        searchString: '',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: ChatMessageStatus.failure,
+          chatMessages: [],
+          message: getDioError(e)));
     }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
-          chatRoomId: event.chatRoomId, searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: ChatMessageStatus.success,
-                chatMessages: data,
-                hasReachedMax: data.length < _chatMessageLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: ChatMessageStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    }
-    // get next page also for search
-
-    ApiResult<List<ChatMessage>> compResult = await repos.getChatMessages(
-        chatRoomId: event.chatRoomId, searchString: event.searchString);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: ChatMessageStatus.success,
-              chatMessages: List.of(state.chatMessages)..addAll(data),
-              hasReachedMax: data.length < _chatMessageLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: ChatMessageStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onChatMessageReceiveWs(

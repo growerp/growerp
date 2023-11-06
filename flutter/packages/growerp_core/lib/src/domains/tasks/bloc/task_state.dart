@@ -14,7 +14,7 @@
 
 part of 'task_bloc.dart';
 
-enum TaskStatus { initial, success, failure }
+enum TaskStatus { initial, loading, success, failure }
 
 class TaskState extends Equatable {
   const TaskState({

@@ -1,4 +1,3 @@
-export 'src/api_repository.dart';
 export 'src/templates/templates.dart';
 export 'src/domains/common/functions/functions.dart';
 export 'src/domains/domains.dart';

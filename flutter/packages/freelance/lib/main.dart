@@ -76,7 +76,6 @@ Future main() async {
             ? '$databaseUrlDebug/'
             : null)),
     classificationId: 'AppFreelance',
-    dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP Freelance.',
     router: router.generateRoute,

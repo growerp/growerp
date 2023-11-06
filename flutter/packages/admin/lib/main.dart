@@ -77,7 +77,6 @@ Future main() async {
             ? '$databaseUrlDebug/'
             : null)),
     classificationId: 'AppAdmin',
-    dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP administrator.',
     router: router.generateRoute,

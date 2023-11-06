@@ -21,9 +21,11 @@ abstract class TaskEvent extends Equatable {
 }
 
 class TaskFetch extends TaskEvent {
-  const TaskFetch({this.searchString = '', this.refresh = false});
+  const TaskFetch(
+      {this.limit = 20, this.searchString = '', this.refresh = false});
   final String searchString;
   final bool refresh;
+  final int limit;
   @override
   List<Object> get props => [searchString, refresh];
 }

@@ -31,7 +31,6 @@ Future main() async {
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
     classificationId: 'AppAdmin',
-    dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP Catalog.',
     router: generateRoute,

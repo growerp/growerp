@@ -14,7 +14,6 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../models/opportunity_model.dart';
 
 part 'marketing_test_model.freezed.dart';
 part 'marketing_test_model.g.dart';

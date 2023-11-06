@@ -101,7 +101,7 @@ Future<void> main(List<String> args) async {
         Map result = await client.checkEmail(email: username);
         if (result['ok'] == false) {
           // no so register new
-          await client.register(
+          await client.registerCompanyAdmin(
               emailAddress: username,
               companyEmailAddress: 'q$username',
               newPassword: password,

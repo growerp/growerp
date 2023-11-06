@@ -26,7 +26,7 @@ scripts:
       dependsOn: build_runner     
   buildclean:
     description: build_runner clean.
-    run: "flutter pub run build_runner clean"
+    run: "flutter clean && flutter pub run build_runner clean"
     exec:
       concurrency: 1
       orderDependents: true

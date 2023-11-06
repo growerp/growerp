@@ -82,7 +82,6 @@ Future main() async {
             ? '$databaseUrlDebug/'
             : null)),
     classificationId: 'AppHotel',
-    dbServer: APIRepository(),
     chatServer: ChatServer(),
     title: 'GrowERP Hotel.',
     router: router.generateRoute,

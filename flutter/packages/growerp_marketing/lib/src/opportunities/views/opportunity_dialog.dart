@@ -20,7 +20,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../models/models.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityDialog extends StatelessWidget {
@@ -31,15 +30,11 @@ class OpportunityDialog extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<LeadBloc>(
-            create: (BuildContext context) => UserBloc(
-                CompanyUserAPIRepository(
-                    context.read<AuthBloc>().state.authenticate!.apiKey!),
-                Role.lead)),
+            create: (BuildContext context) =>
+                UserBloc(context.read<RestClient>(), Role.lead)),
         BlocProvider<EmployeeBloc>(
-            create: (BuildContext context) => UserBloc(
-                CompanyUserAPIRepository(
-                    context.read<AuthBloc>().state.authenticate!.apiKey!),
-                Role.company)),
+            create: (BuildContext context) =>
+                UserBloc(context.read<RestClient>(), Role.company)),
       ],
       child: OpportunityDialogFull(opportunity),
     );

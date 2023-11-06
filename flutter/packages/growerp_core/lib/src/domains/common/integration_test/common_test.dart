@@ -50,7 +50,6 @@ class CommonTest {
     runApp(TopApp(
       classificationId: 'AppAdmin',
       restClient: RestClient(await buildDioClient(null)),
-      dbServer: APIRepository(),
       chatServer: ChatServer(),
       router: router,
       title: title,
@@ -59,7 +58,7 @@ class CommonTest {
       blocProviders: blocProviders ?? [],
     ));
     await tester.pump(const Duration());
-    await tester.pumpAndSettle(Duration(seconds: waitTime));
+    await tester.pumpAndSettle(const Duration(seconds: waitTime));
   }
 
   static Future<void> createCompanyAndAdmin(WidgetTester tester,
@@ -174,7 +173,7 @@ class CommonTest {
       } else {
         await tapByKey(tester, "tap$formName");
       }
-      await tester.pumpAndSettle(Duration(seconds: waitTime));
+      await tester.pumpAndSettle(const Duration(seconds: waitTime));
     }
     await checkWidgetKey(tester, formName);
   }
@@ -275,7 +274,7 @@ class CommonTest {
     if (hasKey('HomeFormAuth')) {
       debugPrint("Dashboard logged in , needs to logout");
       await tapByKey(tester, 'logoutButton');
-      await tester.pump(Duration(seconds: waitTime));
+      await tester.pump(const Duration(seconds: waitTime));
       expect(find.byKey(const Key('HomeFormUnAuth')), findsOneWidget);
     }
   }
@@ -375,8 +374,8 @@ class CommonTest {
       {int seconds = 1}) async {
     await tapByKey(tester, key); // open search dropdown
     await tester.enterText(find.byType(TextField).last, value);
-    await tester
-        .pumpAndSettle(Duration(seconds: waitTime)); // wait for search result
+    await tester.pumpAndSettle(
+        const Duration(seconds: waitTime)); // wait for search result
     await tester.tap(find.textContaining(" $value").first); // hidden char!
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
@@ -471,7 +470,7 @@ class CommonTest {
       if (isPhone()) {
         await tester.tap(find.byTooltip('Open navigation menu'));
         await tester.pump();
-        await tester.pumpAndSettle(Duration(seconds: waitTime));
+        await tester.pumpAndSettle(const Duration(seconds: waitTime));
       }
       await tapByKey(tester, menuOption);
     }

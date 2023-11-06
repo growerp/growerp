@@ -28,7 +28,6 @@ Future main() async {
   runApp(TopApp(
       restClient: RestClient(await buildDioClient(null)),
       classificationId: 'AppAdmin',
-      dbServer: APIRepository(),
       chatServer: ChatServer(),
       title: 'GrowERP package: growerp_inventory.',
       router: generateRoute,

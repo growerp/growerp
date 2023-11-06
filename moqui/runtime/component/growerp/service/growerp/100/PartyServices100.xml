@@ -237,11 +237,11 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- adjust role -->
             <if condition="role">
                 <set field="companyRole" from="role" />
-                <if condition="role == 'Lead'">
+                <if condition="role == 'lead'">
                     <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
                     <set field="companyRole" value="Customer" />
                 </if>
-                <if condition="role == 'Customer'">
+                <if condition="role == 'customer'">
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </if>
             </if>
@@ -270,7 +270,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="personEmail" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <econdition field-name="companyRole" ignore-if-empty="true" />
+                <econdition field-name="companyRole" ignore-if-empty="true" ignore-case="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econditions combine="or">
                     <econdition field-name="ownerDisabled" operator="equals"
@@ -480,10 +480,10 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
-            <if condition="company.role == 'Lead'">
+            <if condition="company.role == 'lead'">
                 <set field="company.role" value="Customer" />
                 <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                <else-if condition="company.role == 'Customer'">
+                <else-if condition="company.role == 'customer'">
                     <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
                 </else-if>
             </if>
@@ -687,12 +687,12 @@ along with this software (see the LICENSE.md file). If not, see
             <if
                 condition="oldValue.companies[0].role != 'OrgInternal' &amp;&amp; company.role != oldValue.companies[0].role">
                 <set field="newRole" from="company.role" />
-                <if condition="company.role == 'Lead'">
+                <if condition="company.role == 'lead'">
                     <set field="newRole" value="Customer" />
                     <service-call name="update#mantle.party.Party"
                         in-map="[partyId: company.partyId, customerStatusId: 'CUSTOMER_ASSIGNED']" />
                 </if>
-                <if condition="company.role == 'Customer'">
+                <if condition="company.role == 'customer'">
                     <service-call name="update#mantle.party.Party"
                         in-map="[partyId: company.partyId, customerStatusId: CUSTOMER_QUALIFIED]" />
                 </if>
@@ -964,6 +964,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="personToCompanyId" /><!-- used in update user for reassign of company -->
         </out-parameters>
         <actions>
+            <log message="=====incomin role: $role" />
             <if condition="filter != null">
                 <set field="filter" value="%${filter}%" />
             </if>
@@ -982,15 +983,18 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- adjust role -->
             <set field="companyRole" from="role" />
-            <if condition="role == 'Customer'">
+            <if condition="role == 'customer'">
                 <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
             </if>
-            <if condition="role == 'Lead'">
+            <if condition="role == 'lead'">
                 <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
                 <set field="companyRole" value="Customer" />
             </if>
-            <if condition="role == 'Unknown'">
+            <if condition="role == 'unknown'">
                 <set field="companyRole" from="null" />
+            </if>
+            <if condition="role == 'company'">
+                <set field="companyRole" value="OrgInternal" />
             </if>
             <!-- get records -->
             <entity-find offset="start" limit="limit" list="userInfos"
@@ -1021,7 +1025,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="emailAddress" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <econdition field-name="companyRole" ignore-if-empty="true" />
+                <econdition field-name="companyRole" ignore-if-empty="true" ignore-case="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econdition field-name="userGroupId" ignore-if-empty="true" />
                 <econditions combine="or">

@@ -55,7 +55,8 @@ class User with _$User {
   }) = _User;
   User._();
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory User.fromJson(Map<String, dynamic> json) =>
+      _$UserFromJson(json['user'] ?? json);
 
   @override
   String toString() => 'User $firstName $lastName [$partyId] sec: $userGroup '

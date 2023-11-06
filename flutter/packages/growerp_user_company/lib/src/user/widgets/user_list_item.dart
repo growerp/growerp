@@ -34,7 +34,7 @@ class UserListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CompanyUserAPIRepository repos = context.read<CompanyUserAPIRepository>();
+    RestClient repos = context.read<RestClient>();
     UserBloc userBloc = context.read<UserBloc>();
     return ListTile(
         leading: CircleAvatar(

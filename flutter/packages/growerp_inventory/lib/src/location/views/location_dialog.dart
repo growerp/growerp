@@ -40,7 +40,6 @@ class LocationDialogState extends State<LocationDialog> {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    var repos = context.read<APIRepository>();
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -71,14 +70,14 @@ class LocationDialogState extends State<LocationDialog> {
                 },
                 child: popUp(
                     context: context,
-                    child: _showForm(repos, isPhone),
+                    child: _showForm(isPhone),
                     title:
                         'Location Information #${location.locationId ?? "New"}',
                     height: 200,
                     width: 400))));
   }
 
-  Widget _showForm(repos, isPhone) {
+  Widget _showForm(isPhone) {
     return Center(
         child: Form(
             key: _formKey,

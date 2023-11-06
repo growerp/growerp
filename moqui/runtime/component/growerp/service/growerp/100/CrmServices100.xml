@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 This software is in the public domain under CC0 1.0 Universal plus a 
 Grant of Patent License.
@@ -12,134 +12,113 @@ You should have received a copy of the CC0 Public Domaicrn Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="get" noun="Opportunity">
         <in-parameters>
-            <parameter name="opportunityId"/>
-            <parameter name="start" type="Integer" default-value="0"/>
-            <parameter name="limit" type="Integer" default-value="20"/>
-            <parameter name="my" default-value="true" type="Boolean"/>
-            <parameter name="search" default="null"/>
+            <parameter name="opportunityId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="my" default-value="true" type="Boolean" />
+            <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
             <parameter name="opportunities" type="List">
                 <parameter name="opportunity" type="Map">
-                    <parameter name="opportunityId"/>
-                    <parameter name="lastUpdated"/>
-                    <parameter name="opportunityName"/>
-                    <parameter name="stageId"/>
-                    <parameter name="description"/>
-                    <parameter name="nextStep"/>
-                    <parameter name="estAmount"/>
-                    <parameter name="estProbability"/>
+                    <parameter name="opportunityId" />
+                    <parameter name="lastUpdated" />
+                    <parameter name="opportunityName" />
+                    <parameter name="stageId" />
+                    <parameter name="description" />
+                    <parameter name="nextStep" />
+                    <parameter name="estAmount" />
+                    <parameter name="estProbability" />
                     <parameter name="employeeUser" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="email"/>
-                        <parameter name="firstName"/>
-                        <parameter name="lastName"/>
-                        <parameter name="companyPartyId"/>
-                        <parameter name="companyName"/>
+                        <parameter name="partyId" />
+                        <parameter name="email" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                        <parameter name="companyPartyId" />
+                        <parameter name="companyName" />
                     </parameter>
                     <parameter name="employeeUser" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="email"/>
-                        <parameter name="firstName"/>
-                        <parameter name="lastName"/>
+                        <parameter name="partyId" />
+                        <parameter name="email" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
                         <parameter name="company" type="Map">
-                            <parameter name="partyId"/>
-                            <parameter name="name"/>
+                            <parameter name="partyId" />
+                            <parameter name="name" />
                         </parameter>
                     </parameter>
                     <parameter name="leadUser" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="email"/>
-                        <parameter name="firstName"/>
-                        <parameter name="lastName"/>
+                        <parameter name="partyId" />
+                        <parameter name="email" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
                         <parameter name="company" type="Map">
-                            <parameter name="partyId"/>
-                            <parameter name="name"/>
+                            <parameter name="partyId" />
+                            <parameter name="name" />
                         </parameter>
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="opportunity" type="Map">
-                <parameter name="opportunityId"/>
-                <parameter name="lastUpdated"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
-                <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
-                    <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
-                    </parameter>
-            </parameter>
-                <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
-                    <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
-                    </parameter>
-            </parameter>
-            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="my == true &amp;&amp; !opportunityId">
-                <set field="accountPartyId" from="ec.user.userAccount.partyId"/></if>
+                <set field="accntUserPartyId" from="ec.user.userAccount.partyId" />
+            </if>
             <if condition="search != null">
-                <set field="search" value="%${search}%"/></if>
+                <set field="search" value="%${search}%" />
+            </if>
             <if condition="!opportunityId">
-                <set field="notDisplayStatus" from="['Deleted']"/></if>
+                <set field="notDisplayStatus" from="['Deleted']" />
+            </if>
+            <log message="====company: $companyPartyId" />
             <entity-find list="opps" offset="start" limit="limit"
-                    entity-name="growerp.crm.OpportunityAndParties">
-                <econdition field-name="ownerPartyId" from="companyPartyId"/>
-                <econdition field-name="opportunityId" ignore-if-empty="true"/>
-                <econdition field-name="accountPartyId" ignore-if-empty="true"/>
+                entity-name="growerp.crm.OpportunityAndParties">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="opportunityId" ignore-if-empty="true" />
+                <econdition field-name="accntUserPartyId" ignore-if-empty="true" />
                 <econdition field-name="stageId" operator="not-in"
-                     from="notDisplayStatus" ignore-if-empty="true"/>
+                    from="notDisplayStatus" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="opportunityId" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="opportunityName" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
+                        operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="description" ignore-case="true"
-                        operator="like" from="search" ignore-if-empty="true"/>
-                    </econditions>
-                    <order-by field-name="lastUpdatedStamp"/>
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="lastUpdatedStamp" />
             </entity-find>
-            <if condition="!opportunityId">
-                <set field="opportunities" from="[]"/></if>
+            <set field="opportunities" from="[]" />
             <iterate list="opps" entry="opp">
-                <set field="company" from="[
+                <set field="company"
+                    from="[
                         partyId: opp.accntCompanyPartyId,
                         name: opp.accntCompanyName
-                        ]"/>
-                <set field="employeeUser" from="[partyId: opp.accntUserPartyId,
+                        ]" />
+                <set field="employeeUser"
+                    from="[partyId: opp.accntUserPartyId,
                         firstName: opp.accntFirstName,
                         lastName: opp.accntLastName,
-                        company: company]"/>
-                <set field="company" from="[
+                        company: company]" />
+                <set field="company"
+                    from="[
                         partyId: opp.leadCompanyPartyId,
                         name: opp.leadCompanyName
-                        ]"/>
-                <set field="leadUser" from="[partyId: opp.leadUserPartyId,
+                        ]" />
+                <set field="leadUser"
+                    from="[partyId: opp.leadUserPartyId,
                         firstName: opp.leadFirstName,
                         lastName: opp.leadLastName,
-                        company: company]"/>
-                <set field="opOut" from="[
+                        company: company]" />
+                <set field="opOut"
+                    from="[
                         opportunityId: opp.opportunityId,
                         lastUpdated: opp.lastUpdatedStamp
                             ? opp.lastUpdatedStamp.toString() + 'z'
@@ -151,12 +130,8 @@ along with this software (see the LICENSE.md file). If not, see
                         estAmount: opp.estAmount?.toString(),
                         estProbability: opp.estProbability.toString(),
                         employeeUser: employeeUser,
-                        leadUser: leadUser]"/>
-                <if condition="!opportunityId">
-                    <script>opportunities.add(opOut)</script>
-                    <else>
-                        <set field="opportunity" from="opOut"/>
-                    </else></if>
+                        leadUser: leadUser]" />
+                <script>opportunities.add(opOut)</script>
             </iterate>
         </actions>
     </service>
@@ -164,55 +139,55 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Create a Opportunity with a price in a category</description>
         <in-parameters>
             <parameter name="opportunity" type="Map" required="true">
-                <parameter name="opportunityId"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
+                <parameter name="opportunityId" />
+                <parameter name="opportunityName" />
+                <parameter name="stageId" />
+                <parameter name="description" />
+                <parameter name="nextStep" />
+                <parameter name="estAmount" />
+                <parameter name="estProbability" />
                 <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
+                    <parameter name="partyId" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
+                        <parameter name="partyId" />
                     </parameter>
                 </parameter>
                 <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
+                    <parameter name="partyId" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
+                        <parameter name="partyId" />
                     </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="opportunity" type="Map">
-                <parameter name="opportunityId"/>
-                <parameter name="lastUpdated"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
+                <parameter name="opportunityId" />
+                <parameter name="lastUpdated" />
+                <parameter name="opportunityName" />
+                <parameter name="stageId" />
+                <parameter name="description" />
+                <parameter name="nextStep" />
+                <parameter name="estAmount" />
+                <parameter name="estProbability" />
                 <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
                 <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
             </parameter>
@@ -221,11 +196,12 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!opportunity.stageId">
                 <entity-find list="stages"
                     entity-name="mantle.sales.opportunity.SalesOpportunityStage">
-                    <order-by field-name="sequenceNum"/></entity-find>
-                <set field="opportunity.stageId" from="stages[0].opportunityStageId"/>
+                    <order-by field-name="sequenceNum" />
+                </entity-find>
+                <set field="opportunity.stageId" from="stages[0].opportunityStageId" />
             </if>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="create#mantle.sales.opportunity.SalesOpportunity"
                 in-map="[estimatedAmount: opportunity.estAmount,
                         opportunityName: opportunity.opportunityName,
@@ -237,16 +213,20 @@ along with this software (see the LICENSE.md file). If not, see
                         accountPartyId: opportunity.employeeUser
                             ? opportunity.employeeUser.partyId
                             : ec.user.userAccount.partyId,
-                        ]" out-map="context"/>
+                        ]"
+                out-map="context" />
             <if condition="opportunity.leadUser">
-                <service-call 
+                <service-call
                     name="create#mantle.sales.opportunity.SalesOpportunityParty"
                     in-map="[salesOpportunityId: salesOpportunityId,
                         partyId: opportunity.leadUser.partyId,
                         roleTypeId: 'Customer',
-                        fromDate: ec.user.nowTimestamp]" out-map="context"/></if>
+                        fromDate: ec.user.nowTimestamp]"
+                    out-map="context" />
+            </if>
             <service-call name="growerp.100.CrmServices100.get#Opportunity"
-                in-map="[opportunityId: salesOpportunityId]" out-map="context"/>
+                in-map="[opportunityId: salesOpportunityId]" out-map="context" />
+            <set field="opportunity" from="opportunities[0]" />
         </actions>
     </service>
 
@@ -254,116 +234,131 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Update an existing Opportunity</description>
         <in-parameters>
             <parameter name="opportunity" type="Map" required="true">
-                <parameter name="opportunityId"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
+                <parameter name="opportunityId" />
+                <parameter name="opportunityName" />
+                <parameter name="stageId" />
+                <parameter name="description" />
+                <parameter name="nextStep" />
+                <parameter name="estAmount" />
+                <parameter name="estProbability" />
                 <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
+                    <parameter name="partyId" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
                 <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
+                    <parameter name="partyId" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="opportunity" type="Map">
-                <parameter name="opportunityId"/>
-                <parameter name="lastUpdated"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
+                <parameter name="opportunityId" />
+                <parameter name="lastUpdated" />
+                <parameter name="opportunityName" />
+                <parameter name="stageId" />
+                <parameter name="description" />
+                <parameter name="nextStep" />
+                <parameter name="estAmount" />
+                <parameter name="estProbability" />
                 <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
                 <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find list="opps" for-update="true" limit="1"
-                    entity-name="mantle.sales.opportunity.SalesOpportunity">
-                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
-            <set field="oldValue" from="opps[0]"/>
-            <if condition="!oldValue"><return error="true"
-                    message="opportunity ${opportunity?.opportunityId} not found!"/></if>
-            <set field="update" value="false"/>
+                entity-name="mantle.sales.opportunity.SalesOpportunity">
+                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <set field="oldValue" from="opps[0]" />
+            <if condition="!oldValue">
+                <return error="true"
+                    message="opportunity ${opportunity?.opportunityId} not found!" />
+            </if>
+            <set field="update" value="false" />
             <if condition="oldValue.opportunityName != opportunity.opportunityName">
-                <set field="oldValue.opportunityName" from="opportunity.opportunityName"/>
-                <set field="update" value="true"/></if>
+                <set field="oldValue.opportunityName" from="opportunity.opportunityName" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.estimatedAmount != new BigDecimal(opportunity.estAmount)">
-                <set field="oldValue.estimatedAmount" from="new BigDecimal(opportunity.estAmount)"/>
-                <set field="update" value="true"/></if>
-            <if condition="oldValue.estimatedProbability != new BigDecimal(opportunity.estProbability)">
-                <set field="oldValue.estimatedProbability" from="new BigDecimal(opportunity.estProbability)"/>
-                <set field="update" value="true"/></if>
+                <set field="oldValue.estimatedAmount" from="new BigDecimal(opportunity.estAmount)" />
+                <set field="update" value="true" />
+            </if>
+            <if
+                condition="oldValue.estimatedProbability != new BigDecimal(opportunity.estProbability)">
+                <set field="oldValue.estimatedProbability"
+                    from="new BigDecimal(opportunity.estProbability)" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.accountPartyId != opportunity.employeeUser?.partyId">
-                <set field="oldValue.accountPartyId" from="opportunity.employeeUser?.partyId"/>
-                <set field="update" value="true"/></if>
+                <set field="oldValue.accountPartyId" from="opportunity.employeeUser?.partyId" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.description != opportunity.description">
-                <set field="oldValue.description" from="opportunity.description"/>
-                <set field="update" value="true"/></if>
+                <set field="oldValue.description" from="opportunity.description" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.nextStep != opportunity.nextStep">
-                <set field="oldValue.nextStep" from="opportunity.nextStep"/>
-                <set field="update" value="true"/></if>
+                <set field="oldValue.nextStep" from="opportunity.nextStep" />
+                <set field="update" value="true" />
+            </if>
             <if condition="oldValue.opportunityStageId != opportunity.stageId">
-                <set field="oldValue.opportunityStageId" from="opportunity.stageId"/>
-                <set field="update" value="true"/></if>
-            <if condition="update == 'true'">                        
-                <entity-update value-field="oldValue"/></if>
+                <set field="oldValue.opportunityStageId" from="opportunity.stageId" />
+                <set field="update" value="true" />
+            </if>
+            <if condition="update == 'true'">
+                <entity-update value-field="oldValue" />
+            </if>
             <entity-find list="oldValues"
                 entity-name="mantle.sales.opportunity.SalesOpportunityParty" for-update="true">
-                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId"/>
-                <econdition field-name="roleTypeId" value="Customer"/>
-                <date-filter/></entity-find>
+                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId" />
+                <econdition field-name="roleTypeId" value="Customer" />
+                <date-filter />
+            </entity-find>
             <if condition="!oldValues &amp;&amp; opportunity.leadUser">
                 <service-call name="create#mantle.sales.opportunity.SalesOpportunityParty"
-                in-map="[salesOpportunityId: opportunity.opportunityId,
+                    in-map="[salesOpportunityId: opportunity.opportunityId,
                     partyId: opportunity.leadUser?.company.partyId,
                     roleTypeId: 'Customer',
-                    fromDate: ec.user.nowTimestamp]" out-map="context"/>
+                    fromDate: ec.user.nowTimestamp]"
+                    out-map="context" />
             </if>
             <if condition="oldValues">
                 <if condition="oldValues[0].partyId != opportunity.leadUser?.partyId">
-                    <set field="oldValues[0].thruDate" from="ec.user.nowTimestamp"/>
-                    <entity-update value-field="oldValues[0]"/>
+                    <set field="oldValues[0].thruDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="oldValues[0]" />
                     <service-call name="create#mantle.sales.opportunity.SalesOpportunityParty"
                         in-map="[salesOpportunityId: opportunity.opportunityId,
                             partyId: opportunity.leadUser?.partyId,
                             roleTypeId: 'Customer',
-                            fromDate: ec.user.nowTimestamp]"/>
+                            fromDate: ec.user.nowTimestamp]" />
                 </if>
                 <else>
                     <if condition="opportunity.leadUser">
@@ -371,12 +366,14 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="[salesOpportunityId: opportunity.opportunityId,
                                 partyId: opportunity.leadUser.partyId,
                                 roleTypeId: 'Customer',
-                                fromDate: ec.user.nowTimestamp]" out-map="context"/>
+                                fromDate: ec.user.nowTimestamp]"
+                            out-map="context" />
                     </if>
                 </else>
             </if>
             <service-call name="growerp.100.CrmServices100.get#Opportunity"
-                in-map="[opportunityId: opportunity.opportunityId]" out-map="context"/>
+                in-map="[opportunityId: opportunity.opportunityId]" out-map="context" />
+            <set field="opportunity" from="opportunities[0]" />
         </actions>
     </service>
 
@@ -384,55 +381,59 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Delete a Opportunity </description>
         <in-parameters>
             <parameter name="opportunity" required="true" type="Map">
-                <parameter name="opportunityId"/>
+                <parameter name="opportunityId" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="opportunity" type="Map">
-                <parameter name="opportunityId"/>
-                <parameter name="lastUpdated"/>
-                <parameter name="opportunityName"/>
-                <parameter name="stageId"/>
-                <parameter name="description"/>
-                <parameter name="nextStep"/>
-                <parameter name="estAmount"/>
-                <parameter name="estProbability"/>
+                <parameter name="opportunityId" />
+                <parameter name="lastUpdated" />
+                <parameter name="opportunityName" />
+                <parameter name="stageId" />
+                <parameter name="description" />
+                <parameter name="nextStep" />
+                <parameter name="estAmount" />
+                <parameter name="estProbability" />
                 <parameter name="employeeUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
                 <parameter name="leadUser" type="Map">
-                    <parameter name="partyId"/>
-                    <parameter name="email"/>
-                    <parameter name="firstName"/>
-                    <parameter name="lastName"/>
+                    <parameter name="partyId" />
+                    <parameter name="email" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
                     <parameter name="company" type="Map">
-                        <parameter name="partyId"/>
-                        <parameter name="name"/>
+                        <parameter name="partyId" />
+                        <parameter name="name" />
                     </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- make sure it exists -->
             <entity-find list="oldValues" limit="1" for-update="true"
-                    entity-name="mantle.sales.opportunity.SalesOpportunity">
-                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId"/>
-                <econdition field-name="ownerPartyId" from="companyPartyId"/></entity-find>
-            <if condition="!oldValues"><return error="true"
-                message="Opportunity: ${opportunity.opportunityId} not found"/></if>
-            <set field="oldValues[0].opportunityStageId" value="Deleted"/>
+                entity-name="mantle.sales.opportunity.SalesOpportunity">
+                <econdition field-name="salesOpportunityId" from="opportunity.opportunityId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!oldValues">
+                <return error="true"
+                    message="Opportunity: ${opportunity.opportunityId} not found" />
+            </if>
+            <set field="oldValues[0].opportunityStageId" value="Deleted" />
             <service-call name="growerp.100.CrmServices100.get#Opportunity"
-                in-map="[opportunityId: opportunity.opportunityId]" out-map="context"/>
-            <entity-update value-field="oldValues[0]"/>
+                in-map="[opportunityId: opportunity.opportunityId]" out-map="context" />
+            <entity-update value-field="oldValues[0]" />
+            <set field="opportunity" from="opportunities[0]" />
         </actions>
     </service>
 </services>

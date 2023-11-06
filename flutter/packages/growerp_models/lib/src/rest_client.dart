@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart' hide Headers;
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'models/models.dart';
@@ -15,7 +14,7 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/UserAndCompany")
   @FormUrlEncoded()
-  Future<Authenticate> register({
+  Future<Authenticate> registerCompanyAdmin({
     @Field() required String emailAddress,
     @Field() required String companyEmailAddress,
     @Field() required String firstName,
@@ -64,6 +63,7 @@ abstract class RestClient {
   Future<Authenticate> getAuthenticate(
       {@Query('classificationId') required String classificationId});
 
+  // company
   @GET("rest/s1/growerp/100/Company")
   @Extra({'requireApiKey': true})
   Future<Companies> getCompany({
@@ -79,6 +79,51 @@ abstract class RestClient {
     @Query('searchString') Role? searchString,
   });
 
+  @POST("rest/s1/growerp/100/Company")
+  @Extra({'requireApiKey': true})
+  Future<Company> createCompany({@Field() required Company company});
+
+  @PATCH("rest/s1/growerp/100/Company")
+  @Extra({'requireApiKey': true})
+  Future<Company> updateCompany({@Field() required Company company});
+
+  // user
+  @GET("rest/s1/growerp/100/User")
+  @Extra({'requireApiKey': true})
+  Future<Users> getUser({
+    @Query('userpartyId') String? userpartyId,
+    @Query('role') Role? role,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('filter') String? filter,
+    @Query('firstName') String? firstName,
+    @Query('lastName') String? lastName,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/User")
+  @Extra({'requireApiKey': true})
+  Future<User> createUser({@Field() required User user});
+
+  @PATCH("rest/s1/growerp/100/User")
+  @Extra({'requireApiKey': true})
+  Future<User> updateUser({@Field() required User user});
+
+  @DELETE("rest/s1/growerp/100/User")
+  @Extra({'requireApiKey': true})
+  Future<User> deleteUser(
+      {@Field() required String partyId,
+      @Field() required bool deleteCompanyToo});
+
+  // ecommerce
+  @POST("rest/s1/growerp/100/RegisterUser")
+  @FormUrlEncoded()
+  Future<Authenticate> registerUser({
+    @Field() required User user,
+    @Field() required String ownerPartyId,
+    @Field() required String classificationId,
+    @Field() required String newPassword,
+  });
   // Website ======
   @GET("rest/s1/growerp/100/Website")
   @Extra({'requireApiKey': true})
@@ -362,6 +407,85 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<AccountTypes> getAccountType();
 
+  // chat
+  @GET("rest/s1/growerp/100/ChatRoom")
+  @Extra({'requireApiKey': true})
+  Future<ChatRooms> getChatRooms({
+    @Query('userId') String? userId,
+    @Query('chatRoomName') String? chatRoomName,
+    @Query('chatRoomId') String? chatRoomId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('isPrivate') bool? isPrivate,
+    @Query('search') String? searchString,
+    @Query('filter') String? filter,
+  });
+
+  @POST("rest/s1/growerp/100/ChatRoom")
+  @Extra({'requireApiKey': true})
+  Future<ChatRoom> createChatRoom({
+    @Field() required ChatRoom chatRoom,
+  });
+
+  @PATCH("rest/s1/growerp/100/ChatRoom")
+  @Extra({'requireApiKey': true})
+  Future<ChatRoom> updateChatRoom({
+    @Field() required ChatRoom chatRoom,
+  });
+
+  @DELETE("rest/s1/growerp/100/ChatRoom")
+  @Extra({'requireApiKey': true})
+  Future<ChatRoom> deleteChatRoom({@Field() required ChatRoom chatRoom});
+
+  @GET("rest/s1/growerp/100/ChatMessage")
+  @Extra({'requireApiKey': true})
+  Future<ChatMessages> getChatMessages({
+    @Query('chatRoomId') String? chatRoomId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
+
+  // tasks
+  @GET("rest/s1/growerp/100/Task")
+  @Extra({'requireApiKey': true})
+  Future<Tasks> getTask({
+    @Query('taskId') String? taskId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('open') bool? open,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/Task")
+  @Extra({'requireApiKey': true})
+  Future<Task> createTask({
+    @Field() required Task task,
+  });
+
+  @PATCH("rest/s1/growerp/100/Task")
+  @Extra({'requireApiKey': true})
+  Future<Task> updateTask({
+    @Field() required Task task,
+  });
+
+  // time entry
+  @POST("rest/s1/growerp/100/TimeEntry")
+  @Extra({'requireApiKey': true})
+  Future<TimeEntry> createTimeEntry({
+    @Field() required TimeEntry timeEntry,
+  });
+
+  @PATCH("rest/s1/growerp/100/TimeEntry")
+  @Extra({'requireApiKey': true})
+  Future<TimeEntry> updateTimeEntry({
+    @Field() required TimeEntry timeEntry,
+  });
+
+  @DELETE("rest/s1/growerp/100/TimeEntry")
+  @Extra({'requireApiKey': true})
+  Future<TimeEntry> deleteTimeEntry({@Field() required TimeEntry timeEntry});
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
   @Extra({'requireApiKey': true})
@@ -408,4 +532,30 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/User")
   @Extra({'requireApiKey': true})
   Future<Users> getUsers(@Query('limit') String limit);
+
+  // opportunities
+  @GET("rest/s1/growerp/100/Opportunity")
+  @Extra({'requireApiKey': true})
+  Future<Opportunities> getOpportunity({
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('opportunityId') String? opportunityId,
+    @Query('search') String? searchString,
+    @Query('my') bool? my,
+  });
+
+  @POST("rest/s1/growerp/100/Opportunity")
+  @Extra({'requireApiKey': true})
+  Future<Opportunity> createOpportunity(
+      {@Field() required Opportunity opportunity});
+
+  @PATCH("rest/s1/growerp/100/Opportunity")
+  @Extra({'requireApiKey': true})
+  Future<Opportunity> updateOpportunity(
+      {@Field() required Opportunity opportunity});
+
+  @DELETE("rest/s1/growerp/100/Opportunity")
+  @Extra({'requireApiKey': true})
+  Future<Opportunity> deleteOpportunity(
+      {@Field() required Opportunity opportunity});
 }

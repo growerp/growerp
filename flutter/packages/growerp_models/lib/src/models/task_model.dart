@@ -39,7 +39,8 @@ class Task with _$Task {
     @Default([]) List<TimeEntry> timeEntries,
   }) = _Task;
 
-  factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
+  factory Task.fromJson(Map<String, dynamic> json) =>
+      _$TaskFromJson(json['task'] ?? json);
 
   @override
   String toString() => 'Task $taskName [$taskId]';

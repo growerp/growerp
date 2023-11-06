@@ -13,13 +13,12 @@
  */
 
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:growerp_rest/growerp_rest.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
-import '../../marketing_api_repository.dart';
-import '../models/opportunity_model.dart';
 
 part 'opportunity_event.dart';
 part 'opportunity_state.dart';
@@ -33,107 +32,83 @@ EventTransformer<E> opportunityDroppable<E>(Duration duration) {
 }
 
 class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
-  OpportunityBloc(this.repos) : super(const OpportunityState()) {
+  OpportunityBloc(this.restClient) : super(const OpportunityState()) {
     on<OpportunityFetch>(_onOpportunityFetch,
         transformer: opportunityDroppable(const Duration(milliseconds: 100)));
     on<OpportunityUpdate>(_onOpportunityUpdate);
     on<OpportunityDelete>(_onOpportunityDelete);
   }
 
-  final MarketingAPIRepository repos;
+  final RestClient restClient;
+  int start = 0;
+
   Future<void> _onOpportunityFetch(
     OpportunityFetch event,
     Emitter<OpportunityState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
-    // start from record zero for initial and refresh
-    if (state.status == OpportunityStatus.initial || event.refresh) {
-      ApiResult<List<Opportunity>> compResult =
-          await repos.getOpportunity(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: OpportunityStatus.success,
-                opportunities: data,
-                hasReachedMax: data.length < _opportunityLimit ? true : false,
-                searchString: '',
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    if (state.status == OpportunityStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.opportunities.length;
     }
-    // get first search page also for changed search
-    if (event.searchString.isNotEmpty && state.searchString.isEmpty ||
-        (state.searchString.isNotEmpty &&
-            event.searchString != state.searchString)) {
-      ApiResult<List<Opportunity>> compResult =
-          await repos.getOpportunity(searchString: event.searchString);
-      return emit(compResult.when(
-          success: (data) => state.copyWith(
-                status: OpportunityStatus.success,
-                opportunities: data,
-                hasReachedMax: data.length < _opportunityLimit ? true : false,
-                searchString: event.searchString,
-              ),
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      // start from record zero for initial and refresh
+      Opportunities compResult =
+          await restClient.getOpportunity(searchString: event.searchString);
+      return emit(state.copyWith(
+          status: OpportunityStatus.success,
+          opportunities: start == 0
+              ? (List.of(state.opportunities)..addAll(compResult.opportunities))
+              : compResult.opportunities,
+          hasReachedMax: compResult.opportunities.length < _opportunityLimit
+              ? true
+              : false,
+          searchString: ''));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: OpportunityStatus.failure,
+          opportunities: [],
+          message: getDioError(e)));
     }
-    // get next page also for search
-    ApiResult<List<Opportunity>> compResult = await repos.getOpportunity(
-        searchString: event.searchString,
-        start: state.opportunities.length,
-        limit: _opportunityLimit);
-    return emit(compResult.when(
-        success: (data) => state.copyWith(
-              status: OpportunityStatus.success,
-              opportunities: List.of(state.opportunities)..addAll(data),
-              hasReachedMax: data.length < _opportunityLimit ? true : false,
-            ),
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: OpportunityStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
   }
 
   Future<void> _onOpportunityUpdate(
     OpportunityUpdate event,
     Emitter<OpportunityState> emit,
   ) async {
-    List<Opportunity> opportunities = List.from(state.opportunities);
-    if (event.opportunity.opportunityId.isNotEmpty) {
-      ApiResult<Opportunity> compResult =
-          await repos.updateOpportunity(event.opportunity);
-      return emit(compResult.when(
-          success: (data) {
-            int index = opportunities.indexWhere((element) =>
-                element.opportunityId == event.opportunity.opportunityId);
-            opportunities[index] = data;
-            return state.copyWith(
-                status: OpportunityStatus.success,
-                opportunities: opportunities,
-                message:
-                    "opportunity ${event.opportunity.opportunityName} updated");
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
-    } else {
-      // add
-      ApiResult<Opportunity> compResult =
-          await repos.createOpportunity(event.opportunity);
-      return emit(compResult.when(
-          success: (data) {
-            opportunities.insert(0, data);
-            return state.copyWith(
-                status: OpportunityStatus.success,
-                opportunities: opportunities,
-                message:
-                    "opportunity ${event.opportunity.opportunityName} added");
-          },
-          failure: (NetworkExceptions error) => state.copyWith(
-              status: OpportunityStatus.failure,
-              message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<Opportunity> opportunities = List.from(state.opportunities);
+      if (event.opportunity.opportunityId.isNotEmpty) {
+        Opportunity compResult =
+            await restClient.updateOpportunity(opportunity: event.opportunity);
+        int index = opportunities.indexWhere((element) =>
+            element.opportunityId == event.opportunity.opportunityId);
+        opportunities[index] = compResult;
+        return emit(state.copyWith(
+            status: OpportunityStatus.success,
+            opportunities: opportunities,
+            message:
+                "opportunity ${event.opportunity.opportunityName} updated"));
+      } else {
+        // add
+        Opportunity compResult =
+            await restClient.createOpportunity(opportunity: event.opportunity);
+        opportunities.insert(0, compResult);
+        return emit(state.copyWith(
+            status: OpportunityStatus.success,
+            opportunities: opportunities,
+            message: "opportunity ${event.opportunity.opportunityName} added"));
+      }
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: OpportunityStatus.failure,
+          opportunities: [],
+          message: getDioError(e)));
     }
   }
 
@@ -141,22 +116,22 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     OpportunityDelete event,
     Emitter<OpportunityState> emit,
   ) async {
-    List<Opportunity> opportunities = List.from(state.opportunities);
-    ApiResult<Opportunity> compResult =
-        await repos.deleteOpportunity(event.opportunity);
-    return emit(compResult.when(
-        success: (data) {
-          int index = opportunities.indexWhere((element) =>
-              element.opportunityId == event.opportunity.opportunityId);
-          opportunities.removeAt(index);
-          return state.copyWith(
-              status: OpportunityStatus.success,
-              opportunities: opportunities,
-              message:
-                  "opportunity ${event.opportunity.opportunityName} deleted");
-        },
-        failure: (NetworkExceptions error) => state.copyWith(
-            status: OpportunityStatus.failure,
-            message: NetworkExceptions.getErrorMessage(error))));
+    try {
+      List<Opportunity> opportunities = List.from(state.opportunities);
+
+      await restClient.deleteOpportunity(opportunity: event.opportunity);
+      int index = opportunities.indexWhere((element) =>
+          element.opportunityId == event.opportunity.opportunityId);
+      opportunities.removeAt(index);
+      return emit(state.copyWith(
+          status: OpportunityStatus.success,
+          opportunities: opportunities,
+          message: "opportunity ${event.opportunity.opportunityName} deleted"));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: OpportunityStatus.failure,
+          opportunities: [],
+          message: getDioError(e)));
+    }
   }
 }
