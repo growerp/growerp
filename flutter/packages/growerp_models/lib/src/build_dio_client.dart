@@ -1,12 +1,10 @@
 import 'dart:io' show Platform;
-
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:growerp_models/src/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:path_provider/path_provider.dart';
 
 Future<Dio> buildDioClient(String? base,
     {Duration timeout = const Duration(seconds: 5)}) async {
@@ -43,7 +41,7 @@ Future<Dio> buildDioClient(String? base,
       compact: true,
       maxWidth: 133));
 
-  var cacheDir = await getTemporaryDirectory();
+  /*var cacheDir = await getTemporaryDirectory();
   var cacheStore = HiveCacheStore(
     cacheDir.path,
     hiveBoxName: "growerpCache",
@@ -61,8 +59,8 @@ Future<Dio> buildDioClient(String? base,
     allowPostMethod: false,
   );
 
-  // dio.interceptors.add(DioCacheInterceptor(options: customCacheOptions));
-
+  dio.interceptors.add(DioCacheInterceptor(options: customCacheOptions));
+*/
   logger.i("accessing backend at ${dio.options.baseUrl}");
 
   return dio;

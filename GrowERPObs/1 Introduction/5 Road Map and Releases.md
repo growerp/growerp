@@ -13,7 +13,6 @@ Let us know if you have suggestions at support@growerp.com
 	* Be able to maintain the automatic posting configuration.
 	* Access to the error journal of failed postings
 	* automatically add new timeperiod in new year
-	* Upload and maintain ledger organization
 * Extend the growerp.com website to offer growerp as a SAAS
 * Update the freelancer app
 * Create a manufacturing app
@@ -31,7 +30,7 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
-## Ledger enhancement release October 30 2023(v1.2.0)
+## Ledger enhancement release November 30 2023(v1.2.0)
 1. Any ledger organization and numbering possible by upload or manual entry.
 2. Manual ledger transactions and posting added.
 3. Ledger journal function added
@@ -39,6 +38,9 @@ Let us know if you have suggestions at support@growerp.com
 5. Models now in their own package: growerp_models
 6. Replaced custom REST interface with Retrofit
 7. Various fixes and interface enhancements.
+8. GrowERP global command now again fully functional for install, import/export
+9. Example programs for convertion of existing data for import into GrowERP.
+10. Started a weekly mailing list related to GrowERP and ERP in general. [subscribe here!](https://birdsend.page/forms/6228/3tDTt3BLhY)
 
 ## Fault fix release August 20 2023 (v1.1.0)
 1. Separate apps can now be used with the same email address

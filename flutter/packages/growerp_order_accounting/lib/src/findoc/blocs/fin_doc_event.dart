@@ -28,6 +28,7 @@ class FinDocFetch extends FinDocEvent {
     this.searchString = '',
     this.refresh = false,
     this.journalId,
+    this.limit = 20,
   });
   final String searchString;
   final bool refresh;
@@ -35,6 +36,7 @@ class FinDocFetch extends FinDocEvent {
   final String? journalId;
   final FinDocType docType; // to get a single document id, docType
   final String customerCompanyPartyId;
+  final int limit;
 
   @override
   List<Object> get props =>

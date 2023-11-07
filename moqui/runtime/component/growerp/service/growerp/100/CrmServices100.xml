@@ -77,7 +77,6 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!opportunityId">
                 <set field="notDisplayStatus" from="['Deleted']" />
             </if>
-            <log message="====company: $companyPartyId" />
             <entity-find list="opps" offset="start" limit="limit"
                 entity-name="growerp.crm.OpportunityAndParties">
                 <econdition field-name="ownerPartyId" from="companyPartyId" />

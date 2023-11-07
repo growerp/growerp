@@ -94,7 +94,7 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
           if (widget.ledgerJournal.journalId.isNotEmpty)
             ElevatedButton(
                 key: const Key('post'),
-                child: const Text('Post'),
+                child: const Text('Upd.Header'),
                 onPressed: () {
                   if (_formKeyLedgerJournal.currentState!.validate()) {
                     _ledgerJournalBloc.add(LedgerJournalUpdate(LedgerJournal(

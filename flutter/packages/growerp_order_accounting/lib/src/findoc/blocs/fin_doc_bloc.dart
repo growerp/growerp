@@ -74,7 +74,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     FinDocFetch event,
     Emitter<FinDocState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
+      return;
+    }
     if (state.status == FinDocStatus.initial ||
         event.refresh ||
         event.searchString != '') {
@@ -90,6 +92,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         add(FinDocGetItemTypes());
       }
       FinDocs result = await restClient.getFinDoc(
+        start: start,
+        limit: event.limit,
         sales: sales,
         docType: docType,
         searchString: event.searchString,

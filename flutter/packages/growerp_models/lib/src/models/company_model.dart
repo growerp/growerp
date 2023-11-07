@@ -31,7 +31,7 @@ class Company with _$Company {
   factory Company({
     String? partyId,
     String? pseudoId,
-    Role? role,
+    @RoleConverter() Role? role,
     String? name,
     String? email,
     String? telephoneNr,

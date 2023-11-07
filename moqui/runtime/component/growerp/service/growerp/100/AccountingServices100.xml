@@ -694,8 +694,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
-                in-map="[journalId: ledgerJournal[0].journalId]" out-map="old" />
-            <if condition="ledgerJournal.journalName != old.journalName">
+                in-map="[journalId: journalId]" out-map="old" />
+            <if condition="ledgerJournal.journalName != old.ledgerJournals[0].journalName">
                 <service-call name="update#mantle.ledger.transaction.GlJournal"
                     in-map="[
                         glJournalId: ledgerJournal.journalId,
@@ -704,7 +704,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <if
                 condition="ledgerJournal.isPosted &amp;&amp;
-                ledgerJournal.isPosted != old.ledgerJournal.isPosted">
+                ledgerJournal.isPosted != old.ledgerJournals[0].isPosted">
                 <service-call name="mantle.ledger.LedgerServices.post#GlJournal"
                     in-map="[glJournalId: ledgerJournal.journalId]" />
             </if>

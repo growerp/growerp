@@ -15,7 +15,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'models/models.dart';
-//import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 class Uint8ListConverter implements JsonConverter<Uint8List?, String?> {
@@ -142,13 +141,15 @@ class RoleConverter implements JsonConverter<Role?, String?> {
   @override
   Role? fromJson(String? json) {
     if (json == null) return null;
+    print("=====incoming json: $json");
     return Role.getByValue(json);
   }
 
   @override
   String? toJson(Role? object) {
     if (object == null) return null;
-    return object.toString();
+    print("==outgoing=${object.name}===${object.value}");
+    return object.value;
   }
 }
 
