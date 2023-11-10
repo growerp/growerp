@@ -11,19 +11,19 @@ on chrome
 ---------
 
 Download chromedriver and install in path:
-https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/117.0.5938.92/linux64/chromedriver-linux64.zip
+https://chromedriver.chromium.org/downloads
 
 start in a terminal: ./chromedriver --port=4444
 
 Separate terminal:
     flutter drive -d chrome \
      --driver=test_driver/integration_test.dart \
-     --target=integration_test/rondtrip_test.dart
+     --target=integration_test/roundtrip_test.dart
 
 Chat test
 ---------
 
-1. make sure the debug company of John doe exists.
+1. make sure the debug company of John doe exists.fluu
 2. start the chat echo: flutter run -t lib/chatEcho_main.dart
     and login with default debug parameters.
 3. run the chat test in a separate process: 

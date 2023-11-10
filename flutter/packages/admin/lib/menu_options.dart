@@ -202,7 +202,9 @@ List<MenuOption> menuOptions = [
         icon: const Icon(Icons.call_received),
       ),
       TabItem(
-        form: const LocationListForm(),
+        form: const LocationListForm(
+          key: Key('Locations'),
+        ),
         label: '\nWH Locations',
         icon: const Icon(Icons.location_pin),
       ),

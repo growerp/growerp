@@ -25,6 +25,8 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
   for (var option in menu) {
     {
       if (option.readGroups.contains(authenticate.user?.userGroup)) {
+        //print("====tap available: tap${option.route}");
+
         items.add(NavigationRailDestination(
           icon: Image.asset(option.image,
               height: 40, key: Key('tap${option.route}')),

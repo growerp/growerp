@@ -119,7 +119,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
                         InputDecoration(labelText: 'Chat partner')),
                 itemAsString: (User? u) => " ${u!.firstName} ${u.lastName}",
                 asyncItems: (String? filter) async {
-                  Users result = await repos.lookUpUser(
+                  Users result = await repos.getUser(
                       filter: _chatRoomSearchBoxController.text);
                   return result.users;
                 },

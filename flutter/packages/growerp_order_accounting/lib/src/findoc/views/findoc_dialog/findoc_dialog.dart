@@ -204,6 +204,7 @@ class MyFinDocState extends State<FinDocPage> {
         insetPadding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
             key: const Key('listView1'),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: popUp(
               title: "${finDoc.docType} #${finDoc.id() ?? ' new'}",
               height: 650,
@@ -486,6 +487,8 @@ class MyFinDocState extends State<FinDocPage> {
 
     return Expanded(
         child: ListView.builder(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            key: const Key('listView'),
             itemCount: items.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {

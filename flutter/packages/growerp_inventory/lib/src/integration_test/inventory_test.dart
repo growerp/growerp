@@ -29,7 +29,7 @@ class InventoryTest {
 
   static Future<void> selectWareHouseLocations(WidgetTester tester) async {
     await CommonTest.selectOption(
-        tester, 'dbInventory', 'LocationListForm', '3');
+        tester, 'dbInventory', 'LocationListFormLocations', '3');
   }
 
   static Future<void> checkIncomingShipments(WidgetTester tester) async {

@@ -76,7 +76,7 @@ abstract class RestClient {
     @Query('filter') String? filter,
     @Query('firstName') String? firstName,
     @Query('lastName') String? lastName,
-    @Query('searchString') Role? searchString,
+    @Query('searchString') String? searchString,
   });
 
   @POST("rest/s1/growerp/100/Company")
@@ -341,6 +341,10 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Ledger")
   @Extra({'requireApiKey': true})
   Future<LedgerReport> getLedger();
+
+  @POST("rest/s1/growerp/100/Ledger")
+  @Extra({'requireApiKey': true})
+  Future<void> calculateLedger();
 
   @GET("rest/s1/growerp/100/GlAccount")
   @Extra({'requireApiKey': true})

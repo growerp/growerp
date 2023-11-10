@@ -171,6 +171,7 @@ class _HomeState extends State<HomePage> {
           height: 110,
           alignment: Alignment.centerLeft,
           child: ListView.builder(
+              key: const Key('listView'),
               shrinkWrap: true,
               physics: ClampingScrollPhysics(),
               scrollDirection: Axis.horizontal,

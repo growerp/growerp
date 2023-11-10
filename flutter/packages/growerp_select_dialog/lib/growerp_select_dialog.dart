@@ -285,6 +285,7 @@ class _SelectDialogState<T> extends State<SelectDialog<T>> {
                   controller: bloc.scrollController,
                   // isAlwaysShown: widget.alwaysShowScrollBar,
                   child: ListView.builder(
+                    key: const Key('listView'),
                     controller: bloc.scrollController,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {

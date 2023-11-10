@@ -31,29 +31,34 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="orderId" />
             <key-map field-name="orderPartSeqId" />
         </member-entity>
-        <member-entity entity-alias="ITEMTYPE" entity-name="moqui.basic.Enumeration"
+        <member-entity
+            entity-alias="ITEMTYPE" entity-name="moqui.basic.Enumeration"
             join-from-alias="OITEM" join-optional="true">
             <key-map field-name="itemTypeEnumId" related="enumId" />
         </member-entity>
         <member-entity entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
-            join-from-alias="ORHD" join-optional="true">
+            join-from-alias="OITEM" join-optional="true">
             <key-map field-name="orderId" />
+            <key-map field-name="orderItemSeqId" related="invoiceItemSeqId" />
         </member-entity>
         <member-entity entity-alias="OPAY" entity-name="mantle.account.payment.Payment"
             join-from-alias="ORHD" join-optional="true">
             <key-map field-name="orderId" />
         </member-entity>
-        <member-entity entity-alias="RESERV" entity-name="growerp.product.AssetRental"
+        <member-entity
+            entity-alias="RESERV" entity-name="growerp.product.AssetRental"
             join-from-alias="OITEM" join-optional="true">
             <key-map field-name="orderId" />
             <key-map field-name="orderItemSeqId" />
         </member-entity>
-        <member-entity entity-alias="ASSET" entity-name="mantle.product.asset.Asset"
+        <member-entity
+            entity-alias="ASSET" entity-name="mantle.product.asset.Asset"
             join-from-alias="RESERV" join-optional="true">
             <key-map field-name="assetId" />
         </member-entity>
         <!-- vendor data -->
-        <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
+        <member-entity
+            entity-alias="VORG" entity-name="mantle.party.Organization"
             join-from-alias="OPRT" join-optional="true">
             <key-map field-name="vendorPartyId" related="partyId" />
         </member-entity>
@@ -74,7 +79,8 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId" />
         </member-entity>
         <!-- customer data -->
-        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+        <member-entity
+            entity-alias="CORG" entity-name="mantle.party.Organization"
             join-from-alias="OPRT" join-optional="true">
             <key-map field-name="customerPartyId" related="partyId" />
         </member-entity>
@@ -120,7 +126,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="customerEmail" field="emailAddress" entity-alias="CACCOUNT" />
 
         <alias name="orderItemSeqId" entity-alias="OITEM" />
-        <alias name="itemTypeId" field="itemTypeEnumId" entity-alias="OITEM" />
+        <alias
+            name="itemTypeId" field="itemTypeEnumId" entity-alias="OITEM" />
         <alias name="itemTypeName" field="description" entity-alias="ITEMTYPE" />
         <alias name="productId" entity-alias="OITEM" />
         <alias name="description" field="itemDescription" entity-alias="OITEM" />

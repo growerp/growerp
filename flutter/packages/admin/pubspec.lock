@@ -1473,7 +1473,7 @@ packages:
     source: hosted
     version: "2.4.0"
   webdriver:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: webdriver
       sha256: "3c923e918918feeb90c4c9fdf1fe39220fa4c0e8e2c0fffaded174498ef86c49"

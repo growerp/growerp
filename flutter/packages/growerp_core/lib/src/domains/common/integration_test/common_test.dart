@@ -88,8 +88,8 @@ class CommonTest {
     await CommonTest.enterText(tester, 'firstName', admin.firstName!);
     await CommonTest.enterText(tester, 'lastName', admin.lastName!);
     var email = admin.email!.replaceFirst('XXX', '$seq');
+    await CommonTest.drag(tester);
     await CommonTest.enterText(tester, 'email', email);
-
     String companyName = '${initialCompany.name!} $seq';
     await enterText(tester, 'companyName', companyName);
     await CommonTest.drag(tester);
@@ -155,7 +155,7 @@ class CommonTest {
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: 3));
     }
-    debugPrint("=====incoming key: $option");
+    debugPrint("=====incoming key: $option $formName $tapNumber");
     if (!option.startsWith('tap')) {
       if (option.startsWith('db')) {
         // convert old mainscrean tapping to drawer on mobile
@@ -165,7 +165,7 @@ class CommonTest {
       }
       option = "tap$option";
     }
-    debugPrint("=====looking for tap key: $option");
+    debugPrint("=====looking for tap key: $option $tapNumber tap$formName");
     await tapByKey(tester, option, seconds: 3);
     if (tapNumber != null) {
       if (isPhone()) {
@@ -313,6 +313,7 @@ class CommonTest {
 
   static Future<void> checkWidgetKey(WidgetTester tester, String widgetKey,
       [int count = 1]) async {
+    print("====check widget key: $widgetKey");
     expect(find.byKey(Key(widgetKey)), findsNWidgets(count));
   }
 
@@ -478,7 +479,9 @@ class CommonTest {
 
   static Future<void> tapByKey(WidgetTester tester, String key,
       {int seconds = 1}) async {
+    print("common 481 look for key to tap: $key");
     await tester.tap(find.byKey(Key(key)).last);
+    await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 

@@ -89,6 +89,7 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
     return Form(
         key: _formKey,
         child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             key: const Key('listView'),
             child: Column(children: <Widget>[
               const SizedBox(height: 20),

@@ -42,6 +42,7 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
       width: 200,
       key: const Key('drawer'),
       child: ListView.builder(
+        key: const Key('listView'),
         itemCount: options.length + 1,
         itemBuilder: (context, i) {
           if (i == 0) {

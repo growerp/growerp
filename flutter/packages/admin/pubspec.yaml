@@ -28,7 +28,6 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 
@@ -40,6 +39,8 @@ dev_dependencies:
   integration_test: 
     sdk: flutter
   test: ^1.19.5
+  webdriver: ^3.0.2
+
 flutter:
   uses-material-design: true
   assets: 
