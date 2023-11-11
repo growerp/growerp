@@ -228,9 +228,9 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!-- rental -->
-        <resource name="RentalOccupancy">
+        <resource name="DailyRentalOccupancy">
             <method type="get">
-                <service name="growerp.100.FinDocServices100.get#RentalOccupancy" />
+                <service name="growerp.100.FinDocServices100.get#DailyRentalOccupancy" />
             </method>
         </resource>
         <!-- itemTypes -->

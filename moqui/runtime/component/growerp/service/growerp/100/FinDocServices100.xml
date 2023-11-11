@@ -388,7 +388,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <set field="lastItem" from="null" />
                 <iterate entry="item" list="items">
-                    <log message="=====================findocItems: ${finDocItems?.itemSeqId}" />
                     <!-- new orderId, so add last order to the list-->
                     <if condition="lastItem &amp;&amp; lastItem.orderId != item.orderId">
                         <set field="finDocOut.items" from="finDocItems" />
@@ -1819,16 +1818,13 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="get" noun="RentalOccupancy">
+    <service verb="get" noun="DailyRentalOccupancy">
         <description>Provide a list of dates which need to be blocked at input</description>
         <in-parameters>
             <parameter name="productId" />
         </in-parameters>
         <out-parameters>
-            <parameter name="rentalFullDates" type="List">
-                <parameter name="rentalFullDate" /><!-- YYYY-MM-DD -->
-            </parameter>
-            <parameter name="fullDatesProductRental" type="List">
+            <parameter name="products" type="List">
                 <parameter name="productId" />
                 <parameter name="productName" />
                 <parameter name="fullDates" type="List">
@@ -1855,6 +1851,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- gather fullDates which have rentals of this product -->
             <set field="fullDates" from="[]" />
             <set field="fullDatesProductRental" from="[]" />
+            <set field="products" from="[]" />
             <iterate list="rentals" entry="rental">
                 <if condition="lastItem &amp;&amp; lastItem.productId != rental.productId">
                     <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
@@ -1904,7 +1901,6 @@ along with this software (see the LICENSE.md file). If not, see
                     fullDates: fullDates,
                     ])</script>
             </if>
-            <set field="rentalFullDates" from="productId ? fullDates : null" />
             <if condition="!productId">
                 <!-- add empty rental products -->
                 <entity-find entity-name="mantle.product.Product" list="rentalProducts">
@@ -1912,18 +1908,16 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="productTypeEnumId" value="PtFixedAssetUse" />
                     <order-by field-name="productName,productId" />
                 </entity-find>
-                <set field="newList" from="[]" />
                 <iterate list="rentalProducts" entry="rentalProduct">
                     <script>
                     var fullDates = fullDatesProductRental.find 
                             {it.productId == rentalProduct.productId}?.fullDates;
-                    newList.add([
+                    products.add([
                         productId: rentalProduct.productId,
                         productName: rentalProduct.productName,
                         fullDates: fullDates ?: []])</script>
                 </iterate>
             </if>
-            <set field="fullDatesProductRental" from="!productId ? newList : null" />
         </actions>
     </service>
 

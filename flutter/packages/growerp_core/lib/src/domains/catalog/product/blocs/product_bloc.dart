@@ -26,8 +26,6 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 part 'product_event.dart';
 part 'product_state.dart';
 
-const _productLimit = 20;
-
 EventTransformer<E> productDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
@@ -74,7 +72,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           searchString: event.searchString,
           assetClassId: event.assetClassId,
           start: start,
-          limit: event.limit);
+          limit: event.limit,
+          classificationId: classificationId);
       emit(state.copyWith(
         status: ProductStatus.success,
         products: start == 0
@@ -222,14 +221,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       emit(state.copyWith(status: ProductStatus.loading));
       if (event.productId.isNotEmpty) {
-        RentalFullDates result =
-            await restClient.getRentalOccupancy(productId: event.productId);
+        Products result = await restClient.getDailyRentalOccupancy(
+            productId: event.productId);
         emit(state.copyWith(
           status: ProductStatus.success,
-          occupancyDates: result.rentalFullDates,
+          occupancyDates: result.products[0].fullDates,
         ));
       } else {
-        Products result = await restClient.getRentalAllOccupancy();
+        Products result = await restClient.getDailyRentalOccupancy();
         emit(state.copyWith(
           status: ProductStatus.success,
           productFullDates: result.products,

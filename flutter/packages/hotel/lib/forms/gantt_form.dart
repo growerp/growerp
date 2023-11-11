@@ -511,6 +511,7 @@ class GanttChart extends StatelessWidget {
                 items: [FinDocItem(assetId: '', assetName: '')])); // space
 
             // group all open reservations by Room number as a single item
+            assets = List.of(assets);
             assets.sort(
                 (a, b) => (a.assetName ?? '?').compareTo(b.assetName ?? '?'));
             for (var asset in assets) {

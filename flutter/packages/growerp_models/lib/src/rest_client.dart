@@ -266,15 +266,12 @@ abstract class RestClient {
     @Query('classificationId') required String classificationId,
   });
 
-  // rental
-  @GET("rest/s1/growerp/100/RentalOccupancy")
+  // dayly rental
+  @GET("rest/s1/growerp/100/DailyRentalOccupancy")
   @Extra({'requireApiKey': true})
-  Future<RentalFullDates> getRentalOccupancy({
-    @Query('productId') required String productId,
+  Future<Products> getDailyRentalOccupancy({
+    @Query('productId') String? productId,
   });
-  @GET("rest/s1/growerp/100/RentalOccupancy")
-  @Extra({'requireApiKey': true})
-  Future<Products> getRentalAllOccupancy();
 
   // FINDOC
   @GET("rest/s1/growerp/100/FinDoc")
@@ -531,6 +528,7 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<Products> getProducts({
     @Query('limit') int? limit,
+    @Query('classificationId') String? classificationId,
   });
 
   @GET("rest/s1/growerp/100/User")
