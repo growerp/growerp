@@ -22,11 +22,6 @@ abstract class AuthEvent extends Equatable {
 
 class AuthLoad extends AuthEvent {}
 
-class AuthMessage extends AuthEvent {
-  final String message;
-  const AuthMessage(this.message);
-}
-
 class AuthRegisterCompanyAndAdmin extends AuthEvent {
   final User user;
   final String currencyId;

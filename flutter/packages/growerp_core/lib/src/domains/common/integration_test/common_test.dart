@@ -479,7 +479,6 @@ class CommonTest {
 
   static Future<void> tapByKey(WidgetTester tester, String key,
       {int seconds = 1}) async {
-    print("common 481 look for key to tap: $key");
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));

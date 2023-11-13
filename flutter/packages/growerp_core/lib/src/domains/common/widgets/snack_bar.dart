@@ -30,7 +30,7 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
         child: Text(message)),
     backgroundColor: colors,
     behavior: SnackBarBehavior.floating,
-    action: SnackBarAction(
+/*    action: SnackBarAction(
       key: const Key('dismiss'),
       label: 'Dismiss',
       textColor: Colors.yellow,
@@ -39,5 +39,6 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
       },
     ),
+*/
   );
 }

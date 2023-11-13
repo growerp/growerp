@@ -55,5 +55,25 @@
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
         },
+        {
+            "name": "Hotel mobile (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/hotel",
+            "program": "lib/main.dart",
+        },
+        {
+            "name": "Hotel chrome (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/hotel",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-port",
+                "5556"
+            ]
+        },
     ]
 }

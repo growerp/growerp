@@ -21,10 +21,10 @@ dependencies:
   flutter_bloc: ^8.1.1
   flutter_localizations: 
     sdk: flutter
-  global_configuration: ^2.0.0-nullsafety.0
+  global_configuration: ^2.0.0
   intl: ^0.17.0
   shared_preferences: ^2.0.6
-  package_info_plus: ^3.1.2
+  package_info_plus: ^4.2.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 

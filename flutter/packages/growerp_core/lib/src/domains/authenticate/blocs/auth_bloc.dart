@@ -35,7 +35,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.chat, this.restClient, this.classificationId)
       : super(const AuthState()) {
     on<AuthLoad>(_onAuthLoad);
-    on<AuthMessage>(_onAuthMessage);
     on<AuthRegisterCompanyAndAdmin>(_onAuthRegisterCompanyAndAdmin);
 //    on<AuthRegisterUserEcommerce>(_onAuthRegisterUserEcommerce);
     on<AuthLoggedOut>(_onAuthLoggedOut);
@@ -47,15 +46,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RestClient restClient;
   final ChatServer chat;
   final String classificationId;
-
-  void _onAuthMessage(
-    AuthMessage event,
-    Emitter<AuthState> emit,
-  ) {
-    AuthStatus lastStatus = state.status; // save current status
-    emit(state.copyWith(status: AuthStatus.loading));
-    return emit(state.copyWith(status: lastStatus, message: event.message));
-  }
 
   Future<void> _onAuthLoad(
     AuthLoad event,
