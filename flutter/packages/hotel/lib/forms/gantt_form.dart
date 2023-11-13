@@ -333,8 +333,9 @@ class _GanttFormFullState extends State<GanttFormFull> {
         headerText =
             '${days[(ganttFromDate.weekday + i) % 7]}\n${formatter.format(ganttFromDate.add(Duration(days: i)))}';
       }
-      headerItems.add(SizedBox(
+      headerItems.add(Container(
         height: 30,
+        color: Colors.lightGreen.withAlpha(100),
         width: screenWidth / columnsOnScreen,
         child: Text(
           headerText,
@@ -354,6 +355,7 @@ class _GanttFormFullState extends State<GanttFormFull> {
         .where((element) => int.parse(element.shipmentId ?? '') == index)
         .toList();
     return Container(
+      color: Colors.lightGreen.withAlpha(100),
       width: 80,
       height: 20,
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -383,13 +385,15 @@ class _GanttFormFullState extends State<GanttFormFull> {
     double halfDay = dayScale / 2;
 
     var roomReservations = reservations
-        .where((element) => int.parse(element.shipmentId ?? '') == index);
+        .where((element) => int.parse(element.shipmentId ?? '') == index)
+        .toList();
     for (FinDoc reservation in roomReservations) {
-//      debugPrint(
-//          "==${reservation.shipmentId}==room: ${reservation.items[0].assetName} "
-//          "orderId: ${reservation.orderId} "
-//          "fr:${reservation.items[0].rentalFromDate?.dateOnly()} "
-//          "to: ${reservation.items[0].rentalThruDate?.dateOnly()}");
+      debugPrint(
+          "==${reservation.shipmentId}==room: ${reservation.items[0].assetName} "
+          "orderId: ${reservation.orderId} "
+          "fr:${reservation.items[0].rentalFromDate?.dateOnly()} "
+          "to: ${reservation.items[0].rentalThruDate?.dateOnly()}");
+      // occupation by product
       if (reservation.items[0].description != null &&
           // all dates concatenated in description
           reservation.items[0].description!.startsWith('!!') &&
@@ -431,6 +435,8 @@ class _GanttFormFullState extends State<GanttFormFull> {
                   .inDays >=
               0) {
         // show occupation by room(asset) ==================================
+        roomReservations.sort((b, a) => (a.items[0].rentalFromDate!.dateOnly())
+            .compareTo(b.items[0].rentalFromDate!.dateOnly()));
         DateTime from = reservation.items[0].rentalFromDate!;
         DateTime thru = reservation.items[0].rentalThruDate!;
         // started before today only borderradius on the right
