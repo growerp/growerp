@@ -65,22 +65,22 @@ class UserBloc extends Bloc<UserEvent, UserState>
     }
     try {
       // start from record zero for initial and refresh
-      if (state.status == UserStatus.initial || event.refresh) {
-        emit(state.copyWith(status: UserStatus.loading));
-        Users compResult = await restClient.getUser(
-            start: 0,
-            limit: event.limit,
-            role: role,
-            searchString: event.searchString);
-        return emit(state.copyWith(
-          status: UserStatus.success,
-          users: start == 0
-              ? compResult.users
-              : (List.of(state.users)..addAll(compResult.users)),
-          hasReachedMax: compResult.users.length < _userLimit ? true : false,
-          searchString: '',
-        ));
-      }
+      emit(state.copyWith(status: UserStatus.loading));
+
+      Users compResult = await restClient.getUser(
+          start: start,
+          limit: event.limit,
+          role: role,
+          searchString: event.searchString);
+
+      return emit(state.copyWith(
+        status: UserStatus.success,
+        users: start == 0
+            ? compResult.users
+            : (List.of(state.users)..addAll(compResult.users)),
+        hasReachedMax: compResult.users.length < event.limit ? true : false,
+        searchString: '',
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: UserStatus.failure, users: [], message: getDioError(e)));

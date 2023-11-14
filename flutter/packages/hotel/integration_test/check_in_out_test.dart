@@ -60,6 +60,8 @@ void main() {
       "assets": roomsHotel,
       "users": customers
     });
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.tapByKey(tester, 'refresh');
     await createRoomReservation(tester, roomReservations.sublist(0));
     await selectCheckInOut(tester);
     expect(find.byKey(const Key('id0')), findsNWidgets(1));
@@ -75,7 +77,7 @@ void main() {
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
       clear: true,
-      title: 'Hotel reservation Test',
+      title: 'Hotel reservation Checkout Test',
       tester,
       router.generateRoute,
       menuOptions,
@@ -95,7 +97,7 @@ void main() {
         DateTime.now().add(const Duration(days: 1));
     await CommonTest.startTestApp(
       clear: true,
-      title: 'Hotel reservation Test',
+      title: 'Hotel reservation empty checkin/out Test',
       tester,
       router.generateRoute,
       menuOptions,

@@ -125,22 +125,22 @@ class ReservationDialogState extends State<ReservationForm> {
                 height: 600, width: 400, child: _addRentalItemDialog())));
   }
 
+  bool whichDayOk(DateTime day) {
+    var formatter = DateFormat('yyyy-MM-dd');
+    String date = formatter.format(day);
+    if (rentalDays.contains(date)) return false;
+    return true;
+  }
+
+  DateTime firstFreeDate() {
+    var nowDate = CustomizableDateTime.current;
+    while (whichDayOk(nowDate) == false) {
+      nowDate = nowDate.add(const Duration(days: 1));
+    }
+    return nowDate;
+  }
+
   Widget _addRentalItemDialog() {
-    bool whichDayOk(DateTime day) {
-      var formatter = DateFormat('yyyy-MM-dd');
-      String date = formatter.format(day);
-      if (rentalDays.contains(date)) return false;
-      return true;
-    }
-
-    DateTime firstFreeDate() {
-      var nowDate = CustomizableDateTime.current;
-      while (whichDayOk(nowDate) == false) {
-        nowDate = nowDate.add(const Duration(days: 1));
-      }
-      return nowDate;
-    }
-
     Future<void> selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
         context: context,
@@ -276,12 +276,10 @@ class ReservationDialogState extends State<ReservationForm> {
                                     .toString();
                             _productBloc.add(ProductRentalOccupancy(
                                 productId: newValue.productId));
-                            while (!whichDayOk(_selectedDate)) {
-                              _selectedDate =
-                                  _selectedDate.add(const Duration(days: 1));
-                            }
+                            await Future.delayed(
+                                const Duration(milliseconds: 800));
                             setState(() {
-                              _selectedDate = _selectedDate;
+                              _selectedDate = firstFreeDate();
                             });
                           },
                           validator: (value) =>

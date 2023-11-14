@@ -235,6 +235,9 @@ class AssetDialogState extends State<AssetDialogFull> {
                       _assetBloc.add(AssetUpdate(
                         Asset(
                           assetId: widget.asset.assetId,
+                          assetClassId: classificationId == 'AppHotel'
+                              ? 'Hotel Room'
+                              : null,
                           assetName: _nameController.text,
                           quantityOnHand: _quantityOnHandController.text != ""
                               ? Decimal.parse(_quantityOnHandController.text)

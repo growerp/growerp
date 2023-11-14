@@ -722,7 +722,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="product" type="Map">
                     <parameter name="productId" />
                     <parameter name="productTypeId" />
-                    <parameter name="assetClassId" default-value="Hotel Room" />
+                    <parameter name="assetClassId" />
                     <parameter name="productName" />
                     <parameter name="description" />
                     <parameter name="price" />

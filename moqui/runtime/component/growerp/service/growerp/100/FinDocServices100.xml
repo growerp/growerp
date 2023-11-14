@@ -1840,6 +1840,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="nowBeginOfNextDay"
                 from="java.sql.Timestamp.from(nowBeginOfDay.plusDays(1).toInstant())" />
             <!-- get active rentals -->
+            <log message="=====input prod: $productId own $ownerPartyId" />
             <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productId" from="productId" ignore-if-empty="true" />
@@ -1850,14 +1851,14 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <!-- gather fullDates which have rentals of this product -->
             <set field="fullDates" from="[]" />
-            <set field="fullDatesProductRental" from="[]" />
+            <set field="products" from="[]" />
             <set field="products" from="[]" />
             <iterate list="rentals" entry="rental">
                 <if condition="lastItem &amp;&amp; lastItem.productId != rental.productId">
                     <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
                         out-map="context" in-map="[productId: lastItem.productId, dates: fullDates]" />
                     <!-- RentalLastItem has as output fullDates -->
-                    <script>fullDatesProductRental.add([
+                    <script>products.add([
                         productId: lastItem.productId,
                         productName: lastItem.productName,
                         fullDates: fullDates,
@@ -1895,7 +1896,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="lastItem">
                 <service-call name="growerp.100.FinDocServices100.process#RentalLastItem"
                     out-map="context" in-map="[productId: lastItem.productId,dates: fullDates]" />
-                <script>fullDatesProductRental.add([
+                <script>products.add([
                     productId: lastItem.productId,
                     productName: lastItem.productName,
                     fullDates: fullDates,
@@ -1910,7 +1911,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <iterate list="rentalProducts" entry="rentalProduct">
                     <script>
-                    var fullDates = fullDatesProductRental.find 
+                    var fullDates = products.find 
                             {it.productId == rentalProduct.productId}?.fullDates;
                     products.add([
                         productId: rentalProduct.productId,

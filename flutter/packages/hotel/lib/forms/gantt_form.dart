@@ -87,8 +87,6 @@ class _GanttFormFullState extends State<GanttFormFull> {
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     scheme = Theme.of(context).colorScheme;
-    itemCount = 0;
-    reservations = [];
     return BlocBuilder<AssetBloc, AssetState>(builder: (context, assetState) {
       return BlocBuilder<FinDocBloc, FinDocState>(
           builder: (context, finDocState) {
@@ -98,8 +96,15 @@ class _GanttFormFullState extends State<GanttFormFull> {
               productState.status == ProductStatus.success &&
               assetState.status == AssetStatus.success) {
             if (assetState.assets.isEmpty) {
-              return const Center(child: Text("No Rooms found!"));
+              return Column(children: [
+                const SizedBox(height: 10),
+                ganttButtons(),
+                const SizedBox(height: 200),
+                const Center(child: Text("No Rooms found!")),
+              ]);
             }
+            itemCount = 0;
+            reservations = [];
             assets = assetState.assets;
             productFullDates = productState.productFullDates;
             finDocs = finDocState.finDocs;
@@ -210,43 +215,7 @@ class _GanttFormFullState extends State<GanttFormFull> {
               body: Column(
                 children: <Widget>[
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 18,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () =>
-                              setState(() => columnPeriod = Period.day),
-                          child: const Text('Day'),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () =>
-                              setState(() => columnPeriod = Period.week),
-                          child: const Text('Week'),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () =>
-                              setState(() => columnPeriod = Period.month),
-                          child: const Text('Month'),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            _finDocBloc.add(const FinDocFetch(refresh: true));
-                            _assetBloc.add(const AssetFetch(refresh: true));
-                            _productBloc.add(const ProductRentalOccupancy());
-                            setState(() {});
-                            return;
-                          },
-                          child: const Text('Refresh'),
-                        ),
-                        const SizedBox(width: 10),
-                      ],
-                    ),
-                  ),
+                  ganttButtons(),
                   const SizedBox(height: 5),
                   Expanded(
                     child: HorizontalDataTable(
@@ -257,7 +226,7 @@ class _GanttFormFullState extends State<GanttFormFull> {
                       headerWidgets: _getHeaderWidget(),
                       leftSideItemBuilder: _generateFirstColumnRow,
                       rightSideItemBuilder: buildAssetReservation,
-                      itemCount: itemCount,
+                      itemCount: itemCount + 1,
                       itemExtent: 20,
                       leftHandSideColBackgroundColor: scheme.background,
                       rightHandSideColBackgroundColor: scheme.background,
@@ -271,6 +240,44 @@ class _GanttFormFullState extends State<GanttFormFull> {
         });
       });
     });
+  }
+
+  SizedBox ganttButtons() {
+    return SizedBox(
+      height: 18,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          ElevatedButton(
+            onPressed: () => setState(() => columnPeriod = Period.day),
+            child: const Text('Day'),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => setState(() => columnPeriod = Period.week),
+            child: const Text('Week'),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => setState(() => columnPeriod = Period.month),
+            child: const Text('Month'),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            key: const Key('refresh'),
+            onPressed: () {
+              _finDocBloc.add(const FinDocFetch(refresh: true));
+              _assetBloc.add(const AssetFetch(refresh: true));
+              _productBloc.add(const ProductRentalOccupancy());
+              setState(() {});
+              return;
+            },
+            child: const Text('Refresh'),
+          ),
+          const SizedBox(width: 10),
+        ],
+      ),
+    );
   }
 
   Widget buildGrid() {
@@ -383,17 +390,16 @@ class _GanttFormFullState extends State<GanttFormFull> {
       dayScale = screenWidth / (columnsOnScreen * 365 / 12);
     }
     double halfDay = dayScale / 2;
-
     var roomReservations = reservations
         .where((element) => int.parse(element.shipmentId ?? '') == index)
         .toList();
     for (FinDoc reservation in roomReservations) {
-      debugPrint(
+/*      debugPrint(
           "==${reservation.shipmentId}==room: ${reservation.items[0].assetName} "
           "orderId: ${reservation.orderId} "
           "fr:${reservation.items[0].rentalFromDate?.dateOnly()} "
           "to: ${reservation.items[0].rentalThruDate?.dateOnly()}");
-      // occupation by product
+*/ // occupation by product
       if (reservation.items[0].description != null &&
           // all dates concatenated in description
           reservation.items[0].description!.startsWith('!!') &&

@@ -28,7 +28,8 @@ import '../../../../growerp_core.dart';
 import '../../../../test_data.dart';
 
 class CommonTest {
-  String classificationId = GlobalConfiguration().get("classificationId");
+  static String classificationId =
+      GlobalConfiguration().get("classificationId");
   static const int waitTime = 3;
 
   static Future<void> startTestApp(
@@ -48,7 +49,7 @@ class CommonTest {
     }
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
-      classificationId: 'AppAdmin',
+      classificationId: classificationId,
       restClient: RestClient(await buildDioClient(null)),
       chatServer: ChatServer(),
       router: router,
@@ -313,7 +314,6 @@ class CommonTest {
 
   static Future<void> checkWidgetKey(WidgetTester tester, String widgetKey,
       [int count = 1]) async {
-    print("====check widget key: $widgetKey");
     expect(find.byKey(Key(widgetKey)), findsNWidgets(count));
   }
 

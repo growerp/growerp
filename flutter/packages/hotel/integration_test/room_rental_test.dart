@@ -139,6 +139,8 @@ void main() {
       "assets": roomsHotel, // will also add products
       "users": customers
     });
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.tapByKey(tester, 'refresh');
     await createRoomReservation(tester, roomReservations);
     await selectReservations(tester);
     await OrderTest.checkRentalSalesOrder(tester);

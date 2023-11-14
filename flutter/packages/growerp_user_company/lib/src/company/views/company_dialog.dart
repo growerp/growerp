@@ -41,7 +41,7 @@ class ShowCompanyDialog extends StatelessWidget {
         create: (context) =>
             CompanyBloc(repos, company.role, context.read<AuthBloc>())
               ..add(CompanyFetch(companyPartyId: company.partyId ?? '')),
-        child: company.partyId != '_NEW_'
+        child: company.partyId != '_NEW_' // null will show default company
             ? BlocBuilder<CompanyBloc, CompanyState>(
                 builder: (context, state) {
                   if (state.status == CompanyStatus.success) {
@@ -176,8 +176,8 @@ class CompanyFormState extends State<CompanyDialog> {
           if (state.status == CompanyStatus.success) {
             // message on parent page
             HelperFunctions.showMessage(context, state.message, Colors.green);
-            if (widget.dialog == true) {
-              Navigator.of(context).pop(state.companies[0]);
+            if (widget.dialog == true && _nameController.text != '') {
+              Navigator.of(context).pop(company);
             }
           }
         },

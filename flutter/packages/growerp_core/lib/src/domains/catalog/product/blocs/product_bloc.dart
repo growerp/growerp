@@ -225,7 +225,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             productId: event.productId);
         emit(state.copyWith(
           status: ProductStatus.success,
-          occupancyDates: result.products[0].fullDates,
+          occupancyDates:
+              result.products.isNotEmpty ? result.products[0].fullDates : [],
         ));
       } else {
         Products result = await restClient.getDailyRentalOccupancy();
