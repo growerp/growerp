@@ -14,7 +14,7 @@
 
 part of 'opportunity_bloc.dart';
 
-enum OpportunityStatus { initial, success, failure }
+enum OpportunityStatus { initial, loading, success, failure }
 
 class OpportunityState extends Equatable {
   const OpportunityState({

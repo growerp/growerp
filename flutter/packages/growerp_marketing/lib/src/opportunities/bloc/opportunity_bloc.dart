@@ -58,17 +58,20 @@ class OpportunityBloc extends Bloc<OpportunityEvent, OpportunityState> {
     }
     try {
       // start from record zero for initial and refresh
-      Opportunities compResult =
-          await restClient.getOpportunity(searchString: event.searchString);
+      emit(state.copyWith(status: OpportunityStatus.loading));
+
+      Opportunities compResult = await restClient.getOpportunity(
+          start: start, searchString: event.searchString, limit: event.limit);
+
       return emit(state.copyWith(
-          status: OpportunityStatus.success,
-          opportunities: start == 0
-              ? (List.of(state.opportunities)..addAll(compResult.opportunities))
-              : compResult.opportunities,
-          hasReachedMax: compResult.opportunities.length < _opportunityLimit
-              ? true
-              : false,
-          searchString: ''));
+        status: OpportunityStatus.success,
+        opportunities: start == 0
+            ? compResult.opportunities
+            : (List.of(state.opportunities)..addAll(compResult.opportunities)),
+        hasReachedMax:
+            compResult.opportunities.length < _opportunityLimit ? true : false,
+        searchString: '',
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: OpportunityStatus.failure,

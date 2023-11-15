@@ -20,7 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="opportunityId" />
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
-            <parameter name="my" default-value="true" type="Boolean" />
+            <parameter name="my" default-value="false" type="Boolean" />
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
