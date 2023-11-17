@@ -106,7 +106,7 @@ class FinDocListItemTrans extends StatelessWidget {
         trailing: SizedBox(
             width: isPhone ? 96 : 195,
             child: itemButtons(context, paymentMethod, finDocBloc, repos)),
-        children: items(finDoc));
+        children: items(context, finDoc));
   }
 
   Widget itemButtons(BuildContext context, PaymentMethod? paymentMethod,
@@ -150,7 +150,7 @@ class FinDocListItemTrans extends StatelessWidget {
     ]);
   }
 
-  List<Widget> items(FinDoc findoc) {
+  List<Widget> items(BuildContext context, FinDoc findoc) {
     List<Widget> finDocItems = List.from(finDoc.items.mapIndexed((index, e) {
       String debitCredit = '';
       if (e.isDebit != null && e.isDebit == true) {
@@ -176,6 +176,67 @@ class FinDocListItemTrans extends StatelessWidget {
                     key: Key('itemLine$index'))))
       ]);
     }));
+
+    Widget refDocDialog(String id, FinDocType type, bool sales) {
+      return Wrap(
+          alignment: WrapAlignment.center,
+          runAlignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text("${type.toString()} Id: "),
+            TextButton(
+              onPressed: () async => await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) => type == FinDocType.payment
+                      ? ShowPaymentDialog(
+                          FinDoc(paymentId: id, sales: sales, docType: type))
+                      : ShowFinDocDialog(type == FinDocType.invoice
+                          ? FinDoc(invoiceId: id, sales: sales, docType: type)
+                          : type == FinDocType.shipment
+                              ? FinDoc(
+                                  shipmentId: id, sales: sales, docType: type)
+                              : type == FinDocType.order
+                                  ? FinDoc(
+                                      orderId: id, sales: sales, docType: type)
+                                  : FinDoc(
+                                      transactionId: id,
+                                      sales: sales,
+                                      docType: type))),
+              child: Text(id),
+            )
+          ]);
+    }
+
+    List<Widget> refDoc = [];
+    if (finDoc.docType != FinDocType.invoice && finDoc.invoiceId != null) {
+      refDoc.add(
+          refDocDialog(finDoc.invoiceId!, FinDocType.invoice, finDoc.sales));
+    }
+    if (finDoc.docType != FinDocType.order && finDoc.orderId != null) {
+      refDoc.add(refDocDialog(finDoc.orderId!, FinDocType.order, finDoc.sales));
+    }
+    if (finDoc.docType != FinDocType.payment && finDoc.paymentId != null) {
+      refDoc.add(
+          refDocDialog(finDoc.paymentId!, FinDocType.payment, finDoc.sales));
+    }
+    if (finDoc.docType != FinDocType.shipment && finDoc.shipmentId != null) {
+      refDoc.add(
+          refDocDialog(finDoc.shipmentId!, FinDocType.shipment, finDoc.sales));
+    }
+    if (finDoc.docType != FinDocType.transaction &&
+        finDoc.transactionId != null) {
+      refDoc.add(refDocDialog(
+          finDoc.transactionId!, FinDocType.transaction, finDoc.sales));
+    }
+
+    if (refDoc.isNotEmpty) {
+      finDocItems.add(ListTile(
+          leading: const SizedBox(width: 50),
+          title: const Text("Referenced Documents:"),
+          subtitle: Wrap(children: refDoc)));
+    }
+
     return finDocItems;
   }
 }

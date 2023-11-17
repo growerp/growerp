@@ -110,7 +110,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           message: event.refresh ? '${docType}s reloaded' : null));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
+          status: FinDocStatus.failure,
+          finDocs: state.finDocs,
+          message: getDioError(e)));
     }
   }
 

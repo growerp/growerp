@@ -275,68 +275,74 @@ class FinDocListState extends State<FinDocList> {
       }
 
       builder(context, state) {
-        if (state.status == FinDocStatus.success ||
-            state.status == FinDocStatus.failure) {
-          finDocs = state.finDocs;
-          hasReachedMax = state.hasReachedMax;
-          // if rental (hotelroom) need to show checkin/out orders
-          if (widget.onlyRental && widget.status != null) {
-            if (widget.status == FinDocStatusVal.created.toString()) {
+        switch (state.status) {
+          case FinDocStatus.failure:
+            return Center(
+                child: ElevatedButton(
+                    onPressed: () =>
+                        _finDocBloc.add(const FinDocFetch(refresh: true)),
+                    child: const Text('Press here to recover')));
+          case FinDocStatus.success:
+            finDocs = state.finDocs;
+            hasReachedMax = state.hasReachedMax;
+            // if rental (hotelroom) need to show checkin/out orders
+            if (widget.onlyRental && widget.status != null) {
+              if (widget.status == FinDocStatusVal.created.toString()) {
+                finDocs = state.finDocs
+                    .where((FinDoc el) =>
+                        el.items[0].rentalFromDate != null &&
+                        el.status.toString() == widget.status &&
+                        el.items[0].rentalFromDate!
+                            .isSameDate(CustomizableDateTime.current))
+                    .toList();
+              }
+              if (widget.status == FinDocStatusVal.approved.toString()) {
+                finDocs = state.finDocs
+                    .where((FinDoc el) =>
+                        el.items[0].rentalThruDate != null &&
+                        el.status.toString() == widget.status &&
+                        el.items[0].rentalThruDate!
+                            .isSameDate(CustomizableDateTime.current))
+                    .toList();
+              }
+            } else if (widget.onlyRental == true) {
               finDocs = state.finDocs
-                  .where((FinDoc el) =>
-                      el.items[0].rentalFromDate != null &&
-                      el.status.toString() == widget.status &&
-                      el.items[0].rentalFromDate!
-                          .isSameDate(CustomizableDateTime.current))
+                  .where((el) => el.items[0].rentalFromDate != null)
                   .toList();
             }
-            if (widget.status == FinDocStatusVal.approved.toString()) {
-              finDocs = state.finDocs
-                  .where((FinDoc el) =>
-                      el.items[0].rentalThruDate != null &&
-                      el.status.toString() == widget.status &&
-                      el.items[0].rentalThruDate!
-                          .isSameDate(CustomizableDateTime.current))
-                  .toList();
-            }
-          } else if (widget.onlyRental == true) {
-            finDocs = state.finDocs
-                .where((el) => el.items[0].rentalFromDate != null)
-                .toList();
-          }
 
-          return Scaffold(
-              floatingActionButton: ![FinDocType.shipment]
-                      .contains(widget.docType)
-                  ? FloatingActionButton(
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return RepositoryProvider.value(
-                                  value: repos,
-                                  child: BlocProvider.value(
-                                      value: _finDocBloc,
-                                      child: widget.docType ==
-                                              FinDocType.payment
-                                          ? PaymentDialog(
-                                              finDoc: FinDoc(
-                                                  sales: widget.sales,
-                                                  docType: widget.docType))
-                                          : FinDocDialog(
-                                              finDoc: FinDoc(
-                                                  sales: widget.sales,
-                                                  docType: widget.docType))));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add))
-                  : null,
-              body: finDocsPage());
-        } else {
-          return const Center(child: CircularProgressIndicator());
+            return Scaffold(
+                floatingActionButton: ![FinDocType.shipment]
+                        .contains(widget.docType)
+                    ? FloatingActionButton(
+                        key: const Key("addNew"),
+                        onPressed: () async {
+                          await showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return RepositoryProvider.value(
+                                    value: repos,
+                                    child: BlocProvider.value(
+                                        value: _finDocBloc,
+                                        child: widget.docType ==
+                                                FinDocType.payment
+                                            ? PaymentDialog(
+                                                finDoc: FinDoc(
+                                                    sales: widget.sales,
+                                                    docType: widget.docType))
+                                            : FinDocDialog(
+                                                finDoc: FinDoc(
+                                                    sales: widget.sales,
+                                                    docType: widget.docType))));
+                              });
+                        },
+                        tooltip: 'Add New',
+                        child: const Icon(Icons.add))
+                    : null,
+                body: finDocsPage());
+          default:
+            return const Center(child: CircularProgressIndicator());
         }
       }
 

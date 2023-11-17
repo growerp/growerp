@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 String getDioError(e) {
@@ -33,5 +35,12 @@ String getDioError(e) {
       expression = "Connection error";
       break;
   }
-  return "exception: $expression ${exception.message} error: ${e.response}";
+  String returnMessage = '';
+  Map<String, dynamic> response = json.decode(e.response.toString());
+
+  if (exception.type != DioExceptionType.unknown)
+    returnMessage += "$expression: ${exception.message}";
+  if (e.response != null)
+    returnMessage += "${response['errors']}[${response['errorCode']}]";
+  return returnMessage;
 }
