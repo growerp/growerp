@@ -135,6 +135,9 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                   expanded = !expanded;
                 }),
               ),
+            ElevatedButton(
+                child: const Text('Recalculate'),
+                onPressed: () => _ledgerBloc.add(LedgerCalculate())),
           ]),
           const SizedBox(height: 10),
           Row(children: [

@@ -301,7 +301,7 @@ class FinDocListItem extends StatelessWidget {
                     title: Text(
                         // blank required before and after productId for automated test
                         finDoc.docType == FinDocType.shipment
-                            ? "ProductId: ${e.productId} "
+                            ? "Product: ${e.description}[${e.productId}] "
                                 "Quantity: ${e.quantity.toString()} "
                             : finDoc.docType == FinDocType.order ||
                                     finDoc.docType == FinDocType.invoice

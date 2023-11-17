@@ -24,6 +24,7 @@ part 'ledger_state.dart';
 class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
   LedgerBloc(this.restClient) : super(const LedgerState()) {
     on<LedgerFetch>(_onLedgerFetch);
+    on<LedgerCalculate>(_onLedgerCalculate);
     on<LedgerTimePeriods>(_onLedgerTimePeriods);
   }
 
@@ -76,6 +77,19 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     try {
       TimePeriods result = await restClient.getTimePeriods();
       return emit(state.copyWith(timePeriods: result.timePeriods));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerStatus.failure, message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onLedgerCalculate(
+    LedgerCalculate event,
+    Emitter<LedgerState> emit,
+  ) async {
+    try {
+      await restClient.calculateLedger();
+      return emit(state);
     } on DioException catch (e) {
       emit(state.copyWith(
           status: LedgerStatus.failure, message: getDioError(e)));

@@ -31,3 +31,5 @@ class LedgerFetch extends LedgerEvent {
 }
 
 class LedgerTimePeriods extends LedgerEvent {}
+
+class LedgerCalculate extends LedgerEvent {}
