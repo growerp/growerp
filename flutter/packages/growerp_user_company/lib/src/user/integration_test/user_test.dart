@@ -162,7 +162,6 @@ class UserTest {
         await CommonTest.tapByKey(tester, 'newCompany');
         await CommonTest.enterText(
             tester, 'companyName', user.company!.name!); // required!
-        await CommonTest.drag(tester);
         await CommonTest.enterText(
             tester, 'telephoneNr', user.company!.telephoneNr ?? '');
         if (user.company?.email != null) {
@@ -170,9 +169,8 @@ class UserTest {
               company: user.company!.copyWith(
                   email: user.company!.email!.replaceFirst('XXX', '${seq++}')));
         }
-        //     await CommonTest.dragUntil(tester, key: 'email');
+        await CommonTest.dragUntil(tester, key: 'email');
         await CommonTest.enterText(tester, 'email', user.company?.email ?? '');
-        await CommonTest.drag(tester);
         await CommonTest.drag(tester);
         await CommonTest.tapByKey(tester, 'update', seconds: 2);
       }
@@ -196,7 +194,6 @@ class UserTest {
       }
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'updateUser');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
       newUsers.add(user);
     }

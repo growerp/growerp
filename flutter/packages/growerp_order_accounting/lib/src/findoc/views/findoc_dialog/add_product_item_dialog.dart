@@ -12,6 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:async';
+
 import 'package:decimal/decimal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -22,14 +24,16 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../../accounting/accounting.dart';
 
-Future addProductItemDialog(BuildContext context, String classificationId,
-    ProductBloc productBloc, GlAccountBloc accountBloc) async {
+Future addProductItemDialog(BuildContext context) async {
   final priceController = TextEditingController();
   final itemDescriptionController = TextEditingController();
   final quantityController = TextEditingController();
   final productSearchBoxController = TextEditingController();
   GlAccount? selectedGlAccount;
   Product? selectedProduct;
+  GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
+  ProductBloc productBloc = context.read<ProductBloc>();
+  String classificationId = context.read<String>();
 
   return showDialog<FinDocItem>(
       context: context,
@@ -41,7 +45,7 @@ Future addProductItemDialog(BuildContext context, String classificationId,
             return BlocProvider.value(
                 value: productBloc,
                 child: BlocProvider.value(
-                    value: accountBloc,
+                    value: glAccountBloc,
                     child: Dialog(
                         key: const Key('addProductItemDialog'),
                         shape: const RoundedRectangleBorder(
@@ -67,6 +71,8 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                             return DropdownSearch<Product>(
                                               selectedItem: selectedProduct,
                                               popupProps: PopupProps.menu(
+                                                showSelectedItems: true,
+                                                isFilterOnline: true,
                                                 showSearchBox: true,
                                                 searchFieldProps:
                                                     TextFieldProps(
@@ -96,14 +102,24 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                               asyncItems: (String filter) {
                                                 productBloc.add(ProductFetch(
                                                     searchString: filter,
+                                                    limit: 3,
+                                                    isForDropDown: true,
                                                     assetClassId:
                                                         classificationId ==
                                                                 'AppHotel'
                                                             ? 'Hotel Room'
                                                             : ''));
-                                                return Future.value(
-                                                    productState.products);
+                                                return Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 100), () {
+                                                  return Future.value(
+                                                      productBloc
+                                                          .state.products);
+                                                });
                                               },
+                                              compareFn: (item, sItem) =>
+                                                  item.pseudoId ==
+                                                  sItem.pseudoId,
                                               onChanged: (Product? newValue) {
                                                 setState(() {
                                                   selectedProduct = newValue;
@@ -170,8 +186,8 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                       const SizedBox(height: 20),
                                       BlocBuilder<GlAccountBloc,
                                               GlAccountState>(
-                                          builder: (context, state) {
-                                        switch (state.status) {
+                                          builder: (context, glAccountState) {
+                                        switch (glAccountState.status) {
                                           case GlAccountStatus.failure:
                                             return const FatalErrorForm(
                                                 message:
@@ -180,6 +196,8 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                             return DropdownSearch<GlAccount>(
                                               selectedItem: selectedGlAccount,
                                               popupProps: PopupProps.menu(
+                                                isFilterOnline: true,
+                                                showSelectedItems: true,
                                                 showSearchBox: true,
                                                 searchFieldProps:
                                                     const TextFieldProps(
@@ -206,7 +224,23 @@ Future addProductItemDialog(BuildContext context, String classificationId,
                                               key: const Key('glAccount'),
                                               itemAsString: (GlAccount? u) =>
                                                   " ${u?.accountCode} ${u?.accountName} ",
-                                              items: state.glAccounts,
+                                              asyncItems:
+                                                  (String filter) async {
+                                                glAccountBloc.add(
+                                                    GlAccountFetch(
+                                                        searchString: filter,
+                                                        limit: 3));
+                                                return Future.delayed(
+                                                    const Duration(
+                                                        milliseconds: 100), () {
+                                                  return Future.value(
+                                                      glAccountBloc
+                                                          .state.glAccounts);
+                                                });
+                                              },
+                                              compareFn: (item, sItem) =>
+                                                  item.accountCode ==
+                                                  sItem.accountCode,
                                               onChanged: (GlAccount? newValue) {
                                                 selectedGlAccount = newValue!;
                                               },

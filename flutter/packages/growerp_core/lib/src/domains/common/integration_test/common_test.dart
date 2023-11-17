@@ -81,6 +81,7 @@ class CommonTest {
             reason: "Could not find free email address");
       } on DioException catch (e) {
         debugPrint("error checking email: ${getDioError(e)}");
+        expect(true, false, reason: "=============backend error =============");
       }
     }
 
@@ -100,7 +101,7 @@ class CommonTest {
     if (demoData == false) {
       await CommonTest.tapByKey(tester, 'demoData');
     } // no demo data
-    await CommonTest.tapByKey(tester, 'newCompany', seconds: 5);
+    await CommonTest.tapByKey(tester, 'newCompany', seconds: waitTime);
     // start with clean saveTest
     await PersistFunctions.persistTest(SaveTest(
       sequence: ++seq,
@@ -108,7 +109,7 @@ class CommonTest {
       admin: admin.copyWith(email: email, loginName: email),
       company: initialCompany.copyWith(email: email, name: companyName),
     ));
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: waitTime));
     await CommonTest.login(tester, testData: testData);
   }
 
@@ -153,10 +154,11 @@ class CommonTest {
       WidgetTester tester, String option, String formName,
       [String? tapNumber]) async {
     if (isPhone()) {
+      expect(find.byTooltip('Open navigation menu'), findsOneWidget,
+          reason: "could not find tooltip: 'Open navigation menu' to tap on");
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pump(const Duration(seconds: 3));
     }
-    debugPrint("=====incoming key: $option $formName $tapNumber");
     if (!option.startsWith('tap')) {
       if (option.startsWith('db')) {
         // convert old mainscrean tapping to drawer on mobile
@@ -166,11 +168,10 @@ class CommonTest {
       }
       option = "tap$option";
     }
-    debugPrint("=====looking for tap key: $option $tapNumber tap$formName");
     await tapByKey(tester, option, seconds: 3);
     if (tapNumber != null) {
       if (isPhone()) {
-        await tester.tap(find.byTooltip(tapNumber));
+        await tapByTooltip(tester, tapNumber);
       } else {
         await tapByKey(tester, "tap$formName");
       }
@@ -289,9 +290,6 @@ class CommonTest {
       found = tester.any(find.byKey(Key(keyName), skipOffstage: true));
       await tester.pump(const Duration(milliseconds: 500));
     }
-    if (found) {
-      debugPrint("=== waited for key $keyName to show: ${times * 0.5} seconds");
-    }
     //expect(found, true,
     //    reason: 'key $keyName not found even after 6 seconds wait!');
     return found;
@@ -304,11 +302,6 @@ class CommonTest {
       found = tester.any(find.byType(SnackBar));
       await tester.pump(const Duration(milliseconds: 500));
     }
-    if (!found) {
-      debugPrint("=== waited for message to disappear: ${times * 0.5} seconds");
-    }
-//    expect(found, false,
-//        reason: 'Snackbar still found, even after 6 seconds wait!');
     return found;
   }
 
@@ -350,8 +343,6 @@ class CommonTest {
       await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       found = tester.any(find.byKey(Key(key)));
     } while (times++ < 10 && found == false);
-//    await tester.pumpAndSettle();
-    debugPrint("======dragged $times times");
   }
 
   /// [lowLevel]
@@ -377,13 +368,17 @@ class CommonTest {
     await tester.enterText(find.byType(TextField).last, value);
     await tester.pumpAndSettle(
         const Duration(seconds: waitTime)); // wait for search result
-    await tester.tap(find.textContaining(" $value").first); // hidden char!
+    expect(find.textContaining(value).first, findsOneWidget,
+        reason: "could not find text: $value to tap on");
+    await tester.tap(find.textContaining(value).first); // hidden char!
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> enterDropDown(
       WidgetTester tester, String key, String value,
       {int seconds = 1}) async {
+    expect(find.byKey(Key(key)), findsOneWidget,
+        reason: "could not find text: $value in drop down list");
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle(Duration(seconds: seconds));
     if (value.isEmpty) {
@@ -479,6 +474,8 @@ class CommonTest {
 
   static Future<void> tapByKey(WidgetTester tester, String key,
       {int seconds = 1}) async {
+    expect(find.byKey(Key(key)).last, findsOneWidget,
+        reason: "could not find key: $key to tap on");
     await tester.tap(find.byKey(Key(key)).last);
     await tester.pump();
     await tester.pumpAndSettle(Duration(seconds: seconds));
@@ -486,18 +483,26 @@ class CommonTest {
 
   static Future<void> tapByWidget(WidgetTester tester, Widget widget,
       {int seconds = 1}) async {
+    expect(find.byWidget(widget).first, findsOneWidget,
+        reason: "could not find widget: ${widget.toString()} to tap on");
     await tester.tap(find.byWidget(widget).first);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> tapByType(WidgetTester tester, Type type,
       {int seconds = 1}) async {
+    expect(find.byType(type).first, findsOneWidget,
+        reason: "could not find type: $type to tap on");
     await tester.tap(find.byType(type).first);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static Future<void> tapByText(WidgetTester tester, String text,
       {int seconds = 1}) async {
+    expect(find.textContaining(RegExp(text, caseSensitive: false)).last,
+        findsOneWidget,
+        reason:
+            "could not find text: ${RegExp(text, caseSensitive: false)} to tap on");
     await tester
         .tap(find.textContaining(RegExp(text, caseSensitive: false)).last);
     await tester.pumpAndSettle(Duration(seconds: seconds));
@@ -505,6 +510,8 @@ class CommonTest {
 
   static Future<void> tapByTooltip(WidgetTester tester, String text,
       {int seconds = 1}) async {
+    expect(find.byTooltip(text), findsOneWidget,
+        reason: "could not find tooltip: $text to tap on");
     await tester.tap(find.byTooltip(text));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }

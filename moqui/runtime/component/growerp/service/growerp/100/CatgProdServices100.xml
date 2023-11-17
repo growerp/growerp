@@ -26,7 +26,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="assetClassId" />
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
-            <parameter name="filter" default="null" />
+            <parameter name="isForDropDown" type="Boolean" default="false" />
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
@@ -72,9 +72,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <set field="categoryId" from="catList[0].productCategoryId" />
             </if>
-            <if condition="filter != null">
-                <set field="filter" value="%${filter}%" />
-            </if>
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
@@ -101,14 +98,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <!--econdition
                 field-name="productId" operator="is-not-null"/-->
                 <econdition field-name="productId" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="pseudoId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="productId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="productName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                </econditions>
                 <econditions combine="or">
                     <econdition field-name="productId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
@@ -143,23 +132,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <iterate entry="product" list="productList">
                 <if condition="lastItem &amp;&amp; lastItem.productId != product.productId">
-                    <set field="productOut.categories" from="categories" />
+                    <if condition="!isForDropDown">
+                        <set field="productOut.categories" from="categories" />
+                    </if>
                     <script>products.add(productOut)</script>
                     <set field="categories" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.productId != product.productId">
-                    <if condition="filter != null">
-                        <script>
-                            products.add([
-                            productId: product.productId,
-                            pseudoId: product.pseudoId,
-                            productName: product.productName,
-                            price: product.price ? product.price.toString() : '',
-                            listPrice: product.listPrice ? product.listPrice.toString() : '',
-                            ])
-                        </script>
-                        <continue />
-                    </if>
                     <!-- assets for hotel not using moqui inventory -->
                     <if condition="classificationId == 'AppHotel'">
                         <entity-find-count entity-name="mantle.product.asset.Asset"
@@ -184,39 +163,51 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
 
-
-                    <!-- content -->
-                    <entity-find entity-name="mantle.product.ProductContent" list="contents"
-                        limit="1">
-                        <econdition field-name="productId" from="product.productId" />
-                        <econditions combine="or">
-                            <econdition field-name="productContentTypeEnumId" value="PcntImageSmall" />
-                        </econditions>
-                    </entity-find>
-                    <if condition="contents">
-                        <service-call name="growerp.100.ImageServices100.download#Image"
-                            in-map="[contentLocation: contents[0].contentLocation]"
-                            out-map="context" />
+                    <if condition="isForDropDown">
+                        <set field="productOut"
+                            from="[
+                                productId: product.productId,
+                                pseudoId: product.pseudoId,
+                                productName: product.productName,
+                                price: product.price ? product.price.toString() : '',
+                                listPrice: product.listPrice ? product.listPrice.toString() : '',
+                                ]" />
                         <else>
-                            <set field="imageFile" from="null" />
+                            <!-- content -->
+                            <entity-find entity-name="mantle.product.ProductContent" list="contents"
+                                limit="1">
+                                <econdition field-name="productId" from="product.productId" />
+                                <econditions combine="or">
+                                    <econdition field-name="productContentTypeEnumId"
+                                        value="PcntImageSmall" />
+                                </econditions>
+                            </entity-find>
+                            <if condition="contents">
+                                <service-call name="growerp.100.ImageServices100.download#Image"
+                                    in-map="[contentLocation: contents[0].contentLocation]"
+                                    out-map="context" />
+                                <else>
+                                    <set field="imageFile" from="null" />
+                                </else>
+                            </if>
+                            <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                                in-map="[docType: 'product', statusId: product.productTypeEnumId]"
+                                out-map="prodConvert" />
+                            <set field="productOut"
+                                from="[
+                            productId: product.productId,
+                            pseudoId: product.pseudoId,
+                            productName: product.productName ?: '',
+                            productTypeId: prodConvert.convertedStatusId,
+                            assetClassId: product.assetClassEnumId,
+                            description: product.description?:'',
+                            price: product.price ? product.price.toString() : null,
+                            listPrice: product.listPrice ? product.listPrice.toString() : null,
+                            useWarehouse: product.requireInventory == 'Y' ? true : false,
+                            assetCount: assetCount ? assetCount : null,
+                            image: imageFile]" />
                         </else>
                     </if>
-                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                        in-map="[docType: 'product', statusId: product.productTypeEnumId]"
-                        out-map="prodConvert" />
-                    <set field="productOut"
-                        from="[
-                        productId: product.productId,
-                        pseudoId: product.pseudoId,
-                        productName: product.productName ?: '',
-                        productTypeId: prodConvert.convertedStatusId,
-                        assetClassId: product.assetClassEnumId,
-                        description: product.description?:'',
-                        price: product.price ? product.price.toString() : null,
-                        listPrice: product.listPrice ? product.listPrice.toString() : null,
-                        useWarehouse: product.requireInventory == 'Y' ? true : false,
-                        assetCount: assetCount ? assetCount : null,
-                        image: imageFile]" />
                 </if>
                 <if
                     condition="product.categoryId &amp;&amp; 
@@ -229,7 +220,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="lastItem" from="product" />
             </iterate>
             <if condition="lastItem">
-                <set field="productOut.categories" from="categories" />
+                <if condition="!isForDropDown">
+                    <set field="productOut.categories" from="categories" />
+                </if>
                 <script>products.add(productOut)</script>
             </if>
         </actions>

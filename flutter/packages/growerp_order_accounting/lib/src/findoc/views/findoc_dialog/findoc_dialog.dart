@@ -132,11 +132,11 @@ class MyFinDocState extends State<FinDocPage> {
         finDocUpdated.otherCompany ?? finDocUpdated.otherUser?.company;
     _finDocBloc = context.read<FinDocBloc>();
     _userBloc = context.read<UserBloc>();
-    _userBloc.add(const UserFetch());
+    _userBloc.add(const UserFetch(limit: 3));
     _glAccountBloc = context.read<GlAccountBloc>();
-    _glAccountBloc.add(const GlAccountFetch());
+    _glAccountBloc.add(const GlAccountFetch(limit: 3));
     _productBloc = context.read<ProductBloc>();
-    _productBloc.add(const ProductFetch());
+    _productBloc.add(const ProductFetch(limit: 3, isForDropDown: true));
     _descriptionController.text = finDocUpdated.description ?? "";
     if (finDoc.sales) {
       _cartBloc = context.read<SalesCartBloc>() as CartBloc;
@@ -392,8 +392,7 @@ class MyFinDocState extends State<FinDocPage> {
             key: const Key('addProduct'),
             child: const Text('Add Product'),
             onPressed: () async {
-              final dynamic finDocItem = await addProductItemDialog(
-                  context, classificationId, _productBloc, _glAccountBloc);
+              final dynamic finDocItem = await addProductItemDialog(context);
               if (finDocItem != null) {
                 _cartBloc.add(CartAdd(
                     finDoc: finDocUpdated.copyWith(

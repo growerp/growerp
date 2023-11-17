@@ -117,7 +117,6 @@ class InvoiceTest {
       }
       await CommonTest.drag(tester, seconds: 2);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
       // create new findoc with invoiceId
       FinDoc newFinDoc =

@@ -66,7 +66,6 @@ class WebsiteTest {
     while (tester.any(find.byKey(const Key("deleteImageChip")))) {
       await CommonTest.tapByKey(tester, "deleteImageChip");
       await CommonTest.tapByKey(tester, "continue", seconds: 3);
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
     await CommonTest.drag(tester);

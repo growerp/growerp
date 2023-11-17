@@ -85,7 +85,6 @@ class ProductTest {
       // needed when service is removed
       await CommonTest.dragUntil(tester, key: 'update');
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

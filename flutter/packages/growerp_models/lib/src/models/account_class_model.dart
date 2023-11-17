@@ -26,6 +26,8 @@ class AccountClass with _$AccountClass {
     String? parentDescription,
     String? classId,
     String? description,
+    String? detailClassId,
+    String? detailDescription,
     bool? contra,
   }) = _AccountClass;
 

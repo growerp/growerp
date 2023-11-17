@@ -102,8 +102,7 @@ class GlAccountTest {
             tester, 'postedBalance', glAccount.postedBalance.toString());
       }
       await CommonTest.drag(tester);
-      await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
+      await CommonTest.tapByKey(tester, 'update', seconds: 3);
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }
@@ -134,10 +133,8 @@ class GlAccountTest {
         expect(CommonTest.getDropdownSearch('type'),
             equals(glAccount.accountType?.description!));
       }
-      print("===getting: ${CommonTest.getDropdownSearch('class')} "
-          "looking for: ${glAccount.accountClass?.description!}");
       expect(CommonTest.getDropdownSearch('class'),
-          equals(glAccount.accountClass?.description!));
+          contains(glAccount.accountClass?.description!));
       newGlAccounts.add(glAccount.copyWith(glAccountId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

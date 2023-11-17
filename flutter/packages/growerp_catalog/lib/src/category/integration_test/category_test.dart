@@ -58,7 +58,6 @@ class CategoryTest {
       await CommonTest.enterText(tester, 'description', category.description);
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

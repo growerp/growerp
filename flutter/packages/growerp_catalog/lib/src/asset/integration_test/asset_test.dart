@@ -66,7 +66,6 @@ class AssetTest {
       await CommonTest.enterDropDown(tester, 'statusDropDown', asset.statusId!);
       await CommonTest.drag(tester);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

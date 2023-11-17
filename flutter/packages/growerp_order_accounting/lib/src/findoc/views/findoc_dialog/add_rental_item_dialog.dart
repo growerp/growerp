@@ -179,7 +179,7 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                                     CircularProgressIndicator());
                                         }
                                       }),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: 10),
                                       TextFormField(
                                         key: const Key('itemDescription'),
                                         decoration: const InputDecoration(
@@ -189,7 +189,7 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                             ? 'Item description?'
                                             : null,
                                       ),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: 10),
                                       TextFormField(
                                         key: const Key('price'),
                                         decoration: const InputDecoration(
@@ -199,7 +199,7 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                             ? 'Enter Price?'
                                             : null,
                                       ),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: 10),
                                       Row(
                                         children: [
                                           Expanded(
@@ -220,14 +220,13 @@ Future addRentalItemDialog(BuildContext context, ProductBloc productBloc,
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 20),
                                       TextFormField(
                                         key: const Key('quantity'),
                                         decoration: const InputDecoration(
                                             labelText: 'Nbr. of days'),
                                         controller: quantityController,
                                       ),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: 10),
                                       Row(
                                         children: [
                                           Expanded(

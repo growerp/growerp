@@ -29,5 +29,5 @@ class LedgerJournal with _$LedgerJournal {
   }) = _LedgerJournal;
 
   factory LedgerJournal.fromJson(Map<String, dynamic> json) =>
-      _$LedgerJournalFromJson(json);
+      _$LedgerJournalFromJson(json['ledgerJournal'] ?? json);
 }

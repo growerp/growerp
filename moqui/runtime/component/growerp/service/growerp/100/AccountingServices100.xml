@@ -676,7 +676,7 @@ along with this software (see the LICENSE.md file). If not, see
                 out-map="context" />
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
                 in-map="[journalId: glJournalId]" out-map="context" />
-            <set field="ledgerJournal" from="ledgerJournals" />
+            <set field="ledgerJournal" from="ledgerJournals[0]" />
         </actions>
     </service>
 
@@ -719,7 +719,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.AccountingServices100.get#LedgerJournal"
                 in-map="[journalId: ledgerJournal.journalId]" out-map="context" />
-            <set field="ledgerJournal" from="ledgerJournals" />
+            <set field="ledgerJournal" from="ledgerJournals[0]" />
         </actions>
     </service>
 
@@ -981,7 +981,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="GlAccountClass">
         <out-parameters>
-            <parameter name="accountClassList" type="List">
+            <parameter name="accountClasses" type="List">
                 <parameter name="accountClassId" />
                 <parameter name="parentClassId" />
                 <parameter name="description" />
@@ -989,16 +989,18 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums" />
-            <set field="accountClassList" from="[]" />
+            <set field="accountClasses" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
-                    accountClassList.add(
+                    accountClasses.add(
                         topClassId: enumEntry.topEnumId,
                         topDescription: enumEntry.topDescription,
                         parentClassId: enumEntry.middleEnumId,
                         parentDescription: enumEntry.middleDescription,
                         accountClassId: enumEntry.bottomEnumId,
                         description: enumEntry.bottomDescription,
+                        detailClassId: enumEntry.basicEnumId,
+                        detailDescription: enumEntry.basicDescription,
                         contra: enumEntry.bottomContra == 'Y' ? true : false,
                     );
                 </script>
@@ -1008,7 +1010,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="GlAccountType">
         <out-parameters>
-            <parameter name="accountTypeList" type="List">
+            <parameter name="accountTypes" type="List">
                 <parameter name="accountTypeId" />
                 <parameter name="parentTypeId" />
                 <parameter name="description" />
@@ -1018,12 +1020,12 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="moqui.basic.Enumeration" list="enums">
                 <econdition field-name="enumTypeId" value="GlAccountType" />
             </entity-find>
-            <set field="accountTypeList" from="[]" />
+            <set field="accountTypes" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
-                    accountTypeList.add(
-                        accountClassId: enumEntry.enumId,
-                        parentClassId: enumEntry.parentEnumId,
+                    accountTypes.add(
+                        accountTypeId: enumEntry.enumId,
+                        parentTypeId: enumEntry.parentEnumId,
                         description: enumEntry.description,
                     );
                 </script>

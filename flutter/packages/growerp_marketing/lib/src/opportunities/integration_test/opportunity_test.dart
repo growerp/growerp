@@ -108,7 +108,6 @@ class OpportunityTest {
           seconds: 3);
       await CommonTest.drag(tester, seconds: 1);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

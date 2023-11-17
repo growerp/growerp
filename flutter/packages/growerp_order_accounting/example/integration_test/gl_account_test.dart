@@ -32,9 +32,10 @@ void main() {
     await Hive.initFlutter();
   });
 
-  testWidgets('''GrowERP ledger test''', (tester) async {
+  testWidgets('''GlAccount test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
+        title: 'GlAccount test',
         clear: true); // use data from previous run, ifnone same as true
 
     await CommonTest.createCompanyAndAdmin(tester, testData: {

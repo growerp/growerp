@@ -90,7 +90,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     title:
                         "GlAccount #${widget.glAccount.accountCode ?? " New"}",
                     width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 800,
+                    height: 1 / columns.toDouble() * 500,
                     child: BlocBuilder<GlAccountBloc, GlAccountState>(
                         builder: (context, state) {
                       switch (state.status) {
@@ -153,7 +153,7 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         ),
         itemAsString: (AccountClass? u) =>
             " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
-            "${u.description} ${u.contra == true ? '(Contra)' : ''}",
+            "${u.description}-${u.detailDescription}-${u.contra == true ? '(Contra)' : ''}",
         onChanged: (AccountClass? newValue) {
           classSelected = newValue;
         },
@@ -219,10 +219,10 @@ class GlAccountDialogState extends State<GlAccountDialog> {
           children: [
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10), child: widgets[i++])),
+                    padding: const EdgeInsets.all(5), child: widgets[i++])),
             Expanded(
                 child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     child: i < widgets.length ? widgets[i] : Container()))
           ],
         ));

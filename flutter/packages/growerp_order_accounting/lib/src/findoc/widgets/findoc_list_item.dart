@@ -69,11 +69,13 @@ class FinDocListItem extends StatelessWidget {
         const Expanded(child: SizedBox(width: 10)),
         Text(finDoc.otherCompany?.name ?? '', key: Key("otherUser$index")),
         const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.grandTotal.toString(), key: Key("grandTotal$index")),
-        const Expanded(child: SizedBox(width: 10)),
+        if (finDoc.docType != FinDocType.shipment)
+          Text(finDoc.grandTotal.toString(), key: Key("grandTotal$index")),
+        if (finDoc.docType != FinDocType.shipment)
+          const Expanded(child: SizedBox(width: 10)),
         Text(finDoc.displayStatus(classificationId)!, key: Key("status$index")),
         const Expanded(child: SizedBox(width: 10)),
-        Text(finDoc.otherCompany!.email ?? ''),
+        Text(finDoc.otherCompany!.email ?? '             '),
       ];
     }
 
@@ -92,12 +94,14 @@ class FinDocListItem extends StatelessWidget {
                         : '??',
                     key: Key("status$index")),
                 const SizedBox(width: 10),
-                Text(
-                    finDoc.grandTotal != null
-                        ? finDoc.grandTotal.toString()
-                        : '',
-                    key: Key("grandTotal$index")),
-                const SizedBox(width: 10),
+                if (finDoc.docType != FinDocType.shipment)
+                  Text(
+                      finDoc.grandTotal != null
+                          ? finDoc.grandTotal.toString()
+                          : '',
+                      key: Key("grandTotal$index")),
+                if (finDoc.docType != FinDocType.shipment)
+                  const SizedBox(width: 10),
                 Text(finDoc.items.length.toString(),
                     key: Key("itemsLength$index")),
               ],
@@ -123,13 +127,15 @@ class FinDocListItem extends StatelessWidget {
             ? finDoc.items[0].rentalFromDate.toString().substring(0, 10)
             : "${finDoc.creationDate?.toString().substring(0, 11)}"),
         const Expanded(child: SizedBox(width: 10)),
-        Text("${finDoc.grandTotal}", key: Key("grandTotal$index")),
-        const Expanded(child: SizedBox(width: 10)),
+        if (finDoc.docType != FinDocType.shipment)
+          Text("${finDoc.grandTotal}", key: Key("grandTotal$index")),
+        if (finDoc.docType != FinDocType.shipment)
+          const Expanded(child: SizedBox(width: 10)),
         Text("${finDoc.displayStatus(classificationId)}",
             key: Key("status$index")),
         const Expanded(child: SizedBox(width: 10)),
         Text(
-          finDoc.otherUser!.email ?? '??',
+          "${finDoc.otherUser!.email ?? ''}vv",
           key: Key('email$index'),
         ),
         const Divider(),

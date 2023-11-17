@@ -53,7 +53,6 @@ class LocationTest {
           tester, 'name'); // required because keyboard come up
       await CommonTest.enterText(tester, 'name', location.locationName!);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

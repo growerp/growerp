@@ -90,7 +90,6 @@ class ChatTest {
       await CommonTest.checkWidgetKey(tester, 'ChatRoomDialog');
       await CommonTest.enterDropDownSearch(tester, 'userDropDown', 'John');
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

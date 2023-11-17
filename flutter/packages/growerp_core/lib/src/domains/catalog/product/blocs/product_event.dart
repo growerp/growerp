@@ -26,13 +26,15 @@ class ProductFetch extends ProductEvent {
       {this.categoryId = '',
       this.assetClassId = '',
       this.companyPartyId = '',
-      this.searchString = '',
+      this.searchString = '', // general search
+      this.isForDropDown = false, // for dropdowns
       this.refresh = false,
       this.limit = 20});
   final String companyPartyId;
   final String categoryId;
   final String assetClassId;
   final String searchString;
+  final bool isForDropDown;
   final bool refresh;
   final int limit;
 }

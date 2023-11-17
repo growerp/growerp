@@ -124,8 +124,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: authenticate,
-          message: 'Register Company and Admin successful,'
-              'you can now login with the password sent by email'));
+          message: 'Register Company and Admin successful.\n'
+              'You can now login with the password sent by email'));
       await PersistFunctions.persistAuthenticate(state.authenticate!);
     } on DioException catch (e) {
       emit(state.copyWith(status: AuthStatus.failure, message: getDioError(e)));

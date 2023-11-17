@@ -56,8 +56,9 @@ class _FinDocListHeaderState extends State<FinDocListHeader> {
         const Expanded(child: SizedBox(width: 30)),
         Text(widget.sales ? 'Customer' : 'Supplier'),
         const Expanded(child: SizedBox(width: 30)),
-        const Text("Total"),
-        const Expanded(child: SizedBox(width: 30)),
+        if (widget.docType != FinDocType.shipment) const Text("Total"),
+        if (widget.docType != FinDocType.shipment)
+          const Expanded(child: SizedBox(width: 30)),
         const Text("Status"),
         const Expanded(child: SizedBox(width: 30)),
         const Text("Email Address"),

@@ -1142,17 +1142,17 @@ List<GlAccount> glAccounts = [
   GlAccount(
       accountCode: "100",
       accountName: "Asset",
-      accountClass: AccountClass(description: "Assets"),
+      accountClass: AccountClass(description: "Land and Building"),
       postedBalance: Decimal.parse("11.11")),
   GlAccount(
       accountCode: "101",
       accountName: "Cash",
-      accountClass: AccountClass(description: "Cash and Equivalent"),
+      accountClass: AccountClass(description: "Inventory Assets"),
       postedBalance: Decimal.parse("22.22")),
   GlAccount(
       accountCode: "120",
       accountName: "Accounts Receivable",
-      accountClass: AccountClass(description: "Cash and Equivalent"),
+      accountClass: AccountClass(description: "Inventory Assets"),
       postedBalance: Decimal.parse("33.33")),
   GlAccount(
       accountCode: "150",
@@ -1162,7 +1162,7 @@ List<GlAccount> glAccounts = [
   GlAccount(
       accountCode: "180",
       accountName: "Equipment",
-      accountClass: AccountClass(description: "Assets")),
+      accountClass: AccountClass(description: "Loans Receivable")),
   // 2 liability
   GlAccount(
       accountCode: "200",

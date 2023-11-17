@@ -2309,7 +2309,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
                 </else>
             </if>
-            <set field="paymentOld.amount" from="payment.grandTotal" />
+            <set field="paymentOld.amount" from="new BigDecimal(payment.grandTotal)" />
             <!-- first item stores the itemType needed for posting -->
             <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"

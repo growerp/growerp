@@ -91,7 +91,6 @@ class LedgerJournalTest {
       await CommonTest.checkWidgetKey(tester, 'LedgerJournalDialog');
       await CommonTest.enterText(tester, 'name', ledgerJournal.journalName);
       await CommonTest.tapByKey(tester, 'update');
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
     }
   }

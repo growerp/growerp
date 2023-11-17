@@ -120,7 +120,6 @@ class PaymentTest {
           '${payment.items[0].itemType!.itemTypeName}\n ${payment.items[0].itemType!.accountName}');
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: 3);
-      await CommonTest.waitForKey(tester, 'dismiss');
       await CommonTest.waitForSnackbarToGo(tester);
       newPayments
           .add(payment.copyWith(paymentId: CommonTest.getTextField('id0')));
