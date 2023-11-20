@@ -48,17 +48,30 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
   final RestClient restClient;
   final String classificationId;
+  int start = 0;
 
   Future<void> _onCategoryFetch(
     CategoryFetch event,
     Emitter<CategoryState> emit,
   ) async {
+    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
+      return;
+    }
+    if (state.status == CategoryStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+    } else {
+      start = state.categories.length;
+    }
     try {
       emit(state.copyWith(status: CategoryStatus.loading));
 
       Categories compResult = await restClient.getCategory(
           companyPartyId: event.companyPartyId,
-          searchString: event.searchString);
+          searchString: event.searchString,
+          limit: event.limit,
+          isForDropDown: event.isForDropDown);
 
       emit(state.copyWith(
         status: CategoryStatus.success,

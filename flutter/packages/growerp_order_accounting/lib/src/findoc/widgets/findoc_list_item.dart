@@ -220,8 +220,8 @@ class FinDocListItem extends StatelessWidget {
             },
           ),
         if (!isPhone &&
-            finDoc.docType == FinDocType.order &&
-            finDoc.docType == FinDocType.invoice)
+            (finDoc.docType == FinDocType.order ||
+                finDoc.docType == FinDocType.invoice))
           IconButton(
             key: Key('print$index'),
             icon: const Icon(Icons.print),

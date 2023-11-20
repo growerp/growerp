@@ -881,7 +881,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="categoryId" />
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
-            <parameter name="filter" default="null" />
+            <parameter name="isForDropDown" type="Boolean" default="false" />
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
@@ -923,9 +923,6 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Root category not found for ownerPartyId: $ownerPartyId" />
             </if>
             <set field="parentProductCategoryId" from="rootList[0].productCategoryId" />
-            <if condition="filter != null">
-                <set field="filter" value="%${filter}%" />
-            </if>
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
@@ -936,8 +933,6 @@ along with this software (see the LICENSE.md file). If not, see
                     from="parentProductCategoryId" />
                 <econdition field-name="productCategoryId"
                     from="categoryId" ignore-if-empty="true" />
-                <econdition field-name="categoryName" operator="like"
-                    from="filter" ignore-if-empty="true" ignore-case="true" />
                 <econditions combine="or">
                     <econdition field-name="productCategoryId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
@@ -952,49 +947,59 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="categories" from="[]" />
             <set field="lastItem" from="null" />
             <iterate entry="group" list="groups">
-                <!-- number of products -->
-                <entity-find-count entity-name="mantle.product.category.ProductCategoryMember"
-                    count-field="nbrOfProducts">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
-                    <date-filter />
-                </entity-find-count>
-                <!-- content -->
-                <entity-find entity-name="mantle.product.category.ProductCategoryContent"
-                    list="contents">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
-                    <econdition field-name="categoryContentTypeEnumId"
-                        from="categoryId? 'PcctImageMedium' : 'PcctImageThumbNail'" />
-                    <date-filter />
-                </entity-find>
-                <if condition="contents">
-                    <service-call name="growerp.100.ImageServices100.download#Image"
-                        in-map="[contentLocation: contents[0].contentLocation]" out-map="context" />
-                    <else>
-                        <set field="imageFile" from="null" />
-                    </else>
-                </if>
-                <!-- first 10 products -->
-                <entity-find
-                    entity-name="growerp.mobile.party.category.ProductCategoryMemberAndProduct"
-                    limit="10" list="productList">
-                    <econdition field-name="productCategoryId" from="group.productCategoryId" />
-                </entity-find>
-                <set field="products" from="[]" />
-                <iterate list="productList" entry="product">
-                    <script>products.add([productName: product.productName,
+                <if condition="!isForDropDown">
+                    <!-- number of products -->
+                    <entity-find-count entity-name="mantle.product.category.ProductCategoryMember"
+                        count-field="nbrOfProducts">
+                        <econdition field-name="productCategoryId" from="group.productCategoryId" />
+                        <date-filter />
+                    </entity-find-count>
+                    <!-- content -->
+                    <entity-find entity-name="mantle.product.category.ProductCategoryContent"
+                        list="contents">
+                        <econdition field-name="productCategoryId" from="group.productCategoryId" />
+                        <econdition field-name="categoryContentTypeEnumId"
+                            from="categoryId? 'PcctImageMedium' : 'PcctImageThumbNail'" />
+                        <date-filter />
+                    </entity-find>
+                    <if condition="contents">
+                        <service-call name="growerp.100.ImageServices100.download#Image"
+                            in-map="[contentLocation: contents[0].contentLocation]"
+                            out-map="context" />
+                        <else>
+                            <set field="imageFile" from="null" />
+                        </else>
+                    </if>
+                    <!-- first 10 products -->
+                    <entity-find
+                        entity-name="growerp.mobile.party.category.ProductCategoryMemberAndProduct"
+                        limit="10" list="productList">
+                        <econdition field-name="productCategoryId" from="group.productCategoryId" />
+                    </entity-find>
+                    <set field="products" from="[]" />
+                    <iterate list="productList" entry="product">
+                        <script>products.add([productName: product.productName,
                             productId: product.productId])
                     </script>
-                </iterate>
-                <!-- output -->
-                <set field="groupOut"
-                    from="[
-                        categoryId: group.productCategoryId,
-                        categoryName: group.categoryName,
-                        description: group.description,
-                        nbrOfProducts: nbrOfProducts,
-                        products: products,
-                        image: imageFile,
-                        ]" />
+                    </iterate>
+                    <!-- output -->
+                    <set field="groupOut"
+                        from="[
+                            categoryId: group.productCategoryId,
+                            categoryName: group.categoryName,
+                            description: group.description,
+                            nbrOfProducts: nbrOfProducts,
+                            products: products,
+                            image: imageFile,
+                            ]" />
+                    <else>
+                        <set field="groupOut"
+                            from="[
+                                categoryId: group.productCategoryId,
+                                categoryName: group.categoryName,
+                                ]" />
+                    </else>
+                </if>
                 <script>categories.add(groupOut)</script>
             </iterate>
         </actions>

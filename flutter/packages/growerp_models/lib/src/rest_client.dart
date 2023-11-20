@@ -187,7 +187,7 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('companyPartyId') String? companyPartyId,
-    @Query('filter') String? filter,
+    @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
     @Query('classificationId') String? classificationId,
   });

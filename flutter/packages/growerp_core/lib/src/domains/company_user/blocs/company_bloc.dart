@@ -61,7 +61,7 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
-    if (state.status == LocationStatus.initial ||
+    if (state.status == CompanyStatus.initial ||
         event.refresh ||
         event.searchString != '') {
       start = 0;
@@ -69,19 +69,16 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       start = state.companies.length;
     }
     try {
-      // start from record zero for initial and refresh
-      if (state.status == CompanyStatus.initial || event.refresh) {
-        emit(state.copyWith(status: CompanyStatus.loading));
-        Companies compResult = await restClient.getCompany(
-            role: role, companyPartyId: event.companyPartyId);
-        return emit(state.copyWith(
-          status: CompanyStatus.success,
-          companies: compResult.companies,
-          hasReachedMax:
-              compResult.companies.length < _companyLimit ? true : false,
-          searchString: '',
-        ));
-      }
+      emit(state.copyWith(status: CompanyStatus.loading));
+      Companies compResult = await restClient.getCompany(
+          role: role, companyPartyId: event.companyPartyId);
+      return emit(state.copyWith(
+        status: CompanyStatus.success,
+        companies: compResult.companies,
+        hasReachedMax:
+            compResult.companies.length < _companyLimit ? true : false,
+        searchString: '',
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: CompanyStatus.failure,

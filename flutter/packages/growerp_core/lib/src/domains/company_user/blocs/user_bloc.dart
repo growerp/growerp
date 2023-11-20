@@ -23,8 +23,6 @@ import 'package:stream_transform/stream_transform.dart';
 part 'user_event.dart';
 part 'user_state.dart';
 
-const _userLimit = 20;
-
 mixin LeadBloc on Bloc<UserEvent, UserState> {}
 mixin CustomerBloc on Bloc<UserEvent, UserState> {}
 mixin EmployeeBloc on Bloc<UserEvent, UserState> {}

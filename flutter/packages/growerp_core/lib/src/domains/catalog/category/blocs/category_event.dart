@@ -22,12 +22,18 @@ abstract class CategoryEvent extends Equatable {
 
 class CategoryFetch extends CategoryEvent {
   const CategoryFetch(
-      {this.companyPartyId = '', this.searchString = '', this.refresh = false});
+      {this.companyPartyId = '',
+      this.searchString = '',
+      this.refresh = false,
+      this.isForDropDown = false,
+      this.limit = 20});
 
   /// companyPartyId required for ecommerce
   final String companyPartyId;
   final String searchString;
   final bool refresh;
+  final bool isForDropDown;
+  final int limit;
   @override
   List<Object> get props => [companyPartyId, searchString, refresh];
 }

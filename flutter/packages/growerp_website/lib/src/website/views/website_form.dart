@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -23,7 +24,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:from_css_color/from_css_color.dart';
-import 'package:growerp_select_dialog/growerp_select_dialog.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../growerp_website.dart';
@@ -39,6 +39,12 @@ class WebsiteForm extends StatelessWidget {
           create: (BuildContext context) =>
               WebsiteBloc(context.read<RestClient>())..add(WebsiteFetch()),
         ),
+        BlocProvider<CategoryBloc>(
+            create: (BuildContext context) => CategoryBloc(
+                context.read<RestClient>(), context.read<String>())),
+        BlocProvider<ProductBloc>(
+            create: (BuildContext context) => ProductBloc(
+                context.read<RestClient>(), context.read<String>())),
       ], child: const WebsitePage()));
 }
 
@@ -51,14 +57,16 @@ class WebsitePage extends StatefulWidget {
 
 class WebsiteFormState extends State<WebsitePage> {
   late WebsiteBloc _websiteBloc;
-  late RestClient restClient;
-  late RestClient _restClient;
+  late CategoryBloc _categoryBloc;
+  late ProductBloc _productBloc;
   List<Content> _updatedContent = [];
   List<Category> _selectedCategories = [];
   final _urlController = TextEditingController();
   final _titleController = TextEditingController();
   final _obsidianController = TextEditingController();
   final _measurementIdController = TextEditingController();
+  final _productSearchBoxController = TextEditingController();
+  final _categorySearchBoxController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
   final _websiteFormKey2 = GlobalKey<FormState>();
   final _websiteFormKey3 = GlobalKey<FormState>();
@@ -68,7 +76,10 @@ class WebsiteFormState extends State<WebsitePage> {
   void initState() {
     super.initState();
     _websiteBloc = context.read<WebsiteBloc>();
-    _restClient = context.read<RestClient>();
+    _categoryBloc = context.read<CategoryBloc>()
+      ..add(const CategoryFetch(isForDropDown: true, limit: 3));
+    _productBloc = context.read<ProductBloc>()
+      ..add(const ProductFetch(isForDropDown: true, limit: 3));
   }
 
   @override
@@ -254,56 +265,6 @@ class WebsiteFormState extends State<WebsitePage> {
           },
         ));
       });
-
-      Future<List<Product>> getProduct(String filter) async {
-        Products result = await _restClient.getProduct(searchString: filter);
-        return result.products;
-      }
-
-      productWidgets.add(IconButton(
-        key: Key("addProduct${category.categoryName}"),
-        iconSize: 30,
-        icon: const Icon(Icons.add_circle),
-        color: Colors.deepOrange,
-        padding: const EdgeInsets.all(0.0),
-        onPressed: () async {
-          SelectDialog.showModal<Product>(
-            context,
-            searchBoxDecoration: InputDecoration(
-                labelText: 'Search text here...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                )),
-            label: "Find and (un)select products",
-            alwaysShowScrollBar: true,
-            multipleSelectedValues: category.products,
-            onFind: (String filter) async => await getProduct(filter),
-            itemBuilder: (context, item, isSelected) {
-              return ListTile(
-                leading: CircleAvatar(
-                    backgroundColor: Colors.green,
-                    child: Text(
-                        item.productName != null ? item.productName![0] : '')),
-                trailing: isSelected ? const Icon(Icons.check) : null,
-                title: Text(item.productName ?? ''),
-                subtitle: Text(item.price.toString()),
-                selected: isSelected,
-              );
-            },
-            onMultipleItemsChange: (List<Product> selected) {
-              _websiteBloc.add(WebsiteUpdate(Website(
-                  id: state.website!.id,
-                  websiteCategories: [category.copyWith(products: selected)])));
-            },
-            okButtonBuilder: (context, onPressed) {
-              return ElevatedButton(
-                  key: const Key('ok'),
-                  onPressed: onPressed,
-                  child: const Text('ok'));
-            },
-          );
-        },
-      ));
       catButtons.add(
           {"categoryName": category.categoryName, "products": productWidgets});
     });
@@ -337,56 +298,6 @@ class WebsiteFormState extends State<WebsitePage> {
         },
       ));
     });
-
-    Future<List<Category>> getCategory(String filter) async {
-      Categories result = await _restClient.getCategory(searchString: filter);
-      return result.categories;
-    }
-
-    browseCatButtons.add(IconButton(
-      key: const Key('addShopCategory'),
-      iconSize: 30,
-      icon: const Icon(Icons.add_circle),
-      color: Colors.deepOrange,
-      padding: const EdgeInsets.all(0.0),
-      onPressed: () async {
-        SelectDialog.showModal<Category>(
-          context,
-          searchBoxDecoration: InputDecoration(
-              labelText: 'Search text here...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              )),
-          label: "Find and (un)select categories",
-          alwaysShowScrollBar: true,
-          multipleSelectedValues: state.website!.productCategories,
-          onFind: (String filter) async => await getCategory(filter),
-          itemBuilder: (context, item, isSelected) {
-            return ListTile(
-              leading: CircleAvatar(
-                  backgroundColor: Colors.green,
-                  child: Text(item.categoryName.isNotEmpty
-                      ? item.categoryName[0]
-                      : '')),
-              trailing: isSelected ? const Icon(Icons.check) : null,
-              title: Text(item.categoryName),
-              subtitle: Text(item.description),
-              selected: isSelected,
-            );
-          },
-          onMultipleItemsChange: (List<Category> selected) {
-            _websiteBloc.add(WebsiteUpdate(
-                Website(id: state.website!.id, productCategories: selected)));
-          },
-          okButtonBuilder: (context, onPressed) {
-            return ElevatedButton(
-                key: const Key('ok'),
-                onPressed: onPressed,
-                child: const Text('ok'));
-          },
-        );
-      },
-    ));
 
     // create product browse categories
     List<Widget> colorCatButtons = [];
@@ -581,31 +492,129 @@ class WebsiteFormState extends State<WebsitePage> {
                 borderRadius: BorderRadius.circular(25.0),
               )),
           child: Wrap(runSpacing: 10, spacing: 10, children: imageButtons)),
-      for (Map cat in catButtons)
-        InputDecorator(
-            key: Key(cat["categoryName"]),
-            decoration: InputDecoration(
-                labelText: cat["categoryName"],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                )),
-            child: Column(children: [
-              Text(
-                cat["categoryName"],
-                key: Key(cat["categoryName"]),
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      for (Category category in state.website!.websiteCategories)
+        BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, productState) {
+          switch (productState.status) {
+            case ProductStatus.failure:
+              return const FatalErrorForm(message: 'server connection problem');
+            case ProductStatus.success:
+              return DropdownSearch<Product>.multiSelection(
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                        labelText: category.categoryName,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0)))),
+                dropdownBuilder: (context, selectedItems) =>
+                    selectedItems.isEmpty
+                        ? const Text("No item selected")
+                        : Wrap(
+                            spacing: 10,
+                            children: catButtons.firstWhere((element) =>
+                                category.categoryName ==
+                                element["categoryName"])["products"]),
+                popupProps: PopupPropsMultiSelection.menu(
+                  showSelectedItems: true,
+                  isFilterOnline: true,
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    autofocus: true,
+                    decoration:
+                        const InputDecoration(labelText: "Select product"),
+                    controller: _productSearchBoxController,
+                  ),
+                  title: popUp(
+                    context: context,
+                    title: "Select product",
+                    height: 50,
+                    width: 500,
+                  ),
+                ),
+                selectedItems: category.products,
+                itemAsString: (item) => item.productName ?? '?',
+                asyncItems: (String filter) {
+                  _productBloc.add(ProductFetch(
+                    searchString: filter,
+                    limit: 3,
+                    isForDropDown: true,
+                  ));
+                  return Future.delayed(const Duration(milliseconds: 100), () {
+                    return Future.value(_productBloc.state.products);
+                  });
+                },
+                compareFn: (item, sItem) => item.pseudoId == sItem.pseudoId,
+                onChanged: (List<Product>? newValue) {
+                  List<Category> newCats =
+                      List.of(state.website!.websiteCategories);
+                  int index = newCats.indexWhere(
+                      (el) => el.categoryName == category.categoryName);
+                  newCats[index] =
+                      newCats[index].copyWith(products: newValue ?? []);
+                  _websiteBloc.add(WebsiteUpdate(Website(
+                      id: state.website!.id, websiteCategories: newCats)));
+                },
+              );
+            default:
+              return const Center(child: CircularProgressIndicator());
+          }
+        }),
+      BlocBuilder<CategoryBloc, CategoryState>(
+          builder: (context, productState) {
+        switch (productState.status) {
+          case CategoryStatus.failure:
+            return const FatalErrorForm(message: 'server connection problem');
+          case CategoryStatus.success:
+            return DropdownSearch<Category>.multiSelection(
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                      isDense: true,
+                      labelText: 'Shop dropdown categories',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0)))),
+              dropdownBuilder: (context, selectedItems) => selectedItems.isEmpty
+                  ? const Text("No item selected")
+                  : Wrap(spacing: 10, children: browseCatButtons),
+              popupProps: PopupPropsMultiSelection.menu(
+                showSelectedItems: true,
+                isFilterOnline: true,
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: WebsiteLocalizations.of(context)!
+                        .shopDropdownCategories,
+                  ),
+                  controller: _categorySearchBoxController,
+                ),
+                title: popUp(
+                  context: context,
+                  title: "Select/remove category",
+                  height: 50,
+                  width: 400,
+                ),
               ),
-              Wrap(spacing: 10, children: cat["products"])
-            ])),
-      InputDecorator(
-          decoration: InputDecoration(
-              labelText:
-                  WebsiteLocalizations.of(context)!.shopDropdownCategories,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25.0),
-              )),
-          child: Wrap(spacing: 10, children: browseCatButtons)),
+              itemAsString: (Category item) => item.categoryName.truncate(15),
+              selectedItems: _selectedCategories,
+              asyncItems: (String filter) {
+                _categoryBloc.add(CategoryFetch(
+                  searchString: filter,
+                  limit: 3,
+                  isForDropDown: true,
+                ));
+                return Future.delayed(const Duration(milliseconds: 100), () {
+                  return Future.value(_categoryBloc.state.categories);
+                });
+              },
+              compareFn: (item, sItem) => item.categoryId == sItem.categoryId,
+              onChanged: (List<Category>? newValue) {
+                _websiteBloc.add(WebsiteUpdate(Website(
+                    id: state.website!.id, productCategories: newValue ?? [])));
+              },
+            );
+          default:
+            return const Center(child: CircularProgressIndicator());
+        }
+      }),
       InputDecorator(
           decoration: InputDecoration(
               labelText: 'Website Colors',
