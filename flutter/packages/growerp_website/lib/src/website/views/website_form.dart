@@ -136,9 +136,7 @@ class WebsiteFormState extends State<WebsitePage> {
                   return WebsiteContentDialog(state.website!.id, content);
                 });
             if (updContent != null) {
-              setState(() {
-                _websiteBloc.add(WebsiteFetch());
-              });
+              _websiteBloc.add(WebsiteFetch());
             }
           },
           deleteIcon: const Icon(
@@ -503,6 +501,7 @@ class WebsiteFormState extends State<WebsitePage> {
                 dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
                         labelText: category.categoryName,
+                        isDense: true,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25.0)))),
                 dropdownBuilder: (context, selectedItems) =>
@@ -542,7 +541,7 @@ class WebsiteFormState extends State<WebsitePage> {
                     return Future.value(_productBloc.state.products);
                   });
                 },
-                compareFn: (item, sItem) => item.pseudoId == sItem.pseudoId,
+                compareFn: (item, sItem) => item.productId == sItem.productId,
                 onChanged: (List<Product>? newValue) {
                   List<Category> newCats =
                       List.of(state.website!.websiteCategories);

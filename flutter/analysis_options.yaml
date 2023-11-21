@@ -15,7 +15,6 @@ analyzer:
     - "**.freezed.dart"
     - "**/build/**"
     - "packages/ecommerce/**"
-    - "packages/growerp_select_dialog/**"
   errors:
     invalid_annotation_target: ignore
     depend_on_referenced_packages: ignore

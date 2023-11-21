@@ -281,7 +281,7 @@ class FinDocListState extends State<FinDocList> {
                 child: ElevatedButton(
                     onPressed: () =>
                         _finDocBloc.add(const FinDocFetch(refresh: true)),
-                    child: const Text('Press here to recover')));
+                    child: const Text('Press here to continue')));
           case FinDocStatus.success:
             finDocs = state.finDocs;
             hasReachedMax = state.hasReachedMax;

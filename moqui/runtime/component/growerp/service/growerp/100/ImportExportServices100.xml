@@ -485,7 +485,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="websiteContent" from="[]" />
             <iterate list="website.websiteContent" entry="wsContent">
                 <service-call name="growerp.100.WebsiteServices100.get#WebsiteContent"
-                    in-map="content: [path: wsContent.path, text: wsContent.text]"
+                    in-map="path: wsContent.path, text: wsContent.text"
                     out-map="context" />
                 <script>
                     websiteContent.add(content)

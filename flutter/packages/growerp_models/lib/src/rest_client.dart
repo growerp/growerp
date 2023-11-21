@@ -132,7 +132,8 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/WebsiteContent")
   @Extra({'requireApiKey': true})
   Future<Content> getWebsiteContent(
-      {@Query('content') required Content content});
+      {@Query('path') required String path,
+      @Query('text') required String text});
 
   @PATCH("rest/s1/growerp/100/Website")
   @Extra({'requireApiKey': true})

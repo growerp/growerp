@@ -31,7 +31,7 @@ class Content extends Equatable with _$Content {
   }) = _Content;
 
   factory Content.fromJson(Map<String, dynamic> json) =>
-      _$ContentFromJson(json);
+      _$ContentFromJson(json["content"] ?? json);
 
   bool isText() => text.isNotEmpty;
 

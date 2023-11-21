@@ -44,12 +44,13 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     Emitter<ContentState> emit,
   ) async {
     try {
-      Content result = event.content;
       emit(state.copyWith(status: ContentStatus.loading));
-      if (event.content.path.isNotEmpty || event.content.title.isNotEmpty) {
-        result = await restClient.getWebsiteContent(content: event.content);
-      }
-      emit(state.copyWith(status: ContentStatus.success, content: result));
+      final result = await restClient.getWebsiteContent(
+          path: event.content.path, text: event.content.text);
+      emit(state.copyWith(
+        status: ContentStatus.success,
+        content: result,
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: ContentStatus.failure, message: getDioError(e)));

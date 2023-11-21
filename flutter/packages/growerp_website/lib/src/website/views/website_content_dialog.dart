@@ -43,6 +43,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   String data = '';
   String newData = '';
   late bool isMarkDown;
+  late ContentBloc _contentBloc;
 
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
@@ -59,6 +60,7 @@ class WebsiteContentState extends State<WebsiteContent> {
     } else {
       isMarkDown = true;
     }
+    _contentBloc = context.read<ContentBloc>();
   }
 
   @override
@@ -78,6 +80,8 @@ class WebsiteContentState extends State<WebsiteContent> {
         listener: (context, state) {
           switch (state.status) {
             case ContentStatus.success:
+              HelperFunctions.showMessage(
+                  context, "${state.message}", Colors.green);
               Navigator.of(context).pop(newContent);
               break;
             case ContentStatus.failure:
@@ -91,10 +95,14 @@ class WebsiteContentState extends State<WebsiteContent> {
           switch (state.status) {
             case ContentStatus.failure:
               return Center(
-                  child: Text('failed to fetch content: ${state.message}'));
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(newContent),
+                  child: const Text("press to continue"),
+                ),
+              );
             case ContentStatus.success:
               newContent = state.content!;
-              data = state.content?.text ?? '';
+              data = state.content!.text;
               if (widget.content.text.isNotEmpty) {
                 return Dialog(
                     key: const Key('WebsiteContentText'),
@@ -261,7 +269,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                               HelperFunctions.showMessage(
                                   context, "Image upload error!", Colors.red);
                             } else {
-                              context.read<ContentBloc>().add(ContentUpdate(
+                              _contentBloc.add(ContentUpdate(
                                   widget.websiteId,
                                   widget.content.copyWith(
                                       title: _nameController.text,
@@ -284,9 +292,7 @@ class WebsiteContentState extends State<WebsiteContent> {
         textInputAction: TextInputAction.newline,
         initialValue: data,
         onChanged: (text) {
-          setState(() {
-            newData = text;
-          });
+          newData = text;
         });
     return Column(children: [
       isPhone
@@ -302,8 +308,13 @@ class WebsiteContentState extends State<WebsiteContent> {
                     border: Border.all(style: BorderStyle.solid, width: 0.80),
                   ),
                   child: MarkdownWidget(
-                    data: newData.isNotEmpty ? newData : data,
-                  ),
+                      data: data,
+                      styleConfig: StyleConfig(
+                          markdownTheme:
+                              context.read<ThemeBloc>().state.themeMode ==
+                                      ThemeMode.dark
+                                  ? MarkdownTheme.darkTheme
+                                  : MarkdownTheme.lightTheme)),
                 )),
               ]),
             )
@@ -313,7 +324,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                 const SizedBox(width: 20),
                 Expanded(
                     child: MarkdownWidget(
-                        data: newData,
+                        data: data,
                         styleConfig: StyleConfig(
                             markdownTheme:
                                 context.read<ThemeBloc>().state.themeMode ==
@@ -327,8 +338,8 @@ class WebsiteContentState extends State<WebsiteContent> {
           key: const Key('update'),
           child: Text(widget.content.path.isEmpty ? 'Create' : 'Update'),
           onPressed: () async {
-            if (newData != data) {
-              context.read<ContentBloc>().add(ContentUpdate(
+            if (newData != '') {
+              _contentBloc.add(ContentUpdate(
                   widget.websiteId, widget.content.copyWith(text: newData)));
             } else {
               Navigator.of(context).pop();
