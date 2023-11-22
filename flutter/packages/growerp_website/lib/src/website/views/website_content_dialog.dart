@@ -8,7 +8,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
-//import 'package:html_editor_enhanced/html_editor.dart';
+import 'package:html_editor_enhanced/html_editor.dart';
 //import 'package:html_editor_enhanced/utils/options.dart';
 
 import '../../../growerp_website.dart';
@@ -20,8 +20,7 @@ class WebsiteContentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-      create: (BuildContext context) => ContentBloc(context.read<RestClient>())
-        ..add(ContentFetch(websiteId, content)),
+      create: (BuildContext context) => ContentBloc(context.read<RestClient>()),
       child: WebsiteContent(websiteId, content));
 }
 
@@ -44,6 +43,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   String newData = '';
   late bool isMarkDown;
   late ContentBloc _contentBloc;
+  late ThemeBloc _themeBloc;
 
   MethodChannel channel =
       const MethodChannel('plugins.flutter.io/url_launcher');
@@ -61,6 +61,8 @@ class WebsiteContentState extends State<WebsiteContent> {
       isMarkDown = true;
     }
     _contentBloc = context.read<ContentBloc>();
+    _contentBloc.add(ContentFetch(widget.websiteId, widget.content));
+    _themeBloc = context.read<ThemeBloc>();
   }
 
   @override
@@ -80,8 +82,8 @@ class WebsiteContentState extends State<WebsiteContent> {
         listener: (context, state) {
           switch (state.status) {
             case ContentStatus.success:
-              HelperFunctions.showMessage(
-                  context, "${state.message}", Colors.green);
+              //      HelperFunctions.showMessage(
+              //          context, "${state.message}", Colors.green);
               Navigator.of(context).pop(newContent);
               break;
             case ContentStatus.failure:
@@ -120,35 +122,22 @@ class WebsiteContentState extends State<WebsiteContent> {
                             : _showHtmlTextForm(isPhone)));
               } else {
                 return Dialog(
-                    key: const Key('WebsiteContentImage'),
-                    insetPadding: const EdgeInsets.all(20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Stack(clipBehavior: Clip.none, children: [
-                      Container(
-                          width: 400,
-                          height: 50,
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColorDark,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              )),
-                          child:
-                              const Center(child: Text('Image Information'))),
-                      Container(
-                          width: 400,
-                          height: 400,
-                          padding: const EdgeInsets.all(20),
-                          child: Scaffold(
-                              backgroundColor: Colors.transparent,
-                              floatingActionButton: ImageButtons(
-                                  _scrollController, _onImageButtonPressed),
-                              body: imageChild(isPhone))),
-                      const Positioned(
-                          top: 5, right: 5, child: DialogCloseButton())
-                    ]));
+                  key: const Key('WebsiteContentImage'),
+                  insetPadding: const EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: popUp(
+                      context: context,
+                      width: isPhone ? 350 : 800,
+                      height: 500,
+                      title: 'Image information ${widget.content.title}',
+                      child: Scaffold(
+                          backgroundColor: Colors.transparent,
+                          floatingActionButton: ImageButtons(
+                              _scrollController, _onImageButtonPressed),
+                          body: imageChild(isPhone))),
+                );
               }
             default:
               return const Center(child: CircularProgressIndicator());
@@ -292,7 +281,9 @@ class WebsiteContentState extends State<WebsiteContent> {
         textInputAction: TextInputAction.newline,
         initialValue: data,
         onChanged: (text) {
-          newData = text;
+          setState(() {
+            newData = text;
+          });
         });
     return Column(children: [
       isPhone
@@ -308,11 +299,10 @@ class WebsiteContentState extends State<WebsiteContent> {
                     border: Border.all(style: BorderStyle.solid, width: 0.80),
                   ),
                   child: MarkdownWidget(
-                      data: data,
+                      data: newData.isNotEmpty ? newData : data,
                       styleConfig: StyleConfig(
                           markdownTheme:
-                              context.read<ThemeBloc>().state.themeMode ==
-                                      ThemeMode.dark
+                              _themeBloc.state.themeMode == ThemeMode.dark
                                   ? MarkdownTheme.darkTheme
                                   : MarkdownTheme.lightTheme)),
                 )),
@@ -324,11 +314,10 @@ class WebsiteContentState extends State<WebsiteContent> {
                 const SizedBox(width: 20),
                 Expanded(
                     child: MarkdownWidget(
-                        data: data,
+                        data: newData.isNotEmpty ? newData : data,
                         styleConfig: StyleConfig(
                             markdownTheme:
-                                context.read<ThemeBloc>().state.themeMode ==
-                                        ThemeMode.dark
+                                _themeBloc.state.themeMode == ThemeMode.dark
                                     ? MarkdownTheme.darkTheme
                                     : MarkdownTheme.lightTheme))),
               ]),
@@ -349,8 +338,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   }
 
   Widget _showHtmlTextForm(bool isPhone) {
-    return Container();
-/*    Widget input = TextFormField(
+    /*  Widget input = TextFormField(
         key: const Key('htmlInput'),
         autofocus: true,
         decoration: const InputDecoration(labelText: 'Enter text here...'),
@@ -364,18 +352,18 @@ class WebsiteContentState extends State<WebsiteContent> {
             newData = text;
           });
         });
-
+*/
     HtmlEditorController controller = HtmlEditorController();
 
     return HtmlEditor(
       controller: controller, //required
-      htmlEditorOptions: HtmlEditorOptions(
+      htmlEditorOptions: const HtmlEditorOptions(
         hint: "Your text here...",
         //initalText: "text content initial, if any",
       ),
-      otherOptions: OtherOptions(
+      otherOptions: const OtherOptions(
         height: 400,
       ),
-    );*/
+    );
   }
 }

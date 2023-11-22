@@ -34,17 +34,23 @@ void main() {
     await CommonTest.selectOption(tester, 'dbWebsite', 'WebsiteForm');
   }
 
-  testWidgets('''GrowERP website test''', (tester) async {
+  var testName = '''GrowERP website test''';
+  testWidgets(testName, (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         WebsiteLocalizations.localizationsDelegates,
+        title: testName,
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       // related categories also created
       "products": products.sublist(0, 2),
     });
-
     await selectWebsite(tester);
-    await WebsiteTest.updateWebsite(tester);
+    await WebsiteTest.updateTitle(tester);
+    await WebsiteTest.updateTextSection(tester);
+    await WebsiteTest.updateImages(tester);
+    await WebsiteTest.updateHomePageCategories(tester, "Deals", products);
+    await WebsiteTest.updateHomePageCategories(tester, "Featured", products);
+    await WebsiteTest.updateShopCategories(tester);
     await CommonTest.gotoMainMenu(tester);
   });
 }

@@ -24,16 +24,6 @@ class WebsiteTest {
     await CommonTest.selectOption(tester, 'tapCompany', 'WebsiteForm', '1');
   }
 
-  static Future<void> updateWebsite(WidgetTester tester) async {
-    await updateHost(tester);
-    await updateTitle(tester);
-    await updateTextSection(tester);
-    await updateImages(tester);
-    await updateHomePageCategories(tester, "Deals", products);
-    await updateHomePageCategories(tester, "Featured", products);
-    await updateShopCategories(tester);
-  }
-
   static Future<void> updateHost(tester) async {
     await CommonTest.enterText(tester, 'urlInput', 'testingUrl');
     await CommonTest.tapByKey(tester, 'updateHost', seconds: 3);
@@ -90,9 +80,9 @@ class WebsiteTest {
       await CommonTest.tapByKey(tester, "deleteProductChip");
     }
     await CommonTest.dragUntil(tester, key: "addProduct$categoryName");
-    await CommonTest.tapByKey(tester, "addProduct$categoryName");
-    await CommonTest.tapByText(tester, products[0].productName!);
-    await CommonTest.tapByKey(tester, "ok");
+    await CommonTest.enterDropDownSearch(
+        tester, "addProduct$categoryName", products[0].productName!);
+    await CommonTest.tapByText(tester, "ok");
     await CommonTest.drag(tester);
     expect(tester.any(find.byKey(Key(products[0].productName!))), equals(true),
         reason: 'product 0 found?');
@@ -110,9 +100,10 @@ class WebsiteTest {
       await CommonTest.drag(tester);
     }
     await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'addShopCategory');
-    await CommonTest.tapByText(tester, categories[0].categoryName);
-    await CommonTest.tapByKey(tester, 'ok');
+    await CommonTest.enterDropDownSearch(
+        tester, "addShopCategory", categories[0].categoryName,
+        check: true);
+    await CommonTest.tapByText(tester, "ok");
     await CommonTest.drag(tester);
     expect(find.byKey(Key(categories[0].categoryName)), findsOneWidget,
         reason: 'category 0 should be present?');

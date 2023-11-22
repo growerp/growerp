@@ -45,6 +45,10 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
   ) async {
     try {
       emit(state.copyWith(status: ContentStatus.loading));
+      if (event.content.path.isEmpty) {
+        return emit(state.copyWith(
+            status: ContentStatus.success, content: event.content));
+      }
       final result = await restClient.getWebsiteContent(
           path: event.content.path, text: event.content.text);
       emit(state.copyWith(

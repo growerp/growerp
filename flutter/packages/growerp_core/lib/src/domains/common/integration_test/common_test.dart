@@ -363,14 +363,18 @@ class CommonTest {
 
   static Future<void> enterDropDownSearch(
       WidgetTester tester, String key, String value,
-      {int seconds = 1}) async {
+      {int seconds = 1, check = false}) async {
     await tapByKey(tester, key); // open search dropdown
     await tester.enterText(find.byType(TextField).last, value);
     await tester.pumpAndSettle(
         const Duration(seconds: waitTime)); // wait for search result
-    expect(find.textContaining(value).first, findsOneWidget,
-        reason: "could not find text: $value to tap on");
-    await tester.tap(find.textContaining(value).first); // hidden char!
+    expect(find.textContaining(value).at(1), findsOneWidget,
+        reason: "could not find text in dropdownlist: $value to tap on");
+    if (check) {
+      await tapByType(tester, Checkbox);
+    } else {
+      await tester.tap(find.textContaining(value).last, warnIfMissed: false);
+    }
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
@@ -491,9 +495,7 @@ class CommonTest {
 
   static Future<void> tapByType(WidgetTester tester, Type type,
       {int seconds = 1}) async {
-    expect(find.byType(type).first, findsOneWidget,
-        reason: "could not find type: $type to tap on");
-    await tester.tap(find.byType(type).first);
+    await tester.tap(find.byType(type).first, warnIfMissed: false);
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 

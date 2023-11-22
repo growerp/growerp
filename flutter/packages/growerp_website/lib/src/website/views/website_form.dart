@@ -173,9 +173,7 @@ class WebsiteFormState extends State<WebsitePage> {
               });
 
           if (updContent != null) {
-            setState(() {
-              _websiteBloc.add(WebsiteFetch());
-            });
+            _websiteBloc.add(WebsiteFetch());
           }
         }));
 
@@ -196,9 +194,7 @@ class WebsiteFormState extends State<WebsitePage> {
                   return WebsiteContentDialog(state.website!.id, content);
                 });
             if (updContent != null) {
-              setState(() {
-                _websiteBloc.add(WebsiteFetch());
-              });
+              _websiteBloc.add(WebsiteFetch());
             }
           },
           deleteIcon: const Icon(
@@ -234,9 +230,7 @@ class WebsiteFormState extends State<WebsitePage> {
                 return WebsiteContentDialog(state.website!.id, Content());
               });
           if (updContent != null) {
-            setState(() {
-              _websiteBloc.add(WebsiteFetch());
-            });
+            _websiteBloc.add(WebsiteFetch());
           }
         }));
 
@@ -255,11 +249,11 @@ class WebsiteFormState extends State<WebsitePage> {
             var productList = List.of(
                 _websiteBloc.state.website!.websiteCategories[index].products);
             productList.removeAt(productIndex);
-            context.read<WebsiteBloc>().add(WebsiteUpdate(Website(
-                    id: _websiteBloc.state.website!.id,
-                    websiteCategories: [
-                      category.copyWith(products: productList)
-                    ])));
+            _websiteBloc.add(WebsiteUpdate(Website(
+                id: _websiteBloc.state.website!.id,
+                websiteCategories: [
+                  category.copyWith(products: productList)
+                ])));
           },
         ));
       });
@@ -498,6 +492,7 @@ class WebsiteFormState extends State<WebsitePage> {
               return const FatalErrorForm(message: 'server connection problem');
             case ProductStatus.success:
               return DropdownSearch<Product>.multiSelection(
+                key: Key("addProduct${category.categoryName}"),
                 dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration: InputDecoration(
                         labelText: category.categoryName,
@@ -513,7 +508,7 @@ class WebsiteFormState extends State<WebsitePage> {
                                 category.categoryName ==
                                 element["categoryName"])["products"]),
                 popupProps: PopupPropsMultiSelection.menu(
-                  showSelectedItems: true,
+                  showSelectedItems: false,
                   isFilterOnline: true,
                   showSearchBox: true,
                   searchFieldProps: TextFieldProps(
@@ -564,6 +559,7 @@ class WebsiteFormState extends State<WebsitePage> {
             return const FatalErrorForm(message: 'server connection problem');
           case CategoryStatus.success:
             return DropdownSearch<Category>.multiSelection(
+              key: const Key("addShopCategory}"),
               dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
                       isDense: true,
@@ -573,8 +569,12 @@ class WebsiteFormState extends State<WebsitePage> {
               dropdownBuilder: (context, selectedItems) => selectedItems.isEmpty
                   ? const Text("No item selected")
                   : Wrap(spacing: 10, children: browseCatButtons),
+              dropdownButtonProps: const DropdownButtonProps(
+                  // for autom test
+                  icon: Icon(Icons.arrow_drop_down,
+                      size: 24, key: Key("addShopCategory"))),
               popupProps: PopupPropsMultiSelection.menu(
-                showSelectedItems: true,
+                showSelectedItems: false,
                 isFilterOnline: true,
                 showSearchBox: true,
                 searchFieldProps: TextFieldProps(
