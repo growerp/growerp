@@ -356,7 +356,7 @@ class WebsiteFormState extends State<WebsitePage> {
 
     final Uri url = Uri.parse(foundation.kReleaseMode
         ? "https://${state.website?.hostName}"
-        : "http://${state.website!.id}.localhost:8080");
+        : "http://${state.website?.hostName}");
 
     void doLlaunchUrl() async {
       if (!await launchUrl(url)) throw 'Could not launch $url';
