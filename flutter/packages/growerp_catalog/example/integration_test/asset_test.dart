@@ -36,7 +36,6 @@ void main() {
         title: "Asset test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester, testData: {
-//      "categories": categories.sublist(0, 2),
       "products": products.sublist(0, 3) // will create category too
     });
     await AssetTest.selectAsset(tester);

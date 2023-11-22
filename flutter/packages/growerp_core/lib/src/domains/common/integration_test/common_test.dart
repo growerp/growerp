@@ -195,7 +195,7 @@ class CommonTest {
     if (find
         .byKey(const Key('HomeFormAuth'))
         .toString()
-        .startsWith('zero widgets with key')) {
+        .startsWith('Found 0 widgets with key')) {
       await pressLoginWithExistingId(tester);
       await enterText(tester, 'username', username ?? test.admin!.email!);
       await enterText(tester, 'password', password ?? 'qqqqqq9!');
@@ -315,7 +315,7 @@ class CommonTest {
     if (find
         .byKey(Key(widgetKey))
         .toString()
-        .startsWith('zero widgets with key')) return false;
+        .startsWith('Found 0 widgets with key')) return false;
     return true;
   }
 
@@ -453,7 +453,10 @@ class CommonTest {
   }
 
   static bool hasKey(String key) {
-    if (find.byKey(Key(key)).toString().startsWith('zero widgets with key')) {
+    if (find
+        .byKey(Key(key))
+        .toString()
+        .startsWith('Found 0 widgets with key')) {
       return false;
     }
     return true;

@@ -40,7 +40,7 @@ class UserTest {
     if (find
         .byKey(const Key('HomeFormAuth'))
         .toString()
-        .startsWith('zero widgets with key')) {
+        .startsWith('Found 0 widgets with key')) {
       await CommonTest.gotoMainMenu(tester);
     }
     await CommonTest.selectOption(tester, option, formName, tabNumber);

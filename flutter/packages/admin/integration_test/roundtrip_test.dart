@@ -40,7 +40,7 @@ void main() {
   testWidgets('''GrowERP roundtrip Purchase test''', (tester) async {
     await CommonTest.startTestApp(
       title: "RoundTrip Test",
-      clear: false, // use data from previous run, ifnone same as true
+      clear: true, // use data from previous run, ifnone same as true
       tester,
       router.generateRoute,
       menuOptions,
