@@ -40,7 +40,7 @@ class GlAccount with _$GlAccount {
   }) = _GlAccount;
 
   factory GlAccount.fromJson(Map<String, dynamic> json) =>
-      _$GlAccountFromJson(json);
+      _$GlAccountFromJson(json['glAccount'] ?? json);
 }
 
 String glAccountCsvFormat =

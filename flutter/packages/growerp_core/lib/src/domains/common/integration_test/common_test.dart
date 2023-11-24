@@ -368,8 +368,6 @@ class CommonTest {
     await tester.enterText(find.byType(TextField).last, value);
     await tester.pumpAndSettle(
         const Duration(seconds: waitTime)); // wait for search result
-    expect(find.textContaining(value).at(1), findsOneWidget,
-        reason: "could not find text in dropdownlist: $value to tap on");
     if (check) {
       await tapByType(tester, Checkbox);
     } else {

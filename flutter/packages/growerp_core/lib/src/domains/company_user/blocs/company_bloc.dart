@@ -71,7 +71,9 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     try {
       emit(state.copyWith(status: CompanyStatus.loading));
       Companies compResult = await restClient.getCompany(
-          role: role, companyPartyId: event.companyPartyId);
+          role: role,
+          companyPartyId: event.companyPartyId,
+          searchString: event.searchString);
       return emit(state.copyWith(
         status: CompanyStatus.success,
         companies: compResult.companies,

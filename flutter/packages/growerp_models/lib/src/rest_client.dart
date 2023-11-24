@@ -350,6 +350,7 @@ abstract class RestClient {
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('search') String? searchString,
+    @Query('trialBalance') bool? trialBalance,
   });
 
   @GET("rest/s1/growerp/100/Timeperiod")

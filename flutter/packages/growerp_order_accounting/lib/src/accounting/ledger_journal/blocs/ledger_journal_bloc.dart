@@ -45,7 +45,6 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
     LedgerJournalFetch event,
     Emitter<LedgerJournalState> emit,
   ) async {
-    if (state.hasReachedMax) return;
     if (state.status == LedgerJournalStatus.initial ||
         event.refresh ||
         event.searchString != '') {

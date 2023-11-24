@@ -74,8 +74,10 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                     const Expanded(
                         child:
                             Text("Account name", textAlign: TextAlign.center)),
-                  const Expanded(
-                      child: Text("debit/credit", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+                    const Expanded(
+                        child:
+                            Text("debit/credit", textAlign: TextAlign.center)),
                   if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                     const Expanded(
                         child:
@@ -84,9 +86,16 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                     const Expanded(
                         child:
                             Text("Account Type", textAlign: TextAlign.center)),
-                  const Expanded(
-                      child:
-                          Text("Posted balance", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+                    const Expanded(
+                        child: Text("Posted balance",
+                            textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                    const Expanded(
+                        child: Text("Debit", textAlign: TextAlign.center)),
+                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                    const Expanded(
+                        child: Text("Credit", textAlign: TextAlign.center)),
                 ]),
                 const Divider(),
               ]),

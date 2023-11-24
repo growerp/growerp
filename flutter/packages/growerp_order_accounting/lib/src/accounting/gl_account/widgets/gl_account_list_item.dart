@@ -29,6 +29,11 @@ class GlAccountListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glAccountBloc = context.read<GlAccountBloc>();
+    bool isPhone = (ResponsiveBreakpoints.of(context).equals(MOBILE));
+    String postedBalance = glAccount.postedBalance == null ||
+            glAccount.postedBalance.toString() == '0'
+        ? ''
+        : glAccount.postedBalance.toString();
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
@@ -37,35 +42,51 @@ class GlAccountListItem extends StatelessWidget {
             : glAccount.accountCode!.substring(0, 3)),
       ),
       title: Column(children: [
-        if (ResponsiveBreakpoints.of(context).isMobile)
-          Text(glAccount.accountName ?? '', key: Key('name$index')),
+        if (isPhone) Text(glAccount.accountName ?? '', key: Key('name$index')),
         Row(
           children: <Widget>[
             Expanded(
                 child:
                     Text(glAccount.accountCode ?? '', key: Key('code$index'))),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+            if (!isPhone)
               Expanded(
                   child: Text(glAccount.accountName ?? '',
                       key: Key('name$index'))),
-            Expanded(
-                child: Text(glAccount.isDebit == true ? 'Debit' : 'Credit',
-                    key: Key('isDebit$index'), textAlign: TextAlign.center)),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+            if (isPhone)
+              Expanded(
+                  child: Text(glAccount.isDebit == true ? 'Debit' : 'Credit',
+                      key: Key('isDebit$index'), textAlign: TextAlign.center)),
+            if (!isPhone)
               Expanded(
                   child: Text(glAccount.accountClass?.description ?? '',
                       key: Key('class$index'))),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+            if (!isPhone)
               Expanded(
                   child: Text(glAccount.accountType?.description ?? '',
                       key: Key('type$index'))),
-            Expanded(
-                child: Text(
-                    glAccount.postedBalance == null
-                        ? '0'
-                        : glAccount.postedBalance.toString(),
-                    key: Key('postedBalance$index'),
-                    textAlign: TextAlign.center)),
+            if (isPhone)
+              Expanded(
+                  child: Text(postedBalance, key: Key('postedBalance$index'))),
+            if (!isPhone)
+              Expanded(
+                  child: glAccount.isDebit == null
+                      ? Text(glAccount.postedDebits.toString(),
+                          textAlign: TextAlign.center)
+                      : glAccount.isDebit == true
+                          ? Text(postedBalance,
+                              textAlign: TextAlign.center,
+                              key: Key('postedBalance$index'))
+                          : const Text('')),
+            if (!isPhone)
+              Expanded(
+                  child: glAccount.isDebit == null
+                      ? Text(glAccount.postedCredits.toString(),
+                          textAlign: TextAlign.center)
+                      : glAccount.isDebit == false
+                          ? Text(postedBalance,
+                              textAlign: TextAlign.center,
+                              key: Key('postedBalance$index'))
+                          : const Text('')),
           ],
         ),
       ]),

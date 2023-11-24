@@ -729,6 +729,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="10" type="Integer" />
             <parameter name="search" />
+            <parameter name="trialBalance" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="glAccounts" type="List">
@@ -756,20 +757,35 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="search">
                 <set field="search" value="%$search%" />
             </if>
-            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
-                limit="limit" offset="start" list="glAccountList">
-                <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition field-name="glAccountId"
-                    from="glAccountId" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="accountName" operator="like" ignore-case="true"
-                        from="search" ignore-if-empty="true" />
-                    <econdition field-name="accountCode" operator="like" ignore-case="true"
-                        from="search" ignore-if-empty="true" />
-                </econditions>
-                <order-by field-name="accountCode" />
-            </entity-find>
+            <if condition="trialBalance == true">
+                <set field="limit" value="999" />
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                    list="glAccountList">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="postedBalance" operator="not-equals"
+                        from="BigDecimal.ZERO" />
+                    <econdition field-name="postedBalance" operator="is-not-null" />
+                </entity-find>
+                <else>
+                    <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                        limit="limit" offset="start" list="glAccountList">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="glAccountId"
+                            from="glAccountId" ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="accountName" operator="like" ignore-case="true"
+                                from="search" ignore-if-empty="true" />
+                            <econdition field-name="accountCode" operator="like" ignore-case="true"
+                                from="search" ignore-if-empty="true" />
+                        </econditions>
+                        <order-by field-name="accountCode" />
+                    </entity-find>
+
+                </else>
+            </if>
             <set field="glAccounts" from="[]" />
+            <set field="totalCredit" from="BigDecimal.ZERO" type="BigDecimal" />
+            <set field="totalDebit" from="BigDecimal.ZERO" type="BigDecimal" />
             <iterate list="glAccountList" entry="glAccount">
                 <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
                     list="classes">
@@ -799,8 +815,27 @@ along with this software (see the LICENSE.md file). If not, see
                         isDebit: glAccount.isDebit == 'Y' ? true : false,
                         postedBalance: glAccount.postedBalance?.toString(),
                         )
+                    if (glAccount.postedBalance != null &amp;&amp; trialBalance == true) {
+                        if (glAccount.isDebit == 'Y') {
+                            totalDebit += glAccount.postedBalance;
+                        } else {
+                            totalCredit += glAccount.postedBalance;
+                        }
+                    }
+                    
                 </script>
             </iterate>
+            <if
+                condition="trialBalance == true">
+                <script>
+                    glAccounts.add(
+                        accountName: 'Total posted',
+                        accountCode: '-----',
+                        postedCredits: totalCredit?.toString(),
+                        postedDebits: totalDebit?.toString(),
+                    ); 
+                </script>
+            </if>
         </actions>
     </service>
 

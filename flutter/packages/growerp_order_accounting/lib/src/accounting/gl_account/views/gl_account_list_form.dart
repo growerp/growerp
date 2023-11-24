@@ -25,8 +25,7 @@ class GlAccountListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
       create: (BuildContext context) =>
-          GlAccountBloc(context.read<RestClient>())
-            ..add(const GlAccountFetch()),
+          GlAccountBloc(context.read<RestClient>()),
       child: const GlAccountList());
 }
 
@@ -40,103 +39,102 @@ class GlAccountList extends StatefulWidget {
 class GlAccountsState extends State<GlAccountList> {
   final ScrollController _scrollController = ScrollController();
   late GlAccountBloc _glAccountBloc;
+  int limit = 20;
 
   @override
   void initState() {
     super.initState();
-    _glAccountBloc = context.read<GlAccountBloc>();
+    _glAccountBloc = context.read<GlAccountBloc>()
+      ..add(GlAccountFetch(limit: limit));
     _scrollController.addListener(_onScroll);
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConsumer<GlAccountBloc, GlAccountState>(listener: (context, state) {
-        if (state.status == GlAccountStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
-        }
-        if (state.status == GlAccountStatus.success) {
-          HelperFunctions.showMessage(
-              context, '${state.message}', Colors.green);
-        }
-      }, builder: (context, state) {
-        switch (state.status) {
-          case GlAccountStatus.failure:
-            return Center(
-                child: Text('failed to fetch glAccounts: ${state.message}'));
-          case GlAccountStatus.success:
-            return Scaffold(
-                floatingActionButton:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  FloatingActionButton(
-                      heroTag: 'productFiles',
-                      key: const Key("upDownload"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _glAccountBloc,
-                                  child: const GlAccountFilesDialog());
-                            });
-                      },
-                      tooltip: 'products up/download',
-                      child: const Icon(Icons.file_copy)),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) =>
-                                BlocProvider.value(
-                                    value: _glAccountBloc,
-                                    child: GlAccountDialog(GlAccount())));
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add)),
-                ]),
-                body: Column(children: [
-                  const GlAccountListHeader(),
-                  Expanded(
-                      child: RefreshIndicator(
-                          onRefresh: (() async => _glAccountBloc
-                              .add(const GlAccountFetch(refresh: true))),
-                          child: ListView.builder(
-                              key: const Key('listView'),
-                              shrinkWrap: true,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount: state.hasReachedMax
-                                  ? state.glAccounts.length + 1
-                                  : state.glAccounts.length + 2,
-                              controller: _scrollController,
-                              itemBuilder: (BuildContext context, int index) {
-                                if (index == 0) {
-                                  return Visibility(
-                                      visible: state.glAccounts.isEmpty,
-                                      child: const Center(
-                                          heightFactor: 20,
-                                          child: Text(
-                                              'No active glAccounts found',
-                                              key: Key('empty'),
-                                              textAlign: TextAlign.center)));
-                                }
-                                index--;
-                                return index >= state.glAccounts.length
-                                    ? const BottomLoader()
-                                    : Dismissible(
-                                        key: const Key('glAccountItem'),
-                                        direction: DismissDirection.startToEnd,
-                                        child: GlAccountListItem(
-                                            glAccount: state.glAccounts[index],
-                                            index: index));
-                              })))
-                ]));
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      });
+  Widget build(BuildContext context) {
+    limit = (MediaQuery.of(context).size.height / 100).round();
+    return BlocConsumer<GlAccountBloc, GlAccountState>(
+        listener: (context, state) {
+      if (state.status == GlAccountStatus.failure) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+      }
+      if (state.status == GlAccountStatus.success) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+      }
+    }, builder: (context, state) {
+      switch (state.status) {
+        case GlAccountStatus.failure:
+          return Center(
+              child: Text('failed to fetch glAccounts: ${state.message}'));
+        case GlAccountStatus.success:
+          return Scaffold(
+              floatingActionButton:
+                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                FloatingActionButton(
+                    heroTag: 'productFiles',
+                    key: const Key("upDownload"),
+                    onPressed: () async {
+                      await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return BlocProvider.value(
+                                value: _glAccountBloc,
+                                child: const GlAccountFilesDialog());
+                          });
+                    },
+                    tooltip: 'products up/download',
+                    child: const Icon(Icons.file_copy)),
+                const SizedBox(height: 10),
+                FloatingActionButton(
+                    key: const Key("tb"),
+                    onPressed: () {
+                      _glAccountBloc
+                          .add(const GlAccountFetch(trialBalance: true));
+                    },
+                    tooltip: 'Trial Balance',
+                    child: const Text("TB")),
+              ]),
+              body: Column(children: [
+                const GlAccountListHeader(),
+                Expanded(
+                    child: RefreshIndicator(
+                        onRefresh: (() async => _glAccountBloc
+                            .add(const GlAccountFetch(refresh: true))),
+                        child: ListView.builder(
+                            key: const Key('listView'),
+                            shrinkWrap: true,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: state.hasReachedMax
+                                ? state.glAccounts.length + 1
+                                : state.glAccounts.length + 2,
+                            controller: _scrollController,
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index == 0) {
+                                return Visibility(
+                                    visible: state.glAccounts.isEmpty,
+                                    child: const Center(
+                                        heightFactor: 20,
+                                        child: Text(
+                                            'No active glAccounts found',
+                                            key: Key('empty'),
+                                            textAlign: TextAlign.center)));
+                              }
+                              index--;
+                              return index >= state.glAccounts.length
+                                  ? const BottomLoader()
+                                  : Dismissible(
+                                      key: const Key('glAccountItem'),
+                                      direction: DismissDirection.startToEnd,
+                                      child: GlAccountListItem(
+                                          glAccount: state.glAccounts[index],
+                                          index: index));
+                            })))
+              ]));
+        default:
+          return const Center(child: CircularProgressIndicator());
+      }
+    });
+  }
 
   @override
   void dispose() {

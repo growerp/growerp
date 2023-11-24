@@ -25,8 +25,6 @@ import 'package:growerp_models/growerp_models.dart';
 part 'gl_account_event.dart';
 part 'gl_account_state.dart';
 
-const _glAccountLimit = 20;
-
 EventTransformer<E> glAccountDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
@@ -45,6 +43,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   }
 
   final RestClient restClient;
+  int start = 0;
 
   Future<void> _onGlAccountFetch(
     GlAccountFetch event,
@@ -55,17 +54,27 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     }
     try {
       emit(state.copyWith(status: GlAccountStatus.loading));
-      // start from record zero for initial and refresh
+      if (state.status == GlAccountStatus.initial ||
+          event.refresh ||
+          event.searchString != '' ||
+          event.trialBalance) {
+        start = 0;
+      } else {
+        start = state.glAccounts.length;
+      }
       GlAccounts compResult = await restClient.getGlAccount(
         searchString: event.searchString,
         start: 0,
-        limit: event.limit ?? _glAccountLimit,
+        limit: event.limit,
+        trialBalance: event.trialBalance,
       );
       return emit(state.copyWith(
         status: GlAccountStatus.success,
-        glAccounts: compResult.glAccounts,
+        glAccounts: start == 0
+            ? compResult.glAccounts
+            : (List.of(state.glAccounts)..addAll(compResult.glAccounts)),
         hasReachedMax:
-            compResult.glAccounts.length < _glAccountLimit ? true : false,
+            compResult.glAccounts.length < event.limit ? true : false,
         searchString: '',
       ));
     } on DioException catch (e) {

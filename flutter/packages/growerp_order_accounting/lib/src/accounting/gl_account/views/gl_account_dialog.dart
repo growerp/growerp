@@ -90,7 +90,9 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                     title:
                         "GlAccount #${widget.glAccount.accountCode ?? " New"}",
                     width: columns.toDouble() * 400,
-                    height: 1 / columns.toDouble() * 500,
+                    height: columns == 1
+                        ? 1 / columns.toDouble() * 500
+                        : 1 / columns.toDouble() * 700,
                     child: BlocBuilder<GlAccountBloc, GlAccountState>(
                         builder: (context, state) {
                       switch (state.status) {
