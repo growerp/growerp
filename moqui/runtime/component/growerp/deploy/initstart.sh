@@ -2,31 +2,26 @@
 set -x
 
 echo "params 1: $1 2: $2 3: $3"
-
-HOME_DIR=$PWD
-echo $HOME_DIR
+echo "docker tag: $TAG"
 
 CONF_FILE="conf/MoquiProductionConf.xml"
 
 # =================== start ===============================
 
-#cd $HOME_DIR
+#insert version
+if [ -n "$TAG" ] ; then
+    sed -i -e "s/\XXXXX/$TAG/g" runtime/component/growerp/component.xml
+fi
 
 # insert some sensitive data from docker-compose
-if [ -n "$SMTP_USER" ] ; then
-    echo "updating email"
-    sed -i -e "s/\${SMTP_USER}/$SMTP_USER/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/\${SMTP_PASSWORD}/$SMTP_PASSWORD/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-fi
-if [ -n "$BIRDSEND_API_KEY" ] ; then
-    echo "updating birdsend"
-    sed -i -e "s/\${BIRDSEND_API_KEY}/$BIRDSEND_API_KEY/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-    sed -i -e "s/\${BIRDSEND_AUTM_SEQUENCE}/$BIRDSEND_AUTM_SEQUENCE=/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
-fi
-if [ -n "$STRIPE_SECRET_KEY" ] ; then
-    echo "updating stripe key"
-    sed -i -e "s/\${STRIPE_SECRET_KEY}/$STRIPE_SECRET_KEY/g" runtime/component/mantle-stripe/data/StripeInstallData.xml
-fi
+echo "updating email"
+sed -i -e "s/\SMTP_USER/${SMTP_USER}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+sed -i -e "s/\SMTP_PASSWORD/${SMTP_PASSWORD}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+echo "updating birdsend"
+sed -i -e "s/\BIRDSEND_API_KEY/${BIRDSEND_API_KEY}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+sed -i -e "s/\BIRDSEND_AUTM_SEQUENCE/${BIRDSEND_AUTM_SEQUENCE}/g" runtime/component/growerp/data/GrowerpAbSeedData.xml
+echo "updating stripe key"
+sed -i -e "s/\STRIPE_SECRET_KEY/${STRIPE_SECRET_KEY}/g" runtime/component/mantle-stripe/data/StripeInstallData.xml
 
 #load data if required
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then

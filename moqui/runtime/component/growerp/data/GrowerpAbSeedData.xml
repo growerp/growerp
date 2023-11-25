@@ -14,11 +14,14 @@ along with this software (see the LICENSE.md file). If not, see
 -->
 <entity-facade-xml type="seed">
     <moqui.basic.email.EmailServer emailServerId="SYSTEM"
-            smtpHost="smtp.growerp.com.cust.hostedemail.com" smtpPort="465" smtpStartTls="Y" smtpSsl="Y"
-        storeHost="mail.growerp.com.cust.hostedemail.com" storePort="993" storeProtocol="imaps" storeFolder="backend"
-        storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="${SMTP_USER}" mailPassword="${SMTP_PASSWORD}"/>
+        smtpHost="smtp.growerp.com.cust.hostedemail.com" smtpPort="465" smtpStartTls="Y" smtpSsl="Y"
+        storeHost="mail.growerp.com.cust.hostedemail.com" storePort="993" storeProtocol="imaps"
+        storeFolder="backend"
+        storeDelete="N" storeMarkSeen="Y" storeSkipSeen="Y" mailUsername="SMTP_USER"
+        mailPassword="SMTP_PASSWORD" />
 
     <!-- birdsend email registration -->
-    <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co" apiVersion="v1"
-		value1="${BIRDSEND_AUTM_SEQUENCE}" apiKey="${BIRDSEND_API_KEY}"/>
+    <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co"
+        apiVersion="v1"
+        value1="BIRDSEND_AUTM_SEQUENCE" apiKey="BIRDSEND_API_KEY" />
 </entity-facade-xml>

@@ -200,7 +200,7 @@ class ElasticFacadeImpl implements ElasticFacade {
                 try {
                     serverInfo = getServerInfo()
                 } catch (Throwable t) {
-                    if (i == retries) {
+/*                    if (i == retries) {
                         requestFactory.destroy()
                         throw t
                         // logger.error("Final error connecting to ElasticSearch cluster ${clusterName} at ${clusterProtocol}://${clusterHost}:${clusterPort}, try ${i} of ${retries}: ${t.toString()}", t)
@@ -208,7 +208,7 @@ class ElasticFacadeImpl implements ElasticFacade {
                         logger.warn("Error connecting to ElasticSearch cluster ${clusterName} at ${clusterProtocol}://${clusterHost}:${clusterPort}, try ${i} of ${retries}: ${t.toString()}")
                         Thread.sleep(1000)
                     }
-                }
+*/                }
                 if (serverInfo != null) {
                     // [name:dejc-m1p.local, cluster_name:opensearch, cluster_uuid:aoMc3T7ES9yCC6yzi-_Ghg, version:[distribution:opensearch, number:1.3.1, build_type:tar, build_hash:c4c0672877bf0f787ca857c7c37b775967f93d81, build_date:2022-03-29T18:34:46.566802Z, build_snapshot:false, lucene_version:8.10.1, minimum_wire_compatibility_version:6.8.0, minimum_index_compatibility_version:6.0.0-beta1], tagline:The OpenSearch Project: https://opensearch.org/]
                     Map versionMap = ((Map) serverInfo.version)

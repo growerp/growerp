@@ -1,4 +1,5 @@
 #stage 1 -get files and build
+ARG DOCKER_TAG=NOTSET1
 FROM openjdk:11-jdk as build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
@@ -11,9 +12,9 @@ RUN echo "Pat: $PAT"
 RUN apt-get update && \
     apt-get install -y curl git wget zip unzip apt-transport-https && \
     apt-get clean
-RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
+#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /root/growerp
 # build from the moqui directory instead of repository for debugging
-#COPY . /root/growerp/moqui
+COPY . /root/growerp/moqui
 # delete debug user
 RUN rm /root/growerp/moqui/runtime/component/growerp/data/0-GrowerpDebug.xml
 RUN git clone --depth 1 https://$PAT@github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
@@ -31,6 +32,7 @@ WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
 # stage 2 create image
 FROM openjdk:11-jdk
+ARG DOCKER_TAG=NOTSET1
 RUN apt-get update && apt-get install -y apt-transport-https nano && apt-get clean
 COPY --from=build-env /opt/moqui /opt/moqui
 COPY --from=build-env /root/growerp/moqui/runtime /opt/moqui/runtime
@@ -52,11 +54,12 @@ EXPOSE 80
 # ENTRYPOINT ["java", "-jar", "moqui.war"]
 RUN cp /opt/moqui/runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh
 WORKDIR /opt/moqui
-
-ENTRYPOINT ["/bin/bash", "-c", "./initstart.sh"]
+RUN echo "=========$DOCKER_TAG"
 #ENTRYPOINT ["java", "-cp", ".", "MoquiStart", "port=80"]
 
 HEALTHCHECK --interval=30s --timeout=600ms --start-period=120s CMD curl -f -H "X-Forwarded-Proto: https" -H "X-Forwarded-Ssl: on" http://localhost/status || exit 1
 # specify this as a default parameter if none are specified with docker exec/run, ie run production by default
-CMD ["conf=conf/MoquiProductionConf.xml","$DOCKER_TAG"]
+# Add an env to save ARG
+ENV TAG=$DOCKER_TAG
+CMD ./initstart.sh ${TAG}
 
