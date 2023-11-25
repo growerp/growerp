@@ -16,11 +16,12 @@
 FROM growerp/flutter-sdk-image AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
+ARG DOCKER_TAG=NOTSET1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
     apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
-    fonts-droid-fallback nano && \
+    fonts-droid-fallback nano sed && \
     apt-get clean
 
 # git security
@@ -44,6 +45,7 @@ RUN melos l10n --no-select
 RUN melos build --no-select
 # build flutter app
 WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
+RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
