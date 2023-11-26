@@ -2,9 +2,8 @@
 
 # create version tag
 ls
-echo "path: $DOCKERFILE_PATH tag: $DOCKER_TAG"
-cd ../../../flutter
+echo "path: $DOCKERFILE_PATH tag: $DOCKER_TAG pwd: $PWD"
 docker build \
     --build-arg DOCKER_TAG=$DOCKER_TAG \
     -t $IMAGE_NAME \
-    -f packages/admin/Dockerfile .
+    -f $DOCKERFILE_PATH .
