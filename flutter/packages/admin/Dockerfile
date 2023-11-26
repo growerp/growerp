@@ -38,6 +38,7 @@ WORKDIR /home/mobiledevops
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 #RUN dart pub global run melos:melos clean
 WORKDIR /home/mobiledevops/growerp/flutter
+RUN flutter --version
 RUN melos bootstrap
 # localization
 RUN melos l10n --no-select

@@ -57,8 +57,6 @@ dependencies:
   flutter_test: 
     sdk: flutter
   growerp_core: ^1.1.0
-  growerp_models:
-    path: ../growerp_models
   scrollable_positioned_list: ^0.3.8
 dependency_overrides: 
   intl: ^0.18.0

@@ -50,8 +50,7 @@ dependencies:
   flutter_test: 
     sdk: flutter
   growerp_core: ^1.1.0
-  growerp_models:
-    path: ../growerp_models
+  
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 
