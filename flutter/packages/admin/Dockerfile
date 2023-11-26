@@ -11,8 +11,10 @@
 # along with this software (see the LICENSE.md file). If not, see
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
-#build form flutter/packages/admin directory
-
+#
+# to be build from the flutter directory
+# with: docker build -f packages/admin/Dockerfile -t admin . --progress=plain
+#
 #Stage 1 - Install dependencies and build the app
 FROM growerp/flutter-sdk-image AS build-env
 
