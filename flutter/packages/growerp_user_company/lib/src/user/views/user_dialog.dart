@@ -526,9 +526,9 @@ class UserDialogState extends State<UserDialog> {
                       telephoneNr: _telephoneController.text,
                       loginDisabled: _isLoginDisabled,
                       userGroup: _selectedUserGroup,
-                      language: Localizations.localeOf(context)
-                          .languageCode
-                          .toString(),
+//                      language: Localizations.localeOf(context)
+//                          .languageCode
+//                          .toString(),
                       company: _selectedCompany.name != null
                           ? _selectedCompany
                           : Company(

@@ -35,10 +35,11 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 # get growerp repos
 USER mobiledevops
 WORKDIR /home/mobiledevops
-RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-#RUN dart pub global run melos:melos clean
+# RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+COPY . /home/mobiledevops/growerp
 WORKDIR /home/mobiledevops/growerp/flutter
 RUN flutter --version
+RUN melos clean
 RUN melos bootstrap
 # localization
 RUN melos l10n --no-select

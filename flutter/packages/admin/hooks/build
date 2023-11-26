@@ -2,7 +2,6 @@
 
 # create version tag
 docker build \
-    --build-arg PAT=$PAT \
     --build-arg DOCKER_TAG=$DOCKER_TAG \
     -t $IMAGE_NAME \
     -f $DOCKERFILE_PATH .
