@@ -37,7 +37,7 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 USER mobiledevops
 WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-COPY --chown=mobiledevops:mobiledevops ../../../flutter /home/mobiledevops/flutter
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
 WORKDIR /home/mobiledevops/flutter
 RUN ls
 RUN flutter --version
