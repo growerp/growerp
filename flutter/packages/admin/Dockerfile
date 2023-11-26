@@ -16,7 +16,7 @@
 FROM growerp/flutter-sdk-image AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
-ARG DOCKER_TAG=NOTSET1
+ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
@@ -36,8 +36,9 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 USER mobiledevops
 WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-COPY . /home/mobiledevops/growerp
-WORKDIR /home/mobiledevops/growerp/flutter
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
+WORKDIR /home/mobiledevops/flutter
+RUN ls
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
@@ -46,11 +47,11 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/growerp/flutter/packages/admin
+WORKDIR /home/mobiledevops/flutter/packages/admin
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /home/mobiledevops/growerp/flutter/packages/admin/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/flutter/packages/admin/build/web /usr/share/nginx/html
 EXPOSE 80
