@@ -41,7 +41,7 @@ WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
 WORKDIR /home/mobiledevops/flutter
-RUN ls
+RUN echo "pwd: $PWD"
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
