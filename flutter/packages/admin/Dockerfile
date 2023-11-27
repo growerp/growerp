@@ -39,10 +39,9 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 USER mobiledevops
 WORKDIR /home/mobiledevops
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
-WORKDIR /home/mobiledevops/flutter
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
+WORKDIR /home/mobiledevops/
 RUN echo "pwd: $PWD"
-RUN dart pub cache clean -f
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
@@ -51,11 +50,11 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/flutter/packages/admin
+WORKDIR /home/mobiledevops/packages/admin
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /home/mobiledevops/flutter/packages/admin/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/packages/admin/build/web /usr/share/nginx/html
 EXPOSE 80
