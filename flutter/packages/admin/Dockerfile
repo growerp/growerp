@@ -42,6 +42,7 @@ WORKDIR /home/mobiledevops
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
 WORKDIR /home/mobiledevops/flutter
 RUN echo "pwd: $PWD"
+RUN dart pub cache clean
 RUN flutter --version
 RUN melos clean
 RUN melos bootstrap

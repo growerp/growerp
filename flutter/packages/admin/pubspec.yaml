@@ -29,7 +29,6 @@ dependencies:
 dependency_overrides: 
   intl: ^0.18.0
 dev_dependencies: 
-  dependency_validator: ^3.2.0
   flutter_driver: 
     sdk: flutter
   flutter_test: 

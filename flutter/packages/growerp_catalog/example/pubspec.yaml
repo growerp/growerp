@@ -7,7 +7,6 @@ environment:
 dependencies: 
   flutter: 
     sdk: flutter
-  cupertino_icons: ^1.0.2
   growerp_catalog:
     path: ../
 dependency_overrides:

@@ -8,7 +8,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.3
   responsive_builder: ^0.4.1
   url_launcher: ^6.0.9
   
