@@ -41,7 +41,6 @@ dependencies:
   cupertino_icons: ^1.0.5
   stream_transform: ^2.1.0
   collection: ^1.16.0
-  http: ^1.1.0
   flutter_lints: ^2.0.1
   json_annotation: ^4.7.0
   dio: ^5.3.3

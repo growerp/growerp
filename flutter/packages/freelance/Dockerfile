@@ -11,16 +11,20 @@
 # along with this software (see the LICENSE.md file). If not, see
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
 #
-
+#
+# to be build from the flutter directory
+# with: docker build -f packages/freelance/Dockerfile -t freelance . --progress=plain
+#
 #Stage 1 - Install dependencies and build the app
 FROM growerp/flutter-sdk-image AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
+ARG DOCKER_TAG=1.0.0+1
 USER root
 # Install linux dependencies
 RUN apt-get update && \
     apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
-    fonts-droid-fallback nano && \
+    fonts-droid-fallback nano sed && \
     apt-get clean
 
 # git security
@@ -34,20 +38,23 @@ ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 # get growerp repos
 USER mobiledevops
 WORKDIR /home/mobiledevops
-RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-#RUN dart pub global run melos:melos clean
-WORKDIR /home/mobiledevops/growerp/flutter
+# RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/flutter
+WORKDIR /home/mobiledevops/flutter
+RUN echo "pwd: $PWD"
+RUN flutter --version
+RUN melos clean
 RUN melos bootstrap
 # localization
 RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /home/mobiledevops/growerp/flutter/packages/freelance
+WORKDIR /home/mobiledevops/flutter/packages/freelance
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM nginx
-COPY --from=build-env /home/mobiledevops/growerp/flutter/packages/freelance/build/web /usr/share/nginx/html
+COPY --from=build-env /home/mobiledevops/flutter/packages/freelance/build/web /usr/share/nginx/html
 EXPOSE 80
