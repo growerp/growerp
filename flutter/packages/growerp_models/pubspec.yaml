@@ -26,7 +26,7 @@ dependencies:
   path_provider: ^2.1.1
 
 dev_dependencies: 
-  lint_hard: ^1.0.0
+  lint_hard: ^4.0.0
   build_runner: ^2.1.11
   json_serializable: ^6.7.1
   freezed: ^2.0.3
