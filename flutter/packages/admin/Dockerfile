@@ -1,39 +1,48 @@
-# to be build from the flutter directory
-# with: docker build -f packages/admin/Dockerfile -t admin . --progress=plain
 #
+# This software is in the public domain under CC0 1.0 Universal plus a
+# Grant of Patent License.
+# 
+# To the extent possible under law, the author(s) have dedicated all
+# copyright and related and neighboring rights to this software to the
+# public domain worldwide. This software is distributed without any
+# warranty.
+# 
+# You should have received a copy of the CC0 Public Domain Dedication
+# along with this software (see the LICENSE.md file). If not, see
+# <http://creativecommons.org/publicdomain/zero/1.0/>.
+#
+#
+# to be build from the flutter directory
+# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/admin/Dockerfile -t growerp/admin . --progress=plain
+#
+#Stage 1 - Install dependencies and build the app
+FROM growerp/flutter-sdk-image AS build-env
 
-#Stage 1 - Install dependencies and build the app in a build environment
-FROM debian:latest AS build-env
+ARG BRANCH=development # currently either master or development we need to add existing
+ARG DOCKER_TAG=1.0.0+1
+USER root
+# Install linux dependencies
+RUN apt-get update && \
+    apt-get install -y git zip libgconf-2-4 gdb libstdc++6 \
+    fonts-droid-fallback nano sed && \
+    apt-get clean
 
-# Install flutter dependencies
-RUN apt-get update
-RUN apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 libglu1-mesa fonts-droid-fallback lib32stdc++6 python3 sed
-RUN apt-get clean 
-
-# Clone the flutter repo
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
-
-# Set flutter path
-ENV PATH="${PATH}:/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin"
-
-# Run flutter doctor
-RUN flutter doctor -v
-RUN flutter channel stable
-RUN flutter upgrade
-
-# Copy files to container and build
-RUN mkdir /app/
-COPY . /app/
-WORKDIR /app/
-
-RUN echo "pwd: $PWD"
-RUN flutter --version
+# git security
+RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
 RUN dart pub global activate melos
-ENV PATH="$PATH":"/root/.pub-cache/bin"
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 
-# run melos
+# get growerp repos
+USER mobiledevops
+WORKDIR /home/mobiledevops
+# RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/
+WORKDIR /home/mobiledevops/
+RUN echo "pwd: $PWD"
+RUN flutter --version
 RUN melos clean
 RUN melos bootstrap
 # localization
@@ -41,12 +50,11 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /app/packages/admin
+WORKDIR /home/mobiledevops/packages/admin
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
-
 RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
-FROM nginx:1.21.1-alpine
-COPY --from=build-env /app/packages/admin/build/web /usr/share/nginx/html
-
+FROM nginx
+COPY --from=build-env /home/mobiledevops/packages/admin/build/web /usr/share/nginx/html
+EXPOSE 80

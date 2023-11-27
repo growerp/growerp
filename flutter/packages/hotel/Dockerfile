@@ -13,7 +13,7 @@
 #
 #
 # to be build from the flutter directory
-# with: docker build -f packages/hotel/Dockerfile -t hotel . --progress=plain
+# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/hotel/Dockerfile -t growerp/hotel . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
 FROM growerp/flutter-sdk-image AS build-env
