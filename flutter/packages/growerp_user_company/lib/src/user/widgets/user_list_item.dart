@@ -34,7 +34,6 @@ class UserListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    RestClient repos = context.read<RestClient>();
     UserBloc userBloc = context.read<UserBloc>();
     return ListTile(
         leading: CircleAvatar(
@@ -86,10 +85,8 @@ class UserListItem extends StatelessWidget {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return RepositoryProvider.value(
-                    value: repos,
-                    child: BlocProvider.value(
-                        value: userBloc, child: UserDialog(user)));
+                return BlocProvider.value(
+                    value: userBloc, child: UserDialog(user));
               });
         },
         trailing: IconButton(

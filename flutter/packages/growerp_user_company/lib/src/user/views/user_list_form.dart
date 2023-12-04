@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: exhaustive_cases
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -37,33 +36,38 @@ class UserListForm extends StatelessWidget {
           key: key,
           role: role,
         ));
-    switch (role) {
-      case Role.lead:
-        return BlocProvider<LeadBloc>(
-            create: (context) =>
-                UserBloc(restClient, role)..add(const UserFetch()),
-            child: userList);
-      case Role.customer:
-        return BlocProvider<CustomerBloc>(
-            create: (context) =>
-                UserBloc(restClient, role)..add(const UserFetch()),
-            child: userList);
-      case Role.supplier:
-        return BlocProvider<SupplierBloc>(
-            create: (context) =>
-                UserBloc(restClient, role)..add(const UserFetch()),
-            child: userList);
-      case Role.company:
-        return BlocProvider<EmployeeBloc>(
-            create: (context) =>
-                UserBloc(restClient, role)..add(const UserFetch()),
-            child: userList);
-      default:
-        return BlocProvider<UserBloc>(
-            create: (context) =>
-                UserBloc(restClient, role)..add(const UserFetch()),
-            child: userList);
-    }
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      if (state.status == AuthStatus.failure) {
+        return const FatalErrorForm(message: 'Internet or server problem?');
+      }
+      switch (role) {
+        case Role.lead:
+          return BlocProvider<LeadBloc>(
+              create: (context) =>
+                  UserBloc(restClient, role)..add(const UserFetch()),
+              child: userList);
+        case Role.customer:
+          return BlocProvider<CustomerBloc>(
+              create: (context) =>
+                  UserBloc(restClient, role)..add(const UserFetch()),
+              child: userList);
+        case Role.supplier:
+          return BlocProvider<SupplierBloc>(
+              create: (context) =>
+                  UserBloc(restClient, role)..add(const UserFetch()),
+              child: userList);
+        case Role.company:
+          return BlocProvider<EmployeeBloc>(
+              create: (context) =>
+                  UserBloc(restClient, role)..add(const UserFetch()),
+              child: userList);
+        default:
+          return BlocProvider<UserBloc>(
+              create: (context) =>
+                  UserBloc(restClient, role)..add(const UserFetch()),
+              child: userList);
+      }
+    });
   }
 }
 
@@ -80,7 +84,6 @@ class UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
-  late RestClient repos;
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
@@ -92,7 +95,6 @@ class UserListState extends State<UserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    repos = context.read<RestClient>();
     switch (widget.role) {
       case Role.company:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;
@@ -148,28 +150,27 @@ class UserListState extends State<UserList> {
                     : Dismissible(
                         key: const Key('userItem'),
                         direction: DismissDirection.startToEnd,
-                        child: RepositoryProvider.value(
-                            value: repos,
-                            child: BlocProvider.value(
-                                value: _userBloc,
-                                child: UserListItem(
-                                    user: users[index],
-                                    index: index,
-                                    role: widget.role,
-                                    isDeskTop: !isPhone))));
+                        child: BlocProvider.value(
+                          value: _userBloc,
+                          child: UserListItem(
+                            user: users[index],
+                            index: index,
+                            role: widget.role,
+                            isDeskTop: !isPhone,
+                          ),
+                        ));
               },
             ));
       }
 
       blocListener(context, state) {
-/*        if (state.status == UserStatus.failure) {
+        if (state.status == UserStatus.failure) {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == UserStatus.success) {
           HelperFunctions.showMessage(
               context, '${state.message}', Colors.green);
         }
-*/
       }
 
       blocBuilder(context, state) {
@@ -189,14 +190,12 @@ class UserListState extends State<UserList> {
                         barrierDismissible: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return RepositoryProvider.value(
-                              value: repos,
-                              child: BlocProvider.value(
-                                  value: _userBloc,
-                                  child: UserDialog(User(
-                                      company: Company(
-                                    role: widget.role,
-                                  )))));
+                          return BlocProvider.value(
+                              value: _userBloc,
+                              child: UserDialog(User(
+                                  company: Company(
+                                role: widget.role,
+                              ))));
                         });
                   },
                   tooltip: 'Add New',

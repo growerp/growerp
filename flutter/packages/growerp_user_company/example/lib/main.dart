@@ -51,7 +51,7 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: 'packages/growerp_core/images/companyGrey.png',
     selectedImage: 'packages/growerp_core/images/company.png',
-    title: 'Comps',
+    title: 'Companies',
     route: '/companies',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
@@ -100,8 +100,8 @@ List<MenuOption> menuOptions = [
     ],
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/companyGrey.png',
-    selectedImage: 'packages/growerp_core/images/company.png',
+    image: 'packages/growerp_core/images/usersGrey.png',
+    selectedImage: 'packages/growerp_core/images/users.png',
     title: 'Users',
     route: '/users',
     readGroups: [UserGroup.admin, UserGroup.employee],

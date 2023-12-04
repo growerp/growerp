@@ -30,21 +30,37 @@ class ShowUserDialog extends StatelessWidget {
   const ShowUserDialog(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
-    RestClient repos = context.read<RestClient>();
-    return BlocProvider<UserBloc>(
-        create: (context) => UserBloc(repos, Role.company),
-        child: RepositoryProvider.value(value: repos, child: UserDialog(user)));
+    return MultiBlocProvider(providers: [
+      BlocProvider<UserBloc>(
+          create: (context) =>
+              UserBloc(context.read<RestClient>(), Role.company)),
+      BlocProvider<CompanyBloc>(
+          create: (context) => CompanyBloc(context.read<RestClient>(),
+              Role.company, context.read<AuthBloc>())),
+    ], child: UserDialogStateFull(user));
   }
 }
 
-class UserDialog extends StatefulWidget {
+class UserDialog extends StatelessWidget {
   final User user;
   const UserDialog(this.user, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<CompanyBloc>(
+        create: (context) => CompanyBloc(context.read<RestClient>(),
+            user.company!.role, context.read<AuthBloc>()),
+        child: UserDialogStateFull(user));
+  }
+}
+
+class UserDialogStateFull extends StatefulWidget {
+  final User user;
+  const UserDialogStateFull(this.user, {super.key});
   @override
   UserDialogState createState() => UserDialogState();
 }
 
-class UserDialogState extends State<UserDialog> {
+class UserDialogState extends State<UserDialogStateFull> {
   late final GlobalKey<FormState> _userDialogFormKey;
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -63,20 +79,20 @@ class UserDialogState extends State<UserDialog> {
   dynamic _pickImageError;
   String? _retrieveDataError;
   late User updatedUser;
-  late RestClient repos;
   final ImagePicker _picker = ImagePicker();
   late UserBloc _userBloc;
+  late CompanyBloc _companyBloc;
+  late AuthBloc _authBloc;
   bool _isLoginDisabled = false;
   late bool isPhone;
   bool _hasLogin = false;
-  late final GlobalKey<ScaffoldMessengerState> _userDialogKey;
   final ScrollController _scrollController = ScrollController();
+  late User currentUser;
 
   @override
   void initState() {
     super.initState();
     _userDialogFormKey = GlobalKey<FormState>();
-    _userDialogKey = GlobalKey<ScaffoldMessengerState>();
 
     if (widget.user.partyId != null) {
       _firstNameController.text = widget.user.firstName ?? '';
@@ -87,17 +103,19 @@ class UserDialogState extends State<UserDialog> {
       _isLoginDisabled = widget.user.loginDisabled ?? false;
       _hasLogin = widget.user.userId != null;
     }
-    if (widget.user.company != null) {
-      _selectedCompany = Company(
-          partyId: widget.user.company!.partyId,
-          name: widget.user.company!.name);
-    }
+    _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
     _selectedRole = widget.user.company!.role ?? Role.unknown;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.values;
     updatedUser = widget.user;
     _userBloc = context.read<UserBloc>();
-    repos = context.read<RestClient>();
+    _authBloc = context.read<AuthBloc>();
+    currentUser = _authBloc.state.authenticate!.user!;
+    _companyBloc = context.read<CompanyBloc>()
+      ..add(CompanyFetch(
+          ownerPartyId: _authBloc.state.authenticate!.ownerPartyId!,
+          limit: 3,
+          isForDropDown: true));
   }
 
   @override
@@ -139,32 +157,6 @@ class UserDialogState extends State<UserDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    User? user = widget.user;
-    return BlocConsumer<UserBloc, UserState>(
-        listenWhen: (previous, current) =>
-            previous.status == UserStatus.loading,
-        listener: (context, state) {
-          if (state.status == UserStatus.failure) {
-            loading = false;
-            // message on this dialog
-            _userDialogKey.currentState!.showSnackBar(
-                snackBar(context, Colors.red, state.message ?? ''));
-          }
-          if (state.status == UserStatus.success) {
-            // message on parent page
-            HelperFunctions.showMessage(context, state.message, Colors.green);
-            Navigator.of(context).pop(state.users[0]);
-          }
-        },
-        builder: (context, state) {
-          return Stack(children: [
-            scaffoldWidget(user, context),
-            if (state.status == UserStatus.loading) const LoadingIndicator(),
-          ]);
-        });
-  }
-
-  Dialog scaffoldWidget(User user, BuildContext context) {
     return Dialog(
       key: Key('UserDialog${_selectedRole.name}'),
       insetPadding: const EdgeInsets.all(10),
@@ -177,13 +169,29 @@ class UserDialogState extends State<UserDialog> {
               "${_selectedRole == Role.company ? widget.user.userGroup != null && widget.user.userGroup == UserGroup.admin ? 'Admininistrator' : 'Employee' : _selectedRole.name} contact person information",
           width: isPhone ? 400 : 1000,
           height: isPhone ? 700 : 700,
-          child: ScaffoldMessenger(
-              key: _userDialogKey,
-              child: Scaffold(
-                  backgroundColor: Colors.transparent,
-                  floatingActionButton:
-                      ImageButtons(_scrollController, _onImageButtonPressed),
-                  body: listChild()))),
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+              floatingActionButton:
+                  ImageButtons(_scrollController, _onImageButtonPressed),
+              body: BlocConsumer<UserBloc, UserState>(
+                  listenWhen: (previous, current) =>
+                      previous.status == UserStatus.loading,
+                  listener: (context, state) {
+                    if (state.status == UserStatus.failure) {
+                      loading = false;
+                      HelperFunctions.showMessage(
+                          context, state.message, Colors.red);
+                    }
+                    if (state.status == UserStatus.success) {
+                      Navigator.of(context).pop(state.users[0]);
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state.status == UserStatus.loading) {
+                      return const LoadingIndicator();
+                    }
+                    return listChild();
+                  }))),
     );
   }
 
@@ -227,18 +235,6 @@ class UserDialogState extends State<UserDialog> {
   }
 
   Widget _userDialog() {
-    Authenticate authenticate = context.read<AuthBloc>().state.authenticate!;
-    User? currentUser = authenticate.user;
-    if (_selectedRole == Role.company) {
-      _selectedCompany = authenticate.company!;
-    }
-
-    Future<List<Company>> getOwnedCompanies(filter) async {
-      Companies result = await repos.getCompanies(
-          filter: _companySearchBoxController.text, mainCompanies: false);
-      return result.companies;
-    }
-
     List<Widget> widgets = [
       InputDecorator(
         decoration: InputDecoration(
@@ -322,44 +318,73 @@ class UserDialogState extends State<UserDialog> {
               child: Column(children: [
                 Row(children: [
                   Expanded(
-                    child: DropdownSearch<Company>(
-                      key: const Key('userCompanyName'),
-                      selectedItem: _selectedCompany.name == null
-                          ? Company(name: '')
-                          : _selectedCompany,
-                      popupProps: PopupProps.menu(
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          autofocus: true,
-                          decoration:
-                              const InputDecoration(labelText: "company,name"),
-                          controller: _companySearchBoxController,
-                        ),
-                        menuProps: MenuProps(
-                            borderRadius: BorderRadius.circular(20.0)),
-                        title: popUp(
-                          context: context,
-                          title: 'Select company',
-                          height: 50,
-                          width: 450,
-                        ),
-                      ),
-                      dropdownDecoratorProps: const DropDownDecoratorProps(
-                          dropdownSearchDecoration:
-                              InputDecoration(labelText: 'Company')),
-                      itemAsString: (Company? u) => " ${u!.name}",
-                      asyncItems: (String? filter) =>
-                          getOwnedCompanies(_companySearchBoxController.text),
-                      onChanged: (Company? newValue) {
-                        setState(() {
-                          _selectedCompany = newValue ?? Company();
-                        });
-                      },
-                      validator: (value) =>
-                          value == null && _companyController.text == ''
-                              ? "Select an existing or Create a new company"
-                              : null,
-                    ),
+                    child: BlocBuilder<CompanyBloc, CompanyState>(
+                        builder: (context, state) {
+                      switch (state.status) {
+                        case CompanyStatus.failure:
+                          return const FatalErrorForm(
+                              message: 'server connection problem');
+                        case CompanyStatus.success:
+                          return DropdownSearch<Company>(
+                            key: const Key('userCompanyName'),
+                            selectedItem: _selectedCompany.name == null
+                                ? Company(name: '')
+                                : _selectedCompany,
+                            popupProps: PopupProps.menu(
+                              showSelectedItems: true,
+                              isFilterOnline: true,
+                              showSearchBox: true,
+                              searchFieldProps: TextFieldProps(
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                    labelText: "company,name"),
+                                controller: _companySearchBoxController,
+                              ),
+                              menuProps: MenuProps(
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              title: popUp(
+                                context: context,
+                                title: 'Select company',
+                                height: 50,
+                                width: 450,
+                              ),
+                            ),
+                            dropdownDecoratorProps:
+                                const DropDownDecoratorProps(
+                                    dropdownSearchDecoration:
+                                        InputDecoration(labelText: 'Company')),
+                            itemAsString: (Company? u) => " ${u!.name}",
+                            asyncItems: (String filter) {
+                              _companyBloc.add(CompanyFetch(
+                                ownerPartyId:
+                                    _authBloc.state.authenticate!.ownerPartyId!,
+                                searchString: filter,
+                                limit: 3,
+                                isForDropDown: true,
+                              ));
+                              return Future.delayed(
+                                  const Duration(milliseconds: 100), () {
+                                return Future.value(
+                                    _companyBloc.state.companies);
+                              });
+                            },
+                            compareFn: (item, sItem) =>
+                                item.pseudoId == sItem.pseudoId,
+                            onChanged: (Company? newValue) {
+                              setState(() {
+                                _selectedCompany = newValue ?? Company();
+                              });
+                            },
+                            validator: (value) => value == null &&
+                                    _companyController.text == ''
+                                ? "Select an existing or Create a new company"
+                                : null,
+                          );
+                        default:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                      }
+                    }),
                   ),
                 ]),
                 const SizedBox(height: 10),
@@ -370,12 +395,19 @@ class UserDialogState extends State<UserDialog> {
                           child: ElevatedButton(
                         key: const Key('editCompany'),
                         onPressed: () async {
-                          await showDialog(
+                          var result = await showDialog(
                               barrierDismissible: true,
                               context: context,
                               builder: (BuildContext context) {
-                                return ShowCompanyDialog(_selectedCompany);
+                                return ShowCompanyDialog(_selectedCompany,
+                                    dialog: true);
                               });
+                          if (result is Company) {
+                            setState(() {
+                              _selectedCompany = result;
+                              _selectedRole = result.role!;
+                            });
+                          }
                         },
                         child: const Text('Update Company'),
                       )),
@@ -414,7 +446,7 @@ class UserDialogState extends State<UserDialog> {
             ),
             child: Column(children: [
               TextFormField(
-                readOnly: !(currentUser!.userGroup == UserGroup.admin),
+                readOnly: !(currentUser.userGroup == UserGroup.admin),
                 key: const Key('loginName'),
                 decoration:
                     const InputDecoration(labelText: 'User Login Name '),
@@ -498,16 +530,12 @@ class UserDialogState extends State<UserDialog> {
               if (result != null) {
                 if (!mounted) return;
                 // delete company too?
-                if (widget.user.partyId == authenticate.user!.partyId!) {
-                  context
-                      .read<UserBloc>()
-                      .add(UserDelete(widget.user.copyWith(image: null)));
+                if (widget.user.partyId == currentUser.partyId!) {
+                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
                   Navigator.of(context).pop(updatedUser);
                   context.read<AuthBloc>().add(const AuthLoggedOut());
                 } else {
-                  context
-                      .read<UserBloc>()
-                      .add(UserDelete(widget.user.copyWith(image: null)));
+                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
                 }
               }
             }),
@@ -530,7 +558,7 @@ class UserDialogState extends State<UserDialog> {
 //                          .languageCode
 //                          .toString(),
                       company: _selectedCompany.name != null
-                          ? _selectedCompany
+                          ? _selectedCompany.copyWith(role: _selectedRole)
                           : Company(
                               name:
                                   "${_lastNameController.text}, ${_firstNameController.text}",
@@ -543,14 +571,9 @@ class UserDialogState extends State<UserDialog> {
                         context, "Image upload error!", Colors.red);
                   } else {
                     _userBloc.add(UserUpdate(updatedUser));
-                    if (context
-                            .read<AuthBloc>()
-                            .state
-                            .authenticate!
-                            .user!
-                            .partyId ==
+                    if (_authBloc.state.authenticate!.user!.partyId ==
                         updatedUser.partyId) {
-                      context.read<UserBloc>().add(UserUpdate(updatedUser));
+                      _userBloc.add(UserUpdate(updatedUser));
                     }
                   }
                 }

@@ -21,16 +21,16 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
     ),
-    duration: seconds == null
-        ? Duration(milliseconds: colors == Colors.red ? 5000 : 2000)
-        : Duration(seconds: seconds),
     content: Container(
         padding: const EdgeInsets.all(16.0),
         width: screenWidth < 800 ? screenWidth * 0.8 : 500,
         child: Text(message)),
+    duration: seconds == null
+        ? Duration(milliseconds: colors == Colors.red ? 5000 : 2000)
+        : Duration(seconds: seconds),
     backgroundColor: colors,
-    behavior: SnackBarBehavior.floating,
-/*    action: SnackBarAction(
+//    behavior: SnackBarBehavior.floating,
+    action: SnackBarAction(
       key: const Key('dismiss'),
       label: 'Dismiss',
       textColor: Colors.yellow,
@@ -39,6 +39,5 @@ SnackBar snackBar(BuildContext context, Color colors, String message,
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
       },
     ),
-*/
   );
 }

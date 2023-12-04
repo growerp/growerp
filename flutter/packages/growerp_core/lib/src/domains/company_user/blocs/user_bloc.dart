@@ -93,6 +93,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
       emit(state.copyWith(status: UserStatus.loading));
       List<User> users = List.from(state.users);
       if (event.user.partyId != null) {
+        // update
         User compResult = await restClient.updateUser(user: event.user);
         if (users.isNotEmpty) {
           int index = users

@@ -1,4 +1,4 @@
-Any substantial internet information system need a back-end internet server to be able to store and process information but also to share this information with the clients which can be mobile devices or computers connected to the internet/
+Any substantial internet information system needs a back-end internet server to be able to store and process information but also to share this information with the clients which can be mobile devices or computers connected to the internet/
 
 Since GrowERP provides ERP services, we use a back-end software system from another open source system called  [Moqui](https://www.moqui.org) We use the database data model, the services, development framework and the application server it provides. The Moqui system itself provides browser screens but in order to create an easy to use system we have replaced these with a Flutter system communicating over a REST interface.
 

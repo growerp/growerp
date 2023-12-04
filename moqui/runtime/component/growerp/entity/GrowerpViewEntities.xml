@@ -795,6 +795,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="userThruDate" field="thruDate" entity-alias="PERSONTOCOMPANY" />
         <alias name="personToCompanyId" field="partyRelationshipId" entity-alias="PERSONTOCOMPANY" />
         <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />
         <alias name="companyRole" field="roleTypeId" entity-alias="ORGCOMPANYROLE" />

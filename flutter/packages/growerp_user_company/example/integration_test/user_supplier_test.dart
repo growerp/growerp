@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
 import 'package:user_company_example/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -34,7 +33,7 @@ void main() {
     await UserTest.selectUsers(tester, 'dbUsers', 'UserListFormSupplier', '4');
   }
 
-  testWidgets('''GrowERP supplier test''', (tester) async {
+  testWidgets('''GrowERP user supplier test''', (tester) async {
     await CommonTest.startTestApp(tester, generateRoute, menuOptions,
         UserCompanyLocalizations.localizationsDelegates,
         clear: true, title: 'GrowERP user-supplier test');

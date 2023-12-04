@@ -69,7 +69,8 @@ abstract class RestClient {
   Future<Companies> getCompany({
     @Query('companyPartyId') String? companyPartyId,
     @Query('companyName') String? companyName,
-    @Query('userpartyId') String? userpartyId,
+    @Query('userPartyId') String? userPartyId,
+    @Query('ownerPartyId') String? ownerPartyId,
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
@@ -77,6 +78,7 @@ abstract class RestClient {
     @Query('firstName') String? firstName,
     @Query('lastName') String? lastName,
     @Query('searchString') String? searchString,
+    @Query('isForDropDown') bool? isForDropDown,
   });
 
   @POST("rest/s1/growerp/100/Company")
@@ -95,10 +97,10 @@ abstract class RestClient {
     @Query('role') Role? role,
     @Query('start') int? start,
     @Query('limit') int? limit,
-    @Query('filter') String? filter,
     @Query('firstName') String? firstName,
     @Query('lastName') String? lastName,
     @Query('search') String? searchString,
+    @Query('isForDropDown') bool? isForDropDown,
   });
 
   @POST("rest/s1/growerp/100/User")
@@ -166,7 +168,7 @@ abstract class RestClient {
       @Query('assetClassId') String? assetClassId,
       @Query('assetId') String? assetId,
       @Query('productId') String? productId,
-      @Query('filter') String? filter,
+      @Query('isForDropDown') bool? isForDropDown,
       @Query('search') String? search});
 
   @POST("rest/s1/growerp/100/Asset")

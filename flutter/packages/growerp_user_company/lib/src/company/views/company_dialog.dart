@@ -29,35 +29,41 @@ import '../../../growerp_user_company.dart';
 /// from the [AuthBloc]
 /// 2. a [Company.partyId] = "_NEW_" will show an empty form in order
 ///  to create a new company
-/// 3. a [Company.partyId] will retrieve the company from repos
+/// 3. a [Company.partyId] will retrieve the company from restClient
+/// 4. [dialog] will show either as a dialog or full screen
 class ShowCompanyDialog extends StatelessWidget {
   final Company company;
-  final bool dialog;
+  final bool dialog; // displayed as dialog or full screen
   const ShowCompanyDialog(this.company, {super.key, this.dialog = true});
   @override
   Widget build(BuildContext context) {
-    RestClient repos = context.read<RestClient>();
+    AuthBloc authBloc = context.read<AuthBloc>();
+    RestClient restClient = context.read<RestClient>();
+    String companyPartyId = authBloc.state.authenticate!.company!.partyId!;
+    if (company.partyId == null || company.partyId != '_NEW_') {
+      // display (main) company
+      return BlocProvider<CompanyBloc>(
+          create: (context) => CompanyBloc(restClient, company.role, authBloc)
+            ..add(CompanyFetch(
+                companyPartyId:
+                    company.partyId == null ? companyPartyId : company.partyId!,
+                limit: 1)),
+          child:
+              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
+            if (state.status == CompanyStatus.success) {
+              return CompanyDialog(state.companies[0], dialog: dialog);
+            }
+            return const LoadingIndicator();
+          }));
+    }
     return BlocProvider<CompanyBloc>(
-        create: (context) =>
-            CompanyBloc(repos, company.role, context.read<AuthBloc>())
-              ..add(CompanyFetch(companyPartyId: company.partyId ?? '')),
-        child: company.partyId != '_NEW_' // null will show default company
-            ? BlocBuilder<CompanyBloc, CompanyState>(
-                builder: (context, state) {
-                  if (state.status == CompanyStatus.success) {
-                    return RepositoryProvider.value(
-                        value: repos,
-                        child: CompanyDialog(
-                            state.companies.isNotEmpty
-                                ? state.companies[0]
-                                : company,
-                            dialog: dialog));
-                  } else {
-                    return const LoadingIndicator();
-                  }
-                },
-              )
-            : CompanyDialog(company, dialog: dialog));
+        // new company, empty screen
+        create: (context) => CompanyBloc(restClient, company.role, authBloc)
+          ..add(const CompanyFetch(limit: 0)),
+        child: CompanyDialog(
+          Company(role: company.role),
+          dialog: dialog,
+        ));
   }
 }
 
@@ -72,17 +78,16 @@ class CompanyDialog extends StatefulWidget {
 class CompanyFormState extends State<CompanyDialog> {
   late Authenticate authenticate;
   late User user;
-  late List<User> employees;
+  List<User> employees = [];
   late Company company;
-  late Role _selectedRole;
+  Role _selectedRole = Role.unknown;
   final _nameController = TextEditingController();
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _vatPercController = TextEditingController();
   final _salesPercController = TextEditingController();
-  late Currency _selectedCurrency;
+  Currency _selectedCurrency = currencies[0];
   late bool isAdmin;
-  late final GlobalKey<ScaffoldMessengerState> _companyDialogKey;
   late final GlobalKey<FormState> _companyDialogFormKey;
   XFile? _imageFile;
   dynamic _pickImageError;
@@ -90,31 +95,38 @@ class CompanyFormState extends State<CompanyDialog> {
   final ImagePicker _picker = ImagePicker();
   late bool isPhone;
   final ScrollController _scrollController = ScrollController();
+  late CompanyBloc companyBloc;
 
   @override
   void initState() {
     super.initState();
-    _companyDialogKey = GlobalKey<ScaffoldMessengerState>();
+    company = widget.company;
+    companyBloc = context.read<CompanyBloc>();
     _companyDialogFormKey = GlobalKey<FormState>();
     authenticate = context.read<AuthBloc>().state.authenticate!;
-    if (widget.company.partyId == null) {
-      company = authenticate.company!;
-    } else if (widget.company.partyId == '_NEW_') {
-      company = Company(role: widget.company.role);
-    } else {
-      company = widget.company;
+    _selectedRole = widget.company.role!;
+/*    switch (widget.company.partyId) {
+      case null:
+        company = authenticate.company!;
+        companyBloc
+            .add(CompanyFetch(companyPartyId: company.partyId!, limit: 1));
+        break;
+      case '_NEW_':
+        company = widget.company.copyWith(partyId: null);
+        companyBloc.add(const CompanyFetch(limit: 0));
+        break;
+      default:
+        companyBloc.add(
+            CompanyFetch(companyPartyId: widget.company.partyId!, limit: 1));
     }
-    user = authenticate.user!;
+*/
     employees = List.of(company.employees);
-    isAdmin = authenticate.user!.userGroup == UserGroup.admin;
     if (company.currency != null) {
       _selectedCurrency = currencies.firstWhere(
           (element) => element.currencyId == company.currency?.currencyId);
-    } else {
-      _selectedCurrency = Currency(currencyId: '', description: '');
     }
     _nameController.text = company.name ?? '';
-    _selectedRole = company.role ?? Role.unknown;
+    _selectedRole = company.role ?? widget.company.role!;
     _emailController.text = company.email ?? '';
     _vatPercController.text =
         company.vatPerc == null ? '' : company.vatPerc.toString();
@@ -123,6 +135,9 @@ class CompanyFormState extends State<CompanyDialog> {
     if (company.telephoneNr != null) {
       _telephoneController.text = company.telephoneNr!;
     }
+
+    user = authenticate.user!;
+    isAdmin = authenticate.user!.userGroup == UserGroup.admin;
   }
 
   @override
@@ -164,41 +179,20 @@ class CompanyFormState extends State<CompanyDialog> {
   @override
   Widget build(BuildContext context) {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    return BlocConsumer<CompanyBloc, CompanyState>(
-        listenWhen: (previous, current) =>
-            previous.status == CompanyStatus.loading,
-        listener: (context, state) {
-          if (state.status == CompanyStatus.failure) {
-            // message on this dialog
-            _companyDialogKey.currentState!.showSnackBar(
-                snackBar(context, Colors.red, state.message ?? ''));
-          }
-          if (state.status == CompanyStatus.success) {
-            // message on parent page
-            HelperFunctions.showMessage(context, state.message, Colors.green);
-            if (widget.dialog == true && _nameController.text != '') {
-              Navigator.of(context).pop(company);
-            }
-          }
-        },
-        builder: (context, state) {
-          if (state.status == CompanyStatus.loading) const LoadingIndicator();
-          return widget.dialog == true
-              ? Dialog(
-                  key:
-                      Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
-                  insetPadding: const EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: popUp(
-                      context: context,
-                      title: "$_selectedRole Company information",
-                      width: isPhone ? 400 : 1000,
-                      height: isPhone ? 600 : 750,
-                      child: listChild()))
-              : listChild();
-        });
+    return widget.dialog == true
+        ? Dialog(
+            key: Key('CompanyDialog${company.role?.name ?? Role.unknown}'),
+            insetPadding: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: popUp(
+                context: context,
+                title: "$_selectedRole Company information",
+                width: isPhone ? 400 : 1000,
+                height: isPhone ? 600 : 750,
+                child: listChild()))
+        : listChild();
   }
 
   Widget listChild() {
@@ -314,44 +308,49 @@ class CompanyFormState extends State<CompanyDialog> {
       ),
       Row(
         children: [
-          Expanded(
-            child: DropdownButtonFormField<Role>(
-              key: const Key('role'),
-              decoration: const InputDecoration(labelText: 'Role'),
-              hint: const Text('Role'),
-              value: _selectedRole,
-              validator: (value) =>
-                  value == Role.unknown ? 'Select a valid role!' : null,
-              items: Role.values.map((item) {
-                return DropdownMenuItem<Role>(
-                    value: item, child: Text(item.value));
-              }).toList(),
-              onChanged: (Role? newValue) {
-                setState(() {
-                  _selectedRole = newValue!;
-                });
-              },
-              isExpanded: true,
+          Visibility(
+            visible: authenticate.company!.partyId != company.partyId,
+            child: Expanded(
+              child: DropdownButtonFormField<Role>(
+                key: const Key('role'),
+                decoration: const InputDecoration(labelText: 'Role'),
+                hint: const Text('Role'),
+                value: _selectedRole,
+                validator: (value) =>
+                    value == Role.unknown ? 'Select a valid role!' : null,
+                items: Role.values.map((item) {
+                  return DropdownMenuItem<Role>(
+                      value: item, child: Text(item.value));
+                }).toList(),
+                onChanged: (Role? newValue) {
+                  setState(() {
+                    _selectedRole = newValue!;
+                  });
+                },
+                isExpanded: true,
+              ),
             ),
           ),
-          const SizedBox(width: 10),
+          Visibility(
+              visible: authenticate.company!.partyId != company.partyId,
+              child: const SizedBox(width: 10)),
           Expanded(
             child: DropdownButtonFormField<Currency>(
               key: const Key('currency'),
               decoration: const InputDecoration(labelText: 'Currency'),
               hint: const Text('Currency'),
               value: _selectedCurrency,
+              validator: (value) =>
+                  value == null ? 'Currency field required!' : null,
               items: currencies.map((item) {
                 return DropdownMenuItem<Currency>(
                     value: item, child: Text(item.description!));
               }).toList(),
-              onChanged: isAdmin
-                  ? (Currency? newValue) {
-                      setState(() {
-                        _selectedCurrency = newValue!;
-                      });
-                    }
-                  : null,
+              onChanged: (Currency? newValue) {
+                setState(() {
+                  _selectedCurrency = newValue!;
+                });
+              },
               isExpanded: true,
             ),
           ),
@@ -524,7 +523,7 @@ class CompanyFormState extends State<CompanyDialog> {
                   onPressed: isAdmin
                       ? () async {
                           if (_companyDialogFormKey.currentState!.validate()) {
-                            company = Company(
+                            Company updatedCompany = Company(
                                 partyId: company.partyId,
                                 email: _emailController.text,
                                 name: _nameController.text,
@@ -545,13 +544,11 @@ class CompanyFormState extends State<CompanyDialog> {
                                     _imageFile?.path));
                             if (!mounted) return;
                             if (_imageFile?.path != null &&
-                                company.image == null) {
+                                updatedCompany.image == null) {
                               HelperFunctions.showMessage(
                                   context, "Image upload error!", Colors.red);
                             } else {
-                              context
-                                  .read<CompanyBloc>()
-                                  .add(CompanyUpdate(company));
+                              companyBloc.add(CompanyUpdate(updatedCompany));
                             }
                           }
                         }
@@ -583,62 +580,112 @@ class CompanyFormState extends State<CompanyDialog> {
       column.add(Padding(padding: const EdgeInsets.all(5), child: widgets[i]));
     }
 
-    return ScaffoldMessenger(
-        key: _companyDialogKey,
-        child: Scaffold(
-            key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
-            backgroundColor: Colors.transparent,
-            floatingActionButton:
-                ImageButtons(_scrollController, _onImageButtonPressed),
-            body: Form(
-                key: _companyDialogFormKey,
-                child: SingleChildScrollView(
-                    controller: _scrollController,
-                    key: const Key('listView'),
-                    child: Padding(
-                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
-                        child: Column(children: [
-                          Center(
-                              child: Text(
-                            'id:#${company.partyId ?? 'New'}',
-                            style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                            key: const Key('header'),
-                          )),
-                          const SizedBox(height: 10),
-                          CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 60,
-                              child: _imageFile != null
-                                  ? kIsWeb
-                                      ? Image.network(_imageFile!.path,
-                                          scale: 0.3)
-                                      : Image.file(File(_imageFile!.path),
-                                          scale: 0.3)
-                                  : company.image != null
-                                      ? Image.memory(company.image!, scale: 0.3)
-                                      : Text(
-                                          company.name != null
-                                              ? company.name!.substring(0, 1)
-                                              : '?',
-                                          style: const TextStyle(
-                                              fontSize: 30,
-                                              color: Colors.black))),
-                          const SizedBox(height: 10),
-                          Column(children: (rows.isEmpty ? column : rows)),
-                          updateButton,
-                          const SizedBox(height: 10),
-                          InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: 'Employees',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(25.0),
-                                ),
-                              ),
-                              child:
-                                  Wrap(spacing: 10, children: employeeChips)),
-                        ]))))));
+    return Scaffold(
+        key: Key('CompanyDialog${company.role?.value ?? Role.unknown}'),
+        backgroundColor: Colors.transparent,
+        floatingActionButton:
+            ImageButtons(_scrollController, _onImageButtonPressed),
+        body: MultiBlocListener(
+            listeners: [
+              BlocListener<CompanyBloc, CompanyState>(
+                listenWhen: (previous, current) =>
+                    previous.status == CompanyStatus.loading,
+                listener: (context, state) {
+                  if (state.status == CompanyStatus.failure) {
+                    HelperFunctions.showMessage(
+                        context, state.message, Colors.green);
+                  }
+                  if (state.status == CompanyStatus.success) {
+                    if (widget.dialog == true && _nameController.text != '') {
+                      Navigator.of(context).pop(state.companies[0]);
+                    } else {
+                      HelperFunctions.showMessage(
+                          context, state.message, Colors.green);
+                    }
+                  }
+                },
+              ),
+              BlocListener<AuthBloc, AuthState>(
+                listenWhen: (previous, current) =>
+                    previous.status == AuthStatus.loading,
+                listener: (context, state) {
+                  if (state.status == AuthStatus.failure) {
+                    HelperFunctions.showMessage(
+                        context, state.message, Colors.green);
+                  }
+                  if (state.status == AuthStatus.authenticated) {
+                    // message on parent page
+                    HelperFunctions.showMessage(
+                        context, state.message, Colors.green);
+                    if (widget.dialog == true && _nameController.text != '') {
+                      Navigator.of(context).pop(company);
+                    }
+                  }
+                },
+              )
+            ],
+            child: BlocBuilder<CompanyBloc, CompanyState>(
+                builder: (context, state) {
+              if (state.status == CompanyStatus.failure) {
+                return FatalErrorForm(message: state.message!);
+              }
+              if (state.status == CompanyStatus.success) {
+                return Form(
+                    key: _companyDialogFormKey,
+                    child: SingleChildScrollView(
+                        controller: _scrollController,
+                        key: const Key('listView'),
+                        child: Padding(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+                            child: Column(children: [
+                              Center(
+                                  child: Text(
+                                'id:#${company.partyId ?? 'New'}',
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                                key: const Key('header'),
+                              )),
+                              const SizedBox(height: 10),
+                              CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  radius: 60,
+                                  child: _imageFile != null
+                                      ? kIsWeb
+                                          ? Image.network(_imageFile!.path,
+                                              scale: 0.3)
+                                          : Image.file(File(_imageFile!.path),
+                                              scale: 0.3)
+                                      : company.image != null
+                                          ? Image.memory(company.image!,
+                                              scale: 0.3)
+                                          : Text(
+                                              company.name != null
+                                                  ? company.name!
+                                                      .substring(0, 1)
+                                                  : '?',
+                                              style: const TextStyle(
+                                                  fontSize: 30,
+                                                  color: Colors.black))),
+                              const SizedBox(height: 10),
+                              Column(children: (rows.isEmpty ? column : rows)),
+                              updateButton,
+                              if (widget.dialog) const SizedBox(height: 10),
+                              if (widget.dialog)
+                                InputDecorator(
+                                    decoration: InputDecoration(
+                                      labelText: 'Employees',
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(25.0),
+                                      ),
+                                    ),
+                                    child: Wrap(
+                                        spacing: 10, children: employeeChips)),
+                            ]))));
+              }
+              return const LoadingIndicator();
+            })));
   }
 }

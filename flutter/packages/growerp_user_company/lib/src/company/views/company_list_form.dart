@@ -183,14 +183,11 @@ class CompanyListState extends State<CompanyList> {
                         barrierDismissible: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return RepositoryProvider.value(
-                              value: repos,
-                              child: BlocProvider.value(
-                                  value: _companyBloc,
-                                  child: CompanyDialog(Company(
-                                    partyId: "_NEW_", // default is main company
-                                    role: widget.role,
-                                  ))));
+                          return BlocProvider.value(
+                              value: _companyBloc,
+                              child: CompanyDialog(Company(
+                                role: widget.role,
+                              )));
                         });
                   },
                   tooltip: 'Add New',

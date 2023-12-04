@@ -26,8 +26,6 @@ import '../../../domains/domains.dart';
 part 'company_event.dart';
 part 'company_state.dart';
 
-const _companyLimit = 20;
-
 mixin CompanyLeadBloc on Bloc<CompanyEvent, CompanyState> {}
 mixin CompanyCustomerBloc on Bloc<CompanyEvent, CompanyState> {}
 mixin CompanyEmployeeBloc on Bloc<CompanyEvent, CompanyState> {}
@@ -58,7 +56,10 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     CompanyFetch event,
     Emitter<CompanyState> emit,
   ) async {
-    if (state.hasReachedMax && !event.refresh && event.searchString == '') {
+    if (state.hasReachedMax &&
+        !event.refresh &&
+        event.searchString == '' &&
+        event.limit > 0) {
       return;
     }
     if (state.status == CompanyStatus.initial ||
@@ -69,16 +70,29 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
       start = state.companies.length;
     }
     try {
-      emit(state.copyWith(status: CompanyStatus.loading));
-      Companies compResult = await restClient.getCompany(
-          role: role,
-          companyPartyId: event.companyPartyId,
-          searchString: event.searchString);
+      if (state.status != CompanyStatus.initial) {
+        emit(state.copyWith(status: CompanyStatus.loading));
+      }
+      late Companies compResult;
+      if (event.limit > 0) {
+        compResult = await restClient.getCompany(
+            role: role,
+            companyPartyId: event.companyPartyId,
+            ownerPartyId: event.ownerPartyId,
+            searchString: event.searchString,
+            isForDropDown: event.isForDropDown,
+            start: 0,
+            limit: event.limit);
+      } else {
+        // just get status success
+        return emit(state.copyWith(status: CompanyStatus.success));
+      }
       return emit(state.copyWith(
         status: CompanyStatus.success,
-        companies: compResult.companies,
-        hasReachedMax:
-            compResult.companies.length < _companyLimit ? true : false,
+        companies: start == 0
+            ? compResult.companies
+            : (List.of(state.companies)..addAll(compResult.companies)),
+        hasReachedMax: compResult.companies.length < event.limit ? true : false,
         searchString: '',
       ));
     } on DioException catch (e) {
@@ -119,7 +133,6 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
         Company compResult =
             await restClient.createCompany(company: event.company);
         companies.insert(0, compResult);
-        authBloc.add(AuthLoad());
         return emit(state.copyWith(
             status: CompanyStatus.success,
             companies: companies,

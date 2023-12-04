@@ -124,8 +124,11 @@ class CompanyTest {
       }
       expect(CommonTest.getTextFormField('companyName'), equals(c.name!));
       expect(CommonTest.getTextFormField('email'), equals(c.email ?? ''));
-      expect(CommonTest.getDropdown('role'),
-          equals(c.role != null ? c.role!.toString() : ''));
+      if (c.role != Role.company) {
+        // main company role one cannot change
+        expect(CommonTest.getDropdown('role'),
+            equals(c.role != null ? c.role!.toString() : ''));
+      }
       expect(CommonTest.getTextFormField('telephoneNr'),
           equals(c.telephoneNr ?? ''));
       expect(CommonTest.getDropdown('currency'),

@@ -22,12 +22,23 @@ abstract class CompanyEvent extends Equatable {
 
 class CompanyFetch extends CompanyEvent {
   const CompanyFetch(
-      {this.refresh = false, this.searchString = '', this.companyPartyId = ''});
+      {this.refresh = false,
+      this.searchString = '',
+      this.companyPartyId = '',
+      this.limit = 20,
+      this.isForDropDown = false,
+      this.ownerPartyId = ''});
   final bool refresh;
   final String companyPartyId;
+  final String ownerPartyId;
   final String searchString;
+  final int limit;
+  final bool isForDropDown;
   @override
-  List<Object> get props => [refresh, searchString];
+  List<Object> get props => [refresh, searchString, limit, companyPartyId];
+  @override
+  String toString() =>
+      "companyPartyId: $companyPartyId, limit: $limit, owner: $ownerPartyId, isforDropDown: $isForDropDown";
 }
 
 class CompanyUpdate extends CompanyEvent {

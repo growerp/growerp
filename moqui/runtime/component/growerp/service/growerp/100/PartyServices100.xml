@@ -167,6 +167,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="limit" type="Integer" default-value="20" />
             <parameter name="filter" default="null" />
             <parameter name="searchString" default="null" />
+            <parameter name="isForDropDown" type="Boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="companies" type="List">
@@ -237,13 +238,18 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- adjust role -->
             <if condition="role">
-                <set field="companyRole" from="role" />
                 <if condition="role == 'Lead'">
-                    <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                    <set field="companyRole" value="Customer" />
-                </if>
-                <if condition="role == 'Customer'">
-                    <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                    <then>
+                        <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                        <set field="companyRole" value="Customer" />
+                    </then>
+                    <else-if condition="role == 'Customer'">
+                        <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                        <set field="companyRole" from="role" />
+                    </else-if>
+                    <else-if condition="role != 'Company'">
+                        <set field="companyRole" from="role" />
+                    </else-if>
                 </if>
             </if>
             <!-- get records -->
@@ -271,7 +277,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="personEmail" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <econdition field-name="companyRole" ignore-if-empty="true" ignore-case="true" />
+                <econdition field-name="companyRole" ignore-if-empty="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
                 <econditions combine="or">
                     <econdition field-name="ownerDisabled" operator="equals"
@@ -349,22 +355,31 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="imageFile" from="null" />
                         </else>
                     </if>
-
-                    <set field="company"
-                        from="[
-                        partyId: item.companyPartyId,
-                        pseudoId: item.companyPseudoId,
-                        name: item.companyName,
-                        role: item.companyRole == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'? 'Lead': item.companyRole,
-                        email: item.companyEmail,
-                        currency: currency,
-                        image: imageFile,
-                        address: address,
-                        vatPerc: item.vatPerc?item.vatPerc.toString():'0',
-                        salesPerc: item.salesPerc?item.salesPerc.toString():'0',
-                        paymentMethod: paymentMethod,
-                        telephoneNr: telephoneNr
-                        ]" />
+                    <if condition="isForDropDown">
+                        <set field="company"
+                            from="[
+                                partyId: item.companyPartyId,
+                                pseudoId: item.companyPseudoId,
+                                name: item.companyName,
+                                ]" />
+                        <else>
+                            <set field="company"
+                                from="[
+                                    partyId: item.companyPartyId,
+                                    pseudoId: item.companyPseudoId,
+                                    name: item.companyName,
+                                    role: item.companyRole == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'? 'Lead': item.companyRole,
+                                    email: item.companyEmail,
+                                    currency: currency,
+                                    image: imageFile,
+                                    address: address,
+                                    vatPerc: item.vatPerc?item.vatPerc.toString():'0',
+                                    salesPerc: item.salesPerc?item.salesPerc.toString():'0',
+                                    paymentMethod: paymentMethod,
+                                    telephoneNr: telephoneNr
+                                    ]" />
+                        </else>
+                    </if>
                 </if>
                 <if condition="item.personPartyId">
                     <set field="person"
@@ -379,7 +394,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="lastItem" from="item" />
             </iterate>
             <if condition="lastItem">
-                <set field="company.employees" from="employees" />
+                <if condition="!isForDropDown">
+                    <set field="company.employees" from="employees" />
+                </if>
                 <script>companies.add(company)</script>
             </if>
             <if condition="items?.size() > 0">
@@ -505,6 +522,13 @@ along with this software (see the LICENSE.md file). If not, see
                     toPartyId: ownerPartyId,
                     toRoleTypeId: 'Owner']" />
 
+            <!-- currency -->
+            <if condition="company.currency">
+                <service-call name="create#mantle.ledger.config.PartyAcctgPreference"
+                    in-map="[organizationPartyId: partyId,
+                                    baseCurrencyUomId: company.currency?.currencyId]" />
+            </if>
+
             <!-- company email -->
             <if condition="company.email">
                 <service-call name="mantle.party.ContactServices.create#EmailAddress"
@@ -565,7 +589,6 @@ along with this software (see the LICENSE.md file). If not, see
                         in-map="inMap" />
                 </if>
             </if>
-
             <!-- telephone -->
             <if condition="company.telephoneNr">
                 <service-call name="mantle.party.ContactServices.create#TelecomNumber"
@@ -930,8 +953,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" /><!-- required when registering company customers-->
             <parameter name="start" type="Integer" default-value="0" />
             <parameter name="limit" type="Integer" default-value="20" />
-            <parameter name="filter" default="null" />
             <parameter name="search" default="null" />
+            <parameter name="isForDropDown" type="Boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="users" type="List">
@@ -966,9 +989,6 @@ along with this software (see the LICENSE.md file). If not, see
         </out-parameters>
         <actions>
             <set field="role" from="role?.capitalize()" />
-            <if condition="filter != null">
-                <set field="filter" value="%${filter}%" />
-            </if>
             <if condition="search != null">
                 <set field="search" value="%${search}%" />
             </if>
@@ -995,7 +1015,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="companyRole" from="null" />
             </if>
             <if condition="role == 'Company'">
-                <set field="companyRole" from="OrgInternal" />
+                <set field="companyRole" value="OrgInternal" />
             </if>
             <!-- get records -->
             <entity-find offset="start" limit="limit" list="userInfos"
@@ -1004,16 +1024,6 @@ along with this software (see the LICENSE.md file). If not, see
                     ignore="role != 'Unknown'" />
                 <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="userPartyId" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="userPartyId" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="lastName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="firstName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="companyName" operator="like"
-                        from="filter" ignore-if-empty="true" ignore-case="true" />
-                </econditions>
                 <econditions combine="or">
                     <econdition field-name="userPartyId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
@@ -1042,23 +1052,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <if
                     condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
                     <set field="userInfo.companyRole" value="Lead" />
-                </if>
-                <if condition="filter != null">
-                    <set field="company"
-                        from="[
-                        partyId: userInfo?.companyPartyId,
-                        name: userInfo.companyName,
-                        role: userInfo.companyRole,
-                        ]" />
-                    <script>
-                        users.add([
-                            partyId: userInfo?.userPartyId,
-                            firstName: userInfo?.firstName,
-                            lastName: userInfo?.lastName,
-                            company: company,
-                            ])
-                    </script>
-                    <continue />
                 </if>
                 <!-- image -->
                 <entity-find entity-name="mantle.party.PartyContent" list="contents">
@@ -1092,34 +1085,55 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[ ccPaymentMethodId: userInfo.paymentMethodId,
                                 ccDescription: ccDescription]" />
                 </if>
-                <set field="company"
-                    from="[
-                    partyId: userInfo.companyPartyId,
-                    name: userInfo.companyName,
-                    role: userInfo.companyRole,
-                    paymentMethod: paymentMethod,
-                    ]" />
+                <if condition="isForDropDown">
+                    <set field="company"
+                        from="[
+                            partyId: userInfo.companyPartyId,
+                            name: userInfo.companyName,
+                            ]" />
+                    <else>
+                        <set field="company"
+                            from="[
+                            partyId: userInfo.companyPartyId,
+                            pseudoId: userInfo.companyPseudoId,
+                            name: userInfo.companyName,
+                                role: userInfo.companyRole,
+                                paymentMethod: paymentMethod,
+                                ]" />
+                    </else>
+                </if>
                 <set field="telephoneNr"
                     value="${userInfo.telCountryCode?:''}${userInfo.telAreaCode?:''}${userInfo.telContactNumber?:''}" />
-                <set field="userOut"
-                    from="[
-                    partyId: userInfo?.userPartyId,
-                    pseudoId: userInfo?.userPseudoId,
-                    email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
-                    emailContactMechId: userInfo.emailContactMechId,
-                    firstName: userInfo?.firstName,
-                    lastName: userInfo?.lastName,
-                    loginDisabled: userInfo?.loginDisabled == 'Y'? true : false,
-                    loginName: userInfo?.loginName,
-                    userGroupId: userGroupId,
-                    groupDescription: userInfo?.ugDescription,
-                    language: userInfo?.locale ? userInfo?.locale .toString() : '',
-                    image: imageFile,
-                    userId: userInfo?.userId,
-                    locale: userInfo?.locale,
-                    telephoneNr: telephoneNr,
-                    company: company,
-                    ]" />
+                <if condition="isForDropDown">
+                    <set field="userOut"
+                        from="[
+                            pseudoId: userInfo?.userPseudoId,
+                            firstName: userInfo?.firstName,
+                            lastName: userInfo?.lastName,
+                            company: company,
+                            ]" />
+                    <else>
+                        <set field="userOut"
+                            from="[
+                                partyId: userInfo?.userPartyId,
+                                pseudoId: userInfo?.userPseudoId,
+                                email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
+                                emailContactMechId: userInfo.emailContactMechId,
+                                firstName: userInfo?.firstName,
+                                lastName: userInfo?.lastName,
+                                loginDisabled: userInfo?.loginDisabled == 'Y'? true : false,
+                                loginName: userInfo?.loginName,
+                                userGroupId: userGroupId,
+                                groupDescription: userInfo?.ugDescription,
+                                language: userInfo?.locale ? userInfo?.locale .toString() : '',
+                                image: imageFile,
+                                userId: userInfo?.userId,
+                                locale: userInfo?.locale,
+                                telephoneNr: telephoneNr,
+                                company: company,
+                                ]" />
+                    </else>
+                </if>
                 <script>users.add(userOut)</script>
             </iterate>
             <if condition="userPartyId">
@@ -1719,50 +1733,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true" message="New or existing company required!" />
             </if>
             <!-- related company changes -->
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
-                in-map="[userPartyId: user.partyId]" out-map="relComp" />
-            <if
-                condition="user.company.partyId != oldValue.user.company.partyId || 
-                    (!user.company.partyId &amp;&amp; user.company.name)">
-                <!-- company partyId is empty and name provided: means new company-->
-                <if condition="!user.company.partyId &amp;&amp; user.company.name">
-                    <!-- new company -->
-                    <service-call name="growerp.100.PartyServices100.create#Company"
-                        in-map="[company: user.company]" out-map="context" />
-                    <set field="companyPartyId" from="company.partyId" />
-                    <else><!-- existing-->
-                        <set field="companyPartyId" from="user.company.partyId" />
-                        <!-- end current relationship -->
-                        <service-call name="update#mantle.party.PartyRelationship"
-                            in-map="[partyRelationshipId: oldValue.personToCompanyId,
-                                thruDate: ec.user.nowTimestamp]" />
-                    </else>
-                </if>
+            <if condition="user.company.partyId != oldValue.user.company.partyId">
+                <!-- delete  old relationship -->
+                <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
+                    <econdition field-name="fromPartyId" from="oldValue.user.partyId" />
+                </entity-delete-by-condition>
                 <!-- create new relationship -->
                 <service-call name="create#mantle.party.PartyRelationship"
                     in-map="[fromPartyId: user.partyId, fromRoleTypeId: 'Employee',
-                        relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp,
-                        toPartyId: companyPartyId,
-                        toRoleTypeId: user.company.role == 'Lead'? 'Customer' : user.company.role
-                        ]" />
-
-                <!-- check if old company used by other employees , when not, expire to owner -->
-                <entity-find entity-name="mantle.party.PartyRelationship" list="oldCompanies">
-                    <econdition field-name="toPartyId" from="oldValue.user.company.partyId" />
-                    <date-filter />
-                </entity-find>
-                <if condition="!oldCompanies">
-                    <entity-find entity-name="mantle.party.PartyRelationship" list="toOwner"
-                        for-update="true">
-                        <econdition field-name="fromPartyId" from="oldValue.user.company.partyId" />
-                        <econdition field-name="toPartyId" from="relComp.ownerPartyId" />
-                    </entity-find>
-                    <iterate list="toOwner" entry="company">
-                        <service-call name="update#mantle.party.PartyRelationship"
-                            in-map="[partyRelationshipId: company.partyRelationshipId,
-                                    thruDate: ec.user.nowTimestamp]" />
-                    </iterate>
-                </if>
+                    relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp,
+                    toPartyId: user.company.partyId,
+                    toRoleTypeId: user.company.role == 'Lead'? 'Customer' : user.company.role
+                    ]" />
             </if>
             <!-- telephone -->
             <if condition="user.telephoneNr || user.telephoneNr != oldValue.user.telephoneNr">
