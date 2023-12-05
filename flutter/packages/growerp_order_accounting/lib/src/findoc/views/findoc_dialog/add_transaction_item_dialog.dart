@@ -57,11 +57,13 @@ Future addTransactionItemDialog(BuildContext context, bool sales,
                                 return DropdownSearch<GlAccount>(
                                   selectedItem: selectedGlAccount,
                                   popupProps: PopupProps.menu(
+                                    isFilterOnline: true,
+                                    showSelectedItems: true,
                                     showSearchBox: true,
                                     searchFieldProps: const TextFieldProps(
                                       autofocus: true,
                                       decoration: InputDecoration(
-                                          labelText: "Gl Account"),
+                                          labelText: 'Gl Account'),
                                     ),
                                     menuProps: MenuProps(
                                         borderRadius:
@@ -80,15 +82,19 @@ Future addTransactionItemDialog(BuildContext context, bool sales,
                                   key: const Key('glAccount'),
                                   itemAsString: (GlAccount? u) =>
                                       " ${u?.accountCode} ${u?.accountName} ",
-                                  items: state.glAccounts,
+                                  asyncItems: (String filter) async {
+                                    glAccountBloc.add(GlAccountFetch(
+                                        searchString: filter, limit: 3));
+                                    return Future.delayed(
+                                        const Duration(milliseconds: 100), () {
+                                      return Future.value(
+                                          glAccountBloc.state.glAccounts);
+                                    });
+                                  },
+                                  compareFn: (item, sItem) =>
+                                      item.accountCode == sItem.accountCode,
                                   onChanged: (GlAccount? newValue) {
                                     selectedGlAccount = newValue!;
-                                  },
-                                  validator: (value) {
-                                    if (value == null) {
-                                      return 'Enter ledger acount?';
-                                    }
-                                    return null;
                                   },
                                 );
                               default:
