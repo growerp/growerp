@@ -93,6 +93,21 @@ class GlAccountsState extends State<GlAccountList> {
                     },
                     tooltip: 'Trial Balance',
                     child: const Text("TB")),
+                const SizedBox(height: 10),
+                FloatingActionButton(
+                    key: const Key("addNew"),
+                    onPressed: () async {
+                      await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return BlocProvider.value(
+                                value: _glAccountBloc,
+                                child: GlAccountDialog(GlAccount()));
+                          });
+                    },
+                    tooltip: CoreLocalizations.of(context)!.addNew,
+                    child: const Icon(Icons.add))
               ]),
               body: Column(children: [
                 const GlAccountListHeader(),

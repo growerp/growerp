@@ -495,7 +495,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport")
   @Extra({'requireApiKey': true})
   Future<void> uploadEntities(
-      {@Field() required Map<String, dynamic> entities,
+      {@Field() required dynamic entities,
       @Field() required String classificationId});
 
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")

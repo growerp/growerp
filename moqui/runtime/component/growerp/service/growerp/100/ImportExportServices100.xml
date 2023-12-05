@@ -204,6 +204,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <log message="============starting importexport entities: $entities" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
             <if condition="entities.companies">
@@ -273,7 +274,8 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <message public="true" type="success">Locations Upload completed</message>
             </if>
-            <if condition="entities.glAccounts">
+            <!-- empty list will remove all accounts-->
+            <if condition="entities.glAccounts || entities.glAccounts?.size == 0">
                 <!-- delete existing transactions only initial if present-->
                 <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />

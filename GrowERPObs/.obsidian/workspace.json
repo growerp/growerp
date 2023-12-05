@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md",
+                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md",
+                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md",
+                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "3 Technical documentation/3 Moqui Backend.md"
+                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md"
               }
             }
           },
@@ -166,6 +166,7 @@
   },
   "active": "ee481afbef6892fd",
   "lastOpenFiles": [
+    "3 Technical documentation/3 Moqui Backend.md",
     "1 Introduction/4 Getting started.md",
     "1 Introduction/3 Feature list.md",
     "1 Introduction/2 What is GrowERP.md",
@@ -198,7 +199,6 @@
     "2 End User documentation/7 Accounting",
     "3 Technical documentation/2 Flutter frontend & development.md",
     "3 Technical documentation/1 Technical Introduction.md",
-    "3 Technical documentation/3 Moqui Backend.md",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
     "4 Applications/2 Hotel",

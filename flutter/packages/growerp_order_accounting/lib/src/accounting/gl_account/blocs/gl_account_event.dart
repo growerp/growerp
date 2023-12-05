@@ -45,11 +45,13 @@ class GlAccountDelete extends GlAccountEvent {
 }
 
 class AccountClassesFetch extends GlAccountEvent {
-  const AccountClassesFetch();
+  const AccountClassesFetch({this.limit = 20});
+  final int limit;
 }
 
 class AccountTypesFetch extends GlAccountEvent {
-  const AccountTypesFetch();
+  const AccountTypesFetch({this.limit = 20});
+  final int limit;
 }
 
 /// initiate a download of products by email.

@@ -1142,79 +1142,79 @@ List<GlAccount> glAccounts = [
   GlAccount(
       accountCode: "100",
       accountName: "Asset",
-      accountClass: AccountClass(description: "Land and Building"),
+      accountClass: AccountClass(detailDescription: "Land and Building"),
       postedBalance: Decimal.parse("11.11")),
   GlAccount(
       accountCode: "101",
       accountName: "Cash",
-      accountClass: AccountClass(description: "Inventory Assets"),
+      accountClass: AccountClass(detailDescription: "Inventory Assets"),
       postedBalance: Decimal.parse("22.22")),
   GlAccount(
       accountCode: "120",
       accountName: "Accounts Receivable",
-      accountClass: AccountClass(description: "Inventory Assets"),
+      accountClass: AccountClass(detailDescription: "Inventory Assets"),
       postedBalance: Decimal.parse("33.33")),
   GlAccount(
       accountCode: "150",
       accountName: "Supplies",
-      accountClass: AccountClass(description: "Office and Supplies"),
+      accountClass: AccountClass(detailDescription: "Office and Supplies"),
       postedBalance: Decimal.parse("44.44")),
   GlAccount(
       accountCode: "180",
       accountName: "Equipment",
-      accountClass: AccountClass(description: "Loans Receivable")),
+      accountClass: AccountClass(detailDescription: "Loans Receivable")),
   // 2 liability
   GlAccount(
       accountCode: "200",
       accountName: "Notes Payable",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   GlAccount(
       accountCode: "210",
       accountName: "Notes Payable",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   GlAccount(
       accountCode: "215",
       accountName: "Accounts Payable",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   GlAccount(
       accountCode: "220",
       accountName: "Wages Receivable",
-      accountClass: AccountClass(description: "Cash")),
+      accountClass: AccountClass(detailDescription: "Cash")),
   GlAccount(
       accountCode: "230",
       accountName: "Interest Payable",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   // Owner's Equity Accounts
   GlAccount(
       accountCode: "290",
       accountName: "Investor",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   // 3 Operating Revenue
   GlAccount(
       accountCode: "300",
       accountName: "Revenue",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   GlAccount(
       accountCode: "310",
       accountName: "Service revenues",
-      accountClass: AccountClass(description: "Liability")),
+      accountClass: AccountClass(detailDescription: "Liability")),
   // operating expense
   GlAccount(
       accountCode: "500",
       accountName: "Expenses",
-      accountClass: AccountClass(description: "Expenses")),
+      accountClass: AccountClass(detailDescription: "Expenses")),
   GlAccount(
       accountCode: "510",
       accountName: "Wages",
-      accountClass: AccountClass(description: "Expenses")),
+      accountClass: AccountClass(detailDescription: "Expenses")),
   GlAccount(
       accountCode: "540",
       accountName: "Supplies",
-      accountClass: AccountClass(description: "Expenses")),
+      accountClass: AccountClass(detailDescription: "Expenses")),
   GlAccount(
       accountCode: "560",
       accountName: "Rent",
-      accountClass: AccountClass(description: "Expenses")),
+      accountClass: AccountClass(detailDescription: "Expenses")),
 ];
 
 List<LedgerJournal> ledgerJournals = [

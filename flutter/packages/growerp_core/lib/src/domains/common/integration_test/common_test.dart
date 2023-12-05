@@ -407,7 +407,9 @@ class CommonTest {
     if (tff.selectedItem is Category) return tff.selectedItem.categoryName;
     if (tff.selectedItem is Product) return tff.selectedItem.productName;
     if (tff.selectedItem is User) return tff.selectedItem.company.name;
-    if (tff.selectedItem is AccountClass) return tff.selectedItem.description;
+    if (tff.selectedItem is AccountClass) {
+      return tff.selectedItem.detailDescription;
+    }
     if (tff.selectedItem is AccountType) return tff.selectedItem.description;
     return tff.selectedItem.toString();
   }

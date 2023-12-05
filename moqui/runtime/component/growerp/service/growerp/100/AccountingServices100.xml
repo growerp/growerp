@@ -738,8 +738,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountName" />
                 <parameter name="isDebit" type="Boolean" />
                 <parameter name="accountClass" type="Map">
-                    <parameter name="accountClassId" />
+                    <parameter name="topClassId" />
+                    <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
+                    <parameter name="parentDescription" />
+                    <parameter name="classId" />
                     <parameter name="description" />
+                    <parameter name="detailClassId" />
+                    <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -806,9 +812,11 @@ along with this software (see the LICENSE.md file). If not, see
                             topDescription: classes[0].topDescription,
                             parentClassId: classes[0].middleEnumId,
                             parentDescription: classes[0].middleDescription,
-                            accountClassId: classes[0].bottomEnumId,
+                            classId: classes[0].bottomEnumId,
                             description: classes[0].bottomDescription,
-                            contra: classes[0].bottomContra == 'Y' ? true : false,
+                            detailClassId: classes[0].basicEnumId,
+                            detailDescription: classes[0].basicDescription,
+                            contra: classes[0].basicContra == 'Y' ? true : false,
                         ],
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
                             description: glAccount.typeDescription],
@@ -845,8 +853,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
-                    <parameter name="accountClassId" />
-                    <parameter name="description" />
+                    <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -871,10 +878,10 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="====create glaccount with class: ${glAccount.accountClass}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if
-                condition="!glAccount.accountClass.accountClassId &amp;&amp; !glAccount.accountClass.description">
+            <if condition="!glAccount.accountClass.detailDescription">
                 <return error="true"
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
@@ -882,7 +889,8 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!glAccount.accountClass?.accountClassId">
                 <entity-find entity-name="moqui.basic.Enumeration" list="enums">
                     <econdition field-name="enumTypeId" value="GlAccountClass" />
-                    <econdition field-name="description" from="glAccount.accountClass?.description" />
+                    <econdition field-name="description"
+                        from="glAccount.accountClass?.detailDescription" />
                 </entity-find>
                 <if condition="!enums">
                     <return error="true"
@@ -967,7 +975,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
-                    <parameter name="accountClassId" />
+                    <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -1000,12 +1008,17 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
+            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+                <econdition field-name="enumTypeId" value="GlAccountClass" />
+                <econdition field-name="description"
+                    from="glAccount.accountClass?.detailDescription" />
+            </entity-find>
             <service-call name="update#mantle.ledger.account.GlAccount"
                 in-map="[   glAccountId: glAccount.glAccountId,
                             parentGlAccountId: parentGlAccountId,
                             accountCode: glAccount.accountCode,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: glAccount.accountClass.accountClassId,
+                            glAccountClassEnumId: enums[0].enumId,
                             glAccountTypeEnumId: glAccount.accountType.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
@@ -1023,7 +1036,9 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums">
+                <econdition field-name="basicEnumId" operator="is-not-null" />
+            </entity-find>
             <set field="accountClasses" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
