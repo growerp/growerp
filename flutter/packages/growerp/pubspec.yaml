@@ -15,15 +15,13 @@ dependencies:
   dio: ^5.3.3
   fast_csv: ^0.2.6
   get_it: ^7.6.4
-  growerp_models:
-    path: ../growerp_models
+  growerp_models: ^1.2.0
   hive: ^2.2.3
   logger: ^2.0.2+1
   retrofit: ^4.0.3
 
 dev_dependencies:
   lint_hard: ^4.0.0
-  build_runner: ^2.4.6
-  retrofit_generator: '>=7.0.0 <8.0.0'
+
 
 

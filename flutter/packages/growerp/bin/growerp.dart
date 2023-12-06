@@ -1,41 +1,18 @@
 #!/usr/bin/env dcli
+/*
+ * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
+ * Grant of Patent License.
+ * 
+ * To the extent possible under law, the author(s) have dedicated all
+ * copyright and related and neighboring rights to this software to the
+ * public domain worldwide. This software is distributed without any
+ * warranty.
+ * 
+ * You should have received a copy of the CC0 Public Domain Dedication
+ * along with this software (see the LICENSE.md file). If not, see
+ * <http://creativecommons.org/publicdomain/zero/1.0/>.
+ */
 
-///
-/// The Basic global dart GrowERP command.
-/// Activate local version:
-///   dart pub global activate --source path ~/growerp/flutter/packages/growerp
-/// Activate public version:
-///   dart pub global activate growerp.
-///
-/// Sub commands:
-/// install:
-///   1. clone the repository from github into the local ~/growerp directory
-///   2. start the backend and chat server
-///   3. activate the dart melos global command.
-///   4. build the flutter system
-///   package 'admin' can now be started with flutter run.
-///   use the -dev switch to use the Github development branch
-/// Import:
-///   will upload data like ledger, customers products etc from the terminal
-///   Also has a helper program csvToCsv to convert your csv files to the
-///     GrowERP format.
-///   Parameters:
-///     -i input file or directory
-///     -u -p optional
-/// Export:
-///   will create CSV files for growerp entities in the current 'growerp'
-///   directory, if not exist will create it.
-///   Parameters:
-///     1. optional file type
-///
-/// flags:
-///   -dev if present uses development branch by installation
-///   -i filename : input file
-///   -u user : email address, with password create new company otherwise use last one
-///   -p password : required for new company
-///   -o outputDirectory : directory used for exported csv output files,default: growerp
-///
-///
 import 'dart:convert';
 import 'dart:io';
 import 'package:dcli/dcli.dart';

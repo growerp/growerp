@@ -2,7 +2,7 @@ name: growerp_order_accounting
 description: >
   A package providing order and accounting functions such as order, invoice,       
   payments and ledger for the GrowERP system both for sales and purchase.
-version: 1.1.3
+version: 1.2.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms: 
@@ -54,7 +54,8 @@ dependencies:
   archive: ^3.3.0
   flutter_test: 
     sdk: flutter
-  growerp_core: ^1.1.3
+  growerp_core: ^1.2.0
+  growerp_models: ^1.2.0
   scrollable_positioned_list: ^0.3.8
 dependency_overrides: 
   intl: ^0.18.0

@@ -1,3 +1,13 @@
+## 1.2.0
+* upgrade to growerp_core 1.2.0
+* models in separate package
+* Now using retrofit
+* Any ledger organization and numbering possible by upload or manual entry.
+* Manual ledger transactions and posting added.
+* Ledger journal function added
+* Relation of order/invoice/payment/shipment documents now shown and clickable.
+* Added trial balance
+
 ## 1.1.3
 * upgrade to growerp_core 1.1.3
 

@@ -1,3 +1,8 @@
+## 1.2.0
+* upgrade to growerp_core 1.2.0
+* all models now in separate package
+* switched to retrofit
+
 ## 1.1.3
 * upgrade to growerp_core 1.1.3
 

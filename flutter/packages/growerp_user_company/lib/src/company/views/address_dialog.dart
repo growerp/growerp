@@ -175,15 +175,12 @@ class AddressDialogState extends State<AddressDialog> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               Navigator.of(context).pop(Address(
-                                address1: _address1Controller.text,
-                                address2: _address2Controller.text,
-                                postalCode: _postalCodeController.text,
-                                city: _cityController.text,
-                                province: _provinceController.text,
-                                country: _selectedCountry != null
-                                    ? _selectedCountry!.name
-                                    : null,
-                              ));
+                                  address1: _address1Controller.text,
+                                  address2: _address2Controller.text,
+                                  postalCode: _postalCodeController.text,
+                                  city: _cityController.text,
+                                  province: _provinceController.text,
+                                  country: _selectedCountry?.name));
                             }
                           }))
                 ]),

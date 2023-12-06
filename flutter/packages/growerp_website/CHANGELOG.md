@@ -1,3 +1,8 @@
+## 1.2.0
+* upgrade to growerp_core 1.2.0
+* models in separate package
+* Now using retrofit
+
 ## 1.1.4
 * fix error in growerp_select
 

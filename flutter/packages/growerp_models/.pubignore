@@ -1,6 +1,8 @@
 # do not Ignore generated files for pub.dev
 !*.g.dart
 !*.freezed.dart
+!pubspec.lock
+!generated
 
 # Miscellaneous
 *.class

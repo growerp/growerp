@@ -93,7 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
                         // ec.logger.info("===Result: ${response.toString()}");
                         return new groovy.json.JsonSlurper().parseText(response.toString())
                     } else {
-                        ec.logger.info("===GET request did not work: ${con.getResponseCode()} ${con.getResponseMessage()}");
+                        // ec.logger.info("===GET request did not work: ${con.getResponseCode()} ${con.getResponseMessage()}");
                     }
                 }
 

@@ -1,5 +1,7 @@
 ## 1.2.0
-
+- growerp install now working properly
+- added conversion example programs
+- growerp backend can now be accessed from the terminal.
 - Now everything in a single repository.
 - upgraded the install , added first version of import and export.
 

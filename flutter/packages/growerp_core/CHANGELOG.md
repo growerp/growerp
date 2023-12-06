@@ -1,3 +1,7 @@
+## 1.2.0
+* models now moved to separate package
+* added pretty logging
+
 ## 1.1.3
 * different apps can now used with a single email
 * ui improvements
