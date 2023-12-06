@@ -26,7 +26,7 @@ RUN cp /root/vueWebsite/WebSiteRestServices.xml runtime/component/growerp/servic
 # Postgresql driver
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.2.9.jar -o runtime/lib/postgresql-42.2.9.jar
 # elasticsearch
-RUN ./gradlew downloadel
+# RUN ./gradlew downloadel
 # build Moqui system
 RUN ./gradlew addRunTime
 # unzip war file

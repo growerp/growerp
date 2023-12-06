@@ -49,11 +49,10 @@ along with this software (see the LICENSE.md file). If not, see
                 // get sequence id
                 Map result = sendGET("v1/sequences")
 
-                if (result == null) {
-                    logger.info("Getting sequences from birdsend did not work");
+                if (result?.data == null) {
+                    logger.info("Getting sequences from birdsend did not work, result: $result");
                     return
                 }
-                // logger.info("===sequence result: ${result.data}")
 
                 Integer sequenceId;
                 for(sequence in result.data) {

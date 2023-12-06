@@ -27,19 +27,19 @@ sed -i -e "s/\STRIPE_SECRET_KEY/${STRIPE_SECRET_KEY}/g" runtime/component/mantle
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
     if [ "$DB_DATA" == "CONVERSION" ] ; then
         echo "Loading conversion data...takes hours to start up......."
-        java -cp . MoquiStart load types=seed,seed-initial,install,conversion timeout=10800 conf=$CONF_FILE
+        java -cp . MoquiStart load types=seed,seed-initial,install,conversion timeout=10800 conf=$CONF_FILE no-run-es
     fi
     if [ "$DB_DATA" == "DEMO" ] ; then
         echo "Loading demo data...takes minutes to start up......."
-        java -cp . MoquiStart load types=seed,seed-initial,demo conf=$CONF_FILE
+        java -cp . MoquiStart load types=seed,seed-initial,demo conf=$CONF_FILE no-run-es
     fi
     if [ "$DB_DATA" == "SEED-INITIAL" ] ; then
         echo "Loading seed and seed-initial data...takes minutes to start up......."
-        java -cp . MoquiStart load types=seed,seed-initial conf=$CONF_FILE
+        java -cp . MoquiStart load types=seed,seed-initial conf=$CONF_FILE no-run-es
     fi
     if [ "$DB_DATA" == "INSTALL" ] ; then
         echo "Loading seed and seed-initial and Install data...takes minutes to start up......."
-        java -cp . MoquiStart load types=seed,seed-initial,install conf=$CONF_FILE
+        java -cp . MoquiStart load types=seed,seed-initial,install conf=$CONF_FILE no-run-es
     fi
     if [ "$DB_DATA" == "SEED" ] ; then
         echo "Loading seed data...takes minutes to start up......."
@@ -48,5 +48,5 @@ if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then
 fi
 
 # start moqui
-java -cp . MoquiStart port=80 conf=$CONF_FILE
+java -cp . MoquiStart port=80 conf=$CONF_FILE no-run-es
 
