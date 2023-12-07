@@ -13,7 +13,7 @@ dependencies:
   shared_preferences: ^2.0.6
   animations: ^2.0.0
   growerp_website: ^1.2.0
-  growerp_core: ^1.2.0
+  growerp_core: ^1.2.2
   growerp_order_accounting: ^1.2.0
   growerp_user_company: ^1.2.0
   growerp_catalog: ^1.2.0

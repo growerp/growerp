@@ -67,7 +67,6 @@ List<Company> CsvToCompanies(String csvFile) {
   for (final row in result) {
     if (row == result.first) continue;
     companies.add(Company(
-      partyId: row[0],
       pseudoId: row[1],
       role: Role.getByValue(row[2]),
       name: row[3],

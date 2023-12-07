@@ -17,7 +17,7 @@ install:
   2. start the backend and chat server
   3. activate the dart melos global command.
   4. build the flutter system
-  package 'admin' can now be started with flutter run.
+  5. package 'admin' can now be started with flutter run.
   use the -dev switch to use the Github development branch
 Import:
   will upload data like ledger, customers products etc from the terminal
@@ -25,7 +25,8 @@ Import:
     GrowERP format.
   Parameters:
     -i input file or directory
-    -u -p optional
+    -u -p user/password optional, will remember from last time
+    -url the base url of the backend, local host is default
 Export:
   will create CSV files for growerp entities in the current 'growerp'
   directory, if not exist will create it.
@@ -38,5 +39,7 @@ flags:
   -u user : email address, with password create new company otherwise use last one
   -p password : required for new company
   -o outputDirectory : directory used for exported csv output files,default: growerp
+  -url for import/export backend url
+  -t receive timeout: default 60 seconds
 
 

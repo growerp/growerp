@@ -1,3 +1,8 @@
+# 1.2.1
+* added optional -url parameter for the backend
+* added additional -t parameter for receive timeout
+* improve import command with products.
+
 ## 1.2.0
 - growerp install now working properly
 - added conversion example programs

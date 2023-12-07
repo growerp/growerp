@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'dart:typed_data';
@@ -20,6 +21,7 @@ import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:growerp_models/src/json_converters.dart';
+import 'package:logger/logger.dart';
 import '../create_csv_row.dart';
 import 'models.dart';
 part 'product_model.freezed.dart';
@@ -59,29 +61,44 @@ List<String> productTypes = ['Physical Good', 'Service', 'Rental'];
 String productCsvFormat =
     'product Id, Type*, Name*, Description*, List Price*, Sales price*, '
     'Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
-int productCsvLength = productCsvFormat.split(',').length;
+List<String> productCsvTitles = productCsvFormat.split(',');
+int productCsvLength = productCsvTitles.length;
 
-List<Product> CsvToProducts(String csvFile) {
+List<Product> CsvToProducts(String csvFile, Logger logger) {
+  int errors = 0;
   List<Product> products = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    print("======product row: ${row.join()}");
-    products.add(Product(
-      pseudoId: row[0],
-      productTypeId: row[1],
-      productName: row[2],
-      description: row[3],
-      listPrice: row[4] != '' ? Decimal.parse(row[4]) : null,
-      price: row[5] != '' ? Decimal.parse(row[5]) : null,
-      useWarehouse: row[6] == 'true' ? true : false,
-      categories: [
-        Category(categoryName: row[7]),
-        Category(categoryName: row[8]),
-        Category(categoryName: row[9])
-      ],
-      image: row[10].isNotEmpty ? base64.decode(row[10]) : null,
-    ));
+    try {
+      products.add(Product(
+        pseudoId: row[0],
+        productTypeId: row[1],
+        productName: row[2],
+        description: row[3],
+        listPrice: row[4].isNotEmpty && row[4] != 'null'
+            ? Decimal.parse(row[4])
+            : null,
+        price: row[5].isNotEmpty && row[5] != 'null'
+            ? Decimal.parse(row[5])
+            : null,
+        useWarehouse: row[6] == 'true' ? true : false,
+        categories: [
+          Category(categoryName: row[7]),
+          Category(categoryName: row[8]),
+          Category(categoryName: row[9])
+        ],
+        image: row[10].isNotEmpty ? base64.decode(row[10]) : null,
+      ));
+    } catch (e) {
+      String fieldList = '';
+      productCsvTitles
+          .asMap()
+          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
+      logger.e("Error processing product csv line: $fieldList \n"
+          "error message: $e");
+      if (errors++ == 5) exit(1);
+    }
   }
   return products;
 }

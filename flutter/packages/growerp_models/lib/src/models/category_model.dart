@@ -60,7 +60,7 @@ List<Category> CsvToCategories(String csvFile) {
       Category(
           categoryId: row[0],
           categoryName: row[1],
-          description: row[1],
+          description: row[2],
           image:
               row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null),
     );

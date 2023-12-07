@@ -47,6 +47,7 @@ abstract class RestClient {
     @Field() required String username,
     @Field() required String oldPassword,
     @Field() required String newPassword,
+    @Field() required String classificationId,
   });
 
   @GET("rest/s1/growerp/100/Companies")

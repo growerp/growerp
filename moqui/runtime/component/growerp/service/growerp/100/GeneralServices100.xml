@@ -595,7 +595,8 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
 
             <if condition="passwordChange">
-                <set field="authenticate" from="[apiKey: 'passwordChange']" />
+                <set field="authenticate"
+                    from="[apiKey: 'passwordChange',classificationId: classificationId]" />
                 <else>
                     <!-- normal login -->
                     <script>ec.user.loginUser(username, password)</script>
@@ -615,8 +616,29 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="username" />
         </in-parameters>
         <actions>
-            <service-call name="org.moqui.impl.UserServices.reset#Password"
-                in-map="[username: username]" />
+            <entity-find-one entity-name="moqui.basic.email.EmailServer"
+                value-field="emailExist">
+                <field-map field-name="emailServerId" value="SYSTEM" />
+            </entity-find-one>
+            <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
+                <service-call name="org.moqui.impl.UserServices.reset#Password"
+                    in-map="[username: username]" />
+                <else>
+                    <!-- copied from UserServices.xml -->
+                    <entity-find-one entity-name="moqui.security.UserAccount"
+                        value-field="userAccount" for-update="true" />
+                    <set field="resetPassword" from="getRandomString(12)" />
+                    <set field="passwordNode"
+                        from="ec.ecfi.confXmlRoot.first('user-facade').first('password')" />
+                    <set field="userAccount.resetPassword"
+                        from="ec.ecfi.getSimpleHash(resetPassword, userAccount.passwordSalt, userAccount.passwordHashType, 'Y'.equals(userAccount.passwordBase64))" />
+                    <set field="userAccount.requirePasswordChange"
+                        from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'" />
+                    <entity-update value-field="userAccount" />
+                    <log level="warn"
+                        message="Email not configured, not send email to: $username but password reset, password: $resetPassword" />
+                </else>
+            </if>
         </actions>
     </service>
 
@@ -626,6 +648,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="username" required="true" />
             <parameter name="newPassword" required="true" />
             <parameter name="oldPassword" />
+            <parameter name="classificationId" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">

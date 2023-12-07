@@ -29,10 +29,12 @@ import '../logger.dart';
 Future<void> main(List<String> args) async {
   String growerpPath = '$HOME/growerp';
   String validCommands = "valid commands are:'install | import | export'";
+  String? backendUrl;
   String branch = 'master';
   String inputFile = '';
   String username = '';
   String password = '';
+  int timeout = 60; //in seconds
   String outputDirectory = 'growerpCsv';
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');
@@ -50,6 +52,9 @@ Future<void> main(List<String> args) async {
         case '-dev':
           branch = 'development';
           break;
+        case '-url':
+          backendUrl = args[++i];
+          break;
         case '-i':
           inputFile = args[++i];
           break;
@@ -61,6 +66,8 @@ Future<void> main(List<String> args) async {
           break;
         case '-o':
           outputDirectory = args[++i];
+        case '-t':
+          timeout = int.parse(args[++i]);
           break;
         case '-f':
           overrideFileType = getFileType(args[++i]);
@@ -101,7 +108,6 @@ Future<void> main(List<String> args) async {
         // get authenticate
         String? result = box.get('authenticate');
         if (result != null) {
-          print("======777===========$result");
           authenticate =
               Authenticate.fromJson({'authenticate': jsonDecode(result)});
         }
@@ -109,6 +115,9 @@ Future<void> main(List<String> args) async {
     }
 
     // commands
+    if (modifiedArgs.isEmpty) {
+      logger.e("No growerp subcommand found.");
+    }
     switch (modifiedArgs[0].toLowerCase()) {
       case 'install':
         logger.i(
@@ -169,8 +178,8 @@ Future<void> main(List<String> args) async {
           exit(1);
         }
         // talk to backend
-        final client = RestClient(
-            await buildDioClient(null, timeout: Duration(seconds: 20)));
+        final client = RestClient(await buildDioClient(backendUrl,
+            timeout: Duration(seconds: timeout)));
         try {
           await login(client);
           // import
@@ -184,7 +193,8 @@ Future<void> main(List<String> args) async {
                 await client.importGlAccounts(CsvToGlAccounts(csvFile));
                 break;
               case FileType.product:
-                await client.importProducts(CsvToProducts(csvFile), 'AppAdmin');
+                await client.importProducts(
+                    CsvToProducts(csvFile, logger), 'AppAdmin');
                 break;
               case FileType.category:
                 await client.importCategories(CsvToCategories(csvFile));
@@ -219,7 +229,8 @@ Future<void> main(List<String> args) async {
             exit(1);
           }
         }
-        final client = RestClient(await buildDioClient(null));
+        final client = RestClient(await buildDioClient(backendUrl,
+            timeout: Duration(seconds: timeout)));
         try {
           if (isDirectory(outputDirectory)) {
             logger.e(

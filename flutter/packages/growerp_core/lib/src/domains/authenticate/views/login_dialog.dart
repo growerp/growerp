@@ -78,8 +78,8 @@ class LoginDialogState extends State<LoginDialog> {
         oldPassword = _passwordController.text;
       }
       authenticate = state.authenticate!;
-      companyPartyId = authenticate.company!.partyId;
-      companyName = authenticate.company!.name;
+      companyPartyId = authenticate.company?.partyId!;
+      companyName = authenticate.company?.name!;
       if (_usernameController.text.isEmpty) {
         _usernameController.text = authenticate.user?.loginName != null
             ? authenticate.user!.loginName!

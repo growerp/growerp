@@ -1,6 +1,6 @@
 name: growerp_core
 description: The Core of the GrowERP frontend
-version: 1.2.0
+version: 1.2.2
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:
@@ -14,7 +14,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
   flutter: '>=1.17.0'
 dependencies:
-  growerp_models: ^1.2.0
+  growerp_models: ^1.2.1
   flutter: 
     sdk: flutter
   flutter_localizations: 

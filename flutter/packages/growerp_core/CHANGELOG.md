@@ -1,3 +1,9 @@
+## 1.2.2
+* removed path reference
+
+## 1.2.1
+* reset password fixed
+
 ## 1.2.0
 * models now moved to separate package
 * added pretty logging

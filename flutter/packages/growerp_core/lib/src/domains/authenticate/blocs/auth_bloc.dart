@@ -235,7 +235,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Authenticate result = await restClient.updatePassword(
           username: event.username,
           oldPassword: event.oldPassword,
-          newPassword: event.newPassword);
+          newPassword: event.newPassword,
+          classificationId: classificationId);
       emit(state.copyWith(
           status: AuthStatus.authenticated,
           authenticate: result,

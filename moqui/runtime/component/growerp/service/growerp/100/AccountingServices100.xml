@@ -853,6 +853,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
+                    <parameter name="topDescription" />
+                    <parameter name="parentDescription" />
+                    <parameter name="description" />
                     <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
@@ -881,16 +884,24 @@ along with this software (see the LICENSE.md file). If not, see
             <log message="====create glaccount with class: ${glAccount.accountClass}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!glAccount.accountClass.detailDescription">
+            <if condition="!glAccount.accountClass">
                 <return error="true"
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
             <!-- get class from description -->
             <if condition="!glAccount.accountClass?.accountClassId">
-                <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+                <entity-find entity-name="moqui.basic.Enumeration" list="enums" limit="1">
                     <econdition field-name="enumTypeId" value="GlAccountClass" />
-                    <econdition field-name="description"
-                        from="glAccount.accountClass?.detailDescription" />
+                    <econditions combine="or">
+                        <econdition field-name="description"
+                            from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
+                        <econdition field-name="description"
+                            from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
+                        <econdition field-name="description"
+                            from="glAccount.accountClass?.description" ignore-if-empty="true" />
+                        <econdition field-name="description"
+                            from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
+                    </econditions>
                 </entity-find>
                 <if condition="!enums">
                     <return error="true"
