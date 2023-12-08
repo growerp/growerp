@@ -13,7 +13,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:date_utils/date_utils.dart' as utils;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
@@ -352,7 +351,7 @@ class _GanttFormFullState extends State<GanttFormFull> {
           ),
         ),
       ));
-      tempDate = utils.DateUtils.nextMonth(tempDate!);
+      tempDate = DateTime(tempDate!.year, tempDate.month - 1, tempDate.day);
     }
     return headerItems;
   }

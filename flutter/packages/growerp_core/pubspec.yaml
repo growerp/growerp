@@ -20,7 +20,7 @@ dependencies:
   flutter_localizations: 
     sdk: flutter
   decimal: ^2.1.0
-  intl: ^0.17.0
+  intl: ^0.18.1
   global_configuration: ^2.0.0
   equatable: ^2.0.5
   flutter_bloc: ^8.1.1
@@ -35,7 +35,7 @@ dependencies:
   about: ^2.1.1
   web_socket_channel: ^2.1.0
   shared_preferences: ^2.0.15
-  date_utils: ^0.2.0
+
   stream_transform: ^2.1.0
   collection: ^1.16.0
   flutter_lints: ^2.0.1
@@ -64,8 +64,6 @@ dependencies:
   logger: ^2.0.2+1
   http: ^1.1.2
 
-dependency_overrides: 
-  intl: ^0.18.0
 dev_dependencies: 
   flutter_driver: 
     sdk: flutter

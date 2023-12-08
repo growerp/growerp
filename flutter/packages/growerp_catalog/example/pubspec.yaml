@@ -9,8 +9,6 @@ dependencies:
     sdk: flutter
   growerp_catalog:
     path: ../
-dependency_overrides:
-  intl: ^0.18.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -14,8 +14,6 @@ dependencies:
   growerp_core:
     path: ../
     
-dependency_overrides:
-  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:
