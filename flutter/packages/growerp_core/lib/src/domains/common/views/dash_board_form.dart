@@ -18,8 +18,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 class DashBoardForm extends StatelessWidget {
   final List<Widget> dashboardItems;
 
-  const DashBoardForm({Key? key, this.dashboardItems = const []})
-      : super(key: key);
+  const DashBoardForm({super.key, this.dashboardItems = const []});
 
   @override
   Widget build(BuildContext context) {

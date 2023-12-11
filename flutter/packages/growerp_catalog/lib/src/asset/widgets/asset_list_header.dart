@@ -18,7 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 class AssetListHeader extends StatefulWidget {
-  const AssetListHeader({Key? key}) : super(key: key);
+  const AssetListHeader({super.key});
 
   @override
   State<AssetListHeader> createState() => _AssetListHeaderState();

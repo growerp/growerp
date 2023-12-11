@@ -21,8 +21,8 @@ import 'package:growerp_models/growerp_models.dart';
 import '../product.dart';
 
 class ProductListItem extends StatelessWidget {
-  const ProductListItem({Key? key, required this.product, required this.index})
-      : super(key: key);
+  const ProductListItem(
+      {super.key, required this.product, required this.index});
 
   final Product product;
   final int index;

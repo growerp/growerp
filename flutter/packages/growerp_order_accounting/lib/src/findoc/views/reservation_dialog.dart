@@ -25,8 +25,7 @@ import '../findoc.dart';
 class ReservationDialog extends StatelessWidget {
   final FinDoc finDoc;
   final FinDoc? original;
-  const ReservationDialog({Key? key, required this.finDoc, this.original})
-      : super(key: key);
+  const ReservationDialog({super.key, required this.finDoc, this.original});
 
   @override
   Widget build(BuildContext context) {

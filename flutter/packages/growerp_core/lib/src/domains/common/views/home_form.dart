@@ -30,11 +30,10 @@ class HomeForm extends StatefulWidget {
   final String? launcherImage;
 
   const HomeForm(
-      {Key? key,
+      {super.key,
       required this.menuOptions,
       this.title = "",
-      this.launcherImage})
-      : super(key: key);
+      this.launcherImage});
   @override
   HomeFormState createState() => HomeFormState();
 }

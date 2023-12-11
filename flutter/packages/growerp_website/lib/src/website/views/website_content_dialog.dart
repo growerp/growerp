@@ -8,7 +8,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
+//import 'package:html_editor_enhanced/html_editor.dart';
 //import 'package:html_editor_enhanced/utils/options.dart';
 
 import '../../../growerp_website.dart';
@@ -105,6 +105,7 @@ class WebsiteContentState extends State<WebsiteContent> {
             case ContentStatus.success:
               newContent = state.content!;
               data = state.content!.text;
+              if (newData.isEmpty) newData = data;
               if (widget.content.text.isNotEmpty) {
                 return Dialog(
                     key: const Key('WebsiteContentText'),
@@ -117,9 +118,10 @@ class WebsiteContentState extends State<WebsiteContent> {
                         width: isPhone ? 400 : 800,
                         height: 600,
                         title: 'Update content ${widget.content.title}',
-                        child: isMarkDown
-                            ? _showMdTextForm(isPhone)
-                            : _showHtmlTextForm(isPhone)));
+                        child: _showMdTextForm(isPhone)));
+//                        isMarkDown
+//                            ? _showMdTextForm(isPhone)
+//                            : _showHtmlTextForm(isPhone)));
               } else {
                 return Dialog(
                   key: const Key('WebsiteContentImage'),
@@ -289,39 +291,33 @@ class WebsiteContentState extends State<WebsiteContent> {
       isPhone
           ? Expanded(
               child: Column(children: [
-                Expanded(child: input),
-                const SizedBox(height: 10),
-                Expanded(
-                    child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25.0),
-                    border: Border.all(style: BorderStyle.solid, width: 0.80),
-                  ),
-                  child: MarkdownWidget(
-                      data: newData.isNotEmpty ? newData : data,
-                      styleConfig: StyleConfig(
-                          markdownTheme:
-                              _themeBloc.state.themeMode == ThemeMode.dark
-                                  ? MarkdownTheme.darkTheme
-                                  : MarkdownTheme.lightTheme)),
-                )),
-              ]),
-            )
+              Expanded(child: input),
+              const SizedBox(height: 10),
+              Expanded(
+                child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25.0),
+                      border: Border.all(style: BorderStyle.solid, width: 0.80),
+                    ),
+                    child: MarkdownWidget(
+                        data: newData,
+                        config: _themeBloc.state.themeMode == ThemeMode.dark
+                            ? MarkdownConfig.darkConfig
+                            : MarkdownConfig.defaultConfig)),
+              )
+            ]))
           : Expanded(
               child: Row(children: [
-                Expanded(child: input),
-                const SizedBox(width: 20),
-                Expanded(
-                    child: MarkdownWidget(
-                        data: newData.isNotEmpty ? newData : data,
-                        styleConfig: StyleConfig(
-                            markdownTheme:
-                                _themeBloc.state.themeMode == ThemeMode.dark
-                                    ? MarkdownTheme.darkTheme
-                                    : MarkdownTheme.lightTheme))),
-              ]),
-            ),
+              Expanded(child: input),
+              const SizedBox(width: 20),
+              Expanded(
+                  child: MarkdownWidget(
+                      data: newData,
+                      config: _themeBloc.state.themeMode == ThemeMode.dark
+                          ? MarkdownConfig.darkConfig
+                          : MarkdownConfig.defaultConfig)),
+            ])),
       const SizedBox(height: 10),
       ElevatedButton(
           key: const Key('update'),
@@ -336,9 +332,9 @@ class WebsiteContentState extends State<WebsiteContent> {
           })
     ]);
   }
-
+/*
   Widget _showHtmlTextForm(bool isPhone) {
-    /*  Widget input = TextFormField(
+     Widget input = TextFormField(
         key: const Key('htmlInput'),
         autofocus: true,
         decoration: const InputDecoration(labelText: 'Enter text here...'),
@@ -352,7 +348,7 @@ class WebsiteContentState extends State<WebsiteContent> {
             newData = text;
           });
         });
-*/
+
     HtmlEditorController controller = HtmlEditorController();
 
     return HtmlEditor(
@@ -366,4 +362,5 @@ class WebsiteContentState extends State<WebsiteContent> {
       ),
     );
   }
+*/
 }

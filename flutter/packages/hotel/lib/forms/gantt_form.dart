@@ -45,8 +45,8 @@ class GanttForm extends StatelessWidget {
 
 class GanttFormFull extends StatefulWidget {
   const GanttFormFull({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<GanttFormFull> createState() => _GanttFormFullState();

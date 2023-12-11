@@ -19,8 +19,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../tasks.dart';
 
 class TaskListItem extends StatelessWidget {
-  const TaskListItem({Key? key, required this.task, required this.index})
-      : super(key: key);
+  const TaskListItem({super.key, required this.task, required this.index});
 
   final Task task;
   final int index;

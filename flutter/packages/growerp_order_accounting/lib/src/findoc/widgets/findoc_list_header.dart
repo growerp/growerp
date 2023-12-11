@@ -19,12 +19,12 @@ import '../findoc.dart';
 
 class FinDocListHeader extends StatefulWidget {
   const FinDocListHeader({
-    Key? key,
+    super.key,
     required this.sales,
     required this.docType,
     required this.isPhone,
     required this.finDocBloc,
-  }) : super(key: key);
+  });
   final bool sales;
   final FinDocType docType;
   final bool isPhone;

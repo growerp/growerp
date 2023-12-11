@@ -20,7 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../ledger_journal.dart';
 
 class LedgerJournalListHeader extends StatefulWidget {
-  const LedgerJournalListHeader({Key? key}) : super(key: key);
+  const LedgerJournalListHeader({super.key});
 
   @override
   State<LedgerJournalListHeader> createState() =>

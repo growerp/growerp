@@ -22,7 +22,7 @@ dependencies:
   global_configuration: ^2.0.0
   intl: ^0.18.1
   shared_preferences: ^2.0.6
-  package_info_plus: ^4.2.0
+  package_info_plus: ^5.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 

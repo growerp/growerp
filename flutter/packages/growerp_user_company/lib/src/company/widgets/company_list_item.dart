@@ -27,11 +27,11 @@ class CompanyListItem extends StatelessWidget {
   final int index;
 
   const CompanyListItem({
-    Key? key,
+    super.key,
     required this.company,
     required this.index,
     this.role,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,7 @@ import '../../l10n/generated/marketing_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityListHeader extends StatefulWidget {
-  const OpportunityListHeader({Key? key}) : super(key: key);
+  const OpportunityListHeader({super.key});
 
   @override
   State<OpportunityListHeader> createState() => _OpportunityListHeaderState();

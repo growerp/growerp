@@ -25,7 +25,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../accounting.dart';
 
 class LedgerTreeForm extends StatelessWidget {
-  const LedgerTreeForm({Key? key}) : super(key: key);
+  const LedgerTreeForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class LedgerTreeForm extends StatelessWidget {
 }
 
 class LedgerTreeListForm extends StatefulWidget {
-  const LedgerTreeListForm({Key? key}) : super(key: key);
+  const LedgerTreeListForm({super.key});
 
   @override
   LedgerTreeFormState createState() => LedgerTreeFormState();

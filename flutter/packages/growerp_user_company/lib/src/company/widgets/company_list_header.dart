@@ -22,11 +22,11 @@ class CompanyListHeader extends StatefulWidget {
   final bool isPhone;
   final CompanyBloc companyBloc;
   const CompanyListHeader({
-    Key? key,
+    super.key,
     this.role,
     required this.isPhone,
     required this.companyBloc,
-  }) : super(key: key);
+  });
 
   @override
   State<CompanyListHeader> createState() => _CompanyListHeaderState();

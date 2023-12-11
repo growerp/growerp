@@ -26,7 +26,7 @@ import '../../../l10n/generated/core_localizations.dart';
 
 class TopApp extends StatelessWidget {
   TopApp({
-    Key? key,
+    super.key,
     required this.restClient,
     required this.classificationId,
     required this.chatServer,
@@ -35,7 +35,7 @@ class TopApp extends StatelessWidget {
     required this.menuOptions,
     this.extraDelegates = const [],
     this.blocProviders = const [],
-  }) : super(key: key);
+  });
 
   final RestClient restClient;
   final String classificationId;

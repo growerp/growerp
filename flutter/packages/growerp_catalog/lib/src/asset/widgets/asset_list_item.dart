@@ -19,8 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../asset.dart';
 
 class AssetListItem extends StatelessWidget {
-  const AssetListItem({Key? key, required this.asset, required this.index})
-      : super(key: key);
+  const AssetListItem({super.key, required this.asset, required this.index});
 
   final Asset asset;
   final int index;

@@ -22,11 +22,10 @@ import '../location.dart';
 
 class LocationListItem extends StatelessWidget {
   const LocationListItem(
-      {Key? key,
+      {super.key,
       required this.location,
       required this.index,
-      required this.isPhone})
-      : super(key: key);
+      required this.isPhone});
 
   final Location location;
   final int index;

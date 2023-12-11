@@ -25,6 +25,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../accounting.dart';
 
 class BalanceSheetForm extends StatelessWidget {
+  // ignore: use_super_parameters
   const BalanceSheetForm({Key? key}) : super(key: key);
 
   @override
@@ -37,7 +38,7 @@ class BalanceSheetForm extends StatelessWidget {
 }
 
 class BalanceSheetListForm extends StatefulWidget {
-  const BalanceSheetListForm({Key? key}) : super(key: key);
+  const BalanceSheetListForm({super.key});
 
   @override
   BalanceSheetFormState createState() => BalanceSheetFormState();

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ListKeysFinder extends MatchFinder {
-  ListKeysFinder({bool skipOffstage = true})
-      : super(skipOffstage: skipOffstage);
+  ListKeysFinder({super.skipOffstage});
 
   @override
   String get description => 'List all keys';

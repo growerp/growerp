@@ -20,7 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../gl_account.dart';
 
 class GlAccountListHeader extends StatefulWidget {
-  const GlAccountListHeader({Key? key}) : super(key: key);
+  const GlAccountListHeader({super.key});
 
   @override
   State<GlAccountListHeader> createState() => _GlAccountListHeaderState();

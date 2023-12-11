@@ -214,11 +214,11 @@ class ChatRoomListDialogsState extends State<ChatRoomListDialog> {
 
 class ListDetail extends StatelessWidget {
   const ListDetail({
-    Key? key,
+    super.key,
     required this.chatRooms,
     required ChatRoomBloc chatRoomBloc,
     required this.index,
-  }) : super(key: key);
+  });
 
   final List<ChatRoom> chatRooms;
   final int index;

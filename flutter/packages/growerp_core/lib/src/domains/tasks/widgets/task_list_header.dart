@@ -18,7 +18,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../domains/tasks/bloc/task_bloc.dart';
 
 class TaskListHeader extends StatefulWidget {
-  const TaskListHeader({Key? key}) : super(key: key);
+  const TaskListHeader({super.key});
 
   @override
   State<TaskListHeader> createState() => _TaskListHeaderState();

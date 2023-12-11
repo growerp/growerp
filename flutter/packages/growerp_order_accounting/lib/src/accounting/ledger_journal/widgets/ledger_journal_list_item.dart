@@ -20,8 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 class LedgerJournalListItem extends StatelessWidget {
   const LedgerJournalListItem(
-      {Key? key, required this.ledgerJournal, required this.index})
-      : super(key: key);
+      {super.key, required this.ledgerJournal, required this.index});
 
   final LedgerJournal ledgerJournal;
   final int index;

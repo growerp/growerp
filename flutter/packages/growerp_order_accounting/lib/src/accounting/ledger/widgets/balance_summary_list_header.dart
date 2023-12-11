@@ -19,8 +19,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class BalanceSummaryListHeader extends StatefulWidget {
-  const BalanceSummaryListHeader(this.controller, this.ledgerReport, {Key? key})
-      : super(key: key);
+  const BalanceSummaryListHeader(this.controller, this.ledgerReport,
+      {super.key});
   final ItemScrollController controller;
   final LedgerReport ledgerReport;
   @override

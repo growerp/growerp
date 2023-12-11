@@ -22,7 +22,7 @@ import '../findoc.dart';
 
 class PrintingForm extends StatelessWidget {
   final FinDoc finDocIn;
-  const PrintingForm({Key? key, required this.finDocIn}) : super(key: key);
+  const PrintingForm({super.key, required this.finDocIn});
 
   @override
   Widget build(BuildContext context) {

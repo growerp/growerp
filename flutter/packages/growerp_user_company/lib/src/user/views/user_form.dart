@@ -20,7 +20,7 @@ import '../views/views.dart';
 
 class UserForm extends StatelessWidget {
   final User user;
-  const UserForm({Key? key, required this.user}) : super(key: key);
+  const UserForm({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {

@@ -28,7 +28,7 @@ class DisplayMenuOption extends StatefulWidget {
   final List<Widget> actions; // actions at the appBar
   final bool? isPhone;
   const DisplayMenuOption({
-    Key? key,
+    super.key,
     this.menuOption,
     required this.menuList,
     required this.menuIndex,
@@ -36,7 +36,7 @@ class DisplayMenuOption extends StatefulWidget {
     this.tabItem,
     this.actions = const [],
     this.isPhone = false,
-  }) : super(key: key);
+  });
 
   @override
   MenuOptionState createState() => MenuOptionState();

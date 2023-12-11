@@ -21,8 +21,7 @@ import '../category.dart';
 
 class CategoryListItem extends StatelessWidget {
   const CategoryListItem(
-      {Key? key, required this.category, required this.index})
-      : super(key: key);
+      {super.key, required this.category, required this.index});
 
   final Category category;
   final int index;

@@ -20,8 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import '../../l10n/generated/inventory_localizations.dart';
 
 class LocationListHeader extends StatefulWidget {
-  const LocationListHeader({Key? key, required this.locationBloc})
-      : super(key: key);
+  const LocationListHeader({super.key, required this.locationBloc});
   final LocationBloc locationBloc;
 
   @override

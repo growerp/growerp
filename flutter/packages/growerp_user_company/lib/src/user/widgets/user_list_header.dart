@@ -18,11 +18,11 @@ import 'package:growerp_models/growerp_models.dart';
 
 class UserListHeader extends StatefulWidget {
   const UserListHeader({
-    Key? key,
+    super.key,
     this.role,
     required this.isPhone,
     required this.userBloc,
-  }) : super(key: key);
+  });
   final Role? role;
   final bool isPhone;
   final UserBloc userBloc;

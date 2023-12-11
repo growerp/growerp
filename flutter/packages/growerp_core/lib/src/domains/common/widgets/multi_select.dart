@@ -21,11 +21,10 @@ class MultiSelect<T> extends StatefulWidget {
   final List<T> items;
   final List<T> selectedItems;
   const MultiSelect(
-      {Key? key,
+      {super.key,
       this.title = 'Please select one or more',
       required this.items,
-      this.selectedItems = const []})
-      : super(key: key);
+      this.selectedItems = const []});
 
   @override
   MultiSelectState createState() => MultiSelectState<T>();

@@ -21,8 +21,7 @@ import '../views/views.dart';
 
 class OpportunityListItem extends StatelessWidget {
   const OpportunityListItem(
-      {Key? key, required this.opportunity, required this.index})
-      : super(key: key);
+      {super.key, required this.opportunity, required this.index});
 
   final Opportunity opportunity;
   final int index;

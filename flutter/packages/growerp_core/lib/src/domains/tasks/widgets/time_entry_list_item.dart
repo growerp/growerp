@@ -21,11 +21,11 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryListItem extends StatelessWidget {
   const TimeEntryListItem({
-    Key? key,
+    super.key,
     required this.taskId,
     required this.timeEntry,
     required this.index,
-  }) : super(key: key);
+  });
 
   final String taskId;
   final TimeEntry timeEntry;

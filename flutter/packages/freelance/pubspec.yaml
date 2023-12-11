@@ -24,7 +24,7 @@ dependencies:
   growerp_catalog: ^1.2.0
   growerp_order_accounting: ^1.2.0
   growerp_user_company: ^1.2.0
-  package_info_plus: ^4.2.0
+  package_info_plus: ^5.0.1
   shared_preferences: ^2.0.6
   intl: ^0.18.1
   hive: ^2.2.3
@@ -39,7 +39,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mockito: ^5.0.2
-  very_good_analysis: ^2.0.0
+  very_good_analysis: ^5.1.0
 
   bloc_test: ^9.0.1
  # flutter_launcher_icons: ^0.9.2

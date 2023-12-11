@@ -20,8 +20,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 class GlAccountListItem extends StatelessWidget {
   const GlAccountListItem(
-      {Key? key, required this.glAccount, required this.index})
-      : super(key: key);
+      {super.key, required this.glAccount, required this.index});
 
   final GlAccount glAccount;
   final int index;

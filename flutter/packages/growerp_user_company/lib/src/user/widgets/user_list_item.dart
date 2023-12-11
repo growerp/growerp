@@ -25,12 +25,12 @@ class UserListItem extends StatelessWidget {
   final bool isDeskTop;
 
   const UserListItem({
-    Key? key,
+    super.key,
     required this.user,
     required this.index,
     this.role,
     required this.isDeskTop,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

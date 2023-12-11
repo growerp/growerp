@@ -17,8 +17,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 class BalanceSheetItem extends StatelessWidget {
   const BalanceSheetItem(
-      {Key? key, required this.glAccount, required this.index})
-      : super(key: key);
+      {super.key, required this.glAccount, required this.index});
 
   final GlAccount glAccount;
   final int index;

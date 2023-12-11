@@ -39,8 +39,8 @@ Future main() async {
 }
 
 class ChatApp extends StatelessWidget {
-  const ChatApp({Key? key, required this.restClient, required this.chatServer})
-      : super(key: key);
+  const ChatApp(
+      {super.key, required this.restClient, required this.chatServer});
 
   final RestClient restClient;
   final ChatServer chatServer;
@@ -75,7 +75,7 @@ class ChatApp extends StatelessWidget {
 }
 
 class MyChatApp extends StatelessWidget {
-  const MyChatApp({Key? key}) : super(key: key);
+  const MyChatApp({super.key});
 
   static String title = 'GrowERP Chat echo.';
   @override
@@ -142,7 +142,7 @@ List<MenuOption> menuOptions = [
 ];
 
 class ChatRooms extends StatefulWidget {
-  const ChatRooms({Key? key}) : super(key: key);
+  const ChatRooms({super.key});
 
   @override
   ChatRoomsEchoState createState() => ChatRoomsEchoState();

@@ -22,7 +22,7 @@ import '../findoc.dart';
 
 class FinDocListItemTrans extends StatelessWidget {
   const FinDocListItemTrans({
-    Key? key,
+    super.key,
     required this.finDoc,
     required this.index,
     required this.sales,
@@ -31,7 +31,7 @@ class FinDocListItemTrans extends StatelessWidget {
     required this.onlyRental,
     this.additionalItemButton,
     this.paymentMethod,
-  }) : super(key: key);
+  });
 
   final FinDoc finDoc;
   final int index;

@@ -20,8 +20,7 @@ import 'package:intl/intl.dart';
 
 class BalanceSummaryListItem extends StatelessWidget {
   const BalanceSummaryListItem(
-      {Key? key, required this.glAccount, required this.index})
-      : super(key: key);
+      {super.key, required this.glAccount, required this.index});
 
   final GlAccount glAccount;
   final int index;

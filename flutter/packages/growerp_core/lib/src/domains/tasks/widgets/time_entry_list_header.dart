@@ -17,8 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryListHeader extends StatelessWidget {
-  const TimeEntryListHeader({Key? key, required this.taskBloc})
-      : super(key: key);
+  const TimeEntryListHeader({super.key, required this.taskBloc});
   final TaskBloc taskBloc;
 
   @override

@@ -22,7 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../l10n/generated/catalog_localizations.dart';
 
 class ProductListHeader extends StatefulWidget {
-  const ProductListHeader({Key? key}) : super(key: key);
+  const ProductListHeader({super.key});
 
   @override
   State<ProductListHeader> createState() => _ProductListHeaderState();
