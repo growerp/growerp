@@ -853,9 +853,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
+                    <parameter name="topClassId" />
                     <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
                     <parameter name="parentDescription" />
+                    <parameter name="classId" />
                     <parameter name="description" />
+                    <parameter name="detailClassId" />
                     <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
@@ -871,8 +875,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountName" />
                 <parameter name="isDebit" type="Boolean" />
                 <parameter name="accountClass" type="Map">
-                    <parameter name="accountClassId" />
+                    <parameter name="topClassId" />
+                    <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
+                    <parameter name="parentDescription" />
+                    <parameter name="classId" />
                     <parameter name="description" />
+                    <parameter name="detailClassId" />
+                    <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -889,28 +899,22 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
             <!-- get class from description -->
-            <if condition="!glAccount.accountClass?.accountClassId">
-                <entity-find entity-name="moqui.basic.Enumeration" list="enums" limit="1">
-                    <econdition field-name="enumTypeId" value="GlAccountClass" />
-                    <econditions combine="or">
-                        <econdition field-name="description"
-                            from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
-                        <econdition field-name="description"
-                            from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
-                        <econdition field-name="description"
-                            from="glAccount.accountClass?.description" ignore-if-empty="true" />
-                        <econdition field-name="description"
-                            from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
-                    </econditions>
-                </entity-find>
-                <if condition="!enums">
-                    <return error="true"
-                        message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
-                </if>
-                <set field="accountClassId" from="enums[0].enumId" />
-                <else>
-                    <set field="accountClassId" from="glAccount.accountClass?.accountClassId" />
-                </else>
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
+                limit="1">
+                <econditions combine="and">
+                    <econdition field-name="basicDescription"
+                        from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
+                    <econdition field-name="bottomDescription"
+                        from="glAccount.accountClass?.description" ignore-if-empty="true" />
+                    <econdition field-name="middleDescription"
+                        from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
+                    <econdition field-name="topDescription"
+                        from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
+                </econditions>
+            </entity-find>
+            <if condition="!enums">
+                <return error="true"
+                    message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
             </if>
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
@@ -920,7 +924,8 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[   accountCode: glAccount.accountCode,
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: accountClassId,
+                            glAccountClassEnumId: enums[0].basicEnumId ?: enums[0].bottomEnumId 
+                                                    ?: enums[0].middleEnumId ?: enums[0].topEnumId,
                             glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
                             isTemporary: 'N',
                             disallowPosting: 'N',
@@ -986,6 +991,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
+                    <parameter name="topClassId" />
+                    <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
+                    <parameter name="parentDescription" />
+                    <parameter name="classId" />
+                    <parameter name="description" />
+                    <parameter name="detailClassId" />
                     <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
@@ -1000,8 +1012,14 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountName" />
                 <parameter name="isDebit" type="Boolean" />
                 <parameter name="accountClass" type="Map">
-                    <parameter name="accountClassId" />
+                    <parameter name="topClassId" />
+                    <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
+                    <parameter name="parentDescription" />
+                    <parameter name="classId" />
                     <parameter name="description" />
+                    <parameter name="detailClassId" />
+                    <parameter name="detailDescription" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -1019,17 +1037,30 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
-            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
-                <econdition field-name="enumTypeId" value="GlAccountClass" />
-                <econdition field-name="description"
-                    from="glAccount.accountClass?.detailDescription" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
+                limit="1">
+                <econditions combine="and">
+                    <econdition field-name="basicDescription"
+                        from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
+                    <econdition field-name="bottomDescription"
+                        from="glAccount.accountClass?.description" ignore-if-empty="true" />
+                    <econdition field-name="middleDescription"
+                        from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
+                    <econdition field-name="topDescription"
+                        from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
+                </econditions>
             </entity-find>
+            <if condition="!enums">
+                <return error="true"
+                    message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
+            </if>
             <service-call name="update#mantle.ledger.account.GlAccount"
                 in-map="[   glAccountId: glAccount.glAccountId,
                             parentGlAccountId: parentGlAccountId,
                             accountCode: glAccount.accountCode,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: enums[0].enumId,
+                            glAccountClassEnumId: enums[0].basicEnumId ?: enums[0].bottomEnumId 
+                                                    ?: enums[0].middleEnumId ?: enums[0].topEnumId,
                             glAccountTypeEnumId: glAccount.accountType.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
