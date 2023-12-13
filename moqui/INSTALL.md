@@ -45,9 +45,11 @@ overwrite the following lines in framework/build.gradle starting from line167
     runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
 (https://forum.moqui.org/t/receiver-class-org-apache-logging-slf4j-slf4jserviceprovider-does-not-define-or-inherit-an-implementation-of-the-resolved-method-abstract-java-lang-string-getrequestedapiversion-of-interface-org-slf4j-spi-slf4jserviceprovider/345/6)
 
+8. add pseudoId to mantle-usl views
+check commit 6ef24d8463cd53a012d69f80498a4b88c2633b5a
+
 Build moqui system:
 ```sh
-    ./gradlew downloadel #only first time
     ./gradlew build
     java -jar moqui.war load types=seed,seed-initial,install
     java -jar moqui.war

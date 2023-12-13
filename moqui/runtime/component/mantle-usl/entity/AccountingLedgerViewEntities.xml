@@ -13,111 +13,155 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
 
     <!-- ========================================================= -->
     <!-- mantle.ledger.account -->
     <!-- ========================================================= -->
 
     <view-entity entity-name="GlAccountAndOrganization" package="mantle.ledger.account">
-        <member-entity entity-alias="GLACT" entity-name="mantle.ledger.account.GlAccount"/>
-        <member-entity entity-alias="GLAO" entity-name="mantle.ledger.account.GlAccountOrganization" join-from-alias="GLACT">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="GLAO">
-            <key-map field-name="organizationPartyId" related="partyId"/></member-entity>
-        <alias-all entity-alias="GLACT"/>
-        <alias-all entity-alias="GLAO"><exclude field="glAccountId"/></alias-all>
-        <alias-all entity-alias="ORG"/>
+        <member-entity entity-alias="GLACT" entity-name="mantle.ledger.account.GlAccount" />
+        <member-entity entity-alias="GLAO" entity-name="mantle.ledger.account.GlAccountOrganization"
+            join-from-alias="GLACT">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization"
+            join-from-alias="GLAO">
+            <key-map field-name="organizationPartyId" related="partyId" />
+        </member-entity>
+        <alias-all entity-alias="GLACT" />
+        <alias-all entity-alias="GLAO">
+            <exclude field="glAccountId" />
+        </alias-all>
+        <alias-all entity-alias="ORG" />
     </view-entity>
 
     <!-- ========================================================= -->
     <!-- mantle.ledger.config -->
     <!-- ========================================================= -->
-    
+
     <view-entity entity-name="GlAccountAndTypeDefault" package="mantle.ledger.config">
-        <member-entity entity-alias="GATD" entity-name="mantle.ledger.config.GlAccountTypeDefault"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="GATD">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="GATD"/>
-        <alias-all entity-alias="GLA"><exclude field="glAccountTypeEnumId"/></alias-all>
-        <alias name="accountGlAccountTypeEnumId" entity-alias="GLA" field="glAccountTypeEnumId"/>
+        <member-entity entity-alias="GATD" entity-name="mantle.ledger.config.GlAccountTypeDefault" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="GATD">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="GATD" />
+        <alias-all entity-alias="GLA">
+            <exclude field="glAccountTypeEnumId" />
+        </alias-all>
+        <alias name="accountGlAccountTypeEnumId" entity-alias="GLA" field="glAccountTypeEnumId" />
     </view-entity>
     <view-entity entity-name="AssetTypeGlAccountDetail" package="mantle.ledger.config">
-        <member-entity entity-alias="ATGA" entity-name="mantle.ledger.config.AssetTypeGlAccount"/>
-        <member-entity entity-alias="ATEN" entity-name="moqui.basic.Enumeration" join-from-alias="ATGA" join-optional="true">
-            <key-map field-name="assetTypeEnumId" related="enumId"/></member-entity>
-        <member-entity entity-alias="ACEN" entity-name="moqui.basic.Enumeration" join-from-alias="ATGA" join-optional="true">
-            <key-map field-name="classEnumId" related="enumId"/></member-entity>
-        <alias-all entity-alias="ATGA"/>
-        <alias name="assetTypeDescription" entity-alias="ATEN" field="description"/>
-        <alias name="assetClassDescription" entity-alias="ACEN" field="description"/>
+        <member-entity entity-alias="ATGA" entity-name="mantle.ledger.config.AssetTypeGlAccount" />
+        <member-entity entity-alias="ATEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ATGA" join-optional="true">
+            <key-map field-name="assetTypeEnumId" related="enumId" />
+        </member-entity>
+        <member-entity entity-alias="ACEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ATGA" join-optional="true">
+            <key-map field-name="classEnumId" related="enumId" />
+        </member-entity>
+        <alias-all entity-alias="ATGA" />
+        <alias name="assetTypeDescription" entity-alias="ATEN" field="description" />
+        <alias name="assetClassDescription" entity-alias="ACEN" field="description" />
     </view-entity>
     <view-entity entity-name="InvoiceTypeTransTypeDetail" package="mantle.ledger.config">
-        <member-entity entity-alias="ITTT" entity-name="mantle.ledger.config.InvoiceTypeTransType"/>
-        <member-entity entity-alias="ITEN" entity-name="moqui.basic.Enumeration" join-from-alias="ITTT">
-            <key-map field-name="invoiceTypeEnumId" related="enumId"/></member-entity>
-        <member-entity entity-alias="ATTEN" entity-name="moqui.basic.Enumeration" join-from-alias="ITTT" join-optional="true">
-            <key-map field-name="acctgTransTypeEnumId" related="enumId"/></member-entity>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="ITTT" join-optional="true">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="ITTT"/>
-        <alias-all entity-alias="GLA"/>
-        <alias name="invoiceTypeDescription" entity-alias="ITEN" field="description"/>
-        <alias name="acctgTransTypeDescription" entity-alias="ATTEN" field="description"/>
+        <member-entity entity-alias="ITTT" entity-name="mantle.ledger.config.InvoiceTypeTransType" />
+        <member-entity entity-alias="ITEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ITTT">
+            <key-map field-name="invoiceTypeEnumId" related="enumId" />
+        </member-entity>
+        <member-entity entity-alias="ATTEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ITTT" join-optional="true">
+            <key-map field-name="acctgTransTypeEnumId" related="enumId" />
+        </member-entity>
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ITTT" join-optional="true">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="ITTT" />
+        <alias-all entity-alias="GLA" />
+        <alias name="invoiceTypeDescription" entity-alias="ITEN" field="description" />
+        <alias name="acctgTransTypeDescription" entity-alias="ATTEN" field="description" />
     </view-entity>
     <view-entity entity-name="ItemTypeAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="ITGA" entity-name="mantle.ledger.config.ItemTypeGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="ITGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="ITEN" entity-name="moqui.basic.Enumeration" join-from-alias="ITGA">
-            <key-map field-name="itemTypeEnumId" related="enumId"/></member-entity>
-        <alias-all entity-alias="ITGA"/>
-        <alias-all entity-alias="GLA"/>
-        <alias name="itemTypeDescription" entity-alias="ITEN" field="description"/>
+        <member-entity entity-alias="ITGA" entity-name="mantle.ledger.config.ItemTypeGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ITGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="ITEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ITGA">
+            <key-map field-name="itemTypeEnumId" related="enumId" />
+        </member-entity>
+        <alias-all entity-alias="ITGA" />
+        <alias-all entity-alias="GLA" />
+        <alias name="itemTypeDescription" entity-alias="ITEN" field="description" />
     </view-entity>
     <view-entity entity-name="PaymentTypeAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="PTGA" entity-name="mantle.ledger.config.PaymentTypeGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="PTGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="PTEN" entity-name="moqui.basic.Enumeration" join-from-alias="PTGA">
-            <key-map field-name="paymentTypeEnumId" related="enumId"/></member-entity>
-        <alias-all entity-alias="PTGA"/>
-        <alias-all entity-alias="GLA"/>
-        <alias name="typeDescription" entity-alias="PTEN" field="description"/>
+        <member-entity entity-alias="PTGA" entity-name="mantle.ledger.config.PaymentTypeGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="PTGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="PTEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="PTGA">
+            <key-map field-name="paymentTypeEnumId" related="enumId" />
+        </member-entity>
+        <alias-all entity-alias="PTGA" />
+        <alias-all entity-alias="GLA" />
+        <alias name="typeDescription" entity-alias="PTEN" field="description" />
     </view-entity>
     <view-entity entity-name="PaymentInstrumentAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="PIGA" entity-name="mantle.ledger.config.PaymentInstrumentGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="PIGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="PIEN" entity-name="moqui.basic.Enumeration" join-from-alias="PIGA">
-            <key-map field-name="paymentInstrumentEnumId" related="enumId"/></member-entity>
-        <alias-all entity-alias="PIGA"/>
-        <alias-all entity-alias="GLA"/>
-        <alias name="typeDescription" entity-alias="PIEN" field="description"/>
+        <member-entity entity-alias="PIGA"
+            entity-name="mantle.ledger.config.PaymentInstrumentGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="PIGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="PIEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="PIGA">
+            <key-map field-name="paymentInstrumentEnumId" related="enumId" />
+        </member-entity>
+        <alias-all entity-alias="PIGA" />
+        <alias-all entity-alias="GLA" />
+        <alias name="typeDescription" entity-alias="PIEN" field="description" />
     </view-entity>
     <view-entity entity-name="CreditCardTypeAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="CCTGA" entity-name="mantle.ledger.config.CreditCardTypeGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="CCTGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="CCTEN" entity-name="moqui.basic.Enumeration" join-from-alias="CCTGA">
-            <key-map field-name="creditCardTypeEnumId" related="enumId"/></member-entity>
-        <alias-all entity-alias="CCTGA"/>
-        <alias-all entity-alias="GLA"/>
-        <alias name="typeDescription" entity-alias="CCTEN" field="description"/>
+        <member-entity entity-alias="CCTGA"
+            entity-name="mantle.ledger.config.CreditCardTypeGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="CCTGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="CCTEN" entity-name="moqui.basic.Enumeration"
+            join-from-alias="CCTGA">
+            <key-map field-name="creditCardTypeEnumId" related="enumId" />
+        </member-entity>
+        <alias-all entity-alias="CCTGA" />
+        <alias-all entity-alias="GLA" />
+        <alias name="typeDescription" entity-alias="CCTEN" field="description" />
     </view-entity>
     <view-entity entity-name="FinancialAccountTypeAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="FATGA" entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="FATGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="FATGA"/>
-        <alias-all entity-alias="GLA"/>
+        <member-entity entity-alias="FATGA"
+            entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="FATGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="FATGA" />
+        <alias-all entity-alias="GLA" />
     </view-entity>
     <view-entity entity-name="FinancialAccountReasonAndGlAccount" package="mantle.ledger.config">
-        <member-entity entity-alias="FARGA" entity-name="mantle.ledger.config.FinancialAccountReasonGlAccount"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="FARGA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="FARGA"/>
-        <alias-all entity-alias="GLA"/>
+        <member-entity entity-alias="FARGA"
+            entity-name="mantle.ledger.config.FinancialAccountReasonGlAccount" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="FARGA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="FARGA" />
+        <alias-all entity-alias="GLA" />
     </view-entity>
 
     <!-- ========================================================= -->
@@ -125,118 +169,178 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <view-entity entity-name="AcctgTransAndEntry" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <alias-all entity-alias="ATX"><exclude field="description"/><exclude field="voucherRef"/>
-            <exclude field="assetId"/></alias-all>
-        <alias-all entity-alias="ATE"/>
-        <alias name="txDescription" entity-alias="ATX" field="description"/>
-        <alias name="txVoucherRef" entity-alias="ATX" field="voucherRef"/>
-        <alias name="txAssetId" entity-alias="ATX" field="assetId"/>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="ATX">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <alias-all entity-alias="ATX">
+            <exclude field="description" />
+            <exclude field="voucherRef" />
+            <exclude field="assetId" />
+        </alias-all>
+        <alias-all entity-alias="ATE" />
+        <alias name="txDescription" entity-alias="ATX" field="description" />
+        <alias name="txVoucherRef" entity-alias="ATX" field="voucherRef" />
+        <alias name="txAssetId" entity-alias="ATX" field="assetId" />
     </view-entity>
     <view-entity entity-name="AcctgTransEntryGlAccount" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="ATE">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="ATE"><exclude field="glAccountTypeEnumId"/></alias-all>
-        <alias-all entity-alias="GLA"><exclude field="description"/></alias-all>
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ATE">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="ATE">
+            <exclude field="glAccountTypeEnumId" />
+        </alias-all>
+        <alias-all entity-alias="GLA">
+            <exclude field="description" />
+        </alias-all>
     </view-entity>
     <view-entity entity-name="AcctgTransAndEntrySummary" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" join-from-alias="ATX" join-optional="true">
-            <key-map field-name="invoiceId"/></member-entity>
-        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment" join-from-alias="ATX" join-optional="true">
-            <key-map field-name="paymentId"/></member-entity>
-        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="ATX" join-optional="true">
-            <key-map field-name="otherPartyId" related="partyId"/></member-entity>
-        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="ATX" join-optional="true">
-            <key-map field-name="otherPartyId" related="partyId"/></member-entity>
-        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="ATX" join-optional="true">
-            <key-map field-name="otherPartyId" related="partyId"/></member-entity>
-        <alias-all entity-alias="ATX"><exclude field="description"/><exclude field="voucherRef"/>
-            <exclude field="assetId"/></alias-all>
-        <alias-all entity-alias="ATE"><exclude field="amount"/></alias-all>
-        <alias entity-alias="ATX" name="txDescription" field="description"/>
-        <alias entity-alias="ATX" name="txVoucherRef" field="voucherRef"/>
-        <alias entity-alias="ATX" name="txVoucherDate" field="voucherDate"/>
-        <alias entity-alias="ATX" name="txAssetId" field="assetId"/>
-        <alias name="paymentRefNum" entity-alias="PMT"/>
-        <alias name="referenceNumber" entity-alias="INV"/>
-        <alias name="otherPartyOrderId" entity-alias="INV"/>
-        <alias name="pseudoId" entity-alias="PTY"/>
-        <alias name="organizationName" entity-alias="ORG"/>
-        <alias name="firstName" entity-alias="PER"/>
-        <alias name="lastName" entity-alias="PER"/>
-        <alias name="amount" entity-alias="ATE" function="sum"/>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="ATX">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="invoiceId" />
+        </member-entity>
+        <member-entity entity-alias="PMT" entity-name="mantle.account.payment.Payment"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="paymentId" />
+        </member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="ATX"
+            join-optional="true">
+            <key-map field-name="otherPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="otherPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PER" entity-name="mantle.party.Person" join-from-alias="ATX"
+            join-optional="true">
+            <key-map field-name="otherPartyId" related="partyId" />
+        </member-entity>
+        <alias-all entity-alias="ATX">
+            <exclude field="description" />
+            <exclude field="voucherRef" />
+            <exclude field="assetId" />
+        </alias-all>
+        <alias-all entity-alias="ATE">
+            <exclude field="amount" />
+        </alias-all>
+        <alias entity-alias="ATX" name="txPseudoId" field="finDocPseudoId" />
+        <alias entity-alias="ATX" name="txDescription" field="description" />
+        <alias entity-alias="ATX" name="txVoucherRef" field="voucherRef" />
+        <alias entity-alias="ATX" name="txVoucherDate" field="voucherDate" />
+        <alias entity-alias="ATX" name="txAssetId" field="assetId" />
+        <alias name="paymentRefNum" entity-alias="PMT" />
+        <alias name="referenceNumber" entity-alias="INV" />
+        <alias name="otherPartyOrderId" entity-alias="INV" />
+        <alias name="otherPartyPseudoId" field="pseudoId" entity-alias="PTY" />
+        <alias name="organizationName" entity-alias="ORG" />
+        <alias name="firstName" entity-alias="PER" />
+        <alias name="lastName" entity-alias="PER" />
+        <alias name="amount" entity-alias="ATE" function="sum" />
     </view-entity>
     <view-entity entity-name="AcctgTransAndEntryGlaSummary" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="ATE">
-            <key-map field-name="glAccountId"/></member-entity>
-        <alias-all entity-alias="ATX"><exclude field="description"/><exclude field="voucherRef"/>
-            <exclude field="assetId"/></alias-all>
-        <alias-all entity-alias="ATE"><exclude field="amount"/></alias-all>
-        <alias name="amount" entity-alias="ATE" function="sum"/>
-        <alias name="txDescription" entity-alias="ATX" field="description"/>
-        <alias name="txVoucherRef" entity-alias="ATX" field="voucherRef"/>
-        <alias name="txAssetId" entity-alias="ATX" field="assetId"/>
-        <alias name="accountCode" entity-alias="GLA"/>
-        <alias name="accountName" entity-alias="GLA"/>
-        <alias name="isDebit" entity-alias="GLA"/>
-        <alias name="glAccountClassEnumId" entity-alias="GLA"/>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="ATX">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ATE">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias-all entity-alias="ATX">
+            <exclude field="description" />
+            <exclude field="voucherRef" />
+            <exclude field="assetId" />
+        </alias-all>
+        <alias-all entity-alias="ATE">
+            <exclude field="amount" />
+        </alias-all>
+        <alias name="amount" entity-alias="ATE" function="sum" />
+        <alias name="txDescription" entity-alias="ATX" field="description" />
+        <alias name="txVoucherRef" entity-alias="ATX" field="voucherRef" />
+        <alias name="txAssetId" entity-alias="ATX" field="assetId" />
+        <alias name="accountCode" entity-alias="GLA" />
+        <alias name="accountName" entity-alias="GLA" />
+        <alias name="isDebit" entity-alias="GLA" />
+        <alias name="glAccountClassEnumId" entity-alias="GLA" />
     </view-entity>
     <view-entity entity-name="AcctgTransEntryReceiptSummary" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="ATX">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <member-entity entity-alias="ARCT" entity-name="mantle.product.receipt.AssetReceipt" join-from-alias="ATX">
-            <key-map field-name="assetReceiptId"/></member-entity>
-        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset" join-from-alias="ARCT">
-            <key-map field-name="assetId"/></member-entity>
-        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot" join-from-alias="AST" join-optional="true">
-            <key-map field-name="lotId"/></member-entity>
-        <alias-all entity-alias="ATX"><exclude field="description"/><exclude field="voucherRef"/>
-            <exclude field="assetId"/><exclude field="invoiceId"/><exclude field="shipmentId"/></alias-all>
-        <alias-all entity-alias="ATE"><exclude field="assetId"/><exclude field="amount"/></alias-all>
-        <alias entity-alias="ATE" name="amount" function="sum"/>
-        <alias entity-alias="ARCT" name="assetId"/>
-        <alias entity-alias="ARCT" name="orderId"/>
-        <alias entity-alias="ARCT" name="shipmentId"/>
-        <alias entity-alias="ARCT" name="invoiceId"/>
-        <alias entity-alias="ARCT" name="quantityAccepted" function="sum"/>
-        <alias entity-alias="ARCT" name="receivedDate"/>
-        <alias entity-alias="AST" name="facilityId"/>
-        <alias entity-alias="AST" name="acquireCost"/>
-        <alias entity-alias="ALOT" name="mfgPartyId"/>
-        <alias entity-alias="ALOT" name="lotNumber"/>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="ATX">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <member-entity entity-alias="ARCT" entity-name="mantle.product.receipt.AssetReceipt"
+            join-from-alias="ATX">
+            <key-map field-name="assetReceiptId" />
+        </member-entity>
+        <member-entity entity-alias="AST" entity-name="mantle.product.asset.Asset"
+            join-from-alias="ARCT">
+            <key-map field-name="assetId" />
+        </member-entity>
+        <member-entity entity-alias="ALOT" entity-name="mantle.product.asset.Lot"
+            join-from-alias="AST" join-optional="true">
+            <key-map field-name="lotId" />
+        </member-entity>
+        <alias-all entity-alias="ATX">
+            <exclude field="description" />
+            <exclude field="voucherRef" />
+            <exclude field="assetId" />
+            <exclude field="invoiceId" />
+            <exclude field="shipmentId" />
+        </alias-all>
+        <alias-all entity-alias="ATE">
+            <exclude field="assetId" />
+            <exclude field="amount" />
+        </alias-all>
+        <alias entity-alias="ATE" name="amount" function="sum" />
+        <alias entity-alias="ARCT" name="assetId" />
+        <alias entity-alias="ARCT" name="orderId" />
+        <alias entity-alias="ARCT" name="shipmentId" />
+        <alias entity-alias="ARCT" name="invoiceId" />
+        <alias entity-alias="ARCT" name="quantityAccepted" function="sum" />
+        <alias entity-alias="ARCT" name="receivedDate" />
+        <alias entity-alias="AST" name="facilityId" />
+        <alias entity-alias="AST" name="acquireCost" />
+        <alias entity-alias="ALOT" name="mfgPartyId" />
+        <alias entity-alias="ALOT" name="lotNumber" />
     </view-entity>
-    
+
     <view-entity entity-name="AcctgTransEntrySummary" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"/>
-        <alias-all entity-alias="ATE"><exclude field="amount"/></alias-all>
-        <alias name="amountTotal" entity-alias="ATE" field="amount" function="sum"/>
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" />
+        <alias-all entity-alias="ATE">
+            <exclude field="amount" />
+        </alias-all>
+        <alias name="amountTotal" entity-alias="ATE" field="amount" function="sum" />
     </view-entity>
     <view-entity entity-name="AcctgTransDebitCreditSummary" package="mantle.ledger.transaction">
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"/>
-        <member-entity entity-alias="ATED" entity-name="mantle.ledger.transaction.AcctgTransEntrySummary" join-from-alias="ATX"
-                sub-select="true" join-optional="true">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <member-entity entity-alias="ATEC" entity-name="mantle.ledger.transaction.AcctgTransEntrySummary" join-from-alias="ATX"
-                sub-select="true" join-optional="true">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <alias-all entity-alias="ATX"/>
-        <alias name="debitDcFlag" entity-alias="ATED" field="debitCreditFlag"/>
-        <alias name="debitTotal" entity-alias="ATED" field="amountTotal"/>
-        <alias name="creditDcFlag" entity-alias="ATEC" field="debitCreditFlag"/>
-        <alias name="creditTotal" entity-alias="ATEC" field="amountTotal"/>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="ATED"
+            entity-name="mantle.ledger.transaction.AcctgTransEntrySummary" join-from-alias="ATX"
+            sub-select="true" join-optional="true">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <member-entity entity-alias="ATEC"
+            entity-name="mantle.ledger.transaction.AcctgTransEntrySummary" join-from-alias="ATX"
+            sub-select="true" join-optional="true">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <alias-all entity-alias="ATX" />
+        <alias name="debitDcFlag" entity-alias="ATED" field="debitCreditFlag" />
+        <alias name="debitTotal" entity-alias="ATED" field="amountTotal" />
+        <alias name="creditDcFlag" entity-alias="ATEC" field="debitCreditFlag" />
+        <alias name="creditTotal" entity-alias="ATEC" field="amountTotal" />
         <entity-condition>
-            <econdition field-name="debitDcFlag" value="D"/>
-            <econdition field-name="creditDcFlag" value="C"/>
+            <econdition field-name="debitDcFlag" value="D" />
+            <econdition field-name="creditDcFlag" value="C" />
         </entity-condition>
     </view-entity>
 
@@ -245,58 +349,73 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
 
     <view-entity entity-name="PostedAmountSummary" package="mantle.ledger.report">
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"/>
-        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" join-from-alias="GLA">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" join-from-alias="ATE">
-            <key-map field-name="acctgTransId"/></member-entity>
-        <alias name="glAccountId" entity-alias="GLA"/>
-        <alias name="accountName" entity-alias="GLA"/>
-        <alias name="accountCode" entity-alias="GLA"/>
-        <alias name="glAccountClassEnumId" entity-alias="GLA"/>
-        <alias name="amount" entity-alias="ATE" function="sum"/>
-        <alias name="debitCreditFlag" entity-alias="ATE"/><!-- don't select, just use for condition -->
-        <alias name="transactionDate" entity-alias="ATX"/><!-- don't select, just use for condition -->
-        <alias name="amountUomId" entity-alias="ATX"/><!-- don't select, just use for condition -->
-        <alias name="organizationPartyId" entity-alias="ATX"/><!-- don't select, just use for condition -->
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" />
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
+            join-from-alias="GLA">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans"
+            join-from-alias="ATE">
+            <key-map field-name="acctgTransId" />
+        </member-entity>
+        <alias name="glAccountId" entity-alias="GLA" />
+        <alias name="accountName" entity-alias="GLA" />
+        <alias name="accountCode" entity-alias="GLA" />
+        <alias name="glAccountClassEnumId" entity-alias="GLA" />
+        <alias name="amount" entity-alias="ATE" function="sum" />
+        <alias name="debitCreditFlag" entity-alias="ATE" /><!-- don't select, just use for condition -->
+        <alias name="transactionDate" entity-alias="ATX" /><!-- don't select, just use for condition -->
+        <alias name="amountUomId" entity-alias="ATX" /><!-- don't select, just use for condition -->
+        <alias name="organizationPartyId" entity-alias="ATX" /><!-- don't select, just use for
+        condition -->
     </view-entity>
-    
+
     <view-entity entity-name="GlAccountOrgTimePeriodDetail" package="mantle.ledger.report">
-        <member-entity entity-alias="GAOTP" entity-name="mantle.ledger.account.GlAccountOrgTimePeriod"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="GAOTP">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="TPD" entity-name="mantle.party.time.TimePeriod" join-from-alias="GAOTP">
-            <key-map field-name="timePeriodId"/></member-entity>
-        <alias-all entity-alias="GAOTP"/>
-        <alias-all entity-alias="TPD"/>
-        <alias name="accountName" entity-alias="GLA"/>
-        <alias name="accountCode" entity-alias="GLA"/>
-        <alias name="glAccountClassEnumId" entity-alias="GLA"/>
-        <alias name="isDebit" entity-alias="GLA"/>
-        <alias name="isTemporary" entity-alias="GLA"/>
+        <member-entity entity-alias="GAOTP"
+            entity-name="mantle.ledger.account.GlAccountOrgTimePeriod" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="GAOTP">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="TPD" entity-name="mantle.party.time.TimePeriod"
+            join-from-alias="GAOTP">
+            <key-map field-name="timePeriodId" />
+        </member-entity>
+        <alias-all entity-alias="GAOTP" />
+        <alias-all entity-alias="TPD" />
+        <alias name="accountName" entity-alias="GLA" />
+        <alias name="accountCode" entity-alias="GLA" />
+        <alias name="glAccountClassEnumId" entity-alias="GLA" />
+        <alias name="isDebit" entity-alias="GLA" />
+        <alias name="isTemporary" entity-alias="GLA" />
     </view-entity>
     <view-entity entity-name="GlAccountOrgTimePeriodSummary" package="mantle.ledger.report">
-        <member-entity entity-alias="GAOTP" entity-name="mantle.ledger.account.GlAccountOrgTimePeriod"/>
-        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount" join-from-alias="GAOTP">
-            <key-map field-name="glAccountId"/></member-entity>
-        <member-entity entity-alias="TPD" entity-name="mantle.party.time.TimePeriod" join-from-alias="GAOTP">
-            <key-map field-name="timePeriodId"/></member-entity>
-        <alias-all entity-alias="TPD"/>
-        <alias name="glAccountId" entity-alias="GAOTP"/>
-        <alias name="organizationPartyId" entity-alias="GAOTP"/>
-        <alias name="timePeriodId" entity-alias="GAOTP"/>
-        <alias name="postedDebits" entity-alias="GAOTP" function="sum"/>
-        <alias name="postedCredits" entity-alias="GAOTP" function="sum"/>
-        <alias name="postedDebitsNoClosing" entity-alias="GAOTP" function="sum"/>
-        <alias name="postedCreditsNoClosing" entity-alias="GAOTP" function="sum"/>
-        <alias name="beginningBalance" entity-alias="GAOTP" function="sum"/>
-        <alias name="endingBalance" entity-alias="GAOTP" function="sum"/>
-        <alias name="balanceLastUpdated" entity-alias="GAOTP" function="min"/>
+        <member-entity entity-alias="GAOTP"
+            entity-name="mantle.ledger.account.GlAccountOrgTimePeriod" />
+        <member-entity entity-alias="GLA" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="GAOTP">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <member-entity entity-alias="TPD" entity-name="mantle.party.time.TimePeriod"
+            join-from-alias="GAOTP">
+            <key-map field-name="timePeriodId" />
+        </member-entity>
+        <alias-all entity-alias="TPD" />
+        <alias name="glAccountId" entity-alias="GAOTP" />
+        <alias name="organizationPartyId" entity-alias="GAOTP" />
+        <alias name="timePeriodId" entity-alias="GAOTP" />
+        <alias name="postedDebits" entity-alias="GAOTP" function="sum" />
+        <alias name="postedCredits" entity-alias="GAOTP" function="sum" />
+        <alias name="postedDebitsNoClosing" entity-alias="GAOTP" function="sum" />
+        <alias name="postedCreditsNoClosing" entity-alias="GAOTP" function="sum" />
+        <alias name="beginningBalance" entity-alias="GAOTP" function="sum" />
+        <alias name="endingBalance" entity-alias="GAOTP" function="sum" />
+        <alias name="balanceLastUpdated" entity-alias="GAOTP" function="min" />
 
-        <alias name="accountName" entity-alias="GLA"/>
-        <alias name="accountCode" entity-alias="GLA"/>
-        <alias name="glAccountClassEnumId" entity-alias="GLA"/>
-        <alias name="isDebit" entity-alias="GLA"/>
-        <alias name="isTemporary" entity-alias="GLA"/>
+        <alias name="accountName" entity-alias="GLA" />
+        <alias name="accountCode" entity-alias="GLA" />
+        <alias name="glAccountClassEnumId" entity-alias="GLA" />
+        <alias name="isDebit" entity-alias="GLA" />
+        <alias name="isTemporary" entity-alias="GLA" />
     </view-entity>
 </entities>
