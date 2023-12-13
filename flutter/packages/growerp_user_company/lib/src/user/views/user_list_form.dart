@@ -84,6 +84,7 @@ class UserListState extends State<UserList> {
   final ScrollController _scrollController = ScrollController();
   final double _scrollThreshold = 200.0;
   late UserBloc _userBloc;
+  late AuthBloc _authBloc;
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
@@ -95,6 +96,7 @@ class UserListState extends State<UserList> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _authBloc = context.read<AuthBloc>();
     switch (widget.role) {
       case Role.company:
         _userBloc = context.read<EmployeeBloc>() as UserBloc;
@@ -193,9 +195,11 @@ class UserListState extends State<UserList> {
                           return BlocProvider.value(
                               value: _userBloc,
                               child: UserDialog(User(
-                                  company: Company(
-                                role: widget.role,
-                              ))));
+                                  company: widget.role == Role.company
+                                      ? _authBloc.state.authenticate!.company
+                                      : Company(
+                                          role: widget.role,
+                                        ))));
                         });
                   },
                   tooltip: 'Add New',

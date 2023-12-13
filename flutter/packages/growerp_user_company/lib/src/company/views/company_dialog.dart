@@ -487,7 +487,7 @@ class CompanyFormState extends State<CompanyDialog> {
                                         "_DELETE_"
                                 ? "${company.paymentMethod?.ccDescription}"
                                 : "No payment methods yet"
-                                    "${company.address == null ? ",\nneed address to add" : ""}",
+                                    "${company.address == null ? ",\nneed postal address to add" : ""}",
                             key: const Key('paymentMethodLabel')),
                       ),
                       Row(
@@ -641,10 +641,6 @@ class CompanyFormState extends State<CompanyDialog> {
                               Center(
                                   child: Text(
                                 'id:#${company.partyId ?? 'New'}',
-                                style: const TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
                                 key: const Key('header'),
                               )),
                               const SizedBox(height: 10),

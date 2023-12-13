@@ -46,7 +46,7 @@ overwrite the following lines in framework/build.gradle starting from line167
 (https://forum.moqui.org/t/receiver-class-org-apache-logging-slf4j-slf4jserviceprovider-does-not-define-or-inherit-an-implementation-of-the-resolved-method-abstract-java-lang-string-getrequestedapiversion-of-interface-org-slf4j-spi-slf4jserviceprovider/345/6)
 
 8. add pseudoId to mantle-usl views
-check commit 6ef24d8463cd53a012d69f80498a4b88c2633b5a
+check commit 92734db178ed14a5685d942f528133ca537de9c8
 
 Build moqui system:
 ```sh

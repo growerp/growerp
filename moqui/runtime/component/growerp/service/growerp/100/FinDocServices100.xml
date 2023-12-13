@@ -202,6 +202,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="finDoc" type="Map">
                     <parameter name="docType" />
                     <parameter name="sales" type="Boolean" />
+                    <parameter name="pseudoId" />
                     <parameter name="id" />
                     <parameter name="orderId" />
                     <parameter name="shipmentId" />
@@ -308,6 +309,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="rentalFromDate" from="rentalFromDate"
                             ignore-if-empty="true" />
                         <econdition field-name="rentalThruDate" from="rentalThruDate"
+                            ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" from="pseudoId"
                             ignore-if-empty="true" />
                         <econditions combine="or">
                             <econdition field-name="orderId" ignore-case="true"
@@ -434,6 +437,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="finDocOut"
                             from="[
                             id: item.orderId,
+                            pseudoId: item.pseudoId ?: '',
                             orderId: item.orderId,
                             paymentId: item.paymentId,
                             invoiceId: item.invoiceId,
@@ -580,6 +584,7 @@ along with this software (see the LICENSE.md file). If not, see
                             from="[
                             docType: docType,
                             sales: sales,
+                            pseudoId: item.pseudoId ?: '',
                             orderId: item.orderId,
                             invoiceId: item.invoiceId,
                             paymentId: item.paymentId,
@@ -751,6 +756,7 @@ along with this software (see the LICENSE.md file). If not, see
                             orderId: item.orderId,
                             paymentInstrument: item.paymentInstrumentId.substring(2),
                             paymentId: item.paymentId,
+                            pseudoId: item.pseudoId ?: '',
                             id: item.paymentId,
                             invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                             statusId: convertedStatusId,
@@ -901,6 +907,7 @@ along with this software (see the LICENSE.md file). If not, see
                             orderId: item.orderId,
                             Id: item.shipmentId,
                             shipmentId: item.shipmentId,
+                            pseudoId: item.pseudoId ?:'',
                             statusId: convertedStatusId,
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
@@ -1013,6 +1020,7 @@ along with this software (see the LICENSE.md file). If not, see
                             invoiceId: item.invoiceId,
                             shipmentId: item.shipmentId,
                             id: item.transactionId,
+                            pseudoId: item.pseudoId ?: '',
                             transactionId: item.transactionId,
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
@@ -1065,6 +1073,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDoc" type="Map">
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
+                <parameter name="pseudoId" />
                 <parameter name="statusId" />
                 <parameter name="paymentInstrument" />
                 <parameter name="description" />
@@ -1110,6 +1119,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDoc" type="Map">
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
+                <parameter name="pseudoId" />
                 <parameter name="orderId" />
                 <parameter name="shipmentId" />
                 <parameter name="invoiceId" />
@@ -1201,6 +1211,11 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
+            <if condition="!finDoc.pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: finDoc.docType]" />
+                <set field="finDoc.pseudoId" from="seqNum" />
+            </if>
             <if condition="finDoc.docType == 'order'">
                 <service-call name="growerp.100.FinDocServices100.create#Order"
                     in-map="[order: finDoc]" out-map="context" />
@@ -1297,6 +1312,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="order.sales == true">
                 <service-call name="mantle.order.OrderServices.create#Order"
                     in-map="[productStoreId: productStoreId,
+                            pseudoId: order.pseudoId,
                             facilityId: facilities[0].facilityId,
                             vendorPartyId: vendorPartyId,
                             customerPartyId: customerPartyId,
@@ -1305,6 +1321,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <service-call name="mantle.order.OrderServices.create#Order"
                         in-map="[   vendorPartyId: vendorPartyId,
+                                pseudoId: order.pseudoId,
                                 customerPartyId: customerPartyId,
                                 facilityId: facilities[0].facilityId,
                                 orderName: order.description]"
@@ -1365,6 +1382,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="invoice.sales == true">
                 <service-call name="mantle.account.InvoiceServices.create#Invoice"
                     in-map="[productStoreId: productStoreId,
+                            pseudoId: invoice.pseudoId,
                             fromPartyId: fromPartyId,
                             toPartyId: toPartyId,
                             description: invoice.description]"
@@ -1372,6 +1390,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <else>
                     <service-call name="mantle.account.InvoiceServices.create#Invoice"
                         in-map="[   fromPartyId: fromPartyId,
+                                pseudoId: invoice.pseudoId,
                                 toPartyId: toPartyId,
                                 productStoreId: productStoreId,
                                 description: invoice.description]"
@@ -1454,6 +1473,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="instrument" from="'Pi' + payment.paymentInstrument" />
             <service-call name="mantle.account.PaymentServices.create#Payment"
                 in-map="[
+                        pseudoId: payment.pseudoId,
                         paymentTypeEnumId: paymentTypeEnumId,
                         amount: payment.grandTotal,
                         paymentInstrumentEnumId: instrument,
@@ -1552,6 +1572,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDoc" type="Map" required="true">
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
+                <parameter name="pseudoId" />
                 <parameter name="orderId" />
                 <parameter name="shipmentId" />
                 <parameter name="invoiceId" />
@@ -1597,6 +1618,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDoc" type="Map">
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
+                <parameter name="pseudoId" />
                 <parameter name="orderId" />
                 <parameter name="shipmentId" />
                 <parameter name="invoiceId" />
@@ -1773,9 +1795,12 @@ along with this software (see the LICENSE.md file). If not, see
                             message="Transaction ${finDoc.transactionId} is posted, cannot be changed!" />
                     </if>
                     <!-- update description -->
-                    <if condition="transaction.description != finDoc.description">
+                    <if
+                        condition="transaction.description != finDoc.description ||
+                            transaction.pseudoId != finDoc.pseudoId">
                         <service-call name="update#mantle.ledger.transaction.AcctgTrans"
-                            in-map="[acctgTransId: finDoc.transactionId, description: finDoc.description]" />
+                            in-map="[acctgTransId: finDoc.transactionId, description: finDoc.description,
+                                    pseudoId: finDoc.pseudoId]" />
                     </if>
                     <!-- update entries -->
                     <entity-delete-by-condition

@@ -102,6 +102,7 @@ along with this software (see the LICENSE.md file). If not, see
         </member-entity>
 
         <alias name="orderId" entity-alias="ORHD" />
+        <alias name="pseudoId" entity-alias="ORHD" />
         <alias name="orderName" entity-alias="ORHD" />
         <alias name="entryDate" entity-alias="ORHD" />
         <alias name="grandTotal" entity-alias="ORHD" />
@@ -241,6 +242,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId" />
         </member-entity>
         <alias name="shipmentId" entity-alias="SHIP" />
+        <alias name="pseudoId" entity-alias="SHIP" />
         <alias name="shipmentMethod" field="description" entity-alias="METHOD" />
 
         <alias name="contactMechId" entity-alias="PA" />
@@ -431,6 +433,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId" />
         </member-entity>
         <alias name="invoiceId" entity-alias="INV" />
+        <alias name="pseudoId" entity-alias="INV" />
         <alias name="fromPartyId" entity-alias="INV" />
         <alias name="toPartyId" entity-alias="INV" />
         <alias name="invoiceName" field="description" entity-alias="INV" />
@@ -567,6 +570,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="contactMechId" />
         </member-entity>
         <alias name="paymentId" entity-alias="PAY" />
+        <alias name="pseudoId" entity-alias="PAY" />
         <alias name="fromPartyId" entity-alias="PAY" />
         <alias name="toPartyId" entity-alias="PAY" />
         <alias name="invoiceId" field="forInvoiceId" entity-alias="PAY" />
@@ -636,6 +640,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="glAccountId" />
         </member-entity>
         <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
+        <alias name="pseudoId" entity-alias="ATX" />
         <alias name="invoiceId" entity-alias="ATX" />
         <alias name="paymentId" entity-alias="ATX" />
         <alias name="shipmentId" entity-alias="ATX" />
@@ -1459,7 +1464,10 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="ACCOUNT">
             <key-map field-name="partyId" />
         </member-entity>
-        <alias-all entity-alias="CR" />
+        <alias-all entity-alias="CR">
+            <exclude field="isActive" />
+        </alias-all>
+        <alias name="isActiveChatRoom" field="isActive" entity-alias="CR" />
         <alias name="isActive" entity-alias="CMEM" />
         <alias name="hasRead" entity-alias="CMEM" />
         <alias name="userId" entity-alias="ACCOUNT" />

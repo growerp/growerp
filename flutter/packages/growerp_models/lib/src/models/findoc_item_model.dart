@@ -12,8 +12,13 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:io';
+
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:logger/logger.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
+import '../create_csv_row.dart';
 import '../json_converters.dart';
 import 'models.dart';
 
@@ -24,9 +29,12 @@ part 'findoc_item_model.g.dart';
 class FinDocItem with _$FinDocItem {
   FinDocItem._();
   factory FinDocItem({
+    String? pseudoId, // for conversion only for related transaction
+    FinDocType? docType, // for conversion only
     String? itemSeqId,
     ItemType? itemType,
     String? productId,
+    String? pseudoProductId,
     String? description,
     Decimal? quantity,
     Decimal? price,
@@ -41,4 +49,57 @@ class FinDocItem with _$FinDocItem {
 
   factory FinDocItem.fromJson(Map<String, dynamic> json) =>
       _$FinDocItemFromJson(json);
+}
+
+String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
+    " productId, description, quantity, price/amount, accountCode, "
+    " isDebit \r\n";
+List<String> finDocItemCsvTitles = productCsvFormat.split(',');
+int finDocItemCsvLength = finDocItemCsvTitles.length;
+
+List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
+  int errors = 0;
+  List<FinDocItem> finDocItems = [];
+  final result = fast_csv.parse(csvFile);
+  for (final row in result) {
+    if (row == result.first) continue;
+    try {
+      finDocItems.add(FinDocItem(
+        pseudoId: row[0],
+        docType: FinDocType.tryParse(row[1]),
+        itemSeqId: row[2],
+        pseudoProductId: row[3],
+        description: row[4],
+        quantity: Decimal.parse(row[5]),
+        price: Decimal.parse(row[6]),
+        glAccount: GlAccount(accountCode: row[7]),
+        isDebit: row[8] == 'false' ? false : true,
+      ));
+    } catch (e) {
+      String fieldList = '';
+      finDocItemCsvTitles
+          .asMap()
+          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
+      logger.e("Error processing findoc item csv line: $fieldList \n"
+          "error message: $e");
+      if (errors++ == 5) exit(1);
+    }
+  }
+  return finDocItems;
+}
+
+String CsvFromFinDocItems(List<FinDoc> finDocs) {
+  var csv = [finDocCsvFormat];
+  for (FinDoc finDoc in finDocs) {
+    csv.add(createCsvRow([
+      finDoc.pseudoId() ?? '',
+      finDoc.docType.toString(),
+      finDoc.sales.toString(),
+      finDoc.description ?? '',
+      finDoc.creationDate.toString(),
+      finDoc.otherUser!.pseudoId!,
+      finDoc.otherCompany!.pseudoId!,
+    ], finDocCsvLength));
+  }
+  return csv.join();
 }

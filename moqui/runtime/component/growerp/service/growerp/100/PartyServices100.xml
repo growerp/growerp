@@ -143,7 +143,7 @@ along with this software (see the LICENSE.md file). If not, see
                     description: party.uomDescription]" />
                 <set field="company"
                     from="[partyId: party.partyId,
-                                pseudoId: party.pseudoId,
+                                pseudoId: party.pseudoId ?:'',
                                 name: party.organizationName,
                                 role: party.roleTypeId,
                                 currency: party.baseCurrencyUomId == null ? null : currency,
@@ -366,17 +366,17 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="company"
                                 from="[
                                     partyId: item.companyPartyId,
-                                    pseudoId: item.companyPseudoId,
+                                    pseudoId: item.companyPseudoId ?:'',
                                     name: item.companyName,
                                     role: item.companyRole == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'? 'Lead': item.companyRole,
-                                    email: item.companyEmail,
+                                    email: item.companyEmail ?:'',
                                     currency: currency,
                                     image: imageFile,
                                     address: address,
                                     vatPerc: item.vatPerc?item.vatPerc.toString():'0',
                                     salesPerc: item.salesPerc?item.salesPerc.toString():'0',
                                     paymentMethod: paymentMethod,
-                                    telephoneNr: telephoneNr
+                                    telephoneNr: telephoneNr ?: ''
                                     ]" />
                         </else>
                     </if>
@@ -413,6 +413,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="company" type="Map" required="true">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="name" required="true" />
                 <parameter name="role" required="true" />
                 <parameter name="email" />
@@ -451,6 +452,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="company" type="Map">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="name" />
                 <parameter name="email" />
                 <parameter name="role" />
@@ -495,6 +497,11 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="relComp"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!company.pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: relComp.ownerPartyId, seqName: 'company']" />
+                <set field="company.pseudoId" from="seqNum" />
+            </if>
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
@@ -509,6 +516,7 @@ along with this software (see the LICENSE.md file). If not, see
                 name="mantle.party.PartyServices.create#Organization"
                 out-map="context"
                 in-map="[organizationName: company.name,
+                        pseudoId: company.pseudoId,
                         ownerPartyId: ownerPartyId,
                         roleTypeId: company.role,
                         customerStatusId: customerStatusId,
@@ -1128,7 +1136,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 language: userInfo?.locale ? userInfo?.locale .toString() : '',
                                 image: imageFile,
                                 userId: userInfo?.userId,
-                                locale: userInfo?.locale,
+                                locale: userInfo?.locale ?:'',
                                 telephoneNr: telephoneNr,
                                 company: company,
                                 ]" />
@@ -1348,6 +1356,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="user" type="Map" required="true">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -1404,6 +1413,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="user" type="Map">
                 <parameter name="partyId" />
+                <parameter name="pseudoId" />
                 <parameter name="email" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
@@ -1433,6 +1443,12 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
+            <if condition="relComp.companyPartyId &amp;&amp; !user.pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: relComp.companyPartyId, seqName: 'user']" />
+                <set field="user.pseudoId" from="seqNum" />
+            </if>
+
             <if condition="!ownerPartyId">
                 <set field="ownerPartyId" from="relComp.ownerPartyId" />
             </if>
@@ -1446,6 +1462,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="mantle.party.PartyServices.create#Account"
                         in-map="[roleTypeId: user.company.role == 
                                     'Lead'? 'Customer' : user.company.role, 
+                                pseudoId: user.pseudoId,
                                 loginAfterCreate: false,
                                 firstName: user.firstName, lastName: user.lastName,
                                 emailAddress: user.email,
@@ -1469,6 +1486,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- create without account -->
                     <service-call name="create#mantle.party.Party"
                         in-map="[partyTypeEnumId:'PtyPerson',
+                                pseudoId: user.pseudoId,
                                 ownerPartyId: ownerPartyId]"
                         out-map="newPartyOut" />
                     <set field="userPartyId" from="newPartyOut.partyId" />
@@ -1580,6 +1598,9 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <service-call
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relComp" />
             <!-- get old values -->
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[userPartyId: user.partyId]" out-map="oldValue" />
@@ -1680,8 +1701,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
                                 list="admins">
                                 <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
-                                <econdition field-name="companyPartyId" from="reComp.companyPartyId" />
-                                <date-filter />
+                                <econdition field-name="companyPartyId"
+                                    from="relComp.companyPartyId" />
+                                <date-filter from-field-name="ugMemFromDate"
+                                    thru-field-name="ugMemThruDate" />
                             </entity-find>
                             <if condition="admins.size() == 1">
                                 <return error="true"
@@ -1750,6 +1773,7 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="user.telephoneNr || user.telephoneNr != oldValue.user.telephoneNr">
                 <entity-find entity-name="mantle.party.contact.PartyContactMechTelecomNumber"
                     list="telNos">
+                    <econdition field-name="contactMechPurposeId" value="PhonePrimary" />
                     <econdition field-name="partyId" from="user.partyId" />
                     <date-filter />
                 </entity-find>

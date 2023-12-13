@@ -196,6 +196,7 @@ class ElasticFacadeImpl implements ElasticFacade {
 
             // try connecting and get server info
             int retries = clusterHost == 'localhost' && !"true".equals(System.getProperty("moqui.elasticsearch.started")) ? 1 : 20
+            retries = 2; // no need for elastic search
             for (int i = 1; i <= retries; i++) {
                 try {
                     serverInfo = getServerInfo()

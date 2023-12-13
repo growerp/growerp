@@ -70,10 +70,11 @@ class UserListItem extends StatelessWidget {
                 user.telephoneNr ?? ' ',
                 key: Key('telephone$index'),
               )),
-            Expanded(
-                child: Text(user.company?.name ?? ' ',
-                    key: Key('companyName$index'),
-                    textAlign: TextAlign.center)),
+            if (isDeskTop && role != Role.company)
+              Expanded(
+                  child: Text(user.company?.name ?? ' ',
+                      key: Key('companyName$index'),
+                      textAlign: TextAlign.center)),
             Expanded(
               child: Text(user.userGroup == UserGroup.admin ? 'Y' : 'N',
                   textAlign: TextAlign.center, key: Key('isAdmin$index')),

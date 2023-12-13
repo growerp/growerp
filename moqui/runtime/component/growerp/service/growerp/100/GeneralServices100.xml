@@ -15,6 +15,32 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="getNext" noun="PseudoId">
+        <in-parameters>
+            <parameter name="companyPartyId" />
+            <parameter name="seqName" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="seqNum" />
+        </out-parameters>
+        <actions>
+            <set field="seqName" value="$companyPartyId-$seqName" />
+            <entity-find-one entity-name="moqui.entity.SequenceValueItem" value-field="seqItem"
+                for-update="true">
+                <field-map field-name="seqName" from="seqName" />
+            </entity-find-one>
+            <if condition="!seqItem">
+                <set field="seqNum" value="100000" />
+                <service-call name="create#moqui.entity.SequenceValueItem"
+                    in-map="[seqName: seqName, seqNum: seqNum]" />
+                <else>
+                    <set field="seqItem.seqNum" from="seqItem.seqNum + 1" />
+                    <entity-update value-field="seqItem" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
     <service verb="get" noun="RelatedCompanyAndOwner"><!-- internal use only -->
         <in-parameters>
             <parameter name="userPartyId" /><!-- of this particular user, optional -->
@@ -603,6 +629,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                         in-map="classificationId: classificationId"
                         out-map="context" />
+                    <log
+                        message="========user: ${authenticate.user.partyId} company: ${authenticate.company.partyId} owner: ${authenticate.ownerPartyId} userId: ${authenticate.user.userId}" />
                     <!-- check if specific app already logged in before -->
                     <!-- already done in get#authenticate -->
                 </else>

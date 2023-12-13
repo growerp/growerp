@@ -157,7 +157,7 @@ Future<void> main(List<String> args) async {
           }
           if (!exists(
               "$growerpPath/flutter/packages/growerp_core/lib/src/models/account_class_model.freezed.dart")) {
-            run('melos build_all --no-select',
+            run('melos build --no-select',
                 workingDirectory: '$growerpPath/flutter');
           }
           if (!exists(

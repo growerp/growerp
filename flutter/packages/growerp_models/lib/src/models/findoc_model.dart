@@ -12,9 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'dart:io';
+
 import 'package:decimal/decimal.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
+import 'package:logger/logger.dart';
 import '../create_csv_row.dart';
 import '../json_converters.dart';
 import 'models.dart';
@@ -28,13 +31,18 @@ part 'findoc_model.g.dart';
 class FinDoc with _$FinDoc {
   FinDoc._();
   factory FinDoc({
-    FinDocType? docType, // order, invoice, payment etc
+    FinDocType? docType, // order, invoice, payment, shipment, transaction
     @Default(true) bool sales,
     String? orderId,
     String? shipmentId,
     String? invoiceId,
     String? paymentId,
     String? transactionId,
+    String? pseudoOrderId,
+    String? pseudoShipmentId,
+    String? pseudoInvoiceId,
+    String? pseudoPaymentId,
+    String? pseudoTransactionId,
     @PaymentInstrumentConverter() PaymentInstrument? paymentInstrument,
     // ignore: invalid_annotation_target
     @JsonKey(name: 'statusId')
@@ -80,6 +88,17 @@ class FinDoc with _$FinDoc {
                   ? shipmentId
                   : docType == FinDocType.order
                       ? orderId
+                      : null;
+  String? pseudoId() => docType == FinDocType.transaction
+      ? transactionId
+      : docType == FinDocType.payment
+          ? pseudoPaymentId
+          : docType == FinDocType.invoice
+              ? pseudoInvoiceId
+              : docType == FinDocType.shipment
+                  ? pseudoShipmentId
+                  : docType == FinDocType.order
+                      ? pseudoOrderId
                       : null;
 
   String? chainId() =>
@@ -129,37 +148,80 @@ Map<String, String> finDocStatusValuesHotel = {
   'FinDocCancelled': 'Cancelled'
 };
 
-String finDocCsvFormat = "finDoc Id, FinDoc Name*, Description*, image\r\n";
-int finDocCsvLength = finDocCsvFormat.split(',').length;
+String finDocCsvFormat = "finDoc Id, Sales, finDocType, descr, date, "
+    " otherUser Id, other company Id \r\n";
+List<String> finDocCsvTitles = productCsvFormat.split(',');
+int finDocCsvLength = finDocItemCsvTitles.length;
 
-List<FinDoc> CsvToFinDocs(String csvFile) {
+List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
+  int errors = 0;
   List<FinDoc> finDocs = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    finDocs.add(FinDoc(items: [
-      FinDocItem(
-          itemSeqId: row[30],
-          description: row[31],
-          price: Decimal.parse(row[32]))
-    ]));
-  }
+    try {
+      String? pseudoOrderId,
+          pseudoInvoiceId,
+          pseudoPaymentId,
+          pseudoShipmentId,
+          pseudoTransactionId;
+      switch (FinDocType.tryParse(row[2])) {
+        case FinDocType.order:
+          pseudoOrderId = row[0];
+          break;
+        case FinDocType.invoice:
+          pseudoInvoiceId = row[0];
+          break;
+        case FinDocType.payment:
+          pseudoPaymentId = row[0];
+          break;
+        case FinDocType.shipment:
+          pseudoShipmentId = row[0];
+          break;
+        case FinDocType.transaction:
+          pseudoTransactionId = row[0];
+          break;
+        default:
+      }
 
+      finDocs.add(FinDoc(
+        pseudoOrderId: pseudoOrderId,
+        pseudoInvoiceId: pseudoInvoiceId,
+        pseudoPaymentId: pseudoPaymentId,
+        pseudoShipmentId: pseudoShipmentId,
+        pseudoTransactionId: pseudoTransactionId,
+        docType: FinDocType.tryParse(row[2]),
+        sales: row[1] == 'false' ? false : true,
+        description: row[3],
+        creationDate: DateTime.tryParse(row[4]),
+        otherUser: User(pseudoId: row[5]),
+        otherCompany: Company(pseudoId: row[6]),
+      ));
+    } catch (e) {
+      String fieldList = '';
+      finDocCsvTitles
+          .asMap()
+          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
+      logger.e("Error processing findoc csv line: $fieldList \n"
+          "error message: $e");
+      if (errors++ == 5) exit(1);
+    }
+  }
   return finDocs;
 }
 
 String CsvFromFinDocs(List<FinDoc> finDocs) {
   var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
-    for (FinDocItem item in finDoc.items) {
-      csv.add(createCsvRow([
-        finDoc.id() ?? '',
-        finDoc.description ?? '',
-        item.itemSeqId.toString(),
-        item.description ?? '',
-        item.price.toString()
-      ], finDocCsvLength));
-    }
+    csv.add(createCsvRow([
+      finDoc.pseudoId() ?? '',
+      finDoc.docType.toString(),
+      finDoc.sales.toString(),
+      finDoc.description ?? '',
+      finDoc.creationDate.toString(),
+      finDoc.otherUser!.pseudoId!,
+      finDoc.otherCompany!.pseudoId!,
+    ], finDocCsvLength));
   }
   return csv.join();
 }

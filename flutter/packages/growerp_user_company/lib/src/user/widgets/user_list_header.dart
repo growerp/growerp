@@ -79,7 +79,7 @@ class _UserListHeaderState extends State<UserListHeader> {
                   if (!widget.isPhone)
                     const Expanded(child: Text("       Email")),
                   if (!widget.isPhone) const Expanded(child: Text("Telephone")),
-                  if (!widget.isPhone)
+                  if (!widget.isPhone && widget.role != Role.company)
                     const Expanded(
                         child: Text("Company", textAlign: TextAlign.center)),
                   const Expanded(child: Text("Admin?"))

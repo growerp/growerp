@@ -196,6 +196,59 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
+    <service verb="import" noun="FinDocs">
+        <in-parameters>
+            <parameter name="findocs" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <iterate list="findocs" entry="finDoc">
+                <service-call name="growerp.100.FinDocServices100.create#Findoc"
+                    in-map="[finDoc: finDoc, classificationId: classificationId]" />
+            </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${categories.size()} categories imported</message>
+            </if>
+
+        </actions>
+    </service>
+
+    <service verb="import" noun="FinDocItems">
+        <in-parameters>
+            <parameter name="findocItems" required="true" type="List" />
+            <parameter name="classificationId" />
+        </in-parameters>
+        <actions>
+            <set field="itemsOut" from="[]" />
+            <set field="lastItem" from="null" />
+            <iterate list="findocItems" entry="item">
+                <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
+                    <set field="finDocOut.items" from="itemsOut" />
+                    <service-call name="growerp.100.FinDocServices100.update#Findoc"
+                        in-map="[finDoc: finDocOut, classificationId: classificationId]" />
+                    <set field="itemsOut" from="[]" />
+                </if>
+                <!-- first/next order -->
+                <if condition="!lastItem || lastItem.orderId != item.orderId">
+                    <set field="finDocOut"
+                        from="[
+                        pseudoId: item.pseudoId,
+                        docType: item.docType]" />
+                </if>
+                <script>itemsOut.add(item)</script>
+                <set field="lastItem" from="item" />
+            </iterate>
+            <if condition="lastItem">
+                <set field="finDocOut.items" from="itemsOut" />
+                <service-call name="growerp.100.FinDocServices100.update#Findoc"
+                    in-map="[finDoc: finDocOut, classificationId: classificationId]" />
+            </if>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${categories.size()} categories imported</message>
+            </if>
+        </actions>
+    </service>
+
     <!-- depreciated, just used by the screens-->
     <service verb="import" noun="Entities">
         <description> Import general entities</description>

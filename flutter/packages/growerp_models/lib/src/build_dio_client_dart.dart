@@ -1,15 +1,14 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Directory, Platform;
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:growerp_models/src/logger.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
-Future<Dio> buildDioClient(String? base,
-    {Duration timeout = const Duration(seconds: 10)}) async {
+Future<Dio> buildDioClientDart(String? base,
+    {Duration timeout = const Duration(seconds: 5)}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -42,8 +41,8 @@ Future<Dio> buildDioClient(String? base,
       error: true,
       compact: true,
       maxWidth: 133));
-/*
-  var cacheDir = await getTemporaryDirectory();
+
+  var cacheDir = Directory.systemTemp;
   var cacheStore = HiveCacheStore(
     cacheDir.path,
     hiveBoxName: "growerpCache",
@@ -60,7 +59,7 @@ Future<Dio> buildDioClient(String? base,
     },
     allowPostMethod: false,
   );
-*/
+
 //  dio.interceptors.add(KeyDioCacheInterceptor(options: customCacheOptions));
 
   logger.i("accessing backend at ${dio.options.baseUrl}");

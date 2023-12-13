@@ -557,12 +557,14 @@ class UserDialogState extends State<UserDialogStateFull> {
 //                      language: Localizations.localeOf(context)
 //                          .languageCode
 //                          .toString(),
-                      company: _selectedCompany.name != null
-                          ? _selectedCompany.copyWith(role: _selectedRole)
-                          : Company(
-                              name:
-                                  "${_lastNameController.text}, ${_firstNameController.text}",
-                              role: _selectedRole),
+                      company: widget.user.company!.role == Role.company
+                          ? widget.user.company
+                          : _selectedCompany.name != null
+                              ? _selectedCompany.copyWith(role: _selectedRole)
+                              : Company(
+                                  name:
+                                      "${_lastNameController.text}, ${_firstNameController.text}",
+                                  role: _selectedRole),
                       image: await HelperFunctions.getResizedImage(
                           _imageFile?.path));
                   if (!mounted) return;
