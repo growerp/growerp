@@ -6,6 +6,7 @@ enum FileType {
   user,
   asset,
   finDocTransaction,
+  finDocTransactionItem,
   website,
   unknown
 }

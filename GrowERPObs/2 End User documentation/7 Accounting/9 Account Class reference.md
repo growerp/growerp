@@ -70,6 +70,7 @@ mainly defines if the account is a debit or credit account	also used for reporti
 			- Accumulated Depreciation (contra)
 		- Other Assets
 			- Intangible Assets
+			- General Other Assets
 			- Accumulated Amortization (contra)
 	- **Equity Distribution**
 		- Return of Capital

@@ -87,6 +87,8 @@ along with this software (see the LICENSE.md file). If not, see
 
     <moqui.basic.Enumeration description="Other Assets" enumId="OTHER_ASSET" parentEnumId="ASSET"
         enumTypeId="GlAccountClass" />
+    <moqui.basic.Enumeration description="General Other Assets" enumId="GEN_OTHER_ASSET"
+        parentEnumId="OTHER_ASSET" enumTypeId="GlAccountClass" sequenceNum="11" />
     <moqui.basic.Enumeration description="Intangible Assets" enumId="INTANGIBLE_ASSET"
         parentEnumId="OTHER_ASSET" enumTypeId="GlAccountClass" sequenceNum="10" />
     <moqui.basic.Enumeration description="Accumulated Amortization" enumId="ACCUM_AMORTIZATION"

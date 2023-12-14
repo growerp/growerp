@@ -21,6 +21,7 @@ import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 
+import '../build_dio_client.dart';
 import '../file_type_model.dart';
 import '../get_file_type.dart';
 import '../get_files.dart';
@@ -71,13 +72,17 @@ Future<void> main(List<String> args) async {
           break;
         case '-f':
           overrideFileType = getFileType(args[++i]);
+          if (overrideFileType == FileType.unknown) {
+            logger.e("Filetype: ${args[i]}  not recognized");
+            exit(1);
+          }
           break;
         default:
           modifiedArgs.add(args[i]);
       }
     }
-    //logger.i(
-    //    "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch");
+//    logger.i(
+//        "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch -f $overrideFileType");
 
     Future<void> login(RestClient client) async {
       if (username.isNotEmpty && password.isNotEmpty) {
@@ -172,11 +177,12 @@ Future<void> main(List<String> args) async {
         break;
       case 'import':
         List<String> files =
-            getFiles(inputFile, overrrideFileType: overrideFileType);
+            getFiles(inputFile, logger, overrrideFileType: overrideFileType);
         if (files.isEmpty) {
           logger.e("no files found to process, use the -i directive?");
           exit(1);
         }
+        logger.i("Processing files: \n $files");
         // talk to backend
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout)));
@@ -208,7 +214,13 @@ Future<void> main(List<String> args) async {
               case FileType.website:
                 await client.importWebsite(CsvToWebsite(csvFile));
                 break;
-
+              case FileType.finDocTransaction:
+                await client.importFinDoc(CsvToFinDocs(csvFile, logger));
+                break;
+              case FileType.finDocTransactionItem:
+                await client
+                    .importFinDocItem(CsvToFinDocItems(csvFile, logger));
+                break;
               default:
                 logger.e("FileType ${fileType.name} not implemented yet");
                 exit(1);

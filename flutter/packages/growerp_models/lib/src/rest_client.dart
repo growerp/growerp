@@ -260,7 +260,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/ImportExport")
   @Extra({'requireApiKey': true})
   Future<String> importScreenProducts(
-      {@Field() required List products,
+      {@Field() required List<Product> products,
       @Field() required String classificationId});
 
   @GET("rest/s1/growerp/100/ImportExport")
@@ -315,6 +315,14 @@ abstract class RestClient {
   Future<ItemTypes> getPaymentTypes({
     @Query('sales') bool? sales,
   });
+
+  @POST("rest/s1/growerp/100/ImportExport/finDocs")
+  @Extra({'requireApiKey': true})
+  Future<void> importFinDoc(@Field() List<FinDoc> finDocs);
+
+  @POST("rest/s1/growerp/100/ImportExport/finDocItems")
+  @Extra({'requireApiKey': true})
+  Future<void> importFinDocItem(@Field() List<FinDocItem> finDocItems);
 
   // Inventory locations
   @GET("rest/s1/growerp/100/Location")

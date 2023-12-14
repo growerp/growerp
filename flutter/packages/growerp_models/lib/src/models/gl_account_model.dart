@@ -64,7 +64,6 @@ List<GlAccount> CsvToGlAccounts(String csvFile) {
           postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null),
     );
   }
-
   return glAccounts;
 }
 

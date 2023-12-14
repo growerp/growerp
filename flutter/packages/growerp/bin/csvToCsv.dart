@@ -12,18 +12,7 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-/// an example program to make any csv file suitable
-/// to be imported into GrowERP.
-///
-/// Its reordering columns and incoming CSV doing optional
-/// required conversion in the process
-///
-/// input parameter:
-/// 1. the input directory with the filenames defined in this program
-///
-/// run this program with:
-///   dart run ~/growerp/flutter/packages/growerp/bin/csvToCsv.dart inputDir
-///   will create a new directory: growerpOutput with the converted file.
+// see README.md for documentation
 
 import 'dart:io';
 import 'package:dcli/dcli.dart';
@@ -71,7 +60,7 @@ Map convertClass = {
   '6': 'Accumulated Depreciation',
   'Accumulated Depreciation': 'Accumulated Depreciation',
   '8': 'Other Assets',
-  'Other Assets': 'Other Assets',
+  'Other Assets': 'General Other Assets',
   '10': 'Accounts Payable',
   'Accounts Payable': 'Accounts Payable',
   '12': 'Current Liabilities',
@@ -102,6 +91,7 @@ List<String> convertRow(
   switch (fileType) {
     /// convert to [glAccountCsvFormat]
     case FileType.glAccount:
+      // remove empty and double id's
       if (columnsFrom[0] == '' || ids.contains(columnsFrom[0])) return [];
       ids.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[0]); //0 accountCode
@@ -211,8 +201,59 @@ List<String> convertRow(
         }
       }
       return columnsTo;
+
+    case FileType.finDocTransaction:
+      // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
+      // 11: customerId, 13: vendorId, 15: employeeId,
+
+      // convert from m/d/yy to yyyy-mm-dd
+      var dateList = (columnsFrom[2]).split('/');
+      var prefix;
+      if (dateList[2] == '99')
+        prefix = '19';
+      else
+        prefix = '20';
+      var newDate =
+          "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
+      var otherCompanyId = columnsFrom[11].isNotEmpty
+          ? columnsFrom[11]
+          : columnsFrom[13].isNotEmpty
+              ? columnsFrom[13]
+              : columnsFrom[15].isNotEmpty
+                  ? columnsFrom[15]
+                  : '';
+
+      columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
+      columnsTo.add('true');
+      columnsTo.add('transaction');
+      columnsTo.add(columnsFrom[5]);
+      columnsTo.add(newDate);
+      columnsTo.add('');
+      columnsTo.add(otherCompanyId);
+      return columnsTo;
+
+    case FileType.finDocTransactionItem:
+      // 0: accountId, 2:date, 3:reference, 5: debit amount, 6 credit amount,
+      // 17: productId, 18: line description,
+      bool isDebit = true;
+      var amount = columnsFrom[6];
+      if (columnsFrom[7].isNotEmpty) {
+        isDebit = false;
+        amount = columnsFrom[7];
+      }
+
+      columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
+      columnsTo.add('transaction');
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[17]);
+      columnsTo.add(columnsFrom[18]);
+      columnsTo.add('');
+      columnsTo.add(amount);
+      columnsTo.add(columnsFrom[0]);
+      columnsTo.add(isDebit.toString());
+      return columnsTo;
     //
-    // do some conversion here, depending on filetype.
+    // do some more conversion here, depending on filetype.
     //
     default: // no output
       return [];
@@ -241,10 +282,11 @@ String convertFile(FileType fileType, String string, String fileName) {
   return string;
 }
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
   var logger = Logger(filter: MyFilter());
   if (args.isEmpty) {
-    logger.e("Specify a directory?");
+    logger.e(
+        "Specify a directory and optionally a filetype like: ${FileType.values}?");
     exit(1);
   }
 
@@ -257,8 +299,9 @@ void main(List<String> args) {
 
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
+    if (args.length == 2 && fileType.name != args[1]) continue;
     List<String> fileContent = [];
-    print("processing filetype: ${fileType.name}");
+    List<List<String>> convertedRows = [];
     // define search file names for every filetype
     List<String> searchFiles = [];
     switch (fileType) {
@@ -274,6 +317,7 @@ void main(List<String> args) {
         searchFiles.add('0b*.csv');
     }
     if (searchFiles.isEmpty) continue;
+    // list of files to process
     List<String> files = [];
     for (String searchFile in searchFiles) {
       files.addAll(find(searchFile, workingDirectory: args[0]).toList());
@@ -283,8 +327,30 @@ void main(List<String> args) {
           "No ${searchFiles.join()} csv files found in directory ${args[0]}");
       exit(1);
     }
+    // process files and convert rows
+    for (String fileInput in files) {
+      logger.i("Processing filetype: ${fileType.name} file: ${fileInput}");
+      // parse raw csv file string
+      String contentString = File(fileInput).readAsStringSync();
+      // general changes in content
+      contentString = convertFile(fileType, contentString, fileInput);
+
+      // parse input file
+      List<List<String>> inputCsvFile = fast_csv.parse(contentString);
+      // convert rows
+      int index = 0;
+      for (final row in inputCsvFile) {
+        if (++index % 10000 == 0) print("processing row: $index");
+        if (row == inputCsvFile.first) continue; // header line
+        List<String> convertedRow = convertRow(fileType, row, fileInput);
+        // print("==old: $row new: $convertedRow");
+        if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
+      }
+    }
+    // print("==2==${convertedRows.length} 0:${convertedRows[0]}");
+
     int csvLength = 0;
-    // add header in output file
+    // prepare output files and run post processing like sort
     switch (fileType) {
       case FileType.glAccount:
         fileContent.add(glAccountCsvFormat);
@@ -309,30 +375,36 @@ void main(List<String> args) {
       case FileType.finDocTransaction:
         fileContent.add(finDocCsvFormat);
         csvLength = finDocCsvLength;
+        // sort better use maps for empty values
+        convertedRows.sort((a, b) =>
+            "${a.asMap()[4] ?? ''}${a.asMap()[0] ?? ''}"
+                .compareTo("${b.asMap()[4] ?? ''}${b.asMap()[0] ?? ''}"));
+        // remove detail lines
+        List<String> lastRow = [];
+        List<List<String>> headerRows = [];
+        for (final row in convertedRows) {
+          if (row.isEmpty) continue;
+          if (row.isEmpty || lastRow.isEmpty || row[0] != lastRow[0])
+            headerRows.add(row);
+          lastRow = row;
+        }
+        if (lastRow.isNotEmpty) headerRows.add(lastRow);
+        convertedRows = headerRows;
+        break;
+      case FileType.finDocTransactionItem:
+        fileContent.add(finDocItemCsvFormat);
+        csvLength = finDocItemCsvLength;
+        // sort better use maps for empty values
+        convertedRows
+            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
         break;
       default:
     }
-    for (String fileInput in files) {
-      print("processing file: ${fileInput}");
-      // parse raw csv file string
-      String contentString = File(fileInput).readAsStringSync();
-      // general changes in content
-      contentString = convertFile(fileType, contentString, fileInput);
-
-      // parse input file
-      List<List<String>> inputCsvFile = fast_csv.parse(contentString);
-
-      // convert rows
-      int index = 0;
-      for (final row in inputCsvFile) {
-        if (++index % 10000 == 0) print("processing row: $index");
-        if (row == inputCsvFile.first) continue;
-        var convertedRow = convertRow(fileType, row, fileInput);
-        if (convertedRow.isNotEmpty) {
-          fileContent.add(createCsvRow(convertedRow, csvLength));
-        }
-      }
+    // create csv output file
+    for (final convertedRow in convertedRows) {
+      fileContent.add(createCsvRow(convertedRow, csvLength));
     }
+    // write to disk
     if (fileContent.length > 1) {
       final file = File("$outputDirectory/${fileType.name}.csv");
       file.writeAsStringSync(fileContent.join());

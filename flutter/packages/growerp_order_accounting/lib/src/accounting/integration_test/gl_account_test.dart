@@ -92,7 +92,7 @@ class GlAccountTest {
       await CommonTest.enterText(tester, 'code', glAccount.accountCode!);
       await CommonTest.enterText(tester, 'name', glAccount.accountName!);
       await CommonTest.enterDropDownSearch(
-          tester, 'class', glAccount.accountClass!.detailDescription!);
+          tester, 'class', glAccount.accountClass!.description!);
       if (glAccount.accountType != null) {
         await CommonTest.enterDropDownSearch(
             tester, 'type', glAccount.accountType!.description!);
@@ -116,7 +116,7 @@ class GlAccountTest {
       expect(CommonTest.getTextField('name0'), equals(glAccount.accountName));
       if (!CommonTest.isPhone()) {
         expect(CommonTest.getTextField('class0'),
-            equals(glAccount.accountClass!.detailDescription));
+            equals(glAccount.accountClass!.description));
         if (glAccount.accountType != null) {
           expect(CommonTest.getTextField('type0'),
               equals(glAccount.accountType?.description!));
@@ -134,7 +134,7 @@ class GlAccountTest {
             equals(glAccount.accountType?.description!));
       }
       expect(CommonTest.getDropdownSearch('class'),
-          contains(glAccount.accountClass!.detailDescription!));
+          contains(glAccount.accountClass!.description!));
       newGlAccounts.add(glAccount.copyWith(glAccountId: id));
       await CommonTest.tapByKey(tester, 'cancel');
     }

@@ -7,3 +7,4 @@ export 'src/styles/color_schemes.dart';
 export 'src/extensions.dart';
 export 'src/l10n/generated/core_localizations.dart';
 export 'src/services/chat_server.dart';
+export 'src/build_dio_client.dart';

@@ -899,6 +899,7 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
             <!-- get class from description -->
+            <log message="======looking for class: ${glAccount.accountClass}" />
             <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
                 limit="1">
                 <econditions combine="and">
