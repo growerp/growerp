@@ -7,12 +7,12 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   growerp_core: ^1.2.3
-  growerp_marketing: ^1.2.0
-  growerp_website: ^1.2.0
-  growerp_inventory: ^1.2.0
-  growerp_catalog: ^1.2.0
-  growerp_order_accounting: ^1.2.0
-  growerp_user_company: ^1.2.0
+  growerp_marketing: ^1.2.1
+  growerp_website: ^1.2.1
+  growerp_inventory: ^1.2.1
+  growerp_catalog: ^1.2.1
+  growerp_order_accounting: ^1.2.1
+  growerp_user_company: ^1.2.1
   decimal: ^2.1.0
   flutter: 
     sdk: flutter
