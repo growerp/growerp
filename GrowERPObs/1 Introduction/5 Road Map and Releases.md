@@ -30,6 +30,12 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
+## Small fix release December 15, 2023(v1.3.0)
+1. Fixed the general growerp install command
+2. fixed reset password.
+3. Upgrade used packages
+4. Removed elastic search
+
 ## Ledger enhancement release December 8 2023(v1.2.0)
 1. Any ledger organization and numbering possible by upload or manual entry.
 2. Manual ledger transactions and posting added.
