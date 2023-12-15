@@ -1,3 +1,8 @@
+## 1.2.3
+* upgraded models package 1.2.3
+* moved dio build client here.
+* fixed reset user password
+
 ## 1.2.2
 * removed path reference
 

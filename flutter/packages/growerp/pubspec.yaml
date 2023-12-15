@@ -1,5 +1,5 @@
 name: growerp
-version: 1.2.1
+version: 1.2.2
 description: GrowERP installation and tools
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
@@ -15,7 +15,7 @@ dependencies:
   dio: ^5.3.3
   fast_csv: ^0.2.6
   get_it: ^7.6.4
-  growerp_models: ^1.2.1
+  growerp_models: ^1.2.2
   hive: ^2.2.3
   logger: ^2.0.2+1
   retrofit: ^4.0.3

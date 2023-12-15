@@ -1,3 +1,7 @@
+# 1.2.2
+* fixed install subcommand
+* add ledger transaction import
+
 # 1.2.1
 * added optional -url parameter for the backend
 * added additional -t parameter for receive timeout

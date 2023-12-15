@@ -17,13 +17,13 @@ dependencies:
   printing: ^5.11.1
   pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
-  growerp_core: ^1.2.2
-  growerp_marketing: ^1.2.0
-  growerp_website: ^1.2.0
-  growerp_inventory: ^1.2.0
-  growerp_catalog: ^1.2.0
-  growerp_order_accounting: ^1.2.0
-  growerp_user_company: ^1.2.0
+  growerp_core: ^1.2.3
+  growerp_marketing: ^1.2.1
+  growerp_website: ^1.2.1
+  growerp_inventory: ^1.2.1
+  growerp_catalog: ^1.2.1
+  growerp_order_accounting: ^1.2.1
+  growerp_user_company: ^1.2.1
   package_info_plus: ^5.0.1
   shared_preferences: ^2.0.6
   intl: ^0.18.1
