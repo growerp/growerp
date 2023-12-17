@@ -59,7 +59,7 @@ Map convertClass = {
   'Fixed Assets': 'Land and Building',
   '6': 'Accumulated Depreciation',
   'Accumulated Depreciation': 'Accumulated Depreciation',
-  '8': 'Other Assets',
+  '8': 'General Other Assets',
   'Other Assets': 'General Other Assets',
   '10': 'Accounts Payable',
   'Accounts Payable': 'Accounts Payable',
@@ -85,6 +85,26 @@ Map convertClass = {
   '97': 'Customer Returns',
   'Sales Discounts': 'Discounts and Write-downs',
 };
+
+/// specify filenames here, * allowed for names with the same starting characters
+List<String> getFileNames(FileType fileType) {
+  List<String> searchFiles = [];
+  switch (fileType) {
+    case FileType.glAccount:
+      //searchFiles.add('4-1-chart_of_accounts_list.csv');
+      searchFiles.add('Trial_Balance_2020-06-07.csv');
+      break;
+    case FileType.company:
+      searchFiles.add('1-3-customer_list.csv');
+      searchFiles.add('2-3-vendor_list.csv');
+      break;
+    default:
+      searchFiles.add('0b*.csv');
+  }
+  return searchFiles;
+}
+
+/// specify columns to columns mapping for every row here
 List<String> convertRow(
     FileType fileType, List<String> columnsFrom, String fileName) {
   List<String> columnsTo = [];
@@ -95,10 +115,8 @@ List<String> convertRow(
       if (columnsFrom[0] == '' || ids.contains(columnsFrom[0])) return [];
       ids.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[0]); //0 accountCode
-      columnsTo.add(columnsFrom[2]); //1 account name
-      // need to revers column name for different files
-      // this one for Trial_Balan...
-      columnsTo.add(convertClass[columnsFrom[1]]); //2 class
+      columnsTo.add(columnsFrom[1]); //1 account name
+      columnsTo.add(convertClass[columnsFrom[2]]); //2 class
       columnsTo.add(''); //3 type empty
       if (columnsFrom.length > 2 && columnsFrom[3] != '') {
         columnsTo.add(columnsFrom[3].replaceAll(',', ''));
@@ -260,7 +278,9 @@ List<String> convertRow(
   }
 }
 
+// specify file wide changes here
 String convertFile(FileType fileType, String string, String fileName) {
+  /// file type dependent changes here
   switch (fileType) {
     case FileType.glAccount:
       string = string
@@ -277,6 +297,11 @@ String convertFile(FileType fileType, String string, String fileName) {
           .replaceFirst('89500","Cost of Sales","Discount for Early Payment',
               '89500","99","Discount for Early Payment');
       break;
+    default:
+  }
+
+  /// filename dependent changes here
+  switch (fileName) {
     default:
   }
   return string;
@@ -300,22 +325,8 @@ Future<void> main(List<String> args) async {
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
     if (args.length == 2 && fileType.name != args[1]) continue;
-    List<String> fileContent = [];
-    List<List<String>> convertedRows = [];
     // define search file names for every filetype
-    List<String> searchFiles = [];
-    switch (fileType) {
-      case FileType.glAccount:
-        // searchFile = '4-1-chart_of_accounts_list.csv';
-        searchFiles.add('Trial_Balance_2020-06-07.csv');
-        break;
-      case FileType.company:
-        searchFiles.add('1-3-customer_list.csv');
-        searchFiles.add('2-3-vendor_list.csv');
-        break;
-      default:
-        searchFiles.add('0b*.csv');
-    }
+    List<String> searchFiles = getFileNames(fileType);
     if (searchFiles.isEmpty) continue;
     // list of files to process
     List<String> files = [];
@@ -328,6 +339,7 @@ Future<void> main(List<String> args) async {
       exit(1);
     }
     // process files and convert rows
+    List<List<String>> convertedRows = [];
     for (String fileInput in files) {
       logger.i("Processing filetype: ${fileType.name} file: ${fileInput}");
       // parse raw csv file string
@@ -349,8 +361,9 @@ Future<void> main(List<String> args) async {
     }
     // print("==2==${convertedRows.length} 0:${convertedRows[0]}");
 
+    // prepare output files and run post processing like mandatory sort
     int csvLength = 0;
-    // prepare output files and run post processing like sort
+    List<String> fileContent = [];
     switch (fileType) {
       case FileType.glAccount:
         fileContent.add(glAccountCsvFormat);

@@ -134,9 +134,16 @@ Future<void> main(List<String> args) async {
             exit(1);
           }
           logger.i("growerp directory already exist, will upgrade it");
-          run('git stash', workingDirectory: '$growerpPath');
+          // only stash and pop if changes present
+          var lines = '';
+          'git status'.start(
+              workingDirectory: '$growerpPath',
+              progress: Progress((line) => lines += line));
+          if (!lines.contains('working tree clean'))
+            run('git stash', workingDirectory: '$growerpPath');
           run('git pull', workingDirectory: '$growerpPath');
-          run('git stash pop', workingDirectory: '$growerpPath');
+          if (!lines.contains('working tree clean'))
+            run('git stash pop', workingDirectory: '$growerpPath');
         } else {
           run('git clone -b $branch https://github.com/growerp/growerp.git $growerpPath',
               workingDirectory: '$HOME');
@@ -163,7 +170,7 @@ Future<void> main(List<String> args) async {
           run('melos bootstrap', workingDirectory: '$growerpPath/flutter');
         }
         if (!exists(
-            "$growerpPath/flutter/packages/growerp_core/lib/src/models/account_class_model.freezed.dart")) {
+            "$growerpPath/flutter/packages/growerp_models/lib/src/models/account_class_model.freezed.dart")) {
           logger.i('build flutter frontend with freezed....');
           run('melos build --no-select',
               workingDirectory: '$growerpPath/flutter');

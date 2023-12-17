@@ -1,4 +1,11 @@
-# 1.2.2
+## 1.2.4
+* fix stash/pop error with install
+
+## 1.2.3
+* fix when no changes to stash
+* fix not build when freeze files present
+
+## 1.2.2
 * fixed install subcommand
 * add ledger transaction import
 
