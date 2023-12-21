@@ -28,7 +28,6 @@ class AccountClass with _$AccountClass {
     String? description,
     String? detailClassId,
     String? detailDescription,
-    bool? contra,
   }) = _AccountClass;
 
   factory AccountClass.fromJson(Map<String, dynamic> json) =>

@@ -57,34 +57,32 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
+    List<Category> current = [];
     if (state.status == CategoryStatus.initial ||
         event.refresh ||
         event.searchString != '') {
       start = 0;
+      current = [];
     } else {
       start = state.categories.length;
+      current = List.of(state.categories);
     }
     try {
-      emit(state.copyWith(status: CategoryStatus.loading));
-
       Categories compResult = await restClient.getCategory(
           companyPartyId: event.companyPartyId,
           searchString: event.searchString,
+          start: start,
           limit: event.limit,
           isForDropDown: event.isForDropDown);
-
       emit(state.copyWith(
         status: CategoryStatus.success,
-        categories: compResult.categories,
-        hasReachedMax:
-            compResult.categories.length < _categoryLimit ? true : false,
+        categories: current..addAll(compResult.categories),
+        hasReachedMax: compResult.categories.length < event.limit,
         searchString: '',
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: CategoryStatus.failure,
-          categories: [],
-          message: getDioError(e)));
+          status: CategoryStatus.failure, message: getDioError(e)));
     }
   }
 

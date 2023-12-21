@@ -44,13 +44,15 @@ class GlAccountDelete extends GlAccountEvent {
   final GlAccount glAccount;
 }
 
-class AccountClassesFetch extends GlAccountEvent {
-  const AccountClassesFetch({this.limit = 20});
+class GlAccountClassesFetch extends GlAccountEvent {
+  const GlAccountClassesFetch({this.searchString = '', this.limit = 20});
+  final String searchString;
   final int limit;
 }
 
-class AccountTypesFetch extends GlAccountEvent {
-  const AccountTypesFetch({this.limit = 20});
+class GlAccountTypesFetch extends GlAccountEvent {
+  const GlAccountTypesFetch({this.searchString = '', this.limit = 20});
+  final String searchString;
   final int limit;
 }
 

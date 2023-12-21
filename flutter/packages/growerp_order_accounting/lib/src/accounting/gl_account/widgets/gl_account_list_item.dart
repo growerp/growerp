@@ -44,17 +44,25 @@ class GlAccountListItem extends StatelessWidget {
         if (isPhone) Text(glAccount.accountName ?? '', key: Key('name$index')),
         Row(
           children: <Widget>[
-            Expanded(
-                child:
-                    Text(glAccount.accountCode ?? '', key: Key('code$index'))),
+            if ((!isPhone && glAccount.isDebit != null))
+              Expanded(
+                  child: Text(glAccount.accountCode ?? '',
+                      key: Key('code$index'))),
+            if ((isPhone && glAccount.isDebit != null))
+              Expanded(
+                  child: Text(glAccount.accountCode ?? '',
+                      key: Key('code$index'))),
             if (!isPhone)
               Expanded(
                   child: Text(glAccount.accountName ?? '',
                       key: Key('name$index'))),
             if (isPhone)
               Expanded(
-                  child: Text(glAccount.isDebit == true ? 'Debit' : 'Credit',
-                      key: Key('isDebit$index'), textAlign: TextAlign.center)),
+                  child: glAccount.isDebit == true
+                      ? Text(postedBalance,
+                          textAlign: TextAlign.center,
+                          key: Key('isDebit$index'))
+                      : const Text('')),
             if (!isPhone)
               Expanded(
                   child: Text(glAccount.accountClass?.description ?? '',
@@ -63,9 +71,17 @@ class GlAccountListItem extends StatelessWidget {
               Expanded(
                   child: Text(glAccount.accountType?.description ?? '',
                       key: Key('type$index'))),
+            if (isPhone && glAccount.isDebit == null)
+              Text(
+                  "debit:${glAccount.postedDebits.toString()} credit:${glAccount.postedCredits.toString()}",
+                  key: Key('postedBalance$index')),
             if (isPhone)
               Expanded(
-                  child: Text(postedBalance, key: Key('postedBalance$index'))),
+                  child: glAccount.isDebit == false
+                      ? Text(postedBalance,
+                          textAlign: TextAlign.center,
+                          key: Key('isDebit$index'))
+                      : const Text('')),
             if (!isPhone)
               Expanded(
                   child: glAccount.isDebit == null

@@ -62,9 +62,10 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!--resource
-    name="Image just for internal use 
-            <method type="post"><service
-    name="growerp.100.ImageServices100.upload#Image"/></method></resource-->
+        name="Image just for internal use
+            <method type="post">
+                <service name="growerp.100.ImageServices100.upload#Image"/>
+            </method></resource-->
         <!-- parties -->
         <resource name="CheckEmail" require-authentication="anonymous-all">
             <method type="get">

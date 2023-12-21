@@ -311,9 +311,16 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="recalculate" noun="GlAccountOrgSummaries">
+        <in-parameters>
+            <parameter name="companyPartyId" />
+        </in-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!companyPartyId">
+                <service-call out-map="relComp"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+                <set field="companyPartyId" from="relComp.companyPartyId" />
+            </if>
+            <log message="-===========company: $companyPartyId" />
             <service-call in-map="organizationPartyId: companyPartyId"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
         </actions>
@@ -746,6 +753,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="description" />
                     <parameter name="detailClassId" />
                     <parameter name="detailDescription" />
+                    <parameter name="contra" />
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -764,13 +772,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="search" value="%$search%" />
             </if>
             <if condition="trialBalance == true">
-                <set field="limit" value="999" />
                 <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
-                    list="glAccountList">
+                    list="glAccountList" offset="start">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="postedBalance" operator="not-equals"
                         from="BigDecimal.ZERO" />
-                    <econdition field-name="postedBalance" operator="is-not-null" />
+                    <order-by field-name="accountCode" />
                 </entity-find>
                 <else>
                     <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
@@ -796,11 +803,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
                     list="classes">
                     <econditions combine="or">
+                        <econdition field-name="detailDescription" from="glAccount.classDescription" />
+                        <econdition field-name="description" from="glAccount.classDescription" />
+                        <econdition field-name="parentDescription" from="glAccount.classDescription" />
                         <econdition field-name="topDescription" from="glAccount.classDescription" />
-                        <econdition field-name="middleDescription" from="glAccount.classDescription" />
-                        <econdition field-name="bottomDescription" from="glAccount.classDescription" />
-                        <econdition field-name="basicDescription" from="glAccount.classDescription" />
                     </econditions>
+                    <order-by
+                        field-name="[topDescription,parentDescription,description,detailDescription]" />
                 </entity-find>
                 <script>
                     glAccounts.add(
@@ -808,15 +817,15 @@ along with this software (see the LICENSE.md file). If not, see
                         accountCode: glAccount.accountCode,
                         accountName: glAccount.accountName,
                         accountClass: [
-                            topClassId: classes[0].topEnumId,
-                            topDescription: classes[0].topDescription,
-                            parentClassId: classes[0].middleEnumId,
-                            parentDescription: classes[0].middleDescription,
-                            classId: classes[0].bottomEnumId,
-                            description: classes[0].bottomDescription,
-                            detailClassId: classes[0].basicEnumId,
-                            detailDescription: classes[0].basicDescription,
-                            contra: classes[0].basicContra == 'Y' ? true : false,
+                            topClassId: classes[0].topClassId?:'',
+                            topDescription: classes[0].topDescription?:'',
+                            parentClassId: classes[0].parentClassId?:'',
+                            parentDescription: classes[0].parentDescription?:'',
+                            classId: classes[0].classId?:'',
+                            description: classes[0].description?:'',
+                            detailClassId: classes[0].detailClassId?:'',
+                            detailDescription: classes[0].detailDescription?:'',
+                            contra: classes[0].detailContra == 'Y' ? true : false,
                         ],
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
                             description: glAccount.typeDescription],
@@ -853,14 +862,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
-                    <parameter name="topClassId" />
-                    <parameter name="topDescription" />
-                    <parameter name="parentClassId" />
-                    <parameter name="parentDescription" />
                     <parameter name="classId" />
-                    <parameter name="description" />
-                    <parameter name="detailClassId" />
-                    <parameter name="detailDescription" />
+                    <parameter name="description" /><!-- classId/description from any level-->
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -891,7 +894,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="====create glaccount with class: ${glAccount.accountClass}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="!glAccount.accountClass">
@@ -899,21 +901,21 @@ along with this software (see the LICENSE.md file). If not, see
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
             <!-- get class from description -->
-            <log message="======looking for class: ${glAccount.accountClass}" />
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
-                limit="1">
-                <econditions combine="and">
-                    <econdition field-name="basicDescription"
-                        from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
-                    <econdition field-name="bottomDescription"
-                        from="glAccount.accountClass?.description" ignore-if-empty="true" />
-                    <econdition field-name="middleDescription"
-                        from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                list="classes">
+                <econditions combine="or">
+                    <econdition field-name="detailDescription"
+                        from="glAccount.accountClass.description" />
+                    <econdition field-name="description" from="glAccount.accountClass.description" />
+                    <econdition field-name="parentDescription"
+                        from="glAccount.accountClass.description" />
                     <econdition field-name="topDescription"
-                        from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
+                        from="glAccount.accountClass.description" />
                 </econditions>
+                <order-by
+                    field-name="[topDescription,parentDescription,description,detailDescription]" />
             </entity-find>
-            <if condition="!enums">
+            <if condition="!classes">
                 <return error="true"
                     message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
             </if>
@@ -925,8 +927,8 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[   accountCode: glAccount.accountCode,
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: enums[0].basicEnumId ?: enums[0].bottomEnumId 
-                                                    ?: enums[0].middleEnumId ?: enums[0].topEnumId,
+                            glAccountClassEnumId: classes[0].detailClassId ?: classes[0].classId 
+                                                    ?: classes[0].parentClassId ?: classes[0].topClassId,
                             glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
                             isTemporary: 'N',
                             disallowPosting: 'N',
@@ -992,14 +994,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="accountCode" required="true" />
                 <parameter name="accountName" />
                 <parameter name="accountClass" type="Map" required="true">
-                    <parameter name="topClassId" />
-                    <parameter name="topDescription" />
-                    <parameter name="parentClassId" />
-                    <parameter name="parentDescription" />
                     <parameter name="classId" />
-                    <parameter name="description" />
-                    <parameter name="detailClassId" />
-                    <parameter name="detailDescription" />
+                    <parameter name="description" /><!-- classId/description from any level-->
                 </parameter>
                 <parameter name="accountType" type="Map">
                     <parameter name="accountTypeId" />
@@ -1038,20 +1034,21 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
-                limit="1">
-                <econditions combine="and">
-                    <econdition field-name="basicDescription"
-                        from="glAccount.accountClass?.detailDescription" ignore-if-empty="true" />
-                    <econdition field-name="bottomDescription"
-                        from="glAccount.accountClass?.description" ignore-if-empty="true" />
-                    <econdition field-name="middleDescription"
-                        from="glAccount.accountClass?.parentDescription" ignore-if-empty="true" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                list="classes">
+                <econditions combine="or">
+                    <econdition field-name="detailDescription"
+                        from="glAccount.accountClass.description" />
+                    <econdition field-name="description" from="glAccount.accountClass.description" />
+                    <econdition field-name="parentDescription"
+                        from="glAccount.accountClass.description" />
                     <econdition field-name="topDescription"
-                        from="glAccount.accountClass?.topDescription" ignore-if-empty="true" />
+                        from="glAccount.accountClass.description" />
                 </econditions>
+                <order-by
+                    field-name="[topDescription,parentDescription,description,detailDescription]" />
             </entity-find>
-            <if condition="!enums">
+            <if condition="!classes">
                 <return error="true"
                     message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
             </if>
@@ -1060,8 +1057,8 @@ along with this software (see the LICENSE.md file). If not, see
                             parentGlAccountId: parentGlAccountId,
                             accountCode: glAccount.accountCode,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: enums[0].basicEnumId ?: enums[0].bottomEnumId 
-                                                    ?: enums[0].middleEnumId ?: enums[0].topEnumId,
+                            glAccountClassEnumId: classes[0].detailClassId ?: classes[0].classId 
+                                                    ?: classes[0].parentClassId ?: classes[0].topClassId,
                             glAccountTypeEnumId: glAccount.accountType.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
@@ -1071,30 +1068,56 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="get" noun="GlAccountClass">
+        <in-parameters>
+            <parameter name="search" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="3" type="Integer" />
+        </in-parameters>
         <out-parameters>
             <parameter name="accountClasses" type="List">
-                <parameter name="accountClassId" />
-                <parameter name="parentClassId" />
-                <parameter name="description" />
+                <parameter name="accountClass" type="Map">
+                    <parameter name="topClassId" />
+                    <parameter name="topDescription" />
+                    <parameter name="parentClassId" />
+                    <parameter name="parentDescription" />
+                    <parameter name="classId" />
+                    <parameter name="description" />
+                    <parameter name="detailClassId" />
+                    <parameter name="detailDescription" />
+                </parameter>
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums">
-                <econdition field-name="basicEnumId" operator="is-not-null" />
+            <if condition="search">
+                <set field="search" value="%$search%" />
+            </if>
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels" list="enums"
+                limit="limit" offset="start">
+                <econditions combine="or">
+                    <econdition field-name="topDescription" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="parentDescription" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="description" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="detailDescription" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                </econditions>
+                <order-by
+                    field-name="[topDescription,parentDescription,description,detailDescription]" />
             </entity-find>
             <set field="accountClasses" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
                     accountClasses.add(
-                        topClassId: enumEntry.topEnumId,
-                        topDescription: enumEntry.topDescription,
-                        parentClassId: enumEntry.middleEnumId,
-                        parentDescription: enumEntry.middleDescription,
-                        accountClassId: enumEntry.bottomEnumId,
-                        description: enumEntry.bottomDescription,
-                        detailClassId: enumEntry.basicEnumId,
-                        detailDescription: enumEntry.basicDescription,
-                        contra: enumEntry.bottomContra == 'Y' ? true : false,
+                        topClassId: enumEntry.topClassId?:'',
+                        topDescription: enumEntry.topDescription?:'',
+                        parentClassId: enumEntry.parentClassId?:'',
+                        parentDescription: enumEntry.parentDescription?:'',
+                        accountClassId: enumEntry.classId?:'',
+                        description: enumEntry.description?:'',
+                        detailClassId: enumEntry.detailClassId?:'',
+                        detailDescription: enumEntry.detailDescription?:'',
                     );
                 </script>
             </iterate>
@@ -1102,6 +1125,11 @@ along with this software (see the LICENSE.md file). If not, see
     </service>
 
     <service verb="get" noun="GlAccountType">
+        <in-parameters>
+            <parameter name="search" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="2" type="Integer" />
+        </in-parameters>
         <out-parameters>
             <parameter name="accountTypes" type="List">
                 <parameter name="accountTypeId" />
@@ -1110,8 +1138,18 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <entity-find entity-name="moqui.basic.Enumeration" list="enums">
+            <if condition="search">
+                <set field="search" value="%$search%" />
+            </if>
+            <entity-find entity-name="moqui.basic.Enumeration" list="enums" limit="limit"
+                offset="start">
                 <econdition field-name="enumTypeId" value="GlAccountType" />
+                <econditions combine="or">
+                    <econdition field-name="description" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                    <econdition field-name="enumId" operator="like" from="search"
+                        ignore-case="true" ignore-if-empty="true" />
+                </econditions>
             </entity-find>
             <set field="accountTypes" from="[]" />
             <iterate list="enums" entry="enumEntry">

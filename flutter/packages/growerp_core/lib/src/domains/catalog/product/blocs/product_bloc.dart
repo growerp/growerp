@@ -58,16 +58,17 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
+    List<Product> current = [];
+    if (state.status == ProductStatus.initial ||
+        event.refresh ||
+        event.searchString != '') {
+      start = 0;
+      current = [];
+    } else {
+      start = state.products.length;
+      current = List.of(state.products);
+    }
     try {
-      emit(state.copyWith(status: ProductStatus.loading));
-
-      if (state.status == ProductStatus.initial ||
-          event.refresh ||
-          event.searchString != '') {
-        start = 0;
-      } else {
-        start = state.products.length;
-      }
       Products compResult = await restClient.getProduct(
           searchString: event.searchString,
           isForDropDown: event.isForDropDown,
@@ -77,10 +78,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           classificationId: classificationId);
       emit(state.copyWith(
         status: ProductStatus.success,
-        products: start == 0
-            ? compResult.products
-            : (List.of(state.products)..addAll(compResult.products)),
-        hasReachedMax: compResult.products.length < event.limit ? true : false,
+        products: current..addAll(compResult.products),
+        hasReachedMax: compResult.products.length < event.limit,
         searchString: event.searchString,
       ));
     } on DioException catch (e) {

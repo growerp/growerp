@@ -32,7 +32,7 @@ Future main() async {
     restClient: RestClient(await buildDioClient(null)),
     classificationId: 'AppAdmin',
     chatServer: ChatServer(),
-    title: 'GrowERP.',
+    title: 'GrowERP Order and Accounting.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [OrderAccountingLocalizations.delegate],

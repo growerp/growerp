@@ -150,7 +150,7 @@ Map<String, String> finDocStatusValuesHotel = {
 
 String finDocCsvFormat = "finDoc Id, Sales, finDocType, descr, date, "
     " otherUser Id, other company Id \r\n";
-List<String> finDocCsvTitles = productCsvFormat.split(',');
+List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 
 List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {

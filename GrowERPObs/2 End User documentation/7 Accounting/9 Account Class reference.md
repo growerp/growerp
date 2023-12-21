@@ -1,14 +1,16 @@
-mainly defines if the account is a debit or credit account	also used for reporting, mandatory field. It is a categorization of ledger Accounts. If you do not want to use this feature just use the 'Debit' or 'Credit' values.
+mainly defines if the account is a debit or credit account	also used for reporting, mandatory field. It is a categorization of ledger Accounts. If you do not want to use this feature just use the 'Debit' or 'Credit' or any other level values.
 ## Income Statement Classes 
 - Debit
-	- **Cost of Sales**
+	- Cost of Sales
 		- Cost of Goods Sold
 			- Good and Material Cost
+			- Good and Material Cost (contra)
 			- Good Freight Cost
 			- Good Royalties Cost
 			- Inventory Shrinkage
+			- Other Cost of Goods sold
 		- Cost of Services Sold
-	- **Operating Expense**
+	- Operating Expense
 		- Sales and Marketing Expense
 			- Advertising
 			- Promotional Materials
@@ -32,6 +34,7 @@ mainly defines if the account is a debit or credit account	also used for reporti
 			- Utilities Expense
 			- Vehicle Expense
 			- Travel and Entertainment
+			- Other Expenses
 		- Contributions
 		- Non-Cash Expense
 			- Amortization
@@ -41,6 +44,7 @@ mainly defines if the account is a debit or credit account	also used for reporti
 			- Interest Expense
 			- Company Owned Life Insurance
 			- Royalties Expense - Non-COGS
+			- Expenses (contra)
 - Credit
 	- **Revenue**
 		- Goods Revenue
@@ -70,7 +74,6 @@ mainly defines if the account is a debit or credit account	also used for reporti
 			- Accumulated Depreciation (contra)
 		- Other Assets
 			- Intangible Assets
-			- General Other Assets
 			- Accumulated Amortization (contra)
 	- **Equity Distribution**
 		- Return of Capital
@@ -83,6 +86,7 @@ mainly defines if the account is a debit or credit account	also used for reporti
 			- Accrued Expenses (incurred, not yet paid)
 			- Unearned Revenue (received, not yet earned)
 			- Third-Party Holdings
+			- Current Liabilities (contra)
 		- Long Term Liabilities
 	- **Equity**
 		- Owners Equity

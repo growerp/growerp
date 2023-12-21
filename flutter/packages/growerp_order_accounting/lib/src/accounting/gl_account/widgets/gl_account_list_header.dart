@@ -63,6 +63,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                       context
                           .read<GlAccountBloc>()
                           .add(GlAccountFetch(searchString: searchString));
+                      searchString = '';
                     })
               ])
             : Column(children: [
@@ -76,8 +77,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                             Text("Account name", textAlign: TextAlign.center)),
                   if (ResponsiveBreakpoints.of(context).equals(MOBILE))
                     const Expanded(
-                        child:
-                            Text("debit/credit", textAlign: TextAlign.center)),
+                        child: Text("debit", textAlign: TextAlign.center)),
                   if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                     const Expanded(
                         child:
@@ -88,8 +88,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                             Text("Account Type", textAlign: TextAlign.center)),
                   if (ResponsiveBreakpoints.of(context).equals(MOBILE))
                     const Expanded(
-                        child: Text("Posted balance",
-                            textAlign: TextAlign.center)),
+                        child: Text("Credit", textAlign: TextAlign.center)),
                   if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                     const Expanded(
                         child: Text("Debit", textAlign: TextAlign.center)),

@@ -358,8 +358,8 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/GlAccount")
   @Extra({'requireApiKey': true})
   Future<GlAccounts> getGlAccount({
-    @Query('start') int? start,
-    @Query('limit') int? limit,
+    @Query('start') int? start = 0,
+    @Query('limit') int? limit = 10,
     @Query('search') String? searchString,
     @Query('trialBalance') bool? trialBalance,
   });
@@ -415,11 +415,17 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/AccountClass")
   @Extra({'requireApiKey': true})
-  Future<AccountClasses> getAccountClass();
+  Future<AccountClasses> getAccountClass({
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
 
   @GET("rest/s1/growerp/100/AccountType")
   @Extra({'requireApiKey': true})
-  Future<AccountTypes> getAccountType();
+  Future<AccountTypes> getAccountType({
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
 
   // chat
   @GET("rest/s1/growerp/100/ChatRoom")

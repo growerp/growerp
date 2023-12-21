@@ -32,8 +32,6 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   final _formKeyGlAccount = GlobalKey<FormState>();
   final _accountNameController = TextEditingController();
   final _accountCodeController = TextEditingController();
-  final _classSearchBoxController = TextEditingController();
-  final _typeSearchBoxController = TextEditingController();
   final _postedBalanceController = TextEditingController();
   bool? debitSelected;
   AccountClass? classSelected;
@@ -44,8 +42,8 @@ class GlAccountDialogState extends State<GlAccountDialog> {
   void initState() {
     super.initState();
     _glAccountBloc = context.read<GlAccountBloc>()
-      ..add(const AccountTypesFetch())
-      ..add(const AccountClassesFetch());
+      ..add(const GlAccountTypesFetch())
+      ..add(const GlAccountClassesFetch());
     if (widget.glAccount.glAccountId != null) {
       _accountCodeController.text = widget.glAccount.accountCode ?? '';
       _accountNameController.text = widget.glAccount.accountName ?? '';
@@ -135,60 +133,76 @@ class GlAccountDialogState extends State<GlAccountDialog> {
         key: const Key('class'),
         selectedItem: classSelected,
         popupProps: PopupProps.menu(
+          isFilterOnline: true,
+          showSelectedItems: true,
           showSearchBox: true,
-          searchFieldProps: TextFieldProps(
+          searchFieldProps: const TextFieldProps(
             autofocus: true,
-            decoration: const InputDecoration(labelText: 'Account Class'),
-            controller: _classSearchBoxController,
+            decoration: InputDecoration(labelText: 'Account Class'),
           ),
+          menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
           title: popUp(
             context: context,
-            title: 'Account Class',
+            title: 'Select GL Account Class',
             height: 50,
           ),
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: 'Account Class',
-            hintText: "Account Class",
-          ),
-        ),
+            dropdownSearchDecoration:
+                InputDecoration(labelText: 'AccountClass')),
         itemAsString: (AccountClass? u) =>
             " ${u!.topDescription!.substring(0, 1)}-${u.parentDescription}-"
-            "${u.description}-${u.detailDescription}${u.contra == true ? '-(Contra)' : ''}",
-        onChanged: (AccountClass? newValue) {
-          classSelected = newValue;
+            "${u.description}-${u.detailDescription}",
+        asyncItems: (String filter) async {
+          _glAccountBloc
+              .add(GlAccountClassesFetch(searchString: filter, limit: 3));
+          return Future.delayed(const Duration(milliseconds: 100), () {
+            return Future.value(_glAccountBloc.state.accountClasses);
+          });
         },
-        items: state.accountClasses,
+        compareFn: (item, sItem) =>
+            item.topClassId == sItem.topClassId &&
+            item.parentClassId == sItem.parentClassId &&
+            item.classId == sItem.classId &&
+            item.detailClassId == sItem.detailClassId,
+        onChanged: (AccountClass? newValue) {
+          classSelected = newValue!;
+        },
         validator: (value) => value == null ? 'field required' : null,
       ),
       DropdownSearch<AccountType>(
         key: const Key('type'),
         selectedItem: typeSelected,
         popupProps: PopupProps.menu(
+          isFilterOnline: true,
+          showSelectedItems: true,
           showSearchBox: true,
-          searchFieldProps: TextFieldProps(
+          searchFieldProps: const TextFieldProps(
             autofocus: true,
-            decoration: const InputDecoration(labelText: 'Account Type'),
-            controller: _typeSearchBoxController,
+            decoration: InputDecoration(labelText: 'Account Type'),
           ),
+          menuProps: MenuProps(borderRadius: BorderRadius.circular(20.0)),
           title: popUp(
             context: context,
-            title: 'Account Type',
+            title: 'Select GL Account Type',
             height: 50,
           ),
         ),
         dropdownDecoratorProps: const DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: 'Account Type',
-            hintText: "Account Type",
-          ),
-        ),
+            dropdownSearchDecoration:
+                InputDecoration(labelText: 'Account Type')),
         itemAsString: (AccountType? u) => " ${u!.description}",
-        onChanged: (AccountType? newValue) {
-          typeSelected = newValue;
+        asyncItems: (String filter) async {
+          _glAccountBloc
+              .add(GlAccountTypesFetch(searchString: filter, limit: 3));
+          return Future.delayed(const Duration(milliseconds: 100), () {
+            return Future.value(_glAccountBloc.state.accountTypes);
+          });
         },
-        items: state.accountTypes,
+        compareFn: (item, sItem) => item.accountTypeId == sItem.accountTypeId,
+        onChanged: (AccountType? newValue) {
+          typeSelected = newValue!;
+        },
       ),
       TextFormField(
         key: const Key('postedBalance'),
@@ -205,7 +219,14 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                 glAccountId: widget.glAccount.glAccountId,
                 accountName: _accountNameController.text,
                 accountCode: _accountCodeController.text,
-                accountClass: classSelected,
+                accountClass: AccountClass(
+                    description: classSelected!.detailDescription!.isNotEmpty
+                        ? classSelected?.detailDescription
+                        : classSelected!.description!.isNotEmpty
+                            ? classSelected?.description
+                            : classSelected!.parentDescription!.isNotEmpty
+                                ? classSelected?.parentDescription
+                                : classSelected?.topDescription),
                 accountType: typeSelected,
               )));
             }

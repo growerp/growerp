@@ -38,6 +38,7 @@ void main() {
         title: 'GlAccount test',
         clear: true); // use data from previous run, ifnone same as true
 
+    //delete the ledger accounts
     await CommonTest.createCompanyAndAdmin(tester, testData: {
       "glAccounts": <GlAccount>[], // delete all
     });

@@ -48,19 +48,22 @@ String outputDirectory = 'growerpOutput';
 18 Equity - Retained Earnings
 12 Other current liabilities
 */
+// SAGE50 coversion type to class
 Map convertClass = {
+  '0': 'Cash and Equivalent',
+  'Cash': 'Cash and Equivalent',
   '1': 'Accounts Receivable',
   'Accounts Receivable': 'Accounts Receivable',
   '2': 'Inventory Assets',
   'Inventory': 'Inventory Assets',
   '4': 'Other Assets',
   'Other Current Assets': 'Other Assets',
-  '5': 'Land and Building',
-  'Fixed Assets': 'Land and Building',
-  '6': 'Accumulated Depreciation',
-  'Accumulated Depreciation': 'Accumulated Depreciation',
-  '8': 'General Other Assets',
-  'Other Assets': 'General Other Assets',
+  '5': 'Long Term Assets',
+  'Fixed Assets': 'Long Term Assets',
+  '6': 'Accumulated Depreciation (contra)',
+  'Accumulated Depreciation': 'Accumulated Depreciation (contra)',
+  '8': 'Other Assets',
+  'Other Assets': 'Other Assets',
   '10': 'Accounts Payable',
   'Accounts Payable': 'Accounts Payable',
   '12': 'Current Liabilities',
@@ -71,15 +74,13 @@ Map convertClass = {
   'Equity-Retained Earnings': 'Retained Earnings',
   '19': 'Equity Distribution',
   'Equity-gets closed': 'Equity Distribution',
-  '21': 'Cash Income',
-  'Income': 'Cash Income',
+  '21': 'Goods Revenue',
+  'Income': 'Goods Revenue',
   '23': 'Cost of Sales',
   'Cost of Sales': 'Cost of Sales',
-  '24': 'Operating Expense',
-  'Expenses': 'Operating Expense',
+  '24': 'Other Expenses',
+  'Expenses': 'Other Expenses',
   '98': 'Discounts and Write-downs',
-  '0': 'Cash and Equivalent',
-  'Cash': 'Cash and Equivalent',
   '99': 'Goods Revenue',
   '16': 'Owners Equity',
   '97': 'Customer Returns',
@@ -104,6 +105,39 @@ List<String> getFileNames(FileType fileType) {
   return searchFiles;
 }
 
+// specify file wide changes here
+String convertFile(FileType fileType, String string, String fileName) {
+  /// file type dependent changes here
+  switch (fileType) {
+    case FileType.glAccount:
+      string = string
+          .replaceFirst(
+              '24500,Calf. State Income Tax Payable,Other Current Liabilities,',
+              '24500,Calf. State Income Tax Payable,Current Liability (contra),')
+          .replaceFirst(
+              '24700,Federal Income Tax Payable,Other Current Liabilities,',
+              '24700,Federal Income Tax Payable,Current Liability (contra),')
+          .replaceFirst('48000,Sales Returns and Allowances,Income,',
+              '48000,Sales Returns and Allowances,Customer Returns (contra),')
+          .replaceFirst('49000,Sales Discounts,Income,',
+              '49000,Sales Discounts,Discounts and Write-downs (contra),')
+          .replaceFirst('50050,Raw Materials,Cost of Sales,',
+              '50050,Raw Materials,Good and Material Cost (contra),')
+          .replaceFirst('61500,Bad Debt,Expenses,',
+              '61500,Bad Debt,Allowance For Bad Debts (contra),')
+          .replaceFirst('89500,Discount for Early Payment,Cost of Sales,',
+              '89500,Discount for Early Payment,Expenses (contra),');
+      break;
+    default:
+  }
+
+  /// filename dependent changes here
+  switch (fileName) {
+    default:
+  }
+  return string;
+}
+
 /// specify columns to columns mapping for every row here
 List<String> convertRow(
     FileType fileType, List<String> columnsFrom, String fileName) {
@@ -116,7 +150,9 @@ List<String> convertRow(
       ids.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[0]); //0 accountCode
       columnsTo.add(columnsFrom[1]); //1 account name
-      columnsTo.add(convertClass[columnsFrom[2]]); //2 class
+      columnsTo.add(convertClass[columnsFrom[2]] != null
+          ? convertClass[columnsFrom[2]]
+          : columnsFrom[2]); //2 class
       columnsTo.add(''); //3 type empty
       if (columnsFrom.length > 2 && columnsFrom[3] != '') {
         columnsTo.add(columnsFrom[3].replaceAll(',', ''));
@@ -278,35 +314,6 @@ List<String> convertRow(
   }
 }
 
-// specify file wide changes here
-String convertFile(FileType fileType, String string, String fileName) {
-  /// file type dependent changes here
-  switch (fileType) {
-    case FileType.glAccount:
-      string = string
-          .replaceFirst('48000,Sales Returns and Allowances,21',
-              '48000,Sales Returns and Allowances,97')
-          .replaceFirst('49000,Sales Discounts,21', '49000,Sales Discounts,98')
-          .replaceFirst('89500,Discount for Early Payment,23',
-              '89500,Discount for Early Payment,99');
-      string = string
-          .replaceFirst('48000","Income","Sales Returns and Allowances',
-              '48000","97","Sales Returns and Allowances')
-          .replaceFirst('49000","Income","Sales Discounts',
-              '49000","98","Sales Discounts')
-          .replaceFirst('89500","Cost of Sales","Discount for Early Payment',
-              '89500","99","Discount for Early Payment');
-      break;
-    default:
-  }
-
-  /// filename dependent changes here
-  switch (fileName) {
-    default:
-  }
-  return string;
-}
-
 Future<void> main(List<String> args) async {
   var logger = Logger(filter: MyFilter());
   if (args.isEmpty) {
@@ -358,6 +365,7 @@ Future<void> main(List<String> args) async {
         // print("==old: $row new: $convertedRow");
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
+      logger.i("file: ${fileInput} $index records processed");
     }
     // print("==2==${convertedRows.length} 0:${convertedRows[0]}");
 
@@ -422,6 +430,8 @@ Future<void> main(List<String> args) async {
       final file = File("$outputDirectory/${fileType.name}.csv");
       file.writeAsStringSync(fileContent.join());
     }
+    logger.i(
+        "Output file created: ${fileType.name}.csv ${fileContent.length} records");
   }
   exit(0);
 }

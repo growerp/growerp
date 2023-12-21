@@ -1,29 +1,17 @@
-/*
- * This GrowERP software is in the public domain under CC0 1.0 Universal plus a
- * Grant of Patent License.
- * 
- * To the extent possible under law, the author(s) have dedicated all
- * copyright and related and neighboring rights to this software to the
- * public domain worldwide. This software is distributed without any
- * warranty.
- * 
- * You should have received a copy of the CC0 Public Domain Dedication
- * along with this software (see the LICENSE.md file). If not, see
- * <http://creativecommons.org/publicdomain/zero/1.0/>.
- */
-
 import 'dart:async';
+import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
-import 'package:growerp_models/growerp_models.dart';
 
 part 'gl_account_event.dart';
 part 'gl_account_state.dart';
+
+const throttleDuration = Duration(milliseconds: 100);
 
 EventTransformer<E> glAccountDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -34,10 +22,10 @@ EventTransformer<E> glAccountDroppable<E>(Duration duration) {
 class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   GlAccountBloc(this.restClient) : super(const GlAccountState()) {
     on<GlAccountFetch>(_onGlAccountFetch,
-        transformer: glAccountDroppable(const Duration(milliseconds: 100)));
+        transformer: glAccountDroppable(throttleDuration));
     on<GlAccountUpdate>(_onGlAccountUpdate);
-    on<AccountClassesFetch>(_onAccountClassesFetch);
-    on<AccountTypesFetch>(_onAccountTypesFetch);
+    on<GlAccountClassesFetch>(_onGlAccountClassesFetch);
+    on<GlAccountTypesFetch>(_onGlAccountTypesFetch);
     on<GlAccountUpload>(_onGlAccountUpload);
     on<GlAccountDownload>(_onGlAccountDownload);
   }
@@ -52,36 +40,37 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
+    late List<GlAccount> current;
+    if (state.status == GlAccountStatus.initial ||
+        event.refresh ||
+        event.searchString != '' ||
+        event.trialBalance) {
+      start = 0;
+      current = [];
+    } else {
+      start = state.glAccounts.length;
+      current = List.of(state.glAccounts);
+    }
+
     try {
-      emit(state.copyWith(status: GlAccountStatus.loading));
-      if (state.status == GlAccountStatus.initial ||
-          event.refresh ||
-          event.searchString != '' ||
-          event.trialBalance) {
-        start = 0;
-      } else {
-        start = state.glAccounts.length;
-      }
-      GlAccounts compResult = await restClient.getGlAccount(
-        searchString: event.searchString,
-        start: 0,
-        limit: event.limit,
-        trialBalance: event.trialBalance,
-      );
-      return emit(state.copyWith(
-        status: GlAccountStatus.success,
-        glAccounts: start == 0
-            ? compResult.glAccounts
-            : (List.of(state.glAccounts)..addAll(compResult.glAccounts)),
-        hasReachedMax:
-            compResult.glAccounts.length < event.limit ? true : false,
-        searchString: '',
-      ));
-    } on DioException catch (e) {
+      final glAccounts = await restClient.getGlAccount(
+          start: start,
+          limit: event.limit,
+          searchString: event.searchString,
+          trialBalance: event.trialBalance);
+      glAccounts.glAccounts.isEmpty
+          ? emit(state.copyWith(
+              hasReachedMax: true, status: GlAccountStatus.success))
+          : emit(
+              state.copyWith(
+                status: GlAccountStatus.success,
+                glAccounts: current..addAll(glAccounts.glAccounts),
+                hasReachedMax: glAccounts.glAccounts.length < event.limit,
+              ),
+            );
+    } catch (e) {
       emit(state.copyWith(
-          status: GlAccountStatus.failure,
-          glAccounts: [],
-          message: getDioError(e)));
+          status: GlAccountStatus.failure, message: getDioError(e)));
     }
   }
 
@@ -120,34 +109,32 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
     }
   }
 
-  Future<void> _onAccountClassesFetch(
-    AccountClassesFetch event,
+  Future<void> _onGlAccountClassesFetch(
+    GlAccountClassesFetch event,
     Emitter<GlAccountState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: GlAccountStatus.loading));
-      AccountClasses result = await restClient.getAccountClass();
+      AccountClasses result = await restClient.getAccountClass(
+          searchString: event.searchString, limit: event.limit);
       return emit(state.copyWith(
-          accountClasses: result.accountClasses,
+          accountClasses: List.of(result.accountClasses),
           status: GlAccountStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: GlAccountStatus.failure,
-          glAccounts: [],
-          message: getDioError(e)));
+          status: GlAccountStatus.failure, message: getDioError(e)));
     }
   }
 
-  Future<void> _onAccountTypesFetch(
-    AccountTypesFetch event,
+  Future<void> _onGlAccountTypesFetch(
+    GlAccountTypesFetch event,
     Emitter<GlAccountState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: GlAccountStatus.loading));
-
-      AccountTypes result = await restClient.getAccountType();
+      AccountTypes result = await restClient.getAccountType(
+          searchString: event.searchString, limit: event.limit);
       return emit(state.copyWith(
-          accountTypes: result.accountTypes, status: GlAccountStatus.success));
+          accountTypes: List.of(result.accountTypes),
+          status: GlAccountStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: GlAccountStatus.failure,

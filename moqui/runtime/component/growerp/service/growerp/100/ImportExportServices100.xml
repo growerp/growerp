@@ -74,17 +74,17 @@ along with this software (see the LICENSE.md file). If not, see
                         ])</script>
                 </if>
             </iterate>
-            <!-- create unposted balance in initial transaction-->
+            <!-- create posted balance in initial transaction-->
             <if condition="transactions.size() &gt; 0">
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="finDoc: [docType: 'transaction', sales: 'true',
+                    in-map="finDoc: [docType: 'transaction', sales: 'true', isPosted: true,
                                             description: 'Initial balance',
                                             items: transactions]"
                     out-map="context" />
             </if>
-            <!--message
-            public="true" type="success">${glAccounts.size()} Ledger accounts with
-            ${transactions.size()} initial transactions Upload completed</message-->
+            <!-- recalculate posted summary-->
+            <service-call name="growerp.100.AccountingServices100.recalculate#GlAccountOrgSummaries"
+                in-map="companyPartyId: relComp.companyPartyId" />
         </actions>
     </service>
 

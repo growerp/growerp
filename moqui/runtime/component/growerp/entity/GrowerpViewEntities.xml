@@ -1688,34 +1688,35 @@ along with this software (see the LICENSE.md file). If not, see
         <member-entity entity-alias="TOP1" entity-name="moqui.basic.Enumeration">
         </member-entity>
         <member-entity
-            entity-alias="MIDDLE1" entity-name="moqui.basic.Enumeration"
+            entity-alias="PARENT1" entity-name="moqui.basic.Enumeration"
             join-from-alias="TOP1" join-optional="true">
             <key-map field-name="enumId" related="parentEnumId" />
         </member-entity>
         <member-entity
-            entity-alias="BOTTOM1" entity-name="moqui.basic.Enumeration"
-            join-from-alias="MIDDLE1" join-optional="true">
+            entity-alias="NONE1" entity-name="moqui.basic.Enumeration"
+            join-from-alias="PARENT1" join-optional="true">
             <key-map field-name="enumId" related="parentEnumId" />
         </member-entity>
         <member-entity
-            entity-alias="BASIC1" entity-name="moqui.basic.Enumeration"
-            join-from-alias="BOTTOM1" join-optional="true">
+            entity-alias="DETAIL1" entity-name="moqui.basic.Enumeration"
+            join-from-alias="NONE1" join-optional="true">
             <key-map field-name="enumId" related="parentEnumId" />
         </member-entity>
         <alias name="topEnumTypeId" field="enumTypeId" entity-alias="TOP1" />
+        <alias
+            name="topParentClassId" field="parentEnumId" entity-alias="TOP1" />
+
+        <alias name="topClassId" field="enumId" entity-alias="TOP1" />
         <alias name="topDescription" field="description" entity-alias="TOP1" />
+        <alias name="parentClassId" field="enumId" entity-alias="PARENT1" />
         <alias
-            name="topEnumId" field="enumId" entity-alias="TOP1" />
-        <alias
-            name="middleDescription" field="description" entity-alias="MIDDLE1" />
-        <alias name="middleEnumId" field="enumId" entity-alias="MIDDLE1" />
-        <alias name="middleContra" field="optionIndicator" entity-alias="MIDDLE1" />
-        <alias name="bottomDescription" field="description" entity-alias="BOTTOM1" />
-        <alias name="bottomEnumId" field="enumId" entity-alias="BOTTOM1" />
-        <alias name="bottomContra" field="optionIndicator" entity-alias="BOTTOM1" />
-        <alias name="basicDescription" field="description" entity-alias="BASIC1" />
-        <alias name="basicEnumId" field="enumId" entity-alias="BASIC1" />
-        <alias name="basicContra" field="optionIndicator" entity-alias="BASIC1" />
+            name="parentDescription" field="description" entity-alias="PARENT1" />
+        <alias name="classId" field="enumId" entity-alias="NONE1" />
+        <alias name="description" field="description" entity-alias="NONE1" />
+        <alias name="contra" field="optionIndicator" entity-alias="NONE1" />
+        <alias name="detailDescription" field="description" entity-alias="DETAIL1" />
+        <alias name="detailClassId" field="enumId" entity-alias="DETAIL1" />
+        <alias name="detailContra" field="optionIndicator" entity-alias="DETAIL1" />
         <entity-condition>
             <econdition field-name="enumTypeId" value="GlAccountClass" entity-alias="TOP1" />
             <econdition field-name="parentEnumId" value="null" entity-alias="TOP1" />

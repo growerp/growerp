@@ -39,14 +39,17 @@ class GlAccountList extends StatefulWidget {
 class GlAccountsState extends State<GlAccountList> {
   final ScrollController _scrollController = ScrollController();
   late GlAccountBloc _glAccountBloc;
-  int limit = 20;
+  late bool trialBalance;
+  late int limit;
 
   @override
   void initState() {
     super.initState();
+    trialBalance = false;
+    limit = 20;
+    _scrollController.addListener(_onScroll);
     _glAccountBloc = context.read<GlAccountBloc>()
       ..add(GlAccountFetch(limit: limit));
-    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -86,15 +89,34 @@ class GlAccountsState extends State<GlAccountList> {
                     child: const Icon(Icons.file_copy)),
                 const SizedBox(height: 10),
                 FloatingActionButton(
+                    heroTag: "trialBalance",
                     key: const Key("tb"),
                     onPressed: () {
-                      _glAccountBloc
-                          .add(const GlAccountFetch(trialBalance: true));
+                      bool refresh = false;
+                      if (trialBalance == false) {
+                        trialBalance = true;
+                        limit = 999;
+                      } else {
+                        trialBalance = false;
+                        refresh = true;
+                        limit = 20;
+                      }
+                      _glAccountBloc.add(GlAccountFetch(
+                          trialBalance: trialBalance,
+                          limit: limit,
+                          refresh: refresh));
                     },
                     tooltip: 'Trial Balance',
-                    child: const Text("TB")),
+                    child: Text(
+                      "TB",
+                      style: trialBalance
+                          ? const TextStyle(
+                              decoration: TextDecoration.lineThrough)
+                          : null,
+                    )),
                 const SizedBox(height: 10),
                 FloatingActionButton(
+                    heroTag: "addNew",
                     key: const Key("addNew"),
                     onPressed: () async {
                       await showDialog(
@@ -113,8 +135,11 @@ class GlAccountsState extends State<GlAccountList> {
                 const GlAccountListHeader(),
                 Expanded(
                     child: RefreshIndicator(
-                        onRefresh: (() async => _glAccountBloc
-                            .add(const GlAccountFetch(refresh: true))),
+                        onRefresh: (() async => _glAccountBloc.add(
+                            GlAccountFetch(
+                                refresh: true,
+                                limit: limit,
+                                trialBalance: trialBalance))),
                         child: ListView.builder(
                             key: const Key('listView'),
                             shrinkWrap: true,
@@ -160,7 +185,10 @@ class GlAccountsState extends State<GlAccountList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _glAccountBloc.add(const GlAccountFetch());
+    if (_isBottom) {
+      _glAccountBloc
+          .add(GlAccountFetch(trialBalance: trialBalance, limit: limit));
+    }
   }
 
   bool get _isBottom {

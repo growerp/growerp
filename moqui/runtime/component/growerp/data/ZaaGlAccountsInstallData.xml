@@ -71,7 +71,8 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="CURRENT_ASSET" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Accrued Revenue" enumId="ACCRUED_REVENUE"
         parentEnumId="CURRENT_ASSET" enumTypeId="GlAccountClass" />
-    <moqui.basic.Enumeration description="Allowance For Bad Debts" enumId="ALLOWANCE_BAD_DEBT"
+    <moqui.basic.Enumeration description="Allowance For Bad Debts (contra)"
+        enumId="ALLOWANCE_BAD_DEBT"
         parentEnumId="CURRENT_ASSET" optionIndicator="Y" enumTypeId="GlAccountClass" />
 
     <!-- contra: CREDIT -->
@@ -81,17 +82,17 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="LONG_TERM_ASSET" enumTypeId="GlAccountClass" sequenceNum="10" />
     <moqui.basic.Enumeration description="Equipment" enumId="EQUIPMENT"
         parentEnumId="LONG_TERM_ASSET" enumTypeId="GlAccountClass" sequenceNum="20" />
-    <moqui.basic.Enumeration description="Accumulated Depreciation" enumId="ACCUM_DEPRECIATION"
+    <moqui.basic.Enumeration description="Accumulated Depreciation (contra)"
+        enumId="ACCUM_DEPRECIATION"
         parentEnumId="LONG_TERM_ASSET" optionIndicator="Y" enumTypeId="GlAccountClass"
         sequenceNum="90" /><!-- contra: CREDIT -->
 
     <moqui.basic.Enumeration description="Other Assets" enumId="OTHER_ASSET" parentEnumId="ASSET"
         enumTypeId="GlAccountClass" />
-    <moqui.basic.Enumeration description="General Other Assets" enumId="GEN_OTHER_ASSET"
-        parentEnumId="OTHER_ASSET" enumTypeId="GlAccountClass" sequenceNum="11" />
     <moqui.basic.Enumeration description="Intangible Assets" enumId="INTANGIBLE_ASSET"
         parentEnumId="OTHER_ASSET" enumTypeId="GlAccountClass" sequenceNum="10" />
-    <moqui.basic.Enumeration description="Accumulated Amortization" enumId="ACCUM_AMORTIZATION"
+    <moqui.basic.Enumeration description="Accumulated Amortization (contra)"
+        enumId="ACCUM_AMORTIZATION"
         parentEnumId="OTHER_ASSET" optionIndicator="Y" enumTypeId="GlAccountClass" sequenceNum="90" /><!--
     contra: CREDIT -->
 
@@ -106,6 +107,9 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="COST_OF_SALES" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Good and Material Cost" enumId="GOOD_MATERIAL_COST"
         parentEnumId="COST_GOODS_SOLD" enumTypeId="GlAccountClass" />
+    <moqui.basic.Enumeration description="Good and Material Cost (contra)"
+        enumId="GOOD_MATERIAL_COST_CONTRA"
+        parentEnumId="COST_GOODS_SOLD" optionIndicator="Y" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Good Freight Cost" enumId="GOOD_FREIGHT_COST"
         parentEnumId="COST_GOODS_SOLD" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Good Royalties Cost" enumId="GOOD_ROYALTIES_COST"
@@ -146,6 +150,8 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="GEN_ADMIN_EXPENSE" sequenceNum="10" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Travel and Entertainment" enumId="TRAVEL_ENT"
         parentEnumId="GEN_ADMIN_EXPENSE" sequenceNum="10" enumTypeId="GlAccountClass" />
+    <moqui.basic.Enumeration description="Other Expenses" enumId="OTHER_EXPENSES"
+        parentEnumId="GEN_ADMIN_EXPENSE" sequenceNum="10" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Utilities Expense" enumId="UTILITIES_EXPENSE"
         parentEnumId="GEN_ADMIN_EXPENSE" sequenceNum="10" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Vehicle Expense" enumId="VEHICLE_EXPENSE"
@@ -181,6 +187,8 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="NON_OP_EXPENSE" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Royalties Expense - Non-COGS" enumId="NON_COGS_ROYALTIES"
         parentEnumId="NON_OP_EXPENSE" enumTypeId="GlAccountClass" />
+    <moqui.basic.Enumeration description="Expenses (contra)" enumId="EXPENSE_CONTRA"
+        parentEnumId="NON_OP_EXPENSE" optionIndicator="Y" enumTypeId="GlAccountClass" />
 
     <!-- CREDIT classes -->
     <moqui.basic.Enumeration description="Current Liabilities" enumId="CURRENT_LIABILITY"
@@ -195,12 +203,15 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="CURRENT_LIABILITY" enumTypeId="GlAccountClass" />
     <moqui.basic.Enumeration description="Third-Party Holdings" enumId="THIRD_PARTY_HOLDINGS"
         parentEnumId="CURRENT_LIABILITY" enumTypeId="GlAccountClass" />
+    <moqui.basic.Enumeration description="Current Liability (contra)"
+        enumId="CURRENT_LIABILITY_CONTRA" parentEnumId="CURRENT_LIABILITY"
+        optionIndicator="Y" enumTypeId="GlAccountClass" /><!-- contra -->
     <moqui.basic.Enumeration description="Long Term Liabilities" enumId="LONG_TERM_LIABILITY"
         parentEnumId="LIABILITY" enumTypeId="GlAccountClass" />
 
     <moqui.basic.Enumeration description="Owners Equity" enumId="OWNERS_EQUITY"
         parentEnumId="EQUITY" enumTypeId="GlAccountClass" />
-    <moqui.basic.Enumeration description="Treasury Stock" enumId="TREASURY_STOCK"
+    <moqui.basic.Enumeration description="Treasury Stock (contra)" enumId="TREASURY_STOCK"
         parentEnumId="EQUITY" optionIndicator="Y" enumTypeId="GlAccountClass" /><!-- DEBIT -->
     <moqui.basic.Enumeration description="Retained Earnings" enumId="RETAINED_EARNINGS"
         parentEnumId="EQUITY" enumTypeId="GlAccountClass" />
@@ -213,10 +224,11 @@ along with this software (see the LICENSE.md file). If not, see
         parentEnumId="REVENUE" enumTypeId="GlAccountClass" sequenceNum="20" />
     <moqui.basic.Enumeration description="Other Revenue" enumId="OTHER_REVENUE"
         parentEnumId="REVENUE" enumTypeId="GlAccountClass" sequenceNum="30" />
-    <moqui.basic.Enumeration description="Discounts and Write-downs" enumId="COST_OF_DISCOUNTS"
+    <moqui.basic.Enumeration description="Discounts and Write-downs (contra)"
+        enumId="COST_OF_DISCOUNTS_CONTRA"
         parentEnumId="REVENUE" optionIndicator="Y" enumTypeId="GlAccountClass" sequenceNum="40" /><!--
     contra: DEBIT -->
-    <moqui.basic.Enumeration description="Customer Returns" enumId="CUSTOMER_RETURNS"
+    <moqui.basic.Enumeration description="Customer Returns (contra)" enumId="CUSTOMER_RETURNS"
         parentEnumId="REVENUE" optionIndicator="Y" enumTypeId="GlAccountClass" sequenceNum="50" /><!--
     contra: DEBIT -->
 
