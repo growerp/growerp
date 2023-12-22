@@ -112,48 +112,50 @@ class CompanyListState extends State<CompanyList> {
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Builder(builder: (BuildContext context) {
       Widget showForm(state) {
-        return RefreshIndicator(
-            onRefresh: (() async =>
-                _companyBloc.add(const CompanyFetch(refresh: true))),
-            child: ListView.builder(
-              key: const Key('listView'),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: hasReachedMax && companies.isNotEmpty
-                  ? companies.length + 1
-                  : companies.length + 2,
-              controller: _scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Column(children: [
-                    CompanyListHeader(
-                        isPhone: isPhone,
-                        role: widget.role,
-                        companyBloc: _companyBloc),
-                    const Divider(),
-                  ]);
-                }
-                if (index == 1 && companies.isEmpty) {
-                  return const Center(
-                      heightFactor: 20,
-                      child: Text("no records found!",
-                          key: Key('empty'), textAlign: TextAlign.center));
-                }
-                index -= 1;
-                return index >= companies.length
-                    ? const BottomLoader()
-                    : Dismissible(
-                        key: const Key('companyItem'),
-                        direction: DismissDirection.startToEnd,
-                        child: RepositoryProvider.value(
-                            value: repos,
-                            child: BlocProvider.value(
-                                value: _companyBloc,
-                                child: CompanyListItem(
-                                    role: widget.role,
-                                    company: companies[index],
-                                    index: index))));
-              },
-            ));
+        return Column(
+          children: [
+            CompanyListHeader(
+                isPhone: isPhone, role: widget.role, companyBloc: _companyBloc),
+            Expanded(
+              child: RefreshIndicator(
+                  onRefresh: (() async =>
+                      _companyBloc.add(const CompanyFetch(refresh: true))),
+                  child: ListView.builder(
+                    key: const Key('listView'),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: hasReachedMax
+                        ? companies.length + 1
+                        : companies.length + 2,
+                    controller: _scrollController,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == 0) {
+                        return Visibility(
+                            visible: companies.isEmpty,
+                            child: const Center(
+                                heightFactor: 20,
+                                child: Text("no records found!",
+                                    key: Key('empty'),
+                                    textAlign: TextAlign.center)));
+                      }
+                      index--;
+                      return index >= companies.length
+                          ? const BottomLoader()
+                          : Dismissible(
+                              key: const Key('companyItem'),
+                              direction: DismissDirection.startToEnd,
+                              child: RepositoryProvider.value(
+                                  value: repos,
+                                  child: BlocProvider.value(
+                                      value: _companyBloc,
+                                      child: CompanyListItem(
+                                          role: widget.role,
+                                          company: companies[index],
+                                          index: index))));
+                    },
+                  )),
+            ),
+          ],
+        );
       }
 
       blocListener(context, state) {

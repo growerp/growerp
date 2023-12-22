@@ -48,6 +48,8 @@ class ProductListItem extends StatelessWidget {
             Row(
               children: <Widget>[
                 if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                  Expanded(child: Text(product.pseudoId, key: Key('id$index'))),
+                if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                   Expanded(
                       child: Text("${product.productName}",
                           key: Key('name$index'))),

@@ -47,6 +47,12 @@ class CompanyListItem extends StatelessWidget {
         ),
         title: Row(
           children: <Widget>[
+            if (!isPhone)
+              Expanded(
+                  child: Text(
+                company.pseudoId ?? '',
+                key: Key('id$index'),
+              )),
             Expanded(
                 child: Text(
               "${company.name ?? ''} ",

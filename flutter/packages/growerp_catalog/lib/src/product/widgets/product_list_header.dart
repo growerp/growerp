@@ -90,6 +90,9 @@ class _ProductListHeaderState extends State<ProductListHeader> {
                   Row(children: <Widget>[
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Expanded(
+                          child: Text("Id", textAlign: TextAlign.center)),
+                    if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                      const Expanded(
                           child: Text("Name", textAlign: TextAlign.center)),
                     if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
                       const Expanded(

@@ -23,8 +23,6 @@ import 'package:hive/hive.dart';
 
 import '../build_dio_client.dart';
 import '../file_type_model.dart';
-import '../get_file_type.dart';
-import '../get_files.dart';
 import '../logger.dart';
 
 Future<void> main(List<String> args) async {
@@ -71,7 +69,10 @@ Future<void> main(List<String> args) async {
           timeout = int.parse(args[++i]);
           break;
         case '-f':
-          overrideFileType = getFileType(args[++i]);
+          i++;
+          overrideFileType = FileType.values.firstWhere(
+              (e) => e.name == args[i],
+              orElse: () => FileType.unknown);
           if (overrideFileType == FileType.unknown) {
             logger.e("Filetype: ${args[i]}  not recognized");
             exit(1);
@@ -81,8 +82,8 @@ Future<void> main(List<String> args) async {
           modifiedArgs.add(args[i]);
       }
     }
-//    logger.i(
-//        "Growerp exec cmd: ${modifiedArgs[0].toLowerCase()} u: $username p: $password -branch: $branch -f $overrideFileType");
+    logger.i(
+        "Growerp command: ${modifiedArgs[0].toLowerCase()} i: $inputFile u: $username p: $password -branch: $branch -f ${overrideFileType.name}");
 
     Future<void> login(RestClient client) async {
       if (username.isNotEmpty && password.isNotEmpty) {
@@ -186,25 +187,35 @@ Future<void> main(List<String> args) async {
         run('flutter run',
             workingDirectory: '$growerpPath/flutter/packages/admin');
         break;
+      //============================= import =================================
       case 'import':
         List<String> files =
-            getFiles(inputFile, logger, overrrideFileType: overrideFileType);
+            find('*.csv', workingDirectory: inputFile).toList();
         if (files.isEmpty) {
-          logger.e("no files found to process, use the -i directive?");
+          logger.e(
+              "no files found to process, use the -i directive for the directory?");
           exit(1);
         }
+        logger.i(
+            "Starting import from file/directory: $inputFile fileType: ${overrideFileType.name}");
         logger.i("Processing files: \n $files");
         // talk to backend
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout)));
+        late FileType fileType;
         try {
           await login(client);
           // import
-          for (String file in files) {
-            logger.i("Importing file: $file with admin user: "
+          for (fileType in FileType.values) {
+            if (overrideFileType != FileType.unknown &&
+                overrideFileType != fileType) continue;
+            var fileName =
+                find('${fileType.name}.csv', workingDirectory: inputFile)
+                    .toList();
+            if (fileName.isEmpty) continue;
+            logger.i("Importing filetype: ${fileType.name} with admin user: "
                 "${authenticate.user?.email}");
-            FileType fileType = getFileType(file);
-            String csvFile = File(file).readAsStringSync();
+            String csvFile = File(fileName.first).readAsStringSync();
             switch (fileType) {
               case FileType.glAccount:
                 await client.importGlAccounts(CsvToGlAccounts(csvFile));
@@ -238,9 +249,10 @@ Future<void> main(List<String> args) async {
             }
           }
         } on DioException catch (e) {
-          logger.e(getDioError(e));
+          logger.e("Importing filetype: $fileType Error: ${getDioError(e)}");
         }
         break;
+      //============================= export =================================
       case 'export':
         FileType fileType = FileType.unknown;
         if (modifiedArgs.length > 1) {
@@ -311,7 +323,7 @@ Future<void> main(List<String> args) async {
             file6.writeAsStringSync(csvContent);
           }
         } on DioException catch (e) {
-          logger.e(getDioError(e));
+          logger.e("Exporting filetype: $fileType Error: ${getDioError(e)}");
         }
         break;
       default:

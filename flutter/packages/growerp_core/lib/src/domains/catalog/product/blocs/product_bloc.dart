@@ -61,7 +61,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     List<Product> current = [];
     if (state.status == ProductStatus.initial ||
         event.refresh ||
-        event.searchString != '') {
+        event.searchString.isNotEmpty) {
       start = 0;
       current = [];
     } else {

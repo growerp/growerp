@@ -56,44 +56,33 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
     CompanyFetch event,
     Emitter<CompanyState> emit,
   ) async {
-    if (state.hasReachedMax &&
-        !event.refresh &&
-        event.searchString == '' &&
-        event.limit > 0) {
+    if (state.hasReachedMax && !event.refresh && event.searchString.isEmpty) {
       return;
     }
+    List<Company> current = [];
     if (state.status == CompanyStatus.initial ||
         event.refresh ||
-        event.searchString != '') {
+        event.searchString.isNotEmpty) {
       start = 0;
+      current = [];
     } else {
       start = state.companies.length;
+      current = List.of(state.companies);
     }
     try {
-      if (state.status != CompanyStatus.initial) {
-        emit(state.copyWith(status: CompanyStatus.loading));
-      }
-      late Companies compResult;
-      if (event.limit > 0) {
-        compResult = await restClient.getCompany(
-            role: role,
-            companyPartyId: event.companyPartyId,
-            ownerPartyId: event.ownerPartyId,
-            searchString: event.searchString,
-            isForDropDown: event.isForDropDown,
-            start: 0,
-            limit: event.limit);
-      } else {
-        // just get status success
-        return emit(state.copyWith(status: CompanyStatus.success));
-      }
-      return emit(state.copyWith(
+      Companies compResult = await restClient.getCompany(
+          role: role,
+          companyPartyId: event.companyPartyId,
+          ownerPartyId: event.ownerPartyId,
+          searchString: event.searchString,
+          isForDropDown: event.isForDropDown,
+          start: start,
+          limit: event.limit);
+      emit(state.copyWith(
         status: CompanyStatus.success,
-        companies: start == 0
-            ? compResult.companies
-            : (List.of(state.companies)..addAll(compResult.companies)),
-        hasReachedMax: compResult.companies.length < event.limit ? true : false,
-        searchString: '',
+        companies: current..addAll(compResult.companies),
+        hasReachedMax: compResult.companies.length < event.limit,
+        searchString: event.searchString,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(

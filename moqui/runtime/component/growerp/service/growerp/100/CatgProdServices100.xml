@@ -33,6 +33,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="products" type="List">
                 <parameter name="product" type="Map">
                     <parameter name="productId" />
+                    <parameter name="pseudoId" />
                     <parameter name="productTypeId" />
                     <parameter name="assetClassId" />
                     <parameter name="productName" />
@@ -100,6 +101,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="productId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="productId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="productName" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
@@ -233,6 +236,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="classificationId" required="true" />
             <parameter name="product" required="true" type="Map">
+                <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
                 <parameter name="assetClassId" />
                 <parameter name="productName" />
@@ -254,6 +258,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="product" type="Map">
                 <parameter name="productId" />
+                <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
                 <parameter name="assetClassId" />
                 <parameter name="productName" />
@@ -283,6 +288,7 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- product -->
             <service-call name="create#mantle.product.Product"
                 in-map="[
+                pseudoId: product.pseudoId,
                 productName: product.productName,
                 description: product.description,
                 salesIntroductionDate: ec.user.nowTimestamp,
@@ -370,6 +376,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="product" required="true" type="Map">
                 <parameter name="productId" />
+                <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
                 <parameter name="assetClassId" />
                 <parameter name="productName" />
@@ -389,6 +396,7 @@ along with this software (see the LICENSE.md file). If not, see
         <out-parameters>
             <parameter name="product" type="Map">
                 <parameter name="productId" />
+                <parameter name="pseudoId" />
                 <parameter name="productTypeId" />
                 <parameter name="assetClassId" />
                 <parameter name="productName" />
@@ -428,11 +436,14 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert" />
             <if
-                condition="(product.productName &amp;&amp; product.productName != oldProduct.productName)
-                || (product.description &amp;&amp; product.description != oldProduct.description)
-                || (prodConvert.convertedStatusId &amp;&amp;
-                    product.productTypeEnumId != prodConvert.convertedStatusId)
-                || (product.useWarehouse &amp;&amp; product.requireInventory != requireInventory)">
+                condition="( 
+                    || (product.pseudoId &amp;&amp; product.psuedoId != oldProduct.pseudoId)
+                    || (product.productName &amp;&amp; product.productName != oldProduct.productName)
+                    || (product.description &amp;&amp; product.description != oldProduct.description)
+                    || (prodConvert.convertedStatusId &amp;&amp;
+                        product.productTypeEnumId != prodConvert.convertedStatusId)
+                    || (product.useWarehouse &amp;&amp; product.requireInventory != requireInventory)">
+                <set field="oldProduct.pseudoId" from="product.pseudoId" />
                 <set field="oldProduct.productName" from="product.productName" />
                 <set field="oldProduct.description" from="product.description" />
                 <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />

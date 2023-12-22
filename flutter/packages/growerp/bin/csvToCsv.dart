@@ -329,6 +329,8 @@ Future<void> main(List<String> args) async {
   }
   createDir(outputDirectory);
 
+  logger.i(
+      "Input directory/filename: ${args[0]} fileType: ${args.length > 1 ? args[1] : ''}");
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
     if (args.length == 2 && fileType.name != args[1]) continue;

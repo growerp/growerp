@@ -72,8 +72,9 @@ class _CompanyListHeaderState extends State<CompanyListHeader> {
                           .add(CompanyFetch(searchString: searchString));
                     })
               ])
-            : Row(
-                children: <Widget>[
+            : Column(children: [
+                Row(children: <Widget>[
+                  if (!widget.isPhone) const Expanded(child: Text("Id")),
                   const Expanded(child: Text("Company Name")),
                   if (!widget.isPhone && widget.role == null)
                     const Expanded(child: Text("Role")),
@@ -87,8 +88,9 @@ class _CompanyListHeaderState extends State<CompanyListHeader> {
                     Expanded(
                         child: Text(UserCompanyLocalizations.of(context)!
                             .numberOfEmployees)),
-                ],
-              ),
+                ]),
+                const Divider(),
+              ]),
         subtitle: widget.isPhone
             ? Row(children: [
                 const Expanded(child: Text('Email')),

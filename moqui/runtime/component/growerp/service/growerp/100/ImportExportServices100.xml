@@ -120,8 +120,35 @@ along with this software (see the LICENSE.md file). If not, see
                                 <message type="danger">Company id: ${company.pseudoId} ${company.name} not processed, email: ${company.email} is not valid!\r\n</message>
                             </else-if>
                             <else>
-                                <service-call name="growerp.100.PartyServices100.create#Company"
-                                    in-map="[company: company]" />
+                                <service-call
+                                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                                    out-map="context" />
+                                <entity-find entity-name="mantle.party.Party" list="parties">
+                                    <econdition field-name="pseudoId" from="company.pseudoId" />
+                                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                                </entity-find>
+                                <if condition="parties">
+                                    <then>
+                                        <entity-find entity-name="mantle.party.PartyRole"
+                                            list="roles">
+                                            <econdition field-name="partyId"
+                                                from="parties[0].partyId" />
+                                        </entity-find>
+                                        <if condition="!roles">
+                                            <service-call name="create#mantle.party.PartyRole"
+                                                in-map="[   partyId: parties[0].partyId,
+                                                        roleTypeId: company.role]" />
+                                            <else>
+                                                <message type="danger">Company: ${company.name} not processed, pseudoId: ${company.pseudoId} already exist!\r\n</message>
+                                            </else>
+                                        </if>
+                                    </then>
+                                    <else>
+                                        <service-call
+                                            name="growerp.100.PartyServices100.create#Company"
+                                            in-map="[company: company]" />
+                                    </else>
+                                </if>
                             </else>
                         </if>
                     </else>
