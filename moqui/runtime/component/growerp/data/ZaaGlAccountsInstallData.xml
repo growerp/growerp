@@ -225,7 +225,7 @@ along with this software (see the LICENSE.md file). If not, see
     <moqui.basic.Enumeration description="Other Revenue" enumId="OTHER_REVENUE"
         parentEnumId="REVENUE" enumTypeId="GlAccountClass" sequenceNum="30" />
     <moqui.basic.Enumeration description="Discounts and Write-downs (contra)"
-        enumId="COST_OF_DISCOUNTS_CONTRA"
+        enumId="COST_OF_DISCOUNTS"
         parentEnumId="REVENUE" optionIndicator="Y" enumTypeId="GlAccountClass" sequenceNum="40" /><!--
     contra: DEBIT -->
     <moqui.basic.Enumeration description="Customer Returns (contra)" enumId="CUSTOMER_RETURNS"
