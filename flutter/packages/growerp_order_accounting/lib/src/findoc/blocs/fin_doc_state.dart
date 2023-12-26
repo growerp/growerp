@@ -20,6 +20,7 @@ class FinDocState extends Equatable {
   const FinDocState({
     this.status = FinDocStatus.initial,
     this.finDocs = const [],
+    this.finDocItems = const [],
     this.itemTypes =
         const [], // item types for invoice paymentType for payments
     this.users = const [],
@@ -32,6 +33,7 @@ class FinDocState extends Equatable {
   final FinDocStatus status;
   final String? message;
   final List<FinDoc> finDocs;
+  final List<FinDocItem> finDocItems;
   final List<ItemType> itemTypes;
   final List<User> users;
   final bool hasReachedMax;
@@ -42,6 +44,7 @@ class FinDocState extends Equatable {
     FinDocStatus? status,
     String? message,
     List<FinDoc>? finDocs,
+    List<FinDocItem>? finDocItems,
     List<ItemType>? itemTypes,
     List<User>? users,
     bool? hasReachedMax,
@@ -52,6 +55,7 @@ class FinDocState extends Equatable {
     return FinDocState(
       status: status ?? this.status,
       finDocs: finDocs ?? this.finDocs,
+      finDocItems: finDocItems ?? this.finDocItems,
       itemTypes: itemTypes ?? this.itemTypes,
       users: users ?? this.users,
       message: message,
@@ -62,7 +66,8 @@ class FinDocState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, message, finDocs, itemTypes, users];
+  List<Object?> get props =>
+      [status, message, finDocs, finDocItems, itemTypes, users];
 
   @override
   String toString() => '$status { #finDocs: ${finDocs.length}, '

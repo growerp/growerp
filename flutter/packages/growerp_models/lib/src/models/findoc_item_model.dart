@@ -48,13 +48,13 @@ class FinDocItem with _$FinDocItem {
   }) = _FinDocItem;
 
   factory FinDocItem.fromJson(Map<String, dynamic> json) =>
-      _$FinDocItemFromJson(json);
+      _$FinDocItemFromJson(json['finDocItem'] ?? json);
 }
 
 String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
     " productId, description, quantity, price/amount, accountCode, "
     " isDebit \r\n";
-List<String> finDocItemCsvTitles = productCsvFormat.split(',');
+List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');
 int finDocItemCsvLength = finDocItemCsvTitles.length;
 
 List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
@@ -70,8 +70,12 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
         itemSeqId: row[2],
         pseudoProductId: row[3],
         description: row[4],
-        quantity: Decimal.parse(row[5]),
-        price: Decimal.parse(row[6]),
+        quantity: row[5] != 'null' && row[5].isNotEmpty
+            ? Decimal.parse(row[5])
+            : null,
+        price: row[6] != 'null' && row[6].isNotEmpty
+            ? Decimal.parse(row[6].replaceAll(',', ''))
+            : null,
         glAccount: GlAccount(accountCode: row[7]),
         isDebit: row[8] == 'false' ? false : true,
       ));
@@ -88,18 +92,20 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
   return finDocItems;
 }
 
-String CsvFromFinDocItems(List<FinDoc> finDocs) {
-  var csv = [finDocCsvFormat];
-  for (FinDoc finDoc in finDocs) {
+String CsvFromFinDocItems(List<FinDocItem> finDocItems) {
+  var csv = [finDocItemCsvFormat];
+  for (FinDocItem finDocItem in finDocItems) {
     csv.add(createCsvRow([
-      finDoc.pseudoId() ?? '',
-      finDoc.docType.toString(),
-      finDoc.sales.toString(),
-      finDoc.description ?? '',
-      finDoc.creationDate.toString(),
-      finDoc.otherUser!.pseudoId!,
-      finDoc.otherCompany!.pseudoId!,
-    ], finDocCsvLength));
+      finDocItem.pseudoId ?? '',
+      finDocItem.docType.toString(),
+      finDocItem.itemSeqId.toString(),
+      finDocItem.pseudoProductId ?? '',
+      finDocItem.description ?? '',
+      finDocItem.quantity?.toString() ?? '',
+      finDocItem.price?.toString() ?? '',
+      finDocItem.glAccount?.accountCode ?? '',
+      finDocItem.isDebit?.toString() ?? '',
+    ], finDocItemCsvLength));
   }
   return csv.join();
 }

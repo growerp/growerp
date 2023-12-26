@@ -100,7 +100,8 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('2-3-vendor_list.csv');
       break;
     default:
-      searchFiles.add('0b*.csv');
+      //  searchFiles.add('0b*.csv');
+      searchFiles.add('0b-yearAll1Test*.csv');
   }
   return searchFiles;
 }
@@ -165,11 +166,11 @@ List<String> convertRow(
 
     /// convert to [productCsvFormat]
     case FileType.product:
-      if (columnsFrom[18] != '' && !ids.contains(columnsFrom[18])) {
-        ids.add(columnsFrom[18]);
-        columnsTo.add(columnsFrom[18]); // id
+      if (columnsFrom[17] != '' && !ids.contains(columnsFrom[17])) {
+        ids.add(columnsFrom[17]);
+        columnsTo.add(columnsFrom[17]); // id
         columnsTo.add('Physical Good'); // type
-        columnsTo.add(columnsFrom[19]); // name
+        columnsTo.add(columnsFrom[18]); // name
         columnsTo.add(''); // description
         columnsTo.add(''); // list price
         columnsTo.add(''); // sales price
@@ -192,7 +193,6 @@ List<String> convertRow(
         // 8:Bill to State,Bill to Zip,Bill to Country,Bill to Sales Tax ID,
         // 12:Telephone 1,Telephone 2,Fax Number,Customer E-mail,
         // 16:Resale Number,Discount Days,Discount Percent,Customer Web Site
-        columnsTo.add('');
         columnsTo.add(columnsFrom[2]); // id
         columnsTo.add(Role.customer.value); //role
         columnsTo.add(columnsFrom[3]); //name
@@ -216,7 +216,6 @@ List<String> convertRow(
         // 17:Remit to 1 Zip,Remit to 1 Country,Telephone 1,Telephone 2,
         // 21:Fax Number,Vendor E-mail,Vendor Web Site,Account Number,
         // 25:Due Days,Discount Days,Discount Percent
-        columnsTo.add('');
         columnsTo.add(columnsFrom[2]); //id
         columnsTo.add(Role.supplier.value); // role
         columnsTo.add(columnsFrom[3]); //name
@@ -279,7 +278,7 @@ List<String> convertRow(
 
       columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
       columnsTo.add('true');
-      columnsTo.add('transaction');
+      columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
       columnsTo.add(newDate);
       columnsTo.add('');
@@ -297,7 +296,7 @@ List<String> convertRow(
       }
 
       columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
-      columnsTo.add('transaction');
+      columnsTo.add('Transaction');
       columnsTo.add('');
       columnsTo.add(columnsFrom[17]);
       columnsTo.add(columnsFrom[18]);
@@ -399,6 +398,7 @@ Future<void> main(List<String> args) async {
         fileContent.add(finDocCsvFormat);
         csvLength = finDocCsvLength;
         // sort better use maps for empty values
+        // sort by reference number and date
         convertedRows.sort((a, b) =>
             "${a.asMap()[4] ?? ''}${a.asMap()[0] ?? ''}"
                 .compareTo("${b.asMap()[4] ?? ''}${b.asMap()[0] ?? ''}"));
@@ -407,17 +407,16 @@ Future<void> main(List<String> args) async {
         List<List<String>> headerRows = [];
         for (final row in convertedRows) {
           if (row.isEmpty) continue;
-          if (row.isEmpty || lastRow.isEmpty || row[0] != lastRow[0])
-            headerRows.add(row);
+          if (lastRow.isEmpty || row[0] != lastRow[0]) headerRows.add(row);
           lastRow = row;
         }
-        if (lastRow.isNotEmpty) headerRows.add(lastRow);
         convertedRows = headerRows;
         break;
       case FileType.finDocTransactionItem:
         fileContent.add(finDocItemCsvFormat);
         csvLength = finDocItemCsvLength;
         // sort better use maps for empty values
+        // sort by just reference number
         convertedRows
             .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
         break;

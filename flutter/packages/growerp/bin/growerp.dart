@@ -99,7 +99,7 @@ Future<void> main(List<String> args) async {
               lastName: 'Jansen',
               companyName: 'test company',
               currencyId: 'USD',
-              demoData: true,
+              demoData: false,
               classificationId: 'AppAdmin');
         }
         // login for key
@@ -202,7 +202,7 @@ Future<void> main(List<String> args) async {
         // talk to backend
         final client = RestClient(await buildDioClient(backendUrl,
             timeout: Duration(seconds: timeout)));
-        late FileType fileType;
+        FileType fileType = FileType.unknown;
         try {
           await login(client);
           // import

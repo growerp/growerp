@@ -55,7 +55,9 @@ class FinDocListItemTrans extends StatelessWidget {
               : finDoc.otherUser!.company!.name![0]),
         ),
         title: Row(children: <Widget>[
-          Expanded(child: Text(finDoc.id() ?? '?', key: Key('id$index'))),
+          Expanded(
+              child: Text(finDoc.pseudoId ?? finDoc.id() ?? '?',
+                  key: Key('id$index'))),
           Expanded(
               child: Text(finDoc.description.truncate(isPhone ? 15 : 40),
                   key: Key('descr$index'))),
@@ -171,6 +173,8 @@ class FinDocListItemTrans extends StatelessWidget {
                 ),
                 title: Text(
                     "GlAccount: ${e.glAccount?.accountCode} ${e.glAccount?.accountName}  "
+                    "${isPhone ? '\n' : ''}"
+                    "ProductId: ${e.pseudoProductId ?? ''} ${e.description ?? ''}  "
                     "${isPhone ? '\n' : ''}"
                     "Amount: $debitCredit ${e.price}",
                     key: Key('itemLine$index'))))

@@ -110,6 +110,17 @@ class FinDocs with _$FinDocs {
 }
 
 @freezed
+class FinDocItems with _$FinDocItems {
+  factory FinDocItems({
+    @Default(const []) List<FinDocItem> finDocItems,
+  }) = _FinDocItems;
+  FinDocItems._();
+
+  factory FinDocItems.fromJson(Map<String, dynamic> json) =>
+      _$FinDocItemsFromJson(json);
+}
+
+@freezed
 class ItemTypes with _$ItemTypes {
   factory ItemTypes({
     @Default(const []) List<ItemType> itemTypes,

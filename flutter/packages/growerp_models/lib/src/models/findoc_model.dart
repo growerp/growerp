@@ -33,6 +33,7 @@ class FinDoc with _$FinDoc {
   factory FinDoc({
     FinDocType? docType, // order, invoice, payment, shipment, transaction
     @Default(true) bool sales,
+    String? pseudoId,
     String? orderId,
     String? shipmentId,
     String? invoiceId,
@@ -89,17 +90,6 @@ class FinDoc with _$FinDoc {
                   : docType == FinDocType.order
                       ? orderId
                       : null;
-  String? pseudoId() => docType == FinDocType.transaction
-      ? transactionId
-      : docType == FinDocType.payment
-          ? pseudoPaymentId
-          : docType == FinDocType.invoice
-              ? pseudoInvoiceId
-              : docType == FinDocType.shipment
-                  ? pseudoShipmentId
-                  : docType == FinDocType.order
-                      ? pseudoOrderId
-                      : null;
 
   String? chainId() =>
       shipmentId ?? (invoiceId ?? (paymentId ?? (orderId ?? (transactionId))));
@@ -111,7 +101,7 @@ class FinDoc with _$FinDoc {
   @override
   String toString() =>
       //    "rental: ${items[0].rentalFromDate?.toString().substring(0, 10)}/${items[0].rentalThruDate?.toString().substring(0, 10)} st:$status!"
-      "$docType# $orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
+      "$docType# $pseudoId/$orderId!/$shipmentId/$invoiceId!/$paymentId! s/p: ${salesString()} "
       "Date: $creationDate! $description! items: ${items.length} "
       "asset: ${items.isNotEmpty ? items[0].assetName : ''} "
       "${items.isNotEmpty ? items[0].assetId : ''}"
@@ -148,7 +138,7 @@ Map<String, String> finDocStatusValuesHotel = {
   'FinDocCancelled': 'Cancelled'
 };
 
-String finDocCsvFormat = "finDoc Id, Sales, finDocType, descr, date, "
+String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
     " otherUser Id, other company Id \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
@@ -160,36 +150,8 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
   for (final row in result) {
     if (row == result.first) continue;
     try {
-      String? pseudoOrderId,
-          pseudoInvoiceId,
-          pseudoPaymentId,
-          pseudoShipmentId,
-          pseudoTransactionId;
-      switch (FinDocType.tryParse(row[2])) {
-        case FinDocType.order:
-          pseudoOrderId = row[0];
-          break;
-        case FinDocType.invoice:
-          pseudoInvoiceId = row[0];
-          break;
-        case FinDocType.payment:
-          pseudoPaymentId = row[0];
-          break;
-        case FinDocType.shipment:
-          pseudoShipmentId = row[0];
-          break;
-        case FinDocType.transaction:
-          pseudoTransactionId = row[0];
-          break;
-        default:
-      }
-
       finDocs.add(FinDoc(
-        pseudoOrderId: pseudoOrderId,
-        pseudoInvoiceId: pseudoInvoiceId,
-        pseudoPaymentId: pseudoPaymentId,
-        pseudoShipmentId: pseudoShipmentId,
-        pseudoTransactionId: pseudoTransactionId,
+        pseudoId: row[0],
         docType: FinDocType.tryParse(row[2]),
         sales: row[1] == 'false' ? false : true,
         description: row[3],
@@ -214,7 +176,7 @@ String CsvFromFinDocs(List<FinDoc> finDocs) {
   var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
     csv.add(createCsvRow([
-      finDoc.pseudoId() ?? '',
+      finDoc.pseudoId ?? '',
       finDoc.docType.toString(),
       finDoc.sales.toString(),
       finDoc.description ?? '',

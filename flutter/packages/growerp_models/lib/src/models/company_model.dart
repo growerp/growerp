@@ -55,8 +55,8 @@ class Company with _$Company {
 }
 
 String companyCsvFormat =
-    'System Id, PseudoId, Role, Company Name*, Email, Telephone, Currency id,'
-    'Image,Postal Address 1, Address 2, Postal Code, City, Province, Country '
+    'Id, Role, Company Name, Email, Telephone, Currency id,'
+    'Image,Postal Address 1, Address 2, Postal Code, City, Province, Country, '
     'Credit Card Description, Number, Type, Expire month, Year, '
     'Vat perc, Sales Perc\r\n';
 int companyCsvLength = companyCsvFormat.split(',').length;
@@ -67,29 +67,29 @@ List<Company> CsvToCompanies(String csvFile) {
   for (final row in result) {
     if (row == result.first) continue;
     companies.add(Company(
-      pseudoId: row[1],
-      role: Role.getByValue(row[2]),
-      name: row[3],
-      email: row[4].contains('@example.com') // avoid duplicated emails
-          ? (Random().nextInt(1000).toString() + row[4])
-          : row[4],
-      telephoneNr: row[5],
-      currency: Currency(currencyId: row[6]),
-      image: row[7].isNotEmpty ? base64.decode(row[6]) : null,
+      pseudoId: row[0],
+      role: Role.getByValue(row[1]),
+      name: row[2],
+      email: row[3].contains('@example.com') // avoid duplicated emails
+          ? (Random().nextInt(1000).toString() + row[3])
+          : row[3],
+      telephoneNr: row[4],
+      currency: Currency(currencyId: row[5]),
+      image: row[6].isNotEmpty ? base64.decode(row[6]) : null,
       address: Address(
-          address1: row[8],
-          address2: row[9],
-          postalCode: row[10],
-          city: row[11],
-          province: row[12],
-          country: row[13]),
+          address1: row[7],
+          address2: row[8],
+          postalCode: row[9],
+          city: row[10],
+          province: row[11],
+          country: row[12]),
       paymentMethod: PaymentMethod(
-          ccDescription: row[14],
-          creditCardType: CreditCardType.getByValue(row[15]),
-          expireMonth: row[16],
-          expireYear: row[17]),
-      vatPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
-      salesPerc: row[19] != '' ? Decimal.parse(row[19]) : null,
+          ccDescription: row[13],
+          creditCardType: CreditCardType.getByValue(row[14]),
+          expireMonth: row[15],
+          expireYear: row[16]),
+      vatPerc: row[17] != '' ? Decimal.parse(row[17]) : null,
+      salesPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
     ));
   }
 
@@ -100,7 +100,6 @@ String CsvFromCompanies(List<Company> companies) {
   var csv = [companyCsvFormat];
   for (Company company in companies) {
     csv.add(createCsvRow([
-      company.partyId ?? '',
       company.pseudoId ?? '',
       company.role.toString(),
       company.name ?? '',

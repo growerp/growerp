@@ -62,59 +62,50 @@ class FinDocListForm extends StatelessWidget {
         if (sales) {
           return BlocProvider<SalesOrderBloc>(
               create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId)
-                    ..add(const FinDocFetch()),
+                  FinDocBloc(restClient, sales, docType, classificationId),
               child: finDocList);
         }
         return BlocProvider<PurchaseOrderBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId)
-                  ..add(const FinDocFetch()),
+                FinDocBloc(restClient, sales, docType, classificationId),
             child: finDocList);
       case FinDocType.invoice:
         if (sales) {
           return BlocProvider<SalesInvoiceBloc>(
               create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId)
-                    ..add(const FinDocFetch()),
+                  FinDocBloc(restClient, sales, docType, classificationId),
               child: finDocList);
         }
         return BlocProvider<PurchaseInvoiceBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId)
-                  ..add(const FinDocFetch()),
+                FinDocBloc(restClient, sales, docType, classificationId),
             child: finDocList);
       case FinDocType.payment:
         if (sales) {
           return BlocProvider<SalesPaymentBloc>(
               create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId)
-                    ..add(const FinDocFetch()),
+                  FinDocBloc(restClient, sales, docType, classificationId),
               child: finDocList);
         }
         return BlocProvider<PurchasePaymentBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId)
-                  ..add(const FinDocFetch()),
+                FinDocBloc(restClient, sales, docType, classificationId),
             child: finDocList);
       case FinDocType.shipment:
         if (sales) {
           return BlocProvider<OutgoingShipmentBloc>(
               create: (context) =>
-                  FinDocBloc(restClient, sales, docType, classificationId)
-                    ..add(const FinDocFetch()),
+                  FinDocBloc(restClient, sales, docType, classificationId),
               child: finDocList);
         }
         return BlocProvider<IncomingShipmentBloc>(
             create: (BuildContext context) =>
-                FinDocBloc(restClient, sales, docType, classificationId)
-                  ..add(const FinDocFetch()),
+                FinDocBloc(restClient, sales, docType, classificationId),
             child: finDocList);
       case FinDocType.transaction:
         return BlocProvider<TransactionBloc>(
             create: (context) =>
-                FinDocBloc(restClient, sales, docType, classificationId)
-                  ..add(const FinDocFetch()),
+                FinDocBloc(restClient, sales, docType, classificationId),
             child: finDocList);
       default:
         return Center(child: Text("FinDoc type: ${docType.name} not allowed"));
@@ -157,7 +148,7 @@ class FinDocListState extends State<FinDocList> {
   final _scrollController = ScrollController();
   List<FinDoc> finDocs = <FinDoc>[];
   int? tab;
-  int limit = 12;
+  late int limit;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
   bool isLoading = true;
@@ -200,11 +191,12 @@ class FinDocListState extends State<FinDocList> {
         break;
       default:
     }
+    _finDocBloc.add(const FinDocFetch(limit: 15));
   }
 
   @override
   Widget build(BuildContext context) {
-    limit = (MediaQuery.of(context).size.height / 60).round();
+    limit = (MediaQuery.of(context).size.height / 100).round();
     Widget finDocsPage() {
       bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
       return Column(children: [
@@ -441,7 +433,7 @@ class FinDocListState extends State<FinDocList> {
   }
 
   void _onScroll() {
-    if (_isBottom) _finDocBloc.add(const FinDocFetch());
+    if (_isBottom) _finDocBloc.add(FinDocFetch(limit: limit));
   }
 
   bool get _isBottom {

@@ -23,8 +23,6 @@ import 'package:stream_transform/stream_transform.dart';
 part 'fin_doc_event.dart';
 part 'fin_doc_state.dart';
 
-const _finDocLimit = 20;
-
 mixin PurchaseInvoiceBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin SalesInvoiceBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin PurchasePaymentBloc on Bloc<FinDocEvent, FinDocState> {}
@@ -36,6 +34,12 @@ mixin IncomingShipmentBloc on Bloc<FinDocEvent, FinDocState> {}
 mixin TransactionBloc on Bloc<FinDocEvent, FinDocState> {}
 
 EventTransformer<E> finDocDroppable<E>(Duration duration) {
+  return (events, mapper) {
+    return droppable<E>().call(events.throttle(duration), mapper);
+  };
+}
+
+EventTransformer<E> finDocItemDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);
   };
@@ -57,6 +61,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       : super(const FinDocState()) {
     on<FinDocFetch>(_onFinDocFetch,
         transformer: finDocDroppable(const Duration(milliseconds: 100)));
+    on<FinDocItemFetch>(_onFinDocItemFetch,
+        transformer: finDocItemDroppable(const Duration(milliseconds: 100)));
     on<FinDocUpdate>(_onFinDocUpdate);
     on<FinDocShipmentReceive>(_onFinDocShipmentReceive);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
@@ -77,12 +83,15 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
+    List<FinDoc> current = [];
     if (state.status == FinDocStatus.initial ||
         event.refresh ||
         event.searchString != '') {
       start = 0;
+      current = [];
     } else {
       start = state.finDocs.length;
+      current = List.of(state.finDocs);
     }
     // start from record zero for initial and refresh
     try {
@@ -100,19 +109,33 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         journalId: event.journalId,
       );
 
-      return emit(state.copyWith(
+      emit(state.copyWith(
           status: FinDocStatus.success,
-          finDocs: start == 0
-              ? result.finDocs
-              : (List.of(state.finDocs)..addAll(result.finDocs)),
-          hasReachedMax: result.finDocs.length < _finDocLimit ? true : false,
-          searchString: '',
+          finDocs: current..addAll(result.finDocs),
+          hasReachedMax: result.finDocs.isEmpty,
+          searchString: event.searchString,
           message: event.refresh ? '${docType}s reloaded' : null));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure,
           finDocs: state.finDocs,
           message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onFinDocItemFetch(
+    FinDocItemFetch event,
+    Emitter<FinDocState> emit,
+  ) async {
+    try {
+      FinDocItems compResult = await restClient.getFinDocItem(
+        finDocId: event.finDocId,
+        docType: docType,
+      );
+      return emit(state.copyWith(finDocItems: compResult.finDocItems));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
     }
   }
 

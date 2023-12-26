@@ -52,6 +52,7 @@ class ProductDialogFull extends StatefulWidget {
 class ProductDialogState extends State<ProductDialogFull> {
   late final GlobalKey<FormState> _productDialogFormKey;
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _listPriceController = TextEditingController();
@@ -73,6 +74,7 @@ class ProductDialogState extends State<ProductDialogFull> {
     super.initState();
     _productBloc = context.read<ProductBloc>();
     _nameController.text = widget.product.productName ?? '';
+    _idController.text = widget.product.pseudoId;
     _descriptionController.text = widget.product.description ?? '';
     _priceController.text =
         widget.product.price == null ? '' : widget.product.price.toString();
@@ -261,6 +263,13 @@ class ProductDialogState extends State<ProductDialogFull> {
 
     List<Widget> widgets = [
       TextFormField(
+        key: const Key('id'),
+        decoration: InputDecoration(
+            labelText:
+                classificationId == 'AppHotel' ? 'Room Type Id' : 'Product Id'),
+        controller: _idController,
+      ),
+      TextFormField(
         key: const Key('name'),
         decoration: InputDecoration(
             labelText: classificationId == 'AppHotel'
@@ -383,6 +392,7 @@ class ProductDialogState extends State<ProductDialogFull> {
                     } else {
                       _productBloc.add(ProductUpdate(Product(
                           productId: widget.product.productId,
+                          pseudoId: _idController.text,
                           productName: _nameController.text,
                           assetClassId: classificationId == 'AppHotel'
                               ? 'Hotel Room'
