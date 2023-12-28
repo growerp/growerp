@@ -629,8 +629,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                         in-map="classificationId: classificationId"
                         out-map="context" />
-                    <log
-                        message="========user: ${authenticate.user.partyId} company: ${authenticate.company.partyId} owner: ${authenticate.ownerPartyId} userId: ${authenticate.user.userId}" />
+                    <!--log
+                        message="========user: ${authenticate.user.partyId} company: ${authenticate.company.partyId} owner:
+                    ${authenticate.ownerPartyId} userId: ${authenticate.user.userId}" /-->
                     <!-- check if specific app already logged in before -->
                     <!-- already done in get#authenticate -->
                 </else>

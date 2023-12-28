@@ -231,7 +231,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias-all entity-alias="ATE">
             <exclude field="amount" />
         </alias-all>
-        <alias entity-alias="ATX" name="txPseudoId" field="finDocPseudoId" />
+        <alias entity-alias="ATX" name="txPseudoId" field="pseudoFinDocId" />
         <alias entity-alias="ATX" name="txDescription" field="description" />
         <alias entity-alias="ATX" name="txVoucherRef" field="voucherRef" />
         <alias entity-alias="ATX" name="txVoucherDate" field="voucherDate" />

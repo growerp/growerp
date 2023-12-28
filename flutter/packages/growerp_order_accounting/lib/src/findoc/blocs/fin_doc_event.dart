@@ -43,17 +43,6 @@ class FinDocFetch extends FinDocEvent {
       [finDocId, docType, customerCompanyPartyId, searchString, refresh];
 }
 
-class FinDocItemFetch extends FinDocEvent {
-  const FinDocItemFetch({
-    required this.finDocId,
-    required this.docType,
-  });
-  final String finDocId;
-  final FinDocType docType;
-  @override
-  List<Object> get props => [finDocId];
-}
-
 class FinDocUpdate extends FinDocEvent {
   const FinDocUpdate(this.finDoc);
   final FinDoc finDoc;

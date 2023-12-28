@@ -290,13 +290,6 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
-  @GET("rest/s1/growerp/100/FinDocItem")
-  @Extra({'requireApiKey': true})
-  Future<FinDocItems> getFinDocItem({
-    @Query('finDocId') required String? finDocId,
-    @Query('docType') required FinDocType? docType,
-  });
-
   @POST("rest/s1/growerp/100/FinDoc")
   @Extra({'requireApiKey': true})
   Future<FinDoc> createFinDoc({

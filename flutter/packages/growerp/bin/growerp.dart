@@ -33,7 +33,7 @@ Future<void> main(List<String> args) async {
   String inputFile = '';
   String username = '';
   String password = '';
-  int timeout = 60; //in seconds
+  int timeout = 600; //in seconds
   String outputDirectory = 'growerpCsv';
   FileType overrideFileType = FileType.unknown;
   Hive.init('growerpDB');

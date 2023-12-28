@@ -62,9 +62,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ok" />
         </out-parameters>
         <actions>
-            <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
-                list="parties" limit="1">
-                <econdition field-name="companyPartyId" from="partyId" />
+            <entity-find entity-name="mantle.party.Organization" list="parties" limit="1">
+                <econdition field-name="partyId" from="partyId" />
             </entity-find>
             <if condition="parties">
                 <set field="ok" value="ok" />
@@ -2211,7 +2210,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <service-call name="create#mantle.product.store.ProductStore"
                     out-map="context" in-map="inMap" />
-
                 <!-- store shipping options -->
                 <entity-find entity-name="mantle.product.store.ProductStoreShipOption"
                     list="options">
@@ -2290,7 +2288,6 @@ along with this software (see the LICENSE.md file). If not, see
                             storeCategoryTypeEnumId: type ]" />
                     </iterate>
                 </iterate>
-
                 <!-- DBResources just 2 dependent levels-->
                 <entity-find entity-name="moqui.resource.DbResource" list="resources1">
                     <econdition field-name="parentResourceId" value="DEFAULT_ROOT" />
@@ -2353,20 +2350,23 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
 
                 <!-- search function -->
-                <service-call name="org.moqui.impl.EntityServices.clone#DataDocument"
+                <!--service-call
+                name="org.moqui.impl.EntityServices.clone#DataDocument"
                     in-map="[dataDocumentId: 'MantleProduct', newDataDocumentId: 'P' + productStoreId,
                                 newIndexName: 'i' + productStoreId]" />
                 <service-call name="create#moqui.entity.document.DataDocumentCondition"
                     in-map="[dataDocumentId: 'P' + productStoreId, conditionSeqId: '01',
                         fieldNameAlias: 'productStoreId', fieldValue: productStoreId, postQuery: 'Y']" />
                 <service-call name="create#moqui.entity.feed.DataFeedDocument"
-                    in-map="[dataFeedId: 'PopCommerceSearch', dataDocumentId: 'P' + productStoreId]" />
+                    in-map="[dataFeedId: 'PopCommerceSearch', dataDocumentId: 'P' + productStoreId]" /-->
 
                 <!-- add to productStore-->
-                <service-call name="update#mantle.product.store.ProductStore"
-                    in-map="productStoreId: productStoreId, productDataDocumentId: 'P' + productStoreId" />
+                <!--service-call
+                name="update#mantle.product.store.ProductStore"
+                    in-map="productStoreId: productStoreId, productDataDocumentId: 'P' + productStoreId" /-->
                 <!-- index documents (copied from -->
-                <entity-find entity-name="moqui.entity.feed.DataFeedDocument" list="dfDocList"
+                <!--entity-find
+                entity-name="moqui.entity.feed.DataFeedDocument" list="dfDocList"
                     cache="false">
                     <econdition field-name="dataFeedId" value="PopCommerceSearch" />
                     <econdition field-name="dataDocumentId" value="P$productStoreId" />
@@ -2374,10 +2374,11 @@ along with this software (see the LICENSE.md file). If not, see
 
                 <if condition="!dfDocList">
                     <return error="true"
-                        message="No DataDocuments found for DataFeed ID ${dataFeedId}${dataDocumentId ? ' and DataDocument ID ' + dataDocumentId : ''}" />
+                        message="No DataDocuments found for DataFeed ID ${dataFeedId}${dataDocumentId ? ' and DataDocument
+                ID ' + dataDocumentId : ''}" />
                 </if>
 
-                <set field="documentsIndexed" from="0" />
+                <set field="documentsIndexed" from="0" /-->
                 <!--script><![CDATA[
                     import org.moqui.context.ExecutionContext
                     import java.util.concurrent.Future
@@ -2432,7 +2433,7 @@ along with this software (see the LICENSE.md file). If not, see
                             productCategoryId: productCategoryId]" />
             </if>
             <if condition="demoData">
-                <service-call name="growerp.100.PartyServices100.load#DefaultData"
+                <service-call name="growerp.100.PartyServices100.load#DemoData"
                     in-map="[ownerPartyId: ownerPartyId,
                         companyPartyId: companyPartyId,
                         currencyId: currencyId,
@@ -2449,7 +2450,7 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!--internal
     service used in register to run async-->
-    <service verb="load" noun="DefaultData" transaction-timeout="3600">
+    <service verb="load" noun="DemoData" transaction-timeout="3600">
         <!-- not reachable outside -->
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
@@ -3021,6 +3022,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- tasks -->
                 <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                     list="employees">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     <econdition field-name="companyPartyId" from="companyPartyId" />
                     <econdition field-name="companyRole" value="OrgInternal" />
                 </entity-find>

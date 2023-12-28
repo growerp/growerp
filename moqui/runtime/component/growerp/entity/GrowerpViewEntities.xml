@@ -16,6 +16,144 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-2.1.xsd">
 
 
+    <view-entity entity-name="OrderHeaderPartAndParties" package="growerp.order">
+        <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader" />
+        <member-entity entity-alias="SC" entity-name="moqui.basic.Enumeration"
+            join-from-alias="ORHD" join-optional="true">
+            <key-map field-name="salesChannelEnumId" related="enumId" />
+        </member-entity>
+        <member-entity entity-alias="OPRT" entity-name="mantle.order.OrderPart"
+            join-from-alias="ORHD">
+            <key-map field-name="orderId" />
+        </member-entity>
+        <!-- vendor data -->
+        <member-entity
+            entity-alias="VORG" entity-name="mantle.party.Organization"
+            join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="vendorPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="VOPP" entity-name="mantle.order.OrderPartParty"
+            join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="orderId" />
+            <key-map field-name="orderPartSeqId" />
+            <entity-condition>
+                <econdition field-name="vendorRoleTypeId" value="VendorContactPerson" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="VPERSON" entity-name="mantle.party.Person"
+            join-from-alias="VOPP" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="VACCOUNT" entity-name="moqui.security.UserAccount"
+            join-from-alias="VPERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- customer data -->
+        <member-entity
+            entity-alias="CORG" entity-name="mantle.party.Organization"
+            join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="customerPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="COPP" entity-name="mantle.order.OrderPartParty"
+            join-from-alias="OPRT" join-optional="true">
+            <key-map field-name="orderId" />
+            <key-map field-name="orderPartSeqId" />
+            <entity-condition>
+                <econdition field-name="customerRoleTypeId" value="CustomerContactPerson" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="CPERSON" entity-name="mantle.party.Person"
+            join-from-alias="COPP" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="CACCOUNT" entity-name="moqui.security.UserAccount"
+            join-from-alias="CPERSON" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity
+            entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
+            join-from-alias="ORHD" join-optional="true">
+            <key-map field-name="orderId" />
+            <entity-condition>
+                <econdition field-name="invoiceItemSeqId" value="1" or-null="true" />
+            </entity-condition>
+        </member-entity>
+        <member-entity
+            entity-alias="OPAY" entity-name="mantle.account.payment.Payment"
+            join-from-alias="ORHD" join-optional="true">
+            <key-map field-name="orderId" />
+        </member-entity>
+
+        <alias name="orderId" entity-alias="ORHD" />
+        <alias name="pseudoId" entity-alias="ORHD" />
+        <alias name="orderName" entity-alias="ORHD" />
+        <alias name="entryDate" entity-alias="ORHD" />
+        <alias name="grandTotal" entity-alias="ORHD" />
+        <alias name="placedDate" entity-alias="ORHD" />
+        <alias name="salesChannel" field="description" entity-alias="SC" />
+        <alias name="statusId" entity-alias="ORHD" />
+
+        <alias name="vendorPartyId" entity-alias="OPRT" />
+        <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
+        <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VOPP" />
+        <alias name="vendorUserPartyId" field="partyId" entity-alias="VPERSON" />
+        <alias name="vendorFirstName" field="firstName" entity-alias="VPERSON" />
+        <alias name="vendorLastName" field="lastName" entity-alias="VPERSON" />
+        <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
+
+        <alias name="customerPartyId" entity-alias="OPRT" />
+        <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
+        <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="COPP" />
+        <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />
+        <alias name="customerFirstName" field="firstName" entity-alias="CPERSON" />
+        <alias name="customerLastName" field="lastName" entity-alias="CPERSON" />
+        <alias name="customerEmail" field="emailAddress" entity-alias="CACCOUNT" />
+
+        <alias name="invoiceId" entity-alias="OINV" />
+        <alias name="invoiceItemSeqId" entity-alias="OINV" />
+        <alias name="paymentId" entity-alias="OPAY" />
+    </view-entity>
+
+    <view-entity entity-name="OrderItemsAndReservation" package="growerp.order">
+        <member-entity entity-alias="OITEM" entity-name="mantle.order.OrderItem" />
+        <member-entity
+            entity-alias="ITEMTYPE" entity-name="moqui.basic.Enumeration"
+            join-from-alias="OITEM" join-optional="true">
+            <key-map field-name="itemTypeEnumId" related="enumId" />
+        </member-entity>
+        <member-entity entity-alias="OINV" entity-name="mantle.order.OrderItemBilling"
+            join-from-alias="OITEM" join-optional="true">
+            <key-map field-name="orderId" />
+            <key-map field-name="orderItemSeqId" related="invoiceItemSeqId" />
+        </member-entity>
+        <member-entity
+            entity-alias="RESERV" entity-name="growerp.product.AssetRental"
+            join-from-alias="OITEM" join-optional="true">
+            <key-map field-name="orderId" />
+            <key-map field-name="orderItemSeqId" />
+        </member-entity>
+        <member-entity
+            entity-alias="ASSET" entity-name="mantle.product.asset.Asset"
+            join-from-alias="RESERV" join-optional="true">
+            <key-map field-name="assetId" />
+        </member-entity>
+
+        <alias name="orderId" entity-alias="OITEM" />
+        <alias name="orderItemSeqId" entity-alias="OITEM" />
+        <alias
+            name="itemTypeId" field="itemTypeEnumId" entity-alias="OITEM" />
+        <alias name="itemTypeName" field="description" entity-alias="ITEMTYPE" />
+        <alias name="productId" entity-alias="OITEM" />
+        <alias name="description" field="itemDescription" entity-alias="OITEM" />
+        <alias name="quantity" entity-alias="OITEM" />
+        <alias name="unitAmount" entity-alias="OITEM" />
+        <alias name="rentalFromDate" entity-alias="RESERV" />
+        <alias name="rentalThruDate" entity-alias="RESERV" />
+        <alias name="assetRentalId" entity-alias="RESERV" />
+        <alias name="assetId" entity-alias="RESERV" />
+        <alias name="assetName" entity-alias="ASSET" />
+    </view-entity>
+
     <view-entity entity-name="OrderHeaderPartItemPartiesAndReservation" package="growerp.order">
         <member-entity entity-alias="ORHD" entity-name="mantle.order.OrderHeader" />
         <member-entity entity-alias="SC" entity-name="moqui.basic.Enumeration"
@@ -621,6 +759,51 @@ along with this software (see the LICENSE.md file). If not, see
             entity-alias="CPAY" />
     </view-entity>
 
+    <view-entity entity-name="AcctgTransAndCompany" package="growerp.account">
+        <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
+        <member-entity entity-alias="JRNL" entity-name="mantle.ledger.transaction.GlJournal"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="glJournalId" />
+        </member-entity>
+        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+            join-from-alias="ATX" join-optional="true">
+            <key-map field-name="otherPartyId" related="partyId" />
+        </member-entity>
+        <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
+        <alias name="pseudoId" entity-alias="ATX" />
+        <alias name="invoiceId" entity-alias="ATX" />
+        <alias name="paymentId" entity-alias="ATX" />
+        <alias name="shipmentId" entity-alias="ATX" />
+        <alias name="transDescription" field="description" entity-alias="ATX" />
+        <alias name="companyPartyId" field="organizationPartyId" entity-alias="ATX" />
+        <alias name="typeId" field="acctgTransTypeEnumId" entity-alias="ATX" />
+        <alias name="transactionDate" entity-alias="ATX" />
+        <alias name="isPosted" entity-alias="ATX" />
+        <alias name="journalId" field="glJournalId" entity-alias="JRNL" />
+        <alias name="journalName" field="glJournalName" entity-alias="JRNL" />
+        <alias name="otherCompanyPartyId" field="partyId" entity-alias="CORG" />
+        <alias name="otherCompanyName" field="organizationName" entity-alias="CORG" />
+    </view-entity>
+
+    <view-entity entity-name="AcctgEntryAndGlAccount" package="growerp.account">
+        <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry" />
+        <member-entity entity-alias="GLAC" entity-name="mantle.ledger.account.GlAccount"
+            join-from-alias="ATE" join-optional="true">
+            <key-map field-name="glAccountId" />
+        </member-entity>
+        <alias name="transactionId" field="acctgTransId" entity-alias="ATE" />
+        <alias name="entryId" field="acctgTransEntrySeqId" entity-alias="ATE" />
+        <alias name="debitCreditFlag" entity-alias="ATE" />
+        <alias name="productId" entity-alias="ATE" />
+        <alias name="pseudoProductId" entity-alias="ATE" />
+        <alias name="assetId" entity-alias="ATE" />
+        <alias name="description" entity-alias="ATE" />
+        <alias name="glAccountId" entity-alias="ATE" />
+        <alias name="accountCode" entity-alias="GLAC" />
+        <alias name="accountName" entity-alias="GLAC" />
+        <alias name="amount" entity-alias="ATE" />
+    </view-entity>
+
     <view-entity entity-name="AcctgTransAndEntryAndCompany" package="growerp.account">
         <member-entity entity-alias="ATX" entity-name="mantle.ledger.transaction.AcctgTrans" />
         <member-entity entity-alias="JRNL" entity-name="mantle.ledger.transaction.GlJournal"
@@ -628,7 +811,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="glJournalId" />
         </member-entity>
         <member-entity entity-alias="ATE" entity-name="mantle.ledger.transaction.AcctgTransEntry"
-            join-from-alias="ATX">
+            join-from-alias="ATX" join-optional="true">
             <key-map field-name="acctgTransId" />
         </member-entity>
         <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
@@ -636,7 +819,7 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="otherPartyId" related="partyId" />
         </member-entity>
         <member-entity entity-alias="GLAC" entity-name="mantle.ledger.account.GlAccount"
-            join-from-alias="ATE">
+            join-from-alias="ATE" join-optional="true">
             <key-map field-name="glAccountId" />
         </member-entity>
         <alias name="transactionId" field="acctgTransId" entity-alias="ATX" />
@@ -654,6 +837,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="entryId" field="acctgTransEntrySeqId" entity-alias="ATE" />
         <alias name="debitCreditFlag" entity-alias="ATE" />
         <alias name="productId" entity-alias="ATE" />
+        <alias name="pseudoProductId" entity-alias="ATE" />
         <alias name="assetId" entity-alias="ATE" />
         <alias name="description" entity-alias="ATE" />
         <alias name="glAccountId" entity-alias="ATE" />

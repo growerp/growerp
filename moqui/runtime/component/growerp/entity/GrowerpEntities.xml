@@ -96,13 +96,13 @@ along with this software (see the LICENSE.md file). If not, see
     <extend-entity entity-name="AcctgTrans" package="mantle.ledger.transaction"
         sequence-primary-prefix="trn">
         <field name="pseudoId" type="id"></field>
-        <field name="finDocPseudoId" type="id"></field>
+        <field name="pseudoFinDocId" type="id"></field>
         <field name="docType" type="id"></field>
-        <index name="TRANS_FINDOC_PSEUDOID" unique="false">
-            <index-field name="finDocPseudoId" />
-        </index>
         <index name="TRANS_PSEUDOID" unique="false">
             <index-field name="pseudoId" />
+        </index>
+        <index name="TRANS_PSEUDO_FINDOCID" unique="false">
+            <index-field name="pseudoFinDocId" />
         </index>
     </extend-entity>
 

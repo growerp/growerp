@@ -61,8 +61,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       : super(const FinDocState()) {
     on<FinDocFetch>(_onFinDocFetch,
         transformer: finDocDroppable(const Duration(milliseconds: 100)));
-    on<FinDocItemFetch>(_onFinDocItemFetch,
-        transformer: finDocItemDroppable(const Duration(milliseconds: 100)));
     on<FinDocUpdate>(_onFinDocUpdate);
     on<FinDocShipmentReceive>(_onFinDocShipmentReceive);
     on<FinDocGetItemTypes>(_onFinDocGetItemTypes);
@@ -112,7 +110,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       emit(state.copyWith(
           status: FinDocStatus.success,
           finDocs: current..addAll(result.finDocs),
-          hasReachedMax: result.finDocs.isEmpty,
+          hasReachedMax: result.finDocs.length < event.limit,
           searchString: event.searchString,
           message: event.refresh ? '${docType}s reloaded' : null));
     } on DioException catch (e) {
@@ -120,22 +118,6 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
           status: FinDocStatus.failure,
           finDocs: state.finDocs,
           message: getDioError(e)));
-    }
-  }
-
-  Future<void> _onFinDocItemFetch(
-    FinDocItemFetch event,
-    Emitter<FinDocState> emit,
-  ) async {
-    try {
-      FinDocItems compResult = await restClient.getFinDocItem(
-        finDocId: event.finDocId,
-        docType: docType,
-      );
-      return emit(state.copyWith(finDocItems: compResult.finDocItems));
-    } on DioException catch (e) {
-      emit(state.copyWith(
-          status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
     }
   }
 

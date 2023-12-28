@@ -196,9 +196,15 @@ along with this software (see the LICENSE.md file). If not, see
                             from="foundCategories[0].productCategoryId" />
                     </if>
                 </iterate>
-                <service-call name="growerp.100.CatgProdServices100.create#Product"
-                    out-map="result"
-                    in-map="[product: product, classificationId: classificationId]" />
+                <entity-find entity-name="mantle.product.Product" list="products">
+                    <econdition field-name="pseudoId" from="product.pseudoId" />
+                    <econdition field-name="ownerPartyId" from="relComp.ownerPartyId" />
+                </entity-find>
+                <if condition="!products">
+                    <service-call name="growerp.100.CatgProdServices100.create#Product"
+                        out-map="result"
+                        in-map="[product: product, classificationId: classificationId]" />
+                </if>
             </iterate>
             <if condition="!ec.message.hasError()">
                 <message type="success">${products.size()} products imported</message>
@@ -217,9 +223,8 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[category: category, classificationId: classificationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <message type="success">${categories.size()} categories imported</message>
+                <message type="success">${categories?.size()} categories imported</message>
             </if>
-
         </actions>
     </service>
 
@@ -229,14 +234,26 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <iterate list="finDocs" entry="finDoc">
+                <!-- find partyId of other company-->
+                <if condition="finDoc.otherCompany">
+                    <entity-find entity-name="mantle.party.Party" list="parties">
+                        <econdition field-name="pseudoId" from="finDoc.otherCompany.pseudoId" />
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    </entity-find>
+                    <if condition="parties">
+                        <set field="finDoc.otherCompany.partyId" from="parties[0].partyId" />
+                    </if>
+                </if>
+                <set field="finDoc.isPosted" value="false" type="Boolean" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <message type="success">${categories.size()} categories imported</message>
+                <message type="success">${finDocs?.size()} finDocs imported</message>
             </if>
-
         </actions>
     </service>
 
@@ -246,32 +263,106 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
-            <set field="lastItem" from="null" />
+            <log message="importing ${finDocItems?.size()} finDocItems" />
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
-                    <set field="finDocOut.items" from="itemsOut" />
-                    <service-call name="growerp.100.FinDocServices100.update#Findoc"
-                        in-map="[finDoc: finDocOut, classificationId: classificationId]" />
-                    <set field="itemsOut" from="[]" />
+                    <!-- find related transaction header -->
+                    <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                        in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
+                        out-map="context" />
+                    <if condition="finDocs">
+                        <set field="finDocs[0].items" from="itemsOut" />
+                        <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                            in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
+                        <set field="itemsOut" from="[]" />
+                        <else>
+                            <log level="warning"
+                                message="Transaction pseudoId: ${lastItem.pseudoId} not found" />
+                        </else>
+                    </if>
                 </if>
-                <!-- first/next order -->
-                <if condition="!lastItem || lastItem.orderId != item.orderId">
-                    <set field="finDocOut"
-                        from="[
-                        pseudoId: item.pseudoId,
-                        docType: item.docType]" />
+                <!-- find internal glAccountId from glAccount.accountCode-->
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                    list="glAccounts">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" from="item.glAccount.accountCode" />
+                </entity-find>
+                <if condition="glAccounts">
+                    <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
+                    <else>
+                        <log level="warning"
+                            message="could not find ${item.glAccount.accountCode} for company: $companyPartyId" />
+                    </else>
+                </if>
+                <!-- find productId from pseudoProductId -->
+                <if condition="item.pseudoProductId">
+                    <entity-find entity-name="mantle.product.Product" list="products">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="pseudoId" from="item.pseudoProductId" />
+                    </entity-find>
+                    <if condition="products">
+                        <set field="item.productId" from="products[0].productId" />
+                        <else>
+                            <log level="warning"
+                                message="could not find ${item.pseudoProductid} for owner: $ownerPartyId" />
+                        </else>
+                    </if>
                 </if>
                 <script>itemsOut.add(item)</script>
                 <set field="lastItem" from="item" />
             </iterate>
+            <!-- process last record -->
             <if condition="lastItem">
-                <set field="finDocOut.items" from="itemsOut" />
-                <service-call name="growerp.100.FinDocServices100.update#Findoc"
-                    in-map="[finDoc: finDocOut, classificationId: classificationId]" />
+                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
+                    in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
+                    out-map="context" />
+                <if condition="finDocs?.size() &gt; 0">
+                    <set field="finDocs[0].items" from="itemsOut" />
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
+                    <else>
+                        <log level="warn"
+                            message="Transaction pseudoId: ${lastItem.pseudoId} not found" />
+                    </else>
+                </if>
             </if>
+            <return />
+            <!-- post transactions-->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="unPosted">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="isPosted" value="N" or-null="true" />
+                <select-field field-name="acctgTransId,pseudoId" />
+            </entity-find>
+            <log message="posting ${unPosted?.size()} transactions" />
+            <iterate list="unPosted" entry="item">
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
+                    list="entries">
+                    <econdition field-name="acctgTransId" from="item.acctgTransId" />
+                </entity-find>
+                <if condition="!entries">
+                    <log level="warn"
+                        message="Transaction: ${item.acctgTransId} ps: ${item.pseudoId} has no entries" />
+                    <else>
+                        <if condition="entries.glAccountId.contains(null)">
+                            <log
+                                message="entr glaccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
+                            <else>
+                                <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                                    in-map="[acctgTransId: item.acctgTransId]" />
+                            </else>
+                        </if>
+                    </else>
+                </if>
+            </iterate>
+            <service-call
+                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
+                in-map="[organizationPartyId: companyPartyId]" />
+            <!-- end of service result -->
             <if condition="!ec.message.hasError()">
-                <message type="success">${categories.size()} categories imported</message>
+                <message type="success">${finDocItems?.size()} findoc items imported</message>
             </if>
         </actions>
     </service>

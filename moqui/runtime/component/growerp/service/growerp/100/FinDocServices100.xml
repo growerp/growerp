@@ -183,6 +183,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="finDocId">
                 <description>depending on type can be invoice/payment/order</description>
             </parameter>
+            <parameter name="pseudoId" />
             <parameter name="sales" type="Boolean" required="true" />
             <parameter name="docType" />
             <parameter name="open" type="Boolean" default-value="true" />
@@ -287,6 +288,7 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="finDocOut" from="[:]" />
             <set field="finDocs" from="[]" />
             <set field="finDocItems" from="[]" />
+            <set field="finDocIds" from="[]" />
             <set field="weekOldDate"
                 from="Timestamp.valueOf(ec.user.nowTimestamp.toLocalDateTime().atZone(java.time.ZoneId.systemDefault()).plusDays(-7).toLocalDateTime())" />
 
@@ -324,21 +326,20 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="customerLastName" ignore-case="true"
                                 operator="like" from="search" />
                         </econditions>
-                        <order-by field-name="orderPlacedDate" />
-                        <!--use-iterator/-->
+                        <order-by field-name="-orderPlacedDate" />
                     </entity-find>
                     <else>
                         <if condition="customerCompanyPartyId"><!-- by customer for ecommerce -->
                             <entity-find list="items" offset="start" limit="limit"
-                                entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
+                                entity-name="growerp.order.OrderHeaderPartAndParties">
                                 <econdition field-name="customerPartyId"
                                     from="customerCompanyPartyId" />
                                 <use-iterator />
                             </entity-find>
                             <else>
-                                <if condition="finDocId"><!-- single document -->
+                                <if condition="finDocId"><!-- single document with items -->
                                     <entity-find list="items"
-                                        entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
+                                        entity-name="growerp.order.OrderHeaderPartAndParties">
                                         <econdition field-name="orderId" from="finDocId" />
                                         <econditions combine="or">
                                             <econdition field-name="vendorPartyId"
@@ -348,7 +349,7 @@ along with this software (see the LICENSE.md file). If not, see
                                                 from="companyPartyId"
                                                 ignore-if-empty="true" />
                                         </econditions>
-                                        <order-by field-name="orderItemSeqId" />
+                                        <order-by field-name="pseudoId" />
                                     </entity-find>
                                     <else><!-- multiple documents -->
                                         <set field="statusList"
@@ -360,7 +361,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             <set field="status" from="statusList" />
                                         </if>
                                         <entity-find offset="start" limit="limit" list="items"
-                                            entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
+                                            entity-name="growerp.order.OrderHeaderPartAndParties">
                                             <econdition field-name="vendorPartyId"
                                                 from="vendorPartyId"
                                                 ignore-if-empty="true" />
@@ -378,9 +379,7 @@ along with this software (see the LICENSE.md file). If not, see
                                             <econdition field-name="placedDate"
                                                 operator="less-equals"
                                                 from="tsDate" ignore-if-empty="true" />
-                                            <order-by field-name="rentalFromDate" />
                                             <order-by field-name="orderId" />
-                                            <order-by field-name="orderItemSeqId" />
                                             <!--use-iterator/-->
                                         </entity-find>
                                     </else>
@@ -389,19 +388,14 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                     </else>
                 </if>
-                <set field="lastItem" from="null" />
-                <iterate entry="item" list="items">
-                    <!-- new orderId, so add last order to the list-->
-                    <if condition="lastItem &amp;&amp; lastItem.orderId != item.orderId">
-                        <set field="finDocOut.items" from="finDocItems" />
-                        <script>finDocs.add(finDocOut)</script>
-                        <if condition="current++ == limit">
-                            <break />
-                        </if>
+                <!-- get orderheaders -->
+                <iterate list="items" entry="item">
+                    <!-- remove doubles from search -->
+                    <if condition="lastItem &amp;&amp; lastItem.orderId == item.orderId">
+                        <continue />
                     </if>
-                    <!-- first order -->
-                    <if condition="!lastItem || lastItem.orderId != item.orderId">
-                        <if condition="!sales">
+                    <if condition="!sales">
+                        <then>
                             <set field="company"
                                 from="[
                                         partyId: item.vendorPartyId,
@@ -415,27 +409,28 @@ along with this software (see the LICENSE.md file). If not, see
                                             email: item.vendorEmail,
                                             company: company,
                                         ]" />
-                            <else>
-                                <set field="company"
-                                    from="[
+                        </then>
+                        <else>
+                            <set field="company"
+                                from="[
                                     partyId: item.customerPartyId,
                                     name: item.customerCompanyName,
                                     ]" />
-                                <set field="userOut"
-                                    from="[
+                            <set field="userOut"
+                                from="[
                                             partyId: item.customerUserPartyId,
                                             firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
                                             company: company,
                                         ]" />
-                            </else>
-                        </if>
-                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[sales: sales, docType: docType, statusId: item.statusId]"
-                            out-map="context" />
-                        <set field="finDocOut"
-                            from="[
+                        </else>
+                    </if>
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: docType, statusId: item.statusId]"
+                        out-map="context" />
+                    <set field="finDocOut"
+                        from="[
                             id: item.orderId,
                             pseudoId: item.pseudoId ?: '',
                             orderId: item.orderId,
@@ -453,31 +448,59 @@ along with this software (see the LICENSE.md file). If not, see
                             otherUser: userOut,
                             otherCompany: company,
                             grandTotal: item.grandTotal ? item.grandTotal.toString(): null,
+                            items: finDocItems,
                             ]" />
+                    <script>
+                        finDocs.add(finDocOut);
+                        finDocIds.add(item.orderId);
+                    </script>
+                    <set field="lastItem" from="item" />
+                </iterate>
+                <!-- get items -->
+                <entity-find list="items" entity-name="growerp.order.OrderItemsAndReservation">
+                    <econdition field-name="orderId" operator="in" from="finDocIds" />
+                    <order-by field-name="orderId" />
+                    <order-by field-name="orderItemSeqId]" />
+                </entity-find>
+                <iterate list="items" entry="item">
+                    <!-- add items to a single finDoc-->
+                    <if condition="lastOrderId &amp;&amp; item.orderId != lastOrderId">
+                        <iterate entry="finDoc" list="finDocs">
+                            <if condition="finDoc.finDocId == lastOrderId">
+                                <set field="finDoc.items" from="finDocItems" />
+                                <break />
+                            </if>
+                        </iterate>
                         <set field="finDocItems" from="[]" />
                     </if>
                     <set field="finDocItem"
                         from="[
-                        itemSeqId: item.orderItemSeqId,
-                        productId: item.productId,
-                        itemType: [itemTypeId: item.itemTypeId,
-                                    itemTypeName: item.itemTypeName],
-                        description: item.description,
-                        quantity: item.quantity.toString(),
-                        price: item.unitAmount.toString(),
-                        assetId: item.assetId,
-                        assetName: item.assetName,
-                        rentalFromDate: item.rentalFromDate
-                            ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd') : null,
-                        rentalThruDate: item.rentalThruDate
-                            ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
-                        ]" />
+                            finDocId: orderId,
+                            docType: 'order',
+                            itemSeqId: item.orderItemSeqId,
+                            productId: item.productId,
+                            itemType: [itemTypeId: item.itemTypeId,
+                                        itemTypeName: item.itemTypeName],
+                            description: item.description,
+                            quantity: item.quantity.toString(),
+                            price: item.unitAmount.toString(),
+                            assetId: item.assetId,
+                            assetName: item.assetName,
+                            rentalFromDate: item.rentalFromDate
+                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd') : null,
+                            rentalThruDate: item.rentalThruDate
+                                ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
+                            ]" />
                     <script>finDocItems.add(finDocItem)</script>
-                    <set field="lastItem" from="item" />
+                    <set field="lastOrderId" from="item.orderId" />
                 </iterate>
-                <if condition="lastItem">
-                    <set field="finDocOut.items" from="finDocItems" />
-                    <script>finDocs.add(finDocOut)</script>
+                <if condition="lastOrderId">
+                    <iterate entry="finDoc" list="finDocs">
+                        <if condition="finDoc.finDocId == lastOrderId">
+                            <set field="finDoc.items" from="finDocItems" />
+                            <break />
+                        </if>
+                    </iterate>
                 </if>
             </if>
             <!-- invoice -->
@@ -955,15 +978,22 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="journalId?.endsWith('Error')">
                     <set field="isPosted" value="'N'" />
                 </if>
-                <if condition="finDocId">
-                    <entity-find offset="start" list="items"
-                        entity-name="growerp.account.AcctgTransAndEntryAndCompany">
-                        <econdition field-name="companyPartyId" from="companyPartyId" />
-                        <econdition field-name="transactionId" from="finDocId" />
-                    </entity-find>
+                <if condition="finDocId || pseudoId">
+                    <then>
+                        <entity-find list="items" limit="1"
+                            entity-name="growerp.account.AcctgTransAndCompany">
+                            <econdition field-name="companyPartyId" from="companyPartyId" />
+                            <econditions combine="or">
+                                <econdition field-name="transactionId" from="finDocId"
+                                    ignore-if-empty="true" />
+                                <econdition field-name="pseudoId" from="pseudoId"
+                                    ignore-if-empty="true" />
+                            </econditions>
+                        </entity-find>
+                    </then>
                     <else>
-                        <entity-find offset="start" list="items"
-                            entity-name="growerp.account.AcctgTransAndEntryAndCompany">
+                        <entity-find offset="start" limit="limit" list="items"
+                            entity-name="growerp.account.AcctgTransAndCompany">
                             <econdition field-name="companyPartyId" from="companyPartyId" />
                             <econditions combine="or">
                                 <econdition field-name="shipmentId" ignore-case="true"
@@ -981,38 +1011,27 @@ along with this software (see the LICENSE.md file). If not, see
                                 ignore-if-empty="true" />
                             <econdition field-name="isPosted" from="isPosted"
                                 ignore-if-empty="true" />
-                            <order-by field-name="-transactionId" />
-                            <order-by field-name="entryId" />
-                            <use-iterator />
+                            <order-by field-name="transactionDate" />
                         </entity-find>
                     </else>
                 </if>
-                <set field="lastItem" from="null" />
-                <set field="transactionTotal" value="0" type="BigDecimal" />
+                <!-- get transaction headers -->
                 <iterate entry="item" list="items">
-                    <if condition="lastItem &amp;&amp; lastItem.transactionId != item.transactionId">
-                        <set field="finDocOut.items" from="finDocItems" />
-                        <set
-                            field="finDocOut.grandTotal"
-                            from="transactionTotal ? transactionTotal.toString(): null" />
-                        <script>finDocs.add(finDocOut)</script>
-                    </if>
-                    <if condition="!lastItem || lastItem.transactionId != item.transactionId">
-                        <set field="company"
-                            from="[
+                    <set field="company"
+                        from="[
                             partyId: item.otherCompanyPartyId,
                             name: item.otherCompanyName,
                         ]" />
-                        <set field="userOut"
-                            from="[
+                    <set field="userOut"
+                        from="[
                             company: company,
                         ]" />
-                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[docType: 'transaction', 
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[docType: 'transaction', 
                                 statusId: item.isPosted == 'Y'? 'Posted' : 'NotPosted']"
-                            out-map="context" />
-                        <set field="finDocOut"
-                            from="[
+                        out-map="context" />
+                    <set field="finDocOut"
+                        from="[
                             docType: 'transaction',
                             sales: sales,
                             description: item.transDescription,
@@ -1022,6 +1041,7 @@ along with this software (see the LICENSE.md file). If not, see
                             id: item.transactionId,
                             pseudoId: item.pseudoId ?: '',
                             transactionId: item.transactionId,
+                            itemType: [itemTypeId: item.typeId],
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
                                 ? item.transactionDate.toString().substring(0,19) + 'Z' : null,
@@ -1031,37 +1051,63 @@ along with this software (see the LICENSE.md file). If not, see
                             ledgerJournal: [journalId: item.journalId,
                                             journalName: item.journalName],
                         ]" />
+                    <script>
+                        finDocs.add(finDocOut);
+                        finDocIds.add(item.transactionId);
+                    </script>
+                </iterate>
+                <!-- get transaction entries -->
+                <set field="transactionTotal" value="0" type="BigDecimal" />
+                <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="entries">
+                    <econdition field-name="transactionId" operator="in" from="finDocIds" />
+                    <order-by field-name="[transactionId,entryId]" />
+                </entity-find>
+                <iterate list="entries" entry="item">
+                    <!-- add items to a single transaction when transactionId changes-->
+                    <if
+                        condition="lastTransactionId &amp;&amp; item.transactionId != lastTransactionId">
+                        <iterate entry="finDoc" list="finDocs">
+                            <if condition="finDoc.transactionId == lastTransactionId">
+                                <set field="finDoc.items" from="finDocItems" />
+                                <set field="finDoc.grandTotal"
+                                    from="transactionTotal ? transactionTotal.toString(): ''" />
+                            </if>
+                        </iterate>
                         <set field="finDocItems" from="[]" />
+                        <set field="transactionTotal" value="0" type="BigDecimal" />
                     </if>
-                    <set field="finDocItem"
-                        from="[
-                            itemSeqId: item.entryId,
-                            price: item.amount.toString(),
-                            isDebit: item.debitCreditFlag == 'D' ? true : false,
-                            itemType: [itemTypeId: item.typeId],
-                            glAccount: [
-                                glAccountId: item.glAccountId,
-                                accountCode: item.accountCode,
-                                accountName: item.accountName,
-                                ],
-                            productId: item.productId,
-                            assetId: item.assetId,
-                            invoiceId: item.invoiceId,
-                            paymentId: item.paymentId,
-                            shipmentId: item.shipmentId,
-                        ]" />
-                    <script>finDocItems.add(finDocItem)</script>
                     <if condition="item.debitCreditFlag == 'D'">
                         <set field="transactionTotal" from="transactionTotal.add(item.amount)" />
                     </if>
-                    <set field="lastItem" from="item" />
+                    <set field="finDocItem"
+                        from="[
+                                finDocId: item.transactionId,
+                                docType: 'transaction',
+                                itemSeqId: item.entryId,
+                                price: item.amount.toString(),
+                                isDebit: item.debitCreditFlag == 'D' ? true : false,
+                                glAccount: [
+                                    glAccountId: item.glAccountId,
+                                    accountCode: item.accountCode,
+                                    accountName: item.accountName,
+                                    ],
+                                productId: item.productId,
+                                pseudoProductId: item.pseudoProductId,
+                                description: item.description,
+                                assetId: item.assetId,
+                        ]" />
+                    <script>finDocItems.add(finDocItem)</script>
+                    <set field="lastTransactionId" from="item.transactionId" />
                 </iterate>
-                <if condition="lastItem">
-                    <set field="finDocOut.items" from="finDocItems" />
-                    <set
-                        field="finDocOut.grandTotal"
-                        from="transactionTotal ? transactionTotal.toString(): null" />
-                    <script>finDocs.add(finDocOut)</script>
+                <if condition="lastTransactionId">
+                    <iterate entry="finDoc" list="finDocs">
+                        <if condition="finDoc.transactionId == lastTransactionId">
+                            <set field="finDoc.items" from="finDocItems" />
+                            <set field="finDoc.grandTotal"
+                                from="transactionTotal ? transactionTotal.toString(): null" />
+                            <break />
+                        </if>
+                    </iterate>
                 </if>
             </if>
         </actions>
@@ -1099,6 +1145,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="itemTypeName" />
                     </parameter>
                     <parameter name="productId" />
+                    <parameter name="pseudoProductId" />
                     <parameter name="description" />
                     <parameter name="quantity" />
                     <parameter name="price" />
@@ -1213,36 +1260,47 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="finDoc.statusId" from="convertedStatusId" />
             <if condition="!finDoc.pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[companyPartyId: companyPartyId, seqName: finDoc.docType]" />
+                    in-map="[companyPartyId: companyPartyId, seqName: finDoc.docType]"
+                    out-map="context" />
                 <set field="finDoc.pseudoId" from="seqNum" />
             </if>
+            <!-- order -->
             <if condition="finDoc.docType == 'order'">
-                <service-call name="growerp.100.FinDocServices100.create#Order"
-                    in-map="[order: finDoc]" out-map="context" />
-                <set field="finDocId" from="orderId" />
+                <then>
+                    <service-call name="growerp.100.FinDocServices100.create#Order"
+                        in-map="[order: finDoc]" out-map="context" />
+                    <set field="finDocId" from="orderId" />
+                </then>
+                <!-- invoice -->
                 <else-if condition="finDoc.docType == 'invoice'">
                     <service-call name="growerp.100.FinDocServices100.create#Invoice"
                         in-map="[invoice: finDoc]" out-map="context" />
                     <set field="finDocId" from="invoiceId" />
                 </else-if>
+                <!-- payment -->
                 <else-if condition="finDoc.docType == 'payment'">
                     <service-call name="growerp.100.FinDocServices100.create#Payment"
                         in-map="[payment: finDoc]" out-map="context" />
                     <set field="finDocId" from="paymentId" />
                 </else-if>
+                <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   acctgTransTypeEnumId: 'AttInternal',
                                     organizationPartyId: companyPartyId,
+                                    otherPartyId: finDoc.otherCompany?.partyId,
                                     description: finDoc.description,
                                     glJournalId: finDoc.journal?.journalId,
-                                    isPosted: 'N'
+                                    isPosted: 'N',
+                                    pseudoId: finDoc.pseudoId,
                                 ]"
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
                     <iterate list="finDoc.items" entry="item">
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: acctgTransId,
+                                        productId: item.productId,
+                                        pseudoProductId: item.pseudoProductId,
                                         glAccountId: item.glAccount.glAccountId,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,
@@ -1781,11 +1839,12 @@ along with this software (see the LICENSE.md file). If not, see
                         from="[finDocId: finDoc.shipmentId,
                                     docType: 'shipment', sales: finDoc.sales]" />
                 </else-if>
+                <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
                     <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
                         value-field="transaction">
                         <field-map field-name="acctgTransId" from="finDoc.transactionId" />
-                        <field-map field-name="companyPartyId" from="companyPartyId" />
+                        <field-map field-name="organizationPartyId" from="companyPartyId" />
                     </entity-find-one>
                     <if condition="!transaction">
                         <return error="true" message="Transaction ${finDoc.transactionId} not found" />
@@ -1811,6 +1870,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
                             in-map="[   acctgTransId: finDoc.transactionId,
                                         glAccountId: item.glAccount.glAccountId,
+                                        productId: item.productId,
+                                        pseudoProductId: item.pseudoProductId,
+                                        quantity: item.quantity,
                                         debitCreditFlag: item.isDebit == true ? 'D' : 'C',
                                         amount: item.price,
                                     ]" />
