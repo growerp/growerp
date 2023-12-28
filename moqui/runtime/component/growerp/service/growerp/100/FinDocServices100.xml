@@ -2289,7 +2289,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <else><!-- only update items when no status changes -->
                     <!-- delete and recreate all orderitems -->
-                    <if condition="order.items &amp;&amp; order.items.size() &gt; 0">
+                    <if condition="order.items &amp;&amp; !order.items.isEmpty()">
                         <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
                             in-map="[orderId: orderId,
                                          orderPartSeqId: orderPartSeqId,
@@ -2368,7 +2368,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <return message="invoice status wrong: ${items[0].statusId}, cannot update" />
                     </if>
                     <!-- delete and recreate all invoice items -->
-                    <if condition="invoice.items &amp;&amp; invoice.items.size() &gt; 0">
+                    <if condition="invoice.items &amp;&amp; !invoice.items.isEmpty()">
                         <service-call name="growerp.100.FinDocServices100.replace#InvoiceItems"
                             in-map="[invoiceId: invoice.invoiceId,
                                 invoiceItems: invoice.items]" />

@@ -249,7 +249,8 @@ Future<void> main(List<String> args) async {
             }
           }
         } on DioException catch (e) {
-          logger.e("Importing filetype: $fileType Error: ${getDioError(e)}");
+          logger.e(
+              "Importing filetype: ${fileType.name} Error: ${getDioError(e)}");
         }
         break;
       //============================= export =================================

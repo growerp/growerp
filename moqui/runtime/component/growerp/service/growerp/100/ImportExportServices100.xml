@@ -32,7 +32,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true"
                     message="Can only delete ledger when when not more than the initial settiung of posted balance." />
             </if>
-            <if condition="transList.size() &gt; 0">
+            <if condition="!transList.isEmpty()">
                 <entity-delete-by-condition
                     entity-name="mantle.ledger.transaction.AcctgTransEntry">
                     <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
@@ -75,7 +75,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </iterate>
             <!-- create posted balance in initial transaction-->
-            <if condition="transactions.size() &gt; 0">
+            <if condition="!transactions.isEmpty()">
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="finDoc: [docType: 'transaction', sales: 'true', isPosted: true,
                                             description: 'Initial balance',
@@ -243,8 +243,13 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="pseudoId" from="finDoc.otherCompany.pseudoId" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     </entity-find>
-                    <if condition="parties">
+                    <if condition="!parties.isEmpty()">
                         <set field="finDoc.otherCompany.partyId" from="parties[0].partyId" />
+                        <else>
+                            <log level="warn"
+                                message="company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId" />
+                            <continue />
+                        </else>
                     </if>
                 </if>
                 <set field="finDoc.isPosted" value="false" type="Boolean" />
@@ -273,7 +278,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                         in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
                         out-map="context" />
-                    <if condition="finDocs">
+                    <if condition="!finDocs.isEmpty()">
                         <set field="finDocs[0].items" from="itemsOut" />
                         <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                             in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
@@ -290,7 +295,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="partyId" from="companyPartyId" />
                     <econdition field-name="accountCode" from="item.glAccount.accountCode" />
                 </entity-find>
-                <if condition="glAccounts">
+                <if condition="!glAccounts.isEmpty()">
                     <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
                     <else>
                         <log level="warning"
@@ -303,7 +308,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="pseudoId" from="item.pseudoProductId" />
                     </entity-find>
-                    <if condition="products">
+                    <if condition="!products.isEmpty()">
                         <set field="item.productId" from="products[0].productId" />
                         <else>
                             <log level="warning"
@@ -319,7 +324,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                     in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
                     out-map="context" />
-                <if condition="finDocs?.size() &gt; 0">
+                <if condition="!finDocs.isEmpty()">
                     <set field="finDocs[0].items" from="itemsOut" />
                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                         in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
@@ -329,7 +334,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
-            <return />
             <!-- post transactions-->
             <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="unPosted">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -342,7 +346,7 @@ along with this software (see the LICENSE.md file). If not, see
                     list="entries">
                     <econdition field-name="acctgTransId" from="item.acctgTransId" />
                 </entity-find>
-                <if condition="!entries">
+                <if condition="entries.isEmpty()">
                     <log level="warn"
                         message="Transaction: ${item.acctgTransId} ps: ${item.pseudoId} has no entries" />
                     <else>
@@ -454,7 +458,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <return error="true"
                         message="Can only delete ledger when when not more than the initial settiung of posted balance." />
                 </if>
-                <if condition="transList.size() &gt; 0">
+                <if condition="!transList.isEmpty()">
                     <entity-delete-by-condition
                         entity-name="mantle.ledger.transaction.AcctgTransEntry">
                         <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
@@ -492,7 +496,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </iterate>
                 <!-- create unposted balance in initial transaction-->
-                <if condition="transactions.size() &gt; 0">
+                <if condition="!transactions.isEmpty()">
                     <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                         in-map="finDoc: [docType: 'transaction', sales: 'true',
                                 description: 'Initial balance',

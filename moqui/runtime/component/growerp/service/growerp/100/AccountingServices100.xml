@@ -320,7 +320,6 @@ along with this software (see the LICENSE.md file). If not, see
                     name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                 <set field="companyPartyId" from="relComp.companyPartyId" />
             </if>
-            <log message="-===========company: $companyPartyId" />
             <service-call in-map="organizationPartyId: companyPartyId"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
         </actions>

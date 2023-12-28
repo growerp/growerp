@@ -93,7 +93,8 @@ List<String> getFileNames(FileType fileType) {
   switch (fileType) {
     case FileType.glAccount:
       //searchFiles.add('4-1-chart_of_accounts_list.csv');
-      searchFiles.add('Trial_Balance_2020-06-07.csv');
+      //searchFiles.add('Trial_Balance_2020-06-07.csv');
+      searchFiles.add('Trial_Balance_2020-06-07-noposted.csv');
       break;
     case FileType.company:
       searchFiles.add('1-3-customer_list.csv');
@@ -282,7 +283,7 @@ List<String> convertRow(
                   ? columnsFrom[15]
                   : '';
 
-      columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
+      columnsTo.add("${newDate}-${columnsFrom[3]}");
       columnsTo.add('true');
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
@@ -300,8 +301,17 @@ List<String> convertRow(
         isDebit = false;
         amount = columnsFrom[7];
       }
+      // convert from m/d/yy to yyyy-mm-dd
+      var dateList = (columnsFrom[2]).split('/');
+      var prefix;
+      if (dateList[2] == '99')
+        prefix = '19';
+      else
+        prefix = '20';
+      var newDate =
+          "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
 
-      columnsTo.add(columnsFrom[3] == '' ? 'xxxxxx' : columnsFrom[3]);
+      columnsTo.add("${newDate}-${columnsFrom[3]}");
       columnsTo.add('Transaction');
       columnsTo.add('');
       columnsTo.add(columnsFrom[17]);

@@ -44,7 +44,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="partyIds" from="partyIds + [partyInfo.partyId]" />
                 </if>
             </iterate>
-            <if condition="partyIds.size() &gt; 0">
+            <if condition="!partyIds.isEmpty()">
                 <set field="ok" value="true" type="Boolean" />
                 <else>
                     <set field="ok" value="false" type="Boolean" />
