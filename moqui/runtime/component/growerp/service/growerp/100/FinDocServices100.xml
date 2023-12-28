@@ -996,6 +996,8 @@ along with this software (see the LICENSE.md file). If not, see
                             entity-name="growerp.account.AcctgTransAndCompany">
                             <econdition field-name="companyPartyId" from="companyPartyId" />
                             <econditions combine="or">
+                                <econdition field-name="pseudoId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="shipmentId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="invoiceId" ignore-case="true"

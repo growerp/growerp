@@ -79,7 +79,8 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
                 width: 100,
                 child: Text(
                     formatter.format(DecimalIntl(
-                        Decimal.parse(glAccount.postedBalance.toString()))),
+                        Decimal.parse(glAccount.postedBalance.toString()) +
+                            Decimal.parse(glAccount.rollUp.toString()))),
                     textAlign: TextAlign.right)),
             if (!isPhone)
               SizedBox(
