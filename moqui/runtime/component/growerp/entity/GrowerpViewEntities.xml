@@ -1154,6 +1154,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="pseudoId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="vatPerc" entity-alias="ORGCOMPANYPARTY" />
         <alias name="salesPerc" entity-alias="ORGCOMPANYPARTY" />
         <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />

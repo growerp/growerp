@@ -705,12 +705,18 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- get old values -->
             <service-call name="growerp.100.PartyServices100.get#Company"
                 in-map="[companyPartyId: company.partyId]" out-map="oldValue" />
-            <if condition="!oldValue">
+            <if condition="oldValue.companies.isEmpty()">
                 <return error="true"
-                    message="Company ${companyPartyId} not found" />
+                    message="Company ${company.partyId} not found" />
+            </if>
+            <!-- update pseudoId-->
+            <if condition="company.pseudoId != oldValue.companies[0]?.pseudoId">
+                <service-call name="update#mantle.party.Party"
+                    in-map="[partyId: company.partyId, pseudoId: company.pseudoId]" />
             </if>
             <!-- update name -->
-            <if condition="company.name &amp;&amp; oldValue.companies[0].name !=  company.name">
+            <log message="==company update==oldValue: ${oldValue}" />
+            <if condition="company.name &amp;&amp; oldValue.companies[0]?.name !=  company.name">
                 <service-call name="update#mantle.party.Organization"
                     in-map="[partyId: oldValue.companies[0].partyId, organizationName: company.name]" />
             </if>

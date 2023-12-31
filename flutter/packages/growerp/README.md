@@ -67,11 +67,12 @@ will create a new directory: growerpOutput with the converted file(s).
 
 ### The conversion workflow
 1. Extract csv files from the old system and put them in a single directory.
-2. Specify the conversion rules.
+2. When importing images create an 'images' directory and a images.csv file in the format: filetype,id,filename
+3. Specify the conversion rules.
     * specify the names of these files in the getFileNames function
     * specify any file wide changes in the convertFile function
     * specific the column to column conversion the convertRow function
-3. convert the old system files to the GrowERP CSV format into the growerpOutput directory
+4. convert the old system files to the GrowERP CSV format into the growerpOutput directory
     * execute activate: (just the first time or after a change)
     ```bash
     dart pub global activate --source path ~/growerp/flutter/packages/growerp
@@ -84,7 +85,7 @@ will create a new directory: growerpOutput with the converted file(s).
     ```bash
     dart pub global run growerp:csvToCsv inputDir
     ```
-4. Import the generated GrowERP csv files into the growerp system
+5. Import the generated GrowERP csv files into the growerp system
    * execute activate (just the first time or after a change)
    ```bash
    dart pub global activate growerp

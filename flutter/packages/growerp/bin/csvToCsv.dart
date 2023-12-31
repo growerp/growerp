@@ -99,6 +99,7 @@ List<String> getFileNames(FileType fileType) {
     case FileType.company:
       searchFiles.add('1-3-customer_list.csv');
       searchFiles.add('2-3-vendor_list.csv');
+      searchFiles.add('main-company.csv');
       break;
     default:
       searchFiles.add('0b*.csv');
@@ -147,9 +148,22 @@ String convertFile(FileType fileType, String string, String fileName) {
 }
 
 /// specify columns to columns mapping for every row here
-List<String> convertRow(
-    FileType fileType, List<String> columnsFrom, String fileName) {
+List<String> convertRow(FileType fileType, List<String> columnsFrom,
+    String fileName, List<List<String>> images) {
   List<String> columnsTo = [];
+
+  String getImageFileName(FileType fileType, String id) {
+    for (List row in images) {
+      if (row[0] == fileType.name && row[1] == id) {
+        // if not file path, add it using the filename
+        if (row[2][0] != '/')
+          return '${fileName.substring(0, fileName.lastIndexOf('/') + 1)}${row[2]}';
+        return row[2];
+      }
+    }
+    return '';
+  }
+
   switch (fileType) {
     /// convert to [glAccountCsvFormat]
     case FileType.glAccount:
@@ -189,24 +203,31 @@ List<String> convertRow(
         if (columnsFrom[14] != '') {
           columnsTo.add('purchase product'); // category
         }
+        columnsTo.add(''); // category 1
+        columnsTo.add(''); // category 2
+        columnsTo.add(''); // category 3
+        columnsTo.add(getImageFileName(fileType, columnsFrom[17])); //image
       }
       return columnsTo;
 
     /// convert to [companyCsvFormat]
     case FileType.company:
-      if (fileName.contains('customer')) {
+      if (fileName.contains('customer') || fileName.contains('main-company')) {
         // 0:partyId,partyType,Customer ID,Customer Name,Inactive,
         // 5:Bill to Address-Line One,Bill to Address-Line Two,Bill to City,
         // 8:Bill to State,Bill to Zip,Bill to Country,Bill to Sales Tax ID,
         // 12:Telephone 1,Telephone 2,Fax Number,Customer E-mail,
         // 16:Resale Number,Discount Days,Discount Percent,Customer Web Site
         columnsTo.add(columnsFrom[2]); // id
-        columnsTo.add(Role.customer.value); //role
+        if (fileName.contains('main-company'))
+          columnsTo.add(Role.company.value);
+        else
+          columnsTo.add(Role.customer.value); //role
         columnsTo.add(columnsFrom[3]); //name
         columnsTo.add(columnsFrom[15]); //email
         columnsTo.add(columnsFrom[12]); // teleph
         columnsTo.add('USD'); //curr
-        columnsTo.add(''); //image
+        columnsTo.add(getImageFileName(fileType, columnsFrom[2])); //image
         columnsTo.add(columnsFrom[5]); //address1
         columnsTo.add(columnsFrom[6]); //address2
         columnsTo.add(columnsFrom[9]); //postal
@@ -260,6 +281,30 @@ List<String> convertRow(
           return [];
         }
       }
+      return columnsTo;
+
+    case FileType.user:
+      // 15: employeeId 16: employee name
+      if (columnsFrom[15].isEmpty || columnsFrom[16].isEmpty) return [];
+
+      var lastBlank = columnsFrom[16].lastIndexOf(' ');
+
+      columnsTo.add(columnsFrom[15]);
+      if (lastBlank == -1) {
+        columnsTo.add('');
+        columnsTo.add(columnsFrom[16]);
+      } else {
+        columnsTo.add(columnsFrom[16].substring(0, lastBlank));
+        columnsTo.add(columnsFrom[16].substring(lastBlank + 1));
+      }
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('Employee');
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('');
+      columnsTo.add('OrgInternal');
       return columnsTo;
 
     case FileType.finDocTransaction:
@@ -342,10 +387,20 @@ Future<void> main(List<String> args) async {
         "output directory $outputDirectory already exists, cannot overwrite");
     exit(1);
   }
+  // create output directory
   createDir(outputDirectory);
+  // copy images
+  createDir('$outputDirectory/images');
+  copyTree('${args[0]}/images', '$outputDirectory/images');
+  copy('${args[0]}/images.csv', '$outputDirectory/images.csv');
 
   logger.i(
-      "Input directory/filename: ${args[0]} fileType: ${args.length > 1 ? args[1] : ''}");
+      "Input directory: ${args[0]} fileType: ${args.length > 1 ? args[1] : ''}");
+
+  // get images file
+  String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
+  List<List<String>> images = fast_csv.parse(imagesCsv);
+
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
     if (args.length == 2 && fileType.name != args[1]) continue;
@@ -378,7 +433,8 @@ Future<void> main(List<String> args) async {
       for (final row in inputCsvFile) {
         if (++index % 10000 == 0) print("processing row: $index");
         if (row == inputCsvFile.first) continue; // header line
-        List<String> convertedRow = convertRow(fileType, row, fileInput);
+        List<String> convertedRow =
+            convertRow(fileType, row, fileInput, images);
         // print("==old: $row new: $convertedRow");
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }

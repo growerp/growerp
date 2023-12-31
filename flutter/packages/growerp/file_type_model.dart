@@ -1,8 +1,8 @@
 enum FileType {
+  company,
   glAccount,
   product,
   category,
-  company,
   user,
   asset,
   finDocTransaction,

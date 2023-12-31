@@ -13,6 +13,7 @@
  */
 
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
@@ -66,6 +67,14 @@ List<Company> CsvToCompanies(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
+
+    // if image specified get it.
+    Uint8List? image;
+    if (row[6].isNotEmpty) {
+      final file = File(row[6]);
+      image = file.readAsBytesSync();
+    }
+
     companies.add(Company(
       pseudoId: row[0],
       role: Role.getByValue(row[1]),
@@ -75,7 +84,7 @@ List<Company> CsvToCompanies(String csvFile) {
           : row[3],
       telephoneNr: row[4],
       currency: Currency(currencyId: row[5]),
-      image: row[6].isNotEmpty ? base64.decode(row[6]) : null,
+      image: image,
       address: Address(
           address1: row[7],
           address2: row[8],
