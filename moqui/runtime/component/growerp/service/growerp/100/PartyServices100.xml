@@ -1513,8 +1513,19 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[company: user.company, ownerPartyId: ownerPartyId]"
                     out-map="context" />
                 <set field="companyPartyId" from="company.partyId" />
-                <else><!-- existing company -->
-                    <set field="companyPartyId" from="user.company?.partyId" />
+                <else><!-- existing company or orgInternal-->
+                    <if condition="user.company.role == 'OrgInternal'">
+                        <set field="companyPartyId" from="relComp.companyPartyId" />
+                        <else>
+                            <if condition="user.company.partyId">
+                                <set field="companyPartyId" from="user.company.partyId" />
+                                <else>
+                                    <return error="true"
+                                        message="No related company for user: ${user.firstName} ${user.lastName}!" />
+                                </else>
+                            </if>
+                        </else>
+                    </if>
                 </else>
             </if>
             <!-- add new user to company  -->

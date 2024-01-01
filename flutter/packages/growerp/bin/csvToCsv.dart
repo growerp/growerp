@@ -287,6 +287,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 15: employeeId 16: employee name
       if (columnsFrom[15].isEmpty || columnsFrom[16].isEmpty) return [];
 
+      // split up name in first/last
       var lastBlank = columnsFrom[16].lastIndexOf(' ');
 
       columnsTo.add(columnsFrom[15]);
@@ -465,6 +466,18 @@ Future<void> main(List<String> args) async {
       case FileType.user:
         fileContent.add(userCsvFormat);
         csvLength = userCsvLength;
+        // remove doubles
+        convertedRows
+            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        List<List<String>> users = [];
+        var lastUser = [];
+        for (final convertedRow in convertedRows) {
+          if (lastUser.isEmpty || convertedRow[0] != lastUser[0]) {
+            users.add(convertedRow);
+          }
+          lastUser = convertedRow;
+        }
+        convertedRows = users;
         break;
       case FileType.finDocTransaction:
         fileContent.add(finDocCsvFormat);
