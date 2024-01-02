@@ -184,7 +184,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <description>depending on type can be invoice/payment/order</description>
             </parameter>
             <parameter name="pseudoId" />
-            <parameter name="sales" type="Boolean" required="true" />
+            <parameter name="sales" type="Boolean" />
             <parameter name="docType" />
             <parameter name="open" type="Boolean" default-value="true" />
             <parameter name="startDate">
@@ -1388,10 +1388,12 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                 </else>
             </if>
-            <!-- add vendor/customer contact person as an extra party at orderPartParty -->
-            <service-call name="create#mantle.order.OrderPartParty"
-                in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
+            <if condition="order.otherUser?.partyId">
+                <!-- add vendor/customer contact person as an extra party at orderPartParty -->
+                <service-call name="create#mantle.order.OrderPartParty"
+                    in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
                         partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
+            </if>
             <!-- create items -->
             <service-call name="growerp.100.FinDocServices100.replace#OrderItems"
                 in-map="[orderId: orderId,
@@ -1553,7 +1555,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="orderId" required="true" type="String" />
             <parameter name="orderPartSeqId" required="true" type="String" />
-            <parameter name="orderItems" required="true" type="List" />
+            <parameter name="orderItems" type="List" />
         </in-parameters>
         <actions>
             <entity-delete-by-condition entity-name="growerp.product.AssetRental">
@@ -2150,24 +2152,26 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <entity-update value-field="parts[0]" />
                 <!-- contact person (add if missing)-->
-                <entity-find entity-name="mantle.order.OrderPartParty" list="parties"
-                    for-update="true">
-                    <econdition field-name="orderId" />
-                    <econdition field-name="orderPartSeqId" from="parts[0].orderPartSeqId" />
-                    <econdition field-name="roleTypeId" from="contactRole" />
-                </entity-find>
-                <if condition="!parties">
-                    <service-call name="create#mantle.order.OrderPartParty"
-                        in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
+                <if condition="order.otherUser?.partyId">
+                    <entity-find entity-name="mantle.order.OrderPartParty" list="parties"
+                        for-update="true">
+                        <econdition field-name="orderId" />
+                        <econdition field-name="orderPartSeqId" from="parts[0].orderPartSeqId" />
+                        <econdition field-name="roleTypeId" from="contactRole" />
+                    </entity-find>
+                    <if condition="!parties">
+                        <service-call name="create#mantle.order.OrderPartParty"
+                            in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
                             partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
-                    <else>
-                        <if condition="parties[0].partyId != order.otherUser.partyId">
-                            <entity-delete value-field="parties[0]" />
-                            <service-call name="create#mantle.order.OrderPartParty"
-                                in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
+                        <else>
+                            <if condition="parties[0].partyId != order.otherUser.partyId">
+                                <entity-delete value-field="parties[0]" />
+                                <service-call name="create#mantle.order.OrderPartParty"
+                                    in-map="[orderId:orderId, orderPartSeqId:orderPartSeqId,
                                     partyId:order.otherUser.partyId, roleTypeId: contactRole]" />
-                        </if>
-                    </else>
+                            </if>
+                        </else>
+                    </if>
                 </if>
             </if>
             <!-- handle status changes -->

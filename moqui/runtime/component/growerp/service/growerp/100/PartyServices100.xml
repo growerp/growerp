@@ -715,7 +715,6 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[partyId: company.partyId, pseudoId: company.pseudoId]" />
             </if>
             <!-- update name -->
-            <log message="==company update==oldValue: ${oldValue}" />
             <if condition="company.name &amp;&amp; oldValue.companies[0]?.name !=  company.name">
                 <service-call name="update#mantle.party.Organization"
                     in-map="[partyId: oldValue.companies[0].partyId, organizationName: company.name]" />

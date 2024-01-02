@@ -55,6 +55,14 @@ along with this software (see the LICENSE.md file). If not, see
                 entity-name="mantle.ledger.account.GlAccount">
                 <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
             </entity-delete-by-condition>
+            <!-- delete item types-->
+            <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
+                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+            </entity-delete-by-condition>
+            <!-- delete payment types-->
+            <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
+                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+            </entity-delete-by-condition>
             <!-- create new accounts and collect posted balances for new transactions-->
             <set field="transactions" from="[]" />
             <iterate list="glAccounts" entry="newGlAccount">
@@ -288,7 +296,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="import" noun="FinDocItems">
+    <service verb="import" noun="FinDocItems" transaction-timeout="3600">
         <in-parameters>
             <parameter name="finDocItems" required="true" type="List" />
             <parameter name="classificationId" />
@@ -299,21 +307,26 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="itemsOut" from="[]" />
             <log message="importing ${finDocItems?.size()} finDocItems" />
             <iterate list="finDocItems" entry="item">
-                <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
-                    <!-- find related transaction header -->
+                <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
+                    <!-- find related finDoc header -->
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                        in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
+                        in-map="[pseudoId: item.pseudoId, docType: item.docType]"
                         out-map="context" />
-                    <if condition="!finDocs.isEmpty()">
-                        <set field="finDocs[0].items" from="itemsOut" />
-                        <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                            in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                        <set field="itemsOut" from="[]" />
+                    <if condition="finDocs.isEmpty()">
+                        <log level="error"
+                            message="${item.docType} pseudoId: ${item.pseudoId} not found" />
+                        <set field="lastItem" from="null" />
+                        <continue />
                         <else>
-                            <log level="warning"
-                                message="Transaction pseudoId: ${lastItem.pseudoId} not found" />
+                            <set field="finDoc" from="finDocs[0]" />
                         </else>
                     </if>
+                </if>
+                <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
+                    <set field="finDoc.items" from="itemsOut" />
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                    <set field="itemsOut" from="[]" />
                 </if>
                 <!-- find internal glAccountId from glAccount.accountCode-->
                 <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
@@ -324,7 +337,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="!glAccounts.isEmpty()">
                     <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
                     <else>
-                        <log level="warning"
+                        <log level="warn"
                             message="could not find ${item.glAccount.accountCode} for company: $companyPartyId" />
                     </else>
                 </if>
@@ -337,59 +350,59 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="!products.isEmpty()">
                         <set field="item.productId" from="products[0].productId" />
                         <else>
-                            <log level="warning"
+                            <log level="warn"
                                 message="could not find ${item.pseudoProductid} for owner: $ownerPartyId" />
                         </else>
                     </if>
+                </if>
+                <!-- item type on orders if missing create some: -->
+                <if condition="finDoc.docType == 'order' &amp;&amp; !item.itemType">
+                    <log
+                        message="=== no item type for ${item.glAccount.glAccountId} set to ItemExpense" />
+                    <set field="item.itemType" from="[itemTypeId: 'ItemExpense']" />
                 </if>
                 <script>itemsOut.add(item)</script>
                 <set field="lastItem" from="item" />
             </iterate>
             <!-- process last record -->
             <if condition="lastItem">
-                <service-call name="growerp.100.FinDocServices100.get#FinDoc"
-                    in-map="[pseudoId: lastItem.pseudoId, sales: true, docType: 'transaction']"
-                    out-map="context" />
-                <if condition="!finDocs.isEmpty()">
-                    <set field="finDocs[0].items" from="itemsOut" />
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
-                    <else>
-                        <log level="warn"
-                            message="Transaction pseudoId: ${lastItem.pseudoId} not found" />
-                    </else>
-                </if>
+                <set field="finDoc.items" from="itemsOut" />
+                <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                    in-map="[finDoc: finDoc, classificationId: classificationId]" />
             </if>
-            <!-- post transactions-->
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="unPosted">
-                <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition field-name="isPosted" value="N" or-null="true" />
-                <select-field field-name="acctgTransId,pseudoId" />
-            </entity-find>
-            <log message="posting ${unPosted?.size()} transactions" />
-            <iterate list="unPosted" entry="item">
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
-                    list="entries">
-                    <econdition field-name="acctgTransId" from="item.acctgTransId" />
+            <if condition="finDoc.docType == 'transaction'">
+                <!-- post transactions-->
+                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="unPosted">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="isPosted" value="N" or-null="true" />
+                    <select-field field-name="acctgTransId,pseudoId" />
                 </entity-find>
-                <if condition="entries.isEmpty()">
-                    <log level="warn"
-                        message="Transaction: ${item.acctgTransId} ps: ${item.pseudoId} has no entries" />
-                    <else>
-                        <if condition="entries.glAccountId.contains(null)">
-                            <log
-                                message="entr glaccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
-                            <else>
-                                <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                                    in-map="[acctgTransId: item.acctgTransId]" />
-                            </else>
-                        </if>
-                    </else>
-                </if>
-            </iterate>
-            <service-call
-                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
-                in-map="[organizationPartyId: companyPartyId]" />
+                <log message="posting ${unPosted?.size()} transactions" />
+                <iterate list="unPosted" entry="item">
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
+                        list="entries">
+                        <econdition field-name="acctgTransId" from="item.acctgTransId" />
+                    </entity-find>
+                    <if condition="entries.isEmpty()">
+                        <log level="warn"
+                            message="Transaction: ${item.acctgTransId} ps: ${item.pseudoId} has no entries" />
+                        <else>
+                            <if condition="entries.glAccountId.contains(null)">
+                                <log
+                                    message="entr glaccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
+                                <else>
+                                    <service-call
+                                        name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                                        in-map="[acctgTransId: item.acctgTransId]" />
+                                </else>
+                            </if>
+                        </else>
+                    </if>
+                </iterate>
+                <service-call
+                    name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
+                    in-map="[organizationPartyId: companyPartyId]" />
+            </if>
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocItems?.size()} findoc items imported</message>

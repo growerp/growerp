@@ -101,6 +101,10 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('2-3-vendor_list.csv');
       searchFiles.add('main-company.csv');
       break;
+    case FileType.finDocOrderPurchase:
+    case FileType.finDocOrderPurchaseItem:
+      searchFiles.add('2a-purchase_order_journal.csv');
+      searchFiles.add('2a1-purchase_order_journal.csv');
     default:
       searchFiles.add('0b*.csv');
     // searchFiles.add('0b-yearAll1Test*.csv');
@@ -162,6 +166,16 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       }
     }
     return '';
+  }
+
+  String dateConvert(String date) {
+    var dateList = date.split('/');
+    var prefix;
+    if (dateList[2] == '99')
+      prefix = '19';
+    else
+      prefix = '20';
+    return "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
   }
 
   switch (fileType) {
@@ -308,19 +322,57 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add('OrgInternal');
       return columnsTo;
 
+    case FileType.finDocOrderPurchase:
+      // 1:vendorId 2:vendorName, 9:order id, 10:date(mm/dd/yy),
+      // 11:closed(TRUE/FALSE) 27: item number, 28: quantity, 29: productId,
+      // 30: descr, 31: accountCode, 32: price, 33: amount
+
+      columnsTo.add("${dateConvert(columnsFrom[10])}-${columnsFrom[9]}");
+      columnsTo.add('false');
+      columnsTo.add('Order');
+      columnsTo.add('');
+      columnsTo.add(dateConvert(columnsFrom[10]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      return columnsTo;
+
+    case FileType.finDocOrderPurchaseItem:
+      // 1:vendorId 2:vendorName, 9:order id, 10:date(mm/dd/yy),
+      // 11:closed(TRUE/FALSE) 27: seq number, 28: quantity, 29: productId,
+      // 30: descr, 31: accountCode, 32: price, 33: amount
+
+      Map itemTypes = {
+        "23100": "ItemSalesTax",
+        "": "ItemVatTax",
+        "57500": "ItemShipping",
+        "0": "ItemSales",
+        "12000": "ItemProduct",
+        "00": "ItemServiceProduct",
+        "000": "ItemRental",
+        "50050": "ItemInventory",
+        "0000": "ItemAsset",
+        "72000": "ItemExpense",
+        "50040": "ItemExpense",
+        "52500": "ItemExpense",
+        "70000": "ItemExpense",
+      };
+
+      columnsTo.add("${dateConvert(columnsFrom[10])}-${columnsFrom[9]}");
+      columnsTo.add('Order');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(columnsFrom[29]); // product id
+      columnsTo.add(columnsFrom[30]); // descr
+      columnsTo.add(columnsFrom[28]); // quant
+      columnsTo.add(columnsFrom[32]); // price
+      columnsTo.add(columnsFrom[31]); // itemType accountCode
+      columnsTo.add('');
+      columnsTo.add(itemTypes[columnsFrom[31]] ?? '');
+      return columnsTo;
+
     case FileType.finDocTransaction:
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
 
-      // convert from m/d/yy to yyyy-mm-dd
-      var dateList = (columnsFrom[2]).split('/');
-      var prefix;
-      if (dateList[2] == '99')
-        prefix = '19';
-      else
-        prefix = '20';
-      var newDate =
-          "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
       var otherCompanyId = columnsFrom[11].isNotEmpty
           ? columnsFrom[11]
           : columnsFrom[13].isNotEmpty
@@ -329,11 +381,11 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
                   ? columnsFrom[15]
                   : '';
 
-      columnsTo.add("${newDate}-${columnsFrom[3]}");
+      columnsTo.add("${dateConvert(columnsFrom[2])}-${columnsFrom[3]}");
       columnsTo.add('true');
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
-      columnsTo.add(newDate);
+      columnsTo.add(dateConvert(columnsFrom[2]));
       columnsTo.add('');
       columnsTo.add(otherCompanyId);
       return columnsTo;
@@ -347,17 +399,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
         isDebit = false;
         amount = columnsFrom[7];
       }
-      // convert from m/d/yy to yyyy-mm-dd
-      var dateList = (columnsFrom[2]).split('/');
-      var prefix;
-      if (dateList[2] == '99')
-        prefix = '19';
-      else
-        prefix = '20';
-      var newDate =
-          "${prefix}${dateList[2]}-${dateList[0].padLeft(2, '0')}-${dateList[1].padLeft(2, '0')}";
 
-      columnsTo.add("${newDate}-${columnsFrom[3]}");
+      columnsTo.add("${dateConvert(columnsFrom[2])}-${columnsFrom[3]}");
       columnsTo.add('Transaction');
       columnsTo.add('');
       columnsTo.add(columnsFrom[17]);
@@ -402,6 +445,10 @@ Future<void> main(List<String> args) async {
   String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
   List<List<String>> images = fast_csv.parse(imagesCsv);
 
+  if (args.length == 2 && !FileType.values.contains(args[1])) {
+    logger.e("FileType: ${args[1]} not recognized");
+  }
+
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
     if (args.length == 2 && fileType.name != args[1]) continue;
@@ -445,26 +492,26 @@ Future<void> main(List<String> args) async {
 
     // prepare output files and run post processing like mandatory sort
     int csvLength = 0;
-    List<String> fileContent = [];
+    String csvFormat = '';
     switch (fileType) {
       case FileType.glAccount:
-        fileContent.add(glAccountCsvFormat);
+        csvFormat = glAccountCsvFormat;
         csvLength = glAccountCsvLength;
         break;
       case FileType.category:
-        fileContent.add(categoryCsvFormat);
+        csvFormat = categoryCsvFormat;
         csvLength = categoryCsvLength;
         break;
       case FileType.product:
-        fileContent.add(productCsvFormat);
+        csvFormat = productCsvFormat;
         csvLength = productCsvLength;
         break;
       case FileType.company:
-        fileContent.add(companyCsvFormat);
+        csvFormat = companyCsvFormat;
         csvLength = companyCsvLength;
         break;
       case FileType.user:
-        fileContent.add(userCsvFormat);
+        csvFormat = userCsvFormat;
         csvLength = userCsvLength;
         // remove doubles
         convertedRows
@@ -480,7 +527,8 @@ Future<void> main(List<String> args) async {
         convertedRows = users;
         break;
       case FileType.finDocTransaction:
-        fileContent.add(finDocCsvFormat);
+      case FileType.finDocOrderPurchase:
+        csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
         // sort better use maps for empty values
         // sort by reference number and date
@@ -498,7 +546,8 @@ Future<void> main(List<String> args) async {
         convertedRows = headerRows;
         break;
       case FileType.finDocTransactionItem:
-        fileContent.add(finDocItemCsvFormat);
+      case FileType.finDocOrderPurchaseItem:
+        csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
         // sort better use maps for empty values
         // sort by just reference number
@@ -507,17 +556,36 @@ Future<void> main(List<String> args) async {
         break;
       default:
     }
-    // create csv output file
-    for (final convertedRow in convertedRows) {
-      fileContent.add(createCsvRow(convertedRow, csvLength));
+
+    List<String> fileContent = [];
+    int fileIndex = 0;
+    for (int record = 0; record < convertedRows.length; record++) {
+      fileContent.add(createCsvRow(convertedRows[record], csvLength));
+
+      if (record % 10000 == 0 && record != 0) {
+        // wait for id change
+        while (convertedRows[record][0] == convertedRows[record + 1][0]) {
+          fileContent.add(createCsvRow(convertedRows[record++], csvLength));
+        }
+        // insert header
+        fileContent.insert(0, csvFormat);
+        // create file
+        final file = File(
+            "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv");
+        file.writeAsStringSync(fileContent.join());
+        logger.i(
+            "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records");
+        fileContent = [];
+      }
     }
-    // write to disk
-    if (fileContent.length > 1) {
-      final file = File("$outputDirectory/${fileType.name}.csv");
+    if (fileContent.isNotEmpty) {
+      fileContent.insert(0, csvFormat);
+      final file = File(
+          "$outputDirectory/${fileType.name}-${(++fileIndex).toString().padLeft(3, '0')}.csv");
       file.writeAsStringSync(fileContent.join());
+      logger.i(
+          "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records");
     }
-    logger.i(
-        "Output file created: ${fileType.name}.csv ${fileContent.length} records");
   }
   exit(0);
 }

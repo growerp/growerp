@@ -6,7 +6,8 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
 Future<Dio> buildDioClient(String? base,
-    {Duration timeout = const Duration(seconds: 5)}) async {
+    {Duration timeout = const Duration(seconds: 5),
+    bool miniLog = false}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -32,10 +33,10 @@ Future<Dio> buildDioClient(String? base,
   dio.interceptors.add(KeyInterceptor(box));
 
   dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      responseHeader: true,
+      requestHeader: !miniLog,
+      requestBody: !miniLog,
+      responseBody: !miniLog,
+      responseHeader: !miniLog,
       error: true,
       compact: true,
       maxWidth: 133));

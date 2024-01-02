@@ -196,12 +196,9 @@ Future<void> main(List<String> args) async {
               "no files found to process, use the -i directive for the directory?");
           exit(1);
         }
-        logger.i(
-            "Starting import from file/directory: $inputFile fileType: ${overrideFileType.name}");
-        logger.i("Processing files: \n $files");
         // talk to backend
         final client = RestClient(await buildDioClient(backendUrl,
-            timeout: Duration(seconds: timeout)));
+            timeout: Duration(seconds: timeout), miniLog: true));
         FileType fileType = FileType.unknown;
         try {
           await login(client);
@@ -209,43 +206,47 @@ Future<void> main(List<String> args) async {
           for (fileType in FileType.values) {
             if (overrideFileType != FileType.unknown &&
                 overrideFileType != fileType) continue;
-            var fileName =
-                find('${fileType.name}.csv', workingDirectory: inputFile)
+            var fileNames =
+                find('${fileType.name}-*.csv', workingDirectory: inputFile)
                     .toList();
-            if (fileName.isEmpty) continue;
-            logger.i("Importing filetype: ${fileType.name} with admin user: "
-                "${authenticate.user?.email}");
-            String csvFile = File(fileName.first).readAsStringSync();
-            switch (fileType) {
-              case FileType.glAccount:
-                await client.importGlAccounts(CsvToGlAccounts(csvFile));
-                break;
-              case FileType.product:
-                await client.importProducts(
-                    CsvToProducts(csvFile, logger), 'AppAdmin');
-                break;
-              case FileType.category:
-                await client.importCategories(CsvToCategories(csvFile));
-                break;
-              case FileType.company:
-                await client.importCompanies(CsvToCompanies(csvFile));
-                break;
-              case FileType.user:
-                await client.importUsers(CsvToUsers(csvFile));
-                break;
-              case FileType.website:
-                await client.importWebsite(CsvToWebsite(csvFile));
-                break;
-              case FileType.finDocTransaction:
-                await client.importFinDoc(CsvToFinDocs(csvFile, logger));
-                break;
-              case FileType.finDocTransactionItem:
-                await client
-                    .importFinDocItem(CsvToFinDocItems(csvFile, logger));
-                break;
-              default:
-                logger.e("FileType ${fileType.name} not implemented yet");
-                exit(1);
+            fileNames..sort();
+            for (final fileName in fileNames) {
+              logger.i("Importing $fileType: ${fileName} with admin user: "
+                  "${authenticate.user?.email}");
+              String csvFile = File(fileName).readAsStringSync();
+              switch (fileType) {
+                case FileType.glAccount:
+                  await client.importGlAccounts(CsvToGlAccounts(csvFile));
+                  break;
+                case FileType.product:
+                  await client.importProducts(
+                      CsvToProducts(csvFile, logger), 'AppAdmin');
+                  break;
+                case FileType.category:
+                  await client.importCategories(CsvToCategories(csvFile));
+                  break;
+                case FileType.company:
+                  await client.importCompanies(CsvToCompanies(csvFile));
+                  break;
+                case FileType.user:
+                  await client.importUsers(CsvToUsers(csvFile));
+                  break;
+                case FileType.website:
+                  await client.importWebsite(CsvToWebsite(csvFile));
+                  break;
+                case FileType.finDocTransaction:
+                case FileType.finDocOrderPurchase:
+                  await client.importFinDoc(CsvToFinDocs(csvFile, logger));
+                  break;
+                case FileType.finDocTransactionItem:
+                case FileType.finDocOrderPurchaseItem:
+                  await client
+                      .importFinDocItem(CsvToFinDocItems(csvFile, logger));
+                  break;
+                default:
+                  logger.e("FileType ${fileType.name} not implemented yet");
+                  exit(1);
+              }
             }
           }
         } on DioException catch (e) {

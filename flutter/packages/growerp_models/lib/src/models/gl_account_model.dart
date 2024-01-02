@@ -54,7 +54,6 @@ List<GlAccount> CsvToGlAccounts(String csvFile) {
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    print("processing row: $row");
     glAccounts.add(
       GlAccount(
           accountCode: row[0],

@@ -29,7 +29,7 @@ part 'findoc_item_model.g.dart';
 class FinDocItem with _$FinDocItem {
   FinDocItem._();
   factory FinDocItem({
-    String? pseudoId, // for conversion only for related transaction
+    String? pseudoId, // for conversion only
     FinDocType? docType, // for conversion only
     String? itemSeqId,
     ItemType? itemType,
@@ -53,7 +53,7 @@ class FinDocItem with _$FinDocItem {
 
 String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
     " productId, description, quantity, price/amount, accountCode, "
-    " isDebit \r\n";
+    " isDebit, itemType \r\n";
 List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');
 int finDocItemCsvLength = finDocItemCsvTitles.length;
 

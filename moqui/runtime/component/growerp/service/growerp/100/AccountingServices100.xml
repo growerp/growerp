@@ -547,7 +547,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="disallowPosting" value="N" or-null="true" />
                 <econdition field-name="direction" from="sales? 'O' : 'I'" />
-                <order-by field-name="[paymentTypeEnumId,accountCode]" />
+                <order-by field-name="[itemTypeDescription,accountCode]" />
             </entity-find>
             <iterate list="itemTypeList" entry="itemType">
                 <set field="itemTypeOut"
@@ -584,7 +584,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="disallowPosting" value="N" or-null="true" />
                 <econdition field-name="isPayable" from="sales? 'N' : 'Y'" />
-                <order-by field-name="[paymentTypeEnumId,accountCode]" />
+                <order-by field-name="[typeDescription,accountCode]" />
             </entity-find>
             <iterate list="paymentTypeList" entry="paymentType">
                 <set field="itemTypeOut"

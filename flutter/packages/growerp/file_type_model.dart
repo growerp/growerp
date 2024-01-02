@@ -7,6 +7,11 @@ enum FileType {
   asset,
   finDocTransaction,
   finDocTransactionItem,
+  finDocOrderPurchase,
+  finDocOrderPurchaseItem,
+  finDocInvoicePurchase,
+  finDocInvoicePurchaseItem,
+  finDocPaymentPurchase,
   website,
   unknown
 }

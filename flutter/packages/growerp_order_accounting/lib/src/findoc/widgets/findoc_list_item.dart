@@ -50,7 +50,7 @@ class FinDocListItem extends StatelessWidget {
     List<Widget> titleFields = [];
     if (isPhone) {
       titleFields = [
-        Text(finDoc.id() ?? '', key: Key('id$index')),
+        Text(finDoc.pseudoId ?? '', key: Key('id$index')),
         const Expanded(child: SizedBox(width: 10)),
         Text(classificationId == 'AppHotel'
             ? finDoc.items[0].rentalFromDate != null
@@ -349,7 +349,9 @@ class FinDocListItem extends StatelessWidget {
                                   shipmentId: id, sales: sales, docType: type)
                               : type == FinDocType.order
                                   ? FinDoc(
-                                      orderId: id, sales: sales, docType: type)
+                                      orderId: finDoc.pseudoId,
+                                      sales: sales,
+                                      docType: type)
                                   : FinDoc(
                                       transactionId: id,
                                       sales: sales,
