@@ -56,13 +56,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
             </entity-delete-by-condition>
             <!-- delete item types-->
-            <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
+            <!-- entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
                 <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition>
+            </entity-delete-by-condition-->
             <!-- delete payment types-->
-            <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
+            <!-- entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
                 <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition>
+            </entity-delete-by-condition-->
             <!-- create new accounts and collect posted balances for new transactions-->
             <set field="transactions" from="[]" />
             <iterate list="glAccounts" entry="newGlAccount">
@@ -307,6 +307,12 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="itemsOut" from="[]" />
             <log message="importing ${finDocItems?.size()} finDocItems" />
             <iterate list="finDocItems" entry="item">
+                <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
+                    <set field="finDoc.items" from="itemsOut" />
+                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
+                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
+                    <set field="itemsOut" from="[]" />
+                </if>
                 <if condition="!lastItem || lastItem.pseudoId != item.pseudoId">
                     <!-- find related finDoc header -->
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
@@ -322,23 +328,17 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
-                    <set field="finDoc.items" from="itemsOut" />
-                    <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                        in-map="[finDoc: finDoc, classificationId: classificationId]" />
-                    <set field="itemsOut" from="[]" />
-                </if>
-                <!-- find internal glAccountId from glAccount.accountCode-->
+                <!-- find internal item glAccountId from glAccount.accountCode-->
                 <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                     list="glAccounts">
                     <econdition field-name="partyId" from="companyPartyId" />
                     <econdition field-name="accountCode" from="item.glAccount.accountCode" />
                 </entity-find>
-                <if condition="!glAccounts.isEmpty()">
+                <if condition="glAccounts">
                     <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
                     <else>
                         <log level="warn"
-                            message="could not find ${item.glAccount.accountCode} for company: $companyPartyId" />
+                            message="could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId" />
                     </else>
                 </if>
                 <!-- find productId from pseudoProductId -->
@@ -347,7 +347,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="pseudoId" from="item.pseudoProductId" />
                     </entity-find>
-                    <if condition="!products.isEmpty()">
+                    <if condition="products">
                         <set field="item.productId" from="products[0].productId" />
                         <else>
                             <log level="warn"
@@ -383,20 +383,16 @@ along with this software (see the LICENSE.md file). If not, see
                         list="entries">
                         <econdition field-name="acctgTransId" from="item.acctgTransId" />
                     </entity-find>
-                    <if condition="entries.isEmpty()">
-                        <log level="warn"
-                            message="Transaction: ${item.acctgTransId} ps: ${item.pseudoId} has no entries" />
-                        <else>
-                            <if condition="entries.glAccountId.contains(null)">
-                                <log
-                                    message="entr glaccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
-                                <else>
-                                    <service-call
-                                        name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                                        in-map="[acctgTransId: item.acctgTransId]" />
-                                </else>
-                            </if>
-                        </else>
+                    <if condition="entries"><!-- only post when there are entries-->
+                        <if condition="entries.glAccountId.contains(null)">
+                            <log
+                                message="entry with 'null' glAccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
+                            <else>
+                                <service-call
+                                    name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                                    in-map="[acctgTransId: item.acctgTransId]" />
+                            </else>
+                        </if>
                     </if>
                 </iterate>
                 <service-call

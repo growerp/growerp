@@ -103,8 +103,9 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.finDocOrderPurchase:
     case FileType.finDocOrderPurchaseItem:
-      searchFiles.add('2a-purchase_order_journal.csv');
-      searchFiles.add('2a1-purchase_order_journal.csv');
+      //  searchFiles.add('2a-purchase_order_journal.csv');
+      //  searchFiles.add('2a1-purchase_order_journal.csv');
+      break;
     default:
       searchFiles.add('0b*.csv');
     // searchFiles.add('0b-yearAll1Test*.csv');
@@ -560,11 +561,9 @@ Future<void> main(List<String> args) async {
     List<String> fileContent = [];
     int fileIndex = 0;
     for (int record = 0; record < convertedRows.length; record++) {
-      fileContent.add(createCsvRow(convertedRows[record], csvLength));
-
       if (record % 10000 == 0 && record != 0) {
         // wait for id change
-        while (convertedRows[record][0] == convertedRows[record + 1][0]) {
+        while (convertedRows[record][0] == convertedRows[record - 1][0]) {
           fileContent.add(createCsvRow(convertedRows[record++], csvLength));
         }
         // insert header
@@ -575,8 +574,10 @@ Future<void> main(List<String> args) async {
         file.writeAsStringSync(fileContent.join());
         logger.i(
             "Output file created: ${fileType.name}-${(fileIndex).toString().padLeft(3, '0')}.csv ${fileContent.length} records");
+        // start new file
         fileContent = [];
       }
+      fileContent.add(createCsvRow(convertedRows[record], csvLength));
     }
     if (fileContent.isNotEmpty) {
       fileContent.insert(0, csvFormat);
