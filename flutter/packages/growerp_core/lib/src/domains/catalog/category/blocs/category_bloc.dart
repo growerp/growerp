@@ -25,8 +25,6 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 part 'category_event.dart';
 part 'category_state.dart';
 
-const _categoryLimit = 20;
-
 EventTransformer<E> categoryDroppable<E>(Duration duration) {
   return (events, mapper) {
     return droppable<E>().call(events.throttle(duration), mapper);

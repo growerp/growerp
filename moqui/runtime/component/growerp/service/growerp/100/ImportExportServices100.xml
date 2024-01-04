@@ -56,13 +56,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
             </entity-delete-by-condition>
             <!-- delete item types-->
-            <!-- entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
+            <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
                 <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition-->
+            </entity-delete-by-condition>
             <!-- delete payment types-->
-            <!-- entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
+            <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
                 <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-delete-by-condition-->
+            </entity-delete-by-condition>
             <!-- create new accounts and collect posted balances for new transactions-->
             <set field="transactions" from="[]" />
             <iterate list="glAccounts" entry="newGlAccount">
@@ -309,6 +309,7 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <set field="finDoc.items" from="itemsOut" />
+                    <set field="finDoc.isPosted" value="true" type="Boolean" />
                     <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                         in-map="[finDoc: finDoc, classificationId: classificationId]" />
                     <set field="itemsOut" from="[]" />
@@ -367,37 +368,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- process last record -->
             <if condition="lastItem">
                 <set field="finDoc.items" from="itemsOut" />
+                <set field="finDoc.isPosted" value="true" type="Boolean" />
                 <service-call name="growerp.100.FinDocServices100.update#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]" />
-            </if>
-            <if condition="finDoc.docType == 'transaction'">
-                <!-- post transactions-->
-                <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="unPosted">
-                    <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="isPosted" value="N" or-null="true" />
-                    <select-field field-name="acctgTransId,pseudoId" />
-                </entity-find>
-                <log message="posting ${unPosted?.size()} transactions" />
-                <iterate list="unPosted" entry="item">
-                    <entity-find entity-name="mantle.ledger.transaction.AcctgTransEntry"
-                        list="entries">
-                        <econdition field-name="acctgTransId" from="item.acctgTransId" />
-                    </entity-find>
-                    <if condition="entries"><!-- only post when there are entries-->
-                        <if condition="entries.glAccountId.contains(null)">
-                            <log
-                                message="entry with 'null' glAccounts: ${entries.glAccountId} tr: ${item.acctgTransId} ps: ${item.pseudoId}" />
-                            <else>
-                                <service-call
-                                    name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                                    in-map="[acctgTransId: item.acctgTransId]" />
-                            </else>
-                        </if>
-                    </if>
-                </iterate>
-                <service-call
-                    name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
-                    in-map="[organizationPartyId: companyPartyId]" />
             </if>
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">

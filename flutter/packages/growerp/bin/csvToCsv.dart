@@ -120,6 +120,14 @@ String convertFile(FileType fileType, String string, String fileName) {
     case FileType.glAccount:
       string = string
           .replaceFirst(
+              '10205,"Checking Acct, Mission Bank",Cash,,\n',
+              '10205,"Checking Acct, Mission Bank",Cash,,\n'
+                  '10206,Deleted bank account,Cash,,\n')
+          .replaceFirst(
+              "27500,Loan - Kern Schools C. U.,Long Term Liabilities,,\n",
+              "27500,Loan - Kern Schools C. U.,Long Term Liabilities,,\n"
+                  "27600,Loan - Old,Long Term Liabilities,,\n")
+          .replaceFirst(
               "10100,Cash on Hand,", "10000,Assets,Cash,,\n10100,Cash on Hand,")
           .replaceFirst(
               "39005,Capital,", "30000,Equity,Equity-Retained Earnings,,\n39005,Capital,")

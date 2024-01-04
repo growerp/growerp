@@ -1311,16 +1311,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- posting -->
                     <if condition="finDoc.isPosted == true">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                            in-map="[acctgTransId: acctgTransId]"></service-call>
-                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
-                            value-field="acctgTrans" />
-                        <if condition="acctgTrans.isPosted == 'Y'">
-                            <service-call
-                                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
-                                in-map="[organizationPartyId: companyPartyId]" />
-                        </if>
+                            in-map="[acctgTransId: acctgTransId]" />
                     </if>
-
                 </else-if>
                 <else>
                     <return error="true"
@@ -1884,16 +1876,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- posting -->
                     <if condition="finDoc.isPosted == true &amp;&amp; transaction.isPosted == 'N'">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
-                            in-map="[acctgTransId: finDoc.transactionId]"></service-call>
-                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
-                            value-field="acctgTrans">
-                            <field-map field-name="acctgTransId" from="finDoc.transactionId" />
-                        </entity-find-one>
-                        <if condition="acctgTrans.isPosted == 'Y'">
-                            <service-call
-                                name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries"
-                                in-map="[organizationPartyId: companyPartyId]" />
-                        </if>
+                            in-map="[acctgTransId: finDoc.transactionId]" />
                     </if>
                     <set field="inMap"
                         from="[finDocId: finDoc.transactionId,
