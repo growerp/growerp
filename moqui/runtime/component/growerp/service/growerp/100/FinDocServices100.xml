@@ -312,10 +312,10 @@ along with this software (see the LICENSE.md file). If not, see
                             ignore-if-empty="true" />
                         <econdition field-name="rentalThruDate" from="rentalThruDate"
                             ignore-if-empty="true" />
-                        <econdition field-name="pseudoId" from="pseudoId"
-                            ignore-if-empty="true" />
                         <econditions combine="or">
                             <econdition field-name="orderId" ignore-case="true"
+                                operator="like" from="search" />
+                            <econdition field-name="pseudoId" ignore-case="true"
                                 operator="like" from="search" />
                             <econdition field-name="vendorCompanyName" ignore-case="true"
                                 operator="like" from="search" />
@@ -337,10 +337,13 @@ along with this software (see the LICENSE.md file). If not, see
                                 <use-iterator />
                             </entity-find>
                             <else>
-                                <if condition="finDocId"><!-- single document with items -->
+                                <if condition="finDocId || pseudoId"><!-- single document with items -->
                                     <entity-find list="items"
                                         entity-name="growerp.order.OrderHeaderPartAndParties">
-                                        <econdition field-name="orderId" from="finDocId" />
+                                        <econdition field-name="orderId" from="finDocId"
+                                            ignore-if-empty="true" />
+                                        <econdition field-name="pseudoId" from="pseudoId"
+                                            ignore-if-empty="true" />
                                         <econditions combine="or">
                                             <econdition field-name="vendorPartyId"
                                                 from="companyPartyId"
@@ -349,7 +352,7 @@ along with this software (see the LICENSE.md file). If not, see
                                                 from="companyPartyId"
                                                 ignore-if-empty="true" />
                                         </econditions>
-                                        <order-by field-name="pseudoId" />
+                                        <order-by field-name="pseudoId,orderId" />
                                     </entity-find>
                                     <else><!-- multiple documents -->
                                         <set field="statusList"
@@ -1587,7 +1590,8 @@ along with this software (see the LICENSE.md file). If not, see
                             in-map="context + [itemTypeEnumId: item.itemType.itemTypeId,
                                             itemDescription: item.description,
                                             quantity: item.quantity,
-                                            unitAmount: item.price]"
+                                            unitAmount: item.price,
+                                            overrideGlAccountId: item.glAccount.glAccountId]"
                             out-map="itemcreate" />
                     </else>
                 </if>

@@ -15,6 +15,50 @@ along with this software (see the LICENSE.md file). If not, see
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="import" noun="ItemTypes">
+        <description> Import ItemTypes</description>
+        <in-parameters>
+            <parameter name="itemTypes" required="true" type="List" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <!-- delete existing -->
+            <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-delete-by-condition>
+            <!-- create new -->
+            <iterate list="itemTypes" entry="itemType">
+                <set field="direction"
+                    from="itemType.inComing &amp;&amp; itemType.outGoing
+                        ? 'E' : itemType.inComing 
+                            ? 'I' : itemType.outGoing
+                                ? 'O' : ''" />
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                    list="glAccounts">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" from="itemType.accountCode" />
+                </entity-find>
+                <if condition="!glAccounts">
+                    <log level="error"
+                        message="Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId" />
+                    <else>
+                        <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
+                            in-map="[
+                                itemTypeEnumId: itemType.itemTypeId,
+                                organizationPartyId: companyPartyId,
+                                direction: direction,
+                                glAccountId: glAccounts[0].glAccountId,
+                            ]" />
+                    </else>
+                </if>
+            </iterate>
+            <if condition="!ec.message.hasError()">
+                <message type="success">${itemTypes.size()} itemTypes imported</message>
+            </if>
+        </actions>
+    </service>
+
     <service verb="import" noun="GlAccounts">
         <description> Import GlAccounts</description>
         <in-parameters>
@@ -93,6 +137,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- recalculate posted summary-->
             <service-call name="growerp.100.AccountingServices100.recalculate#GlAccountOrgSummaries"
                 in-map="companyPartyId: relComp.companyPartyId" />
+            <if condition="!ec.message.hasError()">
+                <message type="success">${glAccounts.size()} glAccounts imported</message>
+            </if>
         </actions>
     </service>
 
@@ -137,7 +184,6 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <!-- main company already exist so need update -->
                         <if condition="company.role == 'OrgInternal'">
-                            <log message="==== org internal found:" />
                             <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                                 list="mainCompanies">
                                 <econdition field-name="companyRole" value="OrgInternal" />
@@ -149,7 +195,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <else>
                                     <set field="company.partyId"
                                         from="mainCompanies[0].companyPartyId" />
-                                    <log message="====company update: $company" />
                                     <service-call
                                         name="growerp.100.PartyServices100.update#Company"
                                         in-map="[company: company]" />
@@ -299,7 +344,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="FinDocItems" transaction-timeout="3600">
         <in-parameters>
             <parameter name="finDocItems" required="true" type="List" />
-            <parameter name="classificationId" />
+            <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
             <service-call out-map="context"
@@ -329,21 +374,23 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <!-- find internal item glAccountId from glAccount.accountCode-->
-                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
-                    list="glAccounts">
-                    <econdition field-name="partyId" from="companyPartyId" />
-                    <econdition field-name="accountCode" from="item.glAccount.accountCode" />
-                </entity-find>
-                <if condition="glAccounts">
-                    <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
-                    <else>
-                        <log level="warn"
-                            message="could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId" />
-                    </else>
+                <if condition="item.glAccount.accountCode">
+                    <!-- find internal item glAccountId from glAccount.accountCode-->
+                    <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                        list="glAccounts">
+                        <econdition field-name="partyId" from="companyPartyId" />
+                        <econdition field-name="accountCode" from="item.glAccount.accountCode" />
+                    </entity-find>
+                    <if condition="glAccounts">
+                        <set field="item.glAccount.glAccountId" from="glAccounts[0].glAccountId" />
+                        <else>
+                            <log level="warn"
+                                message="id: ${item.pseudoId} could not find item accountCode ${item.glAccount.accountCode} for company: $companyPartyId" />
+                        </else>
+                    </if>
                 </if>
-                <!-- find productId from pseudoProductId -->
                 <if condition="item.pseudoProductId">
+                    <!-- find productId from pseudoProductId -->
                     <entity-find entity-name="mantle.product.Product" list="products">
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="pseudoId" from="item.pseudoProductId" />
@@ -351,15 +398,28 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="products">
                         <set field="item.productId" from="products[0].productId" />
                         <else>
-                            <log level="warn"
-                                message="could not find ${item.pseudoProductid} for owner: $ownerPartyId" />
+                            <!-- not found so better add it-->
+                            <log
+                                message="id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it" />
+                            <set field="product"
+                                from="[
+                                    pseudoId: item.pseudoProductId,
+                                    productTypeId: 'Physical Good',
+                                    productName: item.description,
+                                    price: item.price,
+                                    listPrice: item.price,
+                                    ]" />
+                            <service-call name="growerp.100.CatgProdServices100.create#Product"
+                                out-map="context"
+                                in-map="[product: product, classificationId: classificationId]" />
+                            <set field="item.productId" from="product.productId" />
                         </else>
                     </if>
                 </if>
                 <!-- item type on orders if missing create some: -->
                 <if condition="finDoc.docType == 'order' &amp;&amp; !item.itemType">
                     <log
-                        message="=== no item type for ${item.glAccount.glAccountId} set to ItemExpense" />
+                        message="id: ${item.pseudoId} no item type for ${item.glAccount.glAccountId} set to ItemExpense" />
                     <set field="item.itemType" from="[itemTypeId: 'ItemExpense']" />
                 </if>
                 <script>itemsOut.add(item)</script>

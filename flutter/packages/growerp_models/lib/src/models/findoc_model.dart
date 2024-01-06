@@ -148,7 +148,7 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
   List<FinDoc> finDocs = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
-    if (row == result.first) continue;
+    if (row == result.first || row[0].isEmpty) continue;
     try {
       finDocs.add(FinDoc(
         pseudoId: row[0],

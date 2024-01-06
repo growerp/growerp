@@ -87,10 +87,43 @@ Map convertClass = {
   'Sales Discounts': 'Discounts and Write-downs',
 };
 
+// used on order/invoice/return with default accountCode
+// in backend entity ItemTypeGlAccount and view ItemTypeAndGlAccount
+// which also comtains the companyId/organizationPartyId
+String accountCodeToItemType(String accountCode, String pseudoProductId) {
+  Map accountCodes = {
+    '12000': 'ItemProduct',
+    '53001': 'ItemExpense',
+    '57500': 'ItemShipping',
+    '50050': 'ItemExpense',
+    '72000': 'ItemExpense',
+    '75500': 'ItemProduct',
+    '74500': 'ItemExpense',
+    '70000': 'ItemExpense',
+    '50040': 'ItemProduct',
+    '52500': 'ItemExpense',
+    '89000': 'ItemExpense',
+    '50005': 'ItemProduct',
+    '50000': 'ItemProduct',
+    '50030': 'ItemProduct',
+    '71000': 'ItemExpense',
+    '60000': 'ItemExpense',
+    '15100': 'ItemExpense',
+    '67000': 'ItemExpense',
+  };
+
+  if (accountCodes[accountCode] == 'ItemProduct' && pseudoProductId == '')
+    return ('ItemSales');
+  return (accountCodes[accountCode] ?? '');
+}
+
 /// specify filenames here, * allowed for names with the same starting characters
 List<String> getFileNames(FileType fileType) {
   List<String> searchFiles = [];
   switch (fileType) {
+    case FileType.itemType:
+      searchFiles.add('itemType.csv');
+      break;
     case FileType.glAccount:
       //searchFiles.add('4-1-chart_of_accounts_list.csv');
       //searchFiles.add('Trial_Balance_2020-06-07.csv');
@@ -103,12 +136,25 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.finDocOrderPurchase:
     case FileType.finDocOrderPurchaseItem:
-      //  searchFiles.add('2a-purchase_order_journal.csv');
-      //  searchFiles.add('2a1-purchase_order_journal.csv');
+      searchFiles.add('2a-purchase_order_journal.csv');
+      searchFiles.add('2a1-purchase_order_journal.csv');
+      break;
+    case FileType.product:
+    case FileType.user:
+    case FileType.finDocTransaction:
+    case FileType.finDocTransactionItem:
+      searchFiles.add('0b*.csv');
+      // searchFiles.add('0b-yearAll1Test*.csv');
+      break;
+    case FileType.category:
+    case FileType.asset:
+    case FileType.finDocInvoicePurchase:
+    case FileType.finDocInvoicePurchaseItem:
+    case FileType.finDocPaymentPurchase:
+    case FileType.website:
       break;
     default:
-      searchFiles.add('0b*.csv');
-    // searchFiles.add('0b-yearAll1Test*.csv');
+      logger.w("No files found for fileType: ${fileType.name}");
   }
   return searchFiles;
 }
@@ -188,6 +234,14 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
   }
 
   switch (fileType) {
+    /// convert to [itemTypeCsvFormat]
+    case FileType.itemType:
+      if (columnsFrom[0] == '') return [];
+      columnsTo.add(columnsFrom[0]);
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      return columnsTo;
+
     /// convert to [glAccountCsvFormat]
     case FileType.glAccount:
       // remove empty and double id's
@@ -210,6 +264,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
 
     /// convert to [productCsvFormat]
     case FileType.product:
+      // 17: productId 18: description
       if (columnsFrom[17] != '' && !ids.contains(columnsFrom[17])) {
         ids.add(columnsFrom[17]);
         columnsTo.add(columnsFrom[17]); // id
@@ -350,22 +405,6 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11:closed(TRUE/FALSE) 27: seq number, 28: quantity, 29: productId,
       // 30: descr, 31: accountCode, 32: price, 33: amount
 
-      Map itemTypes = {
-        "23100": "ItemSalesTax",
-        "": "ItemVatTax",
-        "57500": "ItemShipping",
-        "0": "ItemSales",
-        "12000": "ItemProduct",
-        "00": "ItemServiceProduct",
-        "000": "ItemRental",
-        "50050": "ItemInventory",
-        "0000": "ItemAsset",
-        "72000": "ItemExpense",
-        "50040": "ItemExpense",
-        "52500": "ItemExpense",
-        "70000": "ItemExpense",
-      };
-
       columnsTo.add("${dateConvert(columnsFrom[10])}-${columnsFrom[9]}");
       columnsTo.add('Order');
       columnsTo.add(''); //seqId by system
@@ -375,7 +414,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[32]); // price
       columnsTo.add(columnsFrom[31]); // itemType accountCode
       columnsTo.add('');
-      columnsTo.add(itemTypes[columnsFrom[31]] ?? '');
+      columnsTo.add(accountCodeToItemType(columnsFrom[31], columnsFrom[29]));
       return columnsTo;
 
     case FileType.finDocTransaction:
@@ -435,11 +474,20 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
+  logger.i(
+      "Input directory: ${args[0]} fileType: ${args.length > 1 ? args[1] : ''}");
+
+  if (args.length == 2 && !FileType.values.toString().contains(args[1])) {
+    logger.e("FileType: ${args[1]} not recognized");
+    exit(1);
+  }
+
   if (isDirectory(outputDirectory)) {
     logger.e(
         "output directory $outputDirectory already exists, cannot overwrite");
     exit(1);
   }
+
   // create output directory
   createDir(outputDirectory);
   // copy images
@@ -447,16 +495,9 @@ Future<void> main(List<String> args) async {
   copyTree('${args[0]}/images', '$outputDirectory/images');
   copy('${args[0]}/images.csv', '$outputDirectory/images.csv');
 
-  logger.i(
-      "Input directory: ${args[0]} fileType: ${args.length > 1 ? args[1] : ''}");
-
   // get images file
   String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
   List<List<String>> images = fast_csv.parse(imagesCsv);
-
-  if (args.length == 2 && !FileType.values.contains(args[1])) {
-    logger.e("FileType: ${args[1]} not recognized");
-  }
 
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
@@ -495,7 +536,8 @@ Future<void> main(List<String> args) async {
         // print("==old: $row new: $convertedRow");
         if (convertedRow.isNotEmpty) convertedRows.add(convertedRow);
       }
-      logger.i("file: ${fileInput} $index records processed");
+      logger.i(
+          "filetype: ${fileType.name} file: ${fileInput} $index records processed");
     }
     // print("==2==${convertedRows.length} 0:${convertedRows[0]}");
 
@@ -503,6 +545,10 @@ Future<void> main(List<String> args) async {
     int csvLength = 0;
     String csvFormat = '';
     switch (fileType) {
+      case FileType.itemType:
+        csvFormat = itemTypeCsvFormat;
+        csvLength = itemTypeCsvLength;
+        break;
       case FileType.glAccount:
         csvFormat = glAccountCsvFormat;
         csvLength = glAccountCsvLength;

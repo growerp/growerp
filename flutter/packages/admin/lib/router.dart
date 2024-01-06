@@ -27,7 +27,7 @@ import 'package:growerp_models/growerp_models.dart' as cat;
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
     if (kDebugMode) {
-      print('>>>NavigateTo { ${settings.name} '
+      debugPrint('>>>NavigateTo { ${settings.name} '
           'with: ${settings.arguments.toString()} }');
     }
   }

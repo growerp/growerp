@@ -85,7 +85,7 @@ List<MenuOption> menuOptions = [
 // routing
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (kDebugMode) {
-    print('>>>NavigateTo { ${settings.name} '
+    debugPrint('>>>NavigateTo { ${settings.name} '
         'with: ${settings.arguments.toString()} }');
   }
   switch (settings.name) {

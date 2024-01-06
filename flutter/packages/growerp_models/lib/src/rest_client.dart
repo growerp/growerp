@@ -322,7 +322,8 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/ImportExport/finDocItems")
   @Extra({'requireApiKey': true})
-  Future<void> importFinDocItem(@Field() List<FinDocItem> finDocItems);
+  Future<void> importFinDocItem(
+      @Field() List<FinDocItem> finDocItems, @Field() String classificationId);
 
   // Inventory locations
   @GET("rest/s1/growerp/100/Location")
@@ -512,6 +513,10 @@ abstract class RestClient {
   Future<void> uploadEntities(
       {@Field() required dynamic entities,
       @Field() required String classificationId});
+
+  @POST("rest/s1/growerp/100/ImportExport/itemTypes")
+  @Extra({'requireApiKey': true})
+  Future<String> importItemTypes(@Field() List<ItemType> itemTypes);
 
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Extra({'requireApiKey': true})

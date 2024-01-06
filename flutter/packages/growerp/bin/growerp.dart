@@ -215,6 +215,9 @@ Future<void> main(List<String> args) async {
                   "${authenticate.user?.email}");
               String csvFile = File(fileName).readAsStringSync();
               switch (fileType) {
+                case FileType.itemType:
+                  await client.importItemTypes(CsvToItemTypes(csvFile));
+                  break;
                 case FileType.glAccount:
                   await client.importGlAccounts(CsvToGlAccounts(csvFile));
                   break;
@@ -240,8 +243,8 @@ Future<void> main(List<String> args) async {
                   break;
                 case FileType.finDocTransactionItem:
                 case FileType.finDocOrderPurchaseItem:
-                  await client
-                      .importFinDocItem(CsvToFinDocItems(csvFile, logger));
+                  await client.importFinDocItem(
+                      CsvToFinDocItems(csvFile, logger), 'AppAdmin');
                   break;
                 default:
                   logger.e("FileType ${fileType.name} not implemented yet");

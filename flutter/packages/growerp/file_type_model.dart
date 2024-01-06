@@ -1,4 +1,5 @@
 enum FileType {
+  itemType,
   company,
   glAccount,
   product,

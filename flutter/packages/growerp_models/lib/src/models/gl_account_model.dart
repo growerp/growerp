@@ -45,7 +45,7 @@ class GlAccount with _$GlAccount {
 
 String glAccountCsvFormat =
     'Account Code*, Account Name*, Class Description*, Type Description,'
-    ' Posted Balance\r\n';
+    ' Posted Balance, itemType in, itemType out \r\n';
 int glAccountCsvLength = glAccountCsvFormat.split(',').length;
 
 // import

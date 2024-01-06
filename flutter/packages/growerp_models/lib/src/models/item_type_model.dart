@@ -13,6 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
 part 'item_type_model.freezed.dart';
 part 'item_type_model.g.dart';
@@ -26,8 +27,30 @@ class ItemType with _$ItemType {
     @Default('') String itemTypeName,
     @Default('') String accountCode,
     @Default('') String accountName,
+    bool? inComing, //item type
+    bool? outGoing, //itemType
   }) = _ItemType;
 
   factory ItemType.fromJson(Map<String, dynamic> json) =>
       _$ItemTypeFromJson(json);
+}
+
+String itemTypeCsvFormat =
+    'itemTypeId, accountCode, direction(in/out/either) \r\n';
+int itemTypeCsvLength = itemTypeCsvFormat.split(',').length;
+
+// import
+List<ItemType> CsvToItemTypes(String csvFile) {
+  List<ItemType> ItemTypes = [];
+  final result = fast_csv.parse(csvFile);
+  for (final row in result) {
+    if (row == result.first) continue;
+    ItemTypes.add(ItemType(
+      itemTypeId: row[0],
+      accountCode: row[1],
+      inComing: row[2] == 'in' || row[2] == 'either' ? true : false,
+      outGoing: row[2] == 'out' || row[2] == 'either' ? true : false,
+    ));
+  }
+  return ItemTypes;
 }

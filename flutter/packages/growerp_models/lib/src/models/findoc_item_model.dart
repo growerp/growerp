@@ -62,7 +62,7 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
   List<FinDocItem> finDocItems = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
-    if (row == result.first) continue;
+    if (row == result.first || row[0].isEmpty) continue;
     try {
       finDocItems.add(FinDocItem(
         pseudoId: row[0],
@@ -78,6 +78,7 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
             : null,
         glAccount: GlAccount(accountCode: row[7]),
         isDebit: row[8] == 'false' ? false : true,
+        itemType: ItemType(itemTypeId: row[9]),
       ));
     } catch (e) {
       String fieldList = '';

@@ -19,7 +19,7 @@ import 'forms/@forms.dart' as local;
 
 // https://medium.com/flutter-community/flutter-navigation-cheatsheet-a-guide-to-named-routing-dc642702b98c
 Route<dynamic> generateRoute(RouteSettings settings) {
-  print(">>>NavigateTo { ${settings.name} " +
+  debugPrint(">>>NavigateTo { ${settings.name} " +
       "with: ${settings.arguments.toString()} }");
   switch (settings.name) {
     case '/':
