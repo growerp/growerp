@@ -1,4 +1,4 @@
-Item type is used on the order and invoice to indicate the kind of processing and the default accountCode used on the generated invoice for posting.
+Item type is used on the order and invoice to indicate the kind of processing and the default account code used on the generated invoice for posting.
 
 The default list:
 

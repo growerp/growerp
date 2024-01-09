@@ -284,7 +284,7 @@ class FinDocListItem extends StatelessWidget {
         ListTile(
             leading: const SizedBox(width: 50),
             title: Text(
-                "Type: ${finDoc.items[0].itemType?.itemTypeName ?? '??'}[${finDoc.items[0].itemType?.accountCode ?? '??'}]$r"
+                "Type: ${finDoc.items[0].itemType?.itemTypeName ?? '??'}$r"
                 "Overr.GlAccount: ${finDoc.items[0].glAccount?.accountCode ?? ''}"))
       ];
     } else {
@@ -304,15 +304,17 @@ class FinDocListItem extends StatelessWidget {
                             ? "Product: ${e.description}[${e.productId}] "
                                 "Quantity: ${e.quantity.toString()} "
                             : finDoc.docType == FinDocType.order ||
-                                    finDoc.docType == FinDocType.invoice
+                                    finDoc.docType == FinDocType.invoice &&
+                                        e.quantity != null
                                 ? "ProductId: ${e.productId} $r${e.description}$r"
                                     "Quantity: ${e.quantity.toString()} "
-                                    "Price: ${e.price.toString()}$r"
-                                    "SubTotal: ${(e.quantity! * e.price!).toString()}$r${e.rentalFromDate == null ? '' : " "
+                                    "Price: ${e.price.toString()}"
+                                    "SubTotal: ${(e.quantity! * e.price!).toString()}$r"
+                                    "${e.rentalFromDate == null ? '' : " "
                                         "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"
                                         "${e.rentalThruDate.toString().substring(0, 10)}"}\n"
                                     "${finDoc.docType == FinDocType.invoice ? 'Overr.GLAccount: ${e.glAccount?.accountCode ?? ''}' : ''}$r"
-                                    "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}[${e.itemType!.accountCode}]' : ''}\n"
+                                    "${finDoc.docType == FinDocType.invoice || finDoc.docType == FinDocType.order ? 'ItemType: ${e.itemType!.itemTypeName}' : ''}\n"
                                 : '', // payment: no items
                         key: Key('itemLine$index'))))
           ])));

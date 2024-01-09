@@ -44,6 +44,8 @@ class FinDoc with _$FinDoc {
     String? pseudoInvoiceId,
     String? pseudoPaymentId,
     String? pseudoTransactionId,
+    String?
+        reference, //transaction id field saved in AcctgTrans/theirAcctgTransId in backend
     @PaymentInstrumentConverter() PaymentInstrument? paymentInstrument,
     // ignore: invalid_annotation_target
     @JsonKey(name: 'statusId')
@@ -52,7 +54,7 @@ class FinDoc with _$FinDoc {
     @DateTimeConverter() DateTime? creationDate,
     @DateTimeConverter() DateTime? placedDate,
     String? description,
-    User? otherUser, //a person responsible
+    User? otherUser, //a contact person
     Company? otherCompany, // the other company
     Decimal? grandTotal,
     String? classificationId, // is productStore
@@ -139,7 +141,7 @@ Map<String, String> finDocStatusValuesHotel = {
 };
 
 String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
-    " otherUser Id, other company Id \r\n";
+    "other user Id, other company Id, other company Name, reference number \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 
@@ -151,14 +153,14 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
     if (row == result.first || row[0].isEmpty) continue;
     try {
       finDocs.add(FinDoc(
-        pseudoId: row[0],
-        docType: FinDocType.tryParse(row[2]),
-        sales: row[1] == 'false' ? false : true,
-        description: row[3],
-        creationDate: DateTime.tryParse(row[4]),
-        otherUser: User(pseudoId: row[5]),
-        otherCompany: Company(pseudoId: row[6]),
-      ));
+          pseudoId: row[0],
+          docType: FinDocType.tryParse(row[2]),
+          sales: row[1] == 'false' ? false : true,
+          description: row[3],
+          creationDate: DateTime.tryParse(row[4]),
+          otherUser: User(pseudoId: row[5]),
+          otherCompany: Company(pseudoId: row[6], name: row[7]),
+          reference: row[8]));
     } catch (e) {
       String fieldList = '';
       finDocCsvTitles

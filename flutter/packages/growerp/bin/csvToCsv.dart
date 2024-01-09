@@ -93,28 +93,24 @@ Map convertClass = {
 String accountCodeToItemType(String accountCode, String pseudoProductId) {
   Map accountCodes = {
     '12000': 'ItemProduct',
-    '53001': 'ItemExpense',
-    '57500': 'ItemShipping',
-    '50050': 'ItemExpense',
-    '72000': 'ItemExpense',
-    '75500': 'ItemProduct',
-    '74500': 'ItemExpense',
-    '70000': 'ItemExpense',
-    '50040': 'ItemProduct',
-    '52500': 'ItemExpense',
-    '89000': 'ItemExpense',
-    '50005': 'ItemProduct',
+    '15200': 'ItemProduct', // inv
+    '15400': 'ItemProduct', // inv
+    '23100': 'ItemSalesTax', // inv
+    '24500': 'ItemSalesTax', // inv
+    '39005': 'ItemSales', // inv
+    '45500': 'ItemSales', // inv
     '50000': 'ItemProduct',
+    '50005': 'ItemProduct',
+    '50008': 'ItemProduct', //inv
     '50030': 'ItemProduct',
-    '71000': 'ItemExpense',
-    '60000': 'ItemExpense',
-    '15100': 'ItemExpense',
-    '67000': 'ItemExpense',
+    '50040': 'ItemProduct',
+    '57500': 'ItemShipping',
+    '75500': 'ItemProduct',
   };
 
   if (accountCodes[accountCode] == 'ItemProduct' && pseudoProductId == '')
     return ('ItemSales');
-  return (accountCodes[accountCode] ?? '');
+  return (accountCodes[accountCode] ?? 'ItemExpense');
 }
 
 /// specify filenames here, * allowed for names with the same starting characters
@@ -139,6 +135,11 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('2a-purchase_order_journal.csv');
       searchFiles.add('2a1-purchase_order_journal.csv');
       break;
+    case FileType.finDocInvoicePurchase:
+    case FileType.finDocInvoicePurchaseItem:
+      searchFiles.add('2b-purchases_journal.csv');
+      searchFiles.add('2b1-purchases_journal.csv');
+      break;
     case FileType.product:
     case FileType.user:
     case FileType.finDocTransaction:
@@ -148,8 +149,6 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.category:
     case FileType.asset:
-    case FileType.finDocInvoicePurchase:
-    case FileType.finDocInvoicePurchaseItem:
     case FileType.finDocPaymentPurchase:
     case FileType.website:
       break;
@@ -212,6 +211,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
   List<String> columnsTo = [];
 
   String getImageFileName(FileType fileType, String id) {
+    if (images[0].isEmpty) return '';
     for (List row in images) {
       if (row[0] == fileType.name && row[1] == id) {
         // if not file path, add it using the filename
@@ -391,13 +391,16 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11:closed(TRUE/FALSE) 27: item number, 28: quantity, 29: productId,
       // 30: descr, 31: accountCode, 32: price, 33: amount
 
-      columnsTo.add("${dateConvert(columnsFrom[10])}-${columnsFrom[9]}");
+      columnsTo.add(
+          "${dateConvert(columnsFrom[10])}-${columnsFrom[0]}"); // will be replaced by sequential id
       columnsTo.add('false');
       columnsTo.add('Order');
       columnsTo.add('');
       columnsTo.add(dateConvert(columnsFrom[10]));
       columnsTo.add('');
       columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[9]);
       return columnsTo;
 
     case FileType.finDocOrderPurchaseItem:
@@ -405,7 +408,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       // 11:closed(TRUE/FALSE) 27: seq number, 28: quantity, 29: productId,
       // 30: descr, 31: accountCode, 32: price, 33: amount
 
-      columnsTo.add("${dateConvert(columnsFrom[10])}-${columnsFrom[9]}");
+      columnsTo.add(
+          "${dateConvert(columnsFrom[10])}-${columnsFrom[0]}"); // will be replaced by sequential id
       columnsTo.add('Order');
       columnsTo.add(''); //seqId by system
       columnsTo.add(columnsFrom[29]); // product id
@@ -417,25 +421,75 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(accountCodeToItemType(columnsFrom[31], columnsFrom[29]));
       return columnsTo;
 
+    case FileType.finDocInvoicePurchase:
+      // 1:vendorId 2:vendorName, 3:reference id, 4:creditMemo 5:date(mm/dd/yy),
+      // 16:discountAmount, 22: orderId,
+      // 7: item number, 24: quantity, 25: productId,
+      // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
+
+      // just use to combine items, need to replace by seq num
+      columnsTo.add(
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('false');
+      columnsTo.add('Invoice');
+      columnsTo.add('converted');
+      columnsTo.add(dateConvert(columnsFrom[5]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[3]); // put refnum here
+      return columnsTo;
+
+    case FileType.finDocInvoicePurchaseItem:
+      // 1:vendorId 2:vendorName, 3:reference, 4:creditMemo 5:date(mm/dd/yy),
+      // 16:discountAmount, 22: orderId,
+      // 7: item number, 24: quantity, 25: productId,
+      // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
+
+      columnsTo.add(
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('Invoice');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(columnsFrom[25]); // product id
+      columnsTo.add(columnsFrom[26]); // descr
+      columnsTo.add(columnsFrom[24]); // quant
+      columnsTo.add(columnsFrom[28]); // price
+      columnsTo.add(columnsFrom[27]); // itemType accountCode
+      columnsTo.add('');
+      columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
+      return columnsTo;
+
     case FileType.finDocTransaction:
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
+      String otherCompanyId = '', otherCompanyName = '';
+      bool sales = false;
+      if (columnsFrom[11].isNotEmpty) {
+        otherCompanyId = columnsFrom[11];
+        otherCompanyName = columnsFrom[12];
+        sales = true;
+      }
+      if (columnsFrom[13].isNotEmpty) {
+        otherCompanyId = columnsFrom[13];
+        otherCompanyName = columnsFrom[14];
+        sales = false;
+      }
 
-      var otherCompanyId = columnsFrom[11].isNotEmpty
-          ? columnsFrom[11]
-          : columnsFrom[13].isNotEmpty
-              ? columnsFrom[13]
-              : columnsFrom[15].isNotEmpty
-                  ? columnsFrom[15]
-                  : '';
-
-      columnsTo.add("${dateConvert(columnsFrom[2])}-${columnsFrom[3]}");
-      columnsTo.add('true');
+      if (columnsFrom[15].isNotEmpty) {
+        otherCompanyId = columnsFrom[15];
+        otherCompanyName = columnsFrom[16];
+        sales = false;
+      }
+      columnsTo.add(
+          "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}"); // will be replaced by sequential id
+      columnsTo.add(sales.toString());
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
       columnsTo.add(dateConvert(columnsFrom[2]));
       columnsTo.add('');
       columnsTo.add(otherCompanyId);
+      columnsTo.add(otherCompanyName);
+      columnsTo.add(columnsFrom[3]); // reference
       return columnsTo;
 
     case FileType.finDocTransactionItem:
@@ -448,7 +502,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
         amount = columnsFrom[7];
       }
 
-      columnsTo.add("${dateConvert(columnsFrom[2])}-${columnsFrom[3]}");
+      columnsTo.add(
+          "${dateConvert(columnsFrom[2])}-${columnsFrom[3]}"); // will be replaced by sequential id
       columnsTo.add('Transaction');
       columnsTo.add('');
       columnsTo.add(columnsFrom[17]);
@@ -492,13 +547,15 @@ Future<void> main(List<String> args) async {
   createDir(outputDirectory);
   // copy images
   createDir('$outputDirectory/images');
-  copyTree('${args[0]}/images', '$outputDirectory/images');
-  copy('${args[0]}/images.csv', '$outputDirectory/images.csv');
-
-  // get images file
-  String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
-  List<List<String>> images = fast_csv.parse(imagesCsv);
-
+  // copy mages if present
+  List<List<String>> images = [[]];
+  if (isDirectory('${args[0]}/images')) {
+    copyTree('${args[0]}/images', '$outputDirectory/images');
+    copy('${args[0]}/images.csv', '$outputDirectory/images.csv');
+    // get images file
+    String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
+    images = fast_csv.parse(imagesCsv);
+  }
   for (var fileType in FileType.values) {
     if (fileType == FileType.unknown) continue;
     if (args.length == 2 && fileType.name != args[1]) continue;
@@ -512,8 +569,7 @@ Future<void> main(List<String> args) async {
     }
     if (files.isEmpty) {
       logger.e(
-          "No ${searchFiles.join()} csv files found in directory ${args[0]}");
-      exit(1);
+          "No ${searchFiles.join()} csv files found in directory ${args[0]}, skipping");
     }
     // process files and convert rows
     List<List<String>> convertedRows = [];
@@ -583,31 +639,53 @@ Future<void> main(List<String> args) async {
         break;
       case FileType.finDocTransaction:
       case FileType.finDocOrderPurchase:
+      case FileType.finDocInvoicePurchase:
         csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
-        // sort better use maps for empty values
-        // sort by reference number and date
-        convertedRows.sort((a, b) =>
-            "${a.asMap()[4] ?? ''}${a.asMap()[0] ?? ''}"
-                .compareTo("${b.asMap()[4] ?? ''}${b.asMap()[0] ?? ''}"));
-        // remove detail lines
+        convertedRows
+            .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        // remove detail lines & create sequence Id
         List<String> lastRow = [];
         List<List<String>> headerRows = [];
+        int seqNumber = 10000;
         for (final row in convertedRows) {
-          if (row.isEmpty) continue;
-          if (lastRow.isEmpty || row[0] != lastRow[0]) headerRows.add(row);
+//          print(
+//              "==process cur: ${row[0]} seq: $seqNumber ${lastRow.isEmpty ? 'empty' : lastRow[0]}");
+          if (row[0].isEmpty) continue;
+          if (lastRow.isEmpty || row[0] != lastRow[0]) {
+//            print(" create header");
+            List<String> newRow = List.from(row);
+            // replace by sequential number
+            newRow[0] = (seqNumber++).toString();
+            headerRows.add(newRow);
+          }
           lastRow = row;
         }
         convertedRows = headerRows;
         break;
       case FileType.finDocTransactionItem:
       case FileType.finDocOrderPurchaseItem:
+      case FileType.finDocInvoicePurchaseItem:
         csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
-        // sort better use maps for empty values
-        // sort by just reference number
         convertedRows
             .sort((a, b) => (a.asMap()[0] ?? '').compareTo(b.asMap()[0] ?? ''));
+        // replace id by sequential number
+        List<List<String>> headerRows = [];
+        List<String> lastRow = [];
+        int seqNumber = 10000;
+        for (final row in convertedRows) {
+          if (lastRow.isNotEmpty && row[0] != lastRow[0]) {
+            seqNumber++;
+          }
+          List<String> newRow = List.from(row);
+          newRow[0] = seqNumber.toString();
+          headerRows.add(newRow);
+          lastRow = row;
+        }
+        convertedRows = headerRows;
+        // sort better use maps for empty values
+        // sort by just reference number
         break;
       default:
     }

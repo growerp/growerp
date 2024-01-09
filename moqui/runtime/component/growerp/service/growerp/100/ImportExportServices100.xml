@@ -313,7 +313,6 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="lineNr" value="0" type="Integer" />
             <iterate list="finDocs" entry="finDoc">
                 <!-- find partyId of other company-->
                 <if condition="finDoc.otherCompany &amp;&amp; finDoc.otherCompany.pseudoId">
@@ -321,22 +320,36 @@ along with this software (see the LICENSE.md file). If not, see
                         <econdition field-name="pseudoId" from="finDoc.otherCompany.pseudoId" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     </entity-find>
-                    <if condition="!parties.isEmpty()">
+                    <if condition="parties">
                         <set field="finDoc.otherCompany.partyId" from="parties[0].partyId" />
+                        <else-if
+                            condition="finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
+                            <!-- create company -->
+                            <if condition="finDoc.sales">
+                                <set field="finDoc.otherCompany.role" value="Customer" />
+                                <else>
+                                    <set field="finDoc.otherCompany.role" value="Supplier" />
+                                </else>
+                            </if>
+                            <service-call name="growerp.100.PartyServices100.create#Company"
+                                in-map="[company: finDoc.otherCompany, ownerPartyId: ownerPartyId]"
+                                out-map="context" />
+                            <set field="finDoc.otherCompany.partyId" from="company.partyId" />
+                            <log
+                                message="finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : added" />
+                        </else-if>
                         <else>
                             <log level="warn"
-                                message="line: $lineNr company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId" />
-                            <continue />
+                                message="finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : need also name to add" />
                         </else>
                     </if>
                 </if>
                 <set field="finDoc.isPosted" value="false" type="Boolean" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="[finDoc: finDoc, classificationId: classificationId]" />
-                <set field="lineNr" from="++lineNr" />
+                    in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="context" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <message type="success">${finDocs?.size()} finDocs imported</message>
+                <message type="success">${finDocs?.size()} finDocs  ${finDocs[0].docType} imported</message>
             </if>
         </actions>
     </service>
@@ -350,7 +363,7 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
-            <log message="importing ${finDocItems?.size()} finDocItems" />
+            <log message="importing ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <set field="finDoc.items" from="itemsOut" />
@@ -364,7 +377,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                         in-map="[pseudoId: item.pseudoId, docType: item.docType]"
                         out-map="context" />
-                    <if condition="finDocs.isEmpty()">
+                    <if condition="!finDocs">
                         <log level="error"
                             message="${item.docType} pseudoId: ${item.pseudoId} not found" />
                         <set field="lastItem" from="null" />
@@ -434,7 +447,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
-                <message type="success">${finDocItems?.size()} findoc items imported</message>
+                <message type="success">${finDocItems?.size()} findoc items ${finDocItems[0].docType} imported</message>
             </if>
         </actions>
     </service>
@@ -465,7 +478,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <else>
                             <service-call name="growerp.100.PartyServices100.create#Company"
-                                in-map="[company: company]" />
+                                in-map="[company: company, ownerPartyId: relComp.ownerPartyId]" />
                         </else>
                     </if>
                 </iterate>

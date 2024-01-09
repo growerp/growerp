@@ -487,10 +487,52 @@ along with this software (see the LICENSE.md file). If not, see
         <alias entity-alias="ASSET" name="totalAssets" field="quantityOnHandTotal" function="sum" />
     </view-entity>
 
+    <view-entity entity-name="InvoiceAndParties" package="growerp.account">
+        <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" />
+        <member-entity
+            entity-alias="PAY" entity-name="mantle.account.payment.Payment"
+            join-from-alias="INV" join-optional="true">
+            <key-map field-name="invoiceId" related="forInvoiceId" />
+        </member-entity>
+        <!-- vendor data -->
+        <member-entity entity-alias="VPARTY" entity-name="mantle.party.Party"
+            join-from-alias="INV" join-optional="true">
+            <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
+            join-from-alias="VPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <!-- customer data -->
+        <member-entity entity-alias="CPARTY" entity-name="mantle.party.Party"
+            join-from-alias="INV" join-optional="true">
+            <key-map field-name="toPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+            join-from-alias="CPARTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <alias name="invoiceId" entity-alias="INV" />
+        <alias name="pseudoId" entity-alias="INV" />
+        <alias name="fromPartyId" entity-alias="INV" />
+        <alias name="toPartyId" entity-alias="INV" />
+        <alias name="invoiceName" field="description" entity-alias="INV" />
+        <alias name="statusId" entity-alias="INV" />
+        <alias name="invoiceDate" entity-alias="INV" />
+        <alias name="invoiceTotal" entity-alias="INV" />
+
+        <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
+        <alias name="vendorPseudoId" field="pseudoId" entity-alias="VPARTY" />
+        <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
+
+        <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
+        <alias name="customerPseudoId" field="pseudoId" entity-alias="CPARTY" />
+        <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
+    </view-entity>
     <view-entity entity-name="InvoiceItemsAndParties" package="growerp.account">
         <member-entity entity-alias="INV" entity-name="mantle.account.invoice.Invoice" />
         <member-entity entity-alias="ITEM" entity-name="mantle.account.invoice.InvoiceItem"
-            join-from-alias="INV">
+            join-from-alias="INV" join-optional="true">
             <key-map field-name="invoiceId" />
         </member-entity>
         <member-entity entity-alias="GLACCOUNT" entity-name="mantle.ledger.account.GlAccount"
@@ -515,25 +557,19 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="ITEM" join-optional="true">
             <key-map field-name="itemTypeEnumId" related="enumId" />
         </member-entity>
-        <member-entity entity-alias="ITEMTYPEGLACCOUNT"
-            entity-name="mantle.ledger.config.ItemTypeGlAccount"
-            join-from-alias="ITEM" join-optional="true">
-            <key-map field-name="itemTypeEnumId" />
-        </member-entity>
-        <member-entity
-            entity-alias="ITGLACCOUNT" entity-name="mantle.ledger.account.GlAccount"
-            join-from-alias="ITEMTYPEGLACCOUNT" join-optional="true">
-            <key-map field-name="glAccountId" />
-        </member-entity>
         <member-entity
             entity-alias="PAY" entity-name="mantle.account.payment.Payment"
             join-from-alias="INV" join-optional="true">
             <key-map field-name="invoiceId" related="forInvoiceId" />
         </member-entity>
         <!-- vendor data -->
-        <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
+        <member-entity entity-alias="VPARTY" entity-name="mantle.party.Party"
             join-from-alias="INV" join-optional="true">
             <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="VORG" entity-name="mantle.party.Organization"
+            join-from-alias="VPARTY" join-optional="true">
+            <key-map field-name="partyId" />
         </member-entity>
         <member-entity entity-alias="VOPP" entity-name="mantle.order.OrderPartParty"
             join-from-alias="OIB" join-optional="true">
@@ -551,9 +587,13 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="partyId" />
         </member-entity>
         <!-- customer data -->
-        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+        <member-entity entity-alias="CPARTY" entity-name="mantle.party.Party"
             join-from-alias="INV" join-optional="true">
             <key-map field-name="toPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="CORG" entity-name="mantle.party.Organization"
+            join-from-alias="CPARTY" join-optional="true">
+            <key-map field-name="partyId" />
         </member-entity>
         <member-entity entity-alias="COPP" entity-name="mantle.order.OrderPartParty"
             join-from-alias="OIB" join-optional="true">
@@ -592,13 +632,6 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="glAccountId" entity-alias="GLACCOUNT" />
         <alias name="accountCode" entity-alias="GLACCOUNT" />
         <alias name="accountName" entity-alias="GLACCOUNT" />
-        <alias
-            name="itGlAccountId" field="glAccountId" entity-alias="ITGLACCOUNT" />
-        <alias
-            name="itAccountCode" field="accountCode" entity-alias="ITGLACCOUNT" />
-        <alias name="direction" entity-alias="ITEMTYPEGLACCOUNT" />
-        <alias name="organizationPartyId" entity-alias="ITEMTYPEGLACCOUNT" />
-        <alias name="itAccountName" field="accountName" entity-alias="ITGLACCOUNT" />
         <alias name="description" entity-alias="ITEM"></alias>
         <alias name="orderId" entity-alias="OIB" />
         <alias name="shipmentId" entity-alias="OIB" />
@@ -607,6 +640,7 @@ along with this software (see the LICENSE.md file). If not, see
         name="paymentId" entity-alias="PAY"/-->
 
         <alias name="vendorPartyId" field="partyId" entity-alias="VORG" />
+        <alias name="vendorPseudoId" field="pseudoId" entity-alias="VPARTY" />
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
         <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VOPP" />
         <alias name="vendorUserPartyId" field="partyId" entity-alias="VPERSON" />
@@ -615,6 +649,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
 
         <alias name="customerPartyId" field="partyId" entity-alias="CORG" />
+        <alias name="customerPseudoId" field="pseudoId" entity-alias="CPARTY" />
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="COPP" />
         <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />

@@ -462,14 +462,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- get items -->
                 <entity-find list="items" entity-name="growerp.order.OrderItemsAndReservation">
                     <econdition field-name="orderId" operator="in" from="finDocIds" />
-                    <order-by field-name="orderId" />
-                    <order-by field-name="orderItemSeqId]" />
+                    <order-by field-name="orderId,orderItemSeqId" />
                 </entity-find>
                 <iterate list="items" entry="item">
                     <!-- add items to a single finDoc-->
                     <if condition="lastOrderId &amp;&amp; item.orderId != lastOrderId">
                         <iterate entry="finDoc" list="finDocs">
-                            <if condition="finDoc.finDocId == lastOrderId">
+                            <if condition="finDoc.orderId == lastOrderId">
                                 <set field="finDoc.items" from="finDocItems" />
                                 <break />
                             </if>
@@ -499,7 +498,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </iterate>
                 <if condition="lastOrderId">
                     <iterate entry="finDoc" list="finDocs">
-                        <if condition="finDoc.finDocId == lastOrderId">
+                        <if condition="finDoc.orderId == lastOrderId">
                             <set field="finDoc.items" from="finDocItems" />
                             <break />
                         </if>
@@ -508,37 +507,44 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- invoice -->
             <if condition="docType == 'invoice'">
-                <set field="openStatusList"
-                    from="['InvoiceInProcess', 'InvoiceFinalized', 'InvoiceApproved']" />
-                <set field="direction" value="I" />
-                <if condition="!sales">
-                    <set field="direction" value="O" />
+                <if condition="sales">
                     <set field="openStatusList"
-                        from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
+                        from="['InvoiceInProcess', 'InvoiceFinalized', 'InvoiceApproved']" />
+                    <set field="fromPartyId" from="companyPartyId" />
+                    <else>
+                        <set field="openStatusList"
+                            from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
+                        <set field="toPartyId" from="companyPartyId" />
+                    </else>
                 </if>
-                <if condition="finDocId">
+                <if condition="finDocId || pseudoId">
                     <entity-find
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
-                        <econdition field-name="invoiceId" from="finDocId" />
-                        <econditions combine="or">
-                            <econdition field-name="fromPartyId" from="companyPartyId" />
-                            <econdition field-name="toPartyId" from="companyPartyId" />
-                        </econditions>
-                        <econdition field-name="direction" from="direction" />
-                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                        <econdition field-name="fromPartyId" from="fromPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" from="toPartyId" ignore-if-empty="true" />
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
-                        <return error="false" message="Invoice: $finDocId not found!" />
+                        <return error="false"
+                            message="Get finDoc Invoice: $finDocId or $pseudoId not found!" />
                     </if>
                     <else><!-- invoice list -->
-                        <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
+                        <if
+                            condition="open == true &amp;&amp; !finDocId &amp;&amp; !pseudoId &amp;&amp; !search">
                             <set field="statusList" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.account.InvoiceItemsAndParties" list="items">
-                            <econdition field-name="toPartyId"
+                            <econdition field-name="fromPartyId" from="fromPartyId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="toPartyId" from="toPartyId"
+                                ignore-if-empty="true" />
+                            <econdition
+                                field-name="toPartyId"
                                 from="customerPartyId" ignore-if-empty="true" />
                             <econdition field-name="fromPartyId"
                                 from="vendorPartyId" ignore-if-empty="true" />
@@ -556,8 +562,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
-                            <econdition field-name="direction" from="direction" />
-                            <econdition field-name="organizationPartyId" from="companyPartyId" />
                             <order-by field-name="invoiceId,invoiceItemSeqId,rentalFromDate" />
                             <!--use-iterator/-->
                         </entity-find>
@@ -577,30 +581,38 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="company"
                                 from="[
                                             partyId: item.vendorPartyId,
+                                            pseudoPartyId: item.vendorPseudoId,
                                             name: item.vendorCompanyName,
                                         ]" />
-                            <set field="userOut"
-                                from="[
+                            <if condition="item.vendorUserPartyId">
+                                <set field="userOut"
+                                    from="[
                                             partyId: item.vendorUserPartyId,
+                                            pseudoPartyId: item.vendorUserPseudoId,
                                             firstName: item.vendorFirstName,
                                             lastName: item.vendorLastName,
                                             email: item.vendorEmail,
                                             company: company,
                                         ]" />
+                            </if>
                             <else>
-                                <set field="company"
-                                    from="[
-                                            partyId: item.customerPartyId,
-                                            name: item.customerCompanyName,
+                                <if condition="item.customerPartyId">
+                                    <set field="company"
+                                        from="[
+                                        partyId: item.customerPartyId,
+                                        pseudoId: item.customerPseudoId,
+                                        name: item.customerCompanyName,
                                         ]" />
-                                <set field="userOut"
-                                    from="[
-                                            partyId: item.customerUserPartyId,
-                                            firstName: item.customerFirstName,
+                                    <set field="userOut"
+                                        from="[
+                                        partyId: item.customerUserPartyId,
+                                        pseudoId: item.customerUserPseudoId,
+                                        firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
                                             company: company,
                                         ]" />
+                                </if>
                             </else>
                         </if>
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
@@ -626,14 +638,13 @@ along with this software (see the LICENSE.md file). If not, see
                             ]" />
                         <set field="finDocItems" from="[]" />
                     </if>
-                    <set field="finDocItem"
-                        from="[
+                    <if condition="item.invoiceItemSeqId">
+                        <set field="finDocItem"
+                            from="[
                         itemSeqId: item.invoiceItemSeqId,
                         productId: item.productId,
                         itemType: [itemTypeId: item.itemTypeId,
-                                    itemTypeName: item.itemTypeName,
-                                    accountCode: item.itAccountCode,
-                                    accountName: item.itAccountName],
+                                    itemTypeName: item.itemTypeName],
                         description: item.description,
                         glAccount: [glAccountId: item.glAccountId,
                                     accountCode: item.accountCode,
@@ -645,7 +656,8 @@ along with this software (see the LICENSE.md file). If not, see
                         rentalThruDate: item.rentalThruDate
                             ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
                         ]" />
-                    <script>finDocItems.add(finDocItem)</script>
+                        <script>finDocItems.add(finDocItem)</script>
+                    </if>
                     <set field="lastItem" from="item" />
                 </iterate>
                 <if condition="lastItem">
@@ -1065,7 +1077,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="transactionTotal" value="0" type="BigDecimal" />
                 <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="entries">
                     <econdition field-name="transactionId" operator="in" from="finDocIds" />
-                    <order-by field-name="[transactionId,entryId]" />
+                    <order-by field-name="transactionId,entryId" />
                 </entity-find>
                 <iterate list="entries" entry="item">
                     <!-- add items to a single transaction when transactionId changes-->
@@ -1125,6 +1137,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="docType" />
                 <parameter name="sales" type="Boolean" />
                 <parameter name="pseudoId" />
+                <parameter name="reference" />
                 <parameter name="statusId" />
                 <parameter name="paymentInstrument" />
                 <parameter name="description" />
@@ -1298,6 +1311,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     glJournalId: finDoc.journal?.journalId,
                                     isPosted: 'N',
                                     pseudoId: finDoc.pseudoId,
+                                    theirAcctgTransId: reference,
                                 ]"
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
@@ -1436,32 +1450,25 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find-one>
             <set field="currencyUomId" from="aPref.baseCurrencyUomId" />
             <!-- create invoice -->
-            <if condition="invoice.sales == true">
-                <service-call name="mantle.account.InvoiceServices.create#Invoice"
-                    in-map="[productStoreId: productStoreId,
-                            pseudoId: invoice.pseudoId,
-                            fromPartyId: fromPartyId,
-                            toPartyId: toPartyId,
-                            description: invoice.description]"
-                    out-map="context" />
-                <else>
-                    <service-call name="mantle.account.InvoiceServices.create#Invoice"
-                        in-map="[   fromPartyId: fromPartyId,
-                                pseudoId: invoice.pseudoId,
-                                toPartyId: toPartyId,
-                                productStoreId: productStoreId,
-                                description: invoice.description]"
-                        out-map="context" />
-                </else>
-            </if>
+            <service-call name="mantle.account.InvoiceServices.create#Invoice"
+                in-map="[productStoreId: productStoreId,
+                        pseudoId: invoice.pseudoId,
+                        fromPartyId: invoice.sales ? toPartyId : fromPartyId,
+                        toPartyId: invoice.sales ? fromPartyId : toPartyId,
+                        description: invoice.description]"
+                out-map="context" />
             <!-- add vendor/customer contact person as an extra party at invoicePartParty -->
-            <service-call name="create#mantle.account.invoice.InvoiceParty"
-                in-map="[invoiceId:invoiceId,
+            <if condition="invoice.otherUser &amp;&amp; invoice.otherUser.partyId">
+                <service-call name="create#mantle.account.invoice.InvoiceParty"
+                    in-map="[invoiceId:invoiceId,
                         partyId:invoice.otherUser.partyId, roleTypeId: contactRole]" />
+            </if>
             <!-- create items -->
-            <service-call name="growerp.100.FinDocServices100.replace#InvoiceItems"
-                in-map="[invoiceId: invoiceId,
+            <if condition="invoice.items &amp;&amp; !invoice.items.isEmpty()">
+                <service-call name="growerp.100.FinDocServices100.replace#InvoiceItems"
+                    in-map="[invoiceId: invoiceId,
                             invoiceItems: invoice.items]" />
+            </if>
         </actions>
     </service>
 
