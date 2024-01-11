@@ -218,6 +218,9 @@ Future<void> main(List<String> args) async {
                 case FileType.itemType:
                   await client.importItemTypes(CsvToItemTypes(csvFile));
                   break;
+                case FileType.paymentType:
+                  await client.importPaymentTypes(CsvToItemTypes(csvFile));
+                  break;
                 case FileType.glAccount:
                   await client.importGlAccounts(CsvToGlAccounts(csvFile));
                   break;
@@ -240,11 +243,13 @@ Future<void> main(List<String> args) async {
                 case FileType.finDocTransaction:
                 case FileType.finDocOrderPurchase:
                 case FileType.finDocInvoicePurchase:
+                case FileType.finDocPaymentPurchase:
                   await client.importFinDoc(CsvToFinDocs(csvFile, logger));
                   break;
                 case FileType.finDocTransactionItem:
                 case FileType.finDocOrderPurchaseItem:
                 case FileType.finDocInvoicePurchaseItem:
+                case FileType.finDocPaymentPurchaseItem:
                   await client.importFinDocItem(
                       CsvToFinDocItems(csvFile, logger), 'AppAdmin');
                   break;

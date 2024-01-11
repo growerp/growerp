@@ -64,6 +64,7 @@ class FinDoc with _$FinDoc {
     String? telephoneNr,
     bool? isPosted,
     LedgerJournal? journal,
+    PaymentMethod? paymentMethod, // check , credit card, electronic
     @Default([]) List<FinDocItem> items,
   }) = _FinDoc;
 
@@ -141,10 +142,12 @@ Map<String, String> finDocStatusValuesHotel = {
 };
 
 String finDocCsvFormat = "Id, Sales, finDocType, descr, date, "
-    "other user Id, other company Id, other company Name, reference number \r\n";
+    "other user Id, other company Id, other company Name, reference number, "
+    "check number(blank is cash), totalAmount \r\n";
 List<String> finDocCsvTitles = finDocCsvFormat.split(',');
 int finDocCsvLength = finDocItemCsvTitles.length;
 
+// import
 List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
   int errors = 0;
   List<FinDoc> finDocs = [];
@@ -152,7 +155,8 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
   for (final row in result) {
     if (row == result.first || row[0].isEmpty) continue;
     try {
-      finDocs.add(FinDoc(
+      finDocs.add(
+        FinDoc(
           pseudoId: row[0],
           docType: FinDocType.tryParse(row[2]),
           sales: row[1] == 'false' ? false : true,
@@ -160,13 +164,22 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
           creationDate: DateTime.tryParse(row[4]),
           otherUser: User(pseudoId: row[5]),
           otherCompany: Company(pseudoId: row[6], name: row[7]),
-          reference: row[8]));
+          reference: row[8],
+          paymentMethod: row[9] != ''
+              ? PaymentMethod(ccPaymentMethodId: 'check', checkNumber: row[9])
+              : PaymentMethod(ccPaymentMethodId: 'cash'),
+          paymentInstrument:
+              row[9] == '' ? PaymentInstrument.cash : PaymentInstrument.check,
+          grandTotal: row[10] != 'null' && row[10].isNotEmpty
+              ? Decimal.parse(row[10].replaceAll(',', ''))
+              : null,
+        ),
+      );
     } catch (e) {
       String fieldList = '';
-      finDocCsvTitles
-          .asMap()
-          .forEach((index, value) => fieldList += "$value: ${row[index]}\n");
-      logger.e("Error processing findoc csv line: $fieldList \n"
+      finDocCsvTitles.asMap().forEach((index, value) =>
+          fieldList += "$value: ${index < row.length ? row[index] : ''}\n");
+      logger.e("Error processing findoc csv line:\n $fieldList \n"
           "error message: $e");
       if (errors++ == 5) exit(1);
     }
@@ -174,6 +187,7 @@ List<FinDoc> CsvToFinDocs(String csvFile, Logger logger) {
   return finDocs;
 }
 
+// export
 String CsvFromFinDocs(List<FinDoc> finDocs) {
   var csv = [finDocCsvFormat];
   for (FinDoc finDoc in finDocs) {
@@ -183,7 +197,7 @@ String CsvFromFinDocs(List<FinDoc> finDocs) {
       finDoc.sales.toString(),
       finDoc.description ?? '',
       finDoc.creationDate.toString(),
-      finDoc.otherUser!.pseudoId!,
+      finDoc.otherUser!.pseudoId ?? '',
       finDoc.otherCompany!.pseudoId!,
     ], finDocCsvLength));
   }

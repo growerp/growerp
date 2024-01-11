@@ -518,6 +518,10 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<String> importItemTypes(@Field() List<ItemType> itemTypes);
 
+  @POST("rest/s1/growerp/100/ImportExport/paymentTypes")
+  @Extra({'requireApiKey': true})
+  Future<String> importPaymentTypes(@Field() List<ItemType> itemTypes);
+
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
   @Extra({'requireApiKey': true})
   Future<String> importGlAccounts(@Field() List<GlAccount> glAccounts);

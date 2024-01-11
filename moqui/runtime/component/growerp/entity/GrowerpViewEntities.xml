@@ -660,18 +660,9 @@ along with this software (see the LICENSE.md file). If not, see
 
     <view-entity entity-name="PaymentAndInfo" package="growerp.order">
         <member-entity entity-alias="PAY" entity-name="mantle.account.payment.Payment" />
-        <member-entity entity-alias="PTYPE" entity-name="mantle.ledger.config.PaymentTypeGlAccount"
-            join-from-alias="PAY" join-optional="true">
-            <key-map field-name="paymentTypeEnumId" />
-        </member-entity>
         <member-entity entity-alias="ENUM" entity-name="moqui.basic.Enumeration"
             join-from-alias="PAY" join-optional="true">
             <key-map field-name="paymentTypeEnumId" related="enumId" />
-        </member-entity>
-        <!-- itemtype glAccount -->
-        <member-entity entity-alias="PTACCOUNT" entity-name="mantle.ledger.account.GlAccount"
-            join-from-alias="PTYPE" join-optional="true">
-            <key-map field-name="glAccountId" />
         </member-entity>
         <!-- override gl account -->
         <member-entity entity-alias="OVACCOUNT" entity-name="mantle.ledger.account.GlAccount"
@@ -753,15 +744,8 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="effectiveDate" entity-alias="PAY" />
         <alias name="amount" entity-alias="PAY" />
         <alias name="paymentInstrumentId" field="paymentInstrumentEnumId" entity-alias="PAY" />
-        <alias name="itemTypeGlAccountId" field="glAccountId" entity-alias="PTYPE" />
-        <alias name="paymentTypeEnumId" entity-alias="PTYPE" />
+        <alias name="paymentTypeId" field="enumId" entity-alias="ENUM"></alias>
         <alias name="paymentTypeDescription" field="description" entity-alias="ENUM" />
-        <alias name="isPayable" entity-alias="PTYPE" />
-        <alias name="isApplied" entity-alias="PTYPE" />
-        <alias name="organizationPartyId" entity-alias="PTYPE" />
-        <alias name="glAccountId" entity-alias="PTACCOUNT" />
-        <alias name="accountCode" entity-alias="PTACCOUNT" />
-        <alias name="accountName" entity-alias="PTACCOUNT" />
         <alias name="overrideGlAccountId" field="glAccountId" entity-alias="OVACCOUNT" />
         <alias name="overrideAccountCode" field="accountCode" entity-alias="OVACCOUNT" />
         <alias name="overrideAccountName" field="accountName" entity-alias="OVACCOUNT" />

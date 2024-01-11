@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "b1042a071a86beb5",
+        "id": "b0191cccbfef5758",
         "type": "tabs",
         "children": [
           {
-            "id": "e8946d47739d6179",
+            "id": "cd2ba6fa8750f0f9",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "2 End User documentation/7 Accounting/6 Payment Type.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "2 End User documentation/7 Accounting/6 Payment Type.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md",
+                "file": "2 End User documentation/7 Accounting/6 Payment Type.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/7 Accounting/7 Item Type.md"
+                "file": "2 End User documentation/7 Accounting/6 Payment Type.md"
               }
             }
           },
@@ -166,10 +166,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "e8946d47739d6179",
+  "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
-    "2 End User documentation/7 Accounting/8 Account type reference.md",
+    "2 End User documentation/7 Accounting/6 Payment Type.md",
     "2 End User documentation/7 Accounting/7 Item Type.md",
+    "2 End User documentation/7 Accounting/8 Account type reference.md",
     "3 Technical documentation/3 Moqui Backend.md",
     "2 End User documentation/7 Accounting/9 Account Class reference.md",
     "1 Introduction/5 Road Map and Releases.md",
@@ -200,7 +201,6 @@
     "2 End User documentation/7 Accounting.md",
     "2 End User documentation/1 Introduction",
     "2 End User documentation/7 Accounting",
-    "3 Technical documentation/2 Flutter frontend & development.md",
     "4 Applications/3 Freelance",
     "4 Applications/1 Admin",
     "4 Applications/2 Hotel",

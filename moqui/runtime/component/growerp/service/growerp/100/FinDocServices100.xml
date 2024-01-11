@@ -510,11 +510,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="sales">
                     <set field="openStatusList"
                         from="['InvoiceInProcess', 'InvoiceFinalized', 'InvoiceApproved']" />
-                    <set field="fromPartyId" from="companyPartyId" />
                     <else>
                         <set field="openStatusList"
                             from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
-                        <set field="toPartyId" from="companyPartyId" />
                     </else>
                 </if>
                 <if condition="finDocId || pseudoId">
@@ -522,9 +520,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                         <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="fromPartyId" from="fromPartyId"
+                        <econdition field-name="vendorPartyId" from="vendorPartyId"
                             ignore-if-empty="true" />
-                        <econdition field-name="toPartyId" from="toPartyId" ignore-if-empty="true" />
+                        <econdition field-name="customerPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
@@ -669,35 +668,37 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="docType == 'payment'">
                 <set field="openStatusList"
                     from="['PmntProposed','PmntPromised','PmntAuthorized']" />
-                <if condition="finDocId">
+                <if condition="finDocId || pseudoId">
                     <entity-find
                         entity-name="growerp.order.PaymentAndInfo" list="items">
-                        <econdition field-name="paymentId" from="finDocId" />
-                        <econditions combine="or">
-                            <econdition field-name="fromPartyId" from="companyPartyId"
-                                ignore-if-empty="true" />
-                            <econdition field-name="toPartyId" from="companyPartyId"
-                                ignore-if-empty="true" />
-                        </econditions>
-                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="paymentId" from="finDocId" ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
+                        <econdition field-name="vendorPartyId" from="vendorPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="customerPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
+                        <!-- econdition field-name="organizationPartyId" from="companyPartyId" />
                         <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
                         <econditions combine="or">
-                            <econdition field-name="isApplied" value="Y" /><!-- applied payment? -->
-                            <econdition field-name="isApplied" value="E" /><!-- either-->
-                        </econditions>
+                            <econdition field-name="isApplied" value="Y" />
+                        <econdition field-name="isApplied" value="E" />
+                        </econditions-->
                     </entity-find>
                     <else>
-                        <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
+                        <if
+                            condition="open == true &amp;&amp; !finDocId
+                            &amp;&amp; !pseudoId &amp;&amp; !search">
                             <set field="statusList" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.PaymentAndInfo" list="items">
-                            <econdition field-name="toPartyId" from="vendorPartyId"
+                            <econdition field-name="vendorPartyId" from="vendorPartyId"
                                 ignore-if-empty="true" />
-                            <econdition field-name="fromPartyId" from="customerPartyId"
+                            <econdition field-name="customerPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
-                            <econditions combine="or">
+                            <econditions
+                                combine="or">
                                 <econdition field-name="statusId" operator="in" from="statusList"
                                     ignore-if-empty="true" />
                                 <econdition field-name="effectiveDate" operator="greater"
@@ -715,99 +716,56 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
-                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <!--econdition
+                            field-name="organizationPartyId" from="companyPartyId" />
                             <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
                             <econditions combine="or">
-                                <econdition field-name="isApplied" value="Y" /><!-- applied payment? -->
-                                <econdition field-name="isApplied" value="E" /><!-- either-->
-                            </econditions>
+                                <econdition field-name="isApplied" value="Y" />
+                                <econdition field-name="isApplied" value="E" />
+                            </econditions-->
                             <order-by field-name="paymentId" />
                         </entity-find>
                     </else>
                 </if>
                 <!-- Iterate thru item list -->
-                <set field="lastItem" from="null" />
                 <set field="paymentMethod" from="[:]" />
                 <set field="fpaymentMethod" from="[:]" />
                 <iterate entry="item" list="items">
-                    <!-- new paymentId, so add last payment to the list-->
-                    <if condition="lastItem &amp;&amp; lastItem.paymentId != item.paymentId">
-                        <set field="finDocOut.otherCompany.paymentMethod" from="paymentMethod" />
-                        <script>finDocs.add(finDocOut)</script>
-                        <set field="paymentMethod" from="[:]" />
-                    </if>
-                    <!-- first/new payment record -->
-                    <if condition="!lastItem || lastItem.paymentId != item.paymentId">
-                        <if condition="!sales">
-                            <set field="company"
-                                from="[
+                    <if condition="!sales">
+                        <set field="company"
+                            from="[
                                         partyId: item.vendorPartyId,
                                         name: item.vendorCompanyName,
                                         paymentMethod: paymentMethod,
                                         ]" />
-                            <set field="userOut"
-                                from="[
+                        <set field="userOut"
+                            from="[
                                             partyId: item.vendorUserPartyId,
                                             firstName: item.vendorFirstName,
                                             lastName: item.vendorLastName,
                                             email: item.vendorEmail,
                                             company: company,
                                         ]" />
-                            <else>
-                                <set field="company"
-                                    from="[
+                        <else>
+                            <set field="company"
+                                from="[
                                         partyId: item.customerPartyId,
                                         name: item.customerCompanyName,
                                         paymentMethod: paymentMethod,
                                         ]" />
-                                <set field="userOut"
-                                    from="[
+                            <set field="userOut"
+                                from="[
                                             partyId: item.customerUserPartyId,
                                             firstName: item.customerFirstName,
                                             lastName: item.customerLastName,
                                             email: item.customerEmail,
                                             company: company,
                                         ]" />
-                            </else>
-                        </if>
-                        <!-- itemType and glAccount first line item-->
-                        <if condition="item.itemTypeGlAccountId || item.overrideGlAccountId">
-                            <set field="glAccount"
-                                from="[
-                                glAccountId: item.overrideGlAccountId ?: item.itemTypeGlAccountId,
-                                accountCode: item.overrideAccountCode ?: item.accountCode,
-                                accountName: item.overrideAccountName ?: item.accountName,
-                                ]" />
-                            <set field="items"
-                                from="[[itemType: [itemTypeId: item.paymentTypeEnumId,
-                                                    itemTypeName: item.paymentTypeDescription,
-                                                    accountCode: item.accountCode,
-                                                    accountName: item.accountName],
-                                            glAccount: glAccount ]]"
-                                type="List" />
-                        </if>
-                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                            in-map="[sales: sales, docType: docType, statusId: item.statusId]"
-                            out-map="context" />
-                        <set field="finDocOut"
-                            from="[
-                            orderId: item.orderId,
-                            paymentInstrument: item.paymentInstrumentId.substring(2),
-                            paymentId: item.paymentId,
-                            pseudoId: item.pseudoId ?: '',
-                            id: item.paymentId,
-                            invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
-                            statusId: convertedStatusId,
-                            creationDate: item.effectiveDate
-                                ? item.effectiveDate.toString().substring(0,19) + 'Z' : null,
-                            sales: sales,
-                            docType: docType,
-                            otherUser: userOut,
-                            otherCompany: company,
-                            grandTotal: item.amount ? item.amount.toString() : null,
-                            items: items ?: [],
-                            ]" />
+                        </else>
                     </if>
+                    <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                        in-map="[sales: sales, docType: docType, statusId: item.statusId]"
+                        out-map="context" />
                     <!-- payment method of 'otherParty' (in future can have more than one?)-->
                     <if condition="sales &amp;&amp; item.customerPaymentMethodId">
                         <set field="paymentMethodId" from="item.customerPaymentMethodId" />
@@ -834,12 +792,37 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="paymentMethod.ccDescription" from="cardNumberHidden" />
                         </if>
                     </if>
-                    <set field="lastItem" from="item" />
-                </iterate>
-                <if condition="lastItem">
-                    <set field="finDocOut.otherCompany.paymentMethod" from="paymentMethod" />
+                    <set field="glAccount"
+                        from="[
+                            glAccountId: overrideGlAccountId,
+                            accountCode: overrideGlAccountCode,
+                            accountName: overrideGlAccountName,
+                        ]" />
+                    <set field="paymentType"
+                        from="[
+                        itemTypeId: item.paymentTypeId,
+                        itemTypeName: item.paymentTypeDescription,                    
+                    ]" />
+                    <set field="finDocOut"
+                        from="[
+                        orderId: item.orderId,
+                        paymentInstrument: item.paymentInstrumentId.substring(2),
+                        paymentId: item.paymentId,
+                        pseudoId: item.pseudoId ?: '',
+                        id: item.paymentId,
+                        invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
+                        statusId: convertedStatusId,
+                        creationDate: item.effectiveDate
+                            ? item.effectiveDate.toString().substring(0,19) + 'Z' : null,
+                        sales: sales,
+                        docType: docType,
+                        otherUser: userOut,
+                        otherCompany: company,
+                        grandTotal: item.amount ? item.amount.toString() : null,
+                        items: [[itemType: paymentType, glAccount: glAccount]],
+                        ]" />
                     <script>finDocs.add(finDocOut)</script>
-                </if>
+                </iterate>
             </if>
             <if condition="docType == 'shipment'">
                 <set field="openStatusList"
@@ -1271,7 +1254,8 @@ along with this software (see the LICENSE.md file). If not, see
             <if
                 condition="finDoc.docType != 'transaction' &amp;&amp; (!finDoc.otherCompany || !finDoc.otherCompany.partyId)">
                 <return error="true"
-                    message="Other company required with valid companyPartyId findoc company: ${finDoc.company} docType: ${finDoc.docType}" />
+                    message="Other company required with valid companyPartyId 
+                    findoc company: ${finDoc.company} docType: ${finDoc.docType} ${finDoc.pseudoId}" />
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
@@ -1526,12 +1510,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="glAccounts">
                     <set field="itemTypeGlAccountId" from="glAccounts[0].glAccountId" />
                 </if>
-            </if>
-            <!--if
-            no glaccount found cannot be posted -->
-            <if condition="!itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId">
-                <return error="true"
-                    message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
+                <!-- if no glaccount found cannot be posted -->
+                <if
+                    condition="!itemTypeGlAccountId 
+                        &amp;&amp; !payment.items[0].glAccount?.glAccountId">
+                    <return error="true"
+                        message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
+                </if>
             </if>
             <!-- create payment -->
             <set field="instrument" from="'Pi' + payment.paymentInstrument" />
@@ -1546,7 +1531,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentGatewayConfigId: paymentGatewayConfigId,
                         toPartyId: toPartyId,
                         itemTypeGlAccountId: itemTypeGlAccountId,
-                        overrideGlAccountId: payment.items[0].glAccount?.glAccountId,
+                        overrideGlAccountId: payment.items? payment.items[0].glAccount?.glAccountId : null,
                         fromPartyId: fromPartyId]"
                 out-map="context" />
         </actions>
@@ -2395,7 +2380,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
                 </else>
             </if>
-            <set field="paymentOld.amount" from="new BigDecimal(payment.grandTotal)" />
+            <set field="paymentOld.amount" from="payment.grandTotal" />
             <!-- first item stores the itemType needed for posting -->
             <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"

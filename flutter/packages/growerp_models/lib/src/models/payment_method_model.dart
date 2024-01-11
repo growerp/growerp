@@ -27,6 +27,7 @@ class PaymentMethod with _$PaymentMethod {
     String? ccPaymentMethodId,
     String? ccDescription,
     String? creditCardNumber,
+    String? checkNumber,
     @CreditCardTypeConverter() CreditCardType? creditCardType,
     String? expireMonth,
     String? expireYear,

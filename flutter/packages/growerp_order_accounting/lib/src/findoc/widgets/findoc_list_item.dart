@@ -13,6 +13,7 @@
  */
 
 import 'package:collection/collection.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -83,8 +84,9 @@ class FinDocListItem extends StatelessWidget {
     if (isPhone) {
       subTitleFields = [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(finDoc.otherUser?.company!.name ?? '',
+            Text(finDoc.otherUser?.company!.name.truncate(25) ?? '',
                 key: Key("otherUser$index")),
             Row(
               children: [

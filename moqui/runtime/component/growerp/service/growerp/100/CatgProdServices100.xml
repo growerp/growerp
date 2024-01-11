@@ -172,8 +172,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 productId: product.productId,
                                 pseudoId: product.pseudoId,
                                 productName: product.productName,
-                                price: product.price ? product.price.toString() : '',
-                                listPrice: product.listPrice ? product.listPrice.toString() : '',
                                 ]" />
                         <else>
                             <!-- content -->
@@ -198,17 +196,22 @@ along with this software (see the LICENSE.md file). If not, see
                                 out-map="prodConvert" />
                             <set field="productOut"
                                 from="[
-                            productId: product.productId,
-                            pseudoId: product.pseudoId,
-                            productName: product.productName ?: '',
-                            productTypeId: prodConvert.convertedStatusId,
-                            assetClassId: product.assetClassEnumId,
-                            description: product.description?:'',
-                            price: product.price ? product.price.toString() : null,
-                            listPrice: product.listPrice ? product.listPrice.toString() : null,
-                            useWarehouse: product.requireInventory == 'Y' ? true : false,
-                            assetCount: assetCount ? assetCount : null,
-                            image: imageFile]" />
+                                    productId: product.productId,
+                                    pseudoId: product.pseudoId,
+                                    productName: product.productName ?: '',
+                                    productTypeId: prodConvert.convertedStatusId,
+                                    assetClassId: product.assetClassEnumId,
+                                    description: product.description?:'',
+                                    useWarehouse: product.requireInventory == 'Y' ? true : false,
+                                    assetCount: assetCount ? assetCount : null,
+                                    image: imageFile]" />
+                            <if condition="product.price">
+                                <set field="productOut.price" from="product.price.toString()" />
+                            </if>
+                            <if condition="product.listPrice">
+                                <set field="productOut.listPrice"
+                                    from="product.listPrice.toString()" />
+                            </if>
                         </else>
                     </if>
                 </if>
@@ -436,8 +439,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'product', statusId: product.productTypeId]" out-map="prodConvert" />
             <if
-                condition="( 
-                    || (product.pseudoId &amp;&amp; product.psuedoId != oldProduct.pseudoId)
+                condition=" 
+                    (product.pseudoId &amp;&amp; product.pseudoId != oldProduct.pseudoId)
                     || (product.productName &amp;&amp; product.productName != oldProduct.productName)
                     || (product.description &amp;&amp; product.description != oldProduct.description)
                     || (prodConvert.convertedStatusId &amp;&amp;

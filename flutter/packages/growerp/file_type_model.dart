@@ -1,5 +1,6 @@
 enum FileType {
   itemType,
+  paymentType,
   company,
   glAccount,
   product,
@@ -13,6 +14,7 @@ enum FileType {
   finDocInvoicePurchase,
   finDocInvoicePurchaseItem,
   finDocPaymentPurchase,
+  finDocPaymentPurchaseItem, // single item for amount, glAccount
   website,
   unknown
 }

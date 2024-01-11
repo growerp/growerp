@@ -120,6 +120,9 @@ List<String> getFileNames(FileType fileType) {
     case FileType.itemType:
       searchFiles.add('itemType.csv');
       break;
+    case FileType.paymentType:
+      searchFiles.add('paymentType.csv');
+      break;
     case FileType.glAccount:
       //searchFiles.add('4-1-chart_of_accounts_list.csv');
       //searchFiles.add('Trial_Balance_2020-06-07.csv');
@@ -140,6 +143,11 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('2b-purchases_journal.csv');
       searchFiles.add('2b1-purchases_journal.csv');
       break;
+    case FileType.finDocPaymentPurchase:
+    case FileType.finDocPaymentPurchaseItem:
+      searchFiles.add('2c-payments_journal.csv');
+      searchFiles.add('2c1-payments_journal.csv');
+      break;
     case FileType.product:
     case FileType.user:
     case FileType.finDocTransaction:
@@ -149,7 +157,6 @@ List<String> getFileNames(FileType fileType) {
       break;
     case FileType.category:
     case FileType.asset:
-    case FileType.finDocPaymentPurchase:
     case FileType.website:
       break;
     default:
@@ -240,6 +247,15 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
+      return columnsTo;
+
+    case FileType.paymentType:
+      if (columnsFrom[0] == '') return [];
+      columnsTo.add(columnsFrom[0]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[4]);
+      columnsTo.add(columnsFrom[5]);
       return columnsTo;
 
     /// convert to [glAccountCsvFormat]
@@ -459,6 +475,43 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
       return columnsTo;
 
+    case FileType.finDocPaymentPurchase:
+      // 0: partyId, 1:vendorId 2:vendorName, 3:checkname, 10: checkNumber, 11:date(mm/dd/yy),
+      // 12: memo // contains reference to invoice/order,  13: cash accountCode,
+      // 14: total amount, 18: date cleared, 20: invoiceId, 21: discount Amount
+      columnsTo.add(
+          "${dateConvert(columnsFrom[11])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('false');
+      columnsTo.add('Payment');
+      columnsTo.add('converted');
+      columnsTo.add(dateConvert(columnsFrom[11]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[20] != ''
+          ? columnsFrom[20]
+          : columnsFrom[12]); // invoice id in reference
+      columnsTo.add(columnsFrom[10]); // check number
+      columnsTo.add(columnsFrom[14].replaceAll('-', '')); // total amount
+      return columnsTo;
+
+    case FileType.finDocPaymentPurchaseItem: // just a single record for amount
+      // 1:vendorId 2:vendorName, 3:checkname, 10: checkNumber, 11:date(mm/dd/yy),
+      // 13: cash accountCode, 18: date cleared, 20: invoiceId, 21: discount Amount,
+      // 24: productId, 23: quantity, 25: description 26: accountCode, 28: price
+      columnsTo.add(
+          "${dateConvert(columnsFrom[11])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('Payment');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(columnsFrom[24]); // product id
+      columnsTo.add(columnsFrom[25]); // descr
+      columnsTo.add(columnsFrom[23]); // quant
+      columnsTo.add(columnsFrom[28]); // price
+      columnsTo.add(columnsFrom[26]); // accountCode
+      columnsTo.add('');
+      columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
+      return columnsTo;
+
     case FileType.finDocTransaction:
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
@@ -537,21 +590,22 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
-  if (isDirectory(outputDirectory)) {
+  if (isDirectory(outputDirectory) && args.length == 1) {
     logger.e(
         "output directory $outputDirectory already exists, cannot overwrite");
     exit(1);
   }
 
   // create output directory
-  createDir(outputDirectory);
-  // copy images
-  createDir('$outputDirectory/images');
-  // copy mages if present
+  if (!isDirectory(outputDirectory)) createDir(outputDirectory);
+  // copy images if present
   List<List<String>> images = [[]];
   if (isDirectory('${args[0]}/images')) {
-    copyTree('${args[0]}/images', '$outputDirectory/images');
-    copy('${args[0]}/images.csv', '$outputDirectory/images.csv');
+    if (!isDirectory('$outputDirectory/images'))
+      createDir('$outputDirectory/images');
+    copyTree('${args[0]}/images', '$outputDirectory/images', overwrite: true);
+    copy('${args[0]}/images.csv', '$outputDirectory/images.csv',
+        overwrite: true);
     // get images file
     String imagesCsv = File('${args[0]}/images.csv').readAsStringSync();
     images = fast_csv.parse(imagesCsv);
@@ -605,6 +659,10 @@ Future<void> main(List<String> args) async {
         csvFormat = itemTypeCsvFormat;
         csvLength = itemTypeCsvLength;
         break;
+      case FileType.paymentType:
+        csvFormat = itemTypeCsvFormat;
+        csvLength = itemTypeCsvLength;
+        break;
       case FileType.glAccount:
         csvFormat = glAccountCsvFormat;
         csvLength = glAccountCsvLength;
@@ -640,6 +698,7 @@ Future<void> main(List<String> args) async {
       case FileType.finDocTransaction:
       case FileType.finDocOrderPurchase:
       case FileType.finDocInvoicePurchase:
+      case FileType.finDocPaymentPurchase:
         csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
         convertedRows
@@ -666,6 +725,7 @@ Future<void> main(List<String> args) async {
       case FileType.finDocTransactionItem:
       case FileType.finDocOrderPurchaseItem:
       case FileType.finDocInvoicePurchaseItem:
+      case FileType.finDocPaymentPurchaseItem:
         csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
         convertedRows

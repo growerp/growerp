@@ -2,10 +2,11 @@ String createCsvRow(List<String> rows, int length) {
   // convert to csv format
   String result = '';
   for (String row in rows) {
-    if (result.isNotEmpty) {
+    if (row.isEmpty) {
       result += ',';
+    } else {
+      result += '\"${row.replaceAll('"', '""')}\",';
     }
-    result += '\"${row.replaceAll('"', '""')}\"';
   }
   for (int index = rows.length; index < length; index++) {
     result += ',';

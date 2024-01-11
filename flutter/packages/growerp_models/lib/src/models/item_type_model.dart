@@ -19,6 +19,7 @@ part 'item_type_model.freezed.dart';
 part 'item_type_model.g.dart';
 
 /// Item type used for order/invoice and payments
+/// same clas used for paymentTypes
 @freezed
 class ItemType with _$ItemType {
   ItemType._();
@@ -27,16 +28,17 @@ class ItemType with _$ItemType {
     @Default('') String itemTypeName,
     @Default('') String accountCode,
     @Default('') String accountName,
-    bool? inComing, //item type
-    bool? outGoing, //itemType
+    String? direction, //item type I:incoming,O:outgoing,E:either
+    String? isPayable, //payment type payable=Y/receivable=N
+    String? isApplied, //payment type Y:applied, N: unapplied, E: either
   }) = _ItemType;
 
   factory ItemType.fromJson(Map<String, dynamic> json) =>
       _$ItemTypeFromJson(json);
 }
 
-String itemTypeCsvFormat =
-    'itemTypeId, accountCode, direction(in/out/either) \r\n';
+String itemTypeCsvFormat = "itemTypeId, accountCode, direction(I/O/E), "
+    "isPayable(Y/N/E), isApplied(Y/N/E) \r\n";
 int itemTypeCsvLength = itemTypeCsvFormat.split(',').length;
 
 // import
@@ -48,8 +50,9 @@ List<ItemType> CsvToItemTypes(String csvFile) {
     ItemTypes.add(ItemType(
       itemTypeId: row[0],
       accountCode: row[1],
-      inComing: row[2] == 'in' || row[2] == 'either' ? true : false,
-      outGoing: row[2] == 'out' || row[2] == 'either' ? true : false,
+      direction: row[2],
+      isPayable: row[3],
+      isApplied: row[4],
     ));
   }
   return ItemTypes;

@@ -47,8 +47,12 @@ class AddressDialogState extends State<AddressDialog> {
       _postalCodeController.text = address!.postalCode ?? '';
       _cityController.text = address!.city ?? '';
       _provinceController.text = address!.province ?? '';
-      _selectedCountry =
-          countries.firstWhere((element) => element.name == address!.country);
+      if (address?.country != null) {
+        _selectedCountry =
+            countries.firstWhere((element) => element.name == address!.country);
+      } else {
+        _selectedCountry = const Country(id: "USA", name: "United States");
+      }
     }
   }
 

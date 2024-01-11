@@ -526,9 +526,6 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="ItemTypes">
         <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
-        <in-parameters>
-            <parameter name="sales" type="Boolean" required="true" />
-        </in-parameters>
         <out-parameters>
             <parameter name="itemTypes" type="List">
                 <parameter name="itemType" type="Map">
@@ -536,6 +533,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="itemTypeName" />
                     <parameter name="accountCode" />
                     <parameter name="accountName" />
+                    <parameter name="isInComing" />
+                    <parameter name="isOutGoing" />
+                    <parameter name="isDebit" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -546,15 +546,24 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="mantle.ledger.config.ItemTypeAndGlAccount" list="itemTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="disallowPosting" value="N" or-null="true" />
-                <econdition field-name="direction" from="sales? 'O' : 'I'" />
                 <order-by field-name="[itemTypeDescription,accountCode]" />
             </entity-find>
             <iterate list="itemTypeList" entry="itemType">
+                <if condition="itemType.direction == O || itemType.direction == E">
+                    <set field="isOutGoing" value="true" type="Boolean" />
+                </if>
+                <if condition="itemType.direction == I || itemType.direction == E">
+                    <set field="isComing" value="true" type="Boolean" />
+                </if>
                 <set field="itemTypeOut"
                     from="[itemTypeId: itemType.itemTypeEnumId,
-                                                itemTypeName: itemType.itemTypeDescription,
-                                                accountCode: itemType.accountCode,
-                                                accountName: itemType.accountName]" />
+                        itemTypeName: itemType.itemTypeDescription,
+                        accountCode: itemType.accountCode,
+                        accountName: itemType.accountName,
+                        isDebit: itemType.isDebit == 'Y' ? true : false,
+                        isOutGoing: isOutGoing,
+                        isInComing: isIncoming,
+                        ]" />
                 <script>itemTypes.add(itemTypeOut)</script>
             </iterate>
         </actions>
