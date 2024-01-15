@@ -1,24 +1,26 @@
-version: "2"
-
 networks:
   my-network:
     driver: bridge
 
 services:
+  sut:
+    build: .
+    # command: run_tests.sh
+    extra_hosts:
+      - backend.growerp.local:127.0.0.1
+      - chat.growerp.local:127.0.0.1
+    depends_on:
+      - emulator
 
-  watch:
-    image: containrrr/watchtower
-    container_name: watch
-    mem_limit: 100m
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TZ=Asia/Bangkok
-      - WATCHTOWER_DEBUG
-      # check every 5mins
-      - WATCHTOWER_POLL_INTERVAL=300
-      - WATCHTOWER_CLEANUP=true
+  emulator:
+    image: avitotech/android-emulator-29:915c1f20be
+    ports:
+      - 5555:5555
+      - 5554:5554
+      - 8554:8554
+    privileged: true
+    depends_on:
+      - nginx-proxy
 
   nginx-proxy:
     # For documentation on SSL and other settings see:
@@ -38,6 +40,9 @@ services:
       # change this for the default host to use when accessing directly by IP, etc
       # use SSL_POLICY to disable TLSv1.0, etc in nginx-proxy
       # - SSL_POLICY=AWS-TLS-1-1-2017-01
+    depends_on:
+      - moqui-server
+      - chat
     networks:
       - my-network
 
@@ -137,37 +142,3 @@ services:
     container_name: gateway
     network_mode: host
     command: sh -c "sleep infinity"
-
-  admin:
-    container_name: admin
-    image: growerp/admin
-    build:
-      context: ../flutter
-      dockerfile: ../flutter/packages/admin/Dockerfile
-    mem_limit: 10m
-    restart: unless-stopped
-    expose:
-      - 80
-    volumes:
-      - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
-    environment:
-      - VIRTUAL_HOST=admin.growerp.local
-    networks:
-      - my-network
-
-  hotel:
-    container_name: hotel
-    image: growerp/hotel
-    build:
-      context: ../flutter
-      dockerfile: ../flutter/packages/hotel/Dockerfile
-    mem_limit: 10m
-    restart: unless-stopped
-    expose:
-      - 80
-    volumes:
-      - ./app_settings.json:/usr/share/nginx/html/assets/assets/cfg/app_settings.json
-    environment:
-      - VIRTUAL_HOST=hotel.growerp.local
-    networks:
-      - my-network

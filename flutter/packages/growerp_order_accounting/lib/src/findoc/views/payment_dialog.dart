@@ -55,9 +55,9 @@ class PaymentDialog extends StatelessWidget {
     if (finDoc.sales) {
       return MultiBlocProvider(
           providers: [
-            BlocProvider<UserBloc>(
-                create: (context) =>
-                    UserBloc(context.read<RestClient>(), Role.customer)),
+            BlocProvider<CompanyBloc>(
+                create: (context) => CompanyBloc(context.read<RestClient>(),
+                    Role.customer, context.read<AuthBloc>())),
             BlocProvider<GlAccountBloc>(
                 create: (context) => GlAccountBloc(context.read<RestClient>())),
           ],
@@ -65,9 +65,9 @@ class PaymentDialog extends StatelessWidget {
               PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
     }
     return MultiBlocProvider(providers: [
-      BlocProvider<UserBloc>(
-          create: (context) =>
-              UserBloc(context.read<RestClient>(), Role.supplier)),
+      BlocProvider<CompanyBloc>(
+          create: (context) => CompanyBloc(context.read<RestClient>(),
+              Role.supplier, context.read<AuthBloc>())),
       BlocProvider<GlAccountBloc>(
           create: (context) => GlAccountBloc(context.read<RestClient>())),
     ], child: PaymentDialogFull(finDoc: finDoc, paymentMethod: paymentMethod));
@@ -88,11 +88,10 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   late FinDoc finDoc; // incoming finDoc
   late FinDoc finDocUpdated;
   late FinDocBloc _finDocBloc;
-  User? _selectedUser;
   GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
   ItemType? _selectedItemType;
-  late UserBloc _userBloc;
+  late CompanyBloc _userBloc;
   late GlAccountBloc _accountBloc;
 
   late bool isPhone;
@@ -105,7 +104,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
     super.initState();
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
-    _selectedUser = finDocUpdated.otherUser;
+    _selectedCompany = finDocUpdated.otherCompany;
     _selectedGlAccount = finDocUpdated.items.isNotEmpty
         ? finDocUpdated.items[0].glAccount
         : null;
@@ -118,10 +117,11 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
     _finDocBloc = context.read<FinDocBloc>();
-    _userBloc = context.read<UserBloc>();
-    _userBloc.add(const UserFetch());
+    _finDocBloc.add(FinDocGetPaymentTypes(finDoc.sales));
+    _userBloc = context.read<CompanyBloc>();
+    _userBloc.add(const CompanyFetch(limit: 3));
     _accountBloc = context.read<GlAccountBloc>();
-    _accountBloc.add(const GlAccountFetch());
+    _accountBloc.add(const GlAccountFetch(limit: 3));
   }
 
   @override
@@ -186,14 +186,14 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
-              BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
                 switch (state.status) {
-                  case UserStatus.failure:
+                  case CompanyStatus.failure:
                     return const FatalErrorForm(
                         message: 'server connection problem');
-                  case UserStatus.success:
-                    return DropdownSearch<User>(
-                      selectedItem: _selectedUser,
+                  case CompanyStatus.success:
+                    return DropdownSearch<Company>(
+                      selectedItem: _selectedCompany,
                       popupProps: PopupProps.menu(
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
@@ -218,16 +218,14 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                                   ? 'Customer'
                                   : 'Supplier')),
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
-                      itemAsString: (User? u) =>
-                          " ${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                      itemAsString: (Company? u) => " ${u!.name}",
                       asyncItems: (String filter) {
-                        _userBloc.add(UserFetch(searchString: filter));
-                        return Future.value(state.users);
+                        _userBloc.add(CompanyFetch(searchString: filter));
+                        return Future.value(state.companies);
                       },
-                      onChanged: (User? newValue) {
+                      onChanged: (Company? newValue) {
                         setState(() {
-                          _selectedUser = newValue;
-                          _selectedCompany = newValue!.company;
+                          _selectedCompany = newValue;
                         });
                       },
                       validator: (value) => value == null
@@ -282,7 +280,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                               }),
                           Expanded(
                               child: Text(
-                                  "Credit Card ${finDoc.sales == false ? authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedUser?.company!.paymentMethod?.ccDescription}")),
+                                  "Credit Card ${finDoc.sales == false ? authBloc.state.authenticate?.company?.paymentMethod?.ccDescription : _selectedCompany?.paymentMethod?.ccDescription}")),
                         ])),
                     Row(children: [
                       Checkbox(
@@ -357,8 +355,10 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                 items: state.itemTypes.map((item) {
                   return DropdownMenuItem<ItemType>(
                       value: item,
-                      child: Text('${item.itemTypeName}\n ${item.accountName}',
-                          overflow: TextOverflow.ellipsis, maxLines: 2));
+                      child: Text(
+                          '${item.itemTypeName}\n ${item.accountCode} ${item.accountName}',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2));
                 }).toList(),
                 onChanged: (ItemType? newValue) {
                   _selectedItemType = newValue;
@@ -424,8 +424,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                         onPressed: () {
                           if (paymentDialogFormKey.currentState!.validate()) {
                             _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
-                              otherUser: _selectedUser,
-                              otherCompany: _selectedUser!.company,
+                              otherCompany: _selectedCompany,
                               grandTotal: Decimal.parse(_amountController.text),
                               paymentInstrument: _paymentInstrument,
                               items: [

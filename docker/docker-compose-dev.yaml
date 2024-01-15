@@ -32,7 +32,7 @@ services:
     container_name: moqui
     build:
       context: ../moqui
-    command: conf=conf/MoquiProductionConf.xml
+    #command: conf=conf/MoquiProductionConf.xml
     restart: always
     depends_on:
       - moqui-database

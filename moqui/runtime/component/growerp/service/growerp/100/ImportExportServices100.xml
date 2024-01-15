@@ -38,6 +38,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <log level="error"
                         message="Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId" />
                     <else>
+                        <log
+                            message="=====create item type ${itemType.itemTypeId} account ${glAccounts[0].glAccountId} dir: ${itemType.direction}" />
                         <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
                             in-map="[
                                 itemTypeEnumId: itemType.itemTypeId,
@@ -68,6 +70,7 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-delete-by-condition>
             <!-- create new -->
             <iterate list="itemTypes" entry="itemType">
+                <set field="glAccountId" from="null" />
                 <if condition="itemType.accountCode">
                     <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                         list="glAccounts">
@@ -82,6 +85,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
+                <log message="create payment Type: $glAccountId ${itemType.accountCode}" />
                 <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
                     in-map="[   paymentTypeEnumId: itemType.itemTypeId,
                                 organizationPartyId: companyPartyId,
@@ -386,7 +390,30 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <set field="finDoc.isPosted" value="false" type="Boolean" />
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="context" />
+                    in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="result" />
+                <!-- create references-->
+                <if condition="finDoc.reference">
+                    <if condition="finDoc.docType == 'invoice'">
+                        <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                            list="transactions" for-update="true">
+                            <econdition field-name="organizationPartyId" from="companyPartyId" />
+                            <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
+                        </entity-find>
+                        <if condition="!transactions">
+                            <log level="warn"
+                                message="could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
+                            <else>
+                                <if condition="transactions[0].invoiceId">
+                                    <log level="warn"
+                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.invoiceId} reference: ${finDoc.reference}" />
+                                </if>
+                                <set field="transactions[0].invoiceId"
+                                    from="result.finDoc.invoiceId" />
+                                <entity-update value-field="transactions[0]" />
+                            </else>
+                        </if>
+                    </if>
+                </if>
             </iterate>
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocs?.size()} finDocs  ${finDocs[0].docType} imported</message>

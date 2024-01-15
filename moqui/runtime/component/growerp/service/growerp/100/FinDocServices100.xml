@@ -996,6 +996,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <econditions combine="or">
                                 <econdition field-name="pseudoId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="theirAcctgTransId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="shipmentId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="invoiceId" ignore-case="true"
@@ -1295,7 +1297,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     glJournalId: finDoc.journal?.journalId,
                                     isPosted: 'N',
                                     pseudoId: finDoc.pseudoId,
-                                    theirAcctgTransId: reference,
+                                    theirAcctgTransId: finDoc.reference,
                                 ]"
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
@@ -2380,7 +2382,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
                 </else>
             </if>
-            <set field="paymentOld.amount" from="payment.grandTotal" />
+            <set field="paymentOld.amount" from="new BigDecimal(payment.grandTotal)" />
             <!-- first item stores the itemType needed for posting -->
             <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"

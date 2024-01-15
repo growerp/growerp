@@ -250,6 +250,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       return columnsTo;
 
     case FileType.paymentType:
+      // 0: type, 1: descr, 2:account code, 3 account name,
+      // 4: is payable, 5: is applied
       if (columnsFrom[0] == '') return [];
       columnsTo.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[2]);
@@ -753,7 +755,7 @@ Future<void> main(List<String> args) async {
     List<String> fileContent = [];
     int fileIndex = 0;
     for (int record = 0; record < convertedRows.length; record++) {
-      if (record % 10000 == 0 && record != 0) {
+      if (record % 5000 == 0 && record != 0) {
         // wait for id change
         while (convertedRows[record][0] == convertedRows[record - 1][0]) {
           fileContent.add(createCsvRow(convertedRows[record++], csvLength));

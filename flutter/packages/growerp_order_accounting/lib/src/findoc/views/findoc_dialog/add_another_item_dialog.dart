@@ -56,7 +56,7 @@ Future addAnotherItemDialog(
                               return DropdownMenuItem<ItemType>(
                                   value: item,
                                   child: Text(
-                                      "${item.itemTypeName}(${item.accountCode} ${item.accountName})"));
+                                      "${item.itemTypeName} ${item.accountCode} ${item.accountName}"));
                             }).toList(),
                             onChanged: (ItemType? newValue) {
                               selectedItemType = newValue;

@@ -67,9 +67,9 @@ class FinDocDialog extends StatelessWidget {
                 finDocBloc: finDocBloc,
                 restClient: restClient)
               ..add(CartFetch(finDoc))),
-        BlocProvider<UserBloc>(
-            create: (context) =>
-                UserBloc(context.read<RestClient>(), Role.customer)),
+        BlocProvider<CompanyBloc>(
+            create: (context) => CompanyBloc(context.read<RestClient>(),
+                Role.customer, context.read<AuthBloc>())),
         BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(
                 context.read<RestClient>(), context.read<String>())),
@@ -85,9 +85,9 @@ class FinDocDialog extends StatelessWidget {
               finDocBloc: finDocBloc,
               restClient: restClient)
             ..add(CartFetch(finDoc))),
-      BlocProvider<UserBloc>(
-          create: (context) =>
-              UserBloc(context.read<RestClient>(), Role.supplier)),
+      BlocProvider<CompanyBloc>(
+          create: (context) => CompanyBloc(context.read<RestClient>(),
+              Role.supplier, context.read<AuthBloc>())),
       BlocProvider<ProductBloc>(
           create: (context) =>
               ProductBloc(context.read<RestClient>(), context.read<String>())),
@@ -107,9 +107,9 @@ class FinDocPage extends StatefulWidget {
 class MyFinDocState extends State<FinDocPage> {
   final _formKeyHeader = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  final _userSearchBoxController = TextEditingController();
+  final _companySearchBoxController = TextEditingController();
   late CartBloc _cartBloc;
-  late UserBloc _userBloc;
+  late CompanyBloc _companyBloc;
   late ProductBloc _productBloc;
   late GlAccountBloc _glAccountBloc;
   late FinDocBloc _finDocBloc;
@@ -117,7 +117,6 @@ class MyFinDocState extends State<FinDocPage> {
   late FinDoc finDocUpdated;
   late FinDoc finDoc; // incoming finDoc
   bool? _isPosted = false;
-  User? _selectedUser;
   Company? _selectedCompany;
   late bool isPhone;
 
@@ -126,13 +125,11 @@ class MyFinDocState extends State<FinDocPage> {
     super.initState();
     finDoc = widget.finDoc;
     finDocUpdated = finDoc;
-    _selectedUser = finDocUpdated.otherUser;
     _isPosted = finDocUpdated.isPosted ?? false;
-    _selectedCompany =
-        finDocUpdated.otherCompany ?? finDocUpdated.otherUser?.company;
+    _selectedCompany = finDocUpdated.otherCompany ?? finDocUpdated.otherCompany;
     _finDocBloc = context.read<FinDocBloc>();
-    _userBloc = context.read<UserBloc>();
-    _userBloc.add(const UserFetch(limit: 3));
+    _companyBloc = context.read<CompanyBloc>();
+    _companyBloc.add(const CompanyFetch(limit: 3));
     _glAccountBloc = context.read<GlAccountBloc>();
     _glAccountBloc.add(const GlAccountFetch(limit: 3));
     _productBloc = context.read<ProductBloc>();
@@ -230,14 +227,15 @@ class MyFinDocState extends State<FinDocPage> {
         Expanded(
             child: Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
+          child:
+              BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
             switch (state.status) {
-              case UserStatus.failure:
+              case CompanyStatus.failure:
                 return const FatalErrorForm(
                     message: 'server connection problem');
-              case UserStatus.success:
-                return DropdownSearch<User>(
-                  selectedItem: _selectedUser,
+              case CompanyStatus.success:
+                return DropdownSearch<Company>(
+                  selectedItem: _selectedCompany,
                   popupProps: PopupProps.menu(
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(
@@ -245,7 +243,7 @@ class MyFinDocState extends State<FinDocPage> {
                       decoration: InputDecoration(
                           labelText:
                               "${finDocUpdated.sales ? 'Customer' : 'Supplier'} name"),
-                      controller: _userSearchBoxController,
+                      controller: _companySearchBoxController,
                     ),
                     title: popUp(
                       context: context,
@@ -261,16 +259,14 @@ class MyFinDocState extends State<FinDocPage> {
                   ),
                   key: Key(
                       finDocUpdated.sales == true ? 'customer' : 'supplier'),
-                  itemAsString: (User? u) =>
-                      " ${u!.company!.name},\n${u.firstName ?? ''} ${u.lastName ?? ''}",
+                  itemAsString: (Company? u) => "${u!.name}}",
                   asyncItems: (String filter) {
-                    _userBloc.add(UserFetch(searchString: filter));
-                    return Future.value(state.users);
+                    _companyBloc.add(CompanyFetch(searchString: filter));
+                    return Future.value(state.companies);
                   },
-                  onChanged: (User? newValue) {
+                  onChanged: (Company? newValue) {
                     setState(() {
-                      _selectedUser = newValue;
-                      _selectedCompany = newValue!.company;
+                      _selectedCompany = newValue;
                     });
                   },
                   validator: (value) => value == null
@@ -342,7 +338,6 @@ class MyFinDocState extends State<FinDocPage> {
           child: const Text("Update Header"),
           onPressed: () {
             _cartBloc.add(CartHeader(finDocUpdated.copyWith(
-                otherUser: _selectedUser,
                 otherCompany: _selectedCompany,
                 description: _descriptionController.text,
                 isPosted: _isPosted)));
@@ -364,7 +359,6 @@ class MyFinDocState extends State<FinDocPage> {
             if (finDocItem != null) {
               _cartBloc.add(CartAdd(
                   finDoc: finDocUpdated.copyWith(
-                      otherUser: _selectedUser,
                       otherCompany: _selectedCompany,
                       description: _descriptionController.text,
                       isPosted: _isPosted),
@@ -381,7 +375,6 @@ class MyFinDocState extends State<FinDocPage> {
               if (finDocItem != null) {
                 _cartBloc.add(CartAdd(
                     finDoc: finDocUpdated.copyWith(
-                        otherUser: _selectedUser,
                         otherCompany: _selectedCompany,
                         description: _descriptionController.text),
                     newItem: finDocItem));
@@ -396,7 +389,6 @@ class MyFinDocState extends State<FinDocPage> {
               if (finDocItem != null) {
                 _cartBloc.add(CartAdd(
                     finDoc: finDocUpdated.copyWith(
-                        otherUser: _selectedUser,
                         otherCompany: _selectedCompany,
                         description: _descriptionController.text),
                     newItem: finDocItem));
@@ -459,8 +451,7 @@ class MyFinDocState extends State<FinDocPage> {
                       status: finDocUpdated.docType == FinDocType.order
                           ? FinDocStatusVal.created
                           : FinDocStatusVal.inPreparation,
-                      otherUser: _selectedUser,
-                      otherCompany: _selectedUser?.company,
+                      otherCompany: _selectedCompany,
                       description: _descriptionController.text);
                   if ((finDocUpdated.docType == FinDocType.transaction &&
                           finDocUpdated.items.isNotEmpty) ||

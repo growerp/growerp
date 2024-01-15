@@ -19,7 +19,7 @@ part 'item_type_model.freezed.dart';
 part 'item_type_model.g.dart';
 
 /// Item type used for order/invoice and payments
-/// same clas used for paymentTypes
+/// same class used for paymentTypes
 @freezed
 class ItemType with _$ItemType {
   ItemType._();
