@@ -1502,12 +1502,17 @@ along with this software (see the LICENSE.md file). If not, see
                 </else>
             </if>
             <!-- itemtype -->
-            <if condition="payment.items">
-                <set field="paymentTypeEnumId" from="payment.items[0].itemType?.itemTypeId" />
+            <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
                     list="glAccounts">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
-                    <econdition field-name="paymentTypeEnumId" from="paymentTypeEnumId" />
+                    <econdition field-name="paymentTypeEnumId"
+                        from="payment.items[0].itemType.itemTypeId" />
+                    <econditions combine="or">
+                        <econdition field-name="isPayable" from="payment.sales == true? 'N' : 'Y'" />
+                        <econdition field-name="isPayable" value="E" />
+                    </econditions>
+                    <econdition field-name="glAccountId" operator="is-not-null" />
                 </entity-find>
                 <if condition="glAccounts">
                     <set field="itemTypeGlAccountId" from="glAccounts[0].glAccountId" />
@@ -2382,7 +2387,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
                 </else>
             </if>
-            <set field="paymentOld.amount" from="new BigDecimal(payment.grandTotal)" />
+            <set field="paymentOld.amount" value="${payment.grandTotal}" />
             <!-- first item stores the itemType needed for posting -->
             <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
@@ -2390,6 +2395,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="paymentTypeEnumId"
                         from="payment.items[0].itemType.itemTypeId" />
+                    <econditions combine="or">
+                        <econdition field-name="isPayable" from="payment.sales == true ? 'N' : 'Y'" />
+                        <econdition field-name="isPayable" value="E" />
+                    </econditions>
+                    <econdition field-name="glAccountId" operator="is-not-null" />
                 </entity-find>
                 <if
                     condition="glAccounts &amp;&amp; glAccounts[0].glAccountId != paymentOld.itemTypeGlAccountId">
@@ -2398,7 +2408,7 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- if no glaccount found cannot be posted -->
             <if
-                condition="!paymentOld.itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId">
+                condition="!paymentOld.itemTypeGlAccountId &amp;&amp; !payment.items[0].glAccount?.glAccountId ">
                 <return error="true"
                     message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
             </if>

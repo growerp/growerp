@@ -169,6 +169,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
           .firstWhere((el) => _selectedItemType!.itemTypeId == el.itemTypeId);
     }
     AuthBloc authBloc = context.read<AuthBloc>();
+    GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
@@ -376,6 +377,8 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                     return DropdownSearch<GlAccount>(
                       selectedItem: _selectedGlAccount,
                       popupProps: PopupProps.menu(
+                        isFilterOnline: true,
+                        showSelectedItems: true,
                         showSearchBox: true,
                         searchFieldProps: const TextFieldProps(
                           autofocus: true,
@@ -394,8 +397,17 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                               InputDecoration(labelText: 'GL Account')),
                       key: const Key('glAccount'),
                       itemAsString: (GlAccount? u) =>
-                          " ${u?.accountCode} ${u?.accountName} ",
-                      items: state.glAccounts,
+                          " ${u?.accountCode ?? ''} ${u?.accountName ?? ''} ",
+                      asyncItems: (String filter) async {
+                        glAccountBloc.add(
+                            GlAccountFetch(searchString: filter, limit: 3));
+                        return Future.delayed(const Duration(milliseconds: 100),
+                            () {
+                          return Future.value(glAccountBloc.state.glAccounts);
+                        });
+                      },
+                      compareFn: (item, sItem) =>
+                          item.accountCode == sItem.accountCode,
                       onChanged: (GlAccount? newValue) {
                         _selectedGlAccount = newValue!;
                       },
