@@ -480,7 +480,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
     case FileType.finDocPaymentPurchase:
       // 0: partyId, 1:vendorId 2:vendorName, 3:checkname, 10: checkNumber, 11:date(mm/dd/yy),
       // 12: memo // contains reference to invoice/order,  13: cash accountCode,
-      // 14: total amount, 18: date cleared, 20: invoiceId, 21: discount Amount
+      // 14: total amount, 18: date cleared, 20: acct Transaction invoiceId, 21: discount Amount
       columnsTo.add(
           "${dateConvert(columnsFrom[11])}-${columnsFrom[0]}"); // will be replaced by sequential id
       columnsTo.add('false');
@@ -492,9 +492,12 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[2]);
       columnsTo.add(columnsFrom[20] != ''
           ? columnsFrom[20]
-          : columnsFrom[12]); // invoice id in reference
-      columnsTo.add(columnsFrom[10]); // check number
-      columnsTo.add(columnsFrom[14].replaceAll('-', '')); // total amount
+          : columnsFrom[12]); // trans invoice id in reference
+      columnsTo.add(columnsFrom[10]);
+      String amount = columnsFrom[14].replaceAll('-', ''); // check number
+      columnsTo.add(amount); // total amount
+      if (amount == '0' || amount == '' || double.tryParse(amount) == null)
+        return []; // ignore records with zero/invalid amounts
       return columnsTo;
 
     case FileType.finDocPaymentPurchaseItem: // just a single record for amount

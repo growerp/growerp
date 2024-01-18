@@ -20,6 +20,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="classificationId" default="AppAdmin" /><!-- AppHotel AppXXXXX-->
             <parameter name="ownerPartyId" />
+            <parameter name="pseudoId" />
             <parameter name="categoryId" />
             <parameter name="productId" />
             <parameter name="productTypeId" />
@@ -90,14 +91,12 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find offset="start" limit="limit*4"
                 entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
                 list="productList">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="productTypeEnumId"
                     from="productType.convertedStatusId" ignore-if-empty="true" />
                 <econdition field-name="assetClassEnumId"
                     from="assetClass.convertedStatusId" ignore-if-empty="true" />
                 <econdition field-name="categoryId" ignore-if-empty="true" />
-                <!--econdition
-                field-name="productId" operator="is-not-null"/-->
                 <econdition field-name="productId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="productId" ignore-case="true"
@@ -109,8 +108,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="description" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
-                <!--econdition
-                field-name="listPrice" operator="is-not-null"/-->
                 <date-filter from-field-name="productFromDate"
                     thru-field-name="productThruDate" />
                 <date-filter /><!-- product from/thrudate on category-->
@@ -703,8 +700,8 @@ along with this software (see the LICENSE.md file). If not, see
                     assetName: item.assetName,
                     quantityOnHand: item.quantityOnHandTotal ? item.quantityOnHandTotal.toString() : '0',
                     availableToPromise: item.availableToPromiseTotal ? item.availableToPromiseTotal.toString() : '0',
-                    receivedDate: item.receivedDate ? item.receivedDate.toString().substring(0,19) + 'Z' : null,
-                    expectedEndOfLifeDate: item.expectedEndOfLife ? item.expectedEndOfLife.toString().substring(0,19) + 'Z' : null,
+                    receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
+                    expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,
                     product: [productId: item.productId, pseudoId: item.pseudoId,
                     productName: item.productName],
                     ]" />

@@ -61,15 +61,14 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                                   authenticate.user?.firstName
                                           ?.substring(0, 1) ??
                                       '',
-                                  style: const TextStyle(
-                                      fontSize: 30, color: Colors.black))),
+                                  style: const TextStyle(fontSize: 30))),
                       const SizedBox(height: 10),
                       Text("${authenticate.user!.firstName} ",
-                          style: const TextStyle(
-                              fontSize: 15, color: Colors.black)),
+                          style: const TextStyle(fontSize: 15)),
                       Text("${authenticate.user!.lastName}",
                           style: const TextStyle(
-                              fontSize: 15, color: Colors.black)),
+                            fontSize: 15,
+                          )),
                     ])));
           }
           if (options[i - 1]["route"] == "theme") {

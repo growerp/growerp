@@ -38,8 +38,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <log level="error"
                         message="Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId" />
                     <else>
-                        <log
-                            message="=====create item type ${itemType.itemTypeId} account ${glAccounts[0].glAccountId} dir: ${itemType.direction}" />
                         <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
                             in-map="[
                                 itemTypeEnumId: itemType.itemTypeId,
@@ -85,7 +83,6 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <log message="create payment Type: $glAccountId ${itemType.accountCode}" />
                 <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
                     in-map="[   paymentTypeEnumId: itemType.itemTypeId,
                                 organizationPartyId: companyPartyId,
@@ -301,6 +298,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
+            <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
             <iterate list="products" entry="product">
                 <!-- check if related category exist using name, if yes use these-->
                 <iterate list="product.categories" entry="category">
@@ -336,6 +334,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <script>ec.user.setEffectiveTime(Timestamp.valueOf("1999-01-01 00:00:00"))</script>
             <iterate list="categories" entry="category">
                 <service-call name="growerp.100.CatgProdServices100.create#ProductCategory"
                     in-map="[category: category, classificationId: classificationId]" />
@@ -354,7 +353,67 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- check if we have a timeperiod here just for transactions.....-->
+            <if condition="finDocs[0].docType == 'transaction'">
+                <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                    <econdition field-name="partyId" from="companyPartyId" />
+                    <date-filter valid-date="Timestamp.valueOf(finDocs[0].creationDate)" />
+                </entity-find>
+                <!-- when not yet create all until next year -->
+                <if condition="!periods">
+                    <log
+                        message="====creating time periods starting with ${finDocs[0].creationDate.substring(0,4)}" />
+                    <!-- delete existing-->
+                    <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                        <econdition field-name="partyId" from="companyPartyId" />
+                        <order-by field-name="-timePeriodId" />
+                    </entity-find>
+                    <iterate list="periods.timePeriodId" entry="id">
+                        <entity-delete-by-condition entity-name="mantle.party.time.TimePeriod">
+                            <econdition field-name="partyId" from="companyPartyId" />
+                            <econdition field-name="timePeriodId" from="id" />
+                        </entity-delete-by-condition>
+                    </iterate>
+                    <!-- create new yearly, quartely, monthly periods until next year-->
+                    <set field="nextYearInt"
+                        from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1" />
+                    <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')" />
+
+                    <!-- start year from first tranaction ordered by date -->
+                    <set field="curYear" from="finDocs[0].creationDate.substring(0,4)" />
+                    <set field="prevPeriodId" from="null" />
+                    <while condition="curYear &lt;= lastYear">
+                        <set field="fromDate"
+                            from="ec.l10n.parseDate(curYear + '-01-01', 'yyyy-MM-dd')" />
+                        <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                            out-map="curYearOut"
+                            in-map="[partyId:companyPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
+                        <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                            out-map="quartersOut"
+                            in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
+                        <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
+                            <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                                out-map="quartersOut"
+                                in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
+                        </iterate>
+                        <set field="prevPeriodId" from="curYearOut.timePeriodId" />
+                        <set field="curYear" from="((curYear as int) + 1) as String" />
+                    </while>
+                    <!-- set time on thrueDates to 23:59:59-->
+                    <!--entity-find
+                    entity-name="mantle.party.time.TimePeriod"
+                        for-update="true" list="timePeriods">
+                        <econdition field-name="partyId" from="companyPartyId" />
+                    </entity-find>
+                    <iterate list="timePeriods" entry="period">
+                        <set field="period.thruDate"
+                            from="Timestamp.valueOf(period.thruDate.toString().substring(0,10) + ' 23:59:59')" />
+                        <entity-update value-field="period" />
+                    </iterate-->
+                </if>
+            </if>
             <iterate list="finDocs" entry="finDoc">
+                <script>ec.user.setEffectiveTime(Timestamp.valueOf(finDoc.creationDate))</script>
                 <!-- find partyId of other company-->
                 <if condition="!finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
                     <set field="finDoc.otherCompany.pseudoId" from="finDoc.otherCompany.name" />
@@ -388,7 +447,11 @@ along with this software (see the LICENSE.md file). If not, see
                         </else>
                     </if>
                 </if>
-                <set field="finDoc.isPosted" value="false" type="Boolean" />
+                <!-- transaction posted-->
+                <if condition="finDoc.docType == 'transaction'">
+                    <set field="finDoc.isPosted" value="false" type="Boolean" />
+                </if>
+                <!-- create findoc-->
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="[finDoc: finDoc, classificationId: classificationId]" out-map="result" />
                 <!-- create references-->
@@ -406,10 +469,12 @@ along with this software (see the LICENSE.md file). If not, see
                                 <if condition="transactions[0].invoiceId">
                                     <log level="warn"
                                         message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.invoiceId} reference: ${finDoc.reference}" />
+                                    <else>
+                                        <set field="transactions[0].invoiceId"
+                                            from="result.finDoc.invoiceId" />
+                                        <entity-update value-field="transactions[0]" />
+                                    </else>
                                 </if>
-                                <set field="transactions[0].invoiceId"
-                                    from="result.finDoc.invoiceId" />
-                                <entity-update value-field="transactions[0]" />
                             </else>
                         </if>
                     </if>
@@ -435,9 +500,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                         in-map="[pseudoId: lastItem.pseudoId,docType: lastItem.docType, classificationId: classificationId]" />
-                    <if condition="finDocs.size() &gt; 0">
+                    <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
+                    <if condition="!finDocs.isEmpty()">
                         <set field="finDocs[0].items" from="itemsOut" />
-                        <set field="finDocs[0].isPosted" value="true" type="Boolean" />
+                        <if condition="finDocs[0].docType == 'transaction'">
+                            <set field="finDocs[0].isPosted" value="true" type="Boolean" />
+                        </if>
                         <if condition="finDocs[0].docType == 'payment'">
                             <service-call name="growerp.100.ImportExportServices100.import#Payment"
                                 in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
@@ -487,8 +555,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <!-- find productId from pseudoProductId -->
                     <service-call name="growerp.100.CatgProdServices100.get#Products"
                         out-map="context"
-                        in-map="[pseudoId: item.pseudoProductId, classificationId: classificationId]" />
-                    <if condition="products.size() &gt; 0">
+                        in-map="[pseudoId: item.pseudoProductId, classificationId: classificationId, ownerPartyId: ownerPartyId]" />
+                    <if condition="!products.isEmpty()"><!-- get services always provide list -->
                         <set field="item.productId" from="products[0].productId" />
                         <!-- update prices when on an invoice -->
                         <if condition="item.docType == 'invoice'">
@@ -504,6 +572,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 message="id: ${item.pseudoId} could not find pseudoProductId ${item.pseudoProductId} for owner: $ownerPartyId, will add it" />
                             <set field="product"
                                 from="[
+                                    ownerPartyId: ownerPartyId,
                                     pseudoId: item.pseudoProductId,
                                     productTypeId: 'Physical Good',
                                     productName: item.description,
@@ -530,9 +599,13 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="lastItem">
                 <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                     in-map="[pseudoId: lastItem.pseudoId,docType: lastItem.docType, classificationId: classificationId]" />
-                <if condition="finDocs.size() &gt; 0">
+                <if condition="!finDocs.isEmpty()">
                     <set field="finDocs[0].items" from="itemsOut" />
-                    <set field="finDocs[0].isPosted" value="true" type="Boolean" />
+                    <!-- transaction posted-->
+                    <if condition="finDocs[0].docType == 'transaction'">
+                        <set field="finDocs[0].isPosted" value="true" type="Boolean" />
+                    </if>
+                    <!-- add findoc items-->
                     <if condition="finDocs[0].docType == 'payment'">
                         <service-call name="growerp.100.ImportExportServices100.import#Payment"
                             in-map="[finDoc: finDocs[0], classificationId: classificationId]" />
@@ -546,7 +619,11 @@ along with this software (see the LICENSE.md file). If not, see
                             message="Could not find ${item.docType} ${item.pseudoId}!" />
                     </else>
                 </if>
+                <!-- if transactions, check latest date and see if previous year period not close
+                yet-->
+
             </if>
+
             <!-- end of service result -->
             <if condition="!ec.message.hasError()">
                 <message type="success">${finDocItems?.size()} findoc items ${finDocItems[0].docType} imported</message>
@@ -560,34 +637,53 @@ along with this software (see the LICENSE.md file). If not, see
             extra invoice for this.
         </description>
         <in-parameters>
-            <parameter name="finDoc" required="true" type="List" />
+            <parameter name="finDoc" required="true" type="Map" />
             <parameter name="classificationId" required="true" />
         </in-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                in-map="[finDoc: finDoc, classificationId: classificationId]" />
-            <return />
+                in-map="[finDoc: finDoc, classificationId: classificationId]"
+                out-map="payment" />
 
-            <if condition="!finDoc.reference">
-                <!-- if no related invoice, convert to invoice and create -->
+            <if condition="!finDoc.reference &amp;&amp; finDoc.items.size() &gt; 1">
+                <!-- if no related invoice and items, convert to invoice and create -->
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="finDoc + [docType: 'invoice', sales: !finDoc.sales,
-                    otherCompany: [partyId: companyPartyId]]"
-                    out-map="context" />
-                <set field="invoiceId" from="finDocs[0].invoiceId" />
+                    in-map="[finDoc: finDoc + [docType: 'invoice', sales: !finDoc.sales]]"
+                    out-map="invoice" />
+                <service-call
+                    name="mantle.account.PaymentServices.apply#InvoicePayment"
+                    in-map="[paymentId: payment.finDoc.paymentId,
+                            invoiceId: invoice.finDoc.invoiceId]" />
                 <else>
-                    <entity-find entity-name="mantle.account.invoice.Invoice" list="invoices">
-                        <econdition field-name="externalId" from="findoc.reference" />
+                    <!-- reference points to existing transaction which could contain
+                        invoiceId-->
+                    <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
+                        list="transactions" for-update="true">
+                        <econdition field-name="organizationPartyId" from="companyPartyId" />
+                        <econdition field-name="theirAcctgTransId" from="finDoc.reference" />
                     </entity-find>
-                    <set field="invoiceId" from="invoices[0].invoiceId" />
+                    <if condition="!transactions">
+                        <log level="warn"
+                            message="could not find invoice transaction of payment reference ${finDoc.reference}" />
+                        <else>
+                            <if condition="!transactions[0].invoiceId">
+                                <log level="warn"
+                                    message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} does not have a related invoiceId: ${finDoc.reference}" />
+                                <else>
+                                    <!-- connect payment to invoice-->
+                                    <service-call
+                                        name="mantle.account.PaymentServices.apply#InvoicePayment"
+                                        in-map="[paymentId: payment.finDoc.paymentId,
+                                                invoiceId: transactions[0].invoiceId]" />
+                                </else>
+                            </if>
+                        </else>
+                    </if>
+
                 </else>
             </if>
-            <!-- connect payment to related invoice over payment application-->
-            <service-call name="growerp.100.FinDocServices100.update#FinDoc"
-                in-map="[finDoc: finDoc, classificationId: classificationId]"
-                out-map="context" />
         </actions>
     </service>
 

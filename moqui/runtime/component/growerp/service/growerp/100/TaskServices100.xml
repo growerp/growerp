@@ -175,7 +175,7 @@ along with this software (see the LICENSE.md file). If not, see
                         taskId: te.workEffortId,
                         partyId: te.partyId,
                         hours: te.hours?.toString(),
-                        date: te.fromDate ? te.fromDate.toString().substring(0,19) + 'Z' : null,
+                        date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
                         comments: te.comments
                     ]" />
                     <set field="unInvoicedHours" from="unInvoicedHours + te.hours" />
@@ -189,9 +189,9 @@ along with this software (see the LICENSE.md file). If not, see
                     statusId: convertedStatusId,
                     description: entry.description,
                     startDate: entry.actualStartDate?
-                        entry.actualStartDate.toString().substring(0,18) + 'Z' : null,
+                        ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,
                     endDate: entry.actualCompletionDate?
-                        entry.actualCompletionDate.toString().substring(0,18) + 'Z' : null,
+                        ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
                     unInvoicedHours: unInvoicedHours.toString(),
                     timeEntries: teOutList,
                 ]" />
@@ -471,7 +471,7 @@ along with this software (see the LICENSE.md file). If not, see
                 partyId: te.partyId,
                 hours: te.hours?.toString(),
                 comments: te.comments,
-                date: te.fromDate ? te.fromDate.toString().substring(0,19) + 'Z': null
+                date: te.fromDate ? ec.l10n.format(te,fromDate,'yyyy-MM-dd') : null
             ]" />
         </actions>
     </service>

@@ -340,10 +340,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <if condition="finDocId || pseudoId"><!-- single document with items -->
                                     <entity-find list="items"
                                         entity-name="growerp.order.OrderHeaderPartAndParties">
-                                        <econdition field-name="orderId" from="finDocId"
-                                            ignore-if-empty="true" />
-                                        <econdition field-name="pseudoId" from="pseudoId"
-                                            ignore-if-empty="true" />
                                         <econditions combine="or">
                                             <econdition field-name="vendorPartyId"
                                                 from="companyPartyId"
@@ -354,6 +350,12 @@ along with this software (see the LICENSE.md file). If not, see
                                         </econditions>
                                         <order-by field-name="pseudoId,orderId" />
                                     </entity-find>
+                                    <if condition="sales == null">
+                                        <set field="sales" value="false" type="Boolean" />
+                                        <if condition="items[0].customerPartyId == companyPartyId">
+                                            <set field="sales" value="true" type="Boolean" />
+                                        </if>
+                                    </if>
                                     <else><!-- multiple documents -->
                                         <set field="statusList"
                                             from="['OrderOpen','OrderPlaced','OrderApproved']" /> <!--
@@ -443,9 +445,9 @@ along with this software (see the LICENSE.md file). If not, see
                             salesChannel: item.salesChannel,
                             statusId: convertedStatusId,
                             creationDate: item.entryDate
-                                ? item.entryDate.toString().substring(0,19) + 'Z': null,
+                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd') : null,
                             placedDate: item.placedDate
-                                ? item.entryDate.toString().substring(0,19) + 'Z' : null,
+                                ? ec.l10n.format(item.placedDate,'yyyy-MM-dd')  : null,
                             sales: sales,
                             docType: docType,
                             otherUser: userOut,
@@ -489,7 +491,7 @@ along with this software (see the LICENSE.md file). If not, see
                             assetId: item.assetId,
                             assetName: item.assetName,
                             rentalFromDate: item.rentalFromDate
-                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd') : null,
+                                ?  ec.l10n.format(item.rentalFromDate,'yyyy-MM-dd')  : null,
                             rentalThruDate: item.rentalThruDate
                                 ? ec.l10n.format(item.rentalThruDate,'yyyy-MM-dd') : null,
                             ]" />
@@ -520,15 +522,21 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                         <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="vendorPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="customerPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="vendorPartyId" from="companyPartyId" />
+                            <econdition field-name="customerPartyId" from="companyPartyId" />
+                        </econditions>
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
                         <return error="false"
                             message="Get finDoc Invoice: $finDocId or $pseudoId not found!" />
+                        <if condition="sales == null">
+                            <set field="sales" value="true" type="Boolean" />
+                            <if condition="items[0].customerPartyId == companyPartyId">
+                                <set field="sales" value="false" type="Boolean" />
+                            </if>
+                        </if>
                     </if>
                     <else><!-- invoice list -->
                         <if
@@ -629,7 +637,7 @@ along with this software (see the LICENSE.md file). If not, see
                             description: item.invoiceName,
                             statusId: convertedStatusId,
                             creationDate: item.invoiceDate
-                                ? item.invoiceDate.toString().substring(0,19) + 'Z' : null,
+                                ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd')  : null,
                             otherUser: userOut,
                             otherCompany: company,
                             grandTotal: item.invoiceTotal
@@ -673,17 +681,18 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.order.PaymentAndInfo" list="items">
                         <econdition field-name="paymentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="vendorPartyId" from="vendorPartyId"
-                            ignore-if-empty="true" />
-                        <econdition field-name="customerPartyId" from="customerPartyId"
-                            ignore-if-empty="true" />
-                        <!-- econdition field-name="organizationPartyId" from="companyPartyId" />
-                        <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
                         <econditions combine="or">
-                            <econdition field-name="isApplied" value="Y" />
-                        <econdition field-name="isApplied" value="E" />
-                        </econditions-->
+                            <econdition field-name="vendorPartyId" from="companyPartyId" />
+                            <econdition field-name="customerPartyId" from="companyPartyId" />
+                        </econditions>
                     </entity-find>
+                    <!-- sales field is optional with single document-->
+                    <if condition="items &amp;&amp; sales == null">
+                        <set field="sales" value="true" type="Boolean" />
+                        <if condition="items[0].customerPartyId == companyPartyId">
+                            <set field="sales" value="false" type="Boolean" />
+                        </if>
+                    </if>
                     <else>
                         <if
                             condition="open == true &amp;&amp; !finDocId
@@ -716,13 +725,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 <econdition field-name="orderId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
-                            <!--econdition
-                            field-name="organizationPartyId" from="companyPartyId" />
-                            <econdition field-name="isPayable" from="sales ? 'Y' : 'N'" />
-                            <econditions combine="or">
-                                <econdition field-name="isApplied" value="Y" />
-                                <econdition field-name="isApplied" value="E" />
-                            </econditions-->
                             <order-by field-name="paymentId" />
                         </entity-find>
                     </else>
@@ -813,12 +815,12 @@ along with this software (see the LICENSE.md file). If not, see
                         invoiceId: item.invoiceId ? item.invoiceId : item.forInvoiceId,
                         statusId: convertedStatusId,
                         creationDate: item.effectiveDate
-                            ? item.effectiveDate.toString().substring(0,19) + 'Z' : null,
+                            ? ec.l10n.format(item.effectiveDate,'yyyy-MM-dd') : null,
                         sales: sales,
                         docType: docType,
                         otherUser: userOut,
                         otherCompany: company,
-                        grandTotal: item.amount ? item.amount.toString() : null,
+                        grandTotal: item.amount ? item.amount.toString() : 0,
                         items: [[itemType: paymentType, glAccount: glAccount]],
                         ]" />
                     <script>finDocs.add(finDocOut)</script>
@@ -932,7 +934,7 @@ along with this software (see the LICENSE.md file). If not, see
                             statusId: convertedStatusId,
                             shipmentMethod: item.shipmentMethod,
                             creationDate: item.entryDate 
-                                ? item.entryDate.toString().substring(0,19) + 'Z' : null,
+                                ? ec.l10n.format(item.entryDate,'yyyy-MM-dd')  : null,
                             otherUser: userOut,
                             otherCompany: company,
                             ]" />
@@ -948,7 +950,7 @@ along with this software (see the LICENSE.md file). If not, see
                         assetId: item.assetId,
                         assetName: item.assetName,
                         receivedDate: item.receivedDate 
-                            ? item.receivedDate.toString().substring(0,19) + 'Z' : null,
+                            ? ec.l10n.format(item.receiveDate,'yyyy-MM-dd')  : null,
                         location: location
                         ]" />
                     <set field="finDocItem"
@@ -1046,7 +1048,7 @@ along with this software (see the LICENSE.md file). If not, see
                             itemType: [itemTypeId: item.typeId],
                             statusId: convertedStatusId,
                             creationDate: item.transactionDate 
-                                ? item.transactionDate.toString().substring(0,19) + 'Z' : null,
+                                ? ec.l10n.format(item.transactionDate,'yyyy-MM-dd')  : null,
                             otherUser: userOut,
                             otherCompany: company,
                             isPosted: item.isPosted == 'Y' ? true : false,
@@ -1482,11 +1484,31 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="paymentGatewayConfigId"
                             from="System.getProperty('paymentGatewayConfigId')" />
                     </if>
+                    <if
+                        condition="payment.paymentInstrument == 'CompanyCheck' &amp;&amp; 
+                                    payment.otherCompany.paymentMethod?.ccPaymentMethodId">
+                        <set field="paymentMethodId"
+                            from="payment.otherCompany.paymentMethod.ccPaymentMethodId" />
+                        <set field="paymentGatewayConfigId"
+                            from="System.getProperty('paymentGatewayConfigId')" />
+                    </if>
                 </then>
                 <else><!-- outgoing purchase payment -->
                     <set field="fromPartyId" from="companyPartyId" />
                     <set field="toPartyId" from="payment.otherCompany.partyId" />
                     <set field="contactRole" value="VendorContactPerson" />
+                    <if condition="payment.paymentInstrument == 'CreditCard'">
+                        <entity-find entity-name="mantle.account.method.PaymentMethod" limit="1"
+                            list="pms">
+                            <econdition field-name="ownerPartyId" from="companyPartyId" />
+                            <econdition field-name="paymentMethodTypeEnumId" value="PmtCreditCard" />
+                        </entity-find>
+                        <if condition="pms">
+                            <set field="paymentMethodId" from="pms[0].paymentMethodId" />
+                            <set field="paymentGatewayConfigId"
+                                from="System.getProperty('paymentGatewayConfigId')" />
+                        </if>
+                    </if>
                     <if condition="payment.paymentInstrument == 'CreditCard'">
                         <entity-find entity-name="mantle.account.method.PaymentMethod" limit="1"
                             list="pms">

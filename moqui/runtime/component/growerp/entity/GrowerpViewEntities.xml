@@ -578,8 +578,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="vendorRoleTypeId" value="VendorContactPerson" />
             </entity-condition>
         </member-entity>
-        <member-entity entity-alias="VPERSON" entity-name="mantle.party.Person"
+        <member-entity entity-alias="VPPARTY" entity-name="mantle.party.Party"
             join-from-alias="VOPP" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="VPERSON" entity-name="mantle.party.Person"
+            join-from-alias="VPPARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
         <member-entity entity-alias="VACCOUNT" entity-name="moqui.security.UserAccount"
@@ -602,8 +606,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="customerRoleTypeId" value="CustomerContactPerson" />
             </entity-condition>
         </member-entity>
-        <member-entity entity-alias="CPERSON" entity-name="mantle.party.Person"
+        <member-entity entity-alias="CPPARTY" entity-name="mantle.party.Party"
             join-from-alias="COPP" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="CPERSON" entity-name="mantle.party.Person"
+            join-from-alias="CPPARTY" join-optional="true">
             <key-map field-name="partyId" />
         </member-entity>
         <member-entity entity-alias="CACCOUNT" entity-name="moqui.security.UserAccount"
@@ -644,6 +652,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="vendorCompanyName" field="organizationName" entity-alias="VORG" />
         <alias name="vendorRoleTypeId" field="roleTypeId" entity-alias="VOPP" />
         <alias name="vendorUserPartyId" field="partyId" entity-alias="VPERSON" />
+        <alias name="vendorUserPseudoId" field="pseudoId" entity-alias="VPPARTY" />
         <alias name="vendorFirstName" field="firstName" entity-alias="VPERSON" />
         <alias name="vendorLastName" field="lastName" entity-alias="VPERSON" />
         <alias name="vendorEmail" field="emailAddress" entity-alias="VACCOUNT" />
@@ -653,6 +662,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="customerCompanyName" field="organizationName" entity-alias="CORG" />
         <alias name="customerRoleTypeId" field="roleTypeId" entity-alias="COPP" />
         <alias name="customerUserPartyId" field="partyId" entity-alias="CPERSON" />
+        <alias name="customerUserPseudoId" field="pseudoId" entity-alias="CPPARTY" />
         <alias name="customerFirstName" field="firstName" entity-alias="CPERSON" />
         <alias name="customerLastName" field="lastName" entity-alias="CPERSON" />
         <alias name="customerEmail" field="emailAddress" entity-alias="CACCOUNT" />

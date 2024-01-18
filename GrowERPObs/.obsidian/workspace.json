@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "1 Introduction/4 Getting started.md",
                 "mode": "source",
                 "source": false
               }
@@ -93,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "1 Introduction/4 Getting started.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md",
+                "file": "1 Introduction/4 Getting started.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2 End User documentation/7 Accounting/9 Account Class reference.md"
+                "file": "1 Introduction/4 Getting started.md"
               }
             }
           },
@@ -168,12 +168,12 @@
   },
   "active": "cd2ba6fa8750f0f9",
   "lastOpenFiles": [
+    "2 End User documentation/7 Accounting/9 Account Class reference.md",
     "2 End User documentation/7 Accounting/1 getting started.md",
     "2 End User documentation/7 Accounting/6 Payment Type.md",
     "2 End User documentation/7 Accounting/7 Item Type.md",
     "2 End User documentation/7 Accounting/8 Account type reference.md",
     "3 Technical documentation/3 Moqui Backend.md",
-    "2 End User documentation/7 Accounting/9 Account Class reference.md",
     "1 Introduction/5 Road Map and Releases.md",
     "1 Introduction/4 Getting started.md",
     "1 Introduction/3 Feature list.md",

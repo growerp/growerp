@@ -652,7 +652,7 @@ along with this software (see the LICENSE.md file). If not, see
                         isError: journal.glJournalTypeEnumId == 'GLJRNL_ERROR'
                             ? true : false,
                         postedDate: journal.postedDate
-                            ? journal.postedDate.toString().substring(0,19) + 'Z': null,
+                            ? ec.l10n.format(journal.postedDate,'yyyy-MM-dd') : null,
                         isPosted: journal.isPosted=='N' ? false : true,
                         )
                 </script>

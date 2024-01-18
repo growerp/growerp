@@ -444,7 +444,7 @@ along with this software (see the LICENSE.md file). If not, see
                     fromUserId: message.fromUserId,
                     content: message.content,
                     creationDate: message.lastUpdatedStamp
-                        ? message.lastUpdatedStamp.toString().substring(0,19) + 'Z'
+                        ? ec.l10n.format(message.lastUpdatedStamp,'yyyy-MM-dd') 
                         : null,
                     ]" />
                 <script>chatMessages.add(chatMessage)</script>

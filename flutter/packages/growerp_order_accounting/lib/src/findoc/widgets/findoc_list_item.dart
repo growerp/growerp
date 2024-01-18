@@ -137,7 +137,7 @@ class FinDocListItem extends StatelessWidget {
             key: Key("status$index")),
         const Expanded(child: SizedBox(width: 10)),
         Text(
-          "${finDoc.otherUser!.email ?? ''}vv",
+          finDoc.otherCompany?.email ?? '',
           key: Key('email$index'),
         ),
         const Divider(),
@@ -147,9 +147,7 @@ class FinDocListItem extends StatelessWidget {
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
-          child: Text(finDoc.otherUser?.company?.name == null
-              ? ''
-              : finDoc.otherUser!.company!.name![0]),
+          child: Text(finDoc.otherCompany?.name ?? ''),
         ),
         title: Row(children: titleFields),
         subtitle: Row(children: subTitleFields),
