@@ -47,10 +47,11 @@ class CommonTest {
     } else {
       await PersistFunctions.persistTest(test.copyWith(sequence: seq));
     }
+
     Bloc.observer = AppBlocObserver();
     runApp(TopApp(
+      restClient: RestClient(await buildDioClient()),
       classificationId: classificationId,
-      restClient: RestClient(await buildDioClient(null)),
       chatServer: ChatServer(),
       router: router,
       title: title,
@@ -69,7 +70,7 @@ class CommonTest {
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
     // check if email address already exist
-    final restClient = RestClient(await buildDioClient(null));
+    final restClient = RestClient(await buildDioClient(overrideUrl: null));
     var exist = true;
     var times = 0;
     while (exist) {
@@ -189,7 +190,6 @@ class CommonTest {
     SaveTest test = await PersistFunctions.getTest();
     if ((test.company == null || test.admin == null) &&
         (username == null || password == null)) {
-      debugPrint("=========== Need company test to be run first");
       return;
     }
     if (find
@@ -208,7 +208,7 @@ class CommonTest {
         .add({"apiKey": apiKey, "moquiSessionToken": moquiSessionToken});
     int seq = test.sequence;
     if (!test.testDataLoaded && testData.isNotEmpty) {
-      final restClient = RestClient(await buildDioClient(null));
+      final restClient = RestClient(await buildDioClient());
       // replace XXX strings
       Map<String, dynamic> parsed = {};
       testData.forEach((k, v) {

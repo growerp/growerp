@@ -16,7 +16,7 @@
 # with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/admin/Dockerfile -t growerp/admin . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
-FROM growerp/flutter-sdk-image AS build-env
+FROM growerp/flutter-sdk-image as build-env
 
 ARG BRANCH=master # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
@@ -32,27 +32,45 @@ RUN git config --system --add safe.directory '*'
 RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
 # activate melos
-RUN dart pub global activate melos
+RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-
-# get repository
-RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /growerp
-RUN ls
+ENV FLUTTER_HOME "/home/mobiledevops/.flutter-sdk"
+ENV PATH $PATH:$FLUTTER_HOME/bin
 
 # get growerp repos
 USER mobiledevops
 WORKDIR /home/mobiledevops
-COPY --chown=mobiledevops:mobiledevops /growerp/flutter .
+#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git growerp
+RUN ls
+COPY --chown=mobiledevops:mobiledevops . .
 RUN echo "pwd: $PWD"
-RUN flutter --version
+RUN echo "path: $PATH"
 RUN melos clean
 RUN melos bootstrap
 # localization
 RUN melos l10n --no-select
 # build
 RUN melos build --no-select
-#connect to emulator
-RUN adb -s 888 connect localhost:5555
+# to be overriden with volume and command params in docker-compose
+RUN ls -la
+
+FROM openjdk:11-jdk
+RUN apt-get update && apt-get install -y apt-transport-https nano inetutils-ping && apt-get clean
+COPY --from=build-env /opt/android-sdk-linux /opt/android-sdk-linux
+COPY --from=build-env /home/mobiledevops /opt/growerp
+COPY --from=build-env /home/mobiledevops/.flutter-sdk /opt/growerp/.flutter-sdk 
+COPY --from=build-env /home/mobiledevops/.flutter /opt/growerp/.flutter
+ENV PATH="$PATH":"/opt/android-sdk-linux/cmdline-tools:/opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/growerp/.flutter-sdk/bin:/opt/growerp/.flutter"
+ENV FLUTTER_HOME "/opt/growerp/.flutter-sdk"
+WORKDIR /opt/growerp
+RUN ls -la
+# activate melos/flutter
+ENV PATH $PATH:$FLUTTER_HOME/bin
+RUN dart pub global activate melos 3.4.0
+ENV PATH="$PATH":"$HOME/.pub-cache/bin"
+RUN echo $PATH
+RUN pwd
 # run test
-WORKDIR /home/mobiledevops/packages/growerp_catalog/example
-RUN flutter test integration_test/category_test.dart -d localhost
+VOLUME /opt/growerp/test
+ENTRYPOINT "test/run_tests.sh"
+

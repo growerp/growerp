@@ -27,8 +27,9 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+
   runApp(TopApp(
-      restClient: RestClient(await buildDioClient(null)),
+      restClient: RestClient(await buildDioClient()),
       classificationId: 'AppAdmin',
       chatServer: ChatServer(),
       title: 'GrowERP package: growerp_inventory.',

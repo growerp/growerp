@@ -36,13 +36,15 @@ class ChatServer {
   ChatServer() {
     if (kReleaseMode) {
       chatUrl = GlobalConfiguration().get("chatUrl");
-    } else if (kIsWeb || Platform.isIOS || Platform.isLinux) {
+    } else {
       chatUrl = GlobalConfiguration().get("chatUrlDebug");
       if (chatUrl.isEmpty) {
-        chatUrl = 'ws://localhost:8081';
+        if (kIsWeb || Platform.isIOS || Platform.isLinux) {
+          chatUrl = 'ws://localhost:8081';
+        } else if (Platform.isAndroid) {
+          chatUrl = 'ws://10.0.2.2:8081';
+        }
       }
-    } else if (Platform.isAndroid) {
-      chatUrl = 'ws://10.0.2.2:8081';
     }
     logger.i('Using base chat backend url: $chatUrl');
   }

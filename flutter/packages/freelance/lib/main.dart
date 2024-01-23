@@ -65,16 +65,10 @@ Future main() async {
   }
 
   await Hive.initFlutter();
-  String databaseUrl = GlobalConfiguration().get('databaseUrl');
-  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient(kReleaseMode
-        ? '$databaseUrl/'
-        : databaseUrlDebug.isNotEmpty
-            ? '$databaseUrlDebug/'
-            : null)),
+    restClient: RestClient(await buildDioClient()),
     classificationId: 'AppFreelance',
     chatServer: ChatServer(),
     title: 'GrowERP Freelance.',

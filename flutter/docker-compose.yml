@@ -4,55 +4,53 @@ networks:
 
 services:
   sut:
-    build: .
-    # command: run_tests.sh
-    extra_hosts:
-      - backend.growerp.local:127.0.0.1
-      - chat.growerp.local:127.0.0.1
+    image: test
+    build: ../flutter
+    container_name: test
+    volumes:
+      - ./test:/opt/growerp/test
     depends_on:
       - emulator
+    networks:
+      - my-network
 
   emulator:
     image: avitotech/android-emulator-29:915c1f20be
+    container_name: emulator
     ports:
-      - 5555:5555
-      - 5554:5554
-      - 8554:8554
+      - "5555:5555"
+      - "5554:5554"
+      - "8554:8554"
     privileged: true
     depends_on:
-      - nginx-proxy
-
-  nginx-proxy:
-    # For documentation on SSL and other settings see:
-    # https://github.com/jwilder/nginx-proxy
-    image: nginxproxy/nginx-proxy
-    container_name: nginx
-    restart: always
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs
-      - ./nginx/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf
-      #- ./logs/nginx:/var/log/nginx
-      #environment:
-      # change this for the default host to use when accessing directly by IP, etc
-      # use SSL_POLICY to disable TLSv1.0, etc in nginx-proxy
-      # - SSL_POLICY=AWS-TLS-1-1-2017-01
-    depends_on:
-      - moqui-server
+      - moqui
       - chat
     networks:
       - my-network
 
-  moqui-server:
+  #  emulator1:
+  #    image: us-docker.pkg.dev/android-emulator-268719/images/28-playstore-x64:30.1.2
+  #    container_name: emulator
+  #    ports:
+  #      - "5555:5555"
+  #      - "5554:5554"
+  #      - "8554:8554"
+  #    devices:
+  #      - '/dev/kvm:/dev/kvm'
+  #    environment:
+  #      - "ADBKEY=$(cat ~/.android/adbkey)"
+  #    depends_on:
+  #      - moqui
+  #      - chat
+  #    networks:
+  #      - my-network
+
+  moqui:
     image: growerp/growerp-moqui
     container_name: moqui
-    build:
-      context: ../moqui
-    # command: conf=conf/MoquiProductionConf.xml
     restart: always
+    ports:
+      - 127.0.0.1:80:80
     depends_on:
       - moqui-database
     volumes:
@@ -62,9 +60,9 @@ services:
       #- ../moqui/runtime/component:/opt/moqui/runtime/component
       #- ./runtime/log:/opt/moqui/runtime/log
       #- ./runtime/txlog:/opt/moqui/runtime/txlog
-      - ./runtime/sessions:/opt/moqui/runtime/sessions
+      - ../docker/runtime/sessions:/opt/moqui/runtime/sessions
       # this one isn't needed when not using H2/etc: - ./runtime/db:/opt/moqui/runtime/db
-      - ./runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
+      - ../docker/runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
     environment:
       - instance_purpose=test
       - entity_ds_db_conf=postgres
@@ -77,13 +75,10 @@ services:
       - entity_ds_crypt_pass='MoquiDefaultPassword:CHANGEME'
       # CHANGE ME - note that VIRTUAL_HOST is for nginx-proxy so it picks up this container as one it should reverse proxy
       # this can be a comma separate list of hosts like 'example.com,www.example.com'
-      - VIRTUAL_HOST=*.growerp.local
       - webapp_allow_origins=*
       # moqui will accept traffic from other hosts but these are the values used for URL writing when specified:
       - webapp_http_host=
       - webapp_http_port=80
-      - webapp_https_port=443
-      - webapp_https_enabled=true
       # nginx-proxy populates X-Real-IP with remote_addr by default, better option for outer proxy than X-Forwarded-For which defaults to proxy_add_x_forwarded_for
       - webapp_client_ip_header=X-Real-IP
       - default_locale=en_US
@@ -108,7 +103,7 @@ services:
       - 127.0.0.1:5432:5432
     volumes:
       # edit these as needed to map configuration and data storage
-      - ./db/postgres/data:/var/lib/postgresql/data
+      - ../docker/db/postgres/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=moqui
       - POSTGRES_DB_SCHEMA=public
@@ -121,16 +116,12 @@ services:
   chat:
     container_name: chat
     image: growerp/chat
-    build:
-      context: ../chat
     mem_limit: 100m
     restart: unless-stopped
     expose:
       - 8080
     environment:
-      - DATABASEBACKEND=https://backend.growerp.local
-      - VIRTUAL_HOST=chat.growerp.local
-      - VIRTUAL_PORT=8080
+      - DATABASEBACKEND=http://moqui
     external_links:
       - internet_gateway
     networks:

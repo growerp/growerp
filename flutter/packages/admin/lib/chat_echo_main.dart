@@ -34,7 +34,7 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(ChatApp(
-      restClient: RestClient(await buildDioClient(null)),
+      restClient: RestClient(await buildDioClient()),
       chatServer: ChatServer()));
 }
 

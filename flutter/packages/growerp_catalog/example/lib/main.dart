@@ -30,13 +30,13 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
+    restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
     chatServer: ChatServer(),
     title: 'GrowERP Catalog.',
     router: generateRoute,
     menuOptions: menuOptions,
     extraDelegates: const [CatalogLocalizations.delegate],
-    restClient: RestClient(await buildDioClient(null)),
   ));
 }
 

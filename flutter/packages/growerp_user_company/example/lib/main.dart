@@ -13,6 +13,7 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,8 +27,9 @@ Future main() async {
   await GlobalConfiguration().loadFromAsset('app_settings');
   Bloc.observer = AppBlocObserver();
   await Hive.initFlutter();
+
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient(null)),
+    restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
     chatServer: ChatServer(),
     title: 'GrowERP package: growerp_user_company.',

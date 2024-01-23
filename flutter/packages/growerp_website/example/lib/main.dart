@@ -29,7 +29,7 @@ Future main() async {
 
   Bloc.observer = AppBlocObserver();
   runApp(TopApp(
-    restClient: RestClient(await buildDioClient(null)),
+    restClient: RestClient(await buildDioClient()),
     classificationId: 'AppAdmin',
     chatServer: ChatServer(),
     title: "GrowERP Website",

@@ -1,6 +1,8 @@
 import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:flutter/foundation.dart';
+import 'package:global_configuration/global_configuration.dart';
 //import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:hive/hive.dart';
@@ -8,8 +10,9 @@ import 'package:hive/hive.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 /// https://kamaravichow.medium.com/caching-with-dio-hive-in-flutter-e630ac5fc777
-Future<Dio> buildDioClient(String? base,
-    {Duration timeout = const Duration(seconds: 10)}) async {
+Future<Dio> buildDioClient(
+    {Duration timeout = const Duration(seconds: 10),
+    String? overrideUrl}) async {
   bool android = false;
   try {
     if (Platform.isAndroid) {
@@ -17,12 +20,19 @@ Future<Dio> buildDioClient(String? base,
     }
   } catch (e) {}
 
+  String databaseUrl = GlobalConfiguration().get('databaseUrl');
+  String databaseUrlDebug = GlobalConfiguration().get('databaseUrlDebug');
+
   final dio = Dio()
     ..options = BaseOptions(
-        baseUrl: base ??
-            ((android == true)
-                ? 'http://10.0.2.2:8080/'
-                : 'http://localhost:8080/'))
+        baseUrl: overrideUrl ??
+            (kReleaseMode
+                ? '$databaseUrl/'
+                : databaseUrlDebug.isNotEmpty
+                    ? '$databaseUrlDebug/'
+                    : android == true
+                        ? 'http://10.0.2.2:8080/'
+                        : 'http://localhost:8080/'))
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;
