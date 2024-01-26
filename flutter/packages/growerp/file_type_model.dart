@@ -15,6 +15,12 @@ enum FileType {
   finDocInvoicePurchaseItem,
   finDocPaymentPurchase,
   finDocPaymentPurchaseItem, // single item for amount, glAccount
+  finDocOrderSale,
+  finDocOrderSaleItem,
+  finDocInvoiceSale,
+  finDocInvoiceSaleItem,
+  finDocPaymentSale,
+  finDocPaymentSaleItem, // single item for amount, glAccount
   website,
   unknown
 }

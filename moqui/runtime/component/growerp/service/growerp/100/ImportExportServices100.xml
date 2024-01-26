@@ -351,18 +351,24 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
+            <log message="importing ${finDocs[0].docType} ${finDocs?.size()} finDocs" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- check if we have a timeperiod here just for transactions.....-->
             <if condition="finDocs[0].docType == 'transaction'">
+                <log message="looking for date: ${finDocs[0].creationDate.substring(0,10)} 12:00:00" />
+                <!-- date-filter does not seem to work here date: 2010-12-31 not found!-->
                 <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                     <econdition field-name="partyId" from="companyPartyId" />
-                    <date-filter valid-date="Timestamp.valueOf(finDocs[0].creationDate)" />
+                    <econdition field-name="fromDate" operator="less-equals"
+                        from="Timestamp.valueOf(finDocs[0].creationDate)" />
+                    <econdition field-name="thruDate" operator="greater-equals"
+                        from="Timestamp.valueOf(finDocs[0].creationDate)" />
                 </entity-find>
                 <!-- when not yet create all until next year -->
                 <if condition="!periods">
                     <log
-                        message="====creating time periods starting with ${finDocs[0].creationDate.substring(0,4)}" />
+                        message="Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)}" />
                     <!-- delete existing-->
                     <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
@@ -399,17 +405,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="prevPeriodId" from="curYearOut.timePeriodId" />
                         <set field="curYear" from="((curYear as int) + 1) as String" />
                     </while>
-                    <!-- set time on thrueDates to 23:59:59-->
-                    <!--entity-find
-                    entity-name="mantle.party.time.TimePeriod"
-                        for-update="true" list="timePeriods">
+                    <entity-find-count entity-name="mantle.party.time.TimePeriod"
+                        count-field="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
-                    </entity-find>
-                    <iterate list="timePeriods" entry="period">
-                        <set field="period.thruDate"
-                            from="Timestamp.valueOf(period.thruDate.toString().substring(0,10) + ' 23:59:59')" />
-                        <entity-update value-field="period" />
-                    </iterate-->
+                    </entity-find-count>
+                    <log message="${periods} time periods created for company ${companyPartyId}" />
                 </if>
             </if>
             <iterate list="finDocs" entry="finDoc">
@@ -496,7 +496,9 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
             <log message="importing ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
+            <set field="index" value="0" type="Integer" />
             <iterate list="finDocItems" entry="item">
+                <!-- log message="${index++}" /-->
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                         in-map="[pseudoId: lastItem.pseudoId,docType: lastItem.docType, classificationId: classificationId]" />

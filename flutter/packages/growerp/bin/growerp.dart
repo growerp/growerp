@@ -244,12 +244,18 @@ Future<void> main(List<String> args) async {
                 case FileType.finDocOrderPurchase:
                 case FileType.finDocInvoicePurchase:
                 case FileType.finDocPaymentPurchase:
+                case FileType.finDocOrderSale:
+                case FileType.finDocInvoiceSale:
+                case FileType.finDocPaymentSale:
                   await client.importFinDoc(CsvToFinDocs(csvFile, logger));
                   break;
                 case FileType.finDocTransactionItem:
                 case FileType.finDocOrderPurchaseItem:
                 case FileType.finDocInvoicePurchaseItem:
                 case FileType.finDocPaymentPurchaseItem:
+                case FileType.finDocOrderSaleItem:
+                case FileType.finDocInvoiceSaleItem:
+                case FileType.finDocPaymentSaleItem:
                   await client.importFinDocItem(
                       CsvToFinDocItems(csvFile, logger), 'AppAdmin');
                   break;

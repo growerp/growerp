@@ -148,6 +148,21 @@ List<String> getFileNames(FileType fileType) {
       searchFiles.add('2c-payments_journal.csv');
       searchFiles.add('2c1-payments_journal.csv');
       break;
+    case FileType.finDocOrderSale:
+    case FileType.finDocOrderSaleItem:
+      searchFiles.add('3a-sales_order_journal.csv');
+      searchFiles.add('3a1-sales_order_journal.csv');
+      break;
+    case FileType.finDocInvoiceSale:
+    case FileType.finDocInvoiceSaleItem:
+      searchFiles.add('3b-sales_journal.csv');
+      searchFiles.add('3b1-sales_journal.csv');
+      break;
+    case FileType.finDocPaymentSale:
+    case FileType.finDocPaymentSaleItem:
+      searchFiles.add('3c-receipts_journal.csv');
+      searchFiles.add('3c1-receipts_journal.csv');
+      break;
     case FileType.product:
     case FileType.user:
     case FileType.finDocTransaction:
@@ -517,6 +532,116 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(accountCodeToItemType(columnsFrom[27], columnsFrom[25]));
       return columnsTo;
 
+    case FileType.finDocOrderSale:
+      // 1:custId 2:custName, 3:order id, 4:date(mm/dd/yy),
+      // 6:closed(TRUE/FALSE) 21: item number, 22: quantity, 23: productId,
+      // 24: descr, 25: accountCode, 26: price, 28: amount
+
+      columnsTo.add(
+          "${dateConvert(columnsFrom[4])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('true');
+      columnsTo.add('Order');
+      columnsTo.add('');
+      columnsTo.add(dateConvert(columnsFrom[4]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[3]);
+      return columnsTo;
+
+    case FileType.finDocOrderSaleItem:
+      // 1:custId 2:custName, 3:order id, 4:date(mm/dd/yy),
+      // 6:closed(TRUE/FALSE) 21: item number, 22: quantity, 23: productId,
+      // 24: descr, 25: accountCode, 26: price, 28: amount
+
+      columnsTo.add(
+          "${dateConvert(columnsFrom[4])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('Order');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(columnsFrom[23]); // product id
+      columnsTo.add(columnsFrom[24]); // descr
+      columnsTo.add(columnsFrom[22]); // quant
+      columnsTo.add(columnsFrom[26]); // price
+      columnsTo.add(columnsFrom[25]); // itemType accountCode
+      columnsTo.add('');
+      columnsTo.add(accountCodeToItemType(columnsFrom[25], columnsFrom[23]));
+      return columnsTo;
+
+    case FileType.finDocInvoiceSale:
+      // 1:custId 2:custName, 3:reference id, 4: applyInvoiceId 5:creditMemo 6:date(mm/dd/yy),
+      // 15: custPO 16:discountAmount, 17: ship date,
+      // 28: quantity, 30: productId,
+      // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
+
+      // just use to combine items, need to replace by seq num
+      columnsTo.add(
+          "${dateConvert(columnsFrom[6])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('true');
+      columnsTo.add('Invoice');
+      columnsTo.add('converted');
+      columnsTo.add(dateConvert(columnsFrom[6]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[3]); // put refnum here
+      return columnsTo;
+
+    case FileType.finDocInvoiceSaleItem:
+      // 1:custId 2:custName, 3:reference id, 4: applyInvoiceId 5:creditMemo 6:date(mm/dd/yy),
+      // 15: custPO 16:discountAmount, 17: ship date,
+      // 28: quantity, 30: productId,
+      // 32: descr, 33: accountCode, 34: price, 36: amount, 30: terms
+
+      columnsTo.add(
+          "${dateConvert(columnsFrom[6])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('Invoice');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(columnsFrom[30]); // product id
+      columnsTo.add(columnsFrom[32]); // descr
+      columnsTo.add(columnsFrom[28]); // quant
+      columnsTo.add(columnsFrom[34]); // price
+      columnsTo.add(columnsFrom[33]); // itemType accountCode
+      columnsTo.add('');
+      columnsTo.add(accountCodeToItemType(columnsFrom[33], columnsFrom[30]));
+      return columnsTo;
+
+    case FileType.finDocPaymentSale:
+      // 0: partyId, 1:custId 2:custName, 3:dep date, 4:reference 5: date,
+      // 8: amount, 11: paid on invoices,  14: invoiceId paid
+      // 16: discount amount, 7: glaccount, 11: discount account 18: rec account
+      // 21: amount
+
+      columnsTo.add(
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('true');
+      columnsTo.add('Payment');
+      columnsTo.add('converted');
+      columnsTo.add(dateConvert(columnsFrom[5]));
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[1]);
+      columnsTo.add(columnsFrom[2]);
+      columnsTo.add(columnsFrom[4]); // trans invoice id in reference
+      columnsTo.add('');
+      String amount = columnsFrom[21].replaceAll('-', ''); // check number
+      columnsTo.add(amount); // total amount
+      return columnsTo;
+
+    case FileType.finDocPaymentSaleItem: // just a single record for amount
+      // 0: partyId, 1:custId 2:custName, 3:dep date, 4:reference 6: pay method,
+      // 8: amount, 11: paid on invoices,  14: invoiceId paid
+      // 16: discount amount, 7: glaccount, 11: discount account 18: rec account
+      // 21: amount
+      columnsTo.add(
+          "${dateConvert(columnsFrom[5])}-${columnsFrom[0]}"); // will be replaced by sequential id
+      columnsTo.add('Payment');
+      columnsTo.add(''); //seqId by system
+      columnsTo.add(''); // product id
+      columnsTo.add(''); // descr
+      columnsTo.add(''); // quant
+      columnsTo.add(''); // price
+      columnsTo.add(columnsFrom[18]); // accountCode
+      return columnsTo;
+
     case FileType.finDocTransaction:
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
@@ -704,6 +829,9 @@ Future<void> main(List<String> args) async {
       case FileType.finDocOrderPurchase:
       case FileType.finDocInvoicePurchase:
       case FileType.finDocPaymentPurchase:
+      case FileType.finDocOrderSale:
+      case FileType.finDocInvoiceSale:
+      case FileType.finDocPaymentSale:
         csvFormat = finDocCsvFormat;
         csvLength = finDocCsvLength;
         convertedRows
@@ -731,6 +859,9 @@ Future<void> main(List<String> args) async {
       case FileType.finDocOrderPurchaseItem:
       case FileType.finDocInvoicePurchaseItem:
       case FileType.finDocPaymentPurchaseItem:
+      case FileType.finDocOrderSaleItem:
+      case FileType.finDocInvoiceSaleItem:
+      case FileType.finDocPaymentSaleItem:
         csvFormat = finDocItemCsvFormat;
         csvLength = finDocItemCsvLength;
         convertedRows
@@ -758,7 +889,7 @@ Future<void> main(List<String> args) async {
     List<String> fileContent = [];
     int fileIndex = 0;
     for (int record = 0; record < convertedRows.length; record++) {
-      if (record % 5000 == 0 && record != 0) {
+      if (record % 2000 == 0 && record != 0) {
         // wait for id change
         while (convertedRows[record][0] == convertedRows[record - 1][0]) {
           fileContent.add(createCsvRow(convertedRows[record++], csvLength));

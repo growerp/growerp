@@ -32,7 +32,8 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="OPRT" join-optional="true">
             <key-map field-name="vendorPartyId" related="partyId" />
         </member-entity>
-        <member-entity entity-alias="VOPP" entity-name="mantle.order.OrderPartParty"
+        <member-entity
+            entity-alias="VOPP" entity-name="mantle.order.OrderPartParty"
             join-from-alias="OPRT" join-optional="true">
             <key-map field-name="orderId" />
             <key-map field-name="orderPartSeqId" />
