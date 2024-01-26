@@ -15,20 +15,15 @@ services:
       - my-network
 
   emulator:
-    image: emulator
-    container_name: emulator
-    ports:
-      - 5558:5555
+    image: us-docker.pkg.dev/android-emulator-268719/images/30-google-x64:30.1.2
+    expose:
+      - 8554/tcp
+      - 5555/tcp
+    devices:
+      - '/dev/kvm:/dev/kvm'
     depends_on:
       - moqui
       - chat
-    privileged: true
-    #command: [ "./entrypoint.sh", "5554", "5555" ]
-    command:
-      - bash
-      - -c
-      #  - "sleep infinity"
-      - "./entrypoint.sh 5554 5555"
     networks:
       - my-network
 

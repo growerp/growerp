@@ -229,70 +229,76 @@ class LoginDialogState extends State<LoginDialog> {
         title: CoreLocalizations.of(context)!.loginWithExistingUserName,
         child: Form(
             key: _loginFormKey,
-            child: Column(children: <Widget>[
-              const SizedBox(height: 20),
-              TextFormField(
-                autofocus: _usernameController.text.isEmpty,
-                key: const Key('username'),
-                decoration: const InputDecoration(labelText: 'Username/Email'),
-                controller: _usernameController,
-                validator: (value) {
-                  if (value!.isEmpty) return 'Please enter username or email?';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                  autofocus: _usernameController.text.isNotEmpty,
-                  key: const Key('password'),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter your password?';
-                    return null;
-                  },
-                  controller: _passwordController,
-                  obscureText: _obscureText,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    autofocus: _usernameController.text.isEmpty,
+                    key: const Key('username'),
+                    decoration:
+                        const InputDecoration(labelText: 'Username/Email'),
+                    controller: _usernameController,
+                    validator: (value) {
+                      if (value!.isEmpty)
+                        return 'Please enter username or email?';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                      autofocus: _usernameController.text.isNotEmpty,
+                      key: const Key('password'),
+                      validator: (value) {
+                        if (value!.isEmpty)
+                          return 'Please enter your password?';
+                        return null;
                       },
-                      child: Icon(_obscureText
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                    ),
-                  )),
-              const SizedBox(height: 20),
-              Row(children: [
-                Expanded(
-                    child: ElevatedButton(
-                        key: const Key('login'),
-                        child: const Text('Login'),
-                        onPressed: () {
-                          if (_loginFormKey.currentState!.validate()) {
-                            _authBloc.add(AuthLogin(_usernameController.text,
-                                _passwordController.text));
-                          }
-                        }))
-              ]),
-              const SizedBox(height: 30),
-              Center(
-                  child: GestureDetector(
-                      child: const Text('forgot/change password?'),
-                      onTap: () async {
-                        String username = authenticate.user?.loginName ??
-                            (kReleaseMode ? '' : 'test@example.com');
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _authBloc,
-                                  child: SendResetPasswordDialog(username));
+                      controller: _passwordController,
+                      obscureText: _obscureText,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
                             });
-                      })),
-            ])));
+                          },
+                          child: Icon(_obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                        ),
+                      )),
+                  const SizedBox(height: 20),
+                  Row(children: [
+                    Expanded(
+                        child: ElevatedButton(
+                            key: const Key('login'),
+                            child: const Text('Login'),
+                            onPressed: () {
+                              if (_loginFormKey.currentState!.validate()) {
+                                _authBloc.add(AuthLogin(
+                                    _usernameController.text,
+                                    _passwordController.text));
+                              }
+                            }))
+                  ]),
+                  const SizedBox(height: 30),
+                  Center(
+                      child: GestureDetector(
+                          child: const Text('forgot/change password?'),
+                          onTap: () async {
+                            String username = authenticate.user?.loginName ??
+                                (kReleaseMode ? '' : 'test@example.com');
+                            await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                      value: _authBloc,
+                                      child: SendResetPasswordDialog(username));
+                                });
+                          })),
+                ])));
   }
 }

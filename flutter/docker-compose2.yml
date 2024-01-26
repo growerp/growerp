@@ -17,18 +17,22 @@ services:
   emulator:
     image: emulator
     container_name: emulator
+    volumes:
+      - ./test:/opt/growerp/test
     ports:
-      - 5558:5555
+      - 8554/tcp
+      - 5555/tcp
     depends_on:
       - moqui
       - chat
     privileged: true
-    #command: [ "./entrypoint.sh", "5554", "5555" ]
     command:
       - bash
       - -c
-      #  - "sleep infinity"
-      - "./entrypoint.sh 5554 5555"
+      - |
+        ./start_emu_headless.sh
+    tty: true
+    stdin_open: true
     networks:
       - my-network
 

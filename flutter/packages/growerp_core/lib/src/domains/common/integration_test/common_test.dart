@@ -328,8 +328,8 @@ class CommonTest {
   /// [lowLevel]
   static Future<void> drag(WidgetTester tester,
       {int seconds = 1, String listViewName = 'listView'}) async {
-    await tester.drag(
-        find.byKey(Key(listViewName)).last, const Offset(0, -400));
+    await tester.drag(find.byKey(Key(listViewName), skipOffstage: false).last,
+        const Offset(0, -400));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 

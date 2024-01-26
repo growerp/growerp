@@ -25,14 +25,15 @@ Future<Dio> buildDioClient(
 
   final dio = Dio()
     ..options = BaseOptions(
-        baseUrl: overrideUrl ??
-            (kReleaseMode
+        baseUrl: overrideUrl != null
+            ? '$overrideUrl/'
+            : kReleaseMode
                 ? '$databaseUrl/'
                 : databaseUrlDebug.isNotEmpty
                     ? '$databaseUrlDebug/'
                     : android == true
                         ? 'http://10.0.2.2:8080/'
-                        : 'http://localhost:8080/'))
+                        : 'http://localhost:8080/')
     ..options.connectTimeout = const Duration(seconds: 5)
     ..options.receiveTimeout = timeout
     ..httpClientAdapter;

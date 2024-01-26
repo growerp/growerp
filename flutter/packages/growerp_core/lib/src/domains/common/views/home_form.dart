@@ -125,36 +125,59 @@ class HomeFormState extends State<HomeForm> {
                           }
                         },
                         child: Center(
-                          child: Column(children: <Widget>[
-                            const SizedBox(height: 20),
-                            Image(
-                                image: AssetImage(themeMode == ThemeMode.light
-                                    ? 'packages/growerp_core/images/growerp100.png'
-                                    : 'packages/growerp_core/images/growerpDark100.png'),
-                                height: 100,
-                                width: 100),
-                            if (widget.title.isNotEmpty)
-                              const SizedBox(height: 30),
-                            InkWell(
-                                onLongPress: () async {
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return const ChangeIpForm();
-                                      });
-                                },
-                                child: Text(widget.title,
-                                    style: TextStyle(
-                                        fontSize: isPhone ? 15 : 25,
-                                        fontWeight: FontWeight.bold))),
-                            if (widget.title.isNotEmpty)
-                              const SizedBox(height: 30),
-                            authenticate.company?.partyId != null
-                                ? ElevatedButton(
-                                    key: const Key('loginButton'),
-                                    child: Text(CoreLocalizations.of(context)!
-                                        .loginWithExistingUserName),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                const SizedBox(height: 20),
+                                Image(
+                                    image: AssetImage(themeMode ==
+                                            ThemeMode.light
+                                        ? 'packages/growerp_core/images/growerp100.png'
+                                        : 'packages/growerp_core/images/growerpDark100.png'),
+                                    height: 100,
+                                    width: 100),
+                                if (widget.title.isNotEmpty)
+                                  const SizedBox(height: 30),
+                                InkWell(
+                                    onLongPress: () async {
+                                      await showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return const ChangeIpForm();
+                                          });
+                                    },
+                                    child: Center(
+                                      child: Text(widget.title,
+                                          style: TextStyle(
+                                              fontSize: isPhone ? 15 : 25,
+                                              fontWeight: FontWeight.bold)),
+                                    )),
+                                if (widget.title.isNotEmpty)
+                                  const SizedBox(height: 30),
+                                authenticate.company?.partyId != null
+                                    ? ElevatedButton(
+                                        key: const Key('loginButton'),
+                                        child: Text(
+                                            CoreLocalizations.of(context)!
+                                                .loginWithExistingUserName),
+                                        onPressed: () async {
+                                          await showDialog(
+                                              barrierDismissible: true,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return BlocProvider.value(
+                                                    value: _authBloc,
+                                                    child: const LoginDialog());
+                                              });
+                                        })
+                                    : const Text(
+                                        'No companies yet, create one!'),
+                                const Expanded(child: SizedBox(height: 130)),
+                                ElevatedButton(
+                                    key: const Key('newCompButton'),
+                                    child: const Text(
+                                        'Create a new company and admin'),
                                     onPressed: () async {
                                       await showDialog(
                                           barrierDismissible: true,
@@ -162,41 +185,12 @@ class HomeFormState extends State<HomeForm> {
                                           builder: (BuildContext context) {
                                             return BlocProvider.value(
                                                 value: _authBloc,
-                                                child: const LoginDialog());
+                                                child: const NewCompanyDialog(
+                                                    true));
                                           });
-                                      /*                           if (message != null) {
-                                    await Future.delayed(
-                                        const Duration(milliseconds: 200),
-                                        () =>
-                                            _authBloc.add(AuthMessage(message)));
-                                  }
-                             */
-                                    })
-                                : const Text('No companies yet, create one!'),
-                            const Expanded(child: SizedBox(height: 130)),
-                            ElevatedButton(
-                                key: const Key('newCompButton'),
-                                child: const Text(
-                                    'Create a new company and admin'),
-                                onPressed: () async {
-                                  await showDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return BlocProvider.value(
-                                            value: _authBloc,
-                                            child:
-                                                const NewCompanyDialog(true));
-                                      });
-                                  /*                        if (message != null) {
-                                await Future.delayed(
-                                    const Duration(milliseconds: 200),
-                                    () => _authBloc.add(AuthMessage(message)));
-                              }
-                            */
-                                }),
-                            const SizedBox(height: 50)
-                          ]),
+                                    }),
+                                const SizedBox(height: 50)
+                              ]),
                         )))),
             Align(alignment: Alignment.bottomCenter, child: appInfo),
           ]);

@@ -15,22 +15,35 @@ services:
       - my-network
 
   emulator:
-    image: emulator
+    image: avitotech/android-emulator-29:915c1f20be
     container_name: emulator
     ports:
-      - 5558:5555
+      - "5555:5555"
+      - "5554:5554"
+      - "8554:8554"
+    privileged: true
     depends_on:
       - moqui
       - chat
-    privileged: true
-    #command: [ "./entrypoint.sh", "5554", "5555" ]
-    command:
-      - bash
-      - -c
-      #  - "sleep infinity"
-      - "./entrypoint.sh 5554 5555"
     networks:
       - my-network
+
+  #  emulator1:
+  #    image: us-docker.pkg.dev/android-emulator-268719/images/28-playstore-x64:30.1.2
+  #    container_name: emulator
+  #    ports:
+  #      - "5555:5555"
+  #      - "5554:5554"
+  #      - "8554:8554"
+  #    devices:
+  #      - '/dev/kvm:/dev/kvm'
+  #    environment:
+  #      - "ADBKEY=$(cat ~/.android/adbkey)"
+  #    depends_on:
+  #      - moqui
+  #      - chat
+  #    networks:
+  #      - my-network
 
   moqui:
     image: growerp/growerp-moqui
