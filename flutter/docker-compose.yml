@@ -15,7 +15,8 @@ services:
       - my-network
 
   emulator:
-    image: emulator
+    image: growerp/android-emulator
+    build: ../flutter/emulator
     container_name: emulator
     ports:
       - 5555:5555
@@ -23,11 +24,9 @@ services:
       - moqui
       - chat
     privileged: true
-    #command: [ "./entrypoint.sh", "5554", "5555" ]
     command:
       - bash
       - -c
-      #  - "sleep infinity"
       - "./entrypoint.sh 5554 5555"
     networks:
       - my-network
