@@ -104,6 +104,7 @@ class CommonTest {
     } // no demo data
     await CommonTest.tapByKey(tester, 'newCompany', seconds: waitTime);
     // start with clean saveTest
+    await waitForSnackbarToGo(tester);
     await PersistFunctions.persistTest(SaveTest(
       sequence: ++seq,
       nowDate: DateTime.now(), // used in rental

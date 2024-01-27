@@ -18,7 +18,7 @@ services:
     image: emulator
     container_name: emulator
     ports:
-      - 5558:5555
+      - 5555:5555
     depends_on:
       - moqui
       - chat

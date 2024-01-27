@@ -73,14 +73,15 @@ class _NewCompanyDialogState extends State<NewCompanyDialog> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: popUp(
-                    context: context,
-                    child: _registerForm(_authBloc.state.authenticate!),
-                    title: !widget.admin
-                        ? "Enter a new customer for company\n "
-                            "${_authBloc.state.authenticate!.company!.name}"
-                        : "Enter a new company with admin",
-                    height: 700,
-                    width: 400)));
+                  context: context,
+                  title: !widget.admin
+                      ? "Enter a new customer for company\n "
+                          "${_authBloc.state.authenticate!.company!.name}"
+                      : "Enter a new company with admin",
+                  height: 700,
+                  width: 400,
+                  child: _registerForm(_authBloc.state.authenticate!),
+                )));
       }
     });
   }

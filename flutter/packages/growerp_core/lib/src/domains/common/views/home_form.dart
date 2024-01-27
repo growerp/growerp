@@ -42,11 +42,13 @@ class HomeFormState extends State<HomeForm> {
   String singleCompany = GlobalConfiguration().get("singleCompany");
 
   late AuthBloc _authBloc;
+  late ThemeBloc _themeBloc;
 
   @override
   void initState() {
     super.initState();
     _authBloc = context.read<AuthBloc>();
+    _themeBloc = context.read<ThemeBloc>();
   }
 
   @override
@@ -98,102 +100,96 @@ class HomeFormState extends State<HomeForm> {
         case AuthStatus.failure:
         case AuthStatus.unAuthenticated:
           Authenticate authenticate = state.authenticate!;
-          ThemeMode? themeMode = context.read<ThemeBloc>().state.themeMode;
-          return Column(children: [
-            Expanded(
-                child: Scaffold(
-                    appBar: AppBar(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        key: const Key('HomeFormUnAuth'),
-                        title: appBarTitle(
-                          context,
-                          authenticate,
-                          'Login / New company',
-                          isPhone,
-                        )),
-                    body: BlocListener<AuthBloc, AuthState>(
-                        listener: (context, state) {
-                          switch (state.status) {
-                            case AuthStatus.failure:
-                              HelperFunctions.showMessage(
-                                  context, '${state.message}', Colors.red);
-                              break;
-                            default:
-                              HelperFunctions.showMessage(
-                                  context, state.message, Colors.green);
-                          }
-                        },
-                        child: Center(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                const SizedBox(height: 20),
-                                Image(
-                                    image: AssetImage(themeMode ==
-                                            ThemeMode.light
-                                        ? 'packages/growerp_core/images/growerp100.png'
-                                        : 'packages/growerp_core/images/growerpDark100.png'),
-                                    height: 100,
-                                    width: 100),
-                                if (widget.title.isNotEmpty)
-                                  const SizedBox(height: 30),
-                                InkWell(
-                                    onLongPress: () async {
-                                      await showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return const ChangeIpForm();
-                                          });
-                                    },
-                                    child: Center(
-                                      child: Text(widget.title,
-                                          style: TextStyle(
-                                              fontSize: isPhone ? 15 : 25,
-                                              fontWeight: FontWeight.bold)),
-                                    )),
-                                if (widget.title.isNotEmpty)
-                                  const SizedBox(height: 30),
-                                authenticate.company?.partyId != null
-                                    ? ElevatedButton(
-                                        key: const Key('loginButton'),
-                                        child: Text(
-                                            CoreLocalizations.of(context)!
-                                                .loginWithExistingUserName),
-                                        onPressed: () async {
-                                          await showDialog(
-                                              barrierDismissible: true,
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return BlocProvider.value(
-                                                    value: _authBloc,
-                                                    child: const LoginDialog());
-                                              });
-                                        })
-                                    : const Text(
-                                        'No companies yet, create one!'),
-                                const Expanded(child: SizedBox(height: 130)),
-                                ElevatedButton(
-                                    key: const Key('newCompButton'),
-                                    child: const Text(
-                                        'Create a new company and admin'),
-                                    onPressed: () async {
-                                      await showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BlocProvider.value(
-                                                value: _authBloc,
-                                                child: const NewCompanyDialog(
-                                                    true));
-                                          });
-                                    }),
-                                const SizedBox(height: 50)
-                              ]),
-                        )))),
-            Align(alignment: Alignment.bottomCenter, child: appInfo),
-          ]);
+          ThemeMode? themeMode = _themeBloc.state.themeMode;
+          return Scaffold(
+              appBar: AppBar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  key: const Key('HomeFormUnAuth'),
+                  title: appBarTitle(
+                    context,
+                    authenticate,
+                    'Login / New company',
+                    isPhone,
+                  )),
+              body: BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    switch (state.status) {
+                      case AuthStatus.failure:
+                        HelperFunctions.showMessage(
+                            context, '${state.message}', Colors.red);
+                        break;
+                      default:
+                        HelperFunctions.showMessage(
+                            context, state.message, Colors.green);
+                    }
+                  },
+                  child: Center(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          const SizedBox(height: 20),
+                          Image(
+                              image: AssetImage(themeMode == ThemeMode.light
+                                  ? 'packages/growerp_core/images/growerp100.png'
+                                  : 'packages/growerp_core/images/growerpDark100.png'),
+                              height: 100,
+                              width: 100),
+                          if (widget.title.isNotEmpty)
+                            const SizedBox(height: 30),
+                          InkWell(
+                              onLongPress: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return const ChangeIpForm();
+                                    });
+                              },
+                              child: Center(
+                                child: Text(widget.title,
+                                    style: TextStyle(
+                                        fontSize: isPhone ? 15 : 25,
+                                        fontWeight: FontWeight.bold)),
+                              )),
+                          if (widget.title.isNotEmpty)
+                            const SizedBox(height: 30),
+                          authenticate.company?.partyId != null
+                              ? ElevatedButton(
+                                  key: const Key('loginButton'),
+                                  child: Text(CoreLocalizations.of(context)!
+                                      .loginWithExistingUserName),
+                                  onPressed: () async {
+                                    await showDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return BlocProvider.value(
+                                              value: _authBloc,
+                                              child: const LoginDialog());
+                                        });
+                                  })
+                              : const Text('No companies yet, create one!'),
+                          const SizedBox(height: 180),
+                          ElevatedButton(
+                              key: const Key('newCompButton'),
+                              child:
+                                  const Text('Create a new company and admin'),
+                              onPressed: () async {
+                                await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                          value: _authBloc,
+                                          child: const NewCompanyDialog(true));
+                                    });
+                              }),
+                          Align(
+                              alignment: Alignment.bottomCenter,
+                              child: appInfo),
+                        ]),
+                  )));
         default:
           return const LoadingIndicator();
       }
