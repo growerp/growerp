@@ -41,7 +41,6 @@ dependencies:
   flutter_lints: ^3.0.1
   json_annotation: ^4.7.0
   dio: ^5.3.3
-  freezed_annotation: ^2.0.3
   credit_card_validator: ^2.0.1
   markdown_widget: ^2.3.1
   url_launcher: ^6.1.4
@@ -72,7 +71,6 @@ dev_dependencies:
   json_serializable: ^6.2.0
   retrofit_generator: ^8.0.5
   lint_hard: ^4.0.0
-  build_runner: ^2.4.6
 flutter: 
   uses-material-design: true
 #  generate: true and run flutter gen-l10n

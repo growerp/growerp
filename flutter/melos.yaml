@@ -8,6 +8,8 @@ packages:
   - packages/growerp*
   - packages/growerp*/*example
 
+runPubGetInParallel: false
+
 ide:
   intellij:
     enabled: false

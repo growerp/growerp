@@ -9,10 +9,7 @@ dependencies:
     sdk: flutter
   growerp_catalog:
     path: ../
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.1
+
 flutter: 
   uses-material-design: true
   generate: true

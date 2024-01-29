@@ -245,9 +245,7 @@ class CategoryDialogState extends State<CategoryDialogFull> {
                           child: Text(
                         'Category #${widget.category.categoryId.isEmpty ? " New" : widget.category.categoryId}',
                         style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold),
+                            fontSize: 10, fontWeight: FontWeight.bold),
                         key: const Key('header'),
                       )),
                       const SizedBox(height: 30),

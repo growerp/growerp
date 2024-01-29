@@ -11,6 +11,7 @@ services:
       - ./test:/opt/growerp/test
     depends_on:
       - emulator
+    command: bash -c "test/run_tests.sh"
     networks:
       - my-network
 
@@ -24,10 +25,9 @@ services:
       - moqui
       - chat
     privileged: true
-    command:
-      - bash
-      - -c
-      - "./entrypoint.sh 5554 5555"
+    devices:
+      - '/dev/kvm:/dev/kvm'
+    command: bash -c "./entrypoint.sh 5554 5555"
     networks:
       - my-network
 
