@@ -17,7 +17,6 @@ services:
 
   emulator:
     image: growerp/android-emulator
-    build: ../flutter/emulator
     container_name: emulator
     ports:
       - 5555:5555
