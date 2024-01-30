@@ -4,8 +4,7 @@ networks:
 
 services:
   sut:
-    image: test
-    build: ../flutter
+    image: growerp/integration-test
     container_name: test
     volumes:
       - ./test:/opt/growerp/test
