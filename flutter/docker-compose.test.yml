@@ -19,14 +19,15 @@ services:
     image: growerp/android-emulator
     container_name: emulator
     ports:
-      - 5555:5555
+      - 5556:5556
+      - 5557:5557
     depends_on:
       - moqui
       - chat
     privileged: true
     devices:
       - '/dev/kvm:/dev/kvm'
-    command: bash -c "./entrypoint.sh 5554 5555"
+    command: bash -c "/entrypoint.sh 5556 5557"
     networks:
       - my-network
 
