@@ -5,11 +5,12 @@ networks:
 services:
   sut:
     build: .
-    image: growerp/integration-test
+    #    image: growerp/integration-test
     volumes:
       - ./test:/opt/growerp/test
     depends_on:
-      - emulator
+      service_started:
+        - emulator
     command: bash -c "test/run_tests.sh"
     networks:
       - my-network
