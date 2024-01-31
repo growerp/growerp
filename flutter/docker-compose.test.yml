@@ -4,8 +4,7 @@ networks:
 
 services:
   sut:
-    build: ../flutter
-    container_name: test
+    build: .
     volumes:
       - ./test:/opt/growerp/test
     depends_on:
