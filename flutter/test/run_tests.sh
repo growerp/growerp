@@ -1,7 +1,7 @@
 #! /bin/bash
 set -x
 echo $PATH
-sleep 30
+sleep 50
 adb connect emulator:5557
 flutter devices
 adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done; input keyevent 82'

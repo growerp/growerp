@@ -63,14 +63,11 @@ COPY --from=build-env /home/mobiledevops/.flutter /opt/growerp/.flutter
 ENV PATH="$PATH":"/opt/android-sdk-linux/cmdline-tools:/opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/growerp/.flutter-sdk/bin:/opt/growerp/.flutter"
 ENV FLUTTER_HOME "/opt/growerp/.flutter-sdk"
 WORKDIR /opt/growerp
-RUN ls -la
 # activate melos/flutter
 ENV PATH $PATH:$FLUTTER_HOME/bin
 RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
-RUN echo $PATH
-RUN pwd
 # run test
 VOLUME /opt/growerp/test
-ENTRYPOINT "test/run_tests.sh"
+
 
