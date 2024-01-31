@@ -9,8 +9,8 @@ services:
     volumes:
       - ./test:/opt/growerp/test
     depends_on:
-      service_started:
-        - emulator
+      emulator:
+        condition: service_started
     command: bash -c "test/run_tests.sh"
     networks:
       - my-network
