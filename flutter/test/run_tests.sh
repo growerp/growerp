@@ -5,6 +5,7 @@ sleep 30
 adb connect emulator:5557
 flutter devices
 adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done; input keyevent 82'
+sleep 20
 
 # hack just for  automated testing
 sed -i -e 's\overrideUrl: null\overrideUrl: "http://moqui"\g' packages/growerp_core/lib/src/domains/common/integration_test/common_test.dart

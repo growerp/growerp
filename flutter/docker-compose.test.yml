@@ -5,7 +5,7 @@ networks:
 services:
   sut:
     build: .
-    container_name: runtests
+    image: growerp/integration-test
     volumes:
       - ./test:/opt/growerp/test
     depends_on:
