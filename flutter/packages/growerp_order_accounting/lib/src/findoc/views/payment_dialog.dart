@@ -98,6 +98,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   late PaymentInstrument _paymentInstrument;
   final _userSearchBoxController = TextEditingController();
   final _amountController = TextEditingController();
+  final _pseudoIdController = TextEditingController();
 
   @override
   void initState() {
@@ -111,6 +112,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
     _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
+    _pseudoIdController.text = finDoc.pseudoId.toString();
     _selectedItemType =
         finDocUpdated.items.isNotEmpty ? finDocUpdated.items[0].itemType : null;
     _paymentInstrument = finDocUpdated.paymentInstrument == null
@@ -153,7 +155,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                     height: 750,
                     width: 400,
                     title: "${finDoc.sales ? 'Incoming' : 'Outgoing'} "
-                        "Payment #${finDoc.paymentId ?? 'new'}",
+                        "Payment #${finDoc.pseudoId ?? 'New'}",
                     child: SingleChildScrollView(
                         key: const Key('listView2'),
                         physics: const ClampingScrollPhysics(),
@@ -187,6 +189,12 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         child: Form(
             key: paymentDialogFormKey,
             child: Column(children: <Widget>[
+              TextFormField(
+                key: const Key('pseudoId'),
+                decoration: const InputDecoration(labelText: 'Id (opt)'),
+                controller: _pseudoIdController,
+                keyboardType: TextInputType.number,
+              ),
               BlocBuilder<CompanyBloc, CompanyState>(builder: (context, state) {
                 switch (state.status) {
                   case CompanyStatus.failure:
@@ -438,6 +446,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                             _finDocBloc.add(FinDocUpdate(finDocUpdated.copyWith(
                               otherCompany: _selectedCompany,
                               grandTotal: Decimal.parse(_amountController.text),
+                              pseudoId: _pseudoIdController.text,
                               paymentInstrument: _paymentInstrument,
                               items: [
                                 FinDocItem(

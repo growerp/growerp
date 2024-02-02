@@ -70,7 +70,7 @@ class CommonTest {
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
     // check if email address already exist
-    final restClient = RestClient(await buildDioClient(overrideUrl: null));
+    final restClient = RestClient(await buildDioClient(overrideUrl: "http://moqui"));
     var exist = true;
     var times = 0;
     while (exist) {

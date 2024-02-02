@@ -50,9 +50,7 @@ class FinDocListItemTrans extends StatelessWidget {
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
-          child: Text(finDoc.otherUser?.company?.name == null
-              ? ''
-              : finDoc.otherUser!.company!.name![0]),
+          child: Text(finDoc.otherCompany?.name?.substring(0, 1) ?? ''),
         ),
         title: Row(children: <Widget>[
           Expanded(

@@ -147,7 +147,7 @@ class FinDocListItem extends StatelessWidget {
     return ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Colors.green,
-          child: Text(finDoc.otherCompany?.name ?? ''),
+          child: Text(finDoc.otherCompany?.name!.substring(0, 1) ?? ''),
         ),
         title: Row(children: titleFields),
         subtitle: Row(children: subTitleFields),

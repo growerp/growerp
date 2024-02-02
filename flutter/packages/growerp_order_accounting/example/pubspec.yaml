@@ -9,6 +9,12 @@ environment:
 dependencies:
   growerp_order_accounting:
     path: ../
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

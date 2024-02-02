@@ -97,7 +97,7 @@ class PaymentTest {
       await CommonTest.enterDropDownSearch(
           tester,
           payment.sales ? 'customer' : 'supplier',
-          payment.otherUser!.lastName!);
+          payment.otherUser!.company!.name!);
       await CommonTest.enterText(tester, 'amount',
           payment.grandTotal!.toString()); // required because keyboard come up
       await CommonTest.drag(tester, listViewName: 'listView2');
@@ -116,8 +116,8 @@ class PaymentTest {
           break;
         default:
       }
-      await CommonTest.enterDropDown(tester, 'itemType',
-          '${payment.items[0].itemType!.itemTypeName}\n ${payment.items[0].itemType!.accountName}');
+      await CommonTest.enterDropDown(
+          tester, 'itemType', payment.items[0].itemType!.accountCode);
       await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: 3);
       await CommonTest.waitForSnackbarToGo(tester);

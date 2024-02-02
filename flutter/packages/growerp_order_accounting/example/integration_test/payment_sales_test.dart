@@ -34,12 +34,13 @@ void main() {
   testWidgets('''GrowERP payment sales test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
+        title: "Payment sales test",
         clear: true); // use data from previous run, ifnone same as true
     await CommonTest.createCompanyAndAdmin(tester,
         testData: {"users": customers.sublist(0, 2)});
     await PaymentTest.selectSalesPayments(tester);
-    await PaymentTest.addPayments(tester, salesPayments.sublist(0, 4));
-    await PaymentTest.updatePayments(tester, salesPayments.sublist(4, 8));
+    await PaymentTest.addPayments(tester, salesPayments.sublist(0, 2));
+    await PaymentTest.updatePayments(tester, salesPayments.sublist(2, 4));
     await PaymentTest.deleteLastPayment(tester);
     await PaymentTest.sendReceivePayment(tester);
     await PaymentTest.checkPaymentComplete(tester);

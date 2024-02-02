@@ -11,7 +11,13 @@ dependencies:
     sdk: flutter
   growerp_user_company:
     path: ../
+  flutter_test:
+    sdk: flutter
 
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+    
 flutter:
   uses-material-design: true
   assets:
