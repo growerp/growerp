@@ -112,7 +112,8 @@ class PaymentDialogState extends State<PaymentDialogFull> {
     _selectedCompany = finDocUpdated.otherCompany;
     _amountController.text =
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
-    _pseudoIdController.text = finDoc.pseudoId.toString();
+    _pseudoIdController.text =
+        finDoc.pseudoId == null ? '' : finDoc.pseudoId.toString();
     _selectedItemType =
         finDocUpdated.items.isNotEmpty ? finDocUpdated.items[0].itemType : null;
     _paymentInstrument = finDocUpdated.paymentInstrument == null

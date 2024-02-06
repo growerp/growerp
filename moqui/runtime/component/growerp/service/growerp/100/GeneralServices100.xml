@@ -37,7 +37,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="seqNum" from="seqItem.seqNum + 1" />
                     <set field="seqItem.seqNum" from="seqNum" />
                     <entity-update value-field="seqItem" />
-
                 </else>
             </if>
         </actions>

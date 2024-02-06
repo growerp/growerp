@@ -39,29 +39,24 @@ ENV PATH $PATH:$FLUTTER_HOME/bin
 
 # get growerp repos
 USER mobiledevops
-WORKDIR /home/mobiledevops
-#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git growerp
-RUN ls
-COPY --chown=mobiledevops:mobiledevops . .
-RUN echo "pwd: $PWD"
-RUN echo "path: $PATH"
+#RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /opt/growerp
+#RUN cp /opt/growerp/flutter /home/mobiledevops/growerp
+# copy from local below, two lines above from repository
+COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/growerp
+WORKDIR /home/mobiledevops/growerp
 RUN melos clean
 RUN melos bootstrap
-# localization
-RUN melos l10n --no-select
-# build
-RUN melos build --no-select
-# to be overriden with volume and command params in docker-compose
-RUN ls -la
-
+RUN  if [ ! -f "packages/growerp_models/lib/src/models/authenticate_model.freezed.dart" ]; then \
+    melos build --no-select && melos l10n --no-select; \
+    fi
 FROM openjdk:11-jdk
 RUN apt-get update && apt-get install -y apt-transport-https nano inetutils-ping && apt-get clean
 COPY --from=build-env /opt/android-sdk-linux /opt/android-sdk-linux
-COPY --from=build-env /home/mobiledevops /opt/growerp
-COPY --from=build-env /home/mobiledevops/.flutter-sdk /opt/growerp/.flutter-sdk 
-COPY --from=build-env /home/mobiledevops/.flutter /opt/growerp/.flutter
-ENV PATH="$PATH":"/opt/android-sdk-linux/cmdline-tools:/opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/growerp/.flutter-sdk/bin:/opt/growerp/.flutter"
-ENV FLUTTER_HOME "/opt/growerp/.flutter-sdk"
+COPY --from=build-env /home/mobiledevops/growerp /opt/growerp
+COPY --from=build-env /home/mobiledevops/.flutter-sdk /opt/.flutter-sdk 
+COPY --from=build-env /home/mobiledevops/.flutter /opt/.flutter
+ENV PATH="$PATH":"/opt/android-sdk-linux/cmdline-tools:/opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/.flutter-sdk/bin:/opt/.flutter"
+ENV FLUTTER_HOME "/opt/.flutter-sdk"
 WORKDIR /opt/growerp
 # activate melos/flutter
 ENV PATH $PATH:$FLUTTER_HOME/bin

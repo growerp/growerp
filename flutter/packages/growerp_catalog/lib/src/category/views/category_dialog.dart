@@ -29,7 +29,7 @@ class CategoryDialog extends StatelessWidget {
     return BlocProvider(
       create: (BuildContext context) =>
           ProductBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const ProductFetch()),
+            ..add(const ProductFetch(isForDropDown: true)),
       child: CategoryDialogFull(category),
     );
   }
@@ -235,11 +235,11 @@ class CategoryDialogState extends State<CategoryDialogFull> {
             backgroundColor: Colors.transparent,
             floatingActionButton:
                 ImageButtons(_scrollController, _onImageButtonPressed),
-            body: Form(
-                key: _categoryDialogFormKey,
-                child: SingleChildScrollView(
-                    controller: _scrollController,
-                    key: const Key('listView'),
+            body: SingleChildScrollView(
+                controller: _scrollController,
+                key: const Key('listView'),
+                child: Form(
+                    key: _categoryDialogFormKey,
                     child: Column(children: [
                       Center(
                           child: Text(

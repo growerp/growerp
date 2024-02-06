@@ -38,7 +38,7 @@ class Category extends Equatable with _$Category {
   }) = _Category;
 
   factory Category.fromJson(Map<String, dynamic> json) =>
-      _$CategoryFromJson(json);
+      _$CategoryFromJson(json['category'] ?? json);
 
   @override
   List<Object?> get props => [categoryId];

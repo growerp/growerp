@@ -1268,13 +1268,13 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="growerp.100.FinDocServices100.convert#StatusId" out-map="context"
                 in-map="[sales: finDoc?.sales, docType: finDoc.docType, statusId: finDoc.statusId]" />
             <set field="finDoc.statusId" from="convertedStatusId" />
-            <if condition="!finDoc.pseudoId">
+            <if condition="!finDoc.pseudoId || finDoc.pseudoId == ''">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[companyPartyId: companyPartyId, seqName: finDoc.docType]"
                     out-map="context" />
                 <set field="finDoc.pseudoId" from="seqNum" />
-                <log message="====create findo pseudo: ${finDoc.pseudoId}" />
             </if>
+            <log message="====create findo pseudo: ${finDoc.pseudoId}" />
             <!-- order -->
             <if condition="finDoc.docType == 'order'">
                 <then>
@@ -2415,7 +2415,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <set field="paymentOld.toPartyId" from="payment.otherCompany.partyId" />
                 </else>
             </if>
-            <set field="paymentOld.amount" value="${payment.grandTotal}" />
+            <set field="amount" from="payment.grandTotal" type="BigDecimal" />
+            <set field="paymentOld.amount" from="amount" />
             <!-- first item stores the itemType needed for posting -->
             <if condition="payment.items &amp;&amp; payment.items[0].itemType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"

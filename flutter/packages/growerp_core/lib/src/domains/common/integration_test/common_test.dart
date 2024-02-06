@@ -70,7 +70,7 @@ class CommonTest {
     if (test.company != null) return; // company already created
     await CommonTest.logout(tester);
     // check if email address already exist
-    final restClient = RestClient(await buildDioClient(overrideUrl: "http://moqui"));
+    final restClient = RestClient(await buildDioClient(overrideUrl: null));
     var exist = true;
     var times = 0;
     while (exist) {
@@ -329,7 +329,7 @@ class CommonTest {
   /// [lowLevel]
   static Future<void> drag(WidgetTester tester,
       {int seconds = 1, String listViewName = 'listView'}) async {
-    await tester.drag(find.byKey(Key(listViewName), skipOffstage: false).first,
+    await tester.drag(find.byKey(Key(listViewName), skipOffstage: false).last,
         const Offset(0, -400));
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
