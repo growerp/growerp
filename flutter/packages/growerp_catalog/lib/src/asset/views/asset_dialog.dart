@@ -31,7 +31,7 @@ class AssetDialog extends StatelessWidget {
     return BlocProvider(
       create: (BuildContext context) =>
           ProductBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const ProductFetch()),
+            ..add(const ProductFetch(isForDropDown: true)),
       child: AssetDialogFull(asset),
     );
   }
@@ -197,7 +197,8 @@ class AssetDialogState extends State<AssetDialogFull> {
                         _selectedProduct = newValue;
                       },
                       asyncItems: (String filter) {
-                        _productBloc.add(ProductFetch(searchString: filter));
+                        _productBloc.add(ProductFetch(
+                            searchString: filter, isForDropDown: true));
                         return Future.value(state.products);
                       },
                       validator: (value) =>

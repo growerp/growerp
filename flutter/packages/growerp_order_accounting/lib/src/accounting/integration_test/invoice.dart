@@ -93,7 +93,7 @@ class InvoiceTest {
       await CommonTest.enterDropDownSearch(
           tester,
           invoice.sales ? 'customer' : 'supplier',
-          invoice.otherUser!.lastName!);
+          invoice.otherUser!.company!.name!);
       await CommonTest.enterText(tester, 'description', invoice.description!);
       // delete existing invoice items
       SaveTest test = await PersistFunctions.getTest();

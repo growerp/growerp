@@ -203,7 +203,7 @@ class MyFinDocState extends State<FinDocPage> {
             key: const Key('listView1'),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: popUp(
-              title: "${finDoc.docType} #${finDoc.id() ?? ' new'}",
+              title: "${finDoc.docType} #${finDoc.pseudoId ?? ' new'}",
               height: 650,
               width: isPhone ? 400 : 800,
               context: context,
@@ -259,7 +259,7 @@ class MyFinDocState extends State<FinDocPage> {
                   ),
                   key: Key(
                       finDocUpdated.sales == true ? 'customer' : 'supplier'),
-                  itemAsString: (Company? u) => "${u!.name}}",
+                  itemAsString: (Company? u) => "${u!.name}",
                   asyncItems: (String filter) {
                     _companyBloc.add(CompanyFetch(searchString: filter));
                     return Future.value(state.companies);

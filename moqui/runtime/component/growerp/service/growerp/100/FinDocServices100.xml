@@ -531,12 +531,12 @@ along with this software (see the LICENSE.md file). If not, see
                     <if condition="!items">
                         <return error="false"
                             message="Get finDoc Invoice: $finDocId or $pseudoId not found!" />
-                        <if condition="sales == null">
+                        <!-- if condition="sales == null">
                             <set field="sales" value="true" type="Boolean" />
                             <if condition="items[0].customerPartyId == companyPartyId">
                                 <set field="sales" value="false" type="Boolean" />
                             </if>
-                        </if>
+                        </if-->
                     </if>
                     <else><!-- invoice list -->
                         <if
@@ -544,6 +544,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="statusList" from="openStatusList" />
                             <set field="fromDate" from="weekOldDate" />
                         </if>
+                        <log
+                            message="======search: $search customerpartyId: $customerpartyId vendor: $vendorPartyId" />
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                             <econdition field-name="fromPartyId" from="fromPartyId"
@@ -564,6 +566,8 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="invoiceDate" operator="less-equals"
                                 from="tsDate" ignore-if-empty="true" />
                             <econditions combine="or">
+                                <econdition field-name="pseudoId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="invoiceId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="orderId" ignore-case="true"
@@ -574,6 +578,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </entity-find>
                     </else>
                 </if>
+                <log message="====invoices found: ${items?.size()}" />
                 <set field="lastItem" from="null" />
                 <iterate entry="item" list="items">
                     <if condition="lastItem &amp;&amp; lastItem.invoiceId != item.invoiceId">
@@ -987,12 +992,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find list="items" limit="1"
                             entity-name="growerp.account.AcctgTransAndCompany">
                             <econdition field-name="companyPartyId" from="companyPartyId" />
-                            <econditions combine="or">
-                                <econdition field-name="transactionId" from="finDocId"
-                                    ignore-if-empty="true" />
-                                <econdition field-name="pseudoId" from="pseudoId"
-                                    ignore-if-empty="true" />
-                            </econditions>
+                            <econdition field-name="transactionId" from="finDocId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="pseudoId" from="pseudoId"
+                                ignore-if-empty="true" />
                         </entity-find>
                     </then>
                     <else>
@@ -1296,6 +1299,10 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                        out-map="context" />
+                    <log message="====geberated trans id: $seqNum " />
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   acctgTransTypeEnumId: 'AttInternal',
                                     organizationPartyId: companyPartyId,
@@ -1305,6 +1312,7 @@ along with this software (see the LICENSE.md file). If not, see
                                     isPosted: 'N',
                                     pseudoId: finDoc.pseudoId,
                                     theirAcctgTransId: finDoc.reference,
+                                    pseudoId: seqNum,
                                 ]"
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
@@ -1446,8 +1454,8 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call name="mantle.account.InvoiceServices.create#Invoice"
                 in-map="[productStoreId: productStoreId,
                         pseudoId: invoice.pseudoId,
-                        fromPartyId: invoice.sales ? toPartyId : fromPartyId,
-                        toPartyId: invoice.sales ? fromPartyId : toPartyId,
+                        fromPartyId: fromPartyId,
+                        toPartyId: toPartyId,
                         description: invoice.description]"
                 out-map="context" />
             <!-- add vendor/customer contact person as an extra party at invoicePartParty -->
@@ -2256,10 +2264,14 @@ along with this software (see the LICENSE.md file). If not, see
                         name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice" />
                     <!-- create payment -->
                     <set field="effectiveDate" from="ec.user.nowTimestamp" />
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[companyPartyId: companyPartyId, seqName: 'payment']"
+                        out-map="context" />
                     <service-call
                         name="mantle.account.PaymentServices.create#InvoicePayment"
                         in-map="[invoiceId: invoiceId, effectiveDate:effectiveDate,
-                                statusId: 'PmntPromised', orderId: order.orderId]"
+                                statusId: 'PmntPromised', orderId: order.orderId,
+                                pseudoId: seqNum]"
                         out-map="context" />
                     <!-- shipment -->
                     <entity-find entity-name="mantle.facility.Facility" list="facilities" limit="1">
@@ -2373,10 +2385,13 @@ along with this software (see the LICENSE.md file). If not, see
                     condition="invoice.statusId == 'InvoiceApproved' ||
                             invoice.statusId == 'InvoiceSent'">
                     <!-- create payment for approved/sent invoices -->
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[companyPartyId: companyPartyId, seqName: 'payment']"
+                        out-map="context" />
                     <service-call
                         name="mantle.account.PaymentServices.create#InvoicePayment"
                         in-map="[invoiceId: invoice.invoiceId, statusId: 'PmntProposed',
-                        effectiveDate: ec.user.nowTimestamp]"
+                        effectiveDate: ec.user.nowTimestamp, pseudoId: seqNum]"
                         out-map="context" />
                 </if>
                 <else><!-- only update items when no status changes -->
@@ -2523,8 +2538,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </if>
                         </if>
                     </if>
-                    <!--status
-                    go to next one -->
+                    <!-- status  go to next one -->
                     <service-call name="update#mantle.account.payment.Payment"
                         in-map="[paymentId: payment.paymentId,
                         statusId: payment.statusId]" />
@@ -2548,6 +2562,18 @@ along with this software (see the LICENSE.md file). If not, see
                     in-map="[acctgTransId: entries[0].acctgTransId]" />
                 <service-call name="update#mantle.account.payment.Payment"
                     in-map="[paymentId: paymentOld.paymentId, statusId: 'PmntConfirmed']" />
+            </if>
+            <!-- check if related transaction has pseudoId -->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
+                for-update="true">
+                <econdition field-name="paymentId" from="paymentOld.paymentId" />
+            </entity-find>
+            <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                    out-map="context" />
+                <set field="transactions[0].pseudoId" from="seqNum" />
+                <entity-update value-field="transactions[0]" />
             </if>
         </actions>
     </service>

@@ -34,7 +34,7 @@ class TransactionTest {
       await CommonTest.doSearch(tester, searchString: finDoc.chainId()!);
       await tester.pumpAndSettle();
       expect(CommonTest.getTextField('status0'), 'Y',
-          reason: 'transaction status field check');
+          reason: 'transaction status field check posted');
     }
   }
 
@@ -42,8 +42,8 @@ class TransactionTest {
       WidgetTester tester, List<FinDoc> transactions,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    // test = test.copyWith(transactions: []); //======= remove
-    // await PersistFunctions.persistTest(test); //=====remove
+    // test = test.copyWith(transactions: []); //======= remove for full test
+    // await PersistFunctions.persistTest(test); //=====remove for full test
     if (test.transactions.isEmpty) {
       await PersistFunctions.persistTest(test.copyWith(
           transactions: await enterTransactionData(tester, transactions)));

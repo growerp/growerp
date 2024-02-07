@@ -36,7 +36,7 @@ class ProductDialog extends StatelessWidget {
     return BlocProvider(
       create: (BuildContext context) =>
           CategoryBloc(context.read<RestClient>(), context.read<String>())
-            ..add(const CategoryFetch()),
+            ..add(const CategoryFetch(isForDropDown: true)),
       child: ProductDialogFull(product),
     );
   }

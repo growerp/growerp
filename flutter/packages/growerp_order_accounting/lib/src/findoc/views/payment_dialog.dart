@@ -91,7 +91,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
   ItemType? _selectedItemType;
-  late CompanyBloc _userBloc;
+  late CompanyBloc _companyBloc;
   late GlAccountBloc _accountBloc;
 
   late bool isPhone;
@@ -121,8 +121,8 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         : finDocUpdated.paymentInstrument!;
     _finDocBloc = context.read<FinDocBloc>();
     _finDocBloc.add(FinDocGetPaymentTypes(finDoc.sales));
-    _userBloc = context.read<CompanyBloc>();
-    _userBloc.add(const CompanyFetch(limit: 3));
+    _companyBloc = context.read<CompanyBloc>();
+    _companyBloc.add(const CompanyFetch(limit: 3));
     _accountBloc = context.read<GlAccountBloc>();
     _accountBloc.add(const GlAccountFetch(limit: 3));
   }
@@ -230,7 +230,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                       key: Key(finDocUpdated.sales ? 'customer' : 'supplier'),
                       itemAsString: (Company? u) => " ${u!.name}",
                       asyncItems: (String filter) {
-                        _userBloc.add(CompanyFetch(searchString: filter));
+                        _companyBloc.add(CompanyFetch(searchString: filter));
                         return Future.value(state.companies);
                       },
                       onChanged: (Company? newValue) {

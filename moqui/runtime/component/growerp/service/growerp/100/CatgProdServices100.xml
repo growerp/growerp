@@ -170,6 +170,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 pseudoId: product.pseudoId,
                                 productName: product.productName,
                                 ]" />
+                        <if condition="product.listPrice">
+                            <set field="productOut.listPrice"
+                                from="product.listPrice.toString()" />
+                        </if>
                         <else>
                             <!-- content -->
                             <entity-find entity-name="mantle.product.ProductContent" list="contents"

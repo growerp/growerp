@@ -142,7 +142,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         return emit(state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: '${event.finDoc.docType} ${finDocs[0].id()} added'));
+            message: '${event.finDoc.docType} ${compResult.pseudoId} added'));
       } else {
         // update
         FinDoc compResult = await restClient.updateFinDoc(
@@ -176,7 +176,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         return emit(state.copyWith(
             status: FinDocStatus.success,
             finDocs: finDocs,
-            message: "$docType ${event.finDoc.id()} updated"));
+            message: "$docType ${compResult.pseudoId!} updated"));
       }
     } on DioException catch (e) {
       emit(state.copyWith(
