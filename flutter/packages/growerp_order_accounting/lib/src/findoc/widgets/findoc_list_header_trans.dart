@@ -55,6 +55,8 @@ class _FinDocListHeaderTransState extends State<FinDocListHeaderTrans> {
         const Expanded(child: SizedBox(width: 10)),
         const Text("Payment"),
         const Expanded(child: SizedBox(width: 10)),
+        const Text("Shipment"),
+        const Expanded(child: SizedBox(width: 10)),
         const Text("Total"),
         const Expanded(child: SizedBox(width: 10)),
         const Expanded(child: Text("#")),

@@ -65,7 +65,7 @@ class ShipmentReceiveState extends State<ShipmentReceiveDialog> {
             ),
             child: popUp(
                 context: context,
-                title: 'Incoming Shipment# ${widget.finDoc.shipmentId}',
+                title: 'Incoming Shipment# ${widget.finDoc.pseudoId}',
                 width: isPhone ? 400 : 800,
                 height: isPhone
                     ? 600

@@ -447,6 +447,10 @@ along with this software (see the LICENSE.md file). If not, see
             join-from-alias="AST" join-optional="true">
             <key-map field-name="productId" />
         </member-entity>
+        <member-entity entity-alias="SHIP" entity-name="mantle.shipment.Shipment"
+            join-from-alias="AST" join-optional="true">
+            <key-map field-name="acquireShipmentId" related="shipmentId" />
+        </member-entity>
         <member-entity entity-alias="UOM" entity-name="moqui.basic.Uom"
             join-from-alias="PROD" join-optional="true">
             <key-map field-name="amountUomId" related="uomId" />
@@ -466,6 +470,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="quantityOnHand" field="quantityOnHandTotal" entity-alias="AST" />
         <alias name="availableToPromise" field="availableToPromiseTotal" entity-alias="AST" />
         <alias name="acquireShipmentId" entity-alias="AST" />
+        <alias name="pseudoShipmentId" field="pseudoId" entity-alias="SHIP" />
 
         <alias name="productId" entity-alias="PROD" />
         <alias name="pseudoId" entity-alias="PROD" />

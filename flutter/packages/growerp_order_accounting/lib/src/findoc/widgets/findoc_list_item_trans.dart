@@ -82,6 +82,10 @@ class FinDocListItemTrans extends StatelessWidget {
             Expanded(
                 child:
                     Text(finDoc.paymentId ?? '', textAlign: TextAlign.center)),
+          if (!isPhone)
+            Expanded(
+                child:
+                    Text(finDoc.shipmentId ?? '', textAlign: TextAlign.center)),
           if (!isPhone) const SizedBox(width: 10),
           if (!isPhone)
             Expanded(

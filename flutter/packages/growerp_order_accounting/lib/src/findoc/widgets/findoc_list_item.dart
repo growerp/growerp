@@ -61,7 +61,7 @@ class FinDocListItem extends StatelessWidget {
       ];
     } else {
       titleFields = [
-        Text(finDoc.id() ?? '', key: Key('id$index')),
+        Text(finDoc.pseudoId ?? '', key: Key('id$index')),
         const Expanded(child: SizedBox(width: 10)),
         Text(classificationId == 'AppHotel' &&
                 finDoc.items[0].rentalFromDate != null
