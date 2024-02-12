@@ -34,6 +34,7 @@ void main() {
   testWidgets('''GrowERP Invoice sales test''', (tester) async {
     await CommonTest.startTestApp(tester, router.generateRoute, menuOptions,
         OrderAccountingLocalizations.localizationsDelegates,
+        title: "Invoice Sales test",
         clear: true); // use data from previous run, ifnone same as true
     // prepare
     await CommonTest.createCompanyAndAdmin(tester, testData: {

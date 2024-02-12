@@ -609,11 +609,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("22.22"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Pre Payment - Expense', accountName: 'Account'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -621,11 +617,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.33"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Financial Account Transaction', accountName: ''))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -633,12 +625,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Invoice Payment',
-              accountName: 'Accounts Payable - Oper'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -646,12 +633,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("55.55"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Pre Payment - Expense',
-              accountName: 'Prepaid Exp'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -659,11 +641,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("66.66"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Financial Account Transaction', accountName: ''))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
   ),
   FinDoc(
     sales: false,
@@ -671,12 +649,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Invoice Payment',
-              accountName: 'Accounts Payable - Oper'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '2160'))],
   ),
   FinDoc(
     sales: false,
@@ -684,12 +657,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("88.88"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Pre Payment - Expense',
-              accountName: 'Prepaid Exp'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
   ),
   FinDoc(
     sales: false,
@@ -697,11 +665,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("9.99"),
-    items: [
-      FinDocItem(
-          itemType: ItemType(
-              itemTypeName: 'Pre Payment - Expense', accountName: 'Account'))
-    ],
+    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
   ),
 ];
 List<FinDoc> salesPayments = [

@@ -294,9 +294,9 @@ along with this software (see the LICENSE.md file). If not, see
 
             <if condition="sales == true">
                 <set field="vendorPartyId" from="companyPartyId" />
-                <else>
-                    <set field="customerPartyId" from="companyPartyId" />
-                </else>
+            </if>
+            <if condition="sales == false">
+                <set field="customerPartyId" from="companyPartyId" />
             </if>
             <set field="current" value="0" type="Integer" />
             <!-- order -->
@@ -517,24 +517,27 @@ along with this software (see the LICENSE.md file). If not, see
                             from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
                     </else>
                 </if>
+                <log message="======looking for invoice: $finDocId" />
                 <if condition="finDocId || pseudoId">
                     <entity-find
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
                         <econdition field-name="invoiceId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econdition field-name="vendorPartyId" from="vendorPartyId" />
-                        <econdition field-name="customerPartyId" from="customerPartyId" />
+                        <econdition field-name="fromPartyId" from="vendorPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
                         <order-by field-name="invoiceItemSeqId" />
                     </entity-find>
                     <if condition="!items">
                         <return error="false"
                             message="Get finDoc Invoice: $finDocId or $pseudoId not found!" />
-                        <!-- if condition="sales == null">
+                        <if condition="sales == null">
                             <set field="sales" value="true" type="Boolean" />
                             <if condition="items[0].customerPartyId == companyPartyId">
                                 <set field="sales" value="false" type="Boolean" />
                             </if>
-                        </if-->
+                        </if>
                     </if>
                     <else><!-- invoice list -->
                         <if
@@ -677,10 +680,10 @@ along with this software (see the LICENSE.md file). If not, see
                         entity-name="growerp.order.PaymentAndInfo" list="items">
                         <econdition field-name="paymentId" from="finDocId" ignore-if-empty="true" />
                         <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
-                        <econditions combine="or">
-                            <econdition field-name="vendorPartyId" from="companyPartyId" />
-                            <econdition field-name="customerPartyId" from="companyPartyId" />
-                        </econditions>
+                        <econdition field-name="fromPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" from="vendorPartyId"
+                            ignore-if-empty="true" />
                     </entity-find>
                     <!-- sales field is optional with single document-->
                     <if condition="items &amp;&amp; sales == null">
@@ -698,9 +701,9 @@ along with this software (see the LICENSE.md file). If not, see
                         </if>
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.order.PaymentAndInfo" list="items">
-                            <econdition field-name="vendorPartyId" from="vendorPartyId"
+                            <econdition field-name="fromPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
-                            <econdition field-name="customerPartyId" from="customerPartyId"
+                            <econdition field-name="toPartyId" from="vendorPartyId"
                                 ignore-if-empty="true" />
                             <econditions
                                 combine="or">
@@ -832,12 +835,10 @@ along with this software (see the LICENSE.md file). If not, see
                     <entity-find
                         entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse" list="items">
                         <econdition field-name="shipmentId" from="finDocId" />
-                        <econditions combine="or">
-                            <econdition field-name="fromPartyId" from="companyPartyId"
-                                ignore-if-empty="true" />
-                            <econdition field-name="toPartyId" from="companyPartyId"
-                                ignore-if-empty="true" />
-                        </econditions>
+                        <econdition field-name="fromPartyId" from="vendorPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="toPartyId" from="customerPartyId"
+                            ignore-if-empty="true" />
                     </entity-find>
                     <else>
                         <if condition="open == true &amp;&amp; !finDocId &amp;&amp; !search">
@@ -847,9 +848,9 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find offset="start" limit="limit"
                             entity-name="growerp.warehouse.ShipmentAndPartiesAndWarehouse"
                             list="items">
-                            <econdition field-name="toPartyId" from="customerPartyId"
-                                ignore-if-empty="true" />
                             <econdition field-name="fromPartyId" from="vendorPartyId"
+                                ignore-if-empty="true" />
+                            <econdition field-name="toPartyId" from="customerPartyId"
                                 ignore-if-empty="true" />
                             <econditions combine="or">
                                 <econdition field-name="statusId" operator="in"
@@ -2433,6 +2434,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 invoiceItems: invoice.items]" />
                     </if>
                 </else>
+            </if>
+            <!-- check if related transaction has pseudoId -->
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transactions"
+                for-update="true">
+                <econdition field-name="invoiceId" from="invoice.invoiceId" />
+            </entity-find>
+            <if condition="transactions &amp;&amp; !transactions[0].pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
+                    out-map="context" />
+                <set field="transactions[0].pseudoId" from="seqNum" />
+                <entity-update value-field="transactions[0]" />
             </if>
         </actions>
     </service>

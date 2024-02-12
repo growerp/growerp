@@ -32,7 +32,8 @@ services:
       - my-network
 
   moqui:
-    image: growerp/growerp-moqui
+    # image: growerp/growerp-moqui
+    build: ../moqui
     container_name: moqui
     restart: always
     ports:

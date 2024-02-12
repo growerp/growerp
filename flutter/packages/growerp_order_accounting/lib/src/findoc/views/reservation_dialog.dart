@@ -271,8 +271,7 @@ class ReservationDialogState extends State<ReservationForm> {
                           onChanged: (Product? newValue) async {
                             _selectedProduct = newValue;
                             _priceController.text =
-                                (newValue!.price ?? newValue.listPrice)
-                                    .toString();
+                                newValue!.listPrice.toString();
                             _productBloc.add(ProductRentalOccupancy(
                                 productId: newValue.productId));
                             await Future.delayed(
