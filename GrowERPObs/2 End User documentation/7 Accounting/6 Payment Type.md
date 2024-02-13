@@ -1,3 +1,8 @@
+The payment type make the connection  between a descriptive payment type  and a account code. 
+
+isPay is a flag to indicate a payment, so outgoing amount equals 'Y' or incoming equals 'N' .
+
+isAppl is a flag to indicate if the payment needs to be applied to and invoice, Y or N or E for either, so both.
 
 | ***Payment Type*** | ***description*** | ***glAccount name*** | ***isPay*** | ***isAppl*** |
 | ---- | ---- | ---- | ---- | ---- |

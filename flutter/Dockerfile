@@ -45,7 +45,7 @@ USER mobiledevops
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/growerp
 WORKDIR /home/mobiledevops/growerp
 RUN melos clean
-RUN melos bootstrap
+RUN melos bootstrap --verbose
 RUN  if [ ! -f "packages/growerp_models/lib/src/models/authenticate_model.freezed.dart" ]; then \
     melos build --no-select && melos l10n --no-select; \
     fi
