@@ -67,4 +67,12 @@ scripts:
       concurrency: 1
     packageFilters:
       dirExists: "integration_test"
+  test-headless:
+    description: run all app and package tests in headless mode using flutter/docker-compose-test.yml.
+    run: $MELOS_ROOT_PATH/test/set_app_settings.sh && flutter test integration_test
+    exec:
+      orderDependents: true
+      concurrency: 1
+    packageFilters:
+      dirExists: "integration_test"
 
