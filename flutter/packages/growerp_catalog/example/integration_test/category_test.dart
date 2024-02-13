@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-// ignore_for_file: depend_on_referenced_packages
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';

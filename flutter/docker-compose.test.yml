@@ -7,7 +7,7 @@ services:
     build: .
     # image: growerp/integration-test
     volumes:
-      - ./test:/opt/growerp/test
+      - ./test:/home/mobiledevops/growerp/test
     depends_on:
       emulator:
         condition: service_started

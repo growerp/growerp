@@ -31,6 +31,8 @@ RUN apt-get update && \
 RUN git config --system --add safe.directory '*'
 RUN git config --global --add safe.directory /home/mobiledevops/.flutter-sdk
 
+USER mobiledevops
+
 # activate melos
 RUN dart pub global activate melos 3.4.0
 ENV PATH="$PATH":"$HOME/.pub-cache/bin"
@@ -38,31 +40,19 @@ ENV FLUTTER_HOME "/home/mobiledevops/.flutter-sdk"
 ENV PATH $PATH:$FLUTTER_HOME/bin
 
 # get growerp repos
-USER mobiledevops
 #RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git /opt/growerp
 #RUN cp /opt/growerp/flutter /home/mobiledevops/growerp
 # copy from local below, two lines above from repository
 COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/growerp
 WORKDIR /home/mobiledevops/growerp
 RUN melos clean
-RUN melos bootstrap --verbose
+RUN melos exec flutter clean
+RUN melos exec flutter pub get
+RUN melos bootstrap
 RUN  if [ ! -f "packages/growerp_models/lib/src/models/authenticate_model.freezed.dart" ]; then \
     melos build --no-select && melos l10n --no-select; \
     fi
-FROM openjdk:11-jdk
-RUN apt-get update && apt-get install -y apt-transport-https nano inetutils-ping && apt-get clean
-COPY --from=build-env /opt/android-sdk-linux /opt/android-sdk-linux
-COPY --from=build-env /home/mobiledevops/growerp /opt/growerp
-COPY --from=build-env /home/mobiledevops/.flutter-sdk /opt/.flutter-sdk 
-COPY --from=build-env /home/mobiledevops/.flutter /opt/.flutter
-ENV PATH="$PATH":"/opt/android-sdk-linux/cmdline-tools:/opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/.flutter-sdk/bin:/opt/.flutter"
-ENV FLUTTER_HOME "/opt/.flutter-sdk"
-WORKDIR /opt/growerp
-# activate melos/flutter
-ENV PATH $PATH:$FLUTTER_HOME/bin
-RUN dart pub global activate melos 3.4.0
-ENV PATH="$PATH":"$HOME/.pub-cache/bin"
 # run test
-VOLUME /opt/growerp/test
+VOLUME /home/mobiledevops/growerp/test
 
 
