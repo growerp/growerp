@@ -18,6 +18,7 @@ Future<Dio> buildDioClient(
     if (Platform.isAndroid) {
       android = true;
     }
+    // ignore: empty_catches
   } catch (e) {}
 
   String databaseUrl = GlobalConfiguration().get('databaseUrl');
@@ -101,7 +102,7 @@ class KeyDioCacheInterceptor extends DioCacheInterceptor {
 class KeyInterceptor extends Interceptor {
   KeyInterceptor(this._box);
 
-  Box? _box;
+  final Box? _box;
 
   @override
   void onRequest(
