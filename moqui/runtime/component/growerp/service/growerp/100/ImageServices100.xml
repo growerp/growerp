@@ -211,7 +211,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)" />
             <if condition="!resourceReference || !resourceReference.getExists()">
-                <log level="info" message="Could not find resource at [${contentLocation}]" />
+                <log level="warn" message="Could not find resource at [${contentLocation}]" />
                 <else>
                     <set field="inputStream" from="resourceReference.openStream()" />
                     <set field="docBytes"
@@ -232,14 +232,13 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="imageFile" />
         </in-parameters>
         <actions>
-            <log message="===updating image ${imageFile?.size()}" />
             <script>byte[] base64Decoded = Base64.getMimeDecoder().decode(imageFile)</script>
             <if condition="base64Decoded == null || base64Decoded.size() == 0">
                 <return error="true" message="No valid base64 decoded image file found" />
             </if>
             <set field="resourceReference" from="ec.resource.getLocationReference(contentLocation)" />
             <if condition="!resourceReference || !resourceReference.getExists()">
-                <log level="info" message="Could not find resource at [${contentLocation}]" />
+                <log level="warn" message="Could not find resource at [${contentLocation}]" />
                 <else>
                     <script>
                     fileStream = new ByteArrayInputStream(base64Decoded);

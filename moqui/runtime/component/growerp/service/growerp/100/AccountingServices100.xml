@@ -585,7 +585,6 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemTypes" from="[]" />
-            <log message="=======company: $companyPartyId sales; $sales" />
             <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount"
                 list="paymentTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -597,9 +596,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </econditions>
                 <order-by field-name="accountCode,typeDescription" />
             </entity-find>
-            <log message="=====records found: ${paymentTypeList?.size()}" />
             <iterate list="paymentTypeList" entry="paymentType">
-                <log message="====${paymentType.accountCode}" />
                 <set field="itemTypeOut"
                     from="[itemTypeId: paymentType.paymentTypeEnumId,
                                                 itemTypeName: paymentType.typeDescription,

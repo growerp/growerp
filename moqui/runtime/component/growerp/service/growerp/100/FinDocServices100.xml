@@ -517,7 +517,6 @@ along with this software (see the LICENSE.md file). If not, see
                             from="['InvoiceIncoming','InvoiceReceived', 'InvoiceApproved']" />
                     </else>
                 </if>
-                <log message="======looking for invoice: $finDocId" />
                 <if condition="finDocId || pseudoId">
                     <entity-find
                         entity-name="growerp.account.InvoiceItemsAndParties" list="items">
