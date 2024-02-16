@@ -29,7 +29,7 @@ Sub commands:
   * -u -p user/password optional, will remember from last time
   * -url the base url of the backend, local host is default
   * -f optional filetype, is missing will process all filetype in the specified dir
-### Export:
+### Export: (partly developed)
   will create CSV files for growerp entities in the current 'growerp'
   directory, if not exist will create it.
   #### Parameters:

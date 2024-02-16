@@ -4,7 +4,7 @@ This directory contains all files related to the Flutter frontend applications.
 
 Applications are stored as packages in the packages directory. Most packages have an 'example' application to be able to try the package and run the integration tests in the integration_test directory.
 
-## hirarchy of packeges
+## hierarchy of packeges
 
 Packages are dependent of each other, bottom up:
     1. growerp_models
@@ -14,6 +14,8 @@ Packages are dependent of each other, bottom up:
             2. growerp_order_acounting
             3. growerp_inventory
             4. growerp_website
+            5. growerp_marketing
+            6. growerp_user_company
                 1. admin
                 2. hotel
                 3. freelance
@@ -25,8 +27,22 @@ To be able to run the tests in the background, the adb ports are at 5556/5557 so
 
 For the background processes also a Moqui, database and chat server are started. The internet gateway service is used to validate chat requests with the moqui backend.
 
-See the README.md file in the root of this project.
+To start the background test:
+```bash
+cd growerp/flutter
+docker compose -f docker-compose.test.yml up
+```
 
+See futher the README.md file in the root of this project.
+
+## integration test restart
+If you once ran the integration test and like to run again you have to delete the emulator container (docker container rm emulator) before restarting
+
+if you want to rebuild the flutter frontend and backe-end and/or chat you have to delete the containers and related images:
+```bash
+docker container -f rm container-name
+docker image rm image-name
+```
 ## For developers: build the system
 
 ```sh

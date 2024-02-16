@@ -23,9 +23,12 @@ class TimePeriod with _$TimePeriod {
   factory TimePeriod({
     @Default('') String periodId,
     @Default('') String periodName,
+    @Default('') String periodType,
     DateTime? fromDate,
     DateTime? thruDate,
-    bool? isClosed,
+    @Default(false) bool hasPreviousPeriod,
+    @Default(false) bool hasNextPeriod,
+    @Default(false) bool isClosed,
   }) = _TimePeriod;
 
   factory TimePeriod.fromJson(Map<String, dynamic> json) =>

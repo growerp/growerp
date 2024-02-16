@@ -280,7 +280,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <service name="growerp.100.AccountingServices100.get#GlAccountType" />
             </method>
         </resource>
-        <resource name="Timeperiod">
+        <resource name="TimePeriod">
             <method type="get">
                 <service name="growerp.100.AccountingServices100.get#TimePeriod" />
             </method>

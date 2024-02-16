@@ -186,6 +186,12 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="TimePeriod">
         <description>Get the accounting periods valid for this company</description>
+        <in-parameters>
+            <parameter name="createNext" type="Boolean" />
+            <parameter name="createPrevious" type="Boolean" />
+            <parameter name="deleteCurrent" type="Boolean" />
+            <parameter name="currentPeriodId" />
+        </in-parameters>
         <out-parameters>
             <parameter name="timePeriods" type="List">
                 <parameter name="timePeriod" type="Map">
@@ -200,7 +206,39 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+            <if condition="createNext || createPrevious">
+                <if condition="!currentPeriodId">
+                    <return error="true"
+                        message="Current periodId required when create previous or next provided" />
+                    <else>
+                        <!-- check if period is owned by the current company-->
+                        <entity-find-one entity-name="mantle.party.time.TimePeriod"
+                            value-field="timePeriod">
+                            <field-map field-name="partyId" from="companyPartyId" />
+                            <field-map field-name="timePeriodId" from="currentPeriodId" />
+                        </entity-find-one>
+                        <if condition="!timePeriod">
+                            <return error="true"
+                                message="TimePeriodId: $currentPeriodId not found for company party id: $companyPartyId" />
+                        </if>
+                        <if condition="createPrevious">
+                            <service-call name="mantle.party.TimeServices.create#TimePeriod"
+                                in-map="[nextPeriodId: timePeriod.nextPeriodId,
+                                    fromDate: timePeriod.fromDate]" />
+                        </if>
+                        <if condition="createNext">
+                            <service-call name="mantle.party.TimeServices.create#TimePeriod"
+                                in-map="[previousPeriodId: timePeriod.previousPeriodId,
+                                    thruDate: timePeriod.thruDate]" />
+                        </if>
+                        <if condition="deleteCurrent">
+                            <service-call name="mantle.party.TimeServices.delete#TimePeriod"
+                                in-map="[timePeriodId: currentPeriodId]" />
+                        </if>
+                    </else>
+                </if>
+            </if>
+            <entity-find entity-name="mantle.party.time.TimePeriodAndType" list="periods">
                 <econdition field-name="partyId" from="companyPartyId" />
                 <econdition field-name="timePeriodTypeId" value="FiscalYear" />
                 <order-by field-name="periodName" />
@@ -210,6 +248,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                     timePeriods.add([periodId: p.timePeriodId,
                                     periodName: p.periodName,
+                                    periodType: p.description,
                                     fromDate: p.fromDate.toString(),
                                     thruDate: p.thruDate.toString(),
                                     isClosed: p.isClosed == 'Y' ? true : false,

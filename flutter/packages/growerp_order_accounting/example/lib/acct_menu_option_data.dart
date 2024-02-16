@@ -143,20 +143,20 @@ List<MenuOption> acctMenuOptions = [
       writeGroups: [
         UserGroup.admin
       ]),
-/*  MenuOption(
+  MenuOption(
       image: "packages/growerp_core/images/setupGrey.png",
       selectedImage: "packages/growerp_core/images/setup.png",
       title: "SetUp",
-      route: '/',
+      route: '/setup',
       tabItems: [
         TabItem(
-          form: const BalanceSheetForm(),
-          label: "Dummy",
+          form: const TimePeriodListForm(),
+          label: "Timeperiods",
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const BalanceSheetForm(),
-          label: "Dummy",
+          form: const TimePeriodListForm(),
+          label: "Timeperiods",
           icon: const Icon(Icons.list),
         ),
       ],
@@ -166,7 +166,6 @@ List<MenuOption> acctMenuOptions = [
       writeGroups: [
         UserGroup.admin
       ]),
-*/
   MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",

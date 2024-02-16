@@ -443,7 +443,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </else-if>
                         <else>
                             <log level="warn"
-                                message="finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : need also name to add" />
+                                message="Import finDocId ${finDoc.pseudoId} company pseudoId: ${finDoc.otherCompany.pseudoId} not found under owner: $ownerPartyId : need also name to add" />
                         </else>
                     </if>
                 </if>
@@ -464,7 +464,7 @@ along with this software (see the LICENSE.md file). If not, see
                         </entity-find>
                         <if condition="!transactions">
                             <log level="warn"
-                                message="could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
+                                message="Import : could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
                             <else>
                                 <if condition="transactions[0].invoiceId">
                                     <log level="warn"
@@ -501,7 +501,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- log message="${index++}" /-->
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
-                        in-map="[pseudoId: lastItem.pseudoId,docType: lastItem.docType, classificationId: classificationId]" />
+                        in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType, classificationId: classificationId]" />
                     <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
                     <if condition="!finDocs.isEmpty()">
                         <set field="finDocs[0].items" from="itemsOut" />
@@ -528,9 +528,9 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc"
                         in-map="[pseudoId: item.pseudoId, docType: item.docType]"
                         out-map="context" />
-                    <if condition="!finDocs">
+                    <if condition="finDocs.isEmpty()">
                         <log level="error"
-                            message="${item.docType} pseudoId: ${item.pseudoId} not found" />
+                            message="Import ${item.docType} pseudoId: ${item.pseudoId} not found" />
                         <set field="lastItem" from="null" />
                         <continue />
                         <else>

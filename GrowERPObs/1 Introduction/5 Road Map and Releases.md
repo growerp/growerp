@@ -30,6 +30,10 @@ Let us know if you have suggestions at support@growerp.com
 
 # Releases
 
+## Conversion framework && Test-ability release February 1024(v1.4.0)
+1. Running all integration tests in a single docker compose file with back-end and database
+2. Created a data conversion framework to bring new users quickly into the system
+3. Documents(invoice/payment/order/transaction) now have sequential or customized numbering.
 ## Small fix release December 15, 2023(v1.3.0)
 1. Fixed the general growerp install command
 2. fixed reset password.

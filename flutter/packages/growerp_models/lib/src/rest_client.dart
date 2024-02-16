@@ -365,9 +365,14 @@ abstract class RestClient {
     @Query('trialBalance') bool? trialBalance,
   });
 
-  @GET("rest/s1/growerp/100/Timeperiod")
+  @GET("rest/s1/growerp/100/TimePeriod")
   @Extra({'requireApiKey': true})
-  Future<TimePeriods> getTimePeriods();
+  Future<TimePeriods> getTimePeriod({
+    @Query('createNext') bool? createNext,
+    @Query('createPrevious') bool? createPrevious,
+    @Query('deleteCurrent') bool? deleteCurrent,
+    @Query('currentPeriodId') String? currentPeriodId,
+  });
 
   @GET("rest/s1/growerp/100/LedgerJournal")
   @Extra({'requireApiKey': true})

@@ -75,8 +75,11 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     Emitter<LedgerState> emit,
   ) async {
     try {
-      TimePeriods result = await restClient.getTimePeriods();
-      return emit(state.copyWith(timePeriods: result.timePeriods));
+      TimePeriods result = await restClient.getTimePeriod();
+      return emit(state.copyWith(
+        timePeriods: result.timePeriods,
+        status: LedgerStatus.success,
+      ));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: LedgerStatus.failure, message: getDioError(e)));

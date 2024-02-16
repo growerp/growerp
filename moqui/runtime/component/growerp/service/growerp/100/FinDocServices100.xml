@@ -989,6 +989,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="pseudoId" from="pseudoId"
                                 ignore-if-empty="true" />
                         </entity-find>
+                        <if condition="!items">
+                            <log level="warn"
+                                message="Get Transaction $finDocid $pseudoId not found" />
+                        </if>
                     </then>
                     <else>
                         <entity-find offset="start" limit="limit" list="items"
@@ -1290,9 +1294,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </else-if>
                 <!-- transaction -->
                 <else-if condition="finDoc.docType == 'transaction'">
-                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                        in-map="[companyPartyId: companyPartyId, seqName: 'transaction']"
-                        out-map="context" />
                     <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
                         in-map="[   acctgTransTypeEnumId: 'AttInternal',
                                     organizationPartyId: companyPartyId,
@@ -1302,7 +1303,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     isPosted: 'N',
                                     pseudoId: finDoc.pseudoId,
                                     theirAcctgTransId: finDoc.reference,
-                                    pseudoId: seqNum,
                                 ]"
                         out-map="context" />
                     <set field="finDocId" from="acctgTransId" />
@@ -1883,7 +1883,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <field-map field-name="organizationPartyId" from="companyPartyId" />
                     </entity-find-one>
                     <if condition="!transaction">
-                        <return error="true" message="Transaction ${finDoc.transactionId} not found" />
+                        <return error="true"
+                            message="Update Transaction ${finDoc.transactionId} not found" />
                     </if>
                     <if condition="transaction.isPosted == true">
                         <return error="true"

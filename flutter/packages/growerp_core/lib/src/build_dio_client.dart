@@ -40,6 +40,10 @@ Future<Dio> buildDioClient(
     ..httpClientAdapter;
 
   //dio.options.headers['Content-Type'] = 'application/json; charset=UTF-8';
+  // suppress Backend warning in debug mode.
+  //if (!kReleaseMode) {
+  //  dio.options.headers['X-Real-IP'] = dio.options.baseUrl;
+  //}
   dio.options.responseType = ResponseType.plain;
 
   var box = await Hive.openBox('growerp');
