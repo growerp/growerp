@@ -47,11 +47,11 @@ COPY --chown=mobiledevops:mobiledevops . /home/mobiledevops/growerp
 WORKDIR /home/mobiledevops/growerp
 RUN melos clean
 RUN melos exec flutter clean
-RUN melos exec flutter pub get
-RUN melos bootstrap
-RUN  if [ ! -f "packages/growerp_models/lib/src/models/authenticate_model.freezed.dart" ]; then \
-    melos build --no-select && melos l10n --no-select; \
-    fi
+# RUN melos exec flutter pub get
+RUN melos bootstrap --no-example
+#RUN  if [ ! -f "packages/growerp_models/lib/src/models/authenticate_model.freezed.dart" ]; then \
+RUN melos build --no-select && melos l10n --no-select; 
+#    fi
 # run test
 VOLUME /home/mobiledevops/growerp/test
 

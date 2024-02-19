@@ -21,19 +21,20 @@ Let us know if you have suggestions at support@growerp.com
 ## Technical internal requests
 * Introduction of a new router: [go_router](https://pub.dev/packages/go_router)
 * [Reusable blocs](https://itnext.io/flutter-blocs-at-scale-2-keeping-blocs-lean-1b659536e3ec)
+* [Dart macros](https://news.ycombinator.com/item?id=39174612) to replace `freezed` and `json_serializable`
 * Separate the order/accounting package
 * Move flutter chat and tasking into their own package.
 * Deep linking into the Android/IOS apps so they can also be used with your own backend.
 * Keep the system updated with the latest Flutter/dart releases, [Flutter roadmap is here](https://github.com/flutter/flutter/wiki/Roadmap)
-* make lists scrollable in two dimensions: https://pub.dev/packages/two_dimensional_scrollables
 * [Wasm, Web Assembly is upcoming](https://docs.flutter.dev/development/platform-integration/web/wasm)
 
 # Releases
 
 ## Conversion framework && Test-ability release February 1024(v1.4.0)
 1. Running all integration tests in a single docker compose file with back-end and database
-2. Created a data conversion framework to bring new users quickly into the system
+2. Created a data conversion framework: a 2 step process to import existing data.
 3. Documents(invoice/payment/order/transaction) now have sequential or customized numbering.
+4. Started a Accounting setup, first option 'Time periods'
 ## Small fix release December 15, 2023(v1.3.0)
 1. Fixed the general growerp install command
 2. fixed reset password.
