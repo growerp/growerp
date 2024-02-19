@@ -15,40 +15,43 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
-part 'item_type_model.freezed.dart';
-part 'item_type_model.g.dart';
+part 'payment_type_model.freezed.dart';
+part 'payment_type_model.g.dart';
 
 /// Item type used for order/invoice and payments
 /// same class used for paymentTypes
 @freezed
-class ItemType with _$ItemType {
-  ItemType._();
-  factory ItemType({
-    @Default('') String itemTypeId,
-    @Default('') String itemTypeName,
+class PaymentType with _$PaymentType {
+  PaymentType._();
+  factory PaymentType({
+    @Default('') String paymentTypeId,
+    @Default('') String paymentTypeName,
     @Default('') String accountCode,
     @Default('') String accountName,
-    String? direction, //item type I:incoming,O:outgoing,E:either
-  }) = _ItemType;
+    String? isPayable, //payment type payable=Y/receivable=N
+    String? isApplied, //payment type Y:applied, N: unapplied, E: either
+  }) = _PaymentType;
 
-  factory ItemType.fromJson(Map<String, dynamic> json) =>
-      _$ItemTypeFromJson(json);
+  factory PaymentType.fromJson(Map<String, dynamic> json) =>
+      _$PaymentTypeFromJson(json);
 }
 
-String itemTypeCsvFormat = "itemTypeId, accountCode, direction(I/O/E), \r\n";
-int itemTypeCsvLength = itemTypeCsvFormat.split(',').length;
+String paymentTypeCsvFormat = "paymentTypeId, accountCode, direction(I/O/E), "
+    "isPayable(Y/N/E), isApplied(Y/N/E) \r\n";
+int paymentTypeCsvLength = paymentTypeCsvFormat.split(',').length;
 
 // import
-List<ItemType> CsvToItemTypes(String csvFile) {
-  List<ItemType> ItemTypes = [];
+List<PaymentType> CsvToPaymentTypes(String csvFile) {
+  List<PaymentType> PaymentTypes = [];
   final result = fast_csv.parse(csvFile);
   for (final row in result) {
     if (row == result.first) continue;
-    ItemTypes.add(ItemType(
-      itemTypeId: row[0],
+    PaymentTypes.add(PaymentType(
+      paymentTypeId: row[0],
       accountCode: row[1],
-      direction: row[2],
+      isPayable: row[3],
+      isApplied: row[4],
     ));
   }
-  return ItemTypes;
+  return PaymentTypes;
 }

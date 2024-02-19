@@ -151,12 +151,17 @@ List<MenuOption> acctMenuOptions = [
       tabItems: [
         TabItem(
           form: const TimePeriodListForm(),
-          label: "Timeperiods",
+          label: "Time Periods",
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const TimePeriodListForm(),
-          label: "Timeperiods",
+          form: const ItemTypeListForm(),
+          label: "Item Types",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const PaymentTypeListForm(true),
+          label: "Paymt Types",
           icon: const Icon(Icons.list),
         ),
       ],

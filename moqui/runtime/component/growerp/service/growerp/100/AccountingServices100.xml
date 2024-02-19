@@ -611,19 +611,21 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="sales" type="Boolean" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="itemTypes" type="List">
-                <parameter name="itemType" type="Map">
-                    <parameter name="itemTypeId" />
-                    <parameter name="itemTypeName" />
+            <parameter name="paymentTypes" type="List">
+                <parameter name="paymentType" type="Map">
+                    <parameter name="paymentTypeId" />
+                    <parameter name="paymentTypeName" />
                     <parameter name="accountCode" />
                     <parameter name="accountName" />
+                    <parameter name="isPayable" />
+                    <parameter name="isApplied" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="itemTypes" from="[]" />
+            <set field="paymentTypes" from="[]" />
             <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount"
                 list="paymentTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -637,11 +639,13 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <iterate list="paymentTypeList" entry="paymentType">
                 <set field="itemTypeOut"
-                    from="[itemTypeId: paymentType.paymentTypeEnumId,
-                                                itemTypeName: paymentType.typeDescription,
+                    from="[paymentTypeId: paymentType.paymentTypeEnumId,
+                                                paymentTypeName: paymentType.typeDescription,
                                                 accountCode: paymentType.accountCode,
-                                                accountName: paymentType.accountName]" />
-                <script>itemTypes.add(itemTypeOut)</script>
+                                                accountName: paymentType.accountName,
+                                                isApplied: paymentType.isApplied,
+                                                isPayable: paymentType.isPayable ]" />
+                <script>paymentTypes.add(itemTypeOut)</script>
             </iterate>
         </actions>
     </service>

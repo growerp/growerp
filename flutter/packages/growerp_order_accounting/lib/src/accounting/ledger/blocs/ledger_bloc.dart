@@ -54,7 +54,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       emit(state.copyWith(status: LedgerStatus.loading));
 
       if (state.timePeriods.isEmpty) {
-        add(LedgerTimePeriods());
+        add(const LedgerTimePeriods());
       }
 
       final compResult =

@@ -112,8 +112,12 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       if (state.status == LedgerStatus.failure) {
         return const FatalErrorForm(message: 'Could not load Ledger tree!');
       }
+      if (state.status == LedgerStatus.loading) {
+        return const CircularProgressIndicator();
+      }
       if (state.status == LedgerStatus.success) {
-        _nodes = convert(state.ledgerReport!.glAccounts);
+        _nodes = convert(
+            state.ledgerReport != null ? state.ledgerReport!.glAccounts : []);
       }
       return ListView(
         children: <Widget>[

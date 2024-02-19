@@ -132,6 +132,17 @@ class ItemTypes with _$ItemTypes {
 }
 
 @freezed
+class PaymentTypes with _$PaymentTypes {
+  factory PaymentTypes({
+    @Default(const []) List<PaymentType> paymentTypes,
+  }) = _PaymentTypes;
+  PaymentTypes._();
+
+  factory PaymentTypes.fromJson(Map<String, dynamic> json) =>
+      _$PaymentTypesFromJson(json);
+}
+
+@freezed
 class Locations with _$Locations {
   factory Locations({
     @Default(const []) List<Location> locations,

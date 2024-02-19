@@ -312,7 +312,7 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/PaymentTypes")
   @Extra({'requireApiKey': true})
-  Future<ItemTypes> getPaymentTypes({
+  Future<PaymentTypes> getPaymentTypes({
     @Query('sales') bool? sales,
   });
 
