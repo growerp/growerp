@@ -1,3 +1,7 @@
+## 1.2.4
+* upgraded models package 1.2.3
+* added data conversion framework
+
 ## 1.2.3
 * upgraded models package 1.2.3
 * moved dio build client here.

@@ -17,7 +17,7 @@ dependencies:
   printing: ^5.11.1
   pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
-  growerp_core: ^1.2.3
+  growerp_core: ^1.2.4
   growerp_marketing: ^1.2.1
   growerp_website: ^1.2.1
   growerp_inventory: ^1.2.1

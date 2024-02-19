@@ -40,7 +40,7 @@ dependencies:
   decimal: ^2.1.0
   fast_csv: ^0.2.6
   dropdown_search: ^5.0.6
-  growerp_core: ^1.2.2
+  growerp_core: ^1.2.4
   growerp_models: ^1.2.1
 dev_dependencies: 
   flutter_lints: ^3.0.1

@@ -1,3 +1,6 @@
+## 1.2.3
+* added more models
+
 ## 1.2.2
 * added fields for data conversion
 * moved dioclient to either growerp or core package

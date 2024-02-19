@@ -49,7 +49,7 @@ dependencies:
   archive: ^3.3.0
   flutter_test: 
     sdk: flutter
-  growerp_core: ^1.2.2
+  growerp_core: ^1.2.4
   growerp_models: ^1.2.1
 dev_dependencies: 
   flutter_driver: 
