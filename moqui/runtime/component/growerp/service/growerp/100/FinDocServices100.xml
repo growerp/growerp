@@ -250,6 +250,10 @@ along with this software (see the LICENSE.md file). If not, see
                                 <parameter name="itemTypeId" />
                                 <parameter name="itemTypeName" />
                             </parameter>
+                            <parameter name="paymentType" type="Map">
+                                <parameter name="paymentTypeId" />
+                                <parameter name="paymentTypeName" />
+                            </parameter>
                             <parameter name="productId" />
                             <parameter name="description" />
                             <parameter name="quantity" />
@@ -802,9 +806,9 @@ along with this software (see the LICENSE.md file). If not, see
                         ]" />
                     <set field="paymentType"
                         from="[
-                        itemTypeId: item.paymentTypeId,
-                        itemTypeName: item.paymentTypeDescription,                    
-                    ]" />
+                            paymentTypeId: item.paymentTypeId,
+                            paymentTypeName: item.paymentTypeDescription,                    
+                        ]" />
                     <set field="finDocOut"
                         from="[
                         orderId: item.orderId,
@@ -821,7 +825,7 @@ along with this software (see the LICENSE.md file). If not, see
                         otherUser: userOut,
                         otherCompany: company,
                         grandTotal: item.amount ? item.amount.toString() : 0,
-                        items: [[itemType: paymentType, glAccount: glAccount]],
+                        items: [[paymentType: paymentType, glAccount: glAccount]],
                         ]" />
                     <script>finDocs.add(finDocOut)</script>
                 </iterate>
@@ -1152,6 +1156,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="itemTypeId" />
                         <parameter name="itemTypeName" />
                     </parameter>
+                    <parameter name="paymentType" type="Map">
+                        <parameter name="paymentTypeId" />
+                        <parameter name="paymentTypeName" />
+                    </parameter>
                     <parameter name="productId" />
                     <parameter name="pseudoProductId" />
                     <parameter name="description" />
@@ -1232,6 +1240,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="itemType" type="Map">
                             <parameter name="itemTypeId" />
                             <parameter name="itemTypeName" />
+                        </parameter>
+                        <parameter name="paymentType" type="Map">
+                            <parameter name="paymentTypeId" />
+                            <parameter name="paymentTypeName" />
                         </parameter>
                         <parameter name="productId" />
                         <parameter name="description" />
@@ -1526,13 +1538,13 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                 </else>
             </if>
-            <!-- itemtype -->
-            <if condition="payment.items &amp;&amp; payment.items[0].itemType">
+            <!-- paymenttype -->
+            <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
                     list="glAccounts">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="paymentTypeEnumId"
-                        from="payment.items[0].itemType.itemTypeId" />
+                        from="payment.items[0].paymentType.paymentTypeId" />
                     <econditions combine="or">
                         <econdition field-name="isPayable" from="payment.sales == true? 'N' : 'Y'" />
                         <econdition field-name="isPayable" value="E" />
@@ -1540,14 +1552,14 @@ along with this software (see the LICENSE.md file). If not, see
                     <econdition field-name="glAccountId" operator="is-not-null" />
                 </entity-find>
                 <if condition="glAccounts">
-                    <set field="itemTypeGlAccountId" from="glAccounts[0].glAccountId" />
+                    <set field="paymentTypeGlAccountId" from="glAccounts[0].glAccountId" />
                 </if>
                 <!-- if no glaccount found cannot be posted -->
                 <if
-                    condition="!itemTypeGlAccountId 
+                    condition="!paymentTypeGlAccountId 
                         &amp;&amp; !payment.items[0].glAccount?.glAccountId">
                     <return error="true"
-                        message="No Gl Account ID found for payment type: ${payment.items[0].itemType?.itemTypeName}[${payment.items[0].itemType?.itemTypeId}]" />
+                        message="No Gl Account ID found for payment type: ${payment.items[0].paymentType?.paymentTypeName}[${payment.items[0].paymentType?.paymentTypeId}]" />
                 </if>
             </if>
             <!-- create payment -->
@@ -1562,7 +1574,7 @@ along with this software (see the LICENSE.md file). If not, see
                         paymentMethodId: paymentMethodId,
                         paymentGatewayConfigId: paymentGatewayConfigId,
                         toPartyId: toPartyId,
-                        itemTypeGlAccountId: itemTypeGlAccountId,
+                        itemTypeGlAccountId: paymentTypeGlAccountId,
                         overrideGlAccountId: payment.items? payment.items[0].glAccount?.glAccountId : null,
                         fromPartyId: fromPartyId]"
                 out-map="context" />
@@ -1683,6 +1695,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="itemTypeId" />
                             <parameter name="itemTypeName" />
                         </parameter>
+                        <parameter name="paymentType" type="Map">
+                            <parameter name="paymentTypeId" />
+                            <parameter name="paymentTypeName" />
+                        </parameter>
                         <parameter name="productId" />
                         <parameter name="description" />
                         <parameter name="quantity" />
@@ -1741,6 +1757,10 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="itemType" type="Map">
                             <parameter name="itemTypeId" />
                             <parameter name="itemTypeName" />
+                        </parameter>
+                        <parameter name="paymentType" type="Map">
+                            <parameter name="paymentTypeId" />
+                            <parameter name="paymentTypeName" />
                         </parameter>
                         <parameter name="productId" />
                         <parameter name="description" />

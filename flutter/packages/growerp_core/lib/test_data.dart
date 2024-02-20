@@ -609,7 +609,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("22.22"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -617,7 +617,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.33"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -625,7 +625,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("44.44"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -633,7 +633,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("55.55"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21200'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21200'))],
   ),
   FinDoc(
     sales: false,
@@ -641,7 +641,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("66.66"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
   ),
   FinDoc(
     sales: false,
@@ -649,7 +649,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("77.77"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '2160'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '2160'))],
   ),
   FinDoc(
     sales: false,
@@ -657,7 +657,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("88.88"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
   ),
   FinDoc(
     sales: false,
@@ -665,7 +665,7 @@ List<FinDoc> purchasePayments = [
     otherUser: suppliers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("9.99"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '21600'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '21600'))],
   ),
 ];
 List<FinDoc> salesPayments = [
@@ -675,7 +675,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.creditcard,
     grandTotal: Decimal.parse("33.22"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '12600'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '12600'))],
   ),
   FinDoc(
     sales: true,
@@ -683,7 +683,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.cash,
     grandTotal: Decimal.parse("44.11"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '12100'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '12100'))],
   ),
   FinDoc(
     sales: true,
@@ -691,7 +691,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[0],
     paymentInstrument: PaymentInstrument.check,
     grandTotal: Decimal.parse("55.11"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '12100'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '12100'))],
   ),
   FinDoc(
     sales: true,
@@ -699,7 +699,7 @@ List<FinDoc> salesPayments = [
     otherUser: customers[1],
     paymentInstrument: PaymentInstrument.bank,
     grandTotal: Decimal.parse("66.11"),
-    items: [FinDocItem(itemType: ItemType(accountCode: '12600'))],
+    items: [FinDocItem(paymentType: PaymentType(accountCode: '12600'))],
   ),
 ];
 

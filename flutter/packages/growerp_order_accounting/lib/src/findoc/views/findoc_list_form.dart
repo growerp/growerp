@@ -197,6 +197,7 @@ class FinDocListState extends State<FinDocList> {
   @override
   Widget build(BuildContext context) {
     limit = (MediaQuery.of(context).size.height / 100).round();
+
     Widget finDocsPage() {
       bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
       return Column(children: [
@@ -255,6 +256,7 @@ class FinDocListState extends State<FinDocList> {
     }
 
     return Builder(builder: (BuildContext context) {
+      //
       // used in the blocConsumer below
       listener(context, state) {
         if (state.status == FinDocStatus.failure) {
@@ -338,7 +340,7 @@ class FinDocListState extends State<FinDocList> {
         }
       }
 
-      // finally create the Blocbuilder
+      // finally create the BlocConsumer
       if (widget.docType == FinDocType.order) {
         if (widget.sales) {
           return BlocConsumer<SalesOrderBloc, FinDocState>(
@@ -371,6 +373,7 @@ class FinDocListState extends State<FinDocList> {
         return BlocConsumer<IncomingShipmentBloc, FinDocState>(
             listener: listener, builder: builder);
       }
+      // Transaction
       return BlocConsumer<TransactionBloc, FinDocState>(
           listener: listener, builder: builder);
     });

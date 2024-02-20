@@ -90,7 +90,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
   late FinDocBloc _finDocBloc;
   GlAccount? _selectedGlAccount;
   Company? _selectedCompany;
-  ItemType? _selectedItemType;
+  PaymentType? _selectedPaymentType;
   late CompanyBloc _companyBloc;
   late GlAccountBloc _accountBloc;
 
@@ -114,8 +114,9 @@ class PaymentDialogState extends State<PaymentDialogFull> {
         finDoc.grandTotal == null ? '' : finDoc.grandTotal.toString();
     _pseudoIdController.text =
         finDoc.pseudoId == null ? '' : finDoc.pseudoId.toString();
-    _selectedItemType =
-        finDocUpdated.items.isNotEmpty ? finDocUpdated.items[0].itemType : null;
+    _selectedPaymentType = finDocUpdated.items.isNotEmpty
+        ? finDocUpdated.items[0].paymentType
+        : null;
     _paymentInstrument = finDocUpdated.paymentInstrument == null
         ? PaymentInstrument.cash
         : finDocUpdated.paymentInstrument!;
@@ -167,9 +168,9 @@ class PaymentDialogState extends State<PaymentDialogFull> {
 
   Widget paymentForm(
       FinDocState state, GlobalKey<FormState> paymentDialogFormKey) {
-    if (_selectedItemType != null) {
-      _selectedItemType = state.itemTypes
-          .firstWhere((el) => _selectedItemType!.itemTypeId == el.itemTypeId);
+    if (_selectedPaymentType != null) {
+      _selectedPaymentType = state.paymentTypes.firstWhere(
+          (el) => _selectedPaymentType!.paymentTypeId == el.paymentTypeId);
     }
     AuthBloc authBloc = context.read<AuthBloc>();
     GlAccountBloc glAccountBloc = context.read<GlAccountBloc>();
@@ -353,25 +354,25 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                 ),
               ),
               const SizedBox(height: 10),
-              DropdownButtonFormField<ItemType>(
-                key: const Key('itemType'),
+              DropdownButtonFormField<PaymentType>(
+                key: const Key('paymentType'),
                 decoration: const InputDecoration(labelText: 'Payment Type'),
                 hint: const Text('Payment Type'),
-                value: _selectedItemType,
+                value: _selectedPaymentType,
                 validator: (value) =>
                     value == null && _selectedGlAccount == null
                         ? 'Enter a item type for posting?'
                         : null,
-                items: state.itemTypes.map((item) {
-                  return DropdownMenuItem<ItemType>(
+                items: state.paymentTypes.map((item) {
+                  return DropdownMenuItem<PaymentType>(
                       value: item,
                       child: Text(
-                          '${item.itemTypeName}\n ${item.accountCode} ${item.accountName}',
+                          '${item.paymentTypeName}\n ${item.accountCode} ${item.accountName}',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2));
                 }).toList(),
-                onChanged: (ItemType? newValue) {
-                  _selectedItemType = newValue;
+                onChanged: (PaymentType? newValue) {
+                  _selectedPaymentType = newValue;
                 },
                 isExpanded: true,
               ),
@@ -451,7 +452,7 @@ class PaymentDialogState extends State<PaymentDialogFull> {
                               paymentInstrument: _paymentInstrument,
                               items: [
                                 FinDocItem(
-                                  itemType: _selectedItemType,
+                                  paymentType: _selectedPaymentType,
                                   glAccount: _selectedGlAccount,
                                 )
                               ],

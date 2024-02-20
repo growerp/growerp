@@ -564,7 +564,7 @@ packages:
       path: "../growerp_core"
       relative: true
     source: path
-    version: "1.2.3"
+    version: "1.2.4"
   growerp_inventory:
     dependency: "direct main"
     description:
@@ -585,7 +585,7 @@ packages:
       path: "../growerp_models"
       relative: true
     source: path
-    version: "1.2.2"
+    version: "1.2.3"
   growerp_order_accounting:
     dependency: "direct main"
     description:

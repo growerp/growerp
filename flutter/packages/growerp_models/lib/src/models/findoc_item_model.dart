@@ -33,6 +33,7 @@ class FinDocItem with _$FinDocItem {
     FinDocType? docType, // for conversion only
     String? itemSeqId,
     ItemType? itemType,
+    PaymentType? paymentType,
     String? productId,
     String? pseudoProductId,
     String? description,
@@ -53,7 +54,7 @@ class FinDocItem with _$FinDocItem {
 
 String finDocItemCsvFormat = "finDoc Id, finDocType, item Seq, "
     " productId, description, quantity, price/amount, accountCode, "
-    " isDebit, itemType \r\n";
+    " isDebit, itemType, paymentType, \r\n";
 List<String> finDocItemCsvTitles = finDocItemCsvFormat.split(',');
 int finDocItemCsvLength = finDocItemCsvTitles.length;
 
@@ -79,6 +80,7 @@ List<FinDocItem> CsvToFinDocItems(String csvFile, Logger logger) {
         glAccount: GlAccount(accountCode: row[7]),
         isDebit: row[8] == 'false' ? false : true,
         itemType: ItemType(itemTypeId: row[9]),
+        paymentType: PaymentType(paymentTypeId: row[9]),
       ));
     } catch (e) {
       String fieldList = '';
@@ -106,6 +108,8 @@ String CsvFromFinDocItems(List<FinDocItem> finDocItems) {
       finDocItem.price?.toString() ?? '',
       finDocItem.glAccount?.accountCode ?? '',
       finDocItem.isDebit?.toString() ?? '',
+      finDocItem.itemType!.itemTypeId,
+      finDocItem.paymentType!.paymentTypeId,
     ], finDocItemCsvLength));
   }
   return csv.join();

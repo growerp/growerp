@@ -210,8 +210,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       ItemTypes compResult = await restClient.getItemTypes(sales: sales);
-      return emit(state.copyWith(
-          itemTypes: compResult.itemTypes, status: FinDocStatus.success));
+      return emit(state.copyWith(itemTypes: compResult.itemTypes));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
@@ -224,8 +223,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       PaymentTypes result = await restClient.getPaymentTypes(sales: sales);
-      return emit(state.copyWith(
-          paymentTypes: result.paymentTypes, status: FinDocStatus.success));
+      return emit(state.copyWith(paymentTypes: result.paymentTypes));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
