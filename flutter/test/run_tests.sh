@@ -1,6 +1,6 @@
 #! /bin/bash
 set -x
-sleep 50
+sleep 30
 
 dart pub global activate melos 3.4.0
 export PATH="$PATH":"$HOME/.pub-cache/bin"

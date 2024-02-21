@@ -93,10 +93,12 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     }
     // start from record zero for initial and refresh
     try {
+      ItemTypes itemTypes = ItemTypes();
+      PaymentTypes paymentTypes = PaymentTypes();
       if (docType == FinDocType.payment) {
-        add(FinDocGetPaymentTypes(sales));
+        paymentTypes = await restClient.getPaymentTypes(sales: sales);
       } else {
-        add(FinDocGetItemTypes());
+        itemTypes = await restClient.getItemTypes(sales: sales);
       }
       FinDocs result = await restClient.getFinDoc(
         start: start,
@@ -110,6 +112,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       emit(state.copyWith(
           status: FinDocStatus.success,
           finDocs: current..addAll(result.finDocs),
+          itemTypes: itemTypes.itemTypes,
+          paymentTypes: paymentTypes.paymentTypes,
           hasReachedMax: result.finDocs.length < event.limit,
           searchString: event.searchString,
           message: event.refresh ? '${docType}s reloaded' : null));
@@ -210,7 +214,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       ItemTypes compResult = await restClient.getItemTypes(sales: sales);
-      return emit(state.copyWith(itemTypes: compResult.itemTypes));
+      return emit(state.copyWith(
+          itemTypes: compResult.itemTypes, status: FinDocStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));
@@ -223,7 +228,8 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   ) async {
     try {
       PaymentTypes result = await restClient.getPaymentTypes(sales: sales);
-      return emit(state.copyWith(paymentTypes: result.paymentTypes));
+      return emit(state.copyWith(
+          paymentTypes: result.paymentTypes, status: FinDocStatus.success));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: FinDocStatus.failure, finDocs: [], message: getDioError(e)));

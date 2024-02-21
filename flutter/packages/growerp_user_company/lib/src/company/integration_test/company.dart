@@ -67,16 +67,23 @@ class CompanyTest {
       }
 
       await CommonTest.enterText(tester, 'companyName', c.name!);
-      await CommonTest.enterDropDown(
-          tester, 'currency', c.currency?.description ?? '');
-      await CommonTest.enterText(tester, 'telephoneNr', c.telephoneNr ?? '');
-      if (c.email != null) {
-        c = c.copyWith(email: c.email!.replaceFirst('XXX', '${seq++}'));
+      if (c.currency != null) {
+        await CommonTest.enterDropDown(
+            tester, 'currency', c.currency?.description ?? '');
       }
-      await CommonTest.drag(tester);
-      await CommonTest.enterText(tester, 'email', c.email ?? '');
-      await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
-      await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
+      await CommonTest.enterText(tester, 'telephoneNr', c.telephoneNr ?? '');
+      await CommonTest.dragNew(tester, key: 'telephoneNr');
+
+      if (c.email != null && c.email!.isNotEmpty) {
+        c = c.copyWith(email: c.email!.replaceFirst('XXX', '${seq++}'));
+        await CommonTest.enterText(tester, 'email', c.email ?? '');
+      }
+      if (c.vatPerc != null) {
+        await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
+      }
+      if (c.salesPerc != null) {
+        await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
+      }
       // if required add address and payment
       if (c.address != null) {
         await updateAddress(tester, c.address!);
@@ -94,9 +101,9 @@ class CompanyTest {
           await CommonTest.tapByKey(tester, 'deletePaymentMethod');
         }
       }
+      await CommonTest.dragNew(tester, key: 'paymentMethodLabel');
       // add/update company record
-      await CommonTest.drag(tester);
-      await CommonTest.tapByKey(tester, 'update', seconds: 5);
+      await CommonTest.tapByKey(tester, 'update', seconds: 3);
       // get partyId if not yet have (not for main company)
       if (clist.length > 1 && c.partyId == null) {
         await CommonTest.doSearch(tester, searchString: c.name!);
@@ -137,12 +144,15 @@ class CompanyTest {
           equals(c.vatPerc != null ? c.vatPerc.toString() : '0'));
       expect(CommonTest.getTextFormField('salesPerc'),
           equals(c.salesPerc != null ? c.salesPerc.toString() : '0'));
+      await CommonTest.dragNew(tester, key: 'salesPerc');
       expect(
           CommonTest.getTextField('addressLabel'),
           equals(c.address == null
               ? 'No postal address yet'
               : "${c.address!.city} ${c.address!.country}"));
       if (c.address != null) {
+        await CommonTest.dragNew(tester, key: 'addressLabel');
+        await CommonTest.tapByKey(tester, 'address');
         await checkAddress(tester, c.address!);
       }
       expect(
@@ -161,24 +171,22 @@ class CompanyTest {
 
   static Future<void> updateAddress(
       WidgetTester tester, Address address) async {
-    await CommonTest.drag(tester);
+    await CommonTest.dragNew(tester);
     await CommonTest.tapByKey(tester, 'address');
     await CommonTest.enterText(tester, 'address1', address.address1!);
     await CommonTest.enterText(tester, 'address2', address.address2!);
     await CommonTest.enterText(tester, 'postalCode', address.postalCode!);
     await CommonTest.enterText(tester, 'city', address.city!);
-    await CommonTest.drag(tester);
+    await CommonTest.dragNew(tester, key: 'city');
     await CommonTest.enterText(tester, 'province', address.province!);
     await CommonTest.enterDropDownSearch(tester, 'country', address.country!);
-    await CommonTest.drag(tester);
+    await CommonTest.dragNew(tester, key: 'province');
     await CommonTest.tapByKey(tester, 'updateAddress');
     await CommonTest.waitForKey(tester, 'dismiss');
     await CommonTest.waitForSnackbarToGo(tester);
   }
 
   static Future<void> checkAddress(WidgetTester tester, Address address) async {
-    await CommonTest.drag(tester);
-    await CommonTest.tapByKey(tester, 'address');
     expect(
         CommonTest.getTextFormField('address1'), contains(address.address1!));
     expect(
@@ -193,7 +201,7 @@ class CompanyTest {
 
   static Future<void> updatePaymentMethod(
       WidgetTester tester, PaymentMethod paymentMethod) async {
-    await CommonTest.drag(tester);
+    await CommonTest.dragNew(tester);
     await CommonTest.tapByKey(tester, 'paymentMethod');
     await CommonTest.enterDropDown(
         tester, 'cardTypeDropDown', paymentMethod.creditCardType.toString());
@@ -210,7 +218,7 @@ class CompanyTest {
   static Future<void> checkPaymentMethod(
       WidgetTester tester, PaymentMethod paymentMethod) async {
     int length = paymentMethod.creditCardNumber!.length;
-    await CommonTest.drag(tester);
+    await CommonTest.dragNew(tester);
     expect(
         CommonTest.getTextField('paymentMethodLabel'),
         contains(

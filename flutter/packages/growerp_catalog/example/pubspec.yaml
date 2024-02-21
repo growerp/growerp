@@ -9,10 +9,10 @@ dependencies:
     sdk: flutter
   growerp_catalog:
     path: ../
-  flutter_test:
-    sdk: flutter
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   integration_test:
     sdk: flutter
 

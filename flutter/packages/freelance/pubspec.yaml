@@ -8,12 +8,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.1
+  flutter_bloc: ^8.1.4
   flutter_localizations:
         sdk: flutter
   global_configuration: ^2.0.0
   responsive_framework: ^1.0.0
-  flutter_simple_treeview: ^3.0.0-nullsafety.1
+  flutter_simple_treeview: ^3.0.2
   printing: ^5.11.1
   pdf: ^3.10.3
   bloc_concurrency: ^0.2.0
@@ -29,10 +29,10 @@ dependencies:
   intl: ^0.18.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  flutter_test:
-    sdk: flutter
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   flutter_driver:
     sdk: flutter
   integration_test:

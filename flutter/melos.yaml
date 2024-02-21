@@ -8,11 +8,9 @@ packages:
   - packages/growerp*
   - packages/growerp*/*example
 
-runPubGetInParallel: false
-
-ide:
-  intellij:
-    enabled: false
+command:
+  bootstrap:
+    runPubGetInParallel: false
     
 scripts:
   analyze:

@@ -13,10 +13,10 @@ dependencies:
   growerp_user_company: ^1.2.1
   package_info_plus: ^4.2.0
   horizontal_data_table: ^4.3.1
-  flutter_test:
-    sdk: flutter
 
 dev_dependencies: 
+  flutter_test:
+    sdk: flutter
   integration_test: 
     sdk: flutter
   flutter_driver: 

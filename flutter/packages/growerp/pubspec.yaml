@@ -12,7 +12,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies: 
   dcli: ^3.2.2
-  dio: ^5.3.3
+  dio: ^5.4.1
   fast_csv: ^0.2.6
   get_it: ^7.6.4
   growerp_models: ^1.2.2

@@ -8,8 +8,6 @@ environment:
 dependencies: 
   flutter: 
     sdk: flutter
-  flutter_test:
-    sdk: flutter
   growerp_core: ^1.2.4
   growerp_marketing: ^1.2.1
   growerp_website: ^1.2.1
@@ -18,7 +16,7 @@ dependencies:
   growerp_order_accounting: ^1.2.1
   growerp_user_company: ^1.2.1
   decimal: ^2.1.0
-  flutter_bloc: ^8.1.1
+  flutter_bloc: ^8.1.4
   flutter_localizations: 
     sdk: flutter
   global_configuration: ^2.0.0
@@ -29,6 +27,8 @@ dependencies:
   hive_flutter: ^1.1.0
 
 dev_dependencies: 
+  flutter_test:
+    sdk: flutter
   flutter_driver: 
     sdk: flutter
   integration_test: 

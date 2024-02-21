@@ -118,7 +118,7 @@ class PaymentTest {
       }
       await CommonTest.enterDropDown(
           tester, 'paymentType', payment.items[0].paymentType!.accountCode);
-      await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
+//      await CommonTest.drag(tester, listViewName: 'listView2', seconds: 2);
       await CommonTest.tapByKey(tester, 'update', seconds: 3);
       await CommonTest.waitForSnackbarToGo(tester);
       newPayments
