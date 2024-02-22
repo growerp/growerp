@@ -270,7 +270,6 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       if (columnsFrom[0] == '') return [];
       columnsTo.add(columnsFrom[0]);
       columnsTo.add(columnsFrom[2]);
-      columnsTo.add('');
       columnsTo.add(columnsFrom[4]);
       columnsTo.add(columnsFrom[5]);
       return columnsTo;
@@ -645,7 +644,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
     case FileType.finDocTransaction:
       // 0: accountId, 2:date, 3:reference, 4:journalId, 5:description,
       // 11: customerId, 13: vendorId, 15: employeeId,
-      String otherCompanyId = '', otherCompanyName = '';
+      String otherCompanyId = '', otherCompanyName = '', otherUserId = '';
       bool sales = false;
       if (columnsFrom[11].isNotEmpty) {
         otherCompanyId = columnsFrom[11];
@@ -659,7 +658,8 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       }
 
       if (columnsFrom[15].isNotEmpty) {
-        otherCompanyId = columnsFrom[15];
+        otherUserId = columnsFrom[15];
+        otherCompanyId = 'Main Company';
         otherCompanyName = columnsFrom[16];
         sales = false;
       }
@@ -669,7 +669,7 @@ List<String> convertRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add('Transaction');
       columnsTo.add(columnsFrom[5]);
       columnsTo.add(dateConvert(columnsFrom[2]));
-      columnsTo.add('');
+      columnsTo.add(otherUserId);
       columnsTo.add(otherCompanyId);
       columnsTo.add(otherCompanyName);
       columnsTo.add(columnsFrom[3]); // reference
@@ -790,8 +790,8 @@ Future<void> main(List<String> args) async {
         csvLength = itemTypeCsvLength;
         break;
       case FileType.paymentType:
-        csvFormat = itemTypeCsvFormat;
-        csvLength = itemTypeCsvLength;
+        csvFormat = paymentTypeCsvFormat;
+        csvLength = paymentTypeCsvLength;
         break;
       case FileType.glAccount:
         csvFormat = glAccountCsvFormat;

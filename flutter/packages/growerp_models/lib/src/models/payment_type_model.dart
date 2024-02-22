@@ -36,8 +36,8 @@ class PaymentType with _$PaymentType {
       _$PaymentTypeFromJson(json);
 }
 
-String paymentTypeCsvFormat = "paymentTypeId, accountCode, direction(I/O/E), "
-    "isPayable(Y/N/E), isApplied(Y/N/E) \r\n";
+String paymentTypeCsvFormat = "paymentTypeId, accountCode, "
+    "isPayable(Y/N/E), isApplied(Y/N/E), \r\n";
 int paymentTypeCsvLength = paymentTypeCsvFormat.split(',').length;
 
 // import
@@ -49,8 +49,8 @@ List<PaymentType> CsvToPaymentTypes(String csvFile) {
     PaymentTypes.add(PaymentType(
       paymentTypeId: row[0],
       accountCode: row[1],
-      isPayable: row[3],
-      isApplied: row[4],
+      isPayable: row[2],
+      isApplied: row[3],
     ));
   }
   return PaymentTypes;

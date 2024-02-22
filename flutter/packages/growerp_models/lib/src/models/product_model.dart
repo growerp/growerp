@@ -60,7 +60,7 @@ List<String> productTypes = ['Physical Good', 'Service', 'Rental'];
 
 String productCsvFormat =
     'product Id, Type*, Name*, Description*, List Price*, Sales price*, '
-    'Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
+    'Purchase price, Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
 List<String> productCsvTitles = productCsvFormat.split(',');
 int productCsvLength = productCsvTitles.length;
 

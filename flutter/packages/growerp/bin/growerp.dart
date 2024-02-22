@@ -219,7 +219,7 @@ Future<void> main(List<String> args) async {
                   await client.importItemTypes(CsvToItemTypes(csvFile));
                   break;
                 case FileType.paymentType:
-                  await client.importPaymentTypes(CsvToItemTypes(csvFile));
+                  await client.importPaymentTypes(CsvToPaymentTypes(csvFile));
                   break;
                 case FileType.glAccount:
                   await client.importGlAccounts(CsvToGlAccounts(csvFile));

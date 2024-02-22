@@ -57,7 +57,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="import" noun="PaymentTypes">
         <description> Import PaymentTypes</description>
         <in-parameters>
-            <parameter name="itemTypes" required="true" type="List" />
+            <parameter name="paymentTypes" required="true" type="List" />
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -67,32 +67,33 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
             </entity-delete-by-condition>
             <!-- create new -->
-            <iterate list="itemTypes" entry="itemType">
+            <iterate list="paymentTypes" entry="paymentType">
                 <set field="glAccountId" from="null" />
-                <if condition="itemType.accountCode">
+                <if condition="paymentType.accountCode">
                     <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                         list="glAccounts">
                         <econdition field-name="partyId" from="companyPartyId" />
-                        <econdition field-name="accountCode" from="itemType.accountCode" />
+                        <econdition field-name="accountCode" from="paymentType.accountCode" />
                     </entity-find>
                     <if condition="!glAccounts">
                         <log level="error"
-                            message="Could not find accountCode: ${itemType.accountCode} for company: $companyPartyId" />
+                            message="Could not find accountCode: ${paymentType.accountCode} for company: $companyPartyId" />
                         <else>
                             <set field="glAccountId" from="glAccounts[0].glAccountId" />
                         </else>
                     </if>
                 </if>
+                <log message="====== $paymentType" />
                 <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
-                    in-map="[   paymentTypeEnumId: itemType.itemTypeId,
+                    in-map="[   paymentTypeEnumId: paymentType.paymentTypeId,
                                 organizationPartyId: companyPartyId,
-                                isPayable: itemType.isPayable,
-                                isApplied: itemType.isApplied,
+                                isPayable: paymentType.isPayable,
+                                isApplied: paymentType.isApplied,
                                 glAccountId: glAccountId,
                             ]" />
             </iterate>
             <if condition="!ec.message.hasError()">
-                <message type="success">${itemTypes.size()} itemTypes imported</message>
+                <message type="success">${paymentTypes.size()} paymentTypes imported</message>
             </if>
         </actions>
     </service>

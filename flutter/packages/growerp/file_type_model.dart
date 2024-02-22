@@ -1,10 +1,10 @@
 enum FileType {
-  itemType,
-  paymentType,
   company,
   glAccount,
   product,
   category,
+  itemType,
+  paymentType,
   user,
   asset,
   finDocTransaction,
