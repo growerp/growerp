@@ -224,14 +224,18 @@ along with this software (see the LICENSE.md file). If not, see
             <key-map field-name="otherPartyId" related="partyId" />
         </member-entity>
         <alias-all entity-alias="ATX">
+            <exclude field="pseudoId" />
+            <exclude field="pseudoFinDocId" />
+            <exclude field="docType" />
             <exclude field="description" />
             <exclude field="voucherRef" />
+            <exclude field="voucherDate" />
             <exclude field="assetId" />
         </alias-all>
         <alias-all entity-alias="ATE">
             <exclude field="amount" />
+            <exclude field="pseudoProductId" />
         </alias-all>
-        <alias entity-alias="ATX" name="txPseudoId" field="pseudoFinDocId" />
         <alias entity-alias="ATX" name="txDescription" field="description" />
         <alias entity-alias="ATX" name="txVoucherRef" field="voucherRef" />
         <alias entity-alias="ATX" name="txVoucherDate" field="voucherDate" />
