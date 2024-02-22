@@ -361,6 +361,8 @@ class CommonTest {
 
   static Future<void> enterText(
       WidgetTester tester, String key, String value) async {
+    await tester.tap(find.byKey(Key(key)), warnIfMissed: false);
+    await tester.pump();
     await tester.enterText(find.byKey(Key(key)), value);
     await tester.pump();
   }

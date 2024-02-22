@@ -58,7 +58,7 @@ class ProductTest {
       await CommonTest.checkWidgetKey(tester, 'ProductDialog');
       await CommonTest.enterText(tester, 'name', product.productName!);
       await CommonTest.enterText(tester, 'description', product.description!);
-      await CommonTest.drag(tester);
+      await CommonTest.dragNew(tester, key: 'description');
       await CommonTest.enterText(tester, 'price', product.price.toString());
       await CommonTest.enterText(
           tester, 'listPrice', product.listPrice.toString());
@@ -166,8 +166,8 @@ class ProductTest {
       List<Product> updProducts = [];
       for (Product product in test.products) {
         updProducts.add(product.copyWith(
-          productName: '${product.productName!}u',
-          description: '${product.description!}u',
+          productName: '${product.productName!}-updated',
+          description: '${product.description!}-updated',
           categories: [product.categories[0]],
           productTypeId: productTypes[0],
           price: product.price! + Decimal.parse('0.10'),
