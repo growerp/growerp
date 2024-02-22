@@ -16,7 +16,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class PaymentTypeListItem extends StatelessWidget {
   const PaymentTypeListItem(
@@ -39,7 +38,7 @@ class PaymentTypeListItem extends StatelessWidget {
                   key: Key('name$index'))),
           Expanded(
               child: Text("${paymentType.accountCode}",
-                  key: Key('accountCode$index'), textAlign: TextAlign.center)),
+                  key: Key('accountCode$index'))),
           Expanded(
               child: Text("${paymentType.accountName}",
                   key: Key('accountName$index'))),

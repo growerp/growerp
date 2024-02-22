@@ -37,17 +37,17 @@ class _ItemTypeListHeaderState extends State<ItemTypeListHeader> {
             child: const Icon(Icons.search_sharp, size: 40)),
         title: Column(children: [
           Row(children: <Widget>[
-            const Expanded(child: Text("Name", textAlign: TextAlign.left)),
-            const Expanded(child: Text('Type', textAlign: TextAlign.left)),
-            if (ResponsiveBreakpoints.of(context).equals(MOBILE))
-              const Expanded(child: Text('Year', textAlign: TextAlign.left)),
+            const Expanded(child: Text('Name', textAlign: TextAlign.left)),
+            const Expanded(
+                child: Text('Account Code', textAlign: TextAlign.left)),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              const Expanded(child: Text('From', textAlign: TextAlign.left)),
+              const Expanded(
+                  child: Text('Account Name', textAlign: TextAlign.left)),
+            const Expanded(
+                child: Text('Direction(In/Out/Either)',
+                    textAlign: TextAlign.left)),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              const Expanded(child: Text('To', textAlign: TextAlign.left)),
-            const Expanded(child: Text("Closed", textAlign: TextAlign.left)),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              Text('           ', textAlign: TextAlign.left),
+              const Text('        ', textAlign: TextAlign.left),
           ]),
           const Divider(),
         ]),

@@ -36,14 +36,15 @@ class ItemTypeListItem extends StatelessWidget {
         children: <Widget>[
           Expanded(
               child: Text("${itemType.itemTypeName}", key: Key('name$index'))),
+          Expanded(
+              child: Text(
+            "${itemType.accountCode}",
+            key: Key('accountCode$index'),
+          )),
           if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
             Expanded(
-                child: Text("${itemType.accountCode}",
-                    key: Key('accountCode$index'),
-                    textAlign: TextAlign.center)),
-          Expanded(
-              child: Text("${itemType.accountName}",
-                  key: Key('accountName$index'))),
+                child: Text("${itemType.accountName}",
+                    key: Key('accountName$index'))),
           Expanded(
               child: Text(itemType.direction!,
                   key: Key('direction$index'), textAlign: TextAlign.center)),
