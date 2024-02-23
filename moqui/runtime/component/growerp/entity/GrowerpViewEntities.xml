@@ -1943,4 +1943,23 @@ along with this software (see the LICENSE.md file). If not, see
             <econdition field-name="parentEnumId" value="null" entity-alias="TOP1" />
         </entity-condition>
     </view-entity>
+
+    <view-entity entity-name="TimePeriodChildAndType" package="growerp.party.time">
+        <member-entity entity-alias="TMPD" entity-name="mantle.party.time.TimePeriod" />
+        <member-entity entity-alias="TMPDCHILD" entity-name="mantle.party.time.TimePeriod"
+            join-from-alias="TMPD" join-optional="true">
+            <key-map field-name="timePeriodId" related="previousPeriodId" />
+            <entity-condition>
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="TPT" entity-name="mantle.party.time.TimePeriodType"
+            join-from-alias="TMPD">
+            <key-map field-name="timePeriodTypeId" />
+        </member-entity>
+        <alias-all entity-alias="TMPD" />
+        <alias-all entity-alias="TPT" />
+        <alias name="nextPeriodId" field="timePeriodId" entity-alias="TMPDCHILD" />
+        <alias name="nextPeriodName" field="periodName" entity-alias="TMPDCHILD" />
+    </view-entity>
 </entities>

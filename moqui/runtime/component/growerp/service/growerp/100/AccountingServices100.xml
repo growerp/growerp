@@ -186,11 +186,49 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="TimePeriod">
         <description>Get the accounting periods valid for this company</description>
+        <out-parameters>
+            <parameter name="timePeriods" type="List">
+                <parameter name="timePeriod" type="Map">
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.party.time.TimePeriodChildAndType" list="periods">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <order-by field-name="periodName" />
+            </entity-find>
+            <set field="timePeriods" from="[]" />
+            <iterate list="periods" entry="p">
+                <script>
+                    timePeriods.add([periodId: p.timePeriodId,
+                                    periodName: p.periodName,
+                                    periodType: p.description,
+                                    fromDate: p.fromDate.toString(),
+                                    thruDate: p.thruDate.toString(),
+                                    isClosed: p.isClosed == 'Y' ? true : false,
+                                    hasPreviousPeriod: p.previousPeriodId != null ? true : false,
+                                    hasNextPeriod: p.nextPeriodId != null ? true : false,
+                                    ]); 
+                </script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="TimePeriod">
+        <description>add, update and delete timeperiods</description>
         <in-parameters>
             <parameter name="createNext" type="Boolean" />
             <parameter name="createPrevious" type="Boolean" />
-            <parameter name="deleteCurrent" type="Boolean" />
-            <parameter name="currentPeriodId" />
+            <parameter name="delete" type="Boolean" />
+            <parameter name="timePeriodId" />
         </in-parameters>
         <out-parameters>
             <parameter name="timePeriods" type="List">
@@ -206,8 +244,8 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="createNext || createPrevious">
-                <if condition="!currentPeriodId">
+            <if condition="createNext || createPrevious || delete">
+                <if condition="!timePeriodId">
                     <return error="true"
                         message="Current periodId required when create previous or next provided" />
                     <else>
@@ -215,46 +253,29 @@ along with this software (see the LICENSE.md file). If not, see
                         <entity-find-one entity-name="mantle.party.time.TimePeriod"
                             value-field="timePeriod">
                             <field-map field-name="partyId" from="companyPartyId" />
-                            <field-map field-name="timePeriodId" from="currentPeriodId" />
+                            <field-map field-name="timePeriodId" from="timePeriodId" />
                         </entity-find-one>
                         <if condition="!timePeriod">
                             <return error="true"
-                                message="TimePeriodId: $currentPeriodId not found for company party id: $companyPartyId" />
+                                message="TimePeriodId: $periodId not found for company party id: $companyPartyId" />
                         </if>
                         <if condition="createPrevious">
                             <service-call name="mantle.party.TimeServices.create#TimePeriod"
-                                in-map="[nextPeriodId: timePeriod.nextPeriodId,
-                                    fromDate: timePeriod.fromDate]" />
+                                in-map="[nextPeriodId: timePeriod.timePeriodId]" />
                         </if>
                         <if condition="createNext">
                             <service-call name="mantle.party.TimeServices.create#TimePeriod"
-                                in-map="[previousPeriodId: timePeriod.previousPeriodId,
-                                    thruDate: timePeriod.thruDate]" />
+                                in-map="[previousPeriodId: timePeriod.timePeriodId]" />
                         </if>
-                        <if condition="deleteCurrent">
+                        <if condition="delete">
                             <service-call name="mantle.party.TimeServices.delete#TimePeriod"
-                                in-map="[timePeriodId: currentPeriodId]" />
+                                in-map="[timePeriodId: timePeriodId]" />
                         </if>
                     </else>
                 </if>
             </if>
-            <entity-find entity-name="mantle.party.time.TimePeriodAndType" list="periods">
-                <econdition field-name="partyId" from="companyPartyId" />
-                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
-                <order-by field-name="periodName" />
-            </entity-find>
-            <set field="timePeriods" from="[]" />
-            <iterate list="periods" entry="p">
-                <script>
-                    timePeriods.add([periodId: p.timePeriodId,
-                                    periodName: p.periodName,
-                                    periodType: p.description,
-                                    fromDate: p.fromDate.toString(),
-                                    thruDate: p.thruDate.toString(),
-                                    isClosed: p.isClosed == 'Y' ? true : false,
-                                    ]); 
-                </script>
-            </iterate>
+            <service-call name="growerp.100.AccountingServices100.get#TimePeriod"
+                out-map="context" />
         </actions>
     </service>
 

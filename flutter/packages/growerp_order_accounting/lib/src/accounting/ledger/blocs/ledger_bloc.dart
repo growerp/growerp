@@ -26,6 +26,7 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     on<LedgerFetch>(_onLedgerFetch);
     on<LedgerCalculate>(_onLedgerCalculate);
     on<LedgerTimePeriods>(_onLedgerTimePeriods);
+    on<LedgerTimePeriodsUpdate>(_onLedgerTimePeriodsUpdate);
   }
 
   final RestClient restClient;
@@ -53,9 +54,9 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
       // start from record zero for initial and refresh
       emit(state.copyWith(status: LedgerStatus.loading));
 
-      if (state.timePeriods.isEmpty) {
-        add(const LedgerTimePeriods());
-      }
+      //    if (state.timePeriods.isEmpty) {
+      //      add(LedgerTimePeriods());
+      //    }
 
       final compResult =
           await callApi(event.reportType, periodName: event.periodName);
@@ -76,6 +77,26 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
   ) async {
     try {
       TimePeriods result = await restClient.getTimePeriod();
+      return emit(state.copyWith(
+        timePeriods: result.timePeriods,
+        status: LedgerStatus.success,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: LedgerStatus.failure, message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onLedgerTimePeriodsUpdate(
+    LedgerTimePeriodsUpdate event,
+    Emitter<LedgerState> emit,
+  ) async {
+    try {
+      TimePeriods result = await restClient.updateTimePeriod(
+          timePeriodId: event.timePeriodId,
+          createNext: event.createNext,
+          createPrevious: event.createPrevious,
+          delete: event.delete);
       return emit(state.copyWith(
         timePeriods: result.timePeriods,
         status: LedgerStatus.success,

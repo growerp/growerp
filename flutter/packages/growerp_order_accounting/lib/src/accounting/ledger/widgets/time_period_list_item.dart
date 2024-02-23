@@ -32,31 +32,39 @@ class TimePeriodListItem extends StatelessWidget {
     final ledgerBloc = context.read<LedgerBloc>();
 
     List<Widget> buttons = [];
-    if (!timePeriod.hasPreviousPeriod) {
+    if (timePeriod.hasPreviousPeriod ||
+        timePeriod.hasNextPeriod ||
+        timePeriod.isClosed) {
+      buttons.add(IconButton(
+          key: Key('delete$index'),
+          icon: const Icon(Icons.delete_forever),
+          tooltip: 'delete period',
+          onPressed: () {
+            ledgerBloc.add(LedgerTimePeriodsUpdate(
+                delete: true, timePeriodId: timePeriod.periodId));
+          }));
+    }
+/*    if (!timePeriod.hasPreviousPeriod) { not working in backend....?
       buttons.add(IconButton(
           key: Key('previous$index'),
           icon: const Icon(Icons.arrow_back),
+          tooltip: 'create previous period',
           onPressed: () {
-            ledgerBloc.add(LedgerTimePeriods(
-                createPrevious: true, currentPeriodId: timePeriod.periodId));
+            ledgerBloc.add(LedgerTimePeriodsUpdate(
+                createPrevious: true, timePeriodId: timePeriod.periodId));
           }));
     }
+*/
     if (!timePeriod.hasNextPeriod) {
       buttons.add(IconButton(
           key: Key('next$index'),
           icon: const Icon(Icons.arrow_forward),
+          tooltip: 'create next period',
           onPressed: () {
-            ledgerBloc.add(LedgerTimePeriods(
-                createNext: true, currentPeriodId: timePeriod.periodId));
+            ledgerBloc.add(LedgerTimePeriodsUpdate(
+                createNext: true, timePeriodId: timePeriod.periodId));
           }));
     }
-    buttons.add(IconButton(
-        key: Key('delete$index'),
-        icon: const Icon(Icons.delete_forever),
-        onPressed: () {
-          ledgerBloc.add(LedgerTimePeriods(
-              deleteCurrent: true, currentPeriodId: timePeriod.periodId));
-        }));
 
     return ListTile(
       leading: CircleAvatar(

@@ -30,17 +30,19 @@ class LedgerFetch extends LedgerEvent {
   List<Object> get props => [reportType, periodName];
 }
 
-class LedgerTimePeriods extends LedgerEvent {
+class LedgerTimePeriods extends LedgerEvent {}
+
+class LedgerTimePeriodsUpdate extends LedgerEvent {
   final bool? createNext;
   final bool? createPrevious;
-  final bool? deleteCurrent;
-  final String? currentPeriodId;
+  final bool? delete;
+  final String timePeriodId;
 
-  const LedgerTimePeriods(
+  const LedgerTimePeriodsUpdate(
       {this.createNext,
       this.createPrevious,
-      this.deleteCurrent,
-      this.currentPeriodId});
+      this.delete,
+      required this.timePeriodId});
 }
 
 class LedgerCalculate extends LedgerEvent {}

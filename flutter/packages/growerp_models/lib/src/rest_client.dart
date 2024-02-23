@@ -367,11 +367,15 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/TimePeriod")
   @Extra({'requireApiKey': true})
-  Future<TimePeriods> getTimePeriod({
-    @Query('createNext') bool? createNext,
-    @Query('createPrevious') bool? createPrevious,
-    @Query('deleteCurrent') bool? deleteCurrent,
-    @Query('currentPeriodId') String? currentPeriodId,
+  Future<TimePeriods> getTimePeriod();
+
+  @PATCH("rest/s1/growerp/100/TimePeriod")
+  @Extra({'requireApiKey': true})
+  Future<TimePeriods> updateTimePeriod({
+    @Field() required String timePeriodId,
+    @Field() bool? createNext,
+    @Field() bool? createPrevious,
+    @Field() bool? delete,
   });
 
   @GET("rest/s1/growerp/100/LedgerJournal")

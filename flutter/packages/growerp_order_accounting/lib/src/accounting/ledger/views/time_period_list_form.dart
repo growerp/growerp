@@ -45,7 +45,7 @@ class TimePeriodListState extends State<TimePeriodList> {
     super.initState();
     entityName = classificationId == 'AppHotel' ? 'Room' : 'TimePeriod';
     _ledgerBloc = context.read<LedgerBloc>();
-    _ledgerBloc.add(const LedgerTimePeriods());
+    _ledgerBloc.add(LedgerTimePeriods());
   }
 
   @override
@@ -81,7 +81,7 @@ class TimePeriodListState extends State<TimePeriodList> {
                     Expanded(
                         child: RefreshIndicator(
                             onRefresh: (() async =>
-                                _ledgerBloc.add(const LedgerTimePeriods())),
+                                _ledgerBloc.add(LedgerTimePeriods())),
                             child: ListView.builder(
                                 key: const Key('listView'),
                                 shrinkWrap: true,
@@ -89,7 +89,7 @@ class TimePeriodListState extends State<TimePeriodList> {
                                 itemCount: state.timePeriods.length,
                                 controller: _scrollController,
                                 itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
+                                  if (state.timePeriods.isEmpty) {
                                     return Visibility(
                                         visible: state.timePeriods.isEmpty,
                                         child: Center(
@@ -98,18 +98,11 @@ class TimePeriodListState extends State<TimePeriodList> {
                                                 "no ${entityName}s found!",
                                                 key: const Key('empty'),
                                                 textAlign: TextAlign.center)));
+                                  } else {
+                                    return TimePeriodListItem(
+                                        timePeriod: state.timePeriods[index],
+                                        index: index);
                                   }
-                                  index--;
-                                  return index >= state.timePeriods.length
-                                      ? const BottomLoader()
-                                      : Dismissible(
-                                          key: const Key('timePeriodItem'),
-                                          direction:
-                                              DismissDirection.startToEnd,
-                                          child: TimePeriodListItem(
-                                              timePeriod:
-                                                  state.timePeriods[index],
-                                              index: index));
                                 })))
                   ]));
             default:
