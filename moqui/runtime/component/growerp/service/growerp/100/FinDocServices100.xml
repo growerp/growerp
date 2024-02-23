@@ -2491,13 +2491,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <set field="amount" from="payment.grandTotal" type="BigDecimal" />
             <set field="paymentOld.amount" from="amount" />
-            <!-- first item stores the itemType needed for posting -->
-            <if condition="payment.items &amp;&amp; payment.items[0].itemType">
+            <!-- first item stores the paymentType needed for posting -->
+            <if condition="payment.items &amp;&amp; payment.items[0].paymentType">
                 <entity-find entity-name="mantle.ledger.config.PaymentTypeGlAccount"
                     list="glAccounts">
                     <econdition field-name="organizationPartyId" from="companyPartyId" />
                     <econdition field-name="paymentTypeEnumId"
-                        from="payment.items[0].itemType.itemTypeId" />
+                        from="payment.items[0].paymentType.paymentTypeId" />
                     <econditions combine="or">
                         <econdition field-name="isPayable" from="payment.sales == true ? 'N' : 'Y'" />
                         <econdition field-name="isPayable" value="E" />

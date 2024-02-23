@@ -48,6 +48,8 @@ overwrite the following lines in framework/build.gradle starting from line167
 8. add pseudoId to mantle-usl views
 check commit 92734db178ed14a5685d942f528133ca537de9c8
 
+9. exclude pseudo fields from AcctgTransAndEntrySummary: 1dbe3f4d8b7c3bc8a777bbaf5262788c0b0e87f8
+
 Build moqui system:
 ```sh
     ./gradlew build
