@@ -8,17 +8,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+      sdk: flutter
   responsive_builder: ^0.4.1
   url_launcher: ^6.0.9
   
 dev_dependencies:
-
-flutter:
   flutter_test:
     sdk: flutter
   integration_test: 
     sdk: flutter
 
+flutter:
   uses-material-design: true
 
   assets:
