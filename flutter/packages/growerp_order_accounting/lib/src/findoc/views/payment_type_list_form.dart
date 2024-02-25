@@ -18,22 +18,26 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/src/findoc/findoc.dart';
 
-import '../widgets/widgets.dart';
+import '../../accounting/accounting.dart';
 
 class PaymentTypeListForm extends StatelessWidget {
-  const PaymentTypeListForm(this.sales, {super.key});
-  final bool sales;
+  const PaymentTypeListForm({super.key});
   @override
-  Widget build(BuildContext context) => BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(context.read<RestClient>(), sales,
-            FinDocType.order, context.read<String>()),
-        child: PaymentTypeList(sales),
+  Widget build(BuildContext context) => MultiBlocProvider(
+        providers: [
+          BlocProvider<FinDocBloc>(
+              create: (context) => FinDocBloc(context.read<RestClient>(), true,
+                  FinDocType.order, context.read<String>()),
+              child: const ItemTypeList()),
+          BlocProvider<GlAccountBloc>(
+              create: (context) => GlAccountBloc(context.read<RestClient>())),
+        ],
+        child: const PaymentTypeList(),
       );
 }
 
 class PaymentTypeList extends StatefulWidget {
-  const PaymentTypeList(this.sales, {super.key});
-  final bool sales;
+  const PaymentTypeList({super.key});
   @override
   PaymentTypeListState createState() => PaymentTypeListState();
 }
@@ -41,15 +45,20 @@ class PaymentTypeList extends StatefulWidget {
 class PaymentTypeListState extends State<PaymentTypeList> {
   final _scrollController = ScrollController();
   late FinDocBloc finDocBloc;
+  late GlAccountBloc glAccountBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
+  late bool showAll;
 
   @override
   void initState() {
     super.initState();
+    showAll = false;
     entityName = classificationId == 'AppHotel' ? 'Room' : 'PaymentType';
     finDocBloc = context.read<FinDocBloc>();
-    finDocBloc.add(FinDocGetPaymentTypes(widget.sales));
+    finDocBloc.add(const FinDocGetPaymentTypes());
+    glAccountBloc = context.read<GlAccountBloc>();
+    glAccountBloc.add(const GlAccountFetch(limit: 3));
   }
 
   @override
@@ -74,47 +83,44 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                   child:
                       Text('failed to fetch paymentTypes: ${state.message}'));
             case FinDocStatus.success:
+              var newList = [];
+              for (var item in state.paymentTypes) {
+                if (showAll) {
+                  newList.add(item);
+                } else {
+                  if (item.accountCode != '') newList.add(item);
+                }
+              }
+
               return Scaffold(
-                  floatingActionButton: FloatingActionButton(
-                      heroTag: "paymentTypeNew",
-                      key: const Key("addNew"),
-                      onPressed: () async {},
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add)),
+                  floatingActionButton: FloatingActionButton.extended(
+                      heroTag: 'showAll',
+                      key: const Key("switchShow"),
+                      onPressed: () {
+                        setState(() {
+                          showAll = !showAll;
+                        });
+                      },
+                      tooltip: 'Show all/used',
+                      label: showAll
+                          ? const Text('All')
+                          : const Text('only used')),
                   body: Column(children: [
                     const PaymentTypeListHeader(),
                     Expanded(
                         child: RefreshIndicator(
-                            onRefresh: (() async => finDocBloc
-                                .add(FinDocGetPaymentTypes(widget.sales))),
+                            onRefresh: (() async =>
+                                finDocBloc.add(const FinDocGetPaymentTypes())),
                             child: ListView.builder(
                                 key: const Key('listView'),
                                 shrinkWrap: true,
                                 physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.paymentTypes.length,
+                                itemCount: newList.length,
                                 controller: _scrollController,
                                 itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return Visibility(
-                                        visible: state.paymentTypes.isEmpty,
-                                        child: Center(
-                                            heightFactor: 20,
-                                            child: Text(
-                                                "no ${entityName}s found!",
-                                                key: const Key('empty'),
-                                                textAlign: TextAlign.center)));
-                                  }
-                                  index--;
-                                  return index >= state.paymentTypes.length
-                                      ? const BottomLoader()
-                                      : Dismissible(
-                                          key: const Key('paymentTypeItem'),
-                                          direction:
-                                              DismissDirection.startToEnd,
-                                          child: PaymentTypeListItem(
-                                              paymentType:
-                                                  state.paymentTypes[index],
-                                              index: index));
+                                  return PaymentTypeListItem(
+                                      paymentType: newList[index],
+                                      index: index);
                                 })))
                   ]));
             default:

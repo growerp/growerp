@@ -47,7 +47,7 @@ class _TimePeriodListHeaderState extends State<TimePeriodListHeader> {
               const Expanded(child: Text('To', textAlign: TextAlign.left)),
             const Expanded(child: Text("Closed", textAlign: TextAlign.left)),
             if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              Text('           ', textAlign: TextAlign.left),
+              const Text('           ', textAlign: TextAlign.left),
           ]),
           const Divider(),
         ]),

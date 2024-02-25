@@ -1194,3 +1194,57 @@ List<FinDoc> transactions = [
     ],
   )
 ];
+
+List<ItemType> itemTypes = [
+  ItemType(
+      itemTypeId: 'ItemExpense',
+      itemTypeName: 'Expense',
+      direction: 'I',
+      accountCode: '74000'),
+  ItemType(
+      itemTypeId: 'ItemInventory',
+      itemTypeName: 'Asset - Inventory',
+      direction: 'O',
+      accountCode: '14900'),
+  ItemType(
+      itemTypeId: 'ItemExpense',
+      itemTypeName: 'Expense',
+      direction: 'I',
+      accountCode: '43000'),
+  ItemType(
+      itemTypeId: 'ItemInventory',
+      itemTypeName: 'Asset - Inventory',
+      direction: 'O',
+      accountCode: '51000'),
+];
+
+List<PaymentType> paymentTypes = [
+  PaymentType(
+      paymentTypeId: "PtInvoicePayment",
+      paymentTypeName: "Invoice Payment",
+      isApplied: true,
+      isPayable: false,
+      accountCode: "11000",
+      accountName: "Accounts Receivable"),
+  PaymentType(
+      paymentTypeId: "PtPrePayment",
+      paymentTypeName: "Pre Payment - Expense",
+      isApplied: true,
+      isPayable: false,
+      accountCode: "20000",
+      accountName: "Accounts Payable"),
+  PaymentType(
+      paymentTypeId: "PtInvoicePayment",
+      paymentTypeName: "Invoice Payment",
+      isApplied: true,
+      isPayable: false,
+      accountCode: "20000",
+      accountName: "Accounts Payable"),
+  PaymentType(
+      paymentTypeId: "PtPrePayment",
+      paymentTypeName: "Pre Payment - Expense",
+      isApplied: true,
+      isPayable: false,
+      accountCode: "11000",
+      accountName: "Accounts Receivable"),
+];

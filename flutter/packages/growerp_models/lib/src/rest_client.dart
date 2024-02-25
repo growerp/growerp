@@ -304,16 +304,32 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<FinDoc> receiveShipment({@Field() required FinDoc finDoc});
 
-  @GET("rest/s1/growerp/100/ItemTypes")
+  @GET("rest/s1/growerp/100/ItemType")
   @Extra({'requireApiKey': true})
   Future<ItemTypes> getItemTypes({
     @Query('sales') bool? sales,
   });
 
-  @GET("rest/s1/growerp/100/PaymentTypes")
+  @PATCH("rest/s1/growerp/100/ItemType")
+  @Extra({'requireApiKey': true})
+  Future<ItemType> updateItemType({
+    @Field() required ItemType itemType,
+    @Field() bool? update,
+    @Field() bool? delete,
+  });
+
+  @GET("rest/s1/growerp/100/PaymentType")
   @Extra({'requireApiKey': true})
   Future<PaymentTypes> getPaymentTypes({
     @Query('sales') bool? sales,
+  });
+
+  @PATCH("rest/s1/growerp/100/PaymentType")
+  @Extra({'requireApiKey': true})
+  Future<PaymentType> updatePaymentType({
+    @Field() required PaymentType paymentType,
+    @Field() bool? update,
+    @Field() bool? delete,
   });
 
   @POST("rest/s1/growerp/100/ImportExport/finDocs")

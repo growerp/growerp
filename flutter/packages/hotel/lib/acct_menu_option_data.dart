@@ -161,6 +161,34 @@ List<MenuOption> acctMenuOptions = [
         UserGroup.admin
       ]),
   MenuOption(
+      image: "packages/growerp_core/images/setupGrey.png",
+      selectedImage: "packages/growerp_core/images/setup.png",
+      title: "SetUp",
+      route: '/acctSetup',
+      tabItems: [
+        TabItem(
+          form: const TimePeriodListForm(),
+          label: "Time Periods",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const ItemTypeListForm(),
+          label: "Item Types",
+          icon: const Icon(Icons.list),
+        ),
+        TabItem(
+          form: const PaymentTypeListForm(),
+          label: "Paymt Types",
+          icon: const Icon(Icons.list),
+        ),
+      ],
+      readGroups: [
+        UserGroup.admin
+      ],
+      writeGroups: [
+        UserGroup.admin
+      ]),
+  MenuOption(
     image: "packages/growerp_core/images/dashBoardGrey.png",
     selectedImage: "packages/growerp_core/images/dashBoard.png",
     title: "Main dashboard",

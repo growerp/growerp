@@ -27,7 +27,6 @@ class CategoryTest {
       WidgetTester tester, List<Category> categories,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    // test = test.copyWith(categories: []); // delete just for test only-------
     if (test.categories.isEmpty) {
       // not yet created
       await enterCategoryData(tester, categories);

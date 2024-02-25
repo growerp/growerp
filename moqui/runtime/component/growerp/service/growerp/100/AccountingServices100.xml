@@ -584,10 +584,10 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="get" noun="ItemTypes">
+    <service verb="get" noun="ItemType">
         <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
         <in-parameters>
-            <parameter name="sales" type="Boolean" required="true" />
+            <parameter name="sales" type="boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="itemTypes" type="List">
@@ -603,33 +603,114 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <set field="itemTypes" from="[]" />
+            <if condition="sales">
+                <set field="direction" from="sales == true? 'O' : 'I'" />
+            </if>
+            <entity-find entity-name="moqui.basic.EnumerationAndType" list="enumItemTypes">
+                <econdition field-name="enumTypeId" value="ItemType" />
+                <order-by field-name="description" />
+            </entity-find>
             <entity-find entity-name="mantle.ledger.config.ItemTypeAndGlAccount" list="itemTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition field-name="disallowPosting" value="N" or-null="true" />
-                <econditions combine="or">
-                    <econdition field-name="direction" from="sales == true? 'O' : 'I'" />
-                    <econdition field-name="direction" value="E" />
-                </econditions>
+                <econdition field-name="direction" from="direction" ignore-if-empty="true" />
                 <order-by field-name="[itemTypeDescription,accountCode]" />
             </entity-find>
-            <iterate list="itemTypeList" entry="itemType">
-                <set field="itemTypeOut"
-                    from="[itemTypeId: itemType.itemTypeEnumId,
-                        itemTypeName: itemType.itemTypeDescription,
-                        accountCode: itemType.accountCode,
-                        accountName: itemType.accountName,
-                        direction: itemType.direction,
+            <set field="itemTypes" from="[]" />
+            <iterate list="['I','O']" entry="inOut">
+                <iterate list="enumItemTypes" entry="itemType">
+                    <script>
+                        var newItemType = itemTypeList.find{
+                            item -&gt; item.itemTypeEnumId == itemType.enumId
+                                &amp;&amp; item.direction == inOut
+                            }
+                    </script>
+                    <set field="itemTypeOut"
+                        from="[itemTypeId: itemType.enumId,
+                            itemTypeName: itemType.description,
+                            accountCode: newItemType?.accountCode,
+                            accountName: newItemType?.accountName,
+                            direction: inOut,
                         ]" />
-                <script>itemTypes.add(itemTypeOut)</script>
+                    <script>itemTypes.add(itemTypeOut)</script>
+                </iterate>
+                <script>itemTypes.sort{it.itemTypeName + it.direction}</script>
             </iterate>
         </actions>
     </service>
 
-    <service verb="get" noun="PaymentTypes">
+    <service verb="update" noun="ItemType">
+        <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
+        <in-parameters>
+            <parameter name="itemType" type="Map">
+                <parameter name="itemTypeId" />
+                <parameter name="itemTypeName" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="direction" />
+            </parameter>
+            <parameter name="update" type="Boolean" />
+            <parameter name="delete" type="Boolean" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="itemType" type="Map">
+                <parameter name="itemTypeId" />
+                <parameter name="itemTypeName" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="direction" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if
+                condition="itemType.itemTypeId &amp;&amp; itemType.direction &amp;&amp; itemType.accountCode">
+                <entity-find-one entity-name="mantle.ledger.config.ItemTypeGlAccount"
+                    value-field="itemTypeGlAccount" for-update="true">
+                    <field-map field-name="itemTypeEnumId" from="itemType.itemTypeId" />
+                    <field-map field-name="organizationPartyId" from="companyPartyId" />
+                    <field-map field-name="direction" from="itemType.direction" />
+                </entity-find-one>
+                <if condition="!itemTypeGlAccount &amp;&amp; delete">
+                    <return error="true"
+                        message="Could not find itemTypeId/company/direction ${itemType.itemTypeId}/${companyPartyId}/${itemType.direction}" />
+                </if>
+                <else>
+                    <return error="true"
+                        message="one of fields itemTypeId/company/direction/accountcode ${itemType.itemTypeId}/${companyPartyId}/${itemType.direction}/${itemType.accountCode} is missing" />
+                </else>
+            </if>
+            <if condition="update">
+                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                    list="accounts">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" from="itemType.accountCode" />
+                </entity-find>
+                <if condition="itemTypeGlAccount">
+                    <!-- update -->
+                    <set field="itemTypeGlAccount.glAccountId" from="accounts[0].glAccountId" />
+                    <entity-update value-field="itemTypeGlAccount" />
+                    <else>
+                        <!-- add -->
+                        <service-call name="create#mantle.ledger.config.ItemTypeGlAccount"
+                            in-map="[itemTypeEnumId: itemType.itemTypeId,
+                                    organizationPartyId: companyPartyId,
+                                    direction: itemType.direction,
+                                    glAccountId: accounts[0].glAccountId]" />
+                    </else>
+                </if>
+                <set field="itemType.accountName" from="accounts[0].accountName" />
+            </if>
+            <if condition="delete">
+                <entity-delete value-field="itemTypeGlAccount" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PaymentType">
         <description>payment types for payment</description>
         <in-parameters>
-            <parameter name="sales" type="Boolean" required="true" />
+            <parameter name="sales" type="boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="paymentTypes" type="List">
@@ -638,8 +719,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="paymentTypeName" />
                     <parameter name="accountCode" />
                     <parameter name="accountName" />
-                    <parameter name="isPayable" />
-                    <parameter name="isApplied" />
+                    <parameter name="isPayable" type="boolean" />
+                    <parameter name="isApplied" type="boolean" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -647,27 +728,119 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="paymentTypes" from="[]" />
+            <entity-find entity-name="moqui.basic.EnumerationAndType" list="enumPaymentTypes">
+                <econdition field-name="enumTypeId" value="PaymentType" />
+            </entity-find>
+            <if condition="sales">
+                <set field="isPayable" from="sales ? 'N' : 'Y'" />
+            </if>
             <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount"
                 list="paymentTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition
-                    field-name="disallowPosting" value="N" or-null="true" />
-                <econditions combine="or">
-                    <econdition field-name="isPayable" from="sales ? 'N' : 'Y'" />
-                    <econdition field-name="isPayable" value="E" />
-                </econditions>
+                <econdition field-name="isPayable" from="isPayable? 'Y' : 'N' "
+                    ignore-if-empty="true" />
                 <order-by field-name="accountCode,typeDescription" />
             </entity-find>
-            <iterate list="paymentTypeList" entry="paymentType">
-                <set field="itemTypeOut"
-                    from="[paymentTypeId: paymentType.paymentTypeEnumId,
-                                                paymentTypeName: paymentType.typeDescription,
-                                                accountCode: paymentType.accountCode,
-                                                accountName: paymentType.accountName,
-                                                isApplied: paymentType.isApplied,
-                                                isPayable: paymentType.isPayable ]" />
-                <script>paymentTypes.add(itemTypeOut)</script>
+            <iterate list="[true, false]" entry="payable">
+                <set field="isPayable" from="payable" type="Boolean" />
+                <iterate list="[true, false]" entry="applied">
+                    <set field="isApplied" from="applied" type="Boolean" />
+                    <iterate list="enumPaymentTypes" entry="paymentType">
+                        <script>
+                            var newPaymentType = paymentTypeList.find{
+                                item -&gt; item.paymentTypeEnumId == paymentType.enumId
+                                &amp;&amp; item.isPayable == (isPayable ? 'Y' : 'N')
+                                &amp;&amp; item.isApplied == (isApplied ? 'Y' : 'N')
+                            }
+                        </script>
+                        <set field="paymentTypeOut"
+                            from="[paymentTypeId: paymentType.enumId,
+                                paymentTypeName: paymentType.description,
+                                isApplied: applied,
+                                isPayable: payable,
+                                accountCode: newPaymentType?.accountCode,
+                                accountName: newPaymentType?.accountName,
+                                ]" />
+                        <script>paymentTypes.add(paymentTypeOut)</script>
+                    </iterate>
+                </iterate>
             </iterate>
+            <script>paymentTypes.sort{it.paymentTypeName + it.isPayable + it.isApplied}</script>
+        </actions>
+    </service>
+
+    <service verb="update" noun="PaymentType">
+        <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
+        <in-parameters>
+            <parameter name="paymentType" type="Map">
+                <parameter name="paymentTypeId" />
+                <parameter name="paymentTypeName" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isPayable" type="Boolean" />
+                <parameter name="isApplied" type="Boolean" />
+            </parameter>
+            <parameter name="update" type="Boolean" />
+            <parameter name="delete" type="Boolean" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="paymentType" type="Map">
+                <parameter name="paymentTypeId" />
+                <parameter name="paymentTypeName" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isPayable" type="Boolean" />
+                <parameter name="isApplied" type="Boolean" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if
+                condition="paymentType.paymentTypeId != null &amp;&amp; paymentType.isPayable != null &amp;&amp; paymentType.isApplied != null &amp;&amp; paymentType.accountCode != null">
+                <entity-find-one entity-name="mantle.ledger.config.PaymentTypeGlAccount"
+                    value-field="paymentTypeGlAccount" for-update="true">
+                    <field-map field-name="paymentTypeEnumId" from="paymentType.paymentTypeId" />
+                    <field-map field-name="organizationPartyId" from="companyPartyId" />
+                    <field-map field-name="isPayable"
+                        from="paymentType.isPayable == true ? 'Y' : 'N'" />
+                    <field-map field-name="isApplied"
+                        from="paymentType.isApplied == true ? 'Y' : 'N'" />
+                </entity-find-one>
+                <if condition="!paymentTypeGlAccount &amp;&amp; delete">
+                    <return error="true"
+                        message="Could not find paymentTypeId/company/direction ${paymentType.paymentTypeId}/${companyPartyId}/${paymentType.direction}" />
+                </if>
+                <else>
+                    <return error="true"
+                        message="one of paymentTypeId/isPayable/isApplied/accountcode ${paymentType.paymentTypeId}/${paymentType.isPayable}/${paymentType.isApplied}/${paymentType.accountCode} missing" />
+                </else>
+            </if>
+            <if condition="update">
+                <entity-find entity-name="mantle.ledger.account.GlAccountAndOrganization"
+                    list="accounts">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" from="paymentType.accountCode" />
+                </entity-find>
+                <if condition="paymentTypeGlAccount">
+                    <!-- update -->
+                    <set field="paymentTypeGlAccount.glAccountId" from="accounts[0].glAccountId" />
+                    <entity-update value-field="paymentTypeGlAccount" />
+                    <else>
+                        <!-- add -->
+                        <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
+                            in-map="[paymentTypeEnumId: paymentType.paymentTypeId,
+                                    organizationPartyId: companyPartyId,
+                                    isPayable: paymentType.isPayable == true ? 'Y' : 'N',
+                                    isApplied: paymentType.isApplied == true ? 'Y' : 'N',
+                                    glAccountId: accounts[0].glAccountId]" />
+                    </else>
+                </if>
+                <set field="paymentType.accountName" from="accounts[0].accountName" />
+            </if>
+            <if condition="delete">
+                <entity-delete value-field="paymentTypeGlAccount" />
+            </if>
         </actions>
     </service>
 

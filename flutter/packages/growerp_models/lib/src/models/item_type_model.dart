@@ -19,20 +19,20 @@ part 'item_type_model.freezed.dart';
 part 'item_type_model.g.dart';
 
 /// Item type used for order/invoice and payments
-/// same class used for paymentTypes
+/// itemTypeId/direction is the unique key
 @freezed
 class ItemType with _$ItemType {
   ItemType._();
   factory ItemType({
     @Default('') String itemTypeId,
+    @Default('') String direction, //item type I:incoming,O:outgoing
     @Default('') String itemTypeName,
     @Default('') String accountCode,
     @Default('') String accountName,
-    String? direction, //item type I:incoming,O:outgoing,E:either
   }) = _ItemType;
 
   factory ItemType.fromJson(Map<String, dynamic> json) =>
-      _$ItemTypeFromJson(json);
+      _$ItemTypeFromJson(json['itemType'] ?? json);
 }
 
 String itemTypeCsvFormat = "itemTypeId, accountCode, direction(I/O/E), \r\n";

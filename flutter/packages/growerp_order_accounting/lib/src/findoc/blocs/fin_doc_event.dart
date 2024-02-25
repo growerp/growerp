@@ -60,16 +60,37 @@ class FinDocConfirmPayment extends FinDocEvent {
   final FinDoc payment;
 }
 
-@Deprecated("You should use the UserBloc")
+@Deprecated("You should use the UserBloc not FinDoc")
 class FinDocGetUsers extends FinDocEvent {
   const FinDocGetUsers({this.role, this.filter});
   final Role? role;
   final String? filter;
 }
 
-class FinDocGetItemTypes extends FinDocEvent {}
+class FinDocGetItemTypes extends FinDocEvent {
+  const FinDocGetItemTypes({this.searchString, this.sales});
+  final String? searchString;
+  final bool? sales;
+}
+
+class FinDocUpdateItemType extends FinDocEvent {
+  const FinDocUpdateItemType(
+      {required this.itemType, this.update, this.delete});
+  final ItemType itemType;
+  final bool? update;
+  final bool? delete;
+}
 
 class FinDocGetPaymentTypes extends FinDocEvent {
-  const FinDocGetPaymentTypes(this.sales);
-  final bool sales;
+  const FinDocGetPaymentTypes({this.searchString, this.sales});
+  final String? searchString;
+  final bool? sales;
+}
+
+class FinDocUpdatePaymentType extends FinDocEvent {
+  const FinDocUpdatePaymentType(
+      {required this.paymentType, this.update, this.delete});
+  final PaymentType paymentType;
+  final bool? update;
+  final bool? delete;
 }

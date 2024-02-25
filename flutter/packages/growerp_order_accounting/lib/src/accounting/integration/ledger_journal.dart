@@ -27,8 +27,6 @@ class LedgerJournalTest {
       WidgetTester tester, List<LedgerJournal> ledgerJournals,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    test =
-        test.copyWith(ledgerJournals: []); // delete just for test only-------
     if (test.ledgerJournals.isEmpty) {
       // not yet created
       await enterLedgerJournalData(tester, ledgerJournals);

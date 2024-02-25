@@ -136,7 +136,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
-    case '/setup':
+    case '/acctSetup':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));

@@ -18,14 +18,20 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/src/findoc/findoc.dart';
 
-import '../../accounting.dart';
+import '../../accounting/accounting.dart';
 
 class ItemTypeListForm extends StatelessWidget {
   const ItemTypeListForm({super.key});
   @override
-  Widget build(BuildContext context) => BlocProvider<FinDocBloc>(
-        create: (context) => FinDocBloc(context.read<RestClient>(), true,
-            FinDocType.order, context.read<String>()),
+  Widget build(BuildContext context) => MultiBlocProvider(
+        providers: [
+          BlocProvider<FinDocBloc>(
+              create: (context) => FinDocBloc(context.read<RestClient>(), true,
+                  FinDocType.order, context.read<String>()),
+              child: const ItemTypeList()),
+          BlocProvider<GlAccountBloc>(
+              create: (context) => GlAccountBloc(context.read<RestClient>())),
+        ],
         child: const ItemTypeList(),
       );
 }
@@ -39,15 +45,20 @@ class ItemTypeList extends StatefulWidget {
 class ItemTypeListState extends State<ItemTypeList> {
   final _scrollController = ScrollController();
   late FinDocBloc finDocBloc;
+  late GlAccountBloc glAccountBloc;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
+  late bool showAll;
 
   @override
   void initState() {
     super.initState();
+    showAll = false;
     entityName = classificationId == 'AppHotel' ? 'Room' : 'ItemType';
     finDocBloc = context.read<FinDocBloc>();
-    finDocBloc.add(FinDocGetItemTypes());
+    finDocBloc.add(const FinDocGetItemTypes());
+    glAccountBloc = context.read<GlAccountBloc>();
+    glAccountBloc.add(const GlAccountFetch(limit: 3));
   }
 
   @override
@@ -71,46 +82,49 @@ class ItemTypeListState extends State<ItemTypeList> {
               return Center(
                   child: Text('failed to fetch itemTypes: ${state.message}'));
             case FinDocStatus.success:
+              var newList = [];
+              for (var item in state.itemTypes) {
+                if (showAll) {
+                  newList.add(item);
+                } else {
+                  if (item.accountCode != '') newList.add(item);
+                }
+              }
               return Scaffold(
-                  floatingActionButton: FloatingActionButton(
-                      heroTag: "itemTypeNew",
-                      key: const Key("addNew"),
-                      onPressed: () async {},
-                      tooltip: CoreLocalizations.of(context)!.addNew,
-                      child: const Icon(Icons.add)),
+                  floatingActionButton: FloatingActionButton.extended(
+                      heroTag: 'showAll',
+                      key: const Key("switchShow"),
+                      onPressed: () {
+                        setState(() {
+                          showAll = !showAll;
+                        });
+                      },
+                      tooltip: 'Show all/used',
+                      label: showAll
+                          ? const Text('All')
+                          : const Text('only used')),
                   body: Column(children: [
                     const ItemTypeListHeader(),
                     Expanded(
                         child: RefreshIndicator(
                             onRefresh: (() async =>
-                                finDocBloc.add(FinDocGetItemTypes())),
+                                finDocBloc.add(const FinDocGetItemTypes())),
                             child: ListView.builder(
                                 key: const Key('listView'),
                                 shrinkWrap: true,
                                 physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.itemTypes.length,
+                                itemCount: newList.length,
                                 controller: _scrollController,
                                 itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return Visibility(
-                                        visible: state.itemTypes.isEmpty,
-                                        child: Center(
-                                            heightFactor: 20,
-                                            child: Text(
-                                                "no ${entityName}s found!",
-                                                key: const Key('empty'),
-                                                textAlign: TextAlign.center)));
+                                  if (newList.isEmpty) {
+                                    return const Center(
+                                        heightFactor: 20,
+                                        child: Text('No Item Types Active',
+                                            key: Key('empty'),
+                                            textAlign: TextAlign.center));
                                   }
-                                  index--;
-                                  return index >= state.itemTypes.length
-                                      ? const BottomLoader()
-                                      : Dismissible(
-                                          key: const Key('itemTypeItem'),
-                                          direction:
-                                              DismissDirection.startToEnd,
-                                          child: ItemTypeListItem(
-                                              itemType: state.itemTypes[index],
-                                              index: index));
+                                  return ItemTypeListItem(
+                                      itemType: newList[index], index: index);
                                 })))
                   ]));
             default:

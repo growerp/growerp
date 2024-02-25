@@ -32,7 +32,6 @@ class GlAccountTest {
       WidgetTester tester, List<GlAccount> glAccounts,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    test = test.copyWith(glAccounts: []); // delete just for test only-------
     if (test.glAccounts.isEmpty) {
       // not yet created
       await enterGlAccountData(tester, glAccounts);

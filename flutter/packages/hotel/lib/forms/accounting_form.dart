@@ -45,7 +45,9 @@ class AccountingForm extends StatelessWidget {
           "Balance Sheet",
           "Balance summary",
         ]),
-        makeDashboardItem('Main dashboard', context, acctMenuOptions[5], []),
+        makeDashboardItem('AcctSetup', context, acctMenuOptions[5],
+            ["Time Periods", "Item Types", "Payment Types"]),
+        makeDashboardItem('Main dashboard', context, acctMenuOptions[6], []),
       ],
     );
   }

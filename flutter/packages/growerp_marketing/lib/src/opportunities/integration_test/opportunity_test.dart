@@ -28,7 +28,6 @@ class OpportunityTest {
       WidgetTester tester, List<Opportunity> opportunities,
       {bool check = true}) async {
     MarketingTest test = await PersistMarketingTest.get();
-    test = test.copyWith(opportunities: []); // delete just for test only-------
     if (test.opportunities.isEmpty) {
       // not yet created
       await enterOpportunityData(tester, opportunities);

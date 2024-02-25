@@ -147,7 +147,7 @@ List<MenuOption> acctMenuOptions = [
       image: "packages/growerp_core/images/setupGrey.png",
       selectedImage: "packages/growerp_core/images/setup.png",
       title: "SetUp",
-      route: '/setup',
+      route: '/acctSetup',
       tabItems: [
         TabItem(
           form: const TimePeriodListForm(),
@@ -160,7 +160,7 @@ List<MenuOption> acctMenuOptions = [
           icon: const Icon(Icons.list),
         ),
         TabItem(
-          form: const PaymentTypeListForm(true),
+          form: const PaymentTypeListForm(),
           label: "Paymt Types",
           icon: const Icon(Icons.list),
         ),

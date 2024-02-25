@@ -18,26 +18,26 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 part 'payment_type_model.freezed.dart';
 part 'payment_type_model.g.dart';
 
-/// Item type used for order/invoice and payments
-/// same class used for paymentTypes
+/// Payment type used for payments
+/// key is type/isPayable/isApplied
 @freezed
 class PaymentType with _$PaymentType {
   PaymentType._();
   factory PaymentType({
     @Default('') String paymentTypeId,
+    @Default(false) bool isPayable,
+    @Default(false) bool isApplied,
     @Default('') String paymentTypeName,
     @Default('') String accountCode,
     @Default('') String accountName,
-    String? isPayable, //payment type payable=Y/receivable=N
-    String? isApplied, //payment type Y:applied, N: unapplied, E: either
   }) = _PaymentType;
 
   factory PaymentType.fromJson(Map<String, dynamic> json) =>
-      _$PaymentTypeFromJson(json);
+      _$PaymentTypeFromJson(json['paymentType'] ?? json);
 }
 
 String paymentTypeCsvFormat = "paymentTypeId, accountCode, "
-    "isPayable(Y/N/E), isApplied(Y/N/E), \r\n";
+    "isPayable(Y/N), isApplied(Y/N), \r\n";
 int paymentTypeCsvLength = paymentTypeCsvFormat.split(',').length;
 
 // import
@@ -49,8 +49,8 @@ List<PaymentType> CsvToPaymentTypes(String csvFile) {
     PaymentTypes.add(PaymentType(
       paymentTypeId: row[0],
       accountCode: row[1],
-      isPayable: row[2],
-      isApplied: row[3],
+      isPayable: row[2] == "Y" ? true : false,
+      isApplied: row[3] == "Y" ? true : false,
     ));
   }
   return PaymentTypes;

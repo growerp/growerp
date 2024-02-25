@@ -232,15 +232,21 @@ along with this software (see the LICENSE.md file). If not, see
             </method>
         </resource>
         <!-- itemTypes -->
-        <resource name="ItemTypes">
+        <resource name="ItemType">
             <method type="get">
-                <service name="growerp.100.AccountingServices100.get#ItemTypes" />
+                <service name="growerp.100.AccountingServices100.get#ItemType" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AccountingServices100.update#ItemType" />
             </method>
         </resource>
         <!-- paymentTypes -->
-        <resource name="PaymentTypes">
+        <resource name="PaymentType">
             <method type="get">
-                <service name="growerp.100.AccountingServices100.get#PaymentTypes" />
+                <service name="growerp.100.AccountingServices100.get#PaymentType" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.AccountingServices100.update#PaymentType" />
             </method>
         </resource>
         <!-- opportunity -->
