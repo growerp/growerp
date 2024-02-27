@@ -76,14 +76,10 @@ class CompanyTest {
 
       if (c.email != null && c.email!.isNotEmpty) {
         c = c.copyWith(email: c.email!.replaceFirst('XXX', '${seq++}'));
-        await CommonTest.enterText(tester, 'email', c.email ?? '');
       }
-      if (c.vatPerc != null) {
-        await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
-      }
-      if (c.salesPerc != null) {
-        await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
-      }
+      await CommonTest.enterText(tester, 'email', c.email ?? '');
+      await CommonTest.enterText(tester, 'vatPerc', c.vatPerc.toString());
+      await CommonTest.enterText(tester, 'salesPerc', c.salesPerc.toString());
       // if required add address and payment
       if (c.address != null) {
         await updateAddress(tester, c.address!);
