@@ -46,14 +46,12 @@ class ItemTypeTest {
       WidgetTester tester, List<ItemType> itemTypes,
       {bool check = true}) async {
     SaveTest test = await PersistFunctions.getTest();
-    if (test.itemTypes.isEmpty) {
-      if (showAll(tester) == false) {
-        // switch to show all item types
-        await CommonTest.tapByKey(tester, 'switchShow');
-      }
-      await enterItemTypeData(tester, itemTypes);
-      await PersistFunctions.persistTest(test.copyWith(itemTypes: itemTypes));
+    if (showAll(tester) == false) {
+      // switch to show all item types
+      await CommonTest.tapByKey(tester, 'switchShow');
     }
+    await enterItemTypeData(tester, itemTypes);
+    await PersistFunctions.persistTest(test.copyWith(itemTypes: itemTypes));
     if (check) {
       await PersistFunctions.persistTest(
           test.copyWith(itemTypes: await checkItemType(tester, itemTypes)));
