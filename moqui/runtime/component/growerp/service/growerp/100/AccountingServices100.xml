@@ -624,14 +624,17 @@ along with this software (see the LICENSE.md file). If not, see
                                 &amp;&amp; item.direction == inOut
                             }
                     </script>
-                    <set field="itemTypeOut"
-                        from="[itemTypeId: itemType.enumId,
+                    <if
+                        condition="(sales != null &amp;&amp; newItemType != null) || sales == null">
+                        <set field="itemTypeOut"
+                            from="[itemTypeId: itemType.enumId,
                             itemTypeName: itemType.description,
                             accountCode: newItemType?.accountCode,
                             accountName: newItemType?.accountName,
                             direction: inOut,
                         ]" />
-                    <script>itemTypes.add(itemTypeOut)</script>
+                        <script>itemTypes.add(itemTypeOut)</script>
+                    </if>
                 </iterate>
                 <script>itemTypes.sort{it.itemTypeName + it.direction}</script>
             </iterate>
@@ -753,15 +756,18 @@ along with this software (see the LICENSE.md file). If not, see
                                 &amp;&amp; item.isApplied == (isApplied ? 'Y' : 'N')
                             }
                         </script>
-                        <set field="paymentTypeOut"
-                            from="[paymentTypeId: paymentType.enumId,
+                        <if
+                            condition="(sales != null &amp;&amp; newPaymentType != null) || sales == null">
+                            <set field="paymentTypeOut"
+                                from="[paymentTypeId: paymentType.enumId,
                                 paymentTypeName: paymentType.description,
                                 isApplied: applied,
                                 isPayable: payable,
                                 accountCode: newPaymentType?.accountCode,
                                 accountName: newPaymentType?.accountName,
                                 ]" />
-                        <script>paymentTypes.add(paymentTypeOut)</script>
+                            <script>paymentTypes.add(paymentTypeOut)</script>
+                        </if>
                     </iterate>
                 </iterate>
             </iterate>
