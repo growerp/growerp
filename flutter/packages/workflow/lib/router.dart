@@ -20,6 +20,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'acct_menu_options.dart';
+import 'main.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_models/growerp_models.dart' as cat;
@@ -35,6 +36,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/':
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: menuOptions));
+    case '/workflow':
+      return MaterialPageRoute(
+          builder: (context) =>
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
     case '/company':
       return MaterialPageRoute(
           builder: (context) =>

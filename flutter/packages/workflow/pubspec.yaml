@@ -25,6 +25,11 @@ dependencies:
   package_info_plus: ^5.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_flow_chart: ^2.1.2
+  flow_builder: ^0.0.10
+  star_menu: ^3.0.1
+  path_provider: ^2.0.11
+  flutter_colorpicker: ^1.0.3
 
 dev_dependencies: 
   flutter_test:
