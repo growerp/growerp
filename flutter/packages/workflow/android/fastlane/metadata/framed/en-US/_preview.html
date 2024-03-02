@@ -1,0 +1,29 @@
+    <!--suppress ALL --><html lang="en"><head><title>present me</title>
+    <style>
+      :root {
+        --height: 600;
+      }
+      body { background-color: #efefef; }
+      img {
+        max-height: calc(var(--height) * 1px);
+        margin-left: 16px;
+      }
+      input {
+        width: 400px;
+      }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let h = document.getElementById('height');
+      let root = document.documentElement;
+      h.addEventListener('input', function () {
+        console.log('setting to ' + h.value);
+        root.style.setProperty('--height', h.value);
+      });
+    });
+    </script>
+    </head>
+    <div><label for="height">Preview Height:</label> <input type="range" min="100" max="2000" value="600" id="height" /></div>
+    <h1>Framed Screenshots</h2><img src="Nexus_10_API_30-account.png" alt="Nexus_10_API_30-account.png" /><img src="Nexus_10_API_30-catalog.png" alt="Nexus_10_API_30-catalog.png" /><img src="Nexus_10_API_30-dashboard.png" alt="Nexus_10_API_30-dashboard.png" /><img src="Nexus_10_API_30-ledgers.png" alt="Nexus_10_API_30-ledgers.png" /><img src="Nexus_10_API_30-orders.png" alt="Nexus_10_API_30-orders.png" /><img src="Nexus_10_API_30-warehouse.png" alt="Nexus_10_API_30-warehouse.png" /><img src="Nexus_10_API_30-website.png" alt="Nexus_10_API_30-website.png" /><img src="Nexus_7_2012_API_30-account.png" alt="Nexus_7_2012_API_30-account.png" /><img src="Nexus_7_2012_API_30-catalog.png" alt="Nexus_7_2012_API_30-catalog.png" /><img src="Nexus_7_2012_API_30-dashboard.png" alt="Nexus_7_2012_API_30-dashboard.png" /><img src="Nexus_7_2012_API_30-ledgers.png" alt="Nexus_7_2012_API_30-ledgers.png" /><img src="Nexus_7_2012_API_30-orders.png" alt="Nexus_7_2012_API_30-orders.png" /><img src="Nexus_7_2012_API_30-warehouse.png" alt="Nexus_7_2012_API_30-warehouse.png" /><img src="Nexus_7_2012_API_30-website.png" alt="Nexus_7_2012_API_30-website.png" /><img src="Pixel_4_API_31-account.png" alt="Pixel_4_API_31-account.png" /><img src="Pixel_4_API_31-catalog.png" alt="Pixel_4_API_31-catalog.png" /><img src="Pixel_4_API_31-dashboard.png" alt="Pixel_4_API_31-dashboard.png" /><img src="Pixel_4_API_31-ledgers.png" alt="Pixel_4_API_31-ledgers.png" /><img src="Pixel_4_API_31-orders.png" alt="Pixel_4_API_31-orders.png" /><img src="Pixel_4_API_31-warehouse.png" alt="Pixel_4_API_31-warehouse.png" /><img src="Pixel_4_API_31-website.png" alt="Pixel_4_API_31-website.png" />
+    <body></body></html>
+    

@@ -5,6 +5,7 @@ packages:
   - packages/admin
   - packages/hotel
   - packages/freelance
+  - packages/workflow
   - packages/growerp*
   - packages/growerp*/*example
 

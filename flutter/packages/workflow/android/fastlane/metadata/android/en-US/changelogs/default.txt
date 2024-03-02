@@ -1,0 +1,1 @@
+First version which has all basic ERP functions including accounting.
