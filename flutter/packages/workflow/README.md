@@ -7,37 +7,46 @@ under development
 
 entities:
 
-
 Workflow
-	workflowId/date
+	workflowId
 	name,
 	description,
 	image (json)
 
-WorkflowElements
-	workflowId/date
-    elementId
+WorkflowTasks
+	workflowId
+    taskId
 	
-workflowElementLinks
-	workflowId/date
-	fromElementId
-	toElementId
-	condition
+workflowTaskLinks
+	workflowId
+	fromTaskId
+	toTaskId
+    condition
 	
-workflow elements
-	WorkflowElementId
+Tasks
+	TaskId
 	name
     description
 	uiScreen
+
 	
-workflowActive
-	user,
-	workflowId/date,
-	current element
-	data
-	element history
+WorkflowsActive
+	workflowId
+    startdate,
+    statusId
+	current task
+	data(json)
+	task history
 	
 packages to be used:
 [flutter flowbuilder package](https://pub.dev/packages/flow_builder)
 [workflow editor](https://github.com/alnitak/flutter_flow_chart)
+
+screens:
+
+1. workflow list
+2. detail workflow to flowchart editor
+3. task list
+4. task detail popup
+5. Active workflow list
 

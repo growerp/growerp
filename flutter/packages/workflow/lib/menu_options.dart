@@ -43,7 +43,14 @@ List<MenuOption> menuOptions = [
     writeGroups: [UserGroup.admin],
     child: const MyHomePage(title: "workflow"),
   ),
-
+  MenuOption(
+      image: "packages/growerp_core/images/tasksGrey.png",
+      selectedImage: "packages/growerp_core/images/tasks.png",
+      title: "Tasks",
+      route: '/tasks',
+      readGroups: [UserGroup.admin, UserGroup.employee],
+      writeGroups: [UserGroup.admin, UserGroup.employee],
+      child: const TaskListForm()),
 /*  MenuOption(
     image: 'packages/growerp_core/images/dashBoardGrey.png',
     selectedImage: 'packages/growerp_core/images/dashBoard.png',

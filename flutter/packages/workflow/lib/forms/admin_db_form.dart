@@ -25,9 +25,16 @@ class AdminDbForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.authenticated) {
-        //  Authenticate authenticate = state.authenticate!;
+        Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
           makeDashboardItem('dbWorkflow', context, menuOptions[1], []),
+          makeDashboardItem('dbTask', context, menuOptions[2], [
+            authenticate.company!.name!.length > 20
+                ? "${authenticate.company!.name!.substring(0, 20)}..."
+                : "${authenticate.company!.name}",
+            "All open tasks: ${authenticate.stats?.allTasks ?? 0}",
+            "Not Invoiced hours: ${authenticate.stats?.notInvoicedHours ?? 0}",
+          ]),
         ]);
       }
 
