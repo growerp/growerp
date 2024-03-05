@@ -114,7 +114,10 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
     try {
       emit(state.copyWith(status: LedgerStatus.loading));
       await restClient.calculateLedger();
-      return emit(state.copyWith(status: LedgerStatus.success));
+      return emit(state.copyWith(
+          status: LedgerStatus.success,
+          message:
+              "Re-calculation ledger summaries started in the background...."));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: LedgerStatus.failure, message: getDioError(e)));

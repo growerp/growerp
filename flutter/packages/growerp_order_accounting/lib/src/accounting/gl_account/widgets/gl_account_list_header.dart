@@ -14,8 +14,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import '../gl_account.dart';
 
@@ -40,7 +40,7 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
         title: search
             ? Row(children: <Widget>[
                 SizedBox(
-                    width: ResponsiveBreakpoints.of(context).isMobile
+                    width: isPhone(context)
                         ? MediaQuery.of(context).size.width - 250
                         : MediaQuery.of(context).size.width - 350,
                     child: TextField(
@@ -66,35 +66,32 @@ class _GlAccountListHeaderState extends State<GlAccountListHeader> {
                       searchString = '';
                     })
               ])
-            : Column(children: [
-                if (ResponsiveBreakpoints.of(context).equals(MOBILE))
-                  const Text("Account name", textAlign: TextAlign.left),
+            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (isPhone(context)) const Text("Account name"),
                 Row(children: [
                   const Expanded(child: Text("Account code")),
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                  if (isLargerThanPhone(context))
+                    const Expanded(child: Text("Account name")),
+                  if (isPhone(context))
                     const Expanded(
-                        child:
-                            Text("Account name", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).equals(MOBILE))
-                    const Expanded(
-                        child: Text("debit", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                        child: Text("debit", textAlign: TextAlign.right)),
+                  if (isLargerThanPhone(context))
                     const Expanded(
                         child:
                             Text("Account class", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                  if (isLargerThanPhone(context))
                     const Expanded(
                         child:
                             Text("Account Type", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).equals(MOBILE))
+                  if (isPhone(context))
                     const Expanded(
-                        child: Text("Credit", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                        child: Text("Credit", textAlign: TextAlign.right)),
+                  if (isLargerThanPhone(context))
                     const Expanded(
-                        child: Text("Debit", textAlign: TextAlign.center)),
-                  if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
+                        child: Text("Debit", textAlign: TextAlign.right)),
+                  if (isLargerThanPhone(context))
                     const Expanded(
-                        child: Text("Credit", textAlign: TextAlign.center)),
+                        child: Text("Credit", textAlign: TextAlign.right)),
                 ]),
                 const Divider(),
               ]),

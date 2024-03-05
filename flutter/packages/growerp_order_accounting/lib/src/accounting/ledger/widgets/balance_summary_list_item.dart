@@ -15,8 +15,8 @@
 import 'package:decimal/decimal.dart';
 import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:intl/intl.dart';
 
 class BalanceSummaryListItem extends StatelessWidget {
   const BalanceSummaryListItem(
@@ -29,7 +29,6 @@ class BalanceSummaryListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     //   var repos = context.read<AccountingAPIRepository>();
     //   final balanceSummaryBloc = context.read<BalanceSummaryBloc>();
-    var formatter = NumberFormat.decimalPattern('en-US');
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
@@ -44,22 +43,22 @@ class BalanceSummaryListItem extends StatelessWidget {
                   key: Key("code$index"))),
           Expanded(
               child: Text(
-                  formatter.format(DecimalIntl(
+                  Constant.numberFormat.format(DecimalIntl(
                       Decimal.parse(glAccount.beginningBalance.toString()))),
                   textAlign: TextAlign.right)),
           Expanded(
               child: Text(
-                  formatter.format(DecimalIntl(
+                  Constant.numberFormat.format(DecimalIntl(
                       Decimal.parse(glAccount.postedDebits.toString()))),
                   textAlign: TextAlign.right)),
           Expanded(
               child: Text(
-                  formatter.format(DecimalIntl(
+                  Constant.numberFormat.format(DecimalIntl(
                       Decimal.parse(glAccount.postedCredits.toString()))),
                   textAlign: TextAlign.right)),
           Expanded(
               child: Text(
-                  formatter.format(DecimalIntl(
+                  Constant.numberFormat.format(DecimalIntl(
                       Decimal.parse(glAccount.postedBalance.toString()))),
                   textAlign: TextAlign.right)),
         ],

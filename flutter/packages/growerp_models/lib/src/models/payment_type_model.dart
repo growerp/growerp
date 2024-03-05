@@ -49,8 +49,8 @@ List<PaymentType> CsvToPaymentTypes(String csvFile) {
     PaymentTypes.add(PaymentType(
       paymentTypeId: row[0],
       accountCode: row[1],
-      isPayable: row[2] == "Y" ? true : false,
-      isApplied: row[3] == "Y" ? true : false,
+      isPayable: row[2] == "true" ? true : false,
+      isApplied: row[3] == "true" ? true : false,
     ));
   }
   return PaymentTypes;

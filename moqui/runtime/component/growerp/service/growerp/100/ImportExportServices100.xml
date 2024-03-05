@@ -69,28 +69,28 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- create new -->
             <iterate list="paymentTypes" entry="paymentType">
                 <set field="glAccountId" from="null" />
-                <if condition="paymentType.accountCode">
+                <if
+                    condition="paymentType.accountCode &amp;&amp; !paymentType.accountCode.isEmpty()">
                     <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
                         list="glAccounts">
                         <econdition field-name="partyId" from="companyPartyId" />
                         <econdition field-name="accountCode" from="paymentType.accountCode" />
                     </entity-find>
                     <if condition="!glAccounts">
-                        <log level="error"
+                        <return error="true"
                             message="Could not find accountCode: ${paymentType.accountCode} for company: $companyPartyId" />
                         <else>
                             <set field="glAccountId" from="glAccounts[0].glAccountId" />
                         </else>
                     </if>
-                </if>
-                <log message="====== $paymentType" />
-                <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
-                    in-map="[   paymentTypeEnumId: paymentType.paymentTypeId,
+                    <service-call name="create#mantle.ledger.config.PaymentTypeGlAccount"
+                        in-map="[   paymentTypeEnumId: paymentType.paymentTypeId,
                                 organizationPartyId: companyPartyId,
-                                isPayable: paymentType.isPayable,
-                                isApplied: paymentType.isApplied,
+                                isPayable: paymentType.isPayable == true ? 'Y' : 'N',
+                                isApplied: paymentType.isApplied == true ? 'Y' : 'N',
                                 glAccountId: glAccountId,
                             ]" />
+                </if>
             </iterate>
             <if condition="!ec.message.hasError()">
                 <message type="success">${paymentTypes.size()} paymentTypes imported</message>
@@ -369,8 +369,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- when not yet create all until next year -->
                 <if condition="!periods">
                     <log
-                        message="Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)}" />
-                    <!-- delete existing-->
+                        message="Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)} for company $companyPartyId" />
+                    <!-- delete existing timeperiods-->
                     <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                         <econdition field-name="partyId" from="companyPartyId" />
                         <order-by field-name="-timePeriodId" />
@@ -499,7 +499,6 @@ along with this software (see the LICENSE.md file). If not, see
             <log message="importing ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
             <set field="index" value="0" type="Integer" />
             <iterate list="finDocItems" entry="item">
-                <!-- log message="${index++}" /-->
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
                         in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType, classificationId: classificationId]" />

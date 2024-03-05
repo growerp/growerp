@@ -21,7 +21,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="email" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="ok" type="boolean" />
+            <parameter name="ok" type="Boolean" />
         </out-parameters>
         <actions>
             <entity-find entity-name="mantle.party.contact.PartyContactMechInfo"
@@ -2084,7 +2084,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="userPartyId" required="true" />
             <parameter name="companyPartyId" required="true" />
             <parameter name="classificationId" required="true" />
-            <parameter name="demoData" type="boolean" />
+            <parameter name="demoData" type="Boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="productStore" />

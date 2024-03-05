@@ -17,8 +17,6 @@ import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
-import 'package:intl/intl.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -48,7 +46,6 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
   Iterable<TreeNode> _nodes = [];
   late LedgerBloc _ledgerBloc;
   late bool expanded;
-  var formatter = NumberFormat.decimalPattern('en-US');
 
   @override
   void initState() {
@@ -61,7 +58,6 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
 
   @override
   Widget build(BuildContext context) {
-    final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     //convert glAccount list into TreeNodes
     Iterable<TreeNode> convert(List<GlAccount> glAccounts) {
       // convert single leaf/glAccount
@@ -71,22 +67,22 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
           key: ValueKey(glAccount.accountCode),
           content: Row(children: [
             SizedBox(
-                width:
-                    (isPhone ? 210 : 400) - (glAccount.level!.toDouble() * 10),
+                width: (isPhone(context) ? 210 : 400) -
+                    (glAccount.level!.toDouble() * 10),
                 child:
                     Text('${glAccount.accountCode} ${glAccount.accountName} ')),
             SizedBox(
                 width: 100,
                 child: Text(
-                    formatter.format(DecimalIntl(
+                    Constant.numberFormat.format(DecimalIntl(
                         Decimal.parse(glAccount.postedBalance.toString()) +
                             Decimal.parse(glAccount.rollUp.toString()))),
                     textAlign: TextAlign.right)),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               SizedBox(
                   width: 100,
                   child: Text(
-                      formatter.format(DecimalIntl(
+                      Constant.numberFormat.format(DecimalIntl(
                           Decimal.parse(glAccount.rollUp.toString()))),
                       textAlign: TextAlign.right))
           ]),
@@ -108,12 +104,15 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
       if (state.status == LedgerStatus.failure) {
         HelperFunctions.showMessage(context, '${state.message}', Colors.red);
       }
+      if (state.status == LedgerStatus.success) {
+        HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+      }
     }, builder: (context, state) {
       if (state.status == LedgerStatus.failure) {
         return const FatalErrorForm(message: 'Could not load Ledger tree!');
       }
       if (state.status == LedgerStatus.loading) {
-        return const CircularProgressIndicator();
+        return const LoadingIndicator();
       }
       if (state.status == LedgerStatus.success) {
         _nodes = convert(
@@ -148,11 +147,11 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
           Row(children: [
             const SizedBox(width: 20),
             SizedBox(
-                width: isPhone ? 220 : 410,
+                width: isPhone(context) ? 220 : 410,
                 child: const Text('Gl Account ID  GL Account Name')),
             const SizedBox(
                 width: 100, child: Text('Posted', textAlign: TextAlign.right)),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               const SizedBox(
                   width: 100,
                   child: Text('Roll Up', textAlign: TextAlign.right))

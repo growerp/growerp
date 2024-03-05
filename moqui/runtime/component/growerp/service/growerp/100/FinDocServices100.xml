@@ -210,7 +210,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="invoiceId" />
                     <parameter name="paymentId" />
                     <parameter name="transactionId" />
-                    <parameter name="isPosted" type="boolean" />
+                    <parameter name="isPosted" type="Boolean" />
                     <parameter name="paymentInstrument" />
                     <parameter name="statusId" />
                     <parameter name="creationDate" />
@@ -1071,7 +1071,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="transactionTotal" value="0" type="BigDecimal" />
                 <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="entries">
                     <econdition field-name="transactionId" operator="in" from="finDocIds" />
-                    <order-by field-name="transactionId,entryId" />
+                    <order-by field-name="accountCode" />
                 </entity-find>
                 <iterate list="entries" entry="item">
                     <!-- add items to a single transaction when transactionId changes-->
@@ -1081,7 +1081,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <if condition="finDoc.transactionId == lastTransactionId">
                                 <set field="finDoc.items" from="finDocItems" />
                                 <set field="finDoc.grandTotal"
-                                    from="transactionTotal ? transactionTotal.toString(): ''" />
+                                    from="transactionTotal ? transactionTotal.toString(): null" />
                             </if>
                         </iterate>
                         <set field="finDocItems" from="[]" />
@@ -1188,7 +1188,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="invoiceId" />
                 <parameter name="paymentId" />
                 <parameter name="transactionId" />
-                <parameter name="isPosted" type="boolean" />
+                <parameter name="isPosted" type="Boolean" />
                 <parameter name="paymentInstrument" />
                 <parameter name="statusId" />
                 <parameter name="creationDate" />
@@ -1672,7 +1672,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="invoiceId" />
                 <parameter name="paymentId" />
                 <parameter name="transactionId" />
-                <parameter name="isPosted" type="boolean" />
+                <parameter name="isPosted" type="Boolean" />
                 <parameter name="paymentInstrument" />
                 <parameter name="statusId" />
                 <parameter name="description" />
@@ -1722,7 +1722,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="invoiceId" />
                 <parameter name="paymentId" />
                 <parameter name="transactionId" />
-                <parameter name="isPosted" type="boolean" />
+                <parameter name="isPosted" type="Boolean" />
                 <parameter name="paymentInstrument" />
                 <parameter name="statusId" />
                 <parameter name="creationDate" />

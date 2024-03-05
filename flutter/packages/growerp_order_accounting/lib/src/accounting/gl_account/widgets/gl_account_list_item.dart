@@ -12,11 +12,12 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class GlAccountListItem extends StatelessWidget {
   const GlAccountListItem(
@@ -28,11 +29,10 @@ class GlAccountListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glAccountBloc = context.read<GlAccountBloc>();
-    bool isPhone = (ResponsiveBreakpoints.of(context).equals(MOBILE));
     String postedBalance = glAccount.postedBalance == null ||
             glAccount.postedBalance.toString() == '0'
         ? ''
-        : glAccount.postedBalance.toString();
+        : Constant.numberFormat.format(DecimalIntl(glAccount.postedBalance!));
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.green,
@@ -40,66 +40,68 @@ class GlAccountListItem extends StatelessWidget {
             ? '?'
             : glAccount.accountCode!.substring(0, 3)),
       ),
-      title: Column(children: [
-        if (isPhone) Text(glAccount.accountName ?? '', key: Key('name$index')),
+      title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (isPhone(context))
+          Text(glAccount.accountName ?? '',
+              textAlign: TextAlign.left, key: Key('name$index')),
         Row(
           children: <Widget>[
-            if ((!isPhone && glAccount.isDebit != null))
+            if ((isLargerThanPhone(context) && glAccount.isDebit != null))
               Expanded(
                   child: Text(glAccount.accountCode ?? '',
                       key: Key('code$index'))),
-            if ((isPhone && glAccount.isDebit != null))
+            if ((isPhone(context) && glAccount.isDebit != null))
               Expanded(
                   child: Text(glAccount.accountCode ?? '',
                       key: Key('code$index'))),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               Expanded(
                   child: Text(glAccount.accountName ?? '',
                       key: Key('name$index'))),
-            if (isPhone)
+            if (isPhone(context))
               Expanded(
                   child: glAccount.isDebit == true
                       ? Text(postedBalance,
-                          textAlign: TextAlign.center,
-                          key: Key('isDebit$index'))
+                          textAlign: TextAlign.right, key: Key('isDebit$index'))
                       : const Text('')),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               Expanded(
-                  child: Text(glAccount.accountClass?.description ?? '',
+                  child: Text(
+                      "${glAccount.accountClass?.description} ${glAccount.isDebit! ? '(D)' : '(C)'} ",
                       key: Key('class$index'))),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               Expanded(
                   child: Text(glAccount.accountType?.description ?? '',
                       key: Key('type$index'))),
-            if (isPhone && glAccount.isDebit == null)
+            if (isPhone(context) && glAccount.isDebit == null)
               Text(
-                  "debit:${glAccount.postedDebits.toString()} credit:${glAccount.postedCredits.toString()}",
+                  "debit:${glAccount.postedDebits.toString()} "
+                  "credit:${glAccount.postedCredits.toString()}",
                   key: Key('postedBalance$index')),
-            if (isPhone)
+            if (isPhone(context))
               Expanded(
                   child: glAccount.isDebit == false
                       ? Text(postedBalance,
-                          textAlign: TextAlign.center,
-                          key: Key('isDebit$index'))
+                          textAlign: TextAlign.right, key: Key('isDebit$index'))
                       : const Text('')),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               Expanded(
                   child: glAccount.isDebit == null
                       ? Text(glAccount.postedDebits.toString(),
                           textAlign: TextAlign.center)
                       : glAccount.isDebit == true
                           ? Text(postedBalance,
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.right,
                               key: Key('postedBalance$index'))
                           : const Text('')),
-            if (!isPhone)
+            if (isLargerThanPhone(context))
               Expanded(
                   child: glAccount.isDebit == null
                       ? Text(glAccount.postedCredits.toString(),
                           textAlign: TextAlign.center)
                       : glAccount.isDebit == false
                           ? Text(postedBalance,
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.right,
                               key: Key('postedBalance$index'))
                           : const Text('')),
           ],

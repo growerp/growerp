@@ -17,7 +17,6 @@ import 'package:decimal/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
-import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -56,7 +55,6 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
   var distribution = Decimal.parse('0');
   var liability = Decimal.parse('0');
   var income = Decimal.parse('0');
-  var formatter = NumberFormat.decimalPattern('en-US');
 
   @override
   void initState() {
@@ -91,7 +89,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
               SizedBox(
                   width: 100,
                   child: Text(
-                      formatter.format(DecimalIntl(Decimal.parse(
+                      Constant.numberFormat.format(DecimalIntl(Decimal.parse(
                           glAccount.postedBalance != null
                               ? glAccount.postedBalance.toString()
                               : '0'))),
@@ -240,7 +238,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
                                 TableCell(child: Text(item["text"])),
                                 TableCell(
                                     child: Text(
-                                        formatter.format(
+                                        Constant.numberFormat.format(
                                             DecimalIntl(item["amount"])),
                                         textAlign: TextAlign.right)),
                               ])

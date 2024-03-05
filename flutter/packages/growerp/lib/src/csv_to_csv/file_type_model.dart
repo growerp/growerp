@@ -1,3 +1,5 @@
+// The sequence in this list defines the squence of loading the files.
+
 enum FileType {
   company,
   glAccount,

@@ -380,7 +380,7 @@ along with this software (see the LICENSE.md file). If not, see
                     name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
                 <set field="companyPartyId" from="relComp.companyPartyId" />
             </if>
-            <service-call in-map="organizationPartyId: companyPartyId"
+            <service-call in-map="organizationPartyId: companyPartyId" async="true"
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgSummaries" />
         </actions>
     </service>
@@ -587,7 +587,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="ItemType">
         <description>itemtypes for orderItem and invoiceItem either sales or purchase</description>
         <in-parameters>
-            <parameter name="sales" type="boolean" />
+            <parameter name="sales" type="Boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="itemTypes" type="List">
@@ -603,7 +603,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="sales">
+            <if condition="sales != null">
                 <set field="direction" from="sales == true? 'O' : 'I'" />
             </if>
             <entity-find entity-name="moqui.basic.EnumerationAndType" list="enumItemTypes">
@@ -713,7 +713,7 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="PaymentType">
         <description>payment types for payment</description>
         <in-parameters>
-            <parameter name="sales" type="boolean" />
+            <parameter name="sales" type="Boolean" />
         </in-parameters>
         <out-parameters>
             <parameter name="paymentTypes" type="List">
@@ -722,8 +722,8 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="paymentTypeName" />
                     <parameter name="accountCode" />
                     <parameter name="accountName" />
-                    <parameter name="isPayable" type="boolean" />
-                    <parameter name="isApplied" type="boolean" />
+                    <parameter name="isPayable" type="Boolean" />
+                    <parameter name="isApplied" type="Boolean" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -734,14 +734,13 @@ along with this software (see the LICENSE.md file). If not, see
             <entity-find entity-name="moqui.basic.EnumerationAndType" list="enumPaymentTypes">
                 <econdition field-name="enumTypeId" value="PaymentType" />
             </entity-find>
-            <if condition="sales">
-                <set field="isPayable" from="sales ? 'N' : 'Y'" />
+            <if condition="sales != null">
+                <set field="isPayable" from="sales == true ? 'N' : 'Y'" />
             </if>
             <entity-find entity-name="mantle.ledger.config.PaymentTypeAndGlAccount"
                 list="paymentTypeList">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
-                <econdition field-name="isPayable" from="isPayable? 'Y' : 'N' "
-                    ignore-if-empty="true" />
+                <econdition field-name="isPayable" from="isPayable" ignore-if-empty="true" />
                 <order-by field-name="accountCode,typeDescription" />
             </entity-find>
             <iterate list="[true, false]" entry="payable">

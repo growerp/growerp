@@ -73,26 +73,27 @@ will create a new directory: growerpOutput with the converted file(s).
     * specify any file wide changes in the convertFile function
     * specific the column to column conversion the convertRow function
 4. convert the old system files to the GrowERP CSV format into the growerpOutput directory
-    * execute activate: (just the first time or after a change)
+    * execute activate: 
     ```bash
     dart pub global activate --source path ~/growerp/flutter/packages/growerp
     ```
-    * run conversion for a single file type for testing
+    * run conversion for a single file type for testing (date optional)
+    for creating starting balances you need at least a start date for the transactions 
     ```bash
-    dart pub global run growerp:csvToCsv inputDir fileType
+    dart pub global run growerp:csvToCsv inputDir -f fileType -start yyyy/mm/dd -end yyy/mm/dd
     ```
     * run conversion for all files
     ```bash
     dart pub global run growerp:csvToCsv inputDir
     ```
 5. Import the generated GrowERP csv files into the growerp system
-   * execute activate (just the first time or after a change)
+   * execute activate 
    ```bash
    dart pub global activate growerp
    ```
    * import the generated files into the growerp system for a single file type 
    ```bash
-   growerp import -i growerpOutput fileType -u username -p password
+   growerp import -i growerpOutput -d fileType -u username -p password
    ```
     * import all files
     ```bash
