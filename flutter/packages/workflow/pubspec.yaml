@@ -47,6 +47,8 @@ flutter:
     - assets/cfg/
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png
+    - packages/growerp_core/images/workflow.png
+    - packages/growerp_core/images/workflowGrey.png
     - packages/growerp_core/images/tasks.png
     - packages/growerp_core/images/tasksGrey.png
     - packages/growerp_core/images/category.png

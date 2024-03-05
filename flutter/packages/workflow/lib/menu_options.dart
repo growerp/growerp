@@ -35,8 +35,8 @@ List<MenuOption> menuOptions = [
     child: const local.AdminDbForm(),
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
+    image: 'packages/growerp_core/images/workflowGrey.png',
+    selectedImage: 'packages/growerp_core/images/workflow.png',
     title: 'Workflow',
     route: '/workflow',
     readGroups: [UserGroup.admin, UserGroup.employee],
