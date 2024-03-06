@@ -66,6 +66,8 @@ along with this software (see the LICENSE.md file). If not, see
         classificationTypeEnumId="PcltMobileApp" description="App for Realtor/property management" />
     <mantle.party.PartyClassification partyClassificationId="AppFreelance"
         classificationTypeEnumId="PcltMobileApp" description="App for a freelancer" />
+    <mantle.party.PartyClassification partyClassificationId="AppWorkflow"
+        classificationTypeEnumId="PcltMobileApp" description="Workflow application" />
 
     <!-- sales opportunity stage -->
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />

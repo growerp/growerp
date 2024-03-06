@@ -16,14 +16,9 @@ import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
-import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'acct_menu_options.dart';
-import 'main.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_models/growerp_models.dart' as cat;
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
@@ -41,6 +36,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) =>
               DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
     case '/tasks':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
+    case '/toDo':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
+    case '/workflows':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
@@ -63,10 +66,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
-    case '/category':
-      return MaterialPageRoute(
-          builder: (context) =>
-              CategoryDialog(settings.arguments as cat.Category));
+
     case '/orders':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
@@ -75,33 +75,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 5, tabIndex: 0));
-    case '/printer':
-      return MaterialPageRoute(
-          builder: (context) =>
-              PrintingForm(finDocIn: settings.arguments as FinDoc));
-    case '/accounting':
-      return MaterialPageRoute(
-          builder: (context) => HomeForm(menuOptions: acctMenuOptions));
-    case '/acctSales':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
-    case '/acctPurchase':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
-    case '/acctLedger':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
-    case '/acctReports':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
-    case '/acctSetup':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
     default:
       return coreRoute(settings);
   }

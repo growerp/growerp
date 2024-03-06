@@ -14,11 +14,9 @@
 
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../common/functions/helper_functions.dart';
+import '../../../../growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import '../../domains.dart';
 
 class TaskDialog extends StatefulWidget {
   final Task task;
@@ -31,18 +29,19 @@ class TaskDialogState extends State<TaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
 
-  late String _statusId;
+  late TaskStatus _status;
+  late TaskBloc taskBloc;
 
   @override
   void initState() {
     super.initState();
-    _statusId = widget.task.statusId ?? 'In Planning';
-    _nameController.text = widget.task.taskName ?? '';
+    _status = widget.task.status ?? TaskStatus.planning;
+    _nameController.text = widget.task.taskName;
+    taskBloc = context.read<TaskBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Dialog(
@@ -54,16 +53,16 @@ class TaskDialogState extends State<TaskDialog> {
             child: BlocListener<TaskBloc, TaskState>(
                 listener: (context, state) async {
                   switch (state.status) {
-                    case TaskStatus.success:
+                    case TaskBlocStatus.success:
                       HelperFunctions.showMessage(
                           context,
-                          '${widget.task.taskId == null ? "Add" : "Update"} successfull',
+                          '${widget.task.taskId.isEmpty ? "Add" : "Update"} successfull',
                           Colors.green);
                       await Future.delayed(const Duration(milliseconds: 500));
                       if (!mounted) return;
                       Navigator.of(context).pop();
                       break;
-                    case TaskStatus.failure:
+                    case TaskBlocStatus.failure:
                       HelperFunctions.showMessage(
                           context, 'Error: ${state.message}', Colors.red);
                       break;
@@ -71,17 +70,12 @@ class TaskDialogState extends State<TaskDialog> {
                       const Text("????");
                   }
                 },
-                child: Stack(clipBehavior: Clip.none, children: [
-                  Container(
-                      padding: const EdgeInsets.all(20),
-                      width: 400,
-                      height: 400,
-                      child: Center(
-                        child: _showForm(isPhone),
-                      )),
-                  const Positioned(
-                      top: 10, right: 10, child: DialogCloseButton())
-                ]))));
+                child: popUp(
+                    context: context,
+                    child: _showForm(isPhone(context)),
+                    title: '${widget.task.taskType} Information',
+                    height: 400,
+                    width: 400))));
   }
 
   Widget _showForm(isPhone) {
@@ -91,35 +85,38 @@ class TaskDialogState extends State<TaskDialog> {
             child: ListView(key: const Key('listView'), children: <Widget>[
               Center(
                   child: Text(
-                      "Task${widget.task.taskId == null ? "New" : "${widget.task.taskId}"}",
+                      "Task${widget.task.taskId.isEmpty ? "New" : widget.task.taskId}",
                       style: const TextStyle(
                           fontSize: 10, fontWeight: FontWeight.bold))),
               const SizedBox(height: 30),
               TextFormField(
                 key: const Key('name'),
-                decoration: const InputDecoration(labelText: 'Task Name'),
+                decoration:
+                    InputDecoration(labelText: '${widget.task.taskType} Name'),
                 controller: _nameController,
                 validator: (value) {
-                  if (value!.isEmpty) return 'Please enter a task name?';
+                  if (value!.isEmpty) {
+                    return 'Please enter a ${widget.task.taskType} name?';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<TaskStatus>(
                 key: const Key('statusDropDown'),
                 decoration: const InputDecoration(labelText: 'Status'),
                 hint: const Text('Status'),
-                value: _statusId,
+                value: _status,
                 validator: (value) => value == null ? 'field required' : null,
-                items: taskStatusValues
-                    .map((label) => DropdownMenuItem<String>(
-                          value: label,
-                          child: Text(label),
+                items: TaskStatus.values
+                    .map((taskStatus) => DropdownMenuItem<TaskStatus>(
+                          value: taskStatus,
+                          child: Text(taskStatus.name),
                         ))
                     .toList(),
-                onChanged: (String? newValue) {
+                onChanged: (newValue) {
                   setState(() {
-                    _statusId = newValue!;
+                    _status = newValue!;
                   });
                 },
                 isExpanded: true,
@@ -127,7 +124,7 @@ class TaskDialogState extends State<TaskDialog> {
               const SizedBox(height: 20),
               Row(children: [
                 Visibility(
-                    visible: widget.task.taskId != null,
+                    visible: widget.task.taskId.isNotEmpty,
                     child: ElevatedButton(
                         key: const Key('TimeEntries'),
                         child: const Text('TimeEntries'),
@@ -137,9 +134,9 @@ class TaskDialogState extends State<TaskDialog> {
                               context: context,
                               builder: (BuildContext context) {
                                 return BlocProvider.value(
-                                    value: context.read<TaskBloc>(),
+                                    value: taskBloc,
                                     child: TimeEntryListDialog(
-                                        widget.task.taskId!,
+                                        widget.task.taskId,
                                         widget.task.timeEntries));
                               });
                         })),
@@ -148,16 +145,16 @@ class TaskDialogState extends State<TaskDialog> {
                     child: ElevatedButton(
                         key: const Key('update'),
                         child: Text(
-                            widget.task.taskId == null ? 'Create' : 'Update'),
+                            widget.task.taskId.isEmpty ? 'Create' : 'Update'),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            context.read<TaskBloc>().add(TaskUpdate(
-                                  Task(
-                                    taskId: widget.task.taskId,
-                                    taskName: _nameController.text,
-                                    statusId: _statusId,
-                                  ),
-                                ));
+                            taskBloc.add(TaskUpdate(
+                              widget.task.copyWith(
+                                taskId: widget.task.taskId,
+                                taskName: _nameController.text,
+                                status: _status,
+                              ),
+                            ));
                           }
                         }))
               ]),

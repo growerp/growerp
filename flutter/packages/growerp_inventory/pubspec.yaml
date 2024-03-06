@@ -60,7 +60,7 @@ dev_dependencies:
   very_good_analysis: ^5.1.0
   bloc_test: ^9.0.1
   mobx_codegen: ^2.0.4
-  json_serializable: ^6.2.0
+  json_serializable: ^6.7.1
 flutter: 
   uses-material-design: true
   assets: 

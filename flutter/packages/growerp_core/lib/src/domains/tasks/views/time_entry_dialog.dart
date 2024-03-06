@@ -15,7 +15,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../common/functions/helper_functions.dart';
@@ -34,6 +33,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
   final TextEditingController _commentsController = TextEditingController();
   final TextEditingController _hoursController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  late TaskBloc taskBloc;
 
   @override
   void initState() {
@@ -41,11 +41,11 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
     _commentsController.text = widget.timeEntry.comments ?? '';
     _hoursController.text =
         widget.timeEntry.hours != null ? widget.timeEntry.hours.toString() : '';
+    taskBloc = context.read<TaskBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Scaffold(
@@ -61,7 +61,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                     child: BlocListener<TaskBloc, TaskState>(
                         listener: (context, state) async {
                           switch (state.status) {
-                            case TaskStatus.success:
+                            case TaskBlocStatus.success:
                               HelperFunctions.showMessage(
                                   context,
                                   '${widget.timeEntry.timeEntryId == null ? "Add" : "Update"} successfull',
@@ -71,7 +71,7 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                               if (!mounted) return;
                               Navigator.of(context).pop();
                               break;
-                            case TaskStatus.failure:
+                            case TaskBlocStatus.failure:
                               HelperFunctions.showMessage(context,
                                   'Error: ${state.message}', Colors.red);
                               break;
@@ -79,20 +79,15 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                               const Text("????");
                           }
                         },
-                        child: Stack(clipBehavior: Clip.none, children: [
-                          Container(
-                              padding: const EdgeInsets.all(20),
-                              width: 400,
-                              height: 400,
-                              child: Center(
-                                child: _showForm(isPhone),
-                              )),
-                          const Positioned(
-                              top: 10, right: 10, child: DialogCloseButton())
-                        ]))))));
+                        child: popUp(
+                            context: context,
+                            child: _showForm(),
+                            title: 'Enter Time Entries',
+                            height: 400,
+                            width: 400))))));
   }
 
-  Widget _showForm(isPhone) {
+  Widget _showForm() {
     Future<void> selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
         context: context,
@@ -161,17 +156,17 @@ class TimeEntryDialogState extends State<TimeEntryDialog> {
                       ? 'Create'
                       : 'Update'),
                   onPressed: () async {
-                    context.read<TaskBloc>().add(TaskTimeEntryUpdate(TimeEntry(
-                          date: _selectedDate,
-                          hours: Decimal.parse(_hoursController.text),
-                          taskId: widget.timeEntry.taskId,
-                          partyId: context
-                              .read<AuthBloc>()
-                              .state
-                              .authenticate!
-                              .user!
-                              .partyId!,
-                        )));
+                    taskBloc.add(TaskTimeEntryUpdate(TimeEntry(
+                      date: _selectedDate,
+                      hours: Decimal.parse(_hoursController.text),
+                      taskId: widget.timeEntry.taskId,
+                      partyId: context
+                          .read<AuthBloc>()
+                          .state
+                          .authenticate!
+                          .user!
+                          .partyId!,
+                    )));
                     Navigator.of(context).pop();
                   })
             ])));

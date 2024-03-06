@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_string_interpolations
+
 /*
  * This software is in the public domain under CC0 1.0 Universal plus a
  * Grant of Patent License.
@@ -14,8 +16,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/src/domains/common/functions/functions.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import '../tasks.dart';
 
 class TaskListItem extends StatelessWidget {
@@ -30,19 +32,22 @@ class TaskListItem extends StatelessWidget {
     return ListTile(
         leading: CircleAvatar(
             backgroundColor: Colors.green,
-            child: Text(task.taskName != null ? task.taskName![0] : '')),
+            child: Text(task.taskName.isNotEmpty ? task.taskName[0] : '')),
         title: Row(
           children: <Widget>[
-            Expanded(child: Text("${task.taskName}", key: Key('name$index'))),
-            Expanded(child: Text("${task.statusId}", key: Key('status$index'))),
-            Text(task.unInvoicedHours!.toString(),
+            Expanded(child: Text(task.taskName, key: Key('name$index'))),
+            Expanded(child: Text("${task.status}", key: Key('status$index'))),
+            Text(
+                task.unInvoicedHours != null
+                    ? task.unInvoicedHours!.toString()
+                    : '0',
                 key: Key('unInvoicedHours$index')),
-            if (!ResponsiveBreakpoints.of(context).isMobile)
+            if (!isPhone(context))
               Expanded(
                   child: Text("${task.description}",
                       key: Key('description$index'),
                       textAlign: TextAlign.center)),
-            if (!ResponsiveBreakpoints.of(context).isMobile)
+            if (!isPhone(context))
               Expanded(
                   child: Text("${task.rate}",
                       key: Key('rate$index'), textAlign: TextAlign.center)),
@@ -63,7 +68,7 @@ class TaskListItem extends StatelessWidget {
             onPressed: () {
               context
                   .read<TaskBloc>()
-                  .add(TaskUpdate(task.copyWith(statusId: 'Closed')));
+                  .add(TaskUpdate(task.copyWith(status: TaskStatus.closed)));
             }));
   }
 }

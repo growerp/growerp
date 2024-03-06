@@ -13,34 +13,41 @@
  */
 
 import 'package:decimal/decimal.dart';
+import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../json_converters.dart';
 import 'models.dart';
 
 part 'task_model.freezed.dart';
 part 'task_model.g.dart';
 
 @freezed
-class Task with _$Task {
+class Task extends Equatable with _$Task {
   Task._();
   factory Task({
-    String? taskId,
-    String? parentTaskId,
-    String? statusId,
-    String? taskName,
-    String? description,
+    @Default("") String taskId,
+    TaskType? taskType, // todo, workflow, workflowTask
+    @Default("") String parentTaskId,
+    TaskStatus? status,
+    @Default("") String taskName,
+    @Default("") String description,
     User? customerUser,
     User? vendorUser,
     User? employeeUser,
     Decimal? rate,
-    @DateTimeConverter() DateTime? startDate,
-    @DateTimeConverter() DateTime? endDate,
+    // from workflow editor
+    @Default("") String jsonImage,
+    DateTime? startDate,
+    DateTime? endDate,
     Decimal? unInvoicedHours,
+    @Default([]) List<Task> tasks,
     @Default([]) List<TimeEntry> timeEntries,
   }) = _Task;
 
   factory Task.fromJson(Map<String, dynamic> json) =>
       _$TaskFromJson(json['task'] ?? json);
+
+  @override
+  List<Object?> get props => [taskId];
 
   @override
   String toString() => 'Task $taskName [$taskId]';

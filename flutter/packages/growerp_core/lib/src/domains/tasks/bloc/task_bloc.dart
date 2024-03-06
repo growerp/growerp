@@ -50,7 +50,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     if (state.hasReachedMax && !event.refresh && event.searchString == '') {
       return;
     }
-    if (state.status == TaskStatus.initial ||
+    if (state.status == TaskBlocStatus.initial ||
         event.refresh ||
         event.searchString != '') {
       start = 0;
@@ -58,11 +58,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       start = state.tasks.length;
     }
     try {
-      emit(state.copyWith(status: TaskStatus.loading));
+      emit(state.copyWith(status: TaskBlocStatus.loading));
       Tasks compResult = await restClient.getTask(
-          start: start, searchString: event.searchString, limit: event.limit);
+          taskType: event.taskType,
+          start: start,
+          searchString: event.searchString,
+          limit: event.limit);
       return emit(state.copyWith(
-        status: TaskStatus.success,
+        status: TaskBlocStatus.success,
         tasks: start == 0
             ? compResult.tasks
             : (List.of(state.tasks)..addAll(compResult.tasks)),
@@ -71,7 +74,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
     }
   }
 
@@ -81,22 +84,24 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     try {
       List<Task> tasks = List.from(state.tasks);
-      emit(state.copyWith(status: TaskStatus.loading));
-      if (event.task.taskId != null) {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+      if (event.task.taskId.isNotEmpty) {
         Task compResult = await restClient.updateTask(task: event.task);
         int index =
             tasks.indexWhere((element) => element.taskId == event.task.taskId);
         tasks[index] = compResult;
-        return emit(state.copyWith(status: TaskStatus.success, tasks: tasks));
+        return emit(
+            state.copyWith(status: TaskBlocStatus.success, tasks: tasks));
       } else {
         // add
         Task compResult = await restClient.createTask(task: event.task);
         tasks.insert(0, compResult);
-        return emit(state.copyWith(status: TaskStatus.success, tasks: tasks));
+        return emit(
+            state.copyWith(status: TaskBlocStatus.success, tasks: tasks));
       }
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
     }
   }
 
@@ -127,7 +132,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       emit(state.copyWith(tasks: tasks));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
     }
   }
 
@@ -145,12 +150,12 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           (element) => element.timeEntryId == teApiResult.timeEntryId);
 
       emit(state.copyWith(
-        status: TaskStatus.success,
+        status: TaskBlocStatus.success,
         tasks: tasks,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
-          status: TaskStatus.failure, tasks: [], message: getDioError(e)));
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
     }
   }
 }

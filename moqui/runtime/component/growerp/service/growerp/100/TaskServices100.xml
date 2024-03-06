@@ -74,34 +74,16 @@ along with this software (see the LICENSE.md file). If not, see
         <description> get a single or multiple tasks</description>
         <in-parameters>
             <parameter name="taskId" />
+            <parameter name="taskType" /><!-- workflow, workflowTask, toDo -->
             <parameter name="my" default-value="true" /> <!-- my task only? (true/false) -->
             <parameter name="open" default-value="true" /> <!-- open tasks only? (true/false)-->
             <parameter name="start" default-value="0" type="Integer" />
             <parameter name="limit" default-value="20" type="Integer" />
+            <parameter name="isForDropDown" type="Boolean" />
             <parameter name="search" default="null" />
         </in-parameters>
         <out-parameters>
-            <parameter name="task" type="Map">
-                <parameter name="taskId" />
-                <parameter name="parentTaskId" />
-                <parameter name="taskName" />
-                <parameter name="statusId" />
-                <parameter name="description" />
-                <parameter name="startDate" />
-                <parameter name="endDate" />
-                <parameter name="unInvoicedHours" />
-                <parameter name="timeEntries" type="List">
-                    <parameter name="timeEntry" type="Map">
-                        <parameter name="timeEntryId" />
-                        <parameter name="taskId" />
-                        <parameter name="partyId" />
-                        <parameter name="hours" />
-                        <parameter name="date" />
-                        <parameter name="comments" />
-                    </parameter>
-                </parameter>
-            </parameter>
-            <parameter name="taskList" type="List">
+            <parameter name="tasks" type="List">
                 <parameter name="task" type="Map">
                     <parameter name="taskId" />
                     <parameter name="parentTaskId" />
@@ -138,70 +120,148 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="my == 'true'">
                 <set field="employeePartyId" from="ec.user.userAccount.partyId" />
             </if>
-            <entity-find offset="start" limit="limit" list="entries"
-                entity-name="growerp.task.TaskAndParties">
-                <econdition field-name="workEffortId" from="taskId"
-                    ignore-if-empty="true" />
-                <econdition field-name="workTypeEnumId" value="WetTask" />
-                <econdition field-name="employeePartyId" from="employeePartyId"
-                    ignore-if-empty="true" />
-                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
-                <econdition field-name="statusId" operator="in"
-                    from="openStatusList" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="workEffortName" ignore-case="true"
-                        operator="like" from="searchString" ignore-if-empty="true" />
-                    <econdition field-name="description" ignore-case="true"
-                        operator="like" from="searchString" ignore-if-empty="true" />
-                </econditions>
-            </entity-find>
-            <if condition="!taskId">
-                <set field="taskList" from="[]" />
-            </if>
-            <iterate entry="entry" list="entries">
-                <service-call name="growerp.100.FinDocServices100.convert#StatusId"
-                    in-map="[docType: 'task', statusId: entry.statusId]" out-map="context" />
-                <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntries">
-                    <econdition field-name="workEffortId" from="entry.workEffortId" />
-                    <econdition field-name="invoiceId" operator="is-null" />
-                    <order-by field-name="fromDate" />
+            <set field="tasks" from="[]" />
+            <!-- translate frontend Task type with backend-->
+            <set field="typeConvert"
+                from="[workflow: 'WetWorkflow',
+                        workflowtask: 'WetWorkflowTask',
+                        todo: 'WetTask']"
+                type="NewMap" />
+            <set field="workEffortType" from="typeConvert[taskType]" />
+            <if condition="taskId">
+                <entity-find list="entries" entity-name="growerp.task.TaskAndParties">
+                    <econdition field-name="workEffortId" from="taskId" ignore-if-empty="true" />
+                    <econdition field-name="ownerPartyId" ignore-if-empty="true" />
                 </entity-find>
-                <set field="teOutList" from="[]" />
-                <set field="unInvoicedHours" value="0" type="Integer" />
-                <iterate list="timeEntries" entry="te">
-                    <set field="teOut"
-                        from="[
-                        timeEntryId: te.timeEntryId,
-                        taskId: te.workEffortId,
-                        partyId: te.partyId,
-                        hours: te.hours?.toString(),
-                        date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
-                        comments: te.comments
-                    ]" />
-                    <set field="unInvoicedHours" from="unInvoicedHours + te.hours" />
-                    <script>teOutList.add(teOut)</script>
-                </iterate>
-                <set field="workEffortOut"
-                    from="[
-                    taskId: entry.workEffortId,
-                    parentTaskId: entry.parentWorkEffortId,
-                    taskName: entry.workEffortName,
-                    statusId: convertedStatusId,
-                    description: entry.description,
-                    startDate: entry.actualStartDate?
-                        ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,
-                    endDate: entry.actualCompletionDate?
-                        ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
-                    unInvoicedHours: unInvoicedHours.toString(),
-                    timeEntries: teOutList,
-                ]" />
-                <if condition="taskId">
-                    <set field="task" from="workEffortOut" />
-                    <else>
-                        <script>taskList.add(workEffortOut)</script>
-                    </else>
+                <if condition="!entries">
+                    <return error="true" message="Task $taskId not found" />
                 </if>
-            </iterate>
+                <set field="workEffortType" from="entries[0].workEffortTypeEnumId" />
+                <else>
+                    <!-- get always the basic listing -->
+                    <entity-find offset="start" limit="limit" list="entries"
+                        entity-name="growerp.task.TaskAndParties">
+                        <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
+                        <econdition field-name="workEffortId" from="taskId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="employeePartyId" from="employeePartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+                        <econdition field-name="statusId" operator="in"
+                            from="openStatusList" ignore-if-empty="true" />
+                        <econditions combine="or">
+                            <econdition field-name="workEffortName" ignore-case="true"
+                                operator="like" from="searchString" ignore-if-empty="true" />
+                            <econdition field-name="description" ignore-case="true"
+                                operator="like" from="searchString" ignore-if-empty="true" />
+                        </econditions>
+                    </entity-find>
+                </else>
+            </if>
+            <!-- and add information depending on the type -->
+            <if condition="workEffortType == 'WetWorkflow'">
+                <then>
+                    <iterate entry="entry" list="entries">
+                        <!-- get editor content -->
+                        <entity-find entity-name="mantle.work.effort.WorkEffortContent"
+                            list="contents">
+                            <econdition field-name="workEffortId" from="entry.workEffortId" />
+                            <econdition field-name="contentTypeEnumId" value="CmctPlainText" />
+                        </entity-find>
+                        <if condition="contents">
+                            <set field="resourceReference"
+                                from="ec.resource.getLocationReference(contents[0].contentLocation)" />
+                            <if condition="!resourceReference || !resourceReference.getExists()">
+                                <log level="warn"
+                                    message="Could not find resource at [${contentLocation}]" />
+                                <else>
+                                    <set field="inputStream"
+                                        from="resourceReference.openStream()" />
+                                    <set field="docBytes"
+                                        from="org.apache.commons.io.IOUtils.toByteArray(inputStream)" />
+                                </else>
+                            </if>
+                        </if>
+                        <set field="workEffortOut"
+                            from="[
+                                    taskId: entry.workEffortId,
+                                    parentTaskId: entry.parentWorkEffortId,
+                                    taskName: entry.workEffortName,
+                                    statusId: convertedStatusId,
+                                    jsonImage: docBytes,
+                                ]" />
+                        <script>tasks.add(workEffortOut)</script>
+                    </iterate>
+                </then>
+                <else-if condition="workEffortType == 'WetWorkflowTask'">
+                    <iterate entry="entry" list="entries">
+                        <set field="workEffortOut"
+                            from="[
+                                    taskId: entry.workEffortId,
+                                    parentTaskId: entry.parentWorkEffortId,
+                                    taskName: entry.workEffortName,
+                                    statusId: convertedStatusId,
+                                ]" />
+                        <script>tasks.add(workEffortOut)</script>
+                    </iterate>
+                </else-if>
+                <else-if condition="workEffortType == 'WetTask'">
+                    <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'task', statusId: entry.statusId]"
+                            out-map="context" />
+                        <entity-find entity-name="mantle.work.time.TimeEntry" list="timeEntries">
+                            <econdition field-name="workEffortId" from="entry.workEffortId" />
+                            <econdition field-name="invoiceId" operator="is-null" />
+                            <order-by field-name="fromDate" />
+                        </entity-find>
+                        <set field="teOutList" from="[]" />
+                        <set field="unInvoicedHours" value="0" type="Integer" />
+                        <iterate list="timeEntries" entry="te">
+                            <set field="teOut"
+                                from="[
+                                timeEntryId: te.timeEntryId,
+                                taskId: te.workEffortId,
+                                partyId: te.partyId,
+                                hours: te.hours?.toString(),
+                                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null,
+                                comments: te.comments
+                            ]" />
+                            <set field="unInvoicedHours" from="unInvoicedHours + te.hours" />
+                            <script>teOutList.add(teOut)</script>
+                        </iterate>
+                        <if condition="isForDropDown">
+                            <set field="workEffortOut"
+                                from="[
+                                    taskId: entry.workEffortId,
+                                    parentTaskId: entry.parentWorkEffortId,
+                                    taskName: entry.workEffortName,
+                                    statusId: convertedStatusId,
+                                ]" />
+                            <else>
+                                <set field="workEffortOut"
+                                    from="[
+                                        taskId: entry.workEffortId,
+                                        parentTaskId: entry.parentWorkEffortId,
+                                        taskName: entry.workEffortName,
+                                        statusId: convertedStatusId,
+                                        description: entry.description,
+                                        startDate: entry.actualStartDate?
+                                            ec.l10n.format(entry.actualStartDate,'yyyy-MM-dd') : null,
+                                        endDate: entry.actualCompletionDate?
+                                            ec.l10n.format(entry.actualCompletionDate,'yyyy-MM-dd')  : null,
+                                        unInvoicedHours: unInvoicedHours.toString(),
+                                        timeEntries: teOutList,
+                                        ]" />
+                            </else>
+                        </if>
+                        <script>tasks.add(workEffortOut)</script>
+                    </iterate>
+                </else-if>
+                <else>
+                    <return error="true" message="Task type $taskType not supported" />
+                </else>
+            </if>
         </actions>
     </service>
 
@@ -209,6 +269,7 @@ along with this software (see the LICENSE.md file). If not, see
         <description> Create a task </description>
         <in-parameters>
             <parameter name="task" type="Map" required="true">
+                <parameter name="taskType" />
                 <parameter name="parentTaskId" />
                 <parameter name="taskName" />
                 <parameter name="statusId" />
@@ -216,11 +277,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
+                <parameter name="jsonImage" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="task" type="Map">
                 <parameter name="taskId" />
+                <parameter name="taskType" />
                 <parameter name="parentTaskId" />
                 <parameter name="taskName" />
                 <parameter name="statusId" />
@@ -228,6 +291,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
+                <parameter name="jsonImage" />
                 <parameter name="timeEntries" type="List">
                     <parameter name="timeEntry" type="Map">
                         <parameter name="timeEntryId" />
@@ -243,6 +307,11 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="typeConvert"
+                from="[workflow: 'WetWorkflow',
+                        workflowtask: 'WetWorkflowTask',
+                        todo: 'WetTask']"
+                type="NewMap" />
             <!-- create task -->
             <if condition="!task.statusId">
                 <set field="task.statusId" value="In Planning" />
@@ -251,9 +320,8 @@ along with this software (see the LICENSE.md file). If not, see
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
             <service-call name="create#mantle.work.effort.WorkEffort"
                 in-map="[
-                    workEffortId: task.taskId,
                     parentWorkEffortId: task.parentTaskId,
-                    workTypeEnumId: 'WetTask',
+                    workEffortTypeEnumId: typeConvert[task.taskType],
                     workEffortName: task.taskName,
                     statusId: convertedStatusId,
                     description: task.description,
@@ -302,8 +370,31 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: 'WeptAssigned'
                     ]" />
             </if>
+            <!-- editor json file -->
+            <if condition="task.jsonImage">
+                <set field="pagePath" value="/workEffort/${workEffortId}/" />
+                <set field="contentLocation"
+                    value="dbresource://C${companyPartyId}/json${pagePath}" />
+                <set field="ec" from="context.ec" />
+                <set field="attachmentReference"
+                    from="ec.resource.getLocationReference(contentLocation)" />
+                <script>
+                    // attachmentReference.delete();
+                    org.apache.commons.fileupload.FileItem attachmentFile = file
+                    InputStream fileStream = attachmentFile.getInputStream()
+                    attachmentReferenceLarge.putStream(fileStream)
+                    fileStream.close()
+                </script>
+                <service-call name="create#mantle.work.effort.WorkEffortContent"
+                    in-map="[workEffortId: workEffortId,
+                    contentTypeEnumId: 'CmctPlainText',
+                            contentLocation: contentLocation]" />
+            </if>
+            <log message="====workeffort created ${workEffortId}" />
+
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: workEffortId]" out-map="context" />
+            <set field="task" from="tasks[0]" />
         </actions>
     </service>
     <service verb="update" noun="Task">
@@ -311,6 +402,7 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="task" type="Map" required="true">
                 <parameter name="taskId" />
+                <parameter name="taskType" />
                 <parameter name="parentTaskId" />
                 <parameter name="taskName" />
                 <parameter name="statusId" />
@@ -318,11 +410,13 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
+                <parameter name="jsonImage" />
             </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="task" type="Map">
                 <parameter name="taskId" />
+                <parameter name="taskType" />
                 <parameter name="parentTaskId" />
                 <parameter name="taskName" />
                 <parameter name="statusId" />
@@ -330,6 +424,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
+                <parameter name="jsonImage" />
                 <parameter name="timeEntries" type="List">
                     <parameter name="timeEntry" type="Map">
                         <parameter name="timeEntryId" />
@@ -442,8 +537,26 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: 'WeptAssigned'
                     ]" />
             </if>
+            <!-- editor json file -->
+            <if condition="task.jsonImage">
+                <set field="pagePath" value="/workEffort/${workEffortId}/" />
+                <set field="contentLocation"
+                    value="dbresource://C${companyPartyId}/json${pagePath}" />
+                <set field="ec" from="context.ec" />
+                <set field="attachmentReference"
+                    from="ec.resource.getLocationReference(contentLocation)" />
+                <script>
+                    attachmentReference.delete();
+                    org.apache.commons.fileupload.FileItem attachmentFile = file
+                    InputStream fileStream = attachmentFile.getInputStream()
+                    attachmentReferenceLarge.putStream(fileStream)
+                    fileStream.close()
+                </script>
+            </if>
+
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: task.taskId]" out-map="context" />
+            <set field="task" from="tasks[0]" />
         </actions>
     </service>
 
@@ -471,7 +584,7 @@ along with this software (see the LICENSE.md file). If not, see
                 partyId: te.partyId,
                 hours: te.hours?.toString(),
                 comments: te.comments,
-                date: te.fromDate ? ec.l10n.format(te,fromDate,'yyyy-MM-dd') : null
+                date: te.fromDate ? ec.l10n.format(te.fromDate,'yyyy-MM-dd') : null
             ]" />
         </actions>
     </service>

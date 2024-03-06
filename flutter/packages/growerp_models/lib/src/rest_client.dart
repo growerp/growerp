@@ -497,9 +497,11 @@ abstract class RestClient {
   @Extra({'requireApiKey': true})
   Future<Tasks> getTask({
     @Query('taskId') String? taskId,
+    @Query('taskType') TaskType? taskType,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('open') bool? open,
+    @Query('isForDropDown') bool? isForDropDown,
     @Query('search') String? searchString,
   });
 

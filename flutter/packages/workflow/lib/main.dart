@@ -17,17 +17,12 @@ import 'dart:io';
 
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'package:growerp_catalog/growerp_catalog.dart';
-import 'package:growerp_inventory/growerp_inventory.dart';
-import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:growerp_website/growerp_website.dart';
-import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:star_menu/star_menu.dart';
-import 'package:workflow/forms/element_settings_menu.dart';
-import 'package:workflow/forms/text_menu.dart';
+import 'package:workflow/views/element_settings_menu.dart';
+import 'package:workflow/views/text_menu.dart';
 import 'menu_options.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,12 +81,6 @@ Future main() async {
 
 List<LocalizationsDelegate<dynamic>> extraDelegates = const [
   UserCompanyLocalizations.delegate,
-  CatalogLocalizations.delegate,
-  InventoryLocalizations.delegate,
-  OrderAccountingLocalizations.delegate,
-  WebsiteLocalizations.delegate,
-  MarketingLocalizations.delegate,
-  InventoryLocalizations.delegate,
 ];
 
 class MyHomePage extends StatefulWidget {

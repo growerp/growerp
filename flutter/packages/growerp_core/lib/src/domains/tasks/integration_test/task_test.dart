@@ -32,7 +32,7 @@ class TaskTest {
   static Future<void> enterTaskDemoDataAndSave(WidgetTester tester) async {}
 
   static Future<void> enterTasktaskName(WidgetTester tester, Task task) async {
-    await CommonTest.enterText(tester, 'taskName', task.taskName!);
+    await CommonTest.enterText(tester, 'taskName', task.taskName);
   }
 
   static Future<void> pressCreate(WidgetTester tester) async {

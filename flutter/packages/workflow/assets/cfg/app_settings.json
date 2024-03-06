@@ -3,7 +3,7 @@
     "packageName": "",
     "version": "",
     "build": "",
-    "classificationId": "AppAdmin",
+    "classificationId": "AppWorkflow",
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
     "_________________comment__release to be used with docker locally ": "https://rest.example.com",

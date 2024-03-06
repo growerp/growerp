@@ -20,7 +20,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
-import 'forms/forms.dart' as local;
+import 'views/forms.dart' as local;
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -41,7 +41,7 @@ List<MenuOption> menuOptions = [
       route: '/tasks',
       readGroups: [UserGroup.admin, UserGroup.employee],
       writeGroups: [UserGroup.admin, UserGroup.employee],
-      child: const TaskListForm()),
+      child: const TaskListForm(TaskType.todo)),
   MenuOption(
     image: "packages/growerp_core/images/crmGrey.png",
     selectedImage: "packages/growerp_core/images/crm.png",

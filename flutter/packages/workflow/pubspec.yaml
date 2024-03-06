@@ -1,5 +1,5 @@
 name: workflow
-version: 1.2.0+72
+version: 0.0.1+1
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -9,11 +9,6 @@ dependencies:
   flutter: 
     sdk: flutter
   growerp_core: ^1.2.4
-  growerp_marketing: ^1.2.1
-  growerp_website: ^1.2.1
-  growerp_inventory: ^1.2.1
-  growerp_catalog: ^1.2.1
-  growerp_order_accounting: ^1.2.1
   growerp_user_company: ^1.2.1
   decimal: ^2.1.0
   flutter_bloc: ^8.1.4

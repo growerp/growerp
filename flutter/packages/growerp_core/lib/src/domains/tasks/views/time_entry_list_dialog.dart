@@ -12,13 +12,11 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:growerp_models/growerp_models.dart';
-
-import '../../common/functions/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import '../../domains.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+import '../../../../growerp_core.dart';
 
 class TimeEntryListDialog extends StatefulWidget {
   final String taskId;
@@ -29,30 +27,28 @@ class TimeEntryListDialog extends StatefulWidget {
 }
 
 class TimeEntryListState extends State<TimeEntryListDialog> {
+  late TaskBloc taskBloc;
+
   @override
   void initState() {
     super.initState();
+    taskBloc = context.read<TaskBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return Dialog(
         key: const Key('TimeEntryListDialog'),
         insetPadding: const EdgeInsets.all(10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Stack(clipBehavior: Clip.none, children: [
-          Container(
-              padding: const EdgeInsets.all(20),
-              width: 400,
-              height: 400,
-              child: Center(
-                child: _showList(isPhone),
-              )),
-          const Positioned(top: 5, right: 5, child: DialogCloseButton())
-        ]));
+        child: popUp(
+            context: context,
+            child: _showList(isPhone(context)),
+            title: 'Time Entry Information',
+            height: 400,
+            width: 400));
   }
 
   Widget _showList(isPhone) {
@@ -65,7 +61,7 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                   context: context,
                   builder: (BuildContext context) {
                     return BlocProvider.value(
-                        value: context.read<TaskBloc>(),
+                        value: taskBloc,
                         child:
                             TimeEntryDialog(TimeEntry(taskId: widget.taskId)));
                   });
@@ -79,14 +75,14 @@ class TimeEntryListState extends State<TimeEntryListDialog> {
                 child: BlocListener<TaskBloc, TaskState>(
                     listener: (context, state) async {
               switch (state.status) {
-                case TaskStatus.success:
+                case TaskBlocStatus.success:
                   HelperFunctions.showMessage(
                       context, 'Update successfull', Colors.green);
                   await Future.delayed(const Duration(milliseconds: 500));
                   if (!mounted) return;
                   Navigator.of(context).pop();
                   break;
-                case TaskStatus.failure:
+                case TaskBlocStatus.failure:
                   HelperFunctions.showMessage(
                       context, 'Error: ${state.message}', Colors.red);
                   break;

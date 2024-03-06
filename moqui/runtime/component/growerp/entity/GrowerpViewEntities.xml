@@ -1773,7 +1773,7 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="statusId" entity-alias="WE" />
         <alias name="actualStartDate" entity-alias="WE" />
         <alias name="actualCompletionDate" entity-alias="WE" />
-        <alias name="workTypeEnumId" entity-alias="WE" />
+        <alias name="workEffortTypeEnumId" entity-alias="WE" />
         <alias name="employeePartyId" field="partyId" entity-alias="WEP" />
         <alias name="vendorPartyId" field="partyId" entity-alias="VWEP" />
         <alias name="customerPartyId" field="partyId" entity-alias="CWEP" />

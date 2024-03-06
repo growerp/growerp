@@ -18,8 +18,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../menu_options.dart';
 
-class AdminDbForm extends StatelessWidget {
-  const AdminDbForm({super.key});
+class WorkflowDbForm extends StatelessWidget {
+  const WorkflowDbForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,10 @@ class AdminDbForm extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbWorkflow', context, menuOptions[1], []),
-          makeDashboardItem('dbTask', context, menuOptions[2], [
+          makeDashboardItem('dbEditor', context, menuOptions[1], []),
+          makeDashboardItem('dbTask', context, menuOptions[2], []),
+          makeDashboardItem('dbWorkflows', context, menuOptions[3], []),
+          makeDashboardItem('dbToDo', context, menuOptions[4], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",

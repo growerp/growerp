@@ -12,9 +12,8 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import '../../../domains/tasks/bloc/task_bloc.dart';
+import '../../../../growerp_core.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryListHeader extends StatelessWidget {
   const TimeEntryListHeader({super.key, required this.taskBloc});
@@ -27,10 +26,10 @@ class TimeEntryListHeader extends StatelessWidget {
         Row(children: <Widget>[
           const Expanded(child: Text("Date")),
           const Text("Hours"),
-          if (!ResponsiveBreakpoints.of(context).isMobile)
+          if (isPhone(context))
             const Expanded(
                 child: Text("From/To Party", textAlign: TextAlign.center)),
-          if (!ResponsiveBreakpoints.of(context).isMobile)
+          if (isPhone(context))
             const Expanded(
                 child: Text("Comments", textAlign: TextAlign.center)),
         ]),

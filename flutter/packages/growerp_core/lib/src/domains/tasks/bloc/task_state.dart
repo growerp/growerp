@@ -14,25 +14,25 @@
 
 part of 'task_bloc.dart';
 
-enum TaskStatus { initial, loading, success, failure }
+enum TaskBlocStatus { initial, loading, success, failure }
 
 class TaskState extends Equatable {
   const TaskState({
-    this.status = TaskStatus.initial,
+    this.status = TaskBlocStatus.initial,
     this.message,
     this.tasks = const <Task>[],
     this.hasReachedMax = false,
     this.searchString = '',
   });
 
-  final TaskStatus status;
+  final TaskBlocStatus status;
   final String? message;
   final List<Task> tasks;
   final bool hasReachedMax; // all records retrieved
   final String searchString; // check to see if search string first or changed
 
   TaskState copyWith({
-    TaskStatus? status,
+    TaskBlocStatus? status,
     String? message,
     List<Task>? tasks,
     bool? hasReachedMax,

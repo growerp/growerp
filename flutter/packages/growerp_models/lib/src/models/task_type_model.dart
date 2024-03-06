@@ -12,29 +12,23 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-enum TaskStatus {
-  planning('In Planning'),
-  progress('In progress'),
-  completed('Completed'),
-  onHold('On Hold'),
-  closed('Closed'),
+enum TaskType {
+  todo('To Do'),
+  workflow('Workflow'),
+  workflowtask('Workflow Task'),
   unkwown('UnKnown');
 
-  const TaskStatus(this._name);
+  const TaskType(this._name);
   final String _name;
 
-  static TaskStatus tryParse(String val) {
+  static TaskType tryParse(String val) {
     switch (val) {
-      case 'In Planning':
-        return planning;
-      case 'In progress':
-        return progress;
-      case 'Completed':
-        return completed;
-      case 'On Hold':
-        return onHold;
-      case 'Closed':
-        return closed;
+      case 'To Do':
+        return todo;
+      case 'Workflow':
+        return workflow;
+      case 'Workflow Task':
+        return workflowtask;
     }
     return unkwown;
   }

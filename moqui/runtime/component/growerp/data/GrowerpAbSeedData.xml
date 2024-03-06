@@ -24,4 +24,9 @@ along with this software (see the LICENSE.md file). If not, see
     <growerp.general.Interface interfaceId="birdSend" baseUrl="https://api.birdsend.co"
         apiVersion="v1"
         value1="BIRDSEND_AUTM_SEQUENCE" apiKey="BIRDSEND_API_KEY" />
+
+    <!-- workeffort types for workflow -->
+    <moqui.basic.Enumeration description="Workflow" enumId="WetWorkflow" enumTypeId="WorkEffortType" />
+    <moqui.basic.Enumeration description="WorkflowTask" enumId="WetWorkflowTask"
+        enumTypeId="WorkEffortType" />
 </entity-facade-xml>

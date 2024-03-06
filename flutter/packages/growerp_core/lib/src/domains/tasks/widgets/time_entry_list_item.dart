@@ -14,10 +14,9 @@
 
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../domains.dart';
+import '../../../../growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class TimeEntryListItem extends StatelessWidget {
   const TimeEntryListItem({
@@ -40,11 +39,11 @@ class TimeEntryListItem extends StatelessWidget {
               child: Text("${timeEntry.date!.toLocal()}".split(' ')[0],
                   key: Key('date$index'))),
           Text("${timeEntry.hours}", key: Key('hours$index')),
-          if (!ResponsiveBreakpoints.of(context).isMobile)
+          if (!isPhone(context))
             Expanded(
                 child: Text("${timeEntry.partyId}",
                     key: Key('partyId$index'), textAlign: TextAlign.center)),
-          if (!ResponsiveBreakpoints.of(context).isMobile)
+          if (!isPhone(context))
             Expanded(
                 child: Text("${timeEntry.comments}",
                     key: Key('comments$index'), textAlign: TextAlign.center)),

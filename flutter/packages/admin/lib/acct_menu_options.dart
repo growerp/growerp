@@ -19,7 +19,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'forms/accounting_form.dart';
+import 'views/accounting_form.dart';
 
 List<MenuOption> acctMenuOptions = [
   MenuOption(

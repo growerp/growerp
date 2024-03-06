@@ -18,19 +18,21 @@ import 'package:growerp_models/growerp_models.dart';
 import '../tasks.dart';
 
 class TaskListForm extends StatelessWidget {
-  const TaskListForm({super.key});
+  final TaskType taskType;
+  const TaskListForm(this.taskType, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => TaskBloc(context.read<RestClient>()),
-      child: const TasksList(),
+      child: TasksList(taskType),
     );
   }
 }
 
 class TasksList extends StatefulWidget {
-  const TasksList({super.key});
+  final TaskType taskType;
+  const TasksList(this.taskType, {super.key});
 
   @override
   TasksListState createState() => TasksListState();
@@ -45,7 +47,7 @@ class TasksListState extends State<TasksList> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(const TaskFetch());
+    _taskBloc.add(TaskFetch(taskType: widget.taskType));
   }
 
   @override
@@ -53,10 +55,10 @@ class TasksListState extends State<TasksList> {
     return BlocBuilder<TaskBloc, TaskState>(
       builder: (context, state) {
         switch (state.status) {
-          case TaskStatus.failure:
+          case TaskBlocStatus.failure:
             return Center(
                 child: Text('failed to fetch tasks: ${state.message}'));
-          case TaskStatus.success:
+          case TaskBlocStatus.success:
             return Scaffold(
                 floatingActionButton: FloatingActionButton(
                     key: const Key("addNew"),
@@ -66,7 +68,9 @@ class TasksListState extends State<TasksList> {
                           context: context,
                           builder: (BuildContext context) {
                             return BlocProvider.value(
-                                value: _taskBloc, child: TaskDialog(Task()));
+                                value: _taskBloc,
+                                child: TaskDialog(
+                                    Task(taskType: widget.taskType)));
                           });
                     },
                     tooltip: 'Add New',
@@ -83,10 +87,11 @@ class TasksListState extends State<TasksList> {
                       controller: _scrollController,
                       itemBuilder: (BuildContext context, int index) {
                         if (state.tasks.isEmpty) {
-                          return const Center(
+                          return Center(
                               heightFactor: 20,
-                              child: Text('No active tasks found',
-                                  key: Key('empty'),
+                              child: Text(
+                                  'No active ${widget.taskType.name} found',
+                                  key: const Key('empty'),
                                   textAlign: TextAlign.center));
                         }
                         if (index == 0) return const TaskListHeader();
