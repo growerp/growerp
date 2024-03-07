@@ -402,17 +402,17 @@ List<User> customers = [
 List<Task> tasks = [
   Task(
     taskName: 'task1',
-    status: TaskStatus.progress,
+    statusId: TaskStatus.progress,
     description: 'This is the description of the task1',
     rate: Decimal.parse('22'),
-    timeEntries: [],
+    timeEntries: const [],
   ),
   Task(
     taskName: 'task2',
-    status: TaskStatus.progress,
+    statusId: TaskStatus.progress,
     description: 'This is the description of the task2',
     rate: Decimal.parse('23'),
-    timeEntries: [],
+    timeEntries: const [],
   )
 ];
 

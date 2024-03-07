@@ -27,7 +27,7 @@ class Task extends Equatable with _$Task {
     @Default("") String taskId,
     TaskType? taskType, // todo, workflow, workflowTask
     @Default("") String parentTaskId,
-    TaskStatus? status,
+    TaskStatus? statusId,
     @Default("") String taskName,
     @Default("") String description,
     User? customerUser,
@@ -41,6 +41,8 @@ class Task extends Equatable with _$Task {
     Decimal? unInvoicedHours,
     @Default([]) List<Task> tasks,
     @Default([]) List<TimeEntry> timeEntries,
+    // workflow task link to the view
+    String? routing,
   }) = _Task;
 
   factory Task.fromJson(Map<String, dynamic> json) =>

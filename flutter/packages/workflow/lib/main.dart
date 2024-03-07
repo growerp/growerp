@@ -12,7 +12,6 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
@@ -25,8 +24,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'router.dart' as router;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
-
-import 'views/flowchart_menus.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

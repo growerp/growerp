@@ -36,7 +36,7 @@ class TaskListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(child: Text(task.taskName, key: Key('name$index'))),
-            Expanded(child: Text("${task.status}", key: Key('status$index'))),
+            Expanded(child: Text("${task.statusId}", key: Key('status$index'))),
             Text(
                 task.unInvoicedHours != null
                     ? task.unInvoicedHours!.toString()
@@ -68,7 +68,7 @@ class TaskListItem extends StatelessWidget {
             onPressed: () {
               context
                   .read<TaskBloc>()
-                  .add(TaskUpdate(task.copyWith(status: TaskStatus.closed)));
+                  .add(TaskUpdate(task.copyWith(statusId: TaskStatus.closed)));
             }));
   }
 }

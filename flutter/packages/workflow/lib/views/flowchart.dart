@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 import 'flowchart_menus.dart';
 
-class Flowchart extends StatefulWidget {
-  const Flowchart({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
+class FlowchartForm extends StatelessWidget {
+  final Task task;
+  const FlowchartForm(this.task, {super.key});
   @override
-  State<Flowchart> createState() => _FlowchartState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (BuildContext context) => TaskBloc(context.read<RestClient>())
+        ..add(const TaskFetch(
+            taskType: TaskType.workflowtask, isForDropDown: true, limit: 3)),
+      child: FlowchartFull(task),
+    );
+  }
 }
 
-class _FlowchartState extends State<Flowchart> {
+class FlowchartFull extends StatefulWidget {
+  const FlowchartFull(this.task, {Key? key}) : super(key: key);
+
+  final Task task;
+
+  @override
+  State<FlowchartFull> createState() => _FlowchartFullState();
+}
+
+class _FlowchartFullState extends State<FlowchartFull> {
   Dashboard dashboard = Dashboard();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('Workflow Editor'),
       ),
       backgroundColor: Colors.black12,
       body: Container(

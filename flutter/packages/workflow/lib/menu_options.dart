@@ -34,7 +34,7 @@ List<MenuOption> menuOptions = [
     route: '/workflow',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    child: const Flowchart(title: "workflow"),
+    child: FlowchartForm(Task(taskType: TaskType.workflow)),
   ),
   MenuOption(
       image: "packages/growerp_core/images/workflow.png",

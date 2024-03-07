@@ -93,6 +93,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="startDate" />
                     <parameter name="endDate" />
                     <parameter name="unInvoicedHours" />
+                    <parameter name="routing" />
                     <parameter name="timeEntries" type="List">
                         <parameter name="timeEntry" type="Map">
                             <parameter name="timeEntryId" />
@@ -123,9 +124,9 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="tasks" from="[]" />
             <!-- translate frontend Task type with backend-->
             <set field="typeConvert"
-                from="[workflow: 'WetWorkflow',
-                        workflowtask: 'WetWorkflowTask',
-                        todo: 'WetTask']"
+                from="[workflow: 'WetWorkflow', WetWorkflow: 'workflow',
+                        workflowtask: 'WetWorkflowTask', WetWorkflowTask: 'workflowtask',
+                        todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
             <set field="workEffortType" from="typeConvert[taskType]" />
             <if condition="taskId">
@@ -185,6 +186,7 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="workEffortOut"
                             from="[
                                     taskId: entry.workEffortId,
+                                    taskType: typeConvert[entry.workEffortTypeEnumId],
                                     parentTaskId: entry.parentWorkEffortId,
                                     taskName: entry.workEffortName,
                                     statusId: convertedStatusId,
@@ -198,9 +200,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="workEffortOut"
                             from="[
                                     taskId: entry.workEffortId,
+                                    taskType: typeConvert[entry.workEffortTypeEnumId],
                                     parentTaskId: entry.parentWorkEffortId,
                                     taskName: entry.workEffortName,
                                     statusId: convertedStatusId,
+                                    routing: entry.routing,
                                 ]" />
                         <script>tasks.add(workEffortOut)</script>
                     </iterate>
@@ -234,6 +238,7 @@ along with this software (see the LICENSE.md file). If not, see
                             <set field="workEffortOut"
                                 from="[
                                     taskId: entry.workEffortId,
+                                    taskType: typeConvert[entry.workEffortTypeEnumId],
                                     parentTaskId: entry.parentWorkEffortId,
                                     taskName: entry.workEffortName,
                                     statusId: convertedStatusId,
@@ -242,6 +247,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 <set field="workEffortOut"
                                     from="[
                                         taskId: entry.workEffortId,
+                                        taskType: typeConvert[entry.workEffortTypeEnumId],
                                         parentTaskId: entry.parentWorkEffortId,
                                         taskName: entry.workEffortName,
                                         statusId: convertedStatusId,
@@ -278,6 +284,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
                 <parameter name="jsonImage" />
+                <parameter name="routing" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -292,6 +299,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
                 <parameter name="jsonImage" />
+                <parameter name="routing" />
                 <parameter name="timeEntries" type="List">
                     <parameter name="timeEntry" type="Map">
                         <parameter name="timeEntryId" />
@@ -318,11 +326,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
+            <log message="=====statusId: ${task.statusId} ${convertedStatusId}" />
             <service-call name="create#mantle.work.effort.WorkEffort"
                 in-map="[
                     parentWorkEffortId: task.parentTaskId,
                     workEffortTypeEnumId: typeConvert[task.taskType],
                     workEffortName: task.taskName,
+                    infoUrl: task.routing,
                     statusId: convertedStatusId,
                     description: task.description,
                     ownerPartyId: ownerPartyId,
@@ -411,6 +421,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
                 <parameter name="jsonImage" />
+                <parameter name="routing" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -425,6 +436,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
                 <parameter name="jsonImage" />
+                <parameter name="routing" />
                 <parameter name="timeEntries" type="List">
                     <parameter name="timeEntry" type="Map">
                         <parameter name="timeEntryId" />
@@ -452,6 +464,7 @@ along with this software (see the LICENSE.md file). If not, see
                 oldTask.statusId != task.statusId ||
                 oldTask.parentTaskId != task.parentTaskId ||
                 oldTask.startDate != task.startDate ||
+                oldTask.routing != task.routing ||
                 oldTask.endDate != task.endDate">
                 <service-call name="update#mantle.work.effort.WorkEffort"
                     in-map="[
@@ -460,6 +473,7 @@ along with this software (see the LICENSE.md file). If not, see
                         workEffortName: task.taskName,
                         statusId: convertedStatusId,
                         description: task.description,
+                        infoUrl: task.routing,
                         actualStartDate: task.startDate ? task.startDate.substring(0,18) : null,
                         actualCompletionDate: task.endDate ? task.endDate.substring(0,18) : null
                     ]" />

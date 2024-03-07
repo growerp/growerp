@@ -28,6 +28,7 @@ class TaskDialog extends StatefulWidget {
 class TaskDialogState extends State<TaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _routingController = TextEditingController();
 
   late TaskStatus _status;
   late TaskBloc taskBloc;
@@ -35,8 +36,9 @@ class TaskDialogState extends State<TaskDialog> {
   @override
   void initState() {
     super.initState();
-    _status = widget.task.status ?? TaskStatus.planning;
+    _status = widget.task.statusId ?? TaskStatus.planning;
     _nameController.text = widget.task.taskName;
+    _routingController.text = widget.task.routing ?? '';
     taskBloc = context.read<TaskBloc>();
   }
 
@@ -121,10 +123,26 @@ class TaskDialogState extends State<TaskDialog> {
                 },
                 isExpanded: true,
               ),
+              if (widget.task.taskType == TaskType.workflowtask)
+                const SizedBox(height: 20),
+              if (widget.task.taskType == TaskType.workflowtask)
+                TextFormField(
+                  key: const Key('routing'),
+                  decoration: InputDecoration(
+                      labelText: '${widget.task.taskType} Routing'),
+                  controller: _routingController,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter a ${widget.task.taskType} routing?';
+                    }
+                    return null;
+                  },
+                ),
               const SizedBox(height: 20),
               Row(children: [
                 Visibility(
-                    visible: widget.task.taskId.isNotEmpty,
+                    visible: widget.task.taskId.isNotEmpty &&
+                        widget.task.taskType == TaskType.todo,
                     child: ElevatedButton(
                         key: const Key('TimeEntries'),
                         child: const Text('TimeEntries'),
@@ -152,7 +170,8 @@ class TaskDialogState extends State<TaskDialog> {
                               widget.task.copyWith(
                                 taskId: widget.task.taskId,
                                 taskName: _nameController.text,
-                                status: _status,
+                                routing: _routingController.text,
+                                statusId: _status,
                               ),
                             ));
                           }

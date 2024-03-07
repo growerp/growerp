@@ -29,20 +29,20 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="docType == 'task'">
                 <set field="taskStatusValues"
                     from="[
-                'WeApproved': 'Approved',
-                'WeCancelled': 'Cancelled',
-                'WeClosed': 'Closed',
-                'WeComplete': 'Complete',
-                'WeInPlanning': 'In Planning',
-                'WeInProgress': 'In Progress',
-                'WeOnHold': 'On Hold',
-                'Approved': 'WeApproved',
-                'Cancelled': 'WeCancelled',
-                'Closed': 'WeClosed',
-                'Complete': 'WeComplete',
-                'In Planning': 'WeInPlanning',
-                'In Progress': 'WeInProgress',
-                'On Hold': 'WeOnHold'
+                'WeApproved': 'approved',
+                'WeCancelled': 'cancelled',
+                'WeClosed': 'closed',
+                'WeComplete': 'completed',
+                'WeInPlanning': 'planning',
+                'WeInProgress': 'progress',
+                'WeOnHold': 'onHold',
+                'approved': 'WeApproved',
+                'cancelled': 'WeCancelled',
+                'closed': 'WeClosed',
+                'completed': 'WeComplete',
+                'planning': 'WeInPlanning',
+                'progress': 'WeInProgress',
+                'onHold': 'WeOnHold'
                 ]" />
                 <set field="convertedStatusId" from="taskStatusValues[statusId]" />
             </if>
