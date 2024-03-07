@@ -13,7 +13,7 @@
  */
 
 import 'package:growerp_core/growerp_core.dart';
-import 'package:workflow/main.dart';
+import 'views/flowchart.dart';
 import 'views/workflow_db_form.dart' as local;
 import 'package:growerp_models/growerp_models.dart';
 
@@ -34,7 +34,7 @@ List<MenuOption> menuOptions = [
     route: '/workflow',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    child: const MyHomePage(title: "workflow"),
+    child: const Flowchart(title: "workflow"),
   ),
   MenuOption(
       image: "packages/growerp_core/images/workflow.png",

@@ -67,7 +67,8 @@ class GlAccountListItem extends StatelessWidget {
             if (isLargerThanPhone(context))
               Expanded(
                   child: Text(
-                      "${glAccount.accountClass?.description} ${glAccount.isDebit! ? '(D)' : '(C)'} ",
+                      "${glAccount.accountClass?.description ?? ''} "
+                      "${glAccount.isDebit != null ? glAccount.isDebit! ? '(D)' : '(C)' : ' '} ",
                       key: Key('class$index'))),
             if (isLargerThanPhone(context))
               Expanded(
