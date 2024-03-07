@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_breakpoints.dart';
 
 import '../../accounting/accounting.dart';
 import '../findoc.dart';
@@ -99,13 +98,10 @@ class PaymentTypeListItem extends StatelessWidget {
                     "${paymentType.isPayable ? 'Outgoing' : 'Incoming'} -- "
                     "${paymentType.isApplied ? 'Y' : 'N'}",
                     key: Key('name$index'))),
-            if (ResponsiveBreakpoints.of(context).largerThan(MOBILE))
-              Expanded(child: accountSelect),
+            if (!isPhone(context)) Expanded(child: accountSelect),
           ],
         ),
-        subtitle: ResponsiveBreakpoints.of(context).equals(MOBILE)
-            ? accountSelect
-            : null,
+        subtitle: isPhone(context) ? accountSelect : null,
         trailing: IconButton(
             key: Key('delete$index'),
             icon: const Icon(Icons.delete_forever),

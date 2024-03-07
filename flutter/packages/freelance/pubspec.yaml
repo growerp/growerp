@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
         sdk: flutter
   global_configuration: ^2.0.0
-  responsive_framework: ^1.0.0
+  responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2
   printing: ^5.11.1
   pdf: ^3.10.3

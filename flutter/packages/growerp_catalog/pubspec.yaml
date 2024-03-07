@@ -22,7 +22,7 @@ dependencies:
   intl: ^0.18.1
   flutter_bloc: ^8.1.4
   equatable: ^2.0.5
-  responsive_framework: ^1.0.0
+  responsive_framework: ^1.4.0
   archive: ^3.3.0
   path_provider: ^2.0.11
   url_launcher: ^6.1.4

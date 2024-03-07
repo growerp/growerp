@@ -28,7 +28,7 @@ dependencies:
   bloc_concurrency: ^0.2.0
   meta: ^1.3.0
   image_picker: ^1.0.4
-  responsive_framework: ^1.0.0
+  responsive_framework: ^1.4.0
   flutter_simple_treeview: ^3.0.2
   dropdown_search: ^5.0.6
   printing: ^5.11.1

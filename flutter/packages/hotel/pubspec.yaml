@@ -11,7 +11,7 @@ dependencies:
   growerp_catalog: ^1.2.1
   growerp_order_accounting: ^1.2.1
   growerp_user_company: ^1.2.1
-  package_info_plus: ^4.2.0
+  package_info_plus: ^5.0.1
   horizontal_data_table: ^4.3.1
 
 dev_dependencies: 
