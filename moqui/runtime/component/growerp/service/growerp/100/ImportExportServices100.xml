@@ -501,7 +501,8 @@ along with this software (see the LICENSE.md file). If not, see
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
                     <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
-                        in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType, classificationId: classificationId]" />
+                        in-map="[pseudoId: lastItem.pseudoId, docType: lastItem.docType,
+                                classificationId: classificationId]" />
                     <script>ec.user.setEffectiveTime(Timestamp.valueOf("${finDoc.creationDate} 00:00:00"))</script>
                     <if condition="!finDocs.isEmpty()">
                         <set field="finDocs[0].items" from="itemsOut" />

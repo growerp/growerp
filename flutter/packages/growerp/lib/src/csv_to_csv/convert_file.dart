@@ -17,6 +17,8 @@ String convertFile(FileType fileType, String string, String fileName) {
           .replaceFirst(
               "10100,Cash on Hand,", "10000,Assets,Cash,,\n10100,Cash on Hand,")
           .replaceFirst(
+              "10100,Cash on Hand,", "10000,Assets,Cash,,\n10100,Cash on Hand,")
+          .replaceFirst(
               "39005,Capital,", "30000,Equity,Equity-Retained Earnings,,\n39005,Capital,")
           .replaceFirst("85000,Discount for Early Payment,",
               "80000,Discounts,Cash,,\n85000,Discount for Early Payment,")

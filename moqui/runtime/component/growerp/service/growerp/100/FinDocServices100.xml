@@ -197,6 +197,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="rentalFromDate" />
             <parameter name="rentalThruDate" />
             <parameter name="journalId" />
+            <parameter name="finDocIdOnly" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="finDocs" type="List">
@@ -305,6 +306,24 @@ along with this software (see the LICENSE.md file). If not, see
             <set field="current" value="0" type="Integer" />
             <!-- order -->
             <if condition="docType == 'order'">
+                <if condition="finDocIdOnly == true">
+                    <entity-find list="items" limit="1"
+                        entity-name="mantle.order.OrderHeaderAndPart">
+                        <econdition field-name="pseudoId" from="pseudoId" />
+                        <econditions combine="or">
+                            <econdition field-name="customerPartyId" from="companyPartyId" />
+                            <econdition field-name="vendorPartyId" from="companyPartyId" />
+                        </econditions>
+                    </entity-find>
+                    <if condition="items">
+                        <set field="finDocOut"
+                            from="[finDocId: items[0].orderId,
+                                    pseudoId: pseudoId,
+                                    docType: 'order']" />
+                        <script>finDocs.add(finDocOut)</script>
+                    </if>
+                    <return />
+                </if>
                 <if condition="search">
                     <entity-find list="items" offset="start" limit="limit"
                         entity-name="growerp.order.OrderHeaderPartItemPartiesAndReservation">
@@ -974,6 +993,21 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <if condition="docType == 'transaction'">
+                <if condition="finDocIdOnly == true">
+                    <entity-find list="items" limit="1"
+                        entity-name="growerp.account.AcctgTransAndEntryAndCompany">
+                        <econdition field-name="pseudoId" from="pseudoId" />
+                        <econdition field-name="companyPartyId" from="companyPartyId" />
+                    </entity-find>
+                    <if condition="items">
+                        <set field="finDocOut"
+                            from="[finDocId: items[0].transactionId,
+                                    pseudoId: pseudoId,
+                                    docType: 'transaction']" />
+                        <script>finDocs.add(finDocOut)</script>
+                    </if>
+                    <return />
+                </if>
                 <if condition="isPosted == true">
                     <set field="isPosted" value="Y" />
                 </if>
