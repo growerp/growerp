@@ -31,7 +31,7 @@ List<MenuOption> menuOptions = [
     image: 'packages/growerp_core/images/workflowGrey.png',
     selectedImage: 'packages/growerp_core/images/workflow.png',
     title: 'Editor',
-    route: '/workflow',
+    route: '/emptyWorkflow',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
     child: WorkflowDialog(Task()),
