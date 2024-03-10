@@ -13,7 +13,7 @@
  */
 
 import 'package:growerp_core/growerp_core.dart';
-import 'views/flowchart.dart';
+import 'views/workflow_dialog.dart';
 import 'views/workflow_db_form.dart' as local;
 import 'package:growerp_models/growerp_models.dart';
 
@@ -34,16 +34,17 @@ List<MenuOption> menuOptions = [
     route: '/workflow',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin],
-    child: FlowchartForm(Task(taskType: TaskType.workflow)),
+    child: WorkflowDialog(Task()),
   ),
   MenuOption(
-      image: "packages/growerp_core/images/workflow.png",
-      selectedImage: "packages/growerp_core/images/workflow.png",
-      title: "Workflows",
-      route: '/workflows',
-      readGroups: [UserGroup.admin, UserGroup.employee],
-      writeGroups: [UserGroup.admin, UserGroup.employee],
-      child: const TaskListForm(TaskType.workflow)),
+    image: "packages/growerp_core/images/workflow.png",
+    selectedImage: "packages/growerp_core/images/workflow.png",
+    title: "Workflows",
+    route: '/workflows',
+    readGroups: [UserGroup.admin, UserGroup.employee],
+    writeGroups: [UserGroup.admin, UserGroup.employee],
+    child: const TaskListForm(TaskType.workflow),
+  ),
   MenuOption(
       image: "packages/growerp_core/images/tasksGrey.png",
       selectedImage: "packages/growerp_core/images/tasks.png",

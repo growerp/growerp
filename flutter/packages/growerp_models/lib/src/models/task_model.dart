@@ -34,15 +34,16 @@ class Task extends Equatable with _$Task {
     User? vendorUser,
     User? employeeUser,
     Decimal? rate,
-    // from workflow editor
-    @Default("") String jsonImage,
     DateTime? startDate,
     DateTime? endDate,
     Decimal? unInvoicedHours,
-    @Default([]) List<Task> tasks,
     @Default([]) List<TimeEntry> timeEntries,
+    // from workflow editor
+    @Default("") String jsonImage,
+    @Default([]) List<Task> workflowTasks,
     // workflow task link to the view
     String? routing,
+    String? flowElementId,
   }) = _Task;
 
   factory Task.fromJson(Map<String, dynamic> json) =>

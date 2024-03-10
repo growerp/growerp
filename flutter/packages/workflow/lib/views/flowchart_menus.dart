@@ -1,18 +1,18 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:star_menu/star_menu.dart';
-import 'package:path_provider/path_provider.dart' as path;
+import 'package:growerp_models/growerp_models.dart';
 
-import 'element_settings_menu.dart';
-import 'text_menu.dart';
+import 'flow_data.dart';
+import 'properties_menu.dart';
 
 class FlowchartMenus {
   /// Display a linear menu for the dashboard
   /// with menu entries built with [menuEntries]
-  static displayDashboardMenu(
-      BuildContext context, Offset position, Dashboard dashboard) {
+  static displayDashboardMenu(BuildContext context, Offset position,
+      Dashboard dashboard, Task workflow) {
     StarMenuOverlay.displayStarMenu(
       context,
       StarMenu(
@@ -114,16 +114,9 @@ class FlowchartMenus {
           ActionChip(
               label: const Text('SAVE dashboard'),
               onPressed: () async {
-                Directory appDocDir =
-                    await path.getApplicationDocumentsDirectory();
-                dashboard.saveDashboard('${appDocDir.path}/FLOWCHART.json');
-              }),
-          ActionChip(
-              label: const Text('LOAD dashboard'),
-              onPressed: () async {
-                Directory appDocDir =
-                    await path.getApplicationDocumentsDirectory();
-                dashboard.loadDashboard('${appDocDir.path}/FLOWCHART.json');
+                print(dashboard.toJson());
+                workflow = workflow.copyWith(jsonImage: dashboard.toJson());
+                context.read<TaskBloc>().add(TaskUpdate(workflow));
               }),
         ],
       ),
@@ -139,6 +132,7 @@ class FlowchartMenus {
     Offset position,
     Handler handler,
     FlowElement element,
+    FlowData data,
     Dashboard dashboard,
   ) {
     StarMenuOverlay.displayStarMenu(
@@ -177,6 +171,7 @@ class FlowchartMenus {
     BuildContext context,
     Offset position,
     FlowElement element,
+    FlowData data,
     Dashboard dashboard,
   ) {
     StarMenuOverlay.displayStarMenu(
@@ -205,7 +200,8 @@ class FlowchartMenus {
           ),
         ),
         onItemTapped: (index, controller) {
-          if (!(index == 5 || index == 2)) {
+          print("=====$index=====");
+          if (!(index == 1)) {
             controller.closeMenu!();
           }
         },
@@ -214,11 +210,13 @@ class FlowchartMenus {
             element.text,
             style: const TextStyle(fontWeight: FontWeight.w900),
           ),
+          PropertiesMenu(element: element, data: data),
           InkWell(
-            onTap: () => dashboard.removeElement(element),
-            child: const Text('Delete'),
+            onTap: () {
+              dashboard.setElementResizable(element, true);
+            },
+            child: const Text('Resize'),
           ),
-          TextMenu(element: element),
           InkWell(
             onTap: () {
               dashboard.removeElementConnections(element);
@@ -226,13 +224,8 @@ class FlowchartMenus {
             child: const Text('Remove all connections'),
           ),
           InkWell(
-            onTap: () {
-              dashboard.setElementResizable(element, true);
-            },
-            child: const Text('Resize'),
-          ),
-          ElementSettingsMenu(
-            element: element,
+            onTap: () => dashboard.removeElement(element),
+            child: const Text('Delete'),
           ),
         ],
         parentContext: context,

@@ -94,6 +94,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="endDate" />
                     <parameter name="unInvoicedHours" />
                     <parameter name="routing" />
+                    <parameter name="jsonImage" />
                     <parameter name="timeEntries" type="List">
                         <parameter name="timeEntry" type="Map">
                             <parameter name="timeEntryId" />
@@ -159,44 +160,47 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                 </else>
             </if>
+            <log message="=====processing type: $workEffortType" />
             <!-- and add information depending on the type -->
             <if condition="workEffortType == 'WetWorkflow'">
                 <then>
                     <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'task', statusId: entry.statusId]"
+                            out-map="context" />
+
                         <!-- get editor content -->
                         <entity-find entity-name="mantle.work.effort.WorkEffortContent"
-                            list="contents">
+                            list="contentList">
                             <econdition field-name="workEffortId" from="entry.workEffortId" />
-                            <econdition field-name="contentTypeEnumId" value="CmctPlainText" />
+                            <econdition field-name="contentTypeEnumId" value="WectCreatedMedia" />
                         </entity-find>
-                        <if condition="contents">
-                            <set field="resourceReference"
-                                from="ec.resource.getLocationReference(contents[0].contentLocation)" />
-                            <if condition="!resourceReference || !resourceReference.getExists()">
-                                <log level="warn"
-                                    message="Could not find resource at [${contentLocation}]" />
-                                <else>
-                                    <set field="inputStream"
-                                        from="resourceReference.openStream()" />
-                                    <set field="docBytes"
-                                        from="org.apache.commons.io.IOUtils.toByteArray(inputStream)" />
-                                </else>
+                        <if condition="contentList">
+                            <log message="=====location: ${contentList[0].contentLocation}" />
+                            <set field="contentRef"
+                                from="ec.resource.getLocationReference(contentList[0].contentLocation)" />
+                            <if condition="contentRef != null">
+                                <set field="contentText" from="contentRef.getText()" />
+                                <log message="=====content: $contentText" />
                             </if>
                         </if>
                         <set field="workEffortOut"
                             from="[
                                     taskId: entry.workEffortId,
                                     taskType: typeConvert[entry.workEffortTypeEnumId],
-                                    parentTaskId: entry.parentWorkEffortId,
                                     taskName: entry.workEffortName,
                                     statusId: convertedStatusId,
-                                    jsonImage: docBytes,
+                                    jsonImage: contentText,
                                 ]" />
                         <script>tasks.add(workEffortOut)</script>
+                        <log message="=====out: =$workEffortOut" />
                     </iterate>
                 </then>
                 <else-if condition="workEffortType == 'WetWorkflowTask'">
                     <iterate entry="entry" list="entries">
+                        <service-call name="growerp.100.FinDocServices100.convert#StatusId"
+                            in-map="[docType: 'task', statusId: entry.statusId]"
+                            out-map="context" />
                         <set field="workEffortOut"
                             from="[
                                     taskId: entry.workEffortId,
@@ -283,7 +287,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
-                <parameter name="jsonImage" />
                 <parameter name="routing" />
             </parameter>
         </in-parameters>
@@ -298,7 +301,6 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="startDate" />
                 <parameter name="endDate" />
                 <parameter name="unInvoicedHours" />
-                <parameter name="jsonImage" />
                 <parameter name="routing" />
                 <parameter name="timeEntries" type="List">
                     <parameter name="timeEntry" type="Map">
@@ -380,28 +382,7 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: 'WeptAssigned'
                     ]" />
             </if>
-            <!-- editor json file -->
-            <if condition="task.jsonImage">
-                <set field="pagePath" value="/workEffort/${workEffortId}/" />
-                <set field="contentLocation"
-                    value="dbresource://C${companyPartyId}/json${pagePath}" />
-                <set field="ec" from="context.ec" />
-                <set field="attachmentReference"
-                    from="ec.resource.getLocationReference(contentLocation)" />
-                <script>
-                    // attachmentReference.delete();
-                    org.apache.commons.fileupload.FileItem attachmentFile = file
-                    InputStream fileStream = attachmentFile.getInputStream()
-                    attachmentReferenceLarge.putStream(fileStream)
-                    fileStream.close()
-                </script>
-                <service-call name="create#mantle.work.effort.WorkEffortContent"
-                    in-map="[workEffortId: workEffortId,
-                    contentTypeEnumId: 'CmctPlainText',
-                            contentLocation: contentLocation]" />
-            </if>
-            <log message="====workeffort created ${workEffortId}" />
-
+            <!-- editor json file always update only -->
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: workEffortId]" out-map="context" />
             <set field="task" from="tasks[0]" />
@@ -450,6 +431,9 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="=====updating task: $task" />
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: task.taskId]" out-map="oldTask" /><!-- owner checked here -->
             <if condition="!oldTask">
@@ -466,6 +450,8 @@ along with this software (see the LICENSE.md file). If not, see
                 oldTask.startDate != task.startDate ||
                 oldTask.routing != task.routing ||
                 oldTask.endDate != task.endDate">
+                <log
+                    message="====oldStatus: ${oldTask.statusId} new: ${task.statusId} convertnew: ${convertedStatusId}" />
                 <service-call name="update#mantle.work.effort.WorkEffort"
                     in-map="[
                         workEffortId: task.taskId,
@@ -553,21 +539,30 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <!-- editor json file -->
             <if condition="task.jsonImage">
-                <set field="pagePath" value="/workEffort/${workEffortId}/" />
-                <set field="contentLocation"
-                    value="dbresource://C${companyPartyId}/json${pagePath}" />
-                <set field="ec" from="context.ec" />
-                <set field="attachmentReference"
-                    from="ec.resource.getLocationReference(contentLocation)" />
-                <script>
-                    attachmentReference.delete();
-                    org.apache.commons.fileupload.FileItem attachmentFile = file
-                    InputStream fileStream = attachmentFile.getInputStream()
-                    attachmentReferenceLarge.putStream(fileStream)
-                    fileStream.close()
-                </script>
+                <entity-find entity-name="mantle.work.effort.WorkEffortContent" list="contentList">
+                    <econdition field-name="workEffortId" from="task.taskId" />
+                </entity-find>
+                <if condition="contentList">
+                    <set field="docRr"
+                        from="ec.resource.getLocationReference(contentList[0].contentLocation)" />
+                    <if condition="task.jsonImage != docRr.getText()">
+                        <script>docRr.putText(task.jsonImage)</script>
+                    </if>
+                    <else>
+                        <set field="location"
+                            value="dbresource://$companyPartyId/content/workflowImage${task.taskId}.json" />
+                        <service-call name="create#mantle.work.effort.WorkEffortContent"
+                            in-map="[workEffortId: task.taskId,
+                                    contentLocation: location,
+                                    contentTypeEnumId:  'WectCreatedMedia',
+                                    description: 'Workflow json image file',
+                                    ]" />
+                        <set field="docRr"
+                            from="ec.resource.getLocationReference(location)" />
+                        <script>docRr.putText(task.jsonImage)</script>
+                    </else>
+                </if>
             </if>
-
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: task.taskId]" out-map="context" />
             <set field="task" from="tasks[0]" />

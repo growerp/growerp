@@ -158,6 +158,14 @@ class TaskDialogState extends State<TaskDialog> {
                                         widget.task.timeEntries));
                               });
                         })),
+                if (widget.task.taskType == TaskType.workflow &&
+                    widget.task.taskId.isNotEmpty)
+                  Expanded(
+                      child: ElevatedButton(
+                          key: const Key('showWorkflowEditor'),
+                          child: const Text('Show Graphycal Image'),
+                          onPressed: () => Navigator.of(context)
+                              .pushNamed('/workflow', arguments: widget.task))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: ElevatedButton(
@@ -175,7 +183,7 @@ class TaskDialogState extends State<TaskDialog> {
                               ),
                             ));
                           }
-                        }))
+                        })),
               ]),
             ])));
   }

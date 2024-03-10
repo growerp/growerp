@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:workflow/views/workflow_dialog.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -32,9 +33,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/workflow':
-      return MaterialPageRoute(
-          builder: (context) =>
-              DisplayMenuOption(menuList: menuOptions, menuIndex: 1));
+      return MaterialPageRoute(builder: (context) => WorkflowDialog(Task()));
     case '/tasks':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

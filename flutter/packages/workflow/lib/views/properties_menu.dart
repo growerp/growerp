@@ -3,19 +3,25 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:star_menu/star_menu.dart';
 
+import 'flow_data.dart';
+
 /// Popup menu for the 'element params" entry
-class TextMenu extends StatelessWidget {
+class PropertiesMenu extends StatelessWidget {
   final FlowElement element;
+  final FlowData data;
   final ValueNotifier<double> sliderSize;
   final ValueNotifier<bool> isBold;
   final TextEditingController textController;
+  final TextEditingController routingController;
 
-  TextMenu({
+  PropertiesMenu({
     super.key,
     required this.element,
+    required this.data,
   })  : sliderSize = ValueNotifier(element.textSize),
         isBold = ValueNotifier(element.textIsBold),
-        textController = TextEditingController(text: element.text);
+        textController = TextEditingController(text: element.text),
+        routingController = TextEditingController(text: data.routing);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,7 @@ class TextMenu extends StatelessWidget {
           centerOffset: const Offset(100, 100),
         ),
         items: _buildEntries(context),
-        child: const Text('Set text'),
+        child: const Text('Properties'),
       ),
     );
   }
@@ -38,7 +44,13 @@ class TextMenu extends StatelessWidget {
       SizedBox(
         width: 250,
         child: TextField(
-          controller: textController,
+          decoration: const InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.transparent),
+            ),
+            hintText: "Name of the task",
+          ),
+          controller: routingController,
           textAlign: TextAlign.center,
           textAlignVertical: TextAlignVertical.center,
           minLines: null,
@@ -70,7 +82,8 @@ class TextMenu extends StatelessWidget {
                 ),
               )
             ],
-            params:const StarMenuParameters(centerOffset: Offset(-1000, -1000)),
+            params:
+                const StarMenuParameters(centerOffset: Offset(-1000, -1000)),
           ),
           const SizedBox(width: 30),
 
