@@ -160,7 +160,6 @@ along with this software (see the LICENSE.md file). If not, see
                     </entity-find>
                 </else>
             </if>
-            <log message="=====processing type: $workEffortType" />
             <!-- and add information depending on the type -->
             <if condition="workEffortType == 'WetWorkflow'">
                 <then>
@@ -176,12 +175,10 @@ along with this software (see the LICENSE.md file). If not, see
                             <econdition field-name="contentTypeEnumId" value="WectCreatedMedia" />
                         </entity-find>
                         <if condition="contentList">
-                            <log message="=====location: ${contentList[0].contentLocation}" />
                             <set field="contentRef"
                                 from="ec.resource.getLocationReference(contentList[0].contentLocation)" />
                             <if condition="contentRef != null">
                                 <set field="contentText" from="contentRef.getText()" />
-                                <log message="=====content: $contentText" />
                             </if>
                         </if>
                         <set field="workEffortOut"
@@ -193,7 +190,6 @@ along with this software (see the LICENSE.md file). If not, see
                                     jsonImage: contentText,
                                 ]" />
                         <script>tasks.add(workEffortOut)</script>
-                        <log message="=====out: =$workEffortOut" />
                     </iterate>
                 </then>
                 <else-if condition="workEffortType == 'WetWorkflowTask'">
@@ -328,7 +324,6 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
-            <log message="=====statusId: ${task.statusId} ${convertedStatusId}" />
             <service-call name="create#mantle.work.effort.WorkEffort"
                 in-map="[
                     parentWorkEffortId: task.parentTaskId,
@@ -431,7 +426,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="=====updating task: $task" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.TaskServices100.get#Task"
@@ -450,8 +444,6 @@ along with this software (see the LICENSE.md file). If not, see
                 oldTask.startDate != task.startDate ||
                 oldTask.routing != task.routing ||
                 oldTask.endDate != task.endDate">
-                <log
-                    message="====oldStatus: ${oldTask.statusId} new: ${task.statusId} convertnew: ${convertedStatusId}" />
                 <service-call name="update#mantle.work.effort.WorkEffort"
                     in-map="[
                         workEffortId: task.taskId,

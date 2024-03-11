@@ -13,7 +13,6 @@
  */
 
 import 'package:growerp_core/growerp_core.dart';
-import 'views/workflow_dialog.dart';
 import 'views/workflow_db_form.dart' as local;
 import 'package:growerp_models/growerp_models.dart';
 
@@ -28,15 +27,6 @@ List<MenuOption> menuOptions = [
     child: const local.WorkflowDbForm(),
   ),
   MenuOption(
-    image: 'packages/growerp_core/images/workflowGrey.png',
-    selectedImage: 'packages/growerp_core/images/workflow.png',
-    title: 'Editor',
-    route: '/emptyWorkflow',
-    readGroups: [UserGroup.admin, UserGroup.employee],
-    writeGroups: [UserGroup.admin],
-    child: WorkflowDialog(Task()),
-  ),
-  MenuOption(
     image: "packages/growerp_core/images/workflow.png",
     selectedImage: "packages/growerp_core/images/workflow.png",
     title: "Workflows",
@@ -49,7 +39,7 @@ List<MenuOption> menuOptions = [
       image: "packages/growerp_core/images/tasksGrey.png",
       selectedImage: "packages/growerp_core/images/tasks.png",
       title: "Workflow Tasks",
-      route: '/tasks',
+      route: '/workflowTasks',
       readGroups: [UserGroup.admin, UserGroup.employee],
       writeGroups: [UserGroup.admin, UserGroup.employee],
       child: const TaskListForm(TaskType.workflowtask)),

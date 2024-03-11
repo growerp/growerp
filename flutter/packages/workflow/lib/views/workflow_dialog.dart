@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
@@ -88,12 +86,12 @@ class _FlowchartState extends State<Flowchart> {
             debugPrint('Element with "${element.text}" text pressed');
 
             FlowchartMenus.displayElementMenu(
-                context, position, element, FlowData(), dashboard);
+                context, position, element, FlowData(), dashboard, taskBloc);
           },
           onElementSecondaryTapped: (context, position, element) {
             debugPrint('Element with "${element.text}" text pressed');
             FlowchartMenus.displayElementMenu(
-                context, position, element, FlowData(), dashboard);
+                context, position, element, FlowData(), dashboard, taskBloc);
           },
           onHandlerPressed: (context, position, handler, element) {
             debugPrint('handler pressed: position $position '

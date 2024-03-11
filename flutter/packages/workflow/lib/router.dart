@@ -35,20 +35,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/workflow':
       return MaterialPageRoute(
           builder: (context) => WorkflowDialog(settings.arguments as Task));
-    case '/emptyWorkflow':
-      return MaterialPageRoute(builder: (context) => WorkflowDialog(Task()));
-    case '/tasks':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
-    case '/toDo':
-      return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/workflows':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 1, tabIndex: 0));
+    case '/workflowTasks':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
+    case '/toDo':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
           builder: (context) =>

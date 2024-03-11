@@ -5,8 +5,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:star_menu/star_menu.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'workflow_element_properties_dialog.dart';
 import 'flow_data.dart';
-import 'properties_menu.dart';
 
 class FlowchartMenus {
   /// Display a linear menu for the dashboard
@@ -114,7 +114,6 @@ class FlowchartMenus {
           ActionChip(
               label: const Text('SAVE dashboard'),
               onPressed: () async {
-                print(dashboard.toJson());
                 workflow = workflow.copyWith(jsonImage: dashboard.toJson());
                 context.read<TaskBloc>().add(TaskUpdate(workflow));
               }),
@@ -173,6 +172,7 @@ class FlowchartMenus {
     FlowElement element,
     FlowData data,
     Dashboard dashboard,
+    TaskBloc taskBloc,
   ) {
     StarMenuOverlay.displayStarMenu(
       context,
@@ -200,7 +200,6 @@ class FlowchartMenus {
           ),
         ),
         onItemTapped: (index, controller) {
-          print("=====$index=====");
           if (!(index == 1)) {
             controller.closeMenu!();
           }
@@ -210,12 +209,21 @@ class FlowchartMenus {
             element.text,
             style: const TextStyle(fontWeight: FontWeight.w900),
           ),
-          PropertiesMenu(element: element, data: data),
           InkWell(
             onTap: () {
               dashboard.setElementResizable(element, true);
             },
             child: const Text('Resize'),
+          ),
+          InkWell(
+            onTap: () async {
+              await showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (BuildContext context) => BlocProvider.value(
+                      value: taskBloc, child: WorkFlowElementDialog(data)));
+            },
+            child: const Text('Properties'),
           ),
           InkWell(
             onTap: () {
