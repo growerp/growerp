@@ -32,7 +32,7 @@ class Flowchart extends StatefulWidget {
 }
 
 class _FlowchartState extends State<Flowchart> {
-  Dashboard dashboard = Dashboard();
+  late Dashboard dashboard;
   late TaskBloc taskBloc;
   late FlowData data;
 
@@ -40,24 +40,12 @@ class _FlowchartState extends State<Flowchart> {
   void initState() {
     super.initState();
     taskBloc = context.read<TaskBloc>();
+    dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
     data = FlowData(
       name: widget.workflow.taskName,
       taskId: widget.workflow.taskId,
       routing: widget.workflow.routing ?? '',
     );
-
-    dashboard.elements.clear;
-    String source = widget.workflow.jsonImage;
-    if (source.isNotEmpty) {
-      List<FlowElement> all = List<FlowElement>.from(
-        ((json.decode(source))['elements'] as List<dynamic>).map<FlowElement>(
-          (x) => FlowElement.fromMap(x as Map<String, dynamic>),
-        ),
-      );
-      for (int i = 0; i < all.length; i++) {
-        dashboard.addElement(all.elementAt(i));
-      }
-    }
   }
 
   @override
