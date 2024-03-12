@@ -6,6 +6,8 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'flow_data.dart';
 import 'flowchart_menus.dart';
+import 'workflow_context_menu.dart';
+import 'workflow_main_menu.dart';
 
 class WorkflowDialog extends StatelessWidget {
   final Task workflow;
@@ -48,66 +50,76 @@ class _FlowchartState extends State<Flowchart> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Workflow Editor'),
-      ),
-      backgroundColor: Colors.black12,
-      body: Container(
-        constraints: const BoxConstraints.expand(),
-        child: FlowChart(
-          dashboard: dashboard,
-          onDashboardTapped: ((context, position) {
-            debugPrint('Dashboard tapped $position');
-            FlowchartMenus.displayDashboardMenu(
-                context, position, dashboard, widget.workflow);
-          }),
-          onDashboardSecondaryTapped: (context, position) {
-            debugPrint('Dashboard right clicked $position');
-            FlowchartMenus.displayDashboardMenu(
-                context, position, dashboard, widget.workflow);
-          },
-          onDashboardLongtTapped: ((context, position) {
-            debugPrint('Dashboard long tapped $position');
-          }),
-          onDashboardSecondaryLongTapped: ((context, position) {
-            debugPrint(
-                'Dashboard long tapped with mouse right click $position');
-          }),
-          onElementLongPressed: (context, position, element) {
-            debugPrint('Element with "${element.text}" text '
-                'long pressed');
-          },
-          onElementSecondaryLongTapped: (context, position, element) {
-            debugPrint('Element with "${element.text}" text '
-                'long tapped with mouse right click');
-          },
-          onElementPressed: (context, position, element) {
-            debugPrint('Element with "${element.text}" text pressed');
+    return PopScope(
+        onPopInvoked: (value) {
+          print("====$data");
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Workflow Editor'),
+          ),
+          backgroundColor: Colors.black12,
+          body: Container(
+            constraints: const BoxConstraints.expand(),
+            child: FlowChart(
+              dashboard: dashboard,
+              onDashboardTapped: ((context, position) async {
+                debugPrint('Dashboard tapped $position');
+                await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) => BlocProvider.value(
+                        value: taskBloc,
+                        child: WorkFlowMainMenu(
+                            widget.workflow, dashboard, position)));
+              }),
+              onDashboardSecondaryTapped: (context, position) async {
+                debugPrint('Dashboard right clicked $position');
+              },
+              onDashboardLongtTapped: ((context, position) {
+                debugPrint('Dashboard long tapped $position');
+              }),
+              onDashboardSecondaryLongTapped: ((context, position) {
+                debugPrint(
+                    'Dashboard long tapped with mouse right click $position');
+              }),
+              onElementLongPressed: (context, position, element) {
+                debugPrint('Element with "${element.text}" text '
+                    'long pressed');
+              },
+              onElementSecondaryLongTapped: (context, position, element) {
+                debugPrint('Element with "${element.text}" text '
+                    'long tapped with mouse right click');
+              },
+              onElementPressed: (context, position, element) async {
+                debugPrint('Element with "${element.text}" text pressed');
 
-            FlowchartMenus.displayElementMenu(
-                context, position, element, FlowData(), dashboard, taskBloc);
-          },
-          onElementSecondaryTapped: (context, position, element) {
-            debugPrint('Element with "${element.text}" text pressed');
-            FlowchartMenus.displayElementMenu(
-                context, position, element, FlowData(), dashboard, taskBloc);
-          },
-          onHandlerPressed: (context, position, handler, element) {
-            debugPrint('handler pressed: position $position '
-                'handler $handler" of element $element');
-            FlowchartMenus.displayHandlerMenu(
-                context, position, handler, element, data, dashboard);
-          },
-          onHandlerLongPressed: (context, position, handler, element) {
-            debugPrint('handler long pressed: position $position '
-                'handler $handler" of element $element');
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: dashboard.recenter,
-          child: const Icon(Icons.center_focus_strong)),
-    );
+                await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) => BlocProvider.value(
+                        value: taskBloc,
+                        child: WorkFlowContextMenu(
+                            widget.workflow, dashboard, element, data)));
+              },
+              onElementSecondaryTapped: (context, position, element) {
+                debugPrint('Element with "${element.text}" text pressed');
+              },
+              onHandlerPressed: (context, position, handler, element) {
+                debugPrint('handler pressed: position $position '
+                    'handler $handler" of element $element');
+                FlowchartMenus.displayHandlerMenu(
+                    context, position, handler, element, dashboard);
+              },
+              onHandlerLongPressed: (context, position, handler, element) {
+                debugPrint('handler long pressed: position $position '
+                    'handler $handler" of element $element');
+              },
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+              onPressed: dashboard.recenter,
+              child: const Icon(Icons.center_focus_strong)),
+        ));
   }
 }

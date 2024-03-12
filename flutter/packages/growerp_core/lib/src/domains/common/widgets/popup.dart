@@ -13,8 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import '../../domains.dart';
+import '../../../../growerp_core.dart';
 
 Widget popUp(
     {Widget? child,
@@ -23,7 +22,7 @@ Widget popUp(
     double? width,
     required BuildContext context}) {
   if (width == null) {
-    ResponsiveBreakpoints.of(context).isMobile ? width = 350 : width = 700;
+    isPhone(context) ? width = 350 : width = 700;
   }
   return Stack(clipBehavior: Clip.none, children: [
     SizedBox(

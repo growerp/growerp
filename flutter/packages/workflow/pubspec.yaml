@@ -20,9 +20,9 @@ dependencies:
   package_info_plus: ^5.0.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  flutter_flow_chart:
-    git:
-      url: https://github.com/growerp/growerp_flutter_flow_chart.git
+  flutter_flow_chart: ^2.1.4
+#    git:
+#      url: https://github.com/growerp/growerp_flutter_flow_chart.git
   flow_builder: ^0.0.10
   star_menu: ^4.0.0
   path_provider: ^2.0.11
@@ -42,6 +42,9 @@ flutter:
   uses-material-design: true
   assets: 
     - assets/cfg/
+    - packages/growerp_core/images/rect.png
+    - packages/growerp_core/images/oval.png
+    - packages/growerp_core/images/diamond.png
     - packages/growerp_core/images/aboutGrey.png
     - packages/growerp_core/images/accounting.png
     - packages/growerp_core/images/workflow.png

@@ -17,21 +17,27 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:workflow/views/flow_data.dart';
 
-import 'flow_data.dart';
-
-class WorkFlowElementDialog extends StatefulWidget {
+class WorkFlowContextMenu extends StatefulWidget {
+  final Task workflow;
+  final Dashboard dashboard;
+  final FlowElement element;
   final FlowData data;
-  const WorkFlowElementDialog(this.data, {super.key});
+  const WorkFlowContextMenu(
+      this.workflow, this.dashboard, this.element, this.data,
+      {super.key});
   @override
-  WorkFlowElementDialogState createState() => WorkFlowElementDialogState();
+  WorkFlowContextMenuState createState() => WorkFlowContextMenuState();
 }
 
-class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
+class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
   final _taskDialogformKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _routingController = TextEditingController();
   final TextEditingController _taskSearchBoxController =
       TextEditingController();
   late TaskBloc _taskBloc;
@@ -42,6 +48,8 @@ class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
     super.initState();
     _taskBloc = context.read<TaskBloc>();
     _taskBloc.add(const TaskFetch());
+    _routingController.text = widget.data.routing;
+    _nameController.text = widget.element.text;
   }
 
   @override
@@ -56,9 +64,9 @@ class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
             ),
             child: popUp(
                 context: context,
-                title: 'Element Information',
-                height: 500,
-                width: 350,
+                title: widget.element.text,
+                height: 300,
+                width: 280,
                 child: _showForm())));
   }
 
@@ -67,6 +75,36 @@ class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
         child: Form(
             key: _taskDialogformKey,
             child: ListView(key: const Key('listView'), children: <Widget>[
+              Center(
+                child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    children: [
+                      ElevatedButton(
+                        child: const Text('Resize'),
+                        onPressed: () async {
+                          widget.dashboard
+                              .setElementResizable(widget.element, true);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      ElevatedButton(
+                        child: const Text('Delete'),
+                        onPressed: () async {
+                          widget.dashboard.removeElement(widget.element);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      ElevatedButton(
+                        child: const Text('remove outgoing connections'),
+                        onPressed: () async {
+                          widget.dashboard
+                              .removeElementConnections(widget.element);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ]),
+              ),
               TextFormField(
                 key: const Key('name'),
                 decoration:
@@ -74,6 +112,16 @@ class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
                 controller: _nameController,
                 validator: (value) {
                   if (value!.isEmpty) return 'Please enter a task name?';
+                  return null;
+                },
+              ),
+              TextFormField(
+                key: const Key('routing'),
+                decoration:
+                    const InputDecoration(labelText: 'Workflow Routing'),
+                controller: _routingController,
+                validator: (value) {
+                  if (value!.isEmpty) return 'Please enter routing?';
                   return null;
                 },
               ),
@@ -125,9 +173,11 @@ class WorkFlowElementDialogState extends State<WorkFlowElementDialog> {
               const SizedBox(height: 20),
               ElevatedButton(
                   key: const Key('update'),
-                  child: const Text('Update'),
+                  child: Text(widget.data.taskId.isEmpty ? 'Create' : 'Update'),
                   onPressed: () async {
-                    Navigator.of(context).pop(widget.data);
+                    Navigator.of(context).pop(widget.data.copyWith(
+                        name: _nameController.text,
+                        routing: _routingController.text));
                   }),
             ])));
   }
