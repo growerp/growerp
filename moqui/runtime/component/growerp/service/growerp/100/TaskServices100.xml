@@ -319,8 +319,8 @@ along with this software (see the LICENSE.md file). If not, see
                         todo: 'WetTask']"
                 type="NewMap" />
             <!-- create task -->
-            <if condition="!task.statusId">
-                <set field="task.statusId" value="In Planning" />
+            <if condition="!task.statusId || task.statusId.isEmpty()">
+                <set field="task.statusId" value="planning" />
             </if>
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
