@@ -36,7 +36,6 @@ class CompanyListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
-    RestClient repos = context.read<RestClient>();
     CompanyBloc companyBloc = context.read<CompanyBloc>();
     return ListTile(
         leading: CircleAvatar(
@@ -124,10 +123,8 @@ class CompanyListItem extends StatelessWidget {
               barrierDismissible: true,
               context: context,
               builder: (BuildContext context) {
-                return RepositoryProvider.value(
-                    value: repos,
-                    child: BlocProvider.value(
-                        value: companyBloc, child: CompanyDialog(company)));
+                return BlocProvider.value(
+                    value: companyBloc, child: CompanyDialog(company));
               });
         },
         trailing: IconButton(

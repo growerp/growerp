@@ -30,12 +30,6 @@ class UserListForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
-    Widget userList = RepositoryProvider.value(
-        value: restClient,
-        child: UserList(
-          key: key,
-          role: role,
-        ));
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (state.status == AuthStatus.failure) {
         return const FatalErrorForm(message: 'Internet or server problem?');
@@ -45,34 +39,34 @@ class UserListForm extends StatelessWidget {
           return BlocProvider<LeadBloc>(
               create: (context) =>
                   UserBloc(restClient, role)..add(const UserFetch()),
-              child: userList);
+              child: UserList(role));
         case Role.customer:
           return BlocProvider<CustomerBloc>(
               create: (context) =>
                   UserBloc(restClient, role)..add(const UserFetch()),
-              child: userList);
+              child: UserList(role));
         case Role.supplier:
           return BlocProvider<SupplierBloc>(
               create: (context) =>
                   UserBloc(restClient, role)..add(const UserFetch()),
-              child: userList);
+              child: UserList(role));
         case Role.company:
           return BlocProvider<EmployeeBloc>(
               create: (context) =>
                   UserBloc(restClient, role)..add(const UserFetch()),
-              child: userList);
+              child: UserList(role));
         default:
           return BlocProvider<UserBloc>(
               create: (context) =>
                   UserBloc(restClient, role)..add(const UserFetch()),
-              child: userList);
+              child: UserList(role));
       }
     });
   }
 }
 
 class UserList extends StatefulWidget {
-  const UserList({super.key, required this.role});
+  const UserList(this.role, {super.key});
 
   final Role? role;
 
