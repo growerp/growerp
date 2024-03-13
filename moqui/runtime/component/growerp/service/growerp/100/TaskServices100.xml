@@ -105,6 +105,11 @@ along with this software (see the LICENSE.md file). If not, see
                             <parameter name="comments" />
                         </parameter>
                     </parameter>
+                    <parameter name="workflowTasks" type="List">
+                        <parameter name="taskId" />
+                        <parameter name="flowElementId" />
+                        <parameter name="routing" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -189,6 +194,21 @@ along with this software (see the LICENSE.md file). If not, see
                                     statusId: convertedStatusId,
                                     jsonImage: contentText,
                                 ]" />
+                        <entity-find entity-name="mantle.work.effort.WorkEffortAssocAndTo"
+                            list="assocs">
+                            <econdition field-name="fromWorkEffortId" from="entry.workEffortId" />
+                            <econdition field-name="workEffortAssocTypeEnumId"
+                                value="WeatRoutingComp" />
+                        </entity-find>
+                        <set field="workflowTasks" from="[]" />
+                        <iterate list="assocs" entry="assoc">
+                            <set field="workflowTask"
+                                from="[taskid: assoc.toWorkEffortId,
+                                    flowElementId: assoc.flowElementId,
+                                    routing: assoc.routing]" />
+                            <script>workflowTasks.add(workflowTask)</script>
+                        </iterate>
+                        <set field="workEffortOut.workflowTasks" from="workflowTasks" />
                         <script>tasks.add(workEffortOut)</script>
                     </iterate>
                 </then>
@@ -398,6 +418,12 @@ along with this software (see the LICENSE.md file). If not, see
                 <parameter name="unInvoicedHours" />
                 <parameter name="jsonImage" />
                 <parameter name="routing" />
+                <parameter name="flowElementId" />
+                <parameter name="workflowTasks" type="List">
+                    <parameter name="taskId" />
+                    <parameter name="flowElementId" />
+                    <parameter name="routing" />
+                </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -422,6 +448,11 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="date" />
                         <parameter name="comments" />
                     </parameter>
+                </parameter>
+                <parameter name="workflowTasks" type="List">
+                    <parameter name="taskId" />
+                    <parameter name="flowElementId" />
+                    <parameter name="routing" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -554,6 +585,28 @@ along with this software (see the LICENSE.md file). If not, see
                         <script>docRr.putText(task.jsonImage)</script>
                     </else>
                 </if>
+            </if>
+            <if condition="task.workFlowTasks">
+                <!-- delete and add workflow tasks -->
+                <entity-find entity-name="mantle.work.effort.WorkEffortAssoc" list="assocs">
+                    <econdition field-name="workEffortId" from="task.taskId" />
+                </entity-find>
+                <iterate list="assocs" entry="assoc">
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
+                        <econdition field-name="workEffortId" from="assoc.toWorkEffortId" />
+                    </entity-delete-by-condition>
+                    <entity-delete value-field="assoc" />
+                </iterate>
+                <iterate list="task.workflowTasks" entry="wfTask">
+                    <service-call name="create#mantle.work.effort.WorkEffort"
+                        in-map="[flowElementId: wfTask.flowElementId,
+                            routing: wfTask.routing]"
+                        out-map="context" />
+                    <service-call name="create#mantle.work.effort.WorkEffortAssoc"
+                        in-map="[workEffortId: task.taskId,
+                        toWorkEffortId: workEffortId,
+                        workEffortAssocTypeEnumId: 'WeatRoutingComp']" />
+                </iterate>
             </if>
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: task.taskId]" out-map="context" />

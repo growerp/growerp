@@ -13,10 +13,10 @@
  */
 
 import 'package:growerp_models/growerp_models.dart';
-
-import '../../../../growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../growerp_core.dart';
 
 class TaskDialog extends StatefulWidget {
   final Task task;
@@ -31,7 +31,7 @@ class TaskDialogState extends State<TaskDialog> {
   final TextEditingController _routingController = TextEditingController();
 
   late TaskStatus _status;
-  late TaskBloc taskBloc;
+  late TaskBloc _taskBloc;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class TaskDialogState extends State<TaskDialog> {
     _status = widget.task.statusId ?? TaskStatus.planning;
     _nameController.text = widget.task.taskName;
     _routingController.text = widget.task.routing ?? '';
-    taskBloc = context.read<TaskBloc>();
+    _taskBloc = context.read<TaskBloc>();
   }
 
   @override
@@ -152,7 +152,7 @@ class TaskDialogState extends State<TaskDialog> {
                               context: context,
                               builder: (BuildContext context) {
                                 return BlocProvider.value(
-                                    value: taskBloc,
+                                    value: _taskBloc,
                                     child: TimeEntryListDialog(
                                         widget.task.taskId,
                                         widget.task.timeEntries));
@@ -163,7 +163,7 @@ class TaskDialogState extends State<TaskDialog> {
                   Expanded(
                       child: ElevatedButton(
                           key: const Key('showWorkflowEditor'),
-                          child: const Text('Show Graphycal Image'),
+                          child: const Text('Show Graphical Image'),
                           onPressed: () => Navigator.of(context)
                               .pushNamed('/workflow', arguments: widget.task))),
                 const SizedBox(width: 10),
@@ -174,7 +174,7 @@ class TaskDialogState extends State<TaskDialog> {
                             widget.task.taskId.isEmpty ? 'Create' : 'Update'),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            taskBloc.add(TaskUpdate(
+                            _taskBloc.add(TaskUpdate(
                               widget.task.copyWith(
                                 taskId: widget.task.taskId,
                                 taskName: _nameController.text,

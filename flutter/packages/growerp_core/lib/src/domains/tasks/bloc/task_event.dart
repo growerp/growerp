@@ -22,12 +22,10 @@ abstract class TaskEvent extends Equatable {
 
 class TaskFetch extends TaskEvent {
   const TaskFetch(
-      {this.taskType = TaskType.todo,
-      this.limit = 20,
+      {this.limit = 20,
       this.searchString = '',
       this.refresh = false,
       this.isForDropDown = false});
-  final TaskType taskType;
   final String searchString;
   final bool refresh;
   final int limit;

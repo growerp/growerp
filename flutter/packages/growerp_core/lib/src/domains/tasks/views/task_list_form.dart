@@ -14,8 +14,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../tasks.dart';
 
 class TaskListForm extends StatelessWidget {
   final TaskType taskType;
@@ -23,90 +23,161 @@ class TaskListForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) => TaskBloc(context.read<RestClient>()),
-      child: TasksList(taskType),
-    );
+    RestClient restClient = context.read<RestClient>();
+    switch (taskType) {
+      case TaskType.todo:
+        return BlocProvider<TaskToDoBloc>(
+          create: (context) => TaskBloc(restClient, taskType),
+          child: TaskList(taskType),
+        );
+      case TaskType.workflow:
+        return BlocProvider<TaskWorkflowBloc>(
+          create: (context) => TaskBloc(restClient, taskType),
+          child: TaskList(taskType),
+        );
+      case TaskType.workflowtask:
+        return BlocProvider<TaskWorkflowTaskBloc>(
+          create: (context) => TaskBloc(restClient, taskType),
+          child: TaskList(taskType),
+        );
+      default:
+        return BlocProvider<TaskBloc>(
+          create: (context) => TaskBloc(restClient, taskType),
+          child: TaskList(taskType),
+        );
+    }
   }
 }
 
-class TasksList extends StatefulWidget {
+class TaskList extends StatefulWidget {
   final TaskType taskType;
-  const TasksList(this.taskType, {super.key});
+  const TaskList(this.taskType, {super.key});
 
   @override
-  TasksListState createState() => TasksListState();
+  TaskListState createState() => TaskListState();
 }
 
-class TasksListState extends State<TasksList> {
+class TaskListState extends State<TaskList> {
   final _scrollController = ScrollController();
   late TaskBloc _taskBloc;
+  bool hasReachedMax = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(TaskFetch(taskType: widget.taskType));
+    switch (widget.taskType) {
+      case TaskType.todo:
+        _taskBloc = context.read<TaskToDoBloc>() as TaskBloc;
+        break;
+      case TaskType.workflow:
+        _taskBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
+        break;
+      case TaskType.workflowtask:
+        _taskBloc = context.read<TaskWorkflowTaskBloc>() as TaskBloc;
+        break;
+      case TaskType.unkwown:
+    }
+    _taskBloc.add(const TaskFetch());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TaskBloc, TaskState>(
-      builder: (context, state) {
-        switch (state.status) {
-          case TaskBlocStatus.failure:
-            return Center(
-                child: Text('failed to fetch tasks: ${state.message}'));
-          case TaskBlocStatus.success:
-            return Scaffold(
-                floatingActionButton: FloatingActionButton(
-                    key: const Key("addNew"),
-                    onPressed: () async {
-                      await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return BlocProvider.value(
-                                value: _taskBloc,
-                                child: TaskDialog(
-                                    Task(taskType: widget.taskType)));
-                          });
-                    },
-                    tooltip: 'Add New',
-                    child: const Icon(Icons.add)),
-                body: RefreshIndicator(
-                    onRefresh: (() async => context
-                        .read<TaskBloc>()
-                        .add(const TaskFetch(refresh: true))),
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.hasReachedMax
-                          ? state.tasks.length + 1
-                          : state.tasks.length + 2,
-                      controller: _scrollController,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (state.tasks.isEmpty) {
-                          return Center(
-                              heightFactor: 20,
-                              child: Text(
-                                  'No active ${widget.taskType.name} found',
-                                  key: const Key('empty'),
-                                  textAlign: TextAlign.center));
-                        }
-                        if (index == 0) return const TaskListHeader();
-                        index--;
-                        return index >= state.tasks.length
-                            ? const BottomLoader()
-                            : TaskListItem(
-                                task: state.tasks[index], index: index);
-                      },
-                    )));
-          default:
-            return const Center(child: CircularProgressIndicator());
+    return Builder(builder: (BuildContext context) {
+      Widget showForm(state) {
+        return RefreshIndicator(
+            onRefresh: (() async =>
+                _taskBloc.add(const TaskFetch(refresh: true))),
+            child: ListView.builder(
+              key: const Key('listView'),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: hasReachedMax && state.tasks.isNotEmpty
+                  ? state.tasks.length + 1
+                  : state.tasks.length + 2,
+              controller: _scrollController,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
+                  return const Column(children: [
+                    TaskListHeader(),
+                    Divider(),
+                  ]);
+                }
+                if (index == 1 && state.tasks.isEmpty) {
+                  return const Center(
+                      heightFactor: 20,
+                      child: Text("no records found!",
+                          key: Key('empty'), textAlign: TextAlign.center));
+                }
+                index -= 1;
+                return index >= state.tasks.length
+                    ? const BottomLoader()
+                    : Dismissible(
+                        key: const Key('userItem'),
+                        direction: DismissDirection.startToEnd,
+                        child: BlocProvider.value(
+                          value: _taskBloc,
+                          child: TaskListItem(
+                            task: state.tasks[index],
+                            index: index,
+                          ),
+                        ));
+              },
+            ));
+      }
+
+      blocListener(context, state) {
+        if (state.status == TaskBlocStatus.failure) {
+          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
-      },
-    );
+        if (state.status == TaskBlocStatus.success) {
+          HelperFunctions.showMessage(
+              context, '${state.message}', Colors.green);
+        }
+      }
+
+      blocBuilder(context, state) {
+        if (state.status == TaskBlocStatus.failure) {
+          return FatalErrorForm(
+              message: "Could not load ${widget.taskType.toString()}s!");
+        }
+        if (state.status == TaskBlocStatus.success) {
+          hasReachedMax = state.hasReachedMax;
+          return Scaffold(
+              floatingActionButton: FloatingActionButton(
+                  key: const Key("addNew"),
+                  onPressed: () async {
+                    await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return BlocProvider.value(
+                              value: _taskBloc,
+                              child:
+                                  TaskDialog(Task(taskType: widget.taskType)));
+                        });
+                  },
+                  tooltip: 'Add New',
+                  child: const Icon(Icons.add)),
+              body: showForm(state));
+        }
+        return const LoadingIndicator();
+      }
+
+      switch (widget.taskType) {
+        case TaskType.todo:
+          return BlocConsumer<TaskToDoBloc, TaskState>(
+              listener: blocListener, builder: blocBuilder);
+        case TaskType.workflow:
+          return BlocConsumer<TaskWorkflowBloc, TaskState>(
+              listener: blocListener, builder: blocBuilder);
+        case TaskType.workflowtask:
+          return BlocConsumer<TaskWorkflowTaskBloc, TaskState>(
+              listener: blocListener, builder: blocBuilder);
+        default:
+          return BlocConsumer<TaskBloc, TaskState>(
+              listener: blocListener, builder: blocBuilder);
+      }
+    });
   }
 
   @override
@@ -118,7 +189,7 @@ class TasksListState extends State<TasksList> {
   }
 
   void _onScroll() {
-    if (_isBottom) context.read<TaskBloc>().add(const TaskFetch());
+    if (_isBottom) _taskBloc.add(const TaskFetch());
   }
 
   bool get _isBottom {

@@ -25,7 +25,8 @@ class Task extends Equatable with _$Task {
   Task._();
   factory Task({
     @Default("") String taskId,
-    TaskType? taskType, // todo, workflow, workflowTask
+    @Default(TaskType.unkwown)
+    TaskType taskType, // todo, workflow, workflowTask
     @Default("") String parentTaskId,
     TaskStatus? statusId,
     @Default("") String taskName,
@@ -53,5 +54,7 @@ class Task extends Equatable with _$Task {
   List<Object?> get props => [taskId];
 
   @override
-  String toString() => 'Task $taskName [$taskId]';
+  String toString() =>
+      'Task $taskName [$taskId] #subtasks ${workflowTasks.length} '
+      '#timeEntries: ${timeEntries.length}';
 }

@@ -395,6 +395,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_flow_chart:
+    dependency: transitive
+    description:
+      name: flutter_flow_chart
+      sha256: ff7da34b5f6340087fc66e45ee586a336d71744b1318da0bb3cc06d69378fdc6
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.4"
   flutter_highlight:
     dependency: transitive
     description:

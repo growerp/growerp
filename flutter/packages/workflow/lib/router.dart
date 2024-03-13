@@ -17,7 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/foundation.dart' as debug;
 import 'package:flutter/material.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:workflow/views/workflow_dialog.dart';
+import 'package:workflow/views/workflow_editor.dart';
 import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 

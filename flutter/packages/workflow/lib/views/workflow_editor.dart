@@ -14,32 +14,41 @@ class WorkflowDialog extends StatelessWidget {
   const WorkflowDialog(this.workflow, {super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) => TaskBloc(context.read<RestClient>())
-        ..add(const TaskFetch(
-            taskType: TaskType.workflowtask, isForDropDown: true, limit: 3)),
-      child: Flowchart(workflow),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<TaskWorkflowBloc>(
+          create: (BuildContext context) =>
+              TaskBloc(context.read<RestClient>(), TaskType.workflow),
+        ),
+        BlocProvider<TaskWorkflowTaskBloc>(
+          create: (BuildContext context) =>
+              TaskBloc(context.read<RestClient>(), TaskType.workflowtask),
+        ),
+      ],
+      child: WorkFlowEditor(workflow),
     );
   }
 }
 
-class Flowchart extends StatefulWidget {
+class WorkFlowEditor extends StatefulWidget {
   final Task workflow;
-  const Flowchart(this.workflow, {super.key});
+  const WorkFlowEditor(this.workflow, {super.key});
 
   @override
-  State<Flowchart> createState() => _FlowchartState();
+  State<WorkFlowEditor> createState() => _WorkFlowEditorState();
 }
 
-class _FlowchartState extends State<Flowchart> {
+class _WorkFlowEditorState extends State<WorkFlowEditor> {
   late Dashboard dashboard;
+  late TaskBloc workflowBloc;
   late TaskBloc taskBloc;
   late FlowData data;
 
   @override
   void initState() {
     super.initState();
-    taskBloc = context.read<TaskBloc>();
+    workflowBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
+    taskBloc = context.read<TaskWorkflowTaskBloc>() as TaskBloc;
     dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
     data = FlowData(
       name: widget.workflow.taskName,

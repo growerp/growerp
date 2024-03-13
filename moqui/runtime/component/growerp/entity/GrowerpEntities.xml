@@ -226,4 +226,9 @@ along with this software (see the LICENSE.md file). If not, see
         <field name="apiVersion" type="text-short" />
     </entity>
 
+    <extend-entity entity-name="WorkEffort" package="mantle.work.effort">
+        <field name="flowElementId" type="id" />
+        <field name="routing" type="text-medium" />
+    </extend-entity>
+
 </entities>

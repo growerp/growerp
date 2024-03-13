@@ -2550,11 +2550,11 @@ along with this software (see the LICENSE.md file). If not, see
 
             <set field="tasks"
                 from="[
-                    [ taskType: 'todo', name: 'The first task' ],
-                    [ taskType: 'todo', name: 'The second task' ],
-                    [ taskType: 'todo', name: 'The third task' ],
-                    [ taskType: 'todo', name: 'The fourth task' ],
-                    [ taskType: 'todo', name: 'The fifth task' ]
+                    [ taskType: 'todo', taskName: 'The first task' ],
+                    [ taskType: 'todo', taskName: 'The second task' ],
+                    [ taskType: 'todo', taskName: 'The third task' ],
+                    [ taskType: 'todo', taskName: 'The fourth task' ],
+                    [ taskType: 'todo', taskName: 'The fifth task' ]
             ]" />
 
             <set field="workflows"

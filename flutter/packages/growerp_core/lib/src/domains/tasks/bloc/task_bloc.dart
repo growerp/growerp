@@ -19,11 +19,16 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
+import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
 
 const _taskLimit = 20;
+
+mixin TaskToDoBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowTaskBloc on Bloc<TaskEvent, TaskState> {}
 
 EventTransformer<E> taskDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -31,8 +36,9 @@ EventTransformer<E> taskDroppable<E>(Duration duration) {
   };
 }
 
-class TaskBloc extends Bloc<TaskEvent, TaskState> {
-  TaskBloc(this.restClient) : super(const TaskState()) {
+class TaskBloc extends Bloc<TaskEvent, TaskState>
+    with TaskToDoBloc, TaskWorkflowBloc, TaskWorkflowTaskBloc {
+  TaskBloc(this.restClient, this.taskType) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
     on<TaskUpdate>(_onTaskUpdate);
@@ -41,6 +47,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   }
 
   final RestClient restClient;
+  final TaskType taskType;
   int start = 0;
 
   Future<void> _onTaskFetch(
@@ -60,7 +67,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       emit(state.copyWith(status: TaskBlocStatus.loading));
       Tasks compResult = await restClient.getTask(
-          taskType: event.taskType,
+          taskType: taskType,
           start: start,
           searchString: event.searchString,
           limit: event.limit);
@@ -85,19 +92,49 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     try {
       List<Task> tasks = List.from(state.tasks);
       emit(state.copyWith(status: TaskBlocStatus.loading));
+      late Task newWorkflow;
       if (event.task.taskId.isNotEmpty) {
-        Task compResult = await restClient.updateTask(task: event.task);
+        /// extract data from editor data [FlowElement] in growerp [Task]s
+        if (event.task.taskType == TaskType.workflow) {
+          Dashboard dashboard = Dashboard.fromJson(event.task.jsonImage);
+          newWorkflow = Task(
+              taskId: event.task.taskId,
+              statusId: event.task.statusId,
+              taskName: event.task.taskName,
+              description: event.task.description);
+          List<Task> newWorkflowTasks = [];
+          for (FlowElement element in dashboard.elements) {
+            if (element == dashboard.elements.first) {
+              newWorkflow = newWorkflow.copyWith(
+                  flowElementId: element.id, jsonImage: event.task.jsonImage);
+            } else {
+              newWorkflowTasks.add(Task(
+                  taskType: TaskType.workflowtask,
+                  flowElementId: element.id,
+                  routing: event.task.routing));
+            }
+          }
+          newWorkflow = newWorkflow.copyWith(workflowTasks: newWorkflowTasks);
+        } else {
+          newWorkflow = event.task;
+        }
+
+        Task compResult = await restClient.updateTask(task: newWorkflow);
         int index =
             tasks.indexWhere((element) => element.taskId == event.task.taskId);
         tasks[index] = compResult;
-        return emit(
-            state.copyWith(status: TaskBlocStatus.success, tasks: tasks));
+        return emit(state.copyWith(
+            status: TaskBlocStatus.success,
+            tasks: tasks,
+            message: "${event.task.taskType} updated"));
       } else {
         // add
         Task compResult = await restClient.createTask(task: event.task);
         tasks.insert(0, compResult);
-        return emit(
-            state.copyWith(status: TaskBlocStatus.success, tasks: tasks));
+        return emit(state.copyWith(
+            status: TaskBlocStatus.success,
+            tasks: tasks,
+            message: "${event.task.taskType} added"));
       }
     } on DioException catch (e) {
       emit(state.copyWith(

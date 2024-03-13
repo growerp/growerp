@@ -20,6 +20,8 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'workflow_helper.dart';
+
 class WorkFlowMainMenu extends StatefulWidget {
   final Task workflow;
   final Dashboard dashboard;
@@ -38,7 +40,7 @@ class WorkFlowMainMenuState extends State<WorkFlowMainMenu> {
   void initState() {
     super.initState();
     _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(const TaskFetch());
+    _taskBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
     elementsSave = List.of(widget.dashboard.elements);
   }
 
@@ -136,12 +138,12 @@ class WorkFlowMainMenuState extends State<WorkFlowMainMenu> {
         const SizedBox(height: 20),
         Expanded(
           child: ElevatedButton(
-            child: const Text('Save'),
-            onPressed: () async {
-              context.read<TaskBloc>().add(TaskUpdate(widget.workflow
-                  .copyWith(jsonImage: widget.dashboard.toJson())));
-            },
-          ),
+              child: const Text('Save'),
+              onPressed: () {
+                WorkflowHelper.saveWorkflow(
+                    context, widget.workflow, widget.dashboard);
+                Navigator.of(context).pop();
+              }),
         ),
       ])
     ]);
