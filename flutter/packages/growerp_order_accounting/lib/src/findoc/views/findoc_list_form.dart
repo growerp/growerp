@@ -45,18 +45,16 @@ class FinDocListForm extends StatelessWidget {
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
     String classificationId = context.read<String>();
-    Widget finDocList = RepositoryProvider.value(
-        value: restClient,
-        child: FinDocList(
-          key: key,
-          sales: sales,
-          docType: docType,
-          onlyRental: onlyRental,
-          status: status,
-          additionalItemButtonName: additionalItemButtonName,
-          additionalItemButtonRoute: additionalItemButtonRoute,
-          journalId: journalId,
-        ));
+    Widget finDocList = FinDocList(
+      key: key,
+      sales: sales,
+      docType: docType,
+      onlyRental: onlyRental,
+      status: status,
+      additionalItemButtonName: additionalItemButtonName,
+      additionalItemButtonRoute: additionalItemButtonRoute,
+      journalId: journalId,
+    );
     switch (docType) {
       case FinDocType.order:
         if (sales) {
@@ -151,10 +149,8 @@ class FinDocListState extends State<FinDocList> {
   late int limit;
   String classificationId = GlobalConfiguration().getValue("classificationId");
   late String entityName;
-  bool isLoading = true;
   bool hasReachedMax = false;
   late FinDocBloc _finDocBloc;
-  late RestClient repos;
 
   @override
   void initState() {
@@ -164,7 +160,6 @@ class FinDocListState extends State<FinDocList> {
             ? 'Reservation'
             : widget.docType.toString();
     _scrollController.addListener(_onScroll);
-    repos = context.read<RestClient>();
     switch (widget.docType) {
       case FinDocType.order:
         widget.sales
@@ -243,14 +238,12 @@ class FinDocListState extends State<FinDocList> {
                               direction: DismissDirection.startToEnd,
                               child: BlocProvider.value(
                                   value: _finDocBloc,
-                                  child: RepositoryProvider.value(
-                                      value: repos,
-                                      child: widget.docType ==
-                                              FinDocType.transaction
+                                  child:
+                                      widget.docType == FinDocType.transaction
                                           ? getFinDocListItemTrans(
                                               index, isPhone, context)
                                           : getFinDocListItem(
-                                              index, isPhone, context))));
+                                              index, isPhone, context)));
                     })))
       ]);
     }
@@ -315,20 +308,17 @@ class FinDocListState extends State<FinDocList> {
                               barrierDismissible: true,
                               context: context,
                               builder: (BuildContext context) {
-                                return RepositoryProvider.value(
-                                    value: repos,
-                                    child: BlocProvider.value(
-                                        value: _finDocBloc,
-                                        child: widget.docType ==
-                                                FinDocType.payment
-                                            ? PaymentDialog(
-                                                finDoc: FinDoc(
-                                                    sales: widget.sales,
-                                                    docType: widget.docType))
-                                            : FinDocDialog(
-                                                finDoc: FinDoc(
-                                                    sales: widget.sales,
-                                                    docType: widget.docType))));
+                                return BlocProvider.value(
+                                    value: _finDocBloc,
+                                    child: widget.docType == FinDocType.payment
+                                        ? PaymentDialog(
+                                            finDoc: FinDoc(
+                                                sales: widget.sales,
+                                                docType: widget.docType))
+                                        : FinDocDialog(
+                                            finDoc: FinDoc(
+                                                sales: widget.sales,
+                                                docType: widget.docType)));
                               });
                         },
                         tooltip: 'Add New',
