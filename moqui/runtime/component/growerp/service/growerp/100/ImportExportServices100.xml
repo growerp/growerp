@@ -595,6 +595,7 @@ along with this software (see the LICENSE.md file). If not, see
                         message="id: ${item.pseudoId} no item type for ${item.glAccount.glAccountId} set to ItemExpense" />
                     <set field="item.itemType" from="[itemTypeId: 'ItemExpense']" />
                 </if>
+                <log message="=====added productId: ${item.productId}" />
                 <script>itemsOut.add(item)</script>
                 <set field="lastItem" from="item" />
             </iterate>
@@ -624,7 +625,6 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
                 <!-- if transactions, check latest date and see if previous year period not close
                 yet-->
-
             </if>
 
             <!-- end of service result -->

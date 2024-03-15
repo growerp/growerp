@@ -1658,6 +1658,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <else>
                         <service-call name="mantle.order.OrderServices.create#OrderItem"
                             in-map="context + [itemTypeEnumId: item.itemType.itemTypeId,
+                                            productId: item.productId,
                                             itemDescription: item.description,
                                             quantity: item.quantity,
                                             unitAmount: item.price,

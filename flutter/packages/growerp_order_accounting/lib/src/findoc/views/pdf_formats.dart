@@ -81,7 +81,8 @@ class PdfFormats {
 
   static Widget buildFinDocInfo(FinDoc info) {
     final titles = <String>[
-      '${info.docType} Number:',
+      '${info.sales == true ? "Sales" : "Purchase"} '
+          '${info.docType} Number:',
       '${info.docType} Date:',
     ];
     final data = <String>[

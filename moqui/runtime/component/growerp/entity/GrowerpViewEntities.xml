@@ -1964,4 +1964,66 @@ along with this software (see the LICENSE.md file). If not, see
         <alias name="nextPeriodId" field="timePeriodId" entity-alias="TMPDCHILD" />
         <alias name="nextPeriodName" field="periodName" entity-alias="TMPDCHILD" />
     </view-entity>
+
+    <view-entity entity-name="OwnerAndCompany" package="growerp.party">
+        <description>get all people related to a certain companyId = PR =&gt; toPartyId</description>
+        <!-- owner to company -->
+        <member-entity entity-alias="PTYOWNER" entity-name="mantle.party.Party">
+            <entity-condition>
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="COMPANYTOOWNER" entity-name="mantle.party.PartyRelationship"
+            join-from-alias="PTYOWNER">
+            <key-map field-name="partyId" related="toPartyId" />
+            <entity-condition>
+                <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup" />
+                <date-filter from-field-name="companyFromDate" thru-field-name="companyThruDate" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="ORGCOMPANYPARTY" entity-name="mantle.party.Party"
+            join-from-alias="COMPANYTOOWNER">
+            <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORGCOMPANY" entity-name="mantle.party.Organization"
+            join-from-alias="ORGCOMPANYPARTY">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORGCOMPANYROLE" entity-name="mantle.party.PartyRole"
+            join-from-alias="ORGCOMPANY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PP" entity-name="mantle.ledger.config.PartyAcctgPreference"
+            join-from-alias="ORGCOMPANY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="CURTYPE" entity-name="moqui.basic.Uom"
+            join-from-alias="PP" join-optional="true">
+            <key-map field-name="baseCurrencyUomId" related="abbreviation" />
+            <entity-condition>
+                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
+            </entity-condition>
+        </member-entity>
+        <!-- ==== fields ====-->
+        <!-- Owner -->
+        <alias name="ownerPartyId" field="partyId" entity-alias="PTYOWNER" />
+        <alias name="ownerDisabled" field="disabled" entity-alias="PTYOWNER" />
+        <alias name="ownerCompanyPartyId" field="ownerPartyId" entity-alias="PTYOWNER" />
+        <alias name="partyTypeEnumId" entity-alias="PTYOWNER" />
+        <!-- Company to owner -->
+        <alias name="companyFromDate" field="fromDate" entity-alias="COMPANYTOOWNER" />
+        <alias name="companyThruDate" field="thruDate" entity-alias="COMPANYTOOWNER" />
+        <!-- Company -->
+        <alias name="companyPartyId" field="partyId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyPseudoId" field="pseudoId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyDisabled" field="disabled" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="pseudoId" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="vatPerc" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="salesPerc" entity-alias="ORGCOMPANYPARTY" />
+        <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />
+        <alias name="companyRole" field="roleTypeId" entity-alias="ORGCOMPANYROLE" />
+        <alias name="baseCurrencyUomId" entity-alias="PP" />
+        <alias name="curDescription" field="description" entity-alias="CURTYPE" />
+        <alias name="customerStatusId" entity-alias="ORGCOMPANYPARTY" />
+    </view-entity>
 </entities>

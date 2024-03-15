@@ -98,6 +98,7 @@ along with this software (see the LICENSE.md file). If not, see
                     from="assetClass.convertedStatusId" ignore-if-empty="true" />
                 <econdition field-name="categoryId" ignore-if-empty="true" />
                 <econdition field-name="productId" ignore-if-empty="true" />
+                <econdition field-name="pseudoId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="productId" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />

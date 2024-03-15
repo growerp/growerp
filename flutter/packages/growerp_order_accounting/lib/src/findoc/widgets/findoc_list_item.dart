@@ -308,7 +308,7 @@ class FinDocListItem extends StatelessWidget {
                                         e.quantity != null
                                 ? "ProductId: ${e.productId} $r${e.description}$r"
                                     "Quantity: ${e.quantity.toString()} "
-                                    "Price: ${e.price.toString()}"
+                                    "Price: ${e.price.toString()} "
                                     "SubTotal: ${(e.quantity! * e.price!).toString()}$r"
                                     "${e.rentalFromDate == null ? '' : " "
                                         "Rental: ${e.rentalFromDate.toString().substring(0, 10)}/"

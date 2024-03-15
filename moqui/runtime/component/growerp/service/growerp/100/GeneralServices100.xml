@@ -134,12 +134,13 @@ along with this software (see the LICENSE.md file). If not, see
     <service verb="get" noun="Statistics" authenticate="false">
         <description>Job run by the job sheduler do not make pubic.</description>
         <actions>
-            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="parties">
-                <econdition field-name="roleTypeId" value="OrgInternal" />
-                <econdition field-name="disabled" value="N" or-null="true" />
+            <entity-find entity-name="growerp.party.OwnerAndCompany" list="parties">
+                <econdition field-name="companyRole" value="OrgInternal" />
+                <econdition field-name="companyDisabled" value="N" or-null="true" />
             </entity-find>
             <iterate list="parties" entry="party">
-                <set field="ownerPartyId" from="party.partyId" />
+                <set field="companyPartyId" from="party.companyPartyId" />
+                <set field="ownerPartyId" from="party.ownerPartyId" />
                 <entity-find-count count-field="employees"
                     entity-name="growerp.party.OwnerPersonDetailAndCompany">
                     <econdition field-name="ownerPartyId" />
@@ -185,7 +186,7 @@ along with this software (see the LICENSE.md file). If not, see
                     count-field="assets">
                     <econdition field-name="statusId"
                         operator="not-equals" value="AstDeactivated" />
-                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    <econdition field-name="ownerPartyId" />
                 </entity-find-count>
                 <entity-find-count count-field="categories"
                     entity-name="growerp.mobile.party.category.ProductCategoryParentsAndChild">
@@ -196,7 +197,7 @@ along with this software (see the LICENSE.md file). If not, see
                     entity-name="mantle.sales.opportunity.SalesOpportunity">
                     <econdition field-name="opportunityStageId"
                         operator="not-equals" value="Deleted" />
-                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 </entity-find-count>
                 <entity-find-count entity-name="mantle.order.OrderPart"
                     count-field="openSlsOrders">

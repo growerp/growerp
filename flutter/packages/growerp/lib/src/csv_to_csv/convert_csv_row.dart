@@ -478,7 +478,8 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
       }
     case FileType.finDocTransactionItem:
       // create initial transaction from ledger
-      if (fileName.toLowerCase().contains('balance') && startDate != null) {
+      if (fileName.toLowerCase().contains('balance')) {
+        if (startDate == null) return [];
         // generate the initial posted balances from the leger organization, if any
         // 1: account code, 2,3 not used here
         // 4: debit amount, 5 credit amount
@@ -502,7 +503,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
         }
         return columnsTo;
       } else {
-        // 0: accountId, 2:date, 3:reference, 5: debit amount, 6 credit amount,
+        // 0: accountId, 2:date, 3:reference, 6: debit amount, 7 credit amount,
         // 17: productId, 18: line description,
         bool isDebit = true;
         var amount = columnsFrom[6];
