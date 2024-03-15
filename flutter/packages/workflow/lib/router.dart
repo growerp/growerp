@@ -34,7 +34,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => HomeForm(menuOptions: menuOptions));
     case '/workflow':
       return MaterialPageRoute(
-          builder: (context) => WorkflowDialog(settings.arguments as Task));
+          builder: (context) =>
+              DisplayMenuOption(menuList: menuOptions, menuIndex: 0));
     case '/workflows':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

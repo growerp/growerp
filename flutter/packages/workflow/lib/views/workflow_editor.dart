@@ -49,7 +49,11 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
     super.initState();
     workflowBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
     taskBloc = context.read<TaskWorkflowTaskBloc>() as TaskBloc;
-    dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
+    if (widget.workflow.jsonImage.isEmpty) {
+      dashboard = Dashboard();
+    } else {
+      dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
+    }
     data = FlowData(
       name: widget.workflow.taskName,
       taskId: widget.workflow.taskId,

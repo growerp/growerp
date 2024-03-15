@@ -26,9 +26,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
-          builder: (context) => HomeForm(
-                menuOptions: menuOptions,
-              ));
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
           builder: (context) =>
