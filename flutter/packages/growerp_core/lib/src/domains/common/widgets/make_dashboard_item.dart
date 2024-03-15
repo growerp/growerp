@@ -45,8 +45,7 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
         child: InkWell(
           key: Key(key),
           onTap: () {
-            Navigator.pushNamed(context, menuOption.route,
-                arguments: FormArguments());
+            Navigator.pushNamed(context, menuOption.route);
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

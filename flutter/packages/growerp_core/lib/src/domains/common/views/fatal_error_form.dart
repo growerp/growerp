@@ -13,7 +13,6 @@
  */
 
 import 'package:flutter/material.dart';
-import '../../common/common.dart';
 
 class FatalErrorForm extends StatelessWidget {
   final String message;
@@ -37,8 +36,7 @@ class FatalErrorForm extends StatelessWidget {
                 child: ElevatedButton(
                     child: Text("$buttonText"),
                     onPressed: () {
-                      Navigator.pushNamed(context, route!,
-                          arguments: FormArguments());
+                      Navigator.pushNamed(context, route!);
                     })),
 /*            const SizedBox(height: 20),
             ElevatedButton(

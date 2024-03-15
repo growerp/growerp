@@ -96,8 +96,7 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                       '/', (Route<dynamic> route) => false);
                 } else {
                   Navigator.pushNamed(context, options[i - 1]["route"],
-                      arguments:
-                          FormArguments(menuIndex: options[i - 1]["tab"]));
+                      arguments: options[i - 1]["tab"]);
                 }
               });
         },

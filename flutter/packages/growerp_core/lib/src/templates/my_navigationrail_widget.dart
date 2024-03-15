@@ -88,8 +88,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                             Navigator.of(context).pushNamedAndRemoveUntil(
                                 '/', (Route<dynamic> route) => false);
                           } else {
-                            Navigator.pushNamed(context, menu[index].route,
-                                arguments: FormArguments());
+                            Navigator.pushNamed(context, menu[index].route);
                           }
                         },
                         labelType: NavigationRailLabelType.all,

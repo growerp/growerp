@@ -91,10 +91,9 @@ class MenuOptionState extends State<DisplayMenuOption>
           tooltip: 'Go Home',
           onPressed: () {
             if (route.startsWith('/acct')) {
-              Navigator.pushNamed(context, '/accounting',
-                  arguments: FormArguments());
+              Navigator.pushNamed(context, '/accounting');
             } else {
-              Navigator.pushNamed(context, '/', arguments: FormArguments());
+              Navigator.pushNamed(context, '/');
             }
           }));
     }

@@ -84,7 +84,7 @@ class HomeFormState extends State<HomeForm> {
                               _authBloc.add(const AuthLoggedOut()),
                             }),
                 ])),
-            // hidden text be able to load demo data
+            // hidden text be able to load demo data for testing
             if (kDebugMode)
               Text(state.authenticate?.apiKey ?? '',
                   key: const Key('apiKey'),
