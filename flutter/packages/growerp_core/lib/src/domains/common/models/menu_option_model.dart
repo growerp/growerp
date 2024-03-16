@@ -28,7 +28,6 @@ class MenuOption {
   final Widget? child; // when no tabs this is single page
   final List<UserGroup> readGroups; // user groups who can read
   final List<UserGroup>? writeGroups; // user groups who can add/update/delete
-  final Widget? floatButtonForm; // for dialogs which use navigator internally
 
   MenuOption({
     required this.image,
@@ -39,7 +38,6 @@ class MenuOption {
     this.child,
     required this.readGroups,
     this.writeGroups,
-    this.floatButtonForm,
   });
 
   @override

@@ -100,20 +100,6 @@ class MenuOptionState extends State<DisplayMenuOption>
 
     child = menuOption.child;
     tabIndex = widget.tabIndex ?? 0;
-    if (menuOption.floatButtonForm != null) {
-      floatingActionButton = FloatingActionButton(
-          key: const Key("addNew"),
-          onPressed: () async {
-            await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return menuOption.floatButtonForm!;
-                });
-          },
-          tooltip: 'Add New',
-          child: const Icon(Icons.add));
-    }
     if (tabItems.isEmpty) {
       displayMOFormKey =
           child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
