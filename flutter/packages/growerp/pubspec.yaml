@@ -10,7 +10,7 @@ platforms:
 executables: 
   growerp:
 environment: 
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.2.6 <4.0.0'
 dependencies: 
   dcli: ^3.3.5
   dio: ^5.4.1

@@ -569,7 +569,7 @@ packages:
       path: "../growerp_models"
       relative: true
     source: path
-    version: "1.2.3"
+    version: "1.2.4"
   growerp_order_accounting:
     dependency: "direct main"
     description:
