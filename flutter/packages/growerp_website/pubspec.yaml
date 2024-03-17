@@ -10,9 +10,11 @@ platforms:
   macos:
   web:
   windows:
+
 environment: 
   sdk: '>=3.2.6 <4.0.0'
   flutter: '>=1.17.0'
+  
 dependencies: 
   flutter: 
     sdk: flutter
