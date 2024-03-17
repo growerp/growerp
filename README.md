@@ -16,10 +16,18 @@ When the application is started, create a new company, select demo data or an em
 
 Documentation available at https://www.growerp.com
 
-## Use GrowERP locally
+## Install GrowERP locally using global growerp command
+```sh
+dart pub global activate growerp
+growerp install
+```
 
-You just need this repository at https://github.com/growerp/growerp
-The next version is in the development branch
+## Install GrowERP locally, manually
+Get repository
+```sh
+git clone https://github.com/growerp/growerp
+cd growerp
+```
 
 ### start the chat server
 ```sh
@@ -31,25 +39,20 @@ cd chat
 Initialize:
 ```sh
     cd moqui
-    ./gradlew downloadel #only one time
-    ./gradlew cleanall   #only one time
     ./gradlew build      #only one time
-    java -jar moqui.war load types=seed,seed-initial,install
+    java -jar moqui.war load types=seed,seed-initial,install no-run-es
 ```
 Run:
 ```sh
     cd moqui
-    java -jar moqui.war
+    java -jar moqui.war no-run-es
 ```
-### run the flutter system:
-
 ### run the flutter emulator or browser
 ```sh
 cd flutter/packages/admin
 flutter run
 ```
-## Use with docker
-Super simple! 
+## Use GrowERP locally with docker
 In the docker directory there is a README.md to run the complete system with docker images locally.
 
 ## Some phone screen shots:
