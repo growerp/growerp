@@ -1,3 +1,6 @@
+## 1.2.5
+* package upgrade
+
 ## 1.2.4
 * fix stash/pop error with install
 

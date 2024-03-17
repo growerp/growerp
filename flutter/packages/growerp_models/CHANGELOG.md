@@ -1,3 +1,6 @@
+## 1.2.4
+* various model changes
+
 ## 1.2.3
 * added more models
 

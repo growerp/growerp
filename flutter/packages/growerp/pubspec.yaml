@@ -1,11 +1,12 @@
 name: growerp
-version: 1.2.4
+version: 1.2.5
 description: GrowERP installation and tools such as import and export.
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp/tree/master/flutter/packages/growerp
 platforms: 
   linux:
   macos:
+  windows:
 executables: 
   growerp:
 environment: 
@@ -15,10 +16,11 @@ dependencies:
   dio: ^5.4.1
   fast_csv: ^0.2.6
   get_it: ^7.6.4
-  growerp_models: ^1.2.2
+  growerp_models: ^1.2.4
   hive: ^2.2.3
   logger: ^2.0.2+1
   retrofit: ^4.0.3
+  pretty_dio_logger: ^1.3.1
 
 dev_dependencies:
   lint_hard: ^4.0.0
