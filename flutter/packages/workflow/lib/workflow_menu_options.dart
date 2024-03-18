@@ -42,7 +42,7 @@ List<MenuOption> workFlowMenuOptions = [
     route: '/workflowTasks',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.workflowtask),
+    child: const TaskListForm(TaskType.workflowTemplateTask),
   ),
   MenuOption(
     image: "packages/growerp_core/images/workflow.png",

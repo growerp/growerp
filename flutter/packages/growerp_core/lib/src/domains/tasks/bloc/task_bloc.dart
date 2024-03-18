@@ -28,8 +28,8 @@ const _taskLimit = 20;
 
 mixin TaskToDoBloc on Bloc<TaskEvent, TaskState> {}
 mixin TaskWorkflowBloc on Bloc<TaskEvent, TaskState> {}
-mixin TaskWorkflowTaskBloc on Bloc<TaskEvent, TaskState> {}
-mixin TaskWorkflowRunningBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowTemplateBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowTemplateTaskBloc on Bloc<TaskEvent, TaskState> {}
 
 EventTransformer<E> taskDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -41,8 +41,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     with
         TaskToDoBloc,
         TaskWorkflowBloc,
-        TaskWorkflowTaskBloc,
-        TaskWorkflowRunningBloc {
+        TaskWorkflowTemplateBloc,
+        TaskWorkflowTemplateTaskBloc {
   TaskBloc(this.restClient, this.taskType) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
@@ -101,7 +101,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       late Task newWorkflow;
       if (event.task.taskId.isNotEmpty) {
         /// extract data from editor data [FlowElement] in growerp [Task]s
-        if (event.task.taskType == TaskType.workflow) {
+        if (event.task.taskType == TaskType.workflowTemplate) {
           Dashboard dashboard = Dashboard.fromJson(event.task.jsonImage);
           newWorkflow = Task(
               taskId: event.task.taskId,
@@ -115,8 +115,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
               links.add(Task(flowElementId: link.destElementId));
             }
             newWorkflowTasks.add(Task(
-                taskType: TaskType.workflowtask,
+                taskType: TaskType.workflowTemplateTask,
                 flowElementId: element.id,
+                taskName: element.text,
                 routing: event.task.routing,
                 workflowTasks: links));
           }

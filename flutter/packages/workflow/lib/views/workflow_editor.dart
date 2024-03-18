@@ -16,13 +16,13 @@ class WorkflowDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<TaskWorkflowBloc>(
+        BlocProvider<TaskWorkflowTemplateBloc>(
           create: (BuildContext context) =>
-              TaskBloc(context.read<RestClient>(), TaskType.workflow),
+              TaskBloc(context.read<RestClient>(), TaskType.workflowTemplate),
         ),
-        BlocProvider<TaskWorkflowTaskBloc>(
-          create: (BuildContext context) =>
-              TaskBloc(context.read<RestClient>(), TaskType.workflowtask),
+        BlocProvider<TaskWorkflowTemplateTaskBloc>(
+          create: (BuildContext context) => TaskBloc(
+              context.read<RestClient>(), TaskType.workflowTemplateTask),
         ),
       ],
       child: WorkFlowEditor(workflow),
@@ -47,8 +47,8 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
   @override
   void initState() {
     super.initState();
-    workflowBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
-    taskBloc = context.read<TaskWorkflowTaskBloc>() as TaskBloc;
+    workflowBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
+    taskBloc = context.read<TaskWorkflowTemplateTaskBloc>() as TaskBloc;
     if (widget.workflow.jsonImage.isEmpty) {
       dashboard = Dashboard();
     } else {

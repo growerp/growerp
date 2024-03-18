@@ -108,6 +108,7 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="workflowTasks" type="List">
                         <parameter name="taskId" />
                         <parameter name="flowElementId" />
+                        <parameter name="taskName" />
                         <parameter name="routing" />
                         <!-- links between tasks -->
                         <parameter name="workflowTasks" type="List">
@@ -137,8 +138,9 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- translate frontend Task type with backend-->
             <set field="typeConvert"
                 from="[workflow: 'WetWorkflow', WetWorkflow: 'workflow',
-                        workflowtask: 'WetWorkflowTask', WetWorkflowTask: 'workflowtask',
-                        todo: 'WetTask', WetTask: 'todo']"
+                workflowTemplate: 'WetWorkflowTemplate', WetWorkflowTemplate: 'workflowTemplate',
+                workflowTemplateTask: 'WetWorkflowTemplateTask', WetWorkflowTemplateTask: 'workflowTemplateTask',
+                todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
             <set field="workEffortType" from="typeConvert[taskType]" />
             <if condition="taskId">
@@ -174,6 +176,11 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- and add information depending on the type -->
             <if condition="workEffortType == 'WetWorkflow'">
                 <then>
+
+                    <!-- to be completed for running workflows-->
+
+                </then>
+                <else-if condition="workEffortType == 'WetWorkflowTemplate'">
                     <iterate entry="entry" list="entries">
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                             in-map="[docType: 'task', statusId: entry.statusId]"
@@ -218,6 +225,7 @@ along with this software (see the LICENSE.md file). If not, see
                             </iterate>
                             <set field="workflowTask"
                                 from="[taskid: child.workEffortId,
+                                    taskName: child.workEffortName,
                                     flowElementId: child.flowElementId,
                                     routing: child.routing,
                                     workflowTasks: linksOut]"
@@ -227,8 +235,8 @@ along with this software (see the LICENSE.md file). If not, see
                         <set field="workEffortOut.workflowTasks" from="workflowTasks" />
                         <script>tasks.add(workEffortOut)</script>
                     </iterate>
-                </then>
-                <else-if condition="workEffortType == 'WetWorkflowTask'">
+                </else-if>
+                <else-if condition="workEffortType == 'WetWorkflowTemplateTask'">
                     <iterate entry="entry" list="entries">
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                             in-map="[docType: 'task', statusId: entry.statusId]"
@@ -351,8 +359,9 @@ along with this software (see the LICENSE.md file). If not, see
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="typeConvert"
                 from="[workflow: 'WetWorkflow',
-                        workflowtask: 'WetWorkflowTask',
-                        todo: 'WetTask']"
+                    workflowTemplate: 'WetWorkflowTemplate',
+                    workflowTemplateTask: 'WetWorkflowTemplateTask',
+                    todo: 'WetTask']"
                 type="NewMap" />
             <!-- create task -->
             <if condition="!task.statusId || task.statusId.isEmpty()">
@@ -468,6 +477,7 @@ along with this software (see the LICENSE.md file). If not, see
                 </parameter>
                 <parameter name="workflowTasks" type="List">
                     <parameter name="taskId" />
+                    <parameter name="taskName" />
                     <parameter name="flowElementId" />
                     <parameter name="routing" />
                     <!-- links -->
@@ -628,6 +638,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <iterate list="task.workflowTasks" entry="wfTask">
                     <service-call name="create#mantle.work.effort.WorkEffort"
                         in-map="[flowElementId: wfTask.flowElementId,
+                            workEffortName: wfTask.taskName,
                             routing: wfTask.routing,
                             parentWorkEffortId: task.taskId]"
                         out-map="context" />

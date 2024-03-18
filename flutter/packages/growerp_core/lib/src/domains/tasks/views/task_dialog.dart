@@ -123,9 +123,9 @@ class TaskDialogState extends State<TaskDialog> {
                 },
                 isExpanded: true,
               ),
-              if (widget.task.taskType == TaskType.workflowtask)
+              if (widget.task.taskType == TaskType.workflowTemplateTask)
                 const SizedBox(height: 20),
-              if (widget.task.taskType == TaskType.workflowtask)
+              if (widget.task.taskType == TaskType.workflowTemplateTask)
                 TextFormField(
                   key: const Key('routing'),
                   decoration: InputDecoration(
@@ -158,7 +158,7 @@ class TaskDialogState extends State<TaskDialog> {
                                         widget.task.timeEntries));
                               });
                         })),
-                if (widget.task.taskType == TaskType.workflow &&
+                if (widget.task.taskType == TaskType.workflowTemplate &&
                     widget.task.taskId.isNotEmpty)
                   Expanded(
                       child: ElevatedButton(
@@ -167,7 +167,7 @@ class TaskDialogState extends State<TaskDialog> {
                           onPressed: () => Navigator.of(context).pushNamed(
                               '/editWorkflow',
                               arguments: widget.task))),
-                if (widget.task.taskType == TaskType.workflow &&
+                if (widget.task.taskType == TaskType.workflowTemplate &&
                     widget.task.taskId.isNotEmpty)
                   Expanded(
                       child: ElevatedButton(

@@ -22,7 +22,7 @@ class WorkflowHelper {
             flowElementId: element.id, jsonImage: dashboard.toJson());
       } else {
         newWorkflowTasks.add(Task(
-            taskType: TaskType.workflowtask,
+            taskType: TaskType.workflowTemplateTask,
             flowElementId: element.id,
             routing: '??'));
       }

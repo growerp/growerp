@@ -27,9 +27,13 @@ class WorkflowDbForm extends StatelessWidget {
       if (state.status == AuthStatus.authenticated) {
         Authenticate authenticate = state.authenticate!;
         return DashBoardForm(dashboardItems: [
-          makeDashboardItem('dbWorkflows', context, menuOptions[1], []),
-          makeDashboardItem('dbWorkflowTasks', context, menuOptions[2], []),
-          makeDashboardItem('dbToDos', context, menuOptions[3], [
+          makeDashboardItem('dbWorkflows', context, menuOptions[1],
+              ["Currently active workflows"]),
+          makeDashboardItem('dbWorkflowTemplates', context, menuOptions[2],
+              ["Workflow definitions", "Workflows start here"]),
+          makeDashboardItem('dbWorkflowTemplateTasks', context, menuOptions[3],
+              ["Workflow Task definitions", "can be used\nwithin a workflow"]),
+          makeDashboardItem('dbToDos', context, menuOptions[4], [
             authenticate.company!.name!.length > 20
                 ? "${authenticate.company!.name!.substring(0, 20)}..."
                 : "${authenticate.company!.name}",

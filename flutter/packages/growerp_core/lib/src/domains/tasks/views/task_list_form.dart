@@ -35,12 +35,17 @@ class TaskListForm extends StatelessWidget {
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
         );
-      case TaskType.workflowtask:
-        return BlocProvider<TaskWorkflowTaskBloc>(
+      case TaskType.workflowTemplate:
+        return BlocProvider<TaskWorkflowTemplateBloc>(
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
         );
-      default:
+      case TaskType.workflowTemplateTask:
+        return BlocProvider<TaskWorkflowTemplateTaskBloc>(
+          create: (context) => TaskBloc(restClient, taskType),
+          child: TaskList(taskType),
+        );
+      case TaskType.unkwown:
         return BlocProvider<TaskBloc>(
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
@@ -73,8 +78,11 @@ class TaskListState extends State<TaskList> {
       case TaskType.workflow:
         _taskBloc = context.read<TaskWorkflowBloc>() as TaskBloc;
         break;
-      case TaskType.workflowtask:
-        _taskBloc = context.read<TaskWorkflowTaskBloc>() as TaskBloc;
+      case TaskType.workflowTemplate:
+        _taskBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
+        break;
+      case TaskType.workflowTemplateTask:
+        _taskBloc = context.read<TaskWorkflowTemplateTaskBloc>() as TaskBloc;
         break;
       case TaskType.unkwown:
     }
@@ -143,21 +151,23 @@ class TaskListState extends State<TaskList> {
         if (state.status == TaskBlocStatus.success) {
           hasReachedMax = state.hasReachedMax;
           return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                  key: const Key("addNew"),
-                  onPressed: () async {
-                    await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return BlocProvider.value(
-                              value: _taskBloc,
-                              child:
-                                  TaskDialog(Task(taskType: widget.taskType)));
-                        });
-                  },
-                  tooltip: 'Add New',
-                  child: const Icon(Icons.add)),
+              floatingActionButton: widget.taskType != TaskType.workflow
+                  ? FloatingActionButton(
+                      key: const Key("addNew"),
+                      onPressed: () async {
+                        await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BlocProvider.value(
+                                  value: _taskBloc,
+                                  child: TaskDialog(
+                                      Task(taskType: widget.taskType)));
+                            });
+                      },
+                      tooltip: 'Add New',
+                      child: const Icon(Icons.add))
+                  : null,
               body: showForm(state));
         }
         return const LoadingIndicator();
@@ -170,8 +180,11 @@ class TaskListState extends State<TaskList> {
         case TaskType.workflow:
           return BlocConsumer<TaskWorkflowBloc, TaskState>(
               listener: blocListener, builder: blocBuilder);
-        case TaskType.workflowtask:
-          return BlocConsumer<TaskWorkflowTaskBloc, TaskState>(
+        case TaskType.workflowTemplate:
+          return BlocConsumer<TaskWorkflowTemplateBloc, TaskState>(
+              listener: blocListener, builder: blocBuilder);
+        case TaskType.workflowTemplateTask:
+          return BlocConsumer<TaskWorkflowTemplateTaskBloc, TaskState>(
               listener: blocListener, builder: blocBuilder);
         default:
           return BlocConsumer<TaskBloc, TaskState>(
