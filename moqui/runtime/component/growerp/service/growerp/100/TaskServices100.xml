@@ -109,6 +109,12 @@ along with this software (see the LICENSE.md file). If not, see
                         <parameter name="taskId" />
                         <parameter name="flowElementId" />
                         <parameter name="routing" />
+                        <!-- links between tasks -->
+                        <parameter name="workflowTasks" type="List">
+                            <parameter name="taskId" />
+                            <parameter name="flowElementId" />
+                            <parameter name="routing" />
+                        </parameter>
                     </parameter>
                 </parameter>
             </parameter>
@@ -194,18 +200,28 @@ along with this software (see the LICENSE.md file). If not, see
                                     statusId: convertedStatusId,
                                     jsonImage: contentText,
                                 ]" />
-                        <entity-find entity-name="mantle.work.effort.WorkEffortAssocAndTo"
-                            list="assocs">
-                            <econdition field-name="fromWorkEffortId" from="entry.workEffortId" />
-                            <econdition field-name="workEffortAssocTypeEnumId"
-                                value="WeatRoutingComp" />
+                        <!-- get workflow tasks -->
+                        <entity-find entity-name="mantle.work.effort.WorkEffort" list="children">
+                            <econdition field-name="parentWorkEffortId" from="entry.workEffortId" />
                         </entity-find>
                         <set field="workflowTasks" from="[]" />
-                        <iterate list="assocs" entry="assoc">
+                        <iterate list="children" entry="child">
+                            <!-- get workflow task links-->
+                            <entity-find entity-name="mantle.work.effort.WorkEffortAssoc"
+                                list="links">
+                                <econdition field-name="workEffortId" from="child.workEffortId" />
+                            </entity-find>
+                            <set field="linksOut" from="[]" />
+                            <iterate list="links" entry="link">
+                                <set field="linkTask" from="[taskId: link.toWorkEffortId]" />
+                                <script>linksOut.add(linkTask)</script>
+                            </iterate>
                             <set field="workflowTask"
-                                from="[taskid: assoc.toWorkEffortId,
-                                    flowElementId: assoc.flowElementId,
-                                    routing: assoc.routing]" />
+                                from="[taskid: child.workEffortId,
+                                    flowElementId: child.flowElementId,
+                                    routing: child.routing,
+                                    workflowTasks: linksOut]"
+                            />
                             <script>workflowTasks.add(workflowTask)</script>
                         </iterate>
                         <set field="workEffortOut.workflowTasks" from="workflowTasks" />
@@ -397,6 +413,7 @@ along with this software (see the LICENSE.md file). If not, see
                         statusId: 'WeptAssigned'
                     ]" />
             </if>
+            <!-- workflow tasks only add when task update-->
             <!-- editor json file always update only -->
             <service-call name="growerp.100.TaskServices100.get#Task"
                 in-map="[taskId: workEffortId]" out-map="context" />
@@ -453,6 +470,11 @@ along with this software (see the LICENSE.md file). If not, see
                     <parameter name="taskId" />
                     <parameter name="flowElementId" />
                     <parameter name="routing" />
+                    <!-- links -->
+                    <parameter name="workflowTasks" type="List">
+                        <parameter name="taskId" />
+                        <parameter name="flowElementId" />
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -586,26 +608,39 @@ along with this software (see the LICENSE.md file). If not, see
                     </else>
                 </if>
             </if>
-            <if condition="task.workFlowTasks">
-                <!-- delete and add workflow tasks -->
-                <entity-find entity-name="mantle.work.effort.WorkEffortAssoc" list="assocs">
-                    <econdition field-name="workEffortId" from="task.taskId" />
+            <if condition="!task.workflowTasks.isEmpty()">
+                <!-- delete existing workflow tasks -->
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="oldTasks">
+                    <econdition field-name="parentWorkEffortId" from="task.taskId" />
                 </entity-find>
-                <iterate list="assocs" entry="assoc">
-                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
-                        <econdition field-name="workEffortId" from="assoc.toWorkEffortId" />
+                <iterate list="oldTasks" entry="oldTask">
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortAssoc">
+                        <econdition field-name="workEffortId" from="oldTask.workEffortId" />
                     </entity-delete-by-condition>
-                    <entity-delete value-field="assoc" />
                 </iterate>
+                <iterate list="oldTasks" entry="oldTask">
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
+                        <econdition field-name="workEffortId" from="oldTask.workEffortId" />
+                    </entity-delete-by-condition>
+                </iterate>
+                <!-- create new workflow tasks -->
+                <set field="wfIds" from="[:]" />
                 <iterate list="task.workflowTasks" entry="wfTask">
                     <service-call name="create#mantle.work.effort.WorkEffort"
                         in-map="[flowElementId: wfTask.flowElementId,
-                            routing: wfTask.routing]"
+                            routing: wfTask.routing,
+                            parentWorkEffortId: task.taskId]"
                         out-map="context" />
-                    <service-call name="create#mantle.work.effort.WorkEffortAssoc"
-                        in-map="[workEffortId: task.taskId,
-                        toWorkEffortId: workEffortId,
-                        workEffortAssocTypeEnumId: 'WeatRoutingComp']" />
+                    <set field="wfIds[wfTask.flowElementId]" from="workEffortId" />
+                </iterate>
+                <!-- add workflow task links -->
+                <iterate list="task.workflowTasks" entry="wfTask">
+                    <iterate list="wfTask.workflowTasks" entry="link">
+                        <service-call name="create#mantle.work.effort.WorkEffortAssoc"
+                            in-map="[workEffortId: wfIds[wfTask.flowElementId],
+                            toWorkEffortId: wfIds[link.flowElementId],
+                            workEffortAssocTypeEnumId: 'WeatDependsOn' ]" />
+                    </iterate>
                 </iterate>
             </if>
             <service-call name="growerp.100.TaskServices100.get#Task"

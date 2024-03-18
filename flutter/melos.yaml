@@ -3,6 +3,7 @@ repository: https://github.com/growerp/growerp
 
 packages:
   - packages/admin
+  - packages/website
   - packages/hotel
   - packages/freelance
   - packages/workflow

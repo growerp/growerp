@@ -162,10 +162,20 @@ class TaskDialogState extends State<TaskDialog> {
                     widget.task.taskId.isNotEmpty)
                   Expanded(
                       child: ElevatedButton(
-                          key: const Key('showWorkflowEditor'),
-                          child: const Text('Show Graphical Image'),
-                          onPressed: () => Navigator.of(context)
-                              .pushNamed('/workflow', arguments: widget.task))),
+                          key: const Key('editWorkflow'),
+                          child: const Text('Edit Workflow'),
+                          onPressed: () => Navigator.of(context).pushNamed(
+                              '/editWorkflow',
+                              arguments: widget.task))),
+                if (widget.task.taskType == TaskType.workflow &&
+                    widget.task.taskId.isNotEmpty)
+                  Expanded(
+                      child: ElevatedButton(
+                          key: const Key('startWorkflow'),
+                          child: const Text('Start Workflow'),
+                          onPressed: () => Navigator.of(context).pushNamed(
+                              '/startWorkflow',
+                              arguments: widget.task))),
                 const SizedBox(width: 10),
                 Expanded(
                     child: ElevatedButton(

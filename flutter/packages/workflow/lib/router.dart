@@ -21,6 +21,7 @@ import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'views/workflow_editor.dart';
+import 'workflow_menu_options.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
@@ -34,9 +35,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 0, tabIndex: 0));
-    case '/workflow':
+    case '/editWorkflow':
       return MaterialPageRoute(
           builder: (context) => WorkflowDialog(settings.arguments as Task));
+    case '/startWorkflow':
+      return MaterialPageRoute(
+          builder: (context) => DisplayMenuOption(
+                menuList: workFlowMenuOptions,
+                menuIndex: 0,
+              ));
     case '/workflows':
       return MaterialPageRoute(
           builder: (context) => DisplayMenuOption(

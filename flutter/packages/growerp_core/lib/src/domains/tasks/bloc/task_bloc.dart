@@ -29,6 +29,7 @@ const _taskLimit = 20;
 mixin TaskToDoBloc on Bloc<TaskEvent, TaskState> {}
 mixin TaskWorkflowBloc on Bloc<TaskEvent, TaskState> {}
 mixin TaskWorkflowTaskBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowRunningBloc on Bloc<TaskEvent, TaskState> {}
 
 EventTransformer<E> taskDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -37,13 +38,18 @@ EventTransformer<E> taskDroppable<E>(Duration duration) {
 }
 
 class TaskBloc extends Bloc<TaskEvent, TaskState>
-    with TaskToDoBloc, TaskWorkflowBloc, TaskWorkflowTaskBloc {
+    with
+        TaskToDoBloc,
+        TaskWorkflowBloc,
+        TaskWorkflowTaskBloc,
+        TaskWorkflowRunningBloc {
   TaskBloc(this.restClient, this.taskType) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
     on<TaskUpdate>(_onTaskUpdate);
     on<TaskTimeEntryUpdate>(_onTimeEntryUpdate); //add,delete
     on<TaskTimeEntryDelete>(_onTimeEntryDelete);
+    on<TaskWorkflowNext>(_onTaskWorkflowNext);
   }
 
   final RestClient restClient;
@@ -104,15 +110,15 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
               description: event.task.description);
           List<Task> newWorkflowTasks = [];
           for (FlowElement element in dashboard.elements) {
-            if (element == dashboard.elements.first) {
-              newWorkflow = newWorkflow.copyWith(
-                  flowElementId: element.id, jsonImage: event.task.jsonImage);
-            } else {
-              newWorkflowTasks.add(Task(
-                  taskType: TaskType.workflowtask,
-                  flowElementId: element.id,
-                  routing: event.task.routing));
+            List<Task> links = [];
+            for (var link in element.next) {
+              links.add(Task(flowElementId: link.destElementId));
             }
+            newWorkflowTasks.add(Task(
+                taskType: TaskType.workflowtask,
+                flowElementId: element.id,
+                routing: event.task.routing,
+                workflowTasks: links));
           }
           newWorkflow = newWorkflow.copyWith(workflowTasks: newWorkflowTasks);
         } else {
@@ -189,6 +195,43 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       emit(state.copyWith(
         status: TaskBlocStatus.success,
         tasks: tasks,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskWorkflowNext(
+    TaskWorkflowNext event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+/*
+  check if an running workflow is selected:
+    allow the user to start a new one or continue the running workflow.
+	if a new workflow,
+      create a workflow instance in the todo list as an running workflow task
+	else check the running workflow for the last result.
+  
+  getNext: Evaluate the result of the last screen if any
+  
+  select the next screen and wait for the result
+  
+  If the workflow is not ended
+    go to getNext
+  If ended 
+    change the status in the to do list to be completed
+    inform the user.
+
+
+
+
+
+*/
+
+      emit(state.copyWith(
+        status: TaskBlocStatus.success,
       ));
     } on DioException catch (e) {
       emit(state.copyWith(

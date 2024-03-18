@@ -27,6 +27,10 @@ along with this software (see the LICENSE.md file). If not, see
 
     <!-- workeffort types for workflow -->
     <moqui.basic.Enumeration description="Workflow" enumId="WetWorkflow" enumTypeId="WorkEffortType" />
-    <moqui.basic.Enumeration description="WorkflowTask" enumId="WetWorkflowTask"
+    <moqui.basic.Enumeration description="Workflow Task" enumId="WetWorkflowTask"
+        enumTypeId="WorkEffortType" />
+    <moqui.basic.Enumeration description="Workflow Run" enumId="WetWorkflowRun"
+        enumTypeId="WorkEffortType" />
+    <moqui.basic.Enumeration description="Workflow Task Run" enumId="WetWorkflowTaskRun"
         enumTypeId="WorkEffortType" />
 </entity-facade-xml>
