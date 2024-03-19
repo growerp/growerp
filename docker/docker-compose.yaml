@@ -144,7 +144,7 @@ services:
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/admin/Dockerfile
-    mem_limit: 10m
+    mem_limit: 100m
     restart: unless-stopped
     expose:
       - 80
@@ -161,7 +161,7 @@ services:
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/hotel/Dockerfile
-    mem_limit: 10m
+    mem_limit: 100m
     restart: unless-stopped
     expose:
       - 80

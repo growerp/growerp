@@ -667,7 +667,7 @@ along with this software (see the LICENSE.md file). If not, see
                         from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'" />
                     <entity-update value-field="userAccount" />
                     <log level="warn"
-                        message="Email not configured, not send email to: $username but password reset, password: $resetPassword" />
+                        message="====== Email not configured, not send email to: $username but password reset, password: $resetPassword" />
                 </else>
             </if>
         </actions>

@@ -9,7 +9,7 @@ services:
   nginx-proxy:
     # For documentation on SSL and other settings see:
     # https://github.com/jwilder/nginx-proxy
-    image: nginxproxy/nginx-proxy
+    image: nginxproxy/nginx-proxy:1.3.1
     container_name: nginx
     restart: always
     ports:
@@ -105,7 +105,6 @@ services:
     image: growerp/chat
     build:
       context: ../chat
-    mem_limit: 100m
     restart: unless-stopped
     expose:
       - 8080
@@ -131,7 +130,6 @@ services:
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/admin/Dockerfile
-    mem_limit: 10m
     restart: unless-stopped
     expose:
       - 80
@@ -148,7 +146,6 @@ services:
     build:
       context: ../flutter
       dockerfile: ../flutter/packages/hotel/Dockerfile
-    mem_limit: 10m
     restart: unless-stopped
     expose:
       - 80
