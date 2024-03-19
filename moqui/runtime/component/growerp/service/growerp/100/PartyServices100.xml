@@ -1335,7 +1335,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </service-call>
                     <else>
                         <log level="warn"
-                            message="Email not configured, ${user.LoginName} password: $newPassword" />
+                            message="====== Email not configured, ${user.LoginName} password: $newPassword" />
                     </else>
                 </if>
                 <!-- add to mailing list -->
@@ -2050,7 +2050,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </service-call>
                     <else>
                         <log level="warn"
-                            message="Email not configured, ${user.loginName} password: $password" />
+                            message="====== Email not configured, ${user.loginName} password: $password" />
                     </else>
                 </if>
                 <!-- add to mailing list -->
@@ -2984,12 +2984,16 @@ along with this software (see the LICENSE.md file). If not, see
                 </entity-find>
                 <set field="index" type="Integer" value="0" />
                 <iterate list="ordersIn" entry="order">
+                    <!-- check if exists -->
                     <entity-find entity-name="mantle.order.OrderHeader" list="orders">
                         <econdition field-name="orderName" from="order.orderName" />
                     </entity-find>
                     <if condition="orders">
+                        <!--exist
+                        it so use orderId -->
                         <set field="orderId" from="orders.orderId" />
                         <else>
+                            <!-- not exist so create -->
                             <service-call name="mantle.order.OrderServices.create#Order"
                                 in-map="[
                                     statusId: 'OrderOpen',

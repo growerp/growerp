@@ -459,7 +459,6 @@ along with this software (see the LICENSE.md file). If not, see
                         out-map="context" />
                     <set field="finDocOut"
                         from="[
-                            id: item.orderId,
                             pseudoId: item.pseudoId,
                             orderId: item.orderId,
                             paymentId: item.paymentId,
@@ -502,7 +501,7 @@ along with this software (see the LICENSE.md file). If not, see
                     </if>
                     <set field="finDocItem"
                         from="[
-                            finDocId: orderId,
+                            finDocId: item.orderId,
                             docType: 'order',
                             itemSeqId: item.orderItemSeqId,
                             productId: item.productId,
@@ -1426,10 +1425,11 @@ along with this software (see the LICENSE.md file). If not, see
                     out-map="context" />
                 <else>
                     <service-call name="mantle.order.OrderServices.create#Order"
-                        in-map="[   vendorPartyId: vendorPartyId,
-                                pseudoId: order.pseudoId,
-                                customerPartyId: customerPartyId,
+                        in-map="[   
                                 facilityId: facilities[0].facilityId,
+                                pseudoId: order.pseudoId,
+                                vendorPartyId: vendorPartyId,
+                                customerPartyId: customerPartyId,
                                 orderName: order.description]"
                         out-map="context" />
                 </else>

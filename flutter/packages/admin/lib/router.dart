@@ -34,64 +34,80 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 0, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               ShowCompanyDialog(settings.arguments as Company));
     case '/companies':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/user':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => ShowUserDialog(settings.arguments as User));
     case '/crm':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     case '/catalog':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/category':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               CategoryDialog(settings.arguments as cat.Category));
     case '/orders':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/inventory':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 5, tabIndex: 0));
     case '/printer':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               PrintingForm(finDocIn: settings.arguments as FinDoc));
     case '/accounting':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => HomeForm(menuOptions: acctMenuOptions));
     case '/acctSales':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
     case '/acctPurchase':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
     case '/acctLedger':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
     case '/acctReports':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
     case '/acctSetup':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
     default:

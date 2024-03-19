@@ -28,9 +28,9 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
         //print("====tap available: tap${option.route}");
 
         items.add(NavigationRailDestination(
-          icon: Image.asset(option.image,
+          icon: Image.asset(option.image!,
               height: 40, key: Key('tap${option.route}')),
-          selectedIcon: Image.asset(option.selectedImage),
+          selectedIcon: Image.asset(option.selectedImage!),
           label: Text(option.title),
         ));
       }
@@ -84,11 +84,13 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                         selectedIndex: menuIndex,
                         onDestinationSelected: (int index) {
                           menuIndex = index;
-                          if (menu[index].route == "/") {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                                '/', (Route<dynamic> route) => false);
-                          } else {
-                            Navigator.pushNamed(context, menu[index].route);
+                          if (menu[index].route != null) {
+                            if (menu[index].route == "/") {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/', (Route<dynamic> route) => false);
+                            } else {
+                              Navigator.pushNamed(context, menu[index].route!);
+                            }
                           }
                         },
                         labelType: NavigationRailLabelType.all,

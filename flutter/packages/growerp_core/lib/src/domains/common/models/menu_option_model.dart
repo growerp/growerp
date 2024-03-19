@@ -20,10 +20,11 @@ import 'models.dart';
 /// item on the main menu, containing tabitems on a lower level.
 class MenuOption {
   // main menu item shown on the left or in drawer
-  final String image; // image when not seleced
-  final String selectedImage; // image when selected
+  final String? image; // image when not seleced
+  final String? selectedImage; // image when selected
   final String title; // a the top of the page
-  final String route; // route path required to show this item
+  final String?
+      route; // route path required to show this item from other Menuoptions
   final List<TabItem>? tabItems; // top/bottom tabs
   final Widget? child; // when no tabs this is single page
   final List<UserGroup> readGroups; // user groups who can read

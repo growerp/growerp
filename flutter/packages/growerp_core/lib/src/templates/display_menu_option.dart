@@ -47,7 +47,6 @@ class MenuOptionState extends State<DisplayMenuOption>
   late int tabIndex;
   List<TabItem> tabItems = [];
   late String title;
-  late String route;
   List<Widget> actions = [];
   Widget? leadAction;
   Widget? child;
@@ -58,6 +57,7 @@ class MenuOptionState extends State<DisplayMenuOption>
   List<BottomNavigationBarItem> bottomItems = [];
   TabController? _controller;
   late String displayMOFormKey;
+  String currentRoute = '';
 
   @override
   void initState() {
@@ -66,38 +66,6 @@ class MenuOptionState extends State<DisplayMenuOption>
         widget.menuOption ?? widget.menuList[widget.menuIndex];
     tabItems = menuOption.tabItems ?? [];
     title = menuOption.title;
-    route = menuOption.route; // used also for key
-    actions = [
-      IconButton(
-          key: const Key('topChatButton'), // causes a duplicate key?
-          icon: const Icon(Icons.chat),
-          tooltip: 'Chat',
-          onPressed: () async => {
-                await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const ChatRoomListDialog();
-                  },
-                )
-              })
-    ];
-    actions.addAll(widget.actions);
-
-    if (route != '/') {
-      actions.add(IconButton(
-          key: const Key('homeButton'),
-          icon: const Icon(Icons.home),
-          tooltip: 'Go Home',
-          onPressed: () {
-            if (route.startsWith('/acct')) {
-              Navigator.pushNamed(context, '/accounting');
-            } else {
-              Navigator.pushNamed(context, '/');
-            }
-          }));
-    }
-
     child = menuOption.child;
     tabIndex = widget.tabIndex ?? 0;
     if (tabItems.isEmpty) {
@@ -172,6 +140,37 @@ class MenuOptionState extends State<DisplayMenuOption>
 
   @override
   Widget build(BuildContext context) {
+    currentRoute = ModalRoute.of(context)?.settings.name ?? '';
+    actions = List.of(widget.actions);
+    actions.insert(
+        0,
+        IconButton(
+            //   key: const Key('chatButton'), // causes a duplicate key?
+            icon: const Icon(Icons.chat),
+            tooltip: 'Chat',
+            onPressed: () async => {
+                  await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const ChatRoomListDialog();
+                    },
+                  )
+                }));
+    if (currentRoute != '/') {
+      actions.add(IconButton(
+          //        key: const Key('homeButton'),
+          icon: const Icon(Icons.home),
+          tooltip: 'Go Home',
+          onPressed: () {
+            if (currentRoute.startsWith('/acct')) {
+              Navigator.pushNamed(context, '/accounting');
+            } else {
+              Navigator.pushNamed(context, '/');
+            }
+          }));
+    }
+
     bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
       if (tabItems.isEmpty) {
@@ -208,7 +207,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
     //debugPrint("==2-simple= current form key: $displayMOFormKey");
     return Scaffold(
-        key: Key(route),
+        key: Key(currentRoute),
         appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             key: Key(displayMOFormKey),
@@ -227,7 +226,7 @@ class MenuOptionState extends State<DisplayMenuOption>
     Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
     //debugPrint("==3-tab= current form key: $displayMOFormKey");
     return Scaffold(
-        key: Key(route),
+        key: Key(currentRoute),
         appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             automaticallyImplyLeading: isPhone,

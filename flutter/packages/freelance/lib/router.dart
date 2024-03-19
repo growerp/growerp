@@ -27,58 +27,76 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 0, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/tasks':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
-
+    case '/orders':
+      return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => DisplayMenuOption(
+              menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/catalog':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/sales':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/purchase':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 5, tabIndex: 0));
     case '/crm':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     case '/accounting':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => HomeForm(menuOptions: acctMenuOptions));
     case '/acctSales':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 1, tabIndex: 0));
     case '/acctPurchase':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 2, tabIndex: 0));
     case '/acctLedger':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 3, tabIndex: 0));
     case '/acctReports':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 4, tabIndex: 0));
     case '/website':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               DisplayMenuOption(menuList: menuOptions, menuIndex: 5));
     case '/acctSetup':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: acctMenuOptions, menuIndex: 5, tabIndex: 0));
     default:

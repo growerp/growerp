@@ -14,8 +14,9 @@ add to /etc/hosts file:
 ### run compose 
 This will start admin/moqui/chat images:
 ```sh
-docker compose up -d # start the images
+docker compose up # start the images
 ```
+Because images already prepared at dockerhub.com the system will start in a couple of minutes.
 
 ### use the system
 ```
@@ -27,4 +28,5 @@ browser hotel frontend: https://hotel.growerp.local
 
 ignore ssl errors of self signed cert.
 
-Because images already prepared at dockerhub.com the system will start in a couple of minutes.
+Register a new company in the admin or hotel app, any email will do
+The look in the moqui log for the password in a line started with '====== Email not configured'

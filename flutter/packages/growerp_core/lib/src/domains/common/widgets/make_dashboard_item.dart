@@ -22,7 +22,7 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
   bool phone = ResponsiveBreakpoints.of(context).isMobile;
 
   List<Widget> textList = [
-    Center(child: Image.asset(menuOption.selectedImage, height: 80.0)),
+    Center(child: Image.asset(menuOption.selectedImage!, height: 80.0)),
     Center(
         child: Text(menuOption.title.replaceAll('\n', ''),
             style: TextStyle(
@@ -45,7 +45,9 @@ Card makeDashboardItem(String key, BuildContext context, MenuOption menuOption,
         child: InkWell(
           key: Key(key),
           onTap: () {
-            Navigator.pushNamed(context, menuOption.route);
+            menuOption.route != null
+                ? Navigator.pushNamed(context, menuOption.route!)
+                : null;
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
