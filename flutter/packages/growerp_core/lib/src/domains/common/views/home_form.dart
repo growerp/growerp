@@ -108,7 +108,6 @@ class HomeFormState extends State<HomeForm> {
                         key: const Key('HomeFormUnAuth'),
                         title: appBarTitle(
                           context,
-                          authenticate,
                           'Login / New company',
                           isPhone,
                         )),

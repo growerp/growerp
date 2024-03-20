@@ -18,13 +18,15 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../domains/domains.dart';
 
-Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget child, int menuIndex, List<MenuOption> menu) {
+Widget myNavigationRail(
+    BuildContext context, Widget child, int menuIndex, List<MenuOption> menu) {
   List<NavigationRailDestination> items = [];
   ThemeBloc themeBloc = context.read<ThemeBloc>();
+  AuthBloc authBloc = context.read<AuthBloc>();
+  Authenticate auth = authBloc.state.authenticate!;
   for (var option in menu) {
     {
-      if (option.readGroups.contains(authenticate.user?.userGroup)) {
+      if (option.readGroups.contains(auth.user?.userGroup)) {
         //print("====tap available: tap${option.route}");
 
         items.add(NavigationRailDestination(
@@ -42,7 +44,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
   if (items.isEmpty) {
     return FatalErrorForm(
         message: "No access to any option here, "
-            "have: ${authenticate.user?.userGroup} "
+            "have: ${auth.user?.userGroup} "
             "should have: ${menu[0].readGroups}");
   }
 
@@ -62,7 +64,7 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                 key: const Key('tapUser'),
                                 onTap: () => Navigator.pushNamed(
                                     context, '/user',
-                                    arguments: authenticate.user),
+                                    arguments: auth.user),
                                 child: Column(children: [
                                   SizedBox(
                                       height: ResponsiveBreakpoints.of(context)
@@ -71,18 +73,17 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                                           : 5),
                                   CircleAvatar(
                                       radius: 15,
-                                      child: authenticate.user?.image != null
-                                          ? Image.memory(
-                                              authenticate.user!.image!)
+                                      child: auth.user?.image != null
+                                          ? Image.memory(auth.user!.image!)
                                           : Text(
-                                              authenticate.user?.firstName
+                                              auth.user?.firstName
                                                       ?.substring(0, 1) ??
                                                   '',
                                               style: const TextStyle(
                                                 fontSize: 20,
                                               ))),
-                                  Text("${authenticate.user!.firstName}"),
-                                  Text("${authenticate.user!.lastName}"),
+                                  Text("${auth.user!.firstName}"),
+                                  Text("${auth.user!.lastName}"),
                                 ]))),
                         selectedIndex: menuIndex,
                         onDestinationSelected: (int index) {

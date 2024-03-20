@@ -13,27 +13,28 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-Widget appBarTitle(BuildContext context, Authenticate authenticate,
-    String title, bool isPhone) {
+Widget appBarTitle(BuildContext context, String title, bool isPhone) {
+  AuthBloc authBloc = context.read<AuthBloc>();
+  Authenticate? auth = authBloc.state.authenticate;
   return Row(children: [
     InkWell(
       key: const Key('tapCompany'),
       onTap: () {
-        if (authenticate.apiKey != null) {
-          Navigator.pushNamed(context, '/company',
-              arguments: authenticate.company);
+        if (auth?.apiKey != null) {
+          Navigator.pushNamed(context, '/company', arguments: auth?.company);
         }
       },
       child: CircleAvatar(
           radius: 15,
-          child: authenticate.company?.image != null
-              ? Image.memory(authenticate.company!.image!)
+          child: auth?.company?.image != null
+              ? Image.memory(auth!.company!.image!)
               : Text(
-                  authenticate.company?.name != null &&
-                          authenticate.company!.name!.isNotEmpty
-                      ? authenticate.company!.name!.substring(0, 1)
+                  auth?.company?.name != null && auth?.company?.name! != ''
+                      ? auth!.company!.name!.substring(0, 1)
                       : '?',
                   key: const Key('appBarAvatarText'),
                 )),
@@ -45,7 +46,7 @@ Widget appBarTitle(BuildContext context, Authenticate authenticate,
         style: const TextStyle(fontSize: 18),
         key: const Key('appBarTitle'),
       ),
-      Text(authenticate.company?.name ?? '??',
+      Text(auth?.company?.name ?? '??',
           key: const Key('appBarCompanyName'),
           style: const TextStyle(fontSize: 10)),
     ]),

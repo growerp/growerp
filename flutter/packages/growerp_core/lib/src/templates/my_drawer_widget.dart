@@ -17,10 +17,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
 
-Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
-    List<MenuOption> menu) {
-  UserGroup? groupId = authenticate.user?.userGroup;
+Widget? myDrawer(BuildContext context, bool isPhone, List<MenuOption> menu) {
   ThemeBloc themeBloc = context.read<ThemeBloc>();
+  AuthBloc authBloc = context.read<AuthBloc>();
+  Authenticate? auth = authBloc.state.authenticate;
+  UserGroup? groupId = auth?.user?.userGroup;
   List options = [];
   for (var option in menu) {
     {
@@ -37,7 +38,7 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
   options.add({
     "route": 'theme',
   });
-  bool loggedIn = authenticate.apiKey != null;
+  bool loggedIn = auth?.apiKey != null;
   if (loggedIn && isPhone) {
     return Drawer(
       width: 200,
@@ -51,22 +52,20 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
                 child: InkWell(
                     key: const Key('tapUser'),
                     onTap: () => Navigator.pushNamed(context, '/user',
-                        arguments: authenticate.user),
+                        arguments: auth?.user),
                     child: Column(children: [
                       CircleAvatar(
                           backgroundColor: Colors.green,
                           radius: 40,
-                          child: authenticate.user?.image != null
-                              ? Image.memory(authenticate.user!.image!)
+                          child: auth?.user?.image != null
+                              ? Image.memory(auth!.user!.image!)
                               : Text(
-                                  authenticate.user?.firstName
-                                          ?.substring(0, 1) ??
-                                      '',
+                                  auth?.user?.firstName?.substring(0, 1) ?? '',
                                   style: const TextStyle(fontSize: 30))),
                       const SizedBox(height: 10),
-                      Text("${authenticate.user!.firstName} ",
+                      Text("${auth?.user!.firstName} ",
                           style: const TextStyle(fontSize: 15)),
-                      Text("${authenticate.user!.lastName}",
+                      Text("${auth?.user!.lastName}",
                           style: const TextStyle(
                             fontSize: 15,
                           )),

@@ -58,10 +58,12 @@ class MenuOptionState extends State<DisplayMenuOption>
   late String currentRoute = '';
   late bool isPhone;
   late TaskBloc taskBloc;
+  late AuthBloc authBloc;
 
   @override
   void initState() {
     super.initState();
+    authBloc = context.read<AuthBloc>();
     if (widget.workflow != null) {
       taskBloc = context.read<TaskBloc>();
     }
@@ -171,147 +173,141 @@ class MenuOptionState extends State<DisplayMenuOption>
           }));
     }
 
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      Widget workflowBar = ColoredBox(
-          color: Colors.green,
-          child: Row(children: [
-            ElevatedButton(
-              child: const Text('Previous'),
-              onPressed: () {
-                taskBloc.add(TaskWorkflowPrevious(widget.workflow!));
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                taskBloc.add(TaskWorkflowCancel(widget.workflow!));
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Suspend'),
-              onPressed: () {
-                taskBloc.add(TaskWorkflowSuspend(widget.workflow!));
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Next'),
-              onPressed: () {
-                taskBloc.add(TaskWorkflowNext(widget.workflow!));
-              },
-            ),
-          ]));
+    Widget workflowBar = ColoredBox(
+        color: Colors.green,
+        child: Row(children: [
+          ElevatedButton(
+            child: const Text('Previous'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowPrevious(widget.workflow!));
+            },
+          ),
+          ElevatedButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowCancel(widget.workflow!));
+            },
+          ),
+          ElevatedButton(
+            child: const Text('Suspend'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowSuspend(widget.workflow!));
+            },
+          ),
+          ElevatedButton(
+            child: const Text('Next'),
+            onPressed: () {
+              taskBloc.add(TaskWorkflowNext(widget.workflow!));
+            },
+          ),
+        ]));
 
-      Widget simplePage(Authenticate authenticate, bool isPhone) {
-        displayMOFormKey =
-            child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-        //debugPrint("==2-simple= current form key: $displayMOFormKey");
+    Widget simplePage(bool isPhone) {
+      displayMOFormKey =
+          child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+      //debugPrint("==2-simple= current form key: $displayMOFormKey");
 
-        List<Widget> simpleChildren = [Expanded(child: child!)];
-        if (widget.workflow != null) {
-          simpleChildren.insert(0, workflowBar);
-        }
-
-        return Scaffold(
-            key: Key(currentRoute),
-            appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                key: Key(displayMOFormKey),
-                automaticallyImplyLeading: isPhone,
-                leading: leadAction,
-                title: appBarTitle(context, authenticate, title, isPhone),
-                actions: actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
-            floatingActionButton: floatingActionButton,
-            body: Column(children: simpleChildren));
+      List<Widget> simpleChildren = [Expanded(child: child!)];
+      if (widget.workflow != null) {
+        simpleChildren.insert(0, workflowBar);
       }
 
-      Widget tabPage(Authenticate authenticate, bool isPhone) {
-        displayMOFormKey = tabList[tabIndex]
-            .toString()
-            .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-        Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
-        //debugPrint("==3-tab= current form key: $displayMOFormKey");
+      return Scaffold(
+          key: Key(currentRoute),
+          appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              key: Key(displayMOFormKey),
+              automaticallyImplyLeading: isPhone,
+              leading: leadAction,
+              title: appBarTitle(context, title, isPhone),
+              actions: actions),
+          drawer: myDrawer(context, isPhone, widget.menuList),
+          floatingActionButton: floatingActionButton,
+          body: Column(children: simpleChildren));
+    }
 
-        List<Widget> tabChildren = [
-          Expanded(
-              child: isPhone
-                  ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
-                  : TabBarView(
-                      key: Key(displayMOFormKey),
+    Widget tabPage(bool isPhone) {
+      displayMOFormKey =
+          tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+      Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
+      //debugPrint("==3-tab= current form key: $displayMOFormKey");
+      List<Widget> tabChildren = [
+        Expanded(
+            child: isPhone
+                ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
+                : TabBarView(
+                    key: Key(displayMOFormKey),
+                    controller: _controller,
+                    children: tabList,
+                  ))
+      ];
+      if (widget.workflow != null) {
+        tabChildren.insert(0, workflowBar);
+      }
+
+      return Scaffold(
+          key: Key(currentRoute),
+          appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              automaticallyImplyLeading: isPhone,
+              bottom: isPhone
+                  ? null
+                  : TabBar(
                       controller: _controller,
-                      children: tabList,
-                    ))
-        ];
-        if (widget.workflow != null) {
-          tabChildren.insert(0, workflowBar);
-        }
-
-        return Scaffold(
-            key: Key(currentRoute),
-            appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                automaticallyImplyLeading: isPhone,
-                bottom: isPhone
-                    ? null
-                    : TabBar(
-                        controller: _controller,
-                        labelPadding: const EdgeInsets.all(5.0),
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicator: BoxDecoration(
-                          color: tabSelectedBackground,
-                          borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10)),
-                        ),
-                        tabs: tabText,
+                      labelPadding: const EdgeInsets.all(5.0),
+                      indicatorSize: TabBarIndicatorSize.label,
+                      indicator: BoxDecoration(
+                        color: tabSelectedBackground,
+                        borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10)),
                       ),
-                title: appBarTitle(context, authenticate,
-                    '$title ${tabItems[tabIndex].label}', isPhone),
-                actions: actions),
-            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
-            floatingActionButton: floatingActionButtonList[tabIndex],
-            bottomNavigationBar: isPhone
-                ? BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    items: bottomItems,
-                    currentIndex: tabIndex,
-                    selectedItemColor: Colors.amber[800],
-                    onTap: (index) {
-                      setState(() {
-                        tabIndex = index;
-                      });
-                    })
-                : null,
-            body: Column(children: tabChildren));
-      }
+                      tabs: tabText,
+                    ),
+              title: appBarTitle(
+                  context, '$title ${tabItems[tabIndex].label}', isPhone),
+              actions: actions),
+          drawer: myDrawer(context, isPhone, widget.menuList),
+          floatingActionButton: floatingActionButtonList[tabIndex],
+          bottomNavigationBar: isPhone
+              ? BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  items: bottomItems,
+                  currentIndex: tabIndex,
+                  selectedItemColor: Colors.amber[800],
+                  onTap: (index) {
+                    setState(() {
+                      tabIndex = index;
+                    });
+                  })
+              : null,
+          body: Column(children: tabChildren));
+    }
 
-      if (tabItems.isEmpty) {
-        // show simple page
-        if (isPhone) {
-          return simplePage(state.authenticate!, isPhone);
-        } else {
-          return myNavigationRail(
-            context,
-            state.authenticate!,
-            simplePage(state.authenticate!, isPhone),
-            widget.menuIndex,
-            widget.menuList,
-          );
-        }
+    if (tabItems.isEmpty) {
+      // show simple page
+      if (isPhone) {
+        return simplePage(isPhone);
       } else {
-        // show tabbar page
-        if (isPhone) {
-          return tabPage(state.authenticate!, isPhone);
-        } else {
-          return myNavigationRail(
-            context,
-            state.authenticate!,
-            tabPage(state.authenticate!, isPhone),
-            widget.menuIndex,
-            widget.menuList,
-          );
-        }
+        return myNavigationRail(
+          context,
+          simplePage(isPhone),
+          widget.menuIndex,
+          widget.menuList,
+        );
       }
-    });
+    } else {
+      // show tabbar page
+      if (isPhone) {
+        return tabPage(isPhone);
+      } else {
+        return myNavigationRail(
+          context,
+          tabPage(isPhone),
+          widget.menuIndex,
+          widget.menuList,
+        );
+      }
+    }
   }
 }
