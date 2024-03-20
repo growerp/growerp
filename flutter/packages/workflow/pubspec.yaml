@@ -45,6 +45,8 @@ flutter:
   uses-material-design: true
   assets: 
     - assets/cfg/
+    - packages/growerp_core/images/select.png
+    - packages/growerp_core/images/selectGrey.png
     - packages/growerp_core/images/rect.png
     - packages/growerp_core/images/oval.png
     - packages/growerp_core/images/diamond.png

@@ -31,10 +31,10 @@ class MenuOption {
   final List<UserGroup>? writeGroups; // user groups who can add/update/delete
 
   MenuOption({
-    required this.image,
-    required this.selectedImage,
+    this.image,
+    this.selectedImage,
     required this.title,
-    required this.route,
+    this.route,
     this.tabItems,
     this.child,
     required this.readGroups,

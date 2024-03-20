@@ -15,9 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import '../domains/domains.dart';
-import 'templates.dart';
+import '../../growerp_core.dart';
 
 class DisplayMenuOption extends StatefulWidget {
   final MenuOption? menuOption; // display not an item from the list like chat
@@ -26,7 +24,7 @@ class DisplayMenuOption extends StatefulWidget {
   final int? tabIndex; // tab selected, if none create new
   final TabItem? tabItem; // create new tab if tabIndex null
   final List<Widget> actions; // actions at the appBar
-  final bool? isPhone;
+  final Task? workflow;
   const DisplayMenuOption({
     super.key,
     this.menuOption,
@@ -35,7 +33,7 @@ class DisplayMenuOption extends StatefulWidget {
     this.tabIndex,
     this.tabItem,
     this.actions = const [],
-    this.isPhone = false,
+    this.workflow,
   });
 
   @override
@@ -57,11 +55,16 @@ class MenuOptionState extends State<DisplayMenuOption>
   List<BottomNavigationBarItem> bottomItems = [];
   TabController? _controller;
   late String displayMOFormKey;
-  String currentRoute = '';
+  late String currentRoute = '';
+  late bool isPhone;
+  late TaskBloc taskBloc;
 
   @override
   void initState() {
     super.initState();
+    if (widget.workflow != null) {
+      taskBloc = context.read<TaskBloc>();
+    }
     MenuOption menuOption =
         widget.menuOption ?? widget.menuList[widget.menuIndex];
     tabItems = menuOption.tabItems ?? [];
@@ -82,11 +85,7 @@ class MenuOptionState extends State<DisplayMenuOption>
       // text of tabs at top of screen (tablet, web)
       tabText.add(Align(
           alignment: Alignment.center,
-          child: Text(
-              widget.isPhone!
-                  ? tabItems[i].label
-                  : tabItems[i].label.replaceAll('\n', ' '),
-              key: Key('tap$displayMOFormKey'))));
+          child: Text(tabItems[i].label, key: Key('tap$displayMOFormKey'))));
       // tabs at bottom of screen : phone
       bottomItems.add(BottomNavigationBarItem(
           icon: tabItems[i].icon,
@@ -141,11 +140,12 @@ class MenuOptionState extends State<DisplayMenuOption>
   @override
   Widget build(BuildContext context) {
     currentRoute = ModalRoute.of(context)?.settings.name ?? '';
+    isPhone = isAPhone(context);
     actions = List.of(widget.actions);
     actions.insert(
         0,
         IconButton(
-            //   key: const Key('chatButton'), // causes a duplicate key?
+            key: const Key('chatButton'), // causes a duplicate key?
             icon: const Icon(Icons.chat),
             tooltip: 'Chat',
             onPressed: () async => {
@@ -157,9 +157,9 @@ class MenuOptionState extends State<DisplayMenuOption>
                     },
                   )
                 }));
-    if (currentRoute != '/') {
+    if (currentRoute != '/' && widget.workflow == null) {
       actions.add(IconButton(
-          //        key: const Key('homeButton'),
+          key: const Key('homeButton'),
           icon: const Icon(Icons.home),
           tooltip: 'Go Home',
           onPressed: () {
@@ -171,8 +171,120 @@ class MenuOptionState extends State<DisplayMenuOption>
           }));
     }
 
-    bool isPhone = ResponsiveBreakpoints.of(context).isMobile;
     return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      Widget workflowBar = ColoredBox(
+          color: Colors.green,
+          child: Row(children: [
+            ElevatedButton(
+              child: const Text('Previous'),
+              onPressed: () {
+                taskBloc.add(TaskWorkflowPrevious(widget.workflow!));
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                taskBloc.add(TaskWorkflowCancel(widget.workflow!));
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Suspend'),
+              onPressed: () {
+                taskBloc.add(TaskWorkflowSuspend(widget.workflow!));
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Next'),
+              onPressed: () {
+                taskBloc.add(TaskWorkflowNext(widget.workflow!));
+              },
+            ),
+          ]));
+
+      Widget simplePage(Authenticate authenticate, bool isPhone) {
+        displayMOFormKey =
+            child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+        //debugPrint("==2-simple= current form key: $displayMOFormKey");
+
+        List<Widget> simpleChildren = [Expanded(child: child!)];
+        if (widget.workflow != null) {
+          simpleChildren.insert(0, workflowBar);
+        }
+
+        return Scaffold(
+            key: Key(currentRoute),
+            appBar: AppBar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                key: Key(displayMOFormKey),
+                automaticallyImplyLeading: isPhone,
+                leading: leadAction,
+                title: appBarTitle(context, authenticate, title, isPhone),
+                actions: actions),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
+            floatingActionButton: floatingActionButton,
+            body: Column(children: simpleChildren));
+      }
+
+      Widget tabPage(Authenticate authenticate, bool isPhone) {
+        displayMOFormKey = tabList[tabIndex]
+            .toString()
+            .replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
+        Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
+        //debugPrint("==3-tab= current form key: $displayMOFormKey");
+
+        List<Widget> tabChildren = [
+          Expanded(
+              child: isPhone
+                  ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
+                  : TabBarView(
+                      key: Key(displayMOFormKey),
+                      controller: _controller,
+                      children: tabList,
+                    ))
+        ];
+        if (widget.workflow != null) {
+          tabChildren.insert(0, workflowBar);
+        }
+
+        return Scaffold(
+            key: Key(currentRoute),
+            appBar: AppBar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                automaticallyImplyLeading: isPhone,
+                bottom: isPhone
+                    ? null
+                    : TabBar(
+                        controller: _controller,
+                        labelPadding: const EdgeInsets.all(5.0),
+                        indicatorSize: TabBarIndicatorSize.label,
+                        indicator: BoxDecoration(
+                          color: tabSelectedBackground,
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10)),
+                        ),
+                        tabs: tabText,
+                      ),
+                title: appBarTitle(context, authenticate,
+                    '$title ${tabItems[tabIndex].label}', isPhone),
+                actions: actions),
+            drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
+            floatingActionButton: floatingActionButtonList[tabIndex],
+            bottomNavigationBar: isPhone
+                ? BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    items: bottomItems,
+                    currentIndex: tabIndex,
+                    selectedItemColor: Colors.amber[800],
+                    onTap: (index) {
+                      setState(() {
+                        tabIndex = index;
+                      });
+                    })
+                : null,
+            body: Column(children: tabChildren));
+      }
+
       if (tabItems.isEmpty) {
         // show simple page
         if (isPhone) {
@@ -201,72 +313,5 @@ class MenuOptionState extends State<DisplayMenuOption>
         }
       }
     });
-  }
-
-  Widget simplePage(Authenticate authenticate, bool isPhone) {
-    displayMOFormKey = child.toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    //debugPrint("==2-simple= current form key: $displayMOFormKey");
-    return Scaffold(
-        key: Key(currentRoute),
-        appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            key: Key(displayMOFormKey),
-            automaticallyImplyLeading: isPhone,
-            leading: leadAction,
-            title: appBarTitle(context, authenticate, title, isPhone),
-            actions: actions),
-        drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
-        floatingActionButton: floatingActionButton,
-        body: child);
-  }
-
-  Widget tabPage(Authenticate authenticate, bool isPhone) {
-    displayMOFormKey =
-        tabList[tabIndex].toString().replaceAll(RegExp(r'[^(a-z,A-Z)]'), '');
-    Color tabSelectedBackground = Theme.of(context).colorScheme.onTertiary;
-    //debugPrint("==3-tab= current form key: $displayMOFormKey");
-    return Scaffold(
-        key: Key(currentRoute),
-        appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            automaticallyImplyLeading: isPhone,
-            bottom: isPhone
-                ? null
-                : TabBar(
-                    controller: _controller,
-                    labelPadding: const EdgeInsets.all(5.0),
-                    indicatorSize: TabBarIndicatorSize.label,
-                    indicator: BoxDecoration(
-                      color: tabSelectedBackground,
-                      borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10)),
-                    ),
-                    tabs: tabText,
-                  ),
-            title: appBarTitle(context, authenticate,
-                '$title ${tabItems[tabIndex].label}', isPhone),
-            actions: actions),
-        drawer: myDrawer(context, authenticate, isPhone, widget.menuList),
-        floatingActionButton: floatingActionButtonList[tabIndex],
-        bottomNavigationBar: isPhone
-            ? BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                items: bottomItems,
-                currentIndex: tabIndex,
-                selectedItemColor: Colors.amber[800],
-                onTap: (index) {
-                  setState(() {
-                    tabIndex = index;
-                  });
-                })
-            : null,
-        body: isPhone
-            ? Center(key: Key(displayMOFormKey), child: tabList[tabIndex])
-            : TabBarView(
-                key: Key(displayMOFormKey),
-                controller: _controller,
-                children: tabList,
-              ));
   }
 }

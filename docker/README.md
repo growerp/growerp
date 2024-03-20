@@ -19,12 +19,10 @@ docker compose up # start the images
 Because images already prepared at dockerhub.com the system will start in a couple of minutes.
 
 ### use the system
-```
 browser logon to backend: https://backend.growerp.local/vapps
 create company with admin or hotel with browser
 browser flutter frontend: https://admin.growerp.local
 browser hotel frontend: https://hotel.growerp.local
-```
 
 ignore ssl errors of self signed cert.
 

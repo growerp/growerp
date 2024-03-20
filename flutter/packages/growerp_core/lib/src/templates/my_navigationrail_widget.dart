@@ -19,7 +19,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../domains/domains.dart';
 
 Widget myNavigationRail(BuildContext context, Authenticate authenticate,
-    Widget widget, int menuIndex, List<MenuOption> menu) {
+    Widget child, int menuIndex, List<MenuOption> menu) {
   List<NavigationRailDestination> items = [];
   ThemeBloc themeBloc = context.read<ThemeBloc>();
   for (var option in menu) {
@@ -28,9 +28,12 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
         //print("====tap available: tap${option.route}");
 
         items.add(NavigationRailDestination(
-          icon: Image.asset(option.image!,
-              height: 40, key: Key('tap${option.route}')),
-          selectedIcon: Image.asset(option.selectedImage!),
+          icon: Image.asset(
+              option.image ?? 'packages/growerp_core/images/selectGrey.png',
+              height: 40,
+              key: Key('tap${option.route}')),
+          selectedIcon: Image.asset(option.selectedImage ??
+              'packages/growerp_core/images/select.png'),
           label: Text(option.title),
         ));
       }
@@ -107,6 +110,6 @@ Widget myNavigationRail(BuildContext context, Authenticate authenticate,
                             ]))))));
       },
     ),
-    Expanded(child: widget)
+    Expanded(child: child)
   ]);
 }

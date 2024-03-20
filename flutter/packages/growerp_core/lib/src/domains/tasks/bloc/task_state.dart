@@ -14,7 +14,7 @@
 
 part of 'task_bloc.dart';
 
-enum TaskBlocStatus { initial, loading, success, failure }
+enum TaskBlocStatus { initial, loading, success, failure, workflowAction }
 
 class TaskState extends Equatable {
   const TaskState({
@@ -23,13 +23,15 @@ class TaskState extends Equatable {
     this.tasks = const <Task>[],
     this.hasReachedMax = false,
     this.searchString = '',
+    this.menuOptions = const <MenuOption>[],
   });
 
   final TaskBlocStatus status;
   final String? message;
   final List<Task> tasks;
   final bool hasReachedMax; // all records retrieved
-  final String searchString; // check to see if search string first or changed
+  final String searchString;
+  final List<MenuOption> menuOptions;
 
   TaskState copyWith({
     TaskBlocStatus? status,
@@ -38,6 +40,7 @@ class TaskState extends Equatable {
     bool? hasReachedMax,
     String? searchString,
     bool? search,
+    List<MenuOption>? menuOptions,
   }) {
     return TaskState(
       status: status ?? this.status,
@@ -45,6 +48,7 @@ class TaskState extends Equatable {
       tasks: tasks ?? this.tasks,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
+      menuOptions: menuOptions ?? this.menuOptions,
     );
   }
 
@@ -55,5 +59,6 @@ class TaskState extends Equatable {
   }
 
   @override
-  List<Object> get props => [status, tasks, hasReachedMax, searchString];
+  List<Object> get props =>
+      [status, tasks, menuOptions, hasReachedMax, searchString];
 }

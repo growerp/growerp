@@ -174,7 +174,7 @@ class TaskDialogState extends State<TaskDialog> {
                           key: const Key('startWorkflow'),
                           child: const Text('Start Workflow'),
                           onPressed: () => Navigator.of(context).pushNamed(
-                              '/startWorkflow',
+                              '/workflowRunner',
                               arguments: widget.task))),
                 const SizedBox(width: 10),
                 Expanded(

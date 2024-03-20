@@ -27,7 +27,8 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
       if (option.readGroups.contains(groupId)) {
         options.add({
           "route": option.route,
-          "selImage": option.selectedImage,
+          "selImage":
+              option.selectedImage ?? 'packages/growerp_core/images/select.png',
           "title": option.title,
         });
       }
@@ -88,7 +89,8 @@ Widget? myDrawer(BuildContext context, Authenticate authenticate, bool isPhone,
               contentPadding: const EdgeInsets.all(5.0),
               title: Text(options[i - 1]["title"]),
               leading: Image.asset(
-                options[i - 1]["selImage"],
+                options[i - 1]["selImage"] ??
+                    'packages/growerp_core/images/select.png',
               ),
               onTap: () {
                 if (options[i - 1]["route"] == "/") {

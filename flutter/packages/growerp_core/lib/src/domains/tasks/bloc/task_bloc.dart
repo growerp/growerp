@@ -14,9 +14,11 @@
 
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
@@ -50,6 +52,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     on<TaskTimeEntryUpdate>(_onTimeEntryUpdate); //add,delete
     on<TaskTimeEntryDelete>(_onTimeEntryDelete);
     on<TaskWorkflowNext>(_onTaskWorkflowNext);
+    on<TaskWorkflowPrevious>(_onTaskWorkflowPrevious);
+    on<TaskWorkflowCancel>(_onTaskWorkflowCancel);
+    on<TaskWorkflowSuspend>(_onTaskWorkflowSuspend);
   }
 
   final RestClient restClient;
@@ -208,8 +213,23 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     Emitter<TaskState> emit,
   ) async {
     try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+      List<MenuOption> menuOptions = [
+        MenuOption(
+          title: "demo workflow",
+          route: '/',
+          readGroups: [UserGroup.admin, UserGroup.employee],
+          child: const Text("Hello world"),
+        ),
+        MenuOption(
+          title: "demo1 workflow",
+          route: '/',
+          readGroups: [UserGroup.admin, UserGroup.employee],
+          child: const Text("Hello world"),
+        ),
+      ];
 /*
-  check if an running workflow is selected:
+  check if a running workflow is selected:
     allow the user to start a new one or continue the running workflow.
 	if a new workflow,
       create a workflow instance in the todo list as an running workflow task
@@ -224,14 +244,62 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
   If ended 
     change the status in the to do list to be completed
     inform the user.
-
-
-
-
-
 */
 
       emit(state.copyWith(
+        menuOptions: menuOptions,
+        message: "Workflow started/next",
+        status: TaskBlocStatus.workflowAction,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskWorkflowPrevious(
+    TaskWorkflowPrevious event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+
+      emit(state.copyWith(
+        message: 'previous Workflow',
+        status: TaskBlocStatus.workflowAction,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskWorkflowSuspend(
+    TaskWorkflowSuspend event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+
+      emit(state.copyWith(
+        message: 'Workflow suspended',
+        status: TaskBlocStatus.success,
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
+    }
+  }
+
+  Future<void> _onTaskWorkflowCancel(
+    TaskWorkflowCancel event,
+    Emitter<TaskState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: TaskBlocStatus.loading));
+
+      emit(state.copyWith(
+        message: 'Workflow cancelled',
         status: TaskBlocStatus.success,
       ));
     } on DioException catch (e) {

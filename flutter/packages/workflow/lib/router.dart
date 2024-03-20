@@ -21,7 +21,7 @@ import 'menu_options.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'views/workflow_editor.dart';
-import 'workflow_menu_options.dart';
+import 'views/workflow_runner.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (debug.kDebugMode) {
@@ -33,59 +33,72 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
-              menuList: menuOptions, menuIndex: 0, tabIndex: 0));
+                menuList: menuOptions,
+                menuIndex: 0,
+                tabIndex: 0,
+              ));
     case '/editWorkflow':
       return MaterialPageRoute(
           builder: (context) => WorkflowDialog(settings.arguments as Task));
-    case '/startWorkflow':
+    case '/workflowRunner':
       return MaterialPageRoute(
-          builder: (context) => DisplayMenuOption(
-                menuList: workFlowMenuOptions,
-                menuIndex: 0,
-              ));
+          builder: (context) =>
+              WorkflowRunner(workflow: settings.arguments as Task));
     case '/workflows':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/workflowTemplates':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     case '/workflowTemplateTasks':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
     case '/toDo':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/company':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) =>
               ShowCompanyDialog(settings.arguments as Company));
     case '/companies':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 1, tabIndex: 0));
     case '/user':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => ShowUserDialog(settings.arguments as User));
     case '/crm':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
     case '/catalog':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 3, tabIndex: 0));
 
     case '/orders':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 4, tabIndex: 0));
     case '/inventory':
       return MaterialPageRoute(
+          settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 5, tabIndex: 0));
     default:

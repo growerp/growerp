@@ -55,3 +55,18 @@ class TaskWorkflowNext extends TaskEvent {
   const TaskWorkflowNext(this.workflow);
   final Task workflow;
 }
+
+class TaskWorkflowPrevious extends TaskEvent {
+  const TaskWorkflowPrevious(this.workflow);
+  final Task workflow;
+}
+
+class TaskWorkflowCancel extends TaskEvent {
+  const TaskWorkflowCancel(this.workflow);
+  final Task workflow;
+}
+
+class TaskWorkflowSuspend extends TaskEvent {
+  const TaskWorkflowSuspend(this.workflow);
+  final Task workflow;
+}
