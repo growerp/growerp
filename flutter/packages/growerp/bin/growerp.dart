@@ -284,6 +284,12 @@ Future<void> main(List<String> args) async {
           logger.e("Exporting filetype: $fileType Error: ${getDioError(e)}");
         }
         break;
+      case 'report':
+      // TODO(hansbak): create a data (conversion) report
+      // how many open documents order,invoices, payments  value
+      // how many orders with no invoices
+      // how many invoices with no ledger tranactions
+      // etc, etc..
       default:
         logger.e("${modifiedArgs[0]} not a valid subcommand");
     }

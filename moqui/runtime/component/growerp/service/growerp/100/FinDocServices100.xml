@@ -1050,6 +1050,8 @@ along with this software (see the LICENSE.md file). If not, see
                                     operator="like" from="search" ignore-if-empty="true" />
                                 <econdition field-name="otherCompanyPartyId" ignore-case="true"
                                     operator="like" from="search" ignore-if-empty="true" />
+                                <econdition field-name="otherCompanyPseudoId" ignore-case="true"
+                                    operator="like" from="search" ignore-if-empty="true" />
                             </econditions>
                             <econdition field-name="journalId" from="journal?.journalId"
                                 ignore-if-empty="true" />

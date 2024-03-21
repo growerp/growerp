@@ -237,7 +237,7 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
 
     case FileType.finDocInvoicePurchase:
       // 1:vendorId 2:vendorName, 3:reference id, 4:creditMemo 5:date(mm/dd/yy),
-      // 16:discountAmount, 22: orderId,
+      // 16:discountAmount, 17: total amount, 22: orderId,
       // 7: item number, 24: quantity, 25: productId,
       // 26: descr, 27: accountCode, 28: price, 29: amount, 30: terms
 
@@ -252,6 +252,8 @@ List<String> convertCsvRow(FileType fileType, List<String> columnsFrom,
       columnsTo.add(columnsFrom[1]);
       columnsTo.add(columnsFrom[2]);
       columnsTo.add(columnsFrom[3]); // put refnum here
+      columnsTo.add('');
+      columnsTo.add(columnsFrom[17]); // total amount
       return columnsTo;
 
     case FileType.finDocInvoicePurchaseItem:

@@ -352,7 +352,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="classificationId" />
         </in-parameters>
         <actions>
-            <log message="importing ${finDocs[0].docType} ${finDocs?.size()} finDocs" />
+            <log
+                message="importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocs[0].docType} ${finDocs?.size()} finDocs" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <!-- check if we have a timeperiod here just for transactions.....-->
@@ -414,17 +415,21 @@ along with this software (see the LICENSE.md file). If not, see
                 </if>
             </if>
             <iterate list="finDocs" entry="finDoc">
+                <log message="processing ${finDoc.pseudoId}" />
                 <script>ec.user.setEffectiveTime(Timestamp.valueOf(finDoc.creationDate))</script>
                 <!-- find partyId of other company-->
                 <if condition="!finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
                     <set field="finDoc.otherCompany.pseudoId" from="finDoc.otherCompany.name" />
                 </if>
+                <!-- translate pseudoId to moqui Id -->
                 <if condition="finDoc.otherCompany &amp;&amp; finDoc.otherCompany.pseudoId">
                     <entity-find entity-name="mantle.party.Party" list="parties">
                         <econdition field-name="pseudoId" from="finDoc.otherCompany.pseudoId" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                     </entity-find>
                     <if condition="parties">
+                        <log
+                            message="=====result from: ${finDoc.otherCompany.pseudoId} to ${parties[0].partyId}" />
                         <set field="finDoc.otherCompany.partyId" from="parties[0].partyId" />
                         <else-if
                             condition="finDoc.otherCompany.pseudoId &amp;&amp; finDoc.otherCompany.name">
@@ -458,6 +463,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <!-- create references-->
                 <if condition="finDoc.reference">
                     <if condition="finDoc.docType == 'invoice'">
+                        <!-- find transaction for invoice-->
+                        <log message="find transaction for reference: ${finDoc.reference}" />
                         <entity-find entity-name="mantle.ledger.transaction.AcctgTrans"
                             list="transactions" for-update="true">
                             <econdition field-name="organizationPartyId" from="companyPartyId" />
@@ -467,13 +474,33 @@ along with this software (see the LICENSE.md file). If not, see
                             <log level="warn"
                                 message="Import : could not find invoice ${result.finDoc.invoiceId} reference ${finDoc.reference}" />
                             <else>
-                                <if condition="transactions[0].invoiceId">
-                                    <log level="warn"
-                                        message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.invoiceId} reference: ${finDoc.reference}" />
+                                <!-- check company name-->
+                                <if
+                                    condition="finDoc.otherCompany.partyId == transactions[0].otherPartyId">
+                                    <log
+                                        message="transaction found but company wrong: trans: ${transactions[0].otherPartyId} invoice: ${finDoc.otherCompany.partyId}" />
+                                    <!-- search for one week after invoice date-->
+                                    <entity-find
+                                        entity-name="mantle.ledger.transaction.AcctgTrans"
+                                        list="transactions1" for-update="true">
+                                        <econdition field-name="organizationPartyId"
+                                            from="companyPartyId" />
+                                        <econdition field-name="otherPartyId"
+                                            from="finDoc.otherCompany.partyId" />
+                                        <econdition field-name="transactionDate" operator="greater"
+                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).getTime)" />
+                                        <econdition field-name="transactionDate" operator="less"
+                                            from="Timestamp(Date.parse('yyyy-MM-dd', finDoc.creationDate).add(7)).getTime)" />
+                                    </entity-find>
+                                </if>
+                                <if condition="!transactions[0].invoiceId">
+                                    <!-- ok found empty transaction -->
+                                    <set field="transactions[0].invoiceId"
+                                        from="result.finDoc.invoiceId" />
+                                    <entity-update value-field="transactions[0]" />
                                     <else>
-                                        <set field="transactions[0].invoiceId"
-                                            from="result.finDoc.invoiceId" />
-                                        <entity-update value-field="transactions[0]" />
+                                        <log level="warn"
+                                            message="Transaction: ${transactions[0].acctgTransId}/${transactions[0].pseudoId} already has invoiceId: ${transactions[0].invoiceId} cannot add ${result.finDoc.invoiceId} reference: ${finDoc.reference} otherCompany: ${finDoc.otherCompany.partyId} trans: ${transactions[0].otherPartyId}" />
                                     </else>
                                 </if>
                             </else>
@@ -496,7 +523,11 @@ along with this software (see the LICENSE.md file). If not, see
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="itemsOut" from="[]" />
-            <log message="importing ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
+            <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
+                in-map="[pseudoId: finDocItems[0].pseudoId, docType: finDocItems[0].docType,
+                                classificationId: classificationId]" />
+            <log
+                message="importing ${finDocs[0].sales == true ? 'Sales' : 'Purchase'} ${finDocItems[0].docType} ${finDocItems?.size()} finDocItems" />
             <set field="index" value="0" type="Integer" />
             <iterate list="finDocItems" entry="item">
                 <if condition="lastItem &amp;&amp; lastItem.pseudoId != item.pseudoId">
@@ -595,7 +626,6 @@ along with this software (see the LICENSE.md file). If not, see
                         message="id: ${item.pseudoId} no item type for ${item.glAccount.glAccountId} set to ItemExpense" />
                     <set field="item.itemType" from="[itemTypeId: 'ItemExpense']" />
                 </if>
-                <log message="=====added productId: ${item.productId}" />
                 <script>itemsOut.add(item)</script>
                 <set field="lastItem" from="item" />
             </iterate>
