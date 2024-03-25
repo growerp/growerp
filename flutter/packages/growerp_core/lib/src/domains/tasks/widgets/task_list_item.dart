@@ -36,18 +36,21 @@ class TaskListItem extends StatelessWidget {
         title: Row(
           children: <Widget>[
             Expanded(child: Text(task.taskName, key: Key('name$index'))),
-            Expanded(child: Text("${task.statusId}", key: Key('status$index'))),
-            Text(
-                task.unInvoicedHours != null
-                    ? task.unInvoicedHours!.toString()
-                    : '0',
-                key: Key('unInvoicedHours$index')),
+            if (task.taskType != TaskType.workflowTemplate)
+              Expanded(
+                  child: Text("${task.statusId}", key: Key('status$index'))),
             if (!isPhone(context))
               Expanded(
-                  child: Text("${task.description}",
+                  child: Text(task.description,
                       key: Key('description$index'),
-                      textAlign: TextAlign.center)),
-            if (!isPhone(context))
+                      textAlign: TextAlign.left)),
+            if (task.taskType != TaskType.workflowTemplate)
+              Text(
+                  task.unInvoicedHours != null
+                      ? task.unInvoicedHours!.toString()
+                      : '0',
+                  key: Key('unInvoicedHours$index')),
+            if (!isPhone(context) && task.taskType != TaskType.workflowTemplate)
               Expanded(
                   child: Text("${task.rate}",
                       key: Key('rate$index'), textAlign: TextAlign.center)),

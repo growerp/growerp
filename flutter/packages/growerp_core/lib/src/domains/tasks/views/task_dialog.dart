@@ -29,6 +29,7 @@ class TaskDialogState extends State<TaskDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _routingController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   late TaskStatus _status;
   late TaskBloc _taskBloc;
@@ -38,6 +39,7 @@ class TaskDialogState extends State<TaskDialog> {
     super.initState();
     _status = widget.task.statusId ?? TaskStatus.planning;
     _nameController.text = widget.task.taskName;
+    _descriptionController.text = widget.task.description;
     _routingController.text = widget.task.routing ?? '';
     _taskBloc = context.read<TaskBloc>();
   }
@@ -103,41 +105,48 @@ class TaskDialogState extends State<TaskDialog> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<TaskStatus>(
-                key: const Key('statusDropDown'),
-                decoration: const InputDecoration(labelText: 'Status'),
-                hint: const Text('Status'),
-                value: _status,
-                validator: (value) => value == null ? 'field required' : null,
-                items: TaskStatus.values
-                    .map((taskStatus) => DropdownMenuItem<TaskStatus>(
-                          value: taskStatus,
-                          child: Text(taskStatus.name),
-                        ))
-                    .toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _status = newValue!;
-                  });
-                },
-                isExpanded: true,
+              TextFormField(
+                key: const Key('description'),
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Description'),
+                controller: _descriptionController,
               ),
-              if (widget.task.taskType == TaskType.workflowTemplateTask)
-                const SizedBox(height: 20),
-              if (widget.task.taskType == TaskType.workflowTemplateTask)
-                TextFormField(
-                  key: const Key('routing'),
-                  decoration: InputDecoration(
-                      labelText: '${widget.task.taskType} Routing'),
-                  controller: _routingController,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please enter a ${widget.task.taskType} routing?';
-                    }
-                    return null;
-                  },
-                ),
+              if (widget.task.taskType != TaskType.workflowTemplate)
+                Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: DropdownButtonFormField<TaskStatus>(
+                        key: const Key('statusDropDown'),
+                        decoration: const InputDecoration(labelText: 'Status'),
+                        hint: const Text('Status'),
+                        value: _status,
+                        validator: (value) =>
+                            value == null ? 'field required' : null,
+                        items: TaskStatus.values
+                            .map((taskStatus) => DropdownMenuItem<TaskStatus>(
+                                  value: taskStatus,
+                                  child: Text(taskStatus.name),
+                                ))
+                            .toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _status = newValue!;
+                          });
+                        },
+                        isExpanded: true)),
+              if (widget.task.taskType != TaskType.workflowTemplate)
+                Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: TextFormField(
+                        key: const Key('routing'),
+                        decoration: InputDecoration(
+                            labelText: '${widget.task.taskType} Routing'),
+                        controller: _routingController,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter a ${widget.task.taskType} routing?';
+                          }
+                          return null;
+                        })),
               const SizedBox(height: 20),
               Row(children: [
                 Visibility(
@@ -188,6 +197,7 @@ class TaskDialogState extends State<TaskDialog> {
                               widget.task.copyWith(
                                 taskId: widget.task.taskId,
                                 taskName: _nameController.text,
+                                description: _descriptionController.text,
                                 routing: _routingController.text,
                                 statusId: _status,
                               ),

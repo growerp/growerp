@@ -26,14 +26,14 @@ class TaskFetch extends TaskEvent {
       this.searchString = '',
       this.refresh = false,
       this.isForDropDown = false,
-      this.parentTaskId = ''});
+      this.taskId = ''});
   final String searchString;
   final bool refresh;
   final int limit;
   final bool isForDropDown;
-  final String parentTaskId;
+  final String taskId;
   @override
-  List<Object> get props => [searchString, refresh];
+  List<Object> get props => [searchString, refresh, taskId, isForDropDown];
 }
 
 class TaskUpdate extends TaskEvent {
@@ -52,21 +52,21 @@ class TaskTimeEntryDelete extends TaskEvent {
 }
 
 class TaskWorkflowNext extends TaskEvent {
-  const TaskWorkflowNext(this.workflow);
-  final Task workflow;
+  const TaskWorkflowNext(this.workflowId);
+  final String workflowId;
 }
 
 class TaskWorkflowPrevious extends TaskEvent {
-  const TaskWorkflowPrevious(this.workflow);
-  final Task workflow;
+  const TaskWorkflowPrevious(this.workflowId);
+  final String workflowId;
 }
 
 class TaskWorkflowCancel extends TaskEvent {
-  const TaskWorkflowCancel(this.workflow);
-  final Task workflow;
+  const TaskWorkflowCancel(this.workflowId);
+  final String workflowId;
 }
 
 class TaskWorkflowSuspend extends TaskEvent {
-  const TaskWorkflowSuspend(this.workflow);
-  final Task workflow;
+  const TaskWorkflowSuspend(this.workflowId);
+  final String workflowId;
 }

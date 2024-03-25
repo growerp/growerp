@@ -45,7 +45,7 @@ class TaskListForm extends StatelessWidget {
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
         );
-      case TaskType.unkwown:
+      default:
         return BlocProvider<TaskBloc>(
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
@@ -84,7 +84,7 @@ class TaskListState extends State<TaskList> {
       case TaskType.workflowTemplateTask:
         _taskBloc = context.read<TaskWorkflowTemplateTaskBloc>() as TaskBloc;
         break;
-      case TaskType.unkwown:
+      default:
     }
     _taskBloc.add(const TaskFetch());
   }
@@ -105,9 +105,9 @@ class TaskListState extends State<TaskList> {
               controller: _scrollController,
               itemBuilder: (BuildContext context, int index) {
                 if (index == 0) {
-                  return const Column(children: [
-                    TaskListHeader(),
-                    Divider(),
+                  return Column(children: [
+                    TaskListHeader(widget.taskType),
+                    const Divider(),
                   ]);
                 }
                 if (index == 1 && state.tasks.isEmpty) {

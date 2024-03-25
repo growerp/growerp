@@ -179,25 +179,25 @@ class MenuOptionState extends State<DisplayMenuOption>
           ElevatedButton(
             child: const Text('Previous'),
             onPressed: () {
-              taskBloc.add(TaskWorkflowPrevious(widget.workflow!));
+              taskBloc.add(TaskWorkflowPrevious(widget.workflow!.taskId));
             },
           ),
           ElevatedButton(
             child: const Text('Cancel'),
             onPressed: () {
-              taskBloc.add(TaskWorkflowCancel(widget.workflow!));
+              taskBloc.add(TaskWorkflowCancel(widget.workflow!.taskId));
             },
           ),
           ElevatedButton(
             child: const Text('Suspend'),
             onPressed: () {
-              taskBloc.add(TaskWorkflowSuspend(widget.workflow!));
+              taskBloc.add(TaskWorkflowSuspend(widget.workflow!.taskId));
             },
           ),
           ElevatedButton(
             child: const Text('Next'),
             onPressed: () {
-              taskBloc.add(TaskWorkflowNext(widget.workflow!));
+              taskBloc.add(TaskWorkflowNext(widget.workflow!.taskId));
             },
           ),
         ]));

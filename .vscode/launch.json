@@ -72,6 +72,17 @@
             ]
         },
         {
+            "name": "Workflow chrome (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/workflow",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+            ]
+        },
+        {
             "name": "csvToCSv",
             "type": "dart",
             "request": "launch",

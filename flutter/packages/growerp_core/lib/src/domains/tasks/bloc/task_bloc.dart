@@ -21,7 +21,6 @@ import 'package:equatable/equatable.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
-import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
@@ -39,6 +38,8 @@ EventTransformer<E> taskDroppable<E>(Duration duration) {
   };
 }
 
+/// Task bloc to service workflow, workflows templates and tasks
+/// It also contains the worflow engine.
 class TaskBloc extends Bloc<TaskEvent, TaskState>
     with
         TaskToDoBloc,
@@ -61,6 +62,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
   final TaskType taskType;
   int start = 0;
 
+  /// general fetch of task type entities
   Future<void> _onTaskFetch(
     TaskFetch event,
     Emitter<TaskState> emit,
@@ -81,15 +83,24 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           taskType: taskType,
           start: start,
           searchString: event.searchString,
-          limit: event.limit);
-      return emit(state.copyWith(
-        status: TaskBlocStatus.success,
-        tasks: start == 0
-            ? compResult.tasks
-            : (List.of(state.tasks)..addAll(compResult.tasks)),
-        hasReachedMax: compResult.tasks.length < _taskLimit ? true : false,
-        searchString: '',
-      ));
+          limit: event.limit,
+          taskId: event.taskId);
+      if (event.taskId.isEmpty) {
+        return emit(state.copyWith(
+          status: TaskBlocStatus.success,
+          tasks: start == 0
+              ? compResult.tasks
+              : (List.of(state.tasks)..addAll(compResult.tasks)),
+          hasReachedMax: compResult.tasks.length < _taskLimit ? true : false,
+          searchString: '',
+        ));
+      } else {
+        return emit(
+          state.copyWith(
+              status: TaskBlocStatus.success,
+              currentWorkflow: compResult.tasks.first),
+        );
+      }
     } on DioException catch (e) {
       emit(state.copyWith(
           status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
@@ -103,35 +114,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     try {
       List<Task> tasks = List.from(state.tasks);
       emit(state.copyWith(status: TaskBlocStatus.loading));
-      late Task newWorkflow;
       if (event.task.taskId.isNotEmpty) {
-        /// extract data from editor data [FlowElement] in growerp [Task]s
-        if (event.task.taskType == TaskType.workflowTemplate) {
-          Dashboard dashboard = Dashboard.fromJson(event.task.jsonImage);
-          newWorkflow = Task(
-              taskId: event.task.taskId,
-              statusId: event.task.statusId,
-              taskName: event.task.taskName,
-              description: event.task.description);
-          List<Task> newWorkflowTasks = [];
-          for (FlowElement element in dashboard.elements) {
-            List<Task> links = [];
-            for (var link in element.next) {
-              links.add(Task(flowElementId: link.destElementId));
-            }
-            newWorkflowTasks.add(Task(
-                taskType: TaskType.workflowTemplateTask,
-                flowElementId: element.id,
-                taskName: element.text,
-                routing: event.task.routing,
-                workflowTasks: links));
-          }
-          newWorkflow = newWorkflow.copyWith(workflowTasks: newWorkflowTasks);
-        } else {
-          newWorkflow = event.task;
-        }
-
-        Task compResult = await restClient.updateTask(task: newWorkflow);
+        // update existing task
+        Task compResult = await restClient.updateTask(task: event.task);
         int index =
             tasks.indexWhere((element) => element.taskId == event.task.taskId);
         tasks[index] = compResult;
@@ -140,8 +125,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
             tasks: tasks,
             message: "${event.task.taskType} updated"));
       } else {
-        // add
+        // add new task
         Task compResult = await restClient.createTask(task: event.task);
+        // add task to list
         tasks.insert(0, compResult);
         return emit(state.copyWith(
             status: TaskBlocStatus.success,
@@ -208,6 +194,9 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     }
   }
 
+  /// this contains the workflow engine which serves the next screen
+  /// to be displayed, will start a new workflow when not started and
+  /// will end the the workflow when the last screen is displayed
   Future<void> _onTaskWorkflowNext(
     TaskWorkflowNext event,
     Emitter<TaskState> emit,
@@ -219,36 +208,134 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
           title: "demo workflow",
           route: '/',
           readGroups: [UserGroup.admin, UserGroup.employee],
-          child: const Text("Hello world"),
+          child: const Text("Hello world1"),
         ),
         MenuOption(
           title: "demo1 workflow",
           route: '/',
           readGroups: [UserGroup.admin, UserGroup.employee],
-          child: const Text("Hello world"),
+          child: const Text("Hello world2"),
         ),
       ];
-/*
-  check if a running workflow is selected:
-    allow the user to start a new one or continue the running workflow.
-	if a new workflow,
-      create a workflow instance in the todo list as an running workflow task
-	else check the running workflow for the last result.
-  
-  getNext: Evaluate the result of the last screen if any
-  
-  select the next screen and wait for the result
-  
-  If the workflow is not ended
-    go to getNext
-  If ended 
-    change the status in the to do list to be completed
-    inform the user.
-*/
+      // get workflow
+      Tasks resultTasks = await restClient.getTask(taskId: event.workflowId);
+      Task currentWorkflow = resultTasks.tasks.first;
+
+      // if template: start new active tasks
+      if (currentWorkflow.taskType == TaskType.workflowTemplate) {
+        // create new active workflow, tasks exracted from json
+        // links will be updated in the backend
+        List<Task> newTasks = [];
+
+        if (currentWorkflow.workflowTasks.isEmpty) {
+          return emit(state.copyWith(
+              status: TaskBlocStatus.failure,
+              message: "Workflow contains no tasks!"));
+        }
+
+        // find first task which has no links
+        int firstTaskIndex = currentWorkflow.workflowTasks
+            .indexWhere((element) => element.workflowTasks.isEmpty);
+        if (firstTaskIndex == -1) {
+          return emit(state.copyWith(
+              status: TaskBlocStatus.failure,
+              message: "starting task not found!"));
+        }
+
+        for (int index = 0;
+            index < currentWorkflow.workflowTasks.length;
+            index++) {
+          newTasks.add(currentWorkflow.workflowTasks[index].copyWith(
+              taskId: "",
+              taskType: TaskType.workflowTask,
+              statusId: index == firstTaskIndex
+                  ? TaskStatus.progress
+                  : TaskStatus.planning));
+        }
+        // create new workflow
+        currentWorkflow = await restClient.createTask(
+            task: currentWorkflow.copyWith(
+                taskType: TaskType.workflow,
+                taskId: "",
+                parentTaskId: currentWorkflow.taskId, // use template in parent
+                statusId: TaskStatus.progress,
+                workflowTasks: newTasks));
+      } else {
+        // find current task within workflow
+        int lastTaskIndex = currentWorkflow.workflowTasks
+            .indexWhere((task) => task.statusId == TaskStatus.progress);
+        // find next tasks TODO: to be decided with a condition which one to use
+        List<int> nextTaskIndexes = [];
+        for (int index = 0;
+            index < currentWorkflow.workflowTasks.length;
+            index++) {
+          if (currentWorkflow.workflowTasks[index].workflowTasks
+              .where((link) =>
+                  link.taskId ==
+                  currentWorkflow.workflowTasks[lastTaskIndex].taskId)
+              .toList()
+              .isNotEmpty) {
+            nextTaskIndexes.add(index);
+          }
+        }
+
+        // check if no new tasks within workflow: complete workflow
+        if (nextTaskIndexes.isEmpty) {
+          await restClient.updateTask(
+              task: currentWorkflow.workflowTasks[lastTaskIndex]
+                  .copyWith(statusId: TaskStatus.completed));
+          currentWorkflow =
+              currentWorkflow.copyWith(statusId: TaskStatus.completed);
+          return emit(state.copyWith(
+              status: TaskBlocStatus.success,
+              message: "Workflow ${currentWorkflow.taskName} completed."));
+        } else {
+          // update old/new task status
+          List<Task> newTasks = [];
+          for (int index = 0;
+              index < currentWorkflow.workflowTasks.length;
+              index++) {
+            late TaskStatus newStatusId;
+            if (index == lastTaskIndex) {
+              newStatusId = TaskStatus.completed;
+              await restClient.updateTask(
+                  task: currentWorkflow.workflowTasks[index]
+                      .copyWith(statusId: newStatusId));
+              newTasks.add(currentWorkflow.workflowTasks[index]
+                  .copyWith(statusId: newStatusId));
+            } else if (index == nextTaskIndexes[0]) {
+              newStatusId = TaskStatus.progress;
+              await restClient.updateTask(
+                  task: currentWorkflow.workflowTasks[index]
+                      .copyWith(statusId: newStatusId));
+              newTasks.add(currentWorkflow.workflowTasks[index]
+                  .copyWith(statusId: newStatusId));
+            } else {
+              newTasks.add(currentWorkflow.workflowTasks[index]);
+            }
+          }
+          currentWorkflow = currentWorkflow.copyWith(workflowTasks: newTasks);
+        }
+      }
+
+      // show title of current task
+      Task nextTask = currentWorkflow.workflowTasks.firstWhere(
+        (task) => task.statusId == TaskStatus.progress,
+        orElse: () => Task(),
+      );
+      if (nextTask.taskId.isEmpty) {
+        debugPrint("system error: no started Task found!");
+      }
+      menuOptions.first = menuOptions.first.copyWith(
+        title: nextTask.taskName,
+      );
 
       emit(state.copyWith(
         menuOptions: menuOptions,
-        message: "Workflow started/next",
+        currentWorkflow: currentWorkflow,
+        message:
+            "Workflow ${state.currentWorkflow == null ? 'Started' : 'Next task'}"
+            " ${nextTask.taskName}",
         status: TaskBlocStatus.workflowAction,
       ));
     } on DioException catch (e) {

@@ -65,7 +65,7 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
             child: popUp(
                 context: context,
                 title: widget.element.text,
-                height: 300,
+                height: 400,
                 width: 280,
                 child: _showForm())));
   }

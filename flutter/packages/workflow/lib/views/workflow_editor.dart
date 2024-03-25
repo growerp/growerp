@@ -107,13 +107,14 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               onElementPressed: (context, position, element) async {
                 debugPrint('Element with "${element.text}" text pressed');
 
-                await showDialog(
+                FlowData flowData = await showDialog(
                     barrierDismissible: true,
                     context: context,
                     builder: (BuildContext context) => BlocProvider.value(
                         value: taskBloc,
                         child: WorkFlowContextMenu(
                             widget.workflow, dashboard, element, data)));
+                element.setText(flowData.name);
               },
               onElementSecondaryTapped: (context, position, element) {
                 debugPrint('Element with "${element.text}" text pressed');

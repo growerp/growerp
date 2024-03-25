@@ -14,10 +14,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_models/growerp_models.dart';
 import '../../../../growerp_core.dart';
 
 class TaskListHeader extends StatefulWidget {
-  const TaskListHeader({super.key});
+  final TaskType taskType;
+  const TaskListHeader(this.taskType, {super.key});
 
   @override
   State<TaskListHeader> createState() => _TaskListHeaderState();
@@ -60,9 +62,14 @@ class _TaskListHeaderState extends State<TaskListHeader> {
             : Column(children: [
                 Row(children: <Widget>[
                   const Expanded(child: Text("Name")),
-                  const Expanded(child: Text("Status")),
-                  const Text("Hours"),
+                  if (widget.taskType != TaskType.workflowTemplate)
+                    const Expanded(child: Text("Status")),
                   if (!isPhone(context))
+                    const Expanded(child: Text("description")),
+                  if (widget.taskType != TaskType.workflowTemplate)
+                    const Text("Hours"),
+                  if (!isPhone(context) &&
+                      widget.taskType != TaskType.workflowTemplate)
                     const Expanded(
                         child:
                             Text("From/To Party", textAlign: TextAlign.center)),

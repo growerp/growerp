@@ -24,6 +24,7 @@ class TaskState extends Equatable {
     this.hasReachedMax = false,
     this.searchString = '',
     this.menuOptions = const <MenuOption>[],
+    this.currentWorkflow,
   });
 
   final TaskBlocStatus status;
@@ -32,6 +33,7 @@ class TaskState extends Equatable {
   final bool hasReachedMax; // all records retrieved
   final String searchString;
   final List<MenuOption> menuOptions;
+  final Task? currentWorkflow;
 
   TaskState copyWith({
     TaskBlocStatus? status,
@@ -41,6 +43,7 @@ class TaskState extends Equatable {
     String? searchString,
     bool? search,
     List<MenuOption>? menuOptions,
+    Task? currentWorkflow,
   }) {
     return TaskState(
       status: status ?? this.status,
@@ -49,6 +52,7 @@ class TaskState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
       menuOptions: menuOptions ?? this.menuOptions,
+      currentWorkflow: currentWorkflow ?? this.currentWorkflow,
     );
   }
 
@@ -59,6 +63,11 @@ class TaskState extends Equatable {
   }
 
   @override
-  List<Object> get props =>
-      [status, tasks, menuOptions, hasReachedMax, searchString];
+  List<Object> get props => [
+        status,
+        tasks,
+        menuOptions,
+        hasReachedMax,
+        searchString,
+      ];
 }

@@ -12,7 +12,7 @@ class WorkflowRunner extends StatelessWidget {
     RestClient restClient = context.read<RestClient>();
     return BlocProvider<TaskBloc>(
         create: (context) => TaskBloc(restClient, workflow.taskType)
-          ..add(TaskWorkflowNext(workflow)),
+          ..add(TaskWorkflowNext(workflow.taskId)),
         child: BlocConsumer<TaskBloc, TaskState>(listener: (context, state) {
           switch (state.status) {
             case TaskBlocStatus.success:
@@ -38,14 +38,14 @@ class WorkflowRunner extends StatelessWidget {
                   child: DisplayMenuOption(
                     menuList: state.menuOptions,
                     menuIndex: 0,
-                    workflow: workflow,
+                    workflow: state.currentWorkflow,
                   ));
             case TaskBlocStatus.loading:
             case TaskBlocStatus.initial:
               return const LoadingIndicator();
             default:
-              return const FatalErrorForm(
-                  message: "Internet or server problem?");
+              return FatalErrorForm(
+                  message: state.message ?? 'server connection problem!');
           }
         }));
   }

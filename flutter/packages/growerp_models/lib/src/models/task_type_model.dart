@@ -15,6 +15,7 @@
 enum TaskType {
   todo('To Do'),
   workflow('Workflow'),
+  workflowTask('WorkflowTask'),
   workflowTemplate('Workflow Template'),
   workflowTemplateTask('Workflow Template Task'),
   unkwown('UnKnown');
@@ -28,6 +29,8 @@ enum TaskType {
         return todo;
       case 'Workflow':
         return workflow;
+      case 'Workflow Task':
+        return workflowTask;
       case 'Workflow Template':
         return workflowTemplate;
       case 'Workflow Template Task':

@@ -41,6 +41,28 @@ class MenuOption {
     this.writeGroups,
   });
 
+  MenuOption copyWith({
+    String? image,
+    String? selectedImage,
+    String? title,
+    String? route,
+    List<TabItem>? tabItems,
+    Widget? child,
+    List<UserGroup>? readGroups,
+    List<UserGroup>? writeGroups,
+  }) {
+    return MenuOption(
+      image: image ?? this.image,
+      selectedImage: selectedImage ?? this.selectedImage,
+      title: title ?? this.title,
+      route: route ?? this.route,
+      tabItems: tabItems ?? this.tabItems,
+      child: child ?? this.child,
+      readGroups: readGroups ?? this.readGroups,
+      writeGroups: writeGroups ?? this.writeGroups,
+    );
+  }
+
   @override
   String toString() => 'MenuOption name: $title route: $route '
       'tabItems# ${tabItems != null ? tabItems!.length : "0"}';
