@@ -40,8 +40,8 @@ class TaskListForm extends StatelessWidget {
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
         );
-      case TaskType.workflowTemplateTask:
-        return BlocProvider<TaskWorkflowTemplateTaskBloc>(
+      case TaskType.workflowTaskTemplate:
+        return BlocProvider<TaskWorkflowTaskTemplateBloc>(
           create: (context) => TaskBloc(restClient, taskType),
           child: TaskList(taskType),
         );
@@ -81,8 +81,8 @@ class TaskListState extends State<TaskList> {
       case TaskType.workflowTemplate:
         _taskBloc = context.read<TaskWorkflowTemplateBloc>() as TaskBloc;
         break;
-      case TaskType.workflowTemplateTask:
-        _taskBloc = context.read<TaskWorkflowTemplateTaskBloc>() as TaskBloc;
+      case TaskType.workflowTaskTemplate:
+        _taskBloc = context.read<TaskWorkflowTaskTemplateBloc>() as TaskBloc;
         break;
       default:
     }
@@ -183,8 +183,8 @@ class TaskListState extends State<TaskList> {
         case TaskType.workflowTemplate:
           return BlocConsumer<TaskWorkflowTemplateBloc, TaskState>(
               listener: blocListener, builder: blocBuilder);
-        case TaskType.workflowTemplateTask:
-          return BlocConsumer<TaskWorkflowTemplateTaskBloc, TaskState>(
+        case TaskType.workflowTaskTemplate:
+          return BlocConsumer<TaskWorkflowTaskTemplateBloc, TaskState>(
               listener: blocListener, builder: blocBuilder);
         default:
           return BlocConsumer<TaskBloc, TaskState>(

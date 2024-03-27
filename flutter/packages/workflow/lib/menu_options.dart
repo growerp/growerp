@@ -47,11 +47,11 @@ List<MenuOption> menuOptions = [
   MenuOption(
     image: "packages/growerp_core/images/workflow.png",
     selectedImage: "packages/growerp_core/images/workflow.png",
-    title: "Workflow Template Tasks",
-    route: '/workflowTemplateTasks',
+    title: "Workflow Task Templates",
+    route: '/workflowTaskTemplates',
     readGroups: [UserGroup.admin, UserGroup.employee],
     writeGroups: [UserGroup.admin, UserGroup.employee],
-    child: const TaskListForm(TaskType.workflowTemplateTask),
+    child: const TaskListForm(TaskType.workflowTaskTemplate),
   ),
   MenuOption(
     image: "packages/growerp_core/images/tasksGrey.png",

@@ -30,7 +30,7 @@ const _taskLimit = 20;
 mixin TaskToDoBloc on Bloc<TaskEvent, TaskState> {}
 mixin TaskWorkflowBloc on Bloc<TaskEvent, TaskState> {}
 mixin TaskWorkflowTemplateBloc on Bloc<TaskEvent, TaskState> {}
-mixin TaskWorkflowTemplateTaskBloc on Bloc<TaskEvent, TaskState> {}
+mixin TaskWorkflowTaskTemplateBloc on Bloc<TaskEvent, TaskState> {}
 
 EventTransformer<E> taskDroppable<E>(Duration duration) {
   return (events, mapper) {
@@ -45,7 +45,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
         TaskToDoBloc,
         TaskWorkflowBloc,
         TaskWorkflowTemplateBloc,
-        TaskWorkflowTemplateTaskBloc {
+        TaskWorkflowTaskTemplateBloc {
   TaskBloc(this.restClient, this.taskType) : super(const TaskState()) {
     on<TaskFetch>(_onTaskFetch,
         transformer: taskDroppable(const Duration(milliseconds: 100)));
@@ -119,7 +119,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
         Task compResult = await restClient.updateTask(task: event.task);
         int index =
             tasks.indexWhere((element) => element.taskId == event.task.taskId);
-        tasks[index] = compResult;
+        if (index != -1) tasks[index] = compResult;
         return emit(state.copyWith(
             status: TaskBlocStatus.success,
             tasks: tasks,
@@ -241,7 +241,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
               status: TaskBlocStatus.failure,
               message: "starting task not found!"));
         }
-
+        // copy all tasks from the template and set statusId
         for (int index = 0;
             index < currentWorkflow.workflowTasks.length;
             index++) {
@@ -252,7 +252,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
                   ? TaskStatus.progress
                   : TaskStatus.planning));
         }
-        // create new workflow
+        // create new workflow with all the tasks
         currentWorkflow = await restClient.createTask(
             task: currentWorkflow.copyWith(
                 taskType: TaskType.workflow,
@@ -261,9 +261,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
                 statusId: TaskStatus.progress,
                 workflowTasks: newTasks));
       } else {
-        // find current task within workflow
+        // workflow is created get next task
+        // find current task within workflow by statusId
         int lastTaskIndex = currentWorkflow.workflowTasks
             .indexWhere((task) => task.statusId == TaskStatus.progress);
+
         // find next tasks TODO: to be decided with a condition which one to use
         List<int> nextTaskIndexes = [];
         for (int index = 0;
@@ -281,12 +283,15 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
 
         // check if no new tasks within workflow: complete workflow
         if (nextTaskIndexes.isEmpty) {
+          // update status of finished last task
           await restClient.updateTask(
               task: currentWorkflow.workflowTasks[lastTaskIndex]
                   .copyWith(statusId: TaskStatus.completed));
-          currentWorkflow =
-              currentWorkflow.copyWith(statusId: TaskStatus.completed);
+          // finish workflow
+          Task workflow = await restClient.updateTask(
+              task: currentWorkflow.copyWith(statusId: TaskStatus.completed));
           return emit(state.copyWith(
+              currentWorkflow: workflow,
               status: TaskBlocStatus.success,
               message: "Workflow ${currentWorkflow.taskName} completed."));
         } else {
@@ -328,6 +333,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       }
       menuOptions.first = menuOptions.first.copyWith(
         title: nextTask.taskName,
+        child: Text(nextTask.routing ?? 'no routing'),
       );
 
       emit(state.copyWith(

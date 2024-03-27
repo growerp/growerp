@@ -41,7 +41,7 @@ class Task extends Equatable with _$Task {
     @Default([]) List<TimeEntry> timeEntries,
     // from workflow editor
     @Default("") String jsonImage,
-    @Default([]) List<Task> workflowTasks,
+    @Default([]) List<Task> workflowTasks, // workflowTasks / links
     // workflow task link to the view
     String? routing,
     String? flowElementId,

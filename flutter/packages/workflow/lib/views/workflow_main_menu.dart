@@ -20,8 +20,6 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'workflow_helper.dart';
-
 class WorkFlowMainMenu extends StatefulWidget {
   final Task workflow;
   final Dashboard dashboard;
@@ -140,9 +138,8 @@ class WorkFlowMainMenuState extends State<WorkFlowMainMenu> {
           child: ElevatedButton(
               child: const Text('Save'),
               onPressed: () {
-                WorkflowHelper.saveWorkflow(
-                    context, widget.workflow, widget.dashboard);
-                Navigator.of(context).pop();
+                context.read<TaskBloc>().add(TaskUpdate(widget.workflow));
+                Navigator.pop(context);
               }),
         ),
       ])

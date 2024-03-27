@@ -62,14 +62,17 @@ class _TaskListHeaderState extends State<TaskListHeader> {
             : Column(children: [
                 Row(children: <Widget>[
                   const Expanded(child: Text("Name")),
-                  if (widget.taskType != TaskType.workflowTemplate)
+                  if (widget.taskType != TaskType.workflowTemplate &&
+                      widget.taskType != TaskType.workflowTaskTemplate)
                     const Expanded(child: Text("Status")),
                   if (!isPhone(context))
                     const Expanded(child: Text("description")),
-                  if (widget.taskType != TaskType.workflowTemplate)
+                  if (widget.taskType != TaskType.workflowTemplate &&
+                      widget.taskType != TaskType.workflowTaskTemplate)
                     const Text("Hours"),
                   if (!isPhone(context) &&
-                      widget.taskType != TaskType.workflowTemplate)
+                      widget.taskType != TaskType.workflowTemplate &&
+                      widget.taskType != TaskType.workflowTaskTemplate)
                     const Expanded(
                         child:
                             Text("From/To Party", textAlign: TextAlign.center)),

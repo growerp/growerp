@@ -123,6 +123,7 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log message="===getting tasks id: $taskId type: ${taskType}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="search != null">
@@ -141,8 +142,12 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- translate frontend Task type with backend-->
             <set field="typeConvert"
                 from="[workflow: 'WetWorkflow', WetWorkflow: 'workflow',
-                workflowTemplate: 'WetWorkflowTemplate', WetWorkflowTemplate: 'workflowTemplate',
-                workflowTemplateTask: 'WetWorkflowTemplateTask', WetWorkflowTemplateTask: 'workflowTemplateTask',
+                workflowTemplate: 'WetWorkflowTemplate',
+                WetWorkflowTemplate: 'workflowTemplate',
+                workflowTemplateTask: 'WetWorkflowTemplateTask',
+                WetWorkflowTemplateTask: 'workflowTemplateTask',
+                workflowTaskTemplate: 'WetWorkflowTaskTemplate',
+                WetWorkflowTaskTemplate: 'workflowTaskTemplate',
                 todo: 'WetTask', WetTask: 'todo']"
                 type="NewMap" />
             <set field="workEffortType" from="typeConvert[taskType]" />
@@ -209,9 +214,17 @@ along with this software (see the LICENSE.md file). If not, see
                                     statusId: convertedStatusId,
                                     jsonImage: contentText,
                                 ]" />
+
                         <!-- get workflow tasks -->
+                        <if condition="entry.workEffortTypeEnumId == 'WetWorkflowTemplate'">
+                            <set field="workEffortTaskType" value="WetWorkflowTemplateTask" />
+                        </if>
+                        <if condition="entry.workEffortTypeEnumId == 'WetWorkflow'">
+                            <set field="workEffortTaskType" value="WetWorkflowTask" />
+                        </if>
                         <entity-find entity-name="mantle.work.effort.WorkEffort" list="children">
                             <econdition field-name="parentWorkEffortId" from="entry.workEffortId" />
+                            <econdition field-name="workEffortTypeEnumId" from="workEffortTaskType" />
                         </entity-find>
                         <set field="workflowTasks" from="[]" />
                         <iterate list="children" entry="child">
@@ -243,12 +256,12 @@ along with this software (see the LICENSE.md file). If not, see
                     </iterate>
                 </then>
                 <else-if
-                    condition="workEffortType == 'WetWorkflowTemplateTask'||
-                        workEffortType == 'WetWorkflowTask'">
+                    condition="workEffortType == 'WetWorkflowTask'">
                     <iterate entry="entry" list="entries">
                         <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                             in-map="[docType: 'task', statusId: entry.statusId]"
                             out-map="context" />
+                        <set field="statusId" from="convertedStatusId" />
                         <set field="workEffortOut"
                             from="[
                                     taskId: entry.workEffortId,
@@ -256,6 +269,20 @@ along with this software (see the LICENSE.md file). If not, see
                                     parentTaskId: entry.parentWorkEffortId,
                                     taskName: entry.workEffortName,
                                     statusId: convertedStatusId,
+                                    routing: entry.routing,
+                                ]" />
+                        <script>tasks.add(workEffortOut)</script>
+                    </iterate>
+                </else-if>
+                <else-if
+                    condition="workEffortType == 'WetWorkflowTaskTemplate'">
+                    <iterate entry="entry" list="entries">
+                        <set field="workEffortOut"
+                            from="[
+                                    taskId: entry.workEffortId,
+                                    taskType: typeConvert[entry.workEffortTypeEnumId],
+                                    description: entry.description,
+                                    taskName: entry.workEffortName,
                                     routing: entry.routing,
                                 ]" />
                         <script>tasks.add(workEffortOut)</script>
@@ -312,6 +339,7 @@ along with this software (see the LICENSE.md file). If not, see
                                         timeEntries: teOutList,
                                         ]" />
                             </else>
+
                         </if>
                         <script>tasks.add(workEffortOut)</script>
                     </iterate>
@@ -398,6 +426,7 @@ along with this software (see the LICENSE.md file). If not, see
                     workflowTask: 'WetWorkflowTask',
                     workflowTemplate: 'WetWorkflowTemplate',
                     workflowTemplateTask: 'WetWorkflowTemplateTask',
+                    workflowTaskTemplate: 'WetWorkflowTaskTemplate',
                     todo: 'WetTask']"
                 type="NewMap" />
             <!-- create task -->
@@ -549,6 +578,8 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
+            <log
+                message="======updating task: ${task.taskId} with routings: ${task.workflowTasks?.routing}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <service-call name="growerp.100.TaskServices100.get#Task"
@@ -556,6 +587,15 @@ along with this software (see the LICENSE.md file). If not, see
             <if condition="!oldTask">
                 <return error="true" message="Task ${task.taskId} not found" />
             </if>
+            <set field="typeConvert"
+                from="[workflow: 'WetWorkflow',
+                    workflowTask: 'WetWorkflowTask',
+                    workflowTemplate: 'WetWorkflowTemplate',
+                    workflowTemplateTask: 'WetWorkflowTemplateTask',
+                    workflowTaskTemplate: 'WetWorkflowTaskTemplate',
+                    todo: 'WetTask']"
+                type="NewMap" />
+
             <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                 in-map="[docType: 'task', statusId: task.statusId]" out-map="context" />
             <if
@@ -685,8 +725,8 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- for workflow template check if json file changed -->
             <!-- to update the tasks status in workflow use direct update#task call-->
             <if
-                condition="task.taskType == 'workflowTemplate' &amp;&amp; 
-                                        task.jsonImage != docRr.getText()">
+                condition="task.taskType == 'workflowTemplate'">
+                <!-- &amp;&amp; task.jsonImage != docRr.getText()-->
                 <!-- for workflow templates delete existing workflow tasks -->
                 <if condition="task.taskType == 'workflowTemplate'">
                     <entity-find entity-name="mantle.work.effort.WorkEffort" list="oldTasks">

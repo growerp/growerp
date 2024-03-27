@@ -56,7 +56,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           settings: settings,
           builder: (context) => DisplayMenuOption(
               menuList: menuOptions, menuIndex: 2, tabIndex: 0));
-    case '/workflowTemplateTasks':
+    case '/workflowTaskTemplates':
       return MaterialPageRoute(
           settings: settings,
           builder: (context) => DisplayMenuOption(

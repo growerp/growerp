@@ -23,12 +23,13 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:workflow/views/flow_data.dart';
 
 class WorkFlowContextMenu extends StatefulWidget {
+  final ValueChanged<FlowData> onFlowDataChanged;
   final Task workflow;
   final Dashboard dashboard;
   final FlowElement element;
-  final FlowData data;
-  const WorkFlowContextMenu(
-      this.workflow, this.dashboard, this.element, this.data,
+  final FlowData flowData;
+  const WorkFlowContextMenu(this.onFlowDataChanged, this.workflow,
+      this.dashboard, this.element, this.flowData,
       {super.key});
   @override
   WorkFlowContextMenuState createState() => WorkFlowContextMenuState();
@@ -41,15 +42,16 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
   final TextEditingController _taskSearchBoxController =
       TextEditingController();
   late TaskBloc _taskBloc;
-  Task? _selectedTask;
+  Task? _selectedTask = Task();
 
   @override
   void initState() {
     super.initState();
     _taskBloc = context.read<TaskBloc>();
-    _taskBloc.add(const TaskFetch());
-    _routingController.text = widget.data.routing;
+    _taskBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
+    _routingController.text = widget.flowData.routing;
     _nameController.text = widget.element.text;
+    _selectedTask = widget.flowData.workflowTaskTemplate;
   }
 
   @override
@@ -156,7 +158,7 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
                       itemAsString: (Task? u) =>
                           " ${u!.taskName}", // invisible char for test
                       onChanged: (Task? newValue) {
-                        _selectedTask = newValue;
+                        _selectedTask = newValue ?? Task();
                       },
                       asyncItems: (String filter) {
                         _taskBloc.add(TaskFetch(
@@ -173,11 +175,14 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
               const SizedBox(height: 20),
               ElevatedButton(
                   key: const Key('update'),
-                  child: Text(widget.data.taskId.isEmpty ? 'Create' : 'Update'),
-                  onPressed: () async {
-                    Navigator.of(context).pop(widget.data.copyWith(
+                  child: Text(
+                      widget.workflow.taskId.isEmpty ? 'Create' : 'Update'),
+                  onPressed: () {
+                    widget.onFlowDataChanged(widget.flowData.copyWith(
                         name: _nameController.text,
+                        workflowTaskTemplate: _selectedTask,
                         routing: _routingController.text));
+                    Navigator.of(context).pop();
                   }),
             ])));
   }

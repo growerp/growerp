@@ -111,7 +111,8 @@ class TaskDialogState extends State<TaskDialog> {
                 decoration: const InputDecoration(labelText: 'Description'),
                 controller: _descriptionController,
               ),
-              if (widget.task.taskType != TaskType.workflowTemplate)
+              if (widget.task.taskType != TaskType.workflowTemplate &&
+                  widget.task.taskType != TaskType.workflowTaskTemplate)
                 Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: DropdownButtonFormField<TaskStatus>(

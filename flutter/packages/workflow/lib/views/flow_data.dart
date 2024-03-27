@@ -1,28 +1,34 @@
+import 'package:growerp_models/growerp_models.dart';
+
 class FlowData {
-  String taskId;
+  Task? workflowTaskTemplate;
+  String flowElementId;
   String name;
   String routing;
 
   FlowData({
-    this.taskId = '',
+    this.workflowTaskTemplate,
     this.name = '',
     this.routing = '',
+    this.flowElementId = '',
   });
 
   FlowData copyWith({
-    String? taskId,
+    Task? workflowTaskTemplate,
+    String? flowElementId,
     String? name,
     String? routing,
   }) {
     return FlowData(
-      taskId: taskId ?? this.taskId,
+      workflowTaskTemplate: workflowTaskTemplate ?? this.workflowTaskTemplate,
       name: name ?? this.name,
+      flowElementId: flowElementId ?? this.flowElementId,
       routing: routing ?? this.routing,
     );
   }
 
   @override
   String toString() {
-    return ("Data id: $taskId name: $name routing: $routing");
+    return ("Data taskId: ${workflowTaskTemplate?.taskId} name: $name routing: $routing");
   }
 }

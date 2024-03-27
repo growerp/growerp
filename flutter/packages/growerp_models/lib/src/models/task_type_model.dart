@@ -18,6 +18,7 @@ enum TaskType {
   workflowTask('WorkflowTask'),
   workflowTemplate('Workflow Template'),
   workflowTemplateTask('Workflow Template Task'),
+  workflowTaskTemplate('Workflow Task Template'),
   unkwown('UnKnown');
 
   const TaskType(this._name);
@@ -35,6 +36,8 @@ enum TaskType {
         return workflowTemplate;
       case 'Workflow Template Task':
         return workflowTemplateTask;
+      case 'Workflow Task Template':
+        return workflowTaskTemplate;
     }
     return unkwown;
   }
