@@ -726,25 +726,28 @@ along with this software (see the LICENSE.md file). If not, see
             <!-- to update the tasks status in workflow use direct update#task call-->
             <if
                 condition="task.taskType == 'workflowTemplate'">
-                <!-- &amp;&amp; task.jsonImage != docRr.getText()-->
                 <!-- for workflow templates delete existing workflow tasks -->
-                <if condition="task.taskType == 'workflowTemplate'">
-                    <entity-find entity-name="mantle.work.effort.WorkEffort" list="oldTasks">
-                        <econdition field-name="parentWorkEffortId" from="task.taskId" />
+                <!-- get subtasks-->
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="oldTasks">
+                    <econdition field-name="workEffortTypeEnumId" value="WetWorkflowTemplateTask" />
+                    <econdition field-name="parentWorkEffortId" from="task.taskId" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                </entity-find>
+                <!-- delete assocs -->
+                <iterate list="oldTasks" entry="oldTask">
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortAssoc">
+                        <econdition field-name="toWorkEffortId" from="oldTask.workEffortId" />
+                    </entity-delete-by-condition>
+                </iterate>
+                <!-- delete sub tasks-->
+                <iterate list="oldTasks" entry="oldTask">
+                    <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
+                        <econdition field-name="workEffortTypeEnumId"
+                            value="WetWorkflowTemplateTask" />
+                        <econdition field-name="workEffortId" from="oldTask.workEffortId" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                    </entity-find>
-                    <iterate list="oldTasks" entry="oldTask">
-                        <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffortAssoc">
-                            <econdition field-name="workEffortId" from="oldTask.workEffortId" />
-                        </entity-delete-by-condition>
-                    </iterate>
-                    <iterate list="oldTasks" entry="oldTask">
-                        <entity-delete-by-condition entity-name="mantle.work.effort.WorkEffort">
-                            <econdition field-name="workEffortId" from="oldTask.workEffortId" />
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                        </entity-delete-by-condition>
-                    </iterate>
-                </if>
+                    </entity-delete-by-condition>
+                </iterate>
                 <!-- create new tasks translation list workEffortId and element id -->
                 <service-call name="growerp.100.TaskServices100.create#WorkflowTasks"
                     in-map="[task: task, typeConvert: typeConvert]" />
