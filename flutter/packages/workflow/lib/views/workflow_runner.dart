@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../menu_options.dart';
+
 class WorkflowRunner extends StatelessWidget {
   const WorkflowRunner({super.key, required this.workflow});
   final Task workflow;
@@ -10,14 +12,32 @@ class WorkflowRunner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     RestClient restClient = context.read<RestClient>();
+    TaskBloc taskBloc = TaskBloc(restClient, workflow.taskType)
+      ..add(TaskWorkflowNext(workflow.taskId));
     return BlocProvider<TaskBloc>(
-        create: (context) => TaskBloc(restClient, workflow.taskType)
-          ..add(TaskWorkflowNext(workflow.taskId)),
-        child: BlocConsumer<TaskBloc, TaskState>(listener: (context, state) {
+        create: (context) => taskBloc..add(TaskWorkflowNext(workflow.taskId)),
+        child:
+            BlocConsumer<TaskBloc, TaskState>(listener: (context, state) async {
+          for (RouteStackItem item in AppNavObserver.navStack) {
+            debugPrint("===nav appserver ${item.name} ${item.args}");
+          }
           switch (state.status) {
+            case TaskBlocStatus.workflowAction:
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BlocProvider.value(
+                          value: taskBloc,
+                          child: DisplayMenuOption(
+                              workflow: state.currentWorkflow,
+                              menuList: state.menuOptions,
+                              menuIndex: 0))));
+              taskBloc.add(TaskWorkflowNext(state.currentWorkflow!.taskId));
             case TaskBlocStatus.success:
               HelperFunctions.showMessage(
                   context, '${state.message}', Colors.green);
+              Navigator.of(context)
+                  .popUntil(ModalRoute.withName('/workflowTemplates'));
               Navigator.of(context).pop();
               break;
             case TaskBlocStatus.failure:
@@ -32,14 +52,10 @@ class WorkflowRunner extends StatelessWidget {
         }, builder: (context, state) {
           switch (state.status) {
             case TaskBlocStatus.success:
-            case TaskBlocStatus.workflowAction:
-              return BlocProvider.value(
-                  value: context.read<TaskBloc>(),
-                  child: DisplayMenuOption(
-                    menuList: state.menuOptions,
-                    menuIndex: 0,
-                    workflow: state.currentWorkflow,
-                  ));
+              return DisplayMenuOption(
+                menuList: menuOptions,
+                menuIndex: 0,
+              );
             case TaskBlocStatus.loading:
             case TaskBlocStatus.initial:
               return const LoadingIndicator();

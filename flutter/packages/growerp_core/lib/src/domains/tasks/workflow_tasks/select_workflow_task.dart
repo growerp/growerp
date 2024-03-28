@@ -8,26 +8,24 @@ class SelectWorkflowTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> selectList = [];
+    List<ButtonSegment> selectList = [];
     int index = 0;
     for (var element in selectText) {
-      selectList.add(
-        InkWell(
-            onTap: () {
-              context
-                  .read<TaskBloc>()
-                  .add(TaskSetReturnString(index.toString()));
-            },
-            child: Text(element)),
-      );
+      selectList.add(ButtonSegment(label: Text(element), value: index++));
     }
     return Center(
-      child: Container(
-        margin: const EdgeInsets.only(top: 100),
-        child: Column(
-          children: selectList,
-        ),
-      ),
-    );
+        child: Container(
+      margin: const EdgeInsets.only(top: 100),
+      child: SegmentedButton(
+          emptySelectionAllowed: true,
+          segments: selectList,
+          selected: const {},
+          onSelectionChanged: (newValue) {
+            context
+                .read<TaskBloc>()
+                .add(TaskSetReturnString(newValue.first.toString()));
+            Navigator.of(context).pop();
+          }),
+    ));
   }
 }

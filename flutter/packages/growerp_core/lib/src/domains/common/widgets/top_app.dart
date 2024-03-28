@@ -141,6 +141,7 @@ class TopApp extends StatelessWidget {
                                 useMaterial3: true,
                                 colorScheme: darkColorScheme),
                             onGenerateRoute: router,
+                            navigatorObservers: [AppNavObserver()],
                             home: BlocBuilder<AuthBloc, AuthState>(
                               builder: (context, state) {
                                 switch (state.status) {

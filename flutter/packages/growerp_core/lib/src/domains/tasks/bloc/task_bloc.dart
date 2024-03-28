@@ -271,8 +271,10 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
             .indexWhere((task) => task.statusId == TaskStatus.progress);
 
         // check return string from last task currently just a number
-        int? nextTaskIndex = int.tryParse(state.returnString!);
+        int? nextTaskIndex = int.tryParse(state.returnString);
         nextTaskIndex ??= 0; // if not found set to 0
+        // reset value
+        add(const TaskSetReturnString(""));
 
         // find next tasks, yes can be more than one
         List<int> nextTaskIndexes = [];
@@ -362,7 +364,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
             "Workflow ${state.currentWorkflow == null ? 'Started' : 'Next task'}"
             " ${nextTask.taskName}",
         status: TaskBlocStatus.workflowAction,
-        returnString: '', // clear for next screen
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
