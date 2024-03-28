@@ -25,6 +25,7 @@ class TaskState extends Equatable {
     this.searchString = '',
     this.menuOptions = const <MenuOption>[],
     this.currentWorkflow,
+    this.returnString,
   });
 
   final TaskBlocStatus status;
@@ -34,6 +35,7 @@ class TaskState extends Equatable {
   final String searchString;
   final List<MenuOption> menuOptions;
   final Task? currentWorkflow;
+  final String? returnString;
 
   TaskState copyWith({
     TaskBlocStatus? status,
@@ -44,6 +46,7 @@ class TaskState extends Equatable {
     bool? search,
     List<MenuOption>? menuOptions,
     Task? currentWorkflow,
+    String? returnString,
   }) {
     return TaskState(
       status: status ?? this.status,
@@ -53,6 +56,7 @@ class TaskState extends Equatable {
       searchString: searchString ?? this.searchString,
       menuOptions: menuOptions ?? this.menuOptions,
       currentWorkflow: currentWorkflow ?? this.currentWorkflow,
+      returnString: returnString ?? this.returnString,
     );
   }
 

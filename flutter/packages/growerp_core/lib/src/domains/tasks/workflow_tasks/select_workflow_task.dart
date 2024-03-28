@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 class SelectWorkflowTask extends StatelessWidget {
   final List<String> selectText;
@@ -12,12 +14,20 @@ class SelectWorkflowTask extends StatelessWidget {
       selectList.add(
         InkWell(
             onTap: () {
-              Navigator.of(context).pop(index++);
+              context
+                  .read<TaskBloc>()
+                  .add(TaskSetReturnString(index.toString()));
             },
             child: Text(element)),
       );
     }
-
-    return Column(children: selectList);
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: 100),
+        child: Column(
+          children: selectList,
+        ),
+      ),
+    );
   }
 }

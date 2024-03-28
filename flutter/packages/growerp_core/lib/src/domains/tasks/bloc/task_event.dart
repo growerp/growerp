@@ -70,3 +70,8 @@ class TaskWorkflowSuspend extends TaskEvent {
   const TaskWorkflowSuspend(this.workflowId);
   final String workflowId;
 }
+
+class TaskSetReturnString extends TaskEvent {
+  const TaskSetReturnString(this.returnString);
+  final String returnString;
+}

@@ -22,6 +22,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../workflow_tasks/workflow_tasks.dart';
+
 part 'task_event.dart';
 part 'task_state.dart';
 
@@ -56,6 +58,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
     on<TaskWorkflowPrevious>(_onTaskWorkflowPrevious);
     on<TaskWorkflowCancel>(_onTaskWorkflowCancel);
     on<TaskWorkflowSuspend>(_onTaskWorkflowSuspend);
+    on<TaskSetReturnString>(_onTaskSetReturnString);
   }
 
   final RestClient restClient;
@@ -261,12 +264,17 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
                 statusId: TaskStatus.progress,
                 workflowTasks: newTasks));
       } else {
-        // workflow is created get next task
-        // find current task within workflow by statusId
+        // workflow is now created from template so get next task
+
+        // find just finished task within workflow by statusId
         int lastTaskIndex = currentWorkflow.workflowTasks
             .indexWhere((task) => task.statusId == TaskStatus.progress);
 
-        // find next tasks TODO: to be decided with a condition which one to use
+        // check return string from last task currently just a number
+        int? nextTaskIndex = int.tryParse(state.returnString!);
+        nextTaskIndex ??= 0; // if not found set to 0
+
+        // find next tasks, yes can be more than one
         List<int> nextTaskIndexes = [];
         for (int index = 0;
             index < currentWorkflow.workflowTasks.length;
@@ -308,7 +316,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
                       .copyWith(statusId: newStatusId));
               newTasks.add(currentWorkflow.workflowTasks[index]
                   .copyWith(statusId: newStatusId));
-            } else if (index == nextTaskIndexes[0]) {
+            } else if (index == nextTaskIndexes[nextTaskIndex]) {
               newStatusId = TaskStatus.progress;
               await restClient.updateTask(
                   task: currentWorkflow.workflowTasks[index]
@@ -331,9 +339,20 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       if (nextTask.taskId.isEmpty) {
         debugPrint("system error: no started Task found!");
       }
+
+      Widget? child;
+      if (nextTask.routing != null) {
+        List<String> routings = nextTask.routing!.split(',');
+        Map<String, Widget> screens = {
+          'selectScreen': SelectWorkflowTask(routings.sublist(1)),
+          'textScreen': TextWorkflowTask(routings.sublist(1)),
+        };
+        child = screens[routings[0]]!;
+      }
+
       menuOptions.first = menuOptions.first.copyWith(
         title: nextTask.taskName,
-        child: Text(nextTask.routing ?? 'no routing'),
+        child: child ?? Text(nextTask.routing ?? 'no routing'),
       );
 
       emit(state.copyWith(
@@ -343,6 +362,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
             "Workflow ${state.currentWorkflow == null ? 'Started' : 'Next task'}"
             " ${nextTask.taskName}",
         status: TaskBlocStatus.workflowAction,
+        returnString: '', // clear for next screen
       ));
     } on DioException catch (e) {
       emit(state.copyWith(
@@ -399,5 +419,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState>
       emit(state.copyWith(
           status: TaskBlocStatus.failure, tasks: [], message: getDioError(e)));
     }
+  }
+
+  void _onTaskSetReturnString(
+    TaskSetReturnString event,
+    Emitter<TaskState> emit,
+  ) {
+    return emit(state.copyWith(
+      returnString: event.returnString,
+    ));
   }
 }
