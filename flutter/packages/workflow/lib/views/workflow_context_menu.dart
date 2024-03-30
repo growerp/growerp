@@ -20,16 +20,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:workflow/views/flow_data.dart';
 
 class WorkFlowContextMenu extends StatefulWidget {
-  final ValueChanged<FlowData> onFlowDataChanged;
+  final ValueChanged<Task> onTaskChanged;
   final Task workflow;
   final Dashboard dashboard;
   final FlowElement element;
-  final FlowData flowData;
-  const WorkFlowContextMenu(this.onFlowDataChanged, this.workflow,
-      this.dashboard, this.element, this.flowData,
+  final Task task;
+  const WorkFlowContextMenu(this.onTaskChanged, this.workflow, this.dashboard,
+      this.element, this.task,
       {super.key});
   @override
   WorkFlowContextMenuState createState() => WorkFlowContextMenuState();
@@ -49,9 +48,9 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
     super.initState();
     _taskBloc = context.read<TaskBloc>();
     _taskBloc.add(const TaskFetch(isForDropDown: true, limit: 3));
-    _routingController.text = widget.flowData.routing;
+    _routingController.text = widget.task.routing ?? '';
     _nameController.text = widget.element.text;
-    _selectedTask = widget.flowData.workflowTaskTemplate;
+    // _selectedTask = widget.task.workflowTaskTemplate;
   }
 
   @override
@@ -178,9 +177,9 @@ class WorkFlowContextMenuState extends State<WorkFlowContextMenu> {
                   child: Text(
                       widget.workflow.taskId.isEmpty ? 'Create' : 'Update'),
                   onPressed: () {
-                    widget.onFlowDataChanged(widget.flowData.copyWith(
-                        name: _nameController.text,
-                        workflowTaskTemplate: _selectedTask,
+                    widget.onTaskChanged(widget.task.copyWith(
+                        taskName: _nameController.text,
+                        //workflowTaskTemplate: _selectedTask,
                         routing: _routingController.text));
                     Navigator.of(context).pop();
                   }),

@@ -4,7 +4,6 @@ import 'package:flutter_flow_chart/flutter_flow_chart.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'flow_data.dart';
 import 'flowchart_menus.dart';
 import 'workflow_context_menu.dart';
 import 'workflow_main_menu.dart';
@@ -42,7 +41,7 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
   late Dashboard dashboard;
   late TaskBloc workflowBloc;
   late TaskBloc taskBloc;
-  List<FlowData> flowDatas = [];
+  List<Task> tasks = [];
 
   @override
   void initState() {
@@ -54,21 +53,25 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
     } else {
       dashboard = Dashboard.fromJson(widget.workflow.jsonImage);
     }
-    for (Task task in widget.workflow.workflowTasks) {
-      flowDatas.add(FlowData(
-        flowElementId: task.flowElementId!,
-        name: task.taskName,
-        routing: task.routing ?? '',
-        // workflowTaskTemplate: task.workflowTaskTemplate,
-      ));
-    }
+    tasks = widget.workflow.workflowTasks;
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Task> syncTasks(List<FlowElement> elements, List<Task> tasks) {
+      List<Task> newTasks = [];
+      for (FlowElement element in elements) {
+        var index = tasks.indexWhere((el) => el.flowElementId == element.id);
+        newTasks.add(Task(
+            flowElementId: element.id,
+            routing: index != -1 ? tasks[index].routing : ''));
+      }
+      return newTasks;
+    }
+
     return PopScope(
         onPopInvoked: (value) {
-          debugPrint("====$flowDatas $value");
+          debugPrint("====$tasks $value");
         },
         child: Scaffold(
           appBar: AppBar(
@@ -82,21 +85,17 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               onDashboardTapped: ((context, position) async {
                 debugPrint('Dashboard tapped $position');
                 // copy flowdata into workflow tasks
-                List<Task> newTasks = [];
-                for (FlowData data in flowDatas) {
-                  newTasks.add(Task(
-                      flowElementId: data.flowElementId,
-                      routing: data.routing));
-                }
+                tasks = syncTasks(dashboard.elements, tasks);
                 await showDialog(
                     barrierDismissible: true,
                     context: context,
                     builder: (BuildContext context) => BlocProvider.value(
                         value: taskBloc,
                         child: WorkFlowMainMenu(
-                            widget.workflow.copyWith(workflowTasks: newTasks),
+                            widget.workflow.copyWith(workflowTasks: tasks),
                             dashboard,
                             position)));
+                tasks = syncTasks(dashboard.elements, tasks);
               }),
               onDashboardSecondaryTapped: (context, position) async {
                 debugPrint('Dashboard right clicked $position');
@@ -118,29 +117,29 @@ class _WorkFlowEditorState extends State<WorkFlowEditor> {
               },
               onElementPressed: (context, position, element) async {
                 debugPrint('Element with "${element.text}" text pressed');
-                FlowData flowData = FlowData();
+                Task task = Task();
                 int index = 0;
                 await showDialog(
                     barrierDismissible: true,
                     context: context,
                     builder: (BuildContext context) {
-                      index = flowDatas
+                      index = tasks
                           .indexWhere((el) => el.flowElementId == element.id);
                       return BlocProvider.value(
                           value: taskBloc,
                           child: WorkFlowContextMenu(
-                            (newFlowData) {
-                              flowData = newFlowData;
+                            (newTask) {
+                              task = newTask;
                             },
                             widget.workflow,
                             dashboard,
                             element,
-                            flowDatas[index],
+                            tasks[index],
                           ));
                     });
-                if (flowData.flowElementId.isNotEmpty) {
-                  element.setText(flowData.name);
-                  flowDatas[index] = flowData;
+                if (task.flowElementId != null) {
+                  element.setText(task.taskName);
+                  tasks[index] = task;
                 }
               },
               onElementSecondaryTapped: (context, position, element) {

@@ -177,8 +177,7 @@ class TaskDialogState extends State<TaskDialog> {
                           onPressed: () => Navigator.of(context).pushNamed(
                               '/editWorkflow',
                               arguments: widget.task))),
-                if (widget.task.taskType == TaskType.workflowTemplate &&
-                    widget.task.taskId.isNotEmpty)
+                if (widget.task.taskType == TaskType.workflow)
                   Expanded(
                       child: ElevatedButton(
                           key: const Key('startWorkflow'),

@@ -151,23 +151,25 @@ class TaskListState extends State<TaskList> {
         if (state.status == TaskBlocStatus.success) {
           hasReachedMax = state.hasReachedMax;
           return Scaffold(
-              floatingActionButton: widget.taskType != TaskType.workflow
-                  ? FloatingActionButton(
-                      key: const Key("addNew"),
-                      onPressed: () async {
-                        await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                  value: _taskBloc,
-                                  child: TaskDialog(
-                                      Task(taskType: widget.taskType)));
-                            });
-                      },
-                      tooltip: 'Add New',
-                      child: const Icon(Icons.add))
-                  : null,
+              floatingActionButton: FloatingActionButton(
+                  key: const Key("addNew"),
+                  onPressed: () async {
+                    await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return BlocProvider.value(
+                              value: _taskBloc,
+                              child:
+                                  TaskDialog(Task(taskType: widget.taskType)));
+                        });
+                  },
+                  tooltip: widget.taskType == TaskType.workflow
+                      ? 'Start new workflow'
+                      : 'Add New Task',
+                  child: Icon(widget.taskType == TaskType.workflow
+                      ? Icons.start
+                      : Icons.add)),
               body: showForm(state));
         }
         return const LoadingIndicator();

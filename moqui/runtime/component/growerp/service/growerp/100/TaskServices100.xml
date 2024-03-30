@@ -123,7 +123,6 @@ along with this software (see the LICENSE.md file). If not, see
             </parameter>
         </out-parameters>
         <actions>
-            <log message="===getting tasks id: $taskId type: ${taskType}" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="search != null">

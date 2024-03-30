@@ -3094,7 +3094,6 @@ along with this software (see the LICENSE.md file). If not, see
                     <service-call name="growerp.100.TaskServices100.create#Task"
                         in-map="[task: task]" out-map="context" />
                 </iterate>
-                <log message="== ending creating workflow" />
             </while>
         </actions>
     </service>
